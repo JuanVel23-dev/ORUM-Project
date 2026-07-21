@@ -1,0 +1,146 @@
+ESQUEMA BD
+
+| table_name         | column_name           | data_type                | is_nullable | column_default             |
+| ------------------ | --------------------- | ------------------------ | ----------- | -------------------------- |
+| bitacora_actividad | id                    | bigint                   | NO          | null                       |
+| bitacora_actividad | actor_id              | uuid                     | YES         | null                       |
+| bitacora_actividad | accion                | text                     | NO          | null                       |
+| bitacora_actividad | entidad               | text                     | NO          | null                       |
+| bitacora_actividad | entidad_id            | bigint                   | YES         | null                       |
+| bitacora_actividad | datos_anteriores      | jsonb                    | YES         | null                       |
+| bitacora_actividad | datos_nuevos          | jsonb                    | YES         | null                       |
+| bitacora_actividad | fecha_hora            | timestamp with time zone | NO          | now()                      |
+| categorias         | id                    | smallint                 | NO          | null                       |
+| categorias         | nombre                | text                     | NO          | null                       |
+| ciudades           | id                    | smallint                 | NO          | null                       |
+| ciudades           | nombre                | text                     | NO          | null                       |
+| ciudades           | departamento          | text                     | YES         | null                       |
+| comercios          | id                    | bigint                   | NO          | null                       |
+| comercios          | perfil_id             | uuid                     | YES         | null                       |
+| comercios          | marca_id              | bigint                   | YES         | null                       |
+| comercios          | categoria_id          | smallint                 | YES         | null                       |
+| comercios          | nombre                | text                     | NO          | null                       |
+| comercios          | descripcion           | text                     | YES         | null                       |
+| comercios          | logo_url              | text                     | YES         | null                       |
+| comercios          | activo                | boolean                  | NO          | true                       |
+| comercios          | created_at            | timestamp with time zone | NO          | now()                      |
+| comercios          | updated_at            | timestamp with time zone | NO          | now()                      |
+| comercios          | deleted_at            | timestamp with time zone | YES         | null                       |
+| configuracion      | id                    | smallint                 | NO          | null                       |
+| configuracion      | clave                 | text                     | NO          | null                       |
+| configuracion      | valor                 | text                     | YES         | null                       |
+| configuracion      | descripcion           | text                     | YES         | null                       |
+| configuracion      | updated_at            | timestamp with time zone | NO          | now()                      |
+| empleados          | id                    | bigint                   | NO          | null                       |
+| empleados          | perfil_id             | uuid                     | YES         | null                       |
+| empleados          | nombres               | text                     | NO          | null                       |
+| empleados          | apellidos             | text                     | NO          | null                       |
+| empleados          | cedula                | text                     | YES         | null                       |
+| empleados          | telefono              | text                     | YES         | null                       |
+| empleados          | created_at            | timestamp with time zone | NO          | now()                      |
+| empleados          | updated_at            | timestamp with time zone | NO          | now()                      |
+| empleados          | deleted_at            | timestamp with time zone | YES         | null                       |
+| marcas             | id                    | bigint                   | NO          | null                       |
+| marcas             | nombre                | text                     | NO          | null                       |
+| marcas             | logo_url              | text                     | YES         | null                       |
+| membresias         | id                    | bigint                   | NO          | null                       |
+| membresias         | miembro_id            | bigint                   | NO          | null                       |
+| membresias         | plan_id               | bigint                   | NO          | null                       |
+| membresias         | tipo                  | USER-DEFINED             | NO          | null                       |
+| membresias         | estado                | USER-DEFINED             | NO          | 'activa'::estado_membresia |
+| membresias         | fecha_inicio          | date                     | NO          | null                       |
+| membresias         | fecha_fin             | date                     | NO          | null                       |
+| membresias         | precio_pagado         | numeric                  | NO          | null                       |
+| membresias         | comprobante_url       | text                     | YES         | null                       |
+| membresias         | vendido_por           | bigint                   | YES         | null                       |
+| membresias         | membresia_anterior_id | bigint                   | YES         | null                       |
+| membresias         | created_at            | timestamp with time zone | NO          | now()                      |
+| membresias         | updated_at            | timestamp with time zone | NO          | now()                      |
+| miembros           | id                    | bigint                   | NO          | null                       |
+| miembros           | perfil_id             | uuid                     | YES         | null                       |
+| miembros           | codigo_publico        | uuid                     | NO          | gen_random_uuid()          |
+| miembros           | numero_membresia      | text                     | NO          | null                       |
+| miembros           | nombres               | text                     | NO          | null                       |
+| miembros           | apellidos             | text                     | NO          | null                       |
+| miembros           | cedula                | text                     | NO          | null                       |
+| miembros           | telefono              | text                     | YES         | null                       |
+| miembros           | direccion             | text                     | YES         | null                       |
+| miembros           | ciudad_id             | smallint                 | YES         | null                       |
+| miembros           | registrado_por        | bigint                   | YES         | null                       |
+| miembros           | fecha_registro        | timestamp with time zone | NO          | now()                      |
+| miembros           | created_at            | timestamp with time zone | NO          | now()                      |
+| miembros           | updated_at            | timestamp with time zone | NO          | now()                      |
+| miembros           | deleted_at            | timestamp with time zone | YES         | null                       |
+| perfiles           | id                    | uuid                     | NO          | null                       |
+| perfiles           | rol_id                | smallint                 | NO          | null                       |
+| perfiles           | activo                | boolean                  | NO          | true                       |
+| perfiles           | created_at            | timestamp with time zone | NO          | now()                      |
+| perfiles           | updated_at            | timestamp with time zone | NO          | now()                      |
+| planes_membresia   | id                    | bigint                   | NO          | null                       |
+| planes_membresia   | nombre                | text                     | NO          | null                       |
+| planes_membresia   | descripcion           | text                     | YES         | null                       |
+| planes_membresia   | precio                | numeric                  | NO          | null                       |
+| planes_membresia   | duracion_meses        | integer                  | NO          | 1                          |
+| planes_membresia   | activo                | boolean                  | NO          | true                       |
+| planes_membresia   | created_at            | timestamp with time zone | NO          | now()                      |
+| planes_membresia   | updated_at            | timestamp with time zone | NO          | now()                      |
+| planes_membresia   | deleted_at            | timestamp with time zone | YES         | null                       |
+| promociones        | id                    | bigint                   | NO          | null                       |
+| promociones        | comercio_id           | bigint                   | NO          | null                       |
+| promociones        | tipo_beneficio_id     | smallint                 | NO          | null                       |
+| promociones        | titulo                | text                     | NO          | null                       |
+| promociones        | descripcion           | text                     | YES         | null                       |
+| promociones        | valor                 | numeric                  | YES         | null                       |
+| promociones        | fecha_inicio          | date                     | YES         | null                       |
+| promociones        | fecha_fin             | date                     | YES         | null                       |
+| promociones        | activo                | boolean                  | NO          | true                       |
+| promociones        | created_at            | timestamp with time zone | NO          | now()                      |
+| promociones        | updated_at            | timestamp with time zone | NO          | now()                      |
+| promociones        | deleted_at            | timestamp with time zone | YES         | null                       |
+| roles              | id                    | smallint                 | NO          | null                       |
+| roles              | codigo                | text                     | NO          | null                       |
+| roles              | nombre                | text                     | NO          | null                       |
+| roles              | descripcion           | text                     | YES         | null                       |
+| sucursales         | id                    | bigint                   | NO          | null                       |
+
+
+
+
+
+
+
+RELACIONES
+
+| tabla       | columna               | referencia_tabla | referencia_columna |
+| ----------- | --------------------- | ---------------- | ------------------ |
+| perfiles    | rol_id                | roles            | id                 |
+| empleados   | perfil_id             | perfiles         | id                 |
+| comercios   | perfil_id             | perfiles         | id                 |
+| comercios   | marca_id              | marcas           | id                 |
+| comercios   | categoria_id          | categorias       | id                 |
+| sucursales  | comercio_id           | comercios        | id                 |
+| sucursales  | ciudad_id             | ciudades         | id                 |
+| miembros    | perfil_id             | perfiles         | id                 |
+| miembros    | ciudad_id             | ciudades         | id                 |
+| miembros    | registrado_por        | empleados        | id                 |
+| membresias  | miembro_id            | miembros         | id                 |
+| membresias  | plan_id               | planes_membresia | id                 |
+| membresias  | vendido_por           | empleados        | id                 |
+| membresias  | membresia_anterior_id | membresias       | id                 |
+| promociones | comercio_id           | comercios        | id                 |
+| promociones | tipo_beneficio_id     | tipos_beneficio  | id                 |
+| ventas      | miembro_id            | miembros         | id                 |
+| ventas      | membresia_id          | membresias       | id                 |
+| ventas      | sucursal_id           | sucursales       | id                 |
+| ventas      | promocion_id          | promociones      | id                 |
+| ventas      | registrada_por_perfil | perfiles         | id                 |
+
+
+TIPOS DE ROLES
+
+| id | codigo      | nombre                  | descripcion                                    |
+| -- | ----------- | ----------------------- | ---------------------------------------------- |
+| 1  | super_admin | Administrador mayor     | Acceso total; gestiona empleados y ve métricas |
+| 2  | empleado    | Empleado administrativo | Registra clientes y vende membresías           |
+| 3  | comercio    | Comercio aliado         | Registra ventas de miembros                    |
+| 4  | miembro     | Miembro                 | Cliente del club                               |

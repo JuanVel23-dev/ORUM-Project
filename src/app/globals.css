@@ -1,0 +1,207 @@
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html {
+  height: 100%;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* ===== Sistema de estilos reutilizable de ORUM ===== */
+:root {
+  --orum-primary: #2563eb;
+  --orum-primary-hover: #1d4ed8;
+  --orum-border: #d1d5db;
+  --orum-muted: #6b7280;
+  --orum-surface: #ffffff;
+  --orum-danger: #dc2626;
+  --orum-success: #16a34a;
+  --orum-radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --orum-border: #374151;
+    --orum-muted: #9ca3af;
+    --orum-surface: #111827;
+  }
+}
+
+.orum-card {
+  background: var(--orum-surface);
+  border: 1px solid var(--orum-border);
+  border-radius: var(--orum-radius);
+  padding: 1.5rem;
+}
+
+.orum-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.orum-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.orum-input,
+.orum-select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--orum-border);
+  border-radius: 8px;
+  background: var(--orum-surface);
+  color: var(--foreground);
+  font-size: 1rem;
+}
+
+.orum-input:focus,
+.orum-select:focus {
+  outline: 2px solid var(--orum-primary);
+  outline-offset: 1px;
+}
+
+.orum-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--orum-primary);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.orum-button:hover {
+  background: var(--orum-primary-hover);
+}
+
+.orum-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.orum-button--secondary {
+  background: transparent;
+  color: var(--foreground);
+  border-color: var(--orum-border);
+}
+
+.orum-button--secondary:hover {
+  background: rgba(127, 127, 127, 0.1);
+}
+
+.orum-button--danger {
+  background: var(--orum-danger);
+}
+
+.orum-button--danger:hover {
+  background: #b91c1c;
+}
+
+.orum-alert {
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+}
+
+.orum-alert--error {
+  color: var(--orum-danger);
+  border-color: var(--orum-danger);
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.orum-alert--success {
+  color: var(--orum-success);
+  border-color: var(--orum-success);
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.orum-muted {
+  color: var(--orum-muted);
+}
+
+.orum-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.925rem;
+}
+
+.orum-table th,
+.orum-table td {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--orum-border);
+}
+
+.orum-table th {
+  font-weight: 600;
+  color: var(--orum-muted);
+}
+
+.orum-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--orum-border);
+}
+
+.orum-badge--on {
+  color: var(--orum-success);
+  border-color: var(--orum-success);
+}
+
+.orum-badge--off {
+  color: var(--orum-muted);
+}

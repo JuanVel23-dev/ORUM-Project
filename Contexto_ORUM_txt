@@ -1,0 +1,75 @@
+ORUM es una plataforma web de club de beneficios que conecta a sus miembros con una red de comercios
+aliados, para que accedan a descuentos, ofertas y promociones.
+Este documento describe, de forma sencilla, qué se va a construir: los objetivos, el alcance del proyecto y
+las funciones que tendrá cada apartado de la plataforma. Sirve como acuerdo de referencia entre el
+cliente y el equipo de desarrollo
+
+La plataforma se compone de cuatro partes, cada una pensada para un tipo de usuario:
+• Portal Público: página informativa, abierta a todos, para conocer ORUM y adquirir la membresía.
+• Portal para Miembros: espacio privado donde el miembro consulta beneficios y busca comercios
+aliados.
+• Portal de Administración: panel interno para gestionar el club (membresías, usuarios, comercios y
+promociones).
+• Herramienta para Comercios Aliados: aplicación para que las tiendas registren las ventas de los
+miembros.
+
+
+A continuación, se listan las funciones de cada parte de la plataforma. Cada función tiene un código para
+poder identificarla con facilidad.
+
+3.1. Portal Público
+
+Código Función Descripción
+RF-01 Información de ORUM Mostrar en qué consiste el club y sus beneficios generales.
+RF-02 Tiendas aliadas Mostrar los comercios aliados, sin detallar los beneficios
+(esos son para miembros).
+RF-03 Precios Publicar los planes de membresía y sus precios.
+RF-04 Adquirir membresía Botón que lleva al WhatsApp del administrador para
+comprar la membresía.
+
+3.2. Portal para Miembros
+Código Función Descripción
+RF-06 Inicio de sesión Ingreso con credenciales propias, asociadas a la
+membresía.
+RF-07 Perfil del miembro Cada miembro tiene su perfil con la información de su
+membresía.
+RF-08 Descuentos generales Pantalla inicial con los descuentos y beneficios disponibles.
+RF-09 Búsqueda Buscar comercios aliados y sus ofertas o promociones.
+RF-10 Filtro por negocio Filtrar los resultados por comercio.
+RF-11 Filtro por marca Filtrar los resultados por marca.
+RF-12 Filtro por ubicación Filtrar los resultados por ubicación.
+RF-13 Soporte Botón que lleva al WhatsApp de soporte.
+RF-14 Código QR Generar un código QR que identifica al miembro en los
+comercios.
+
+
+3.3. Portal de Administración
+Código Función Descripción
+RF-15 Gestión de membresías Crear, ver, editar y eliminar los planes de membresía.
+RF-16 Gestión de usuarios Crear, ver, editar y eliminar usuarios.
+RF-17 Gestión de comercios Crear, ver, editar y eliminar los comercios aliados.
+RF-18 Gestión de promociones Administrar ofertas y beneficios, indicando el tipo (por
+ejemplo, porcentaje o 2x1).
+RF-19 Trazabilidad Ver el historial de movimientos realizados por los
+miembros.
+
+3.4. Herramienta para Comercios Aliados
+Código Función Descripción
+RF-20 Inicio de sesión Ingreso de la tienda a la herramienta.
+RF-21 Venta por QR Registrar una venta escaneando el código QR del miembro.
+RF-22 Venta por número Registrar una venta ingresando el número de membresía.
+
+
+Esto fue la primera versión de documento de requerimientos, pero se tuvo una reunión y hubieron algunos cambios en algunas partes.
+
+- EL cliente quiere que e tengan sesiones de administradores, donde serán los empleados. Estos empleados van a poder consultar los clientes, su estado de membresia. Ademas van a poder añadir una membresia y tiene que quedar registrado que usuario hizo la venta y registro al cliente. Esto debe aparecer como un datos en la membresia del cliente.
+
+- El administrados mayor va a poder ver, estos empleados cuantas membresías vendieron, podrá agregar usuarios administradores.
+
+- En el dashboard o métricas va a mostrar datos como ventas por restaurante, cuantos usuarios nuevos llegaron a la membresia, cuantas veces un usuario ha utilizado la membresia con cada comercio. Todo ese tipo de métricas.
+
+- Se necesita saber cuando se registro el cliente, si la membresia es nueva, renovada.
+
+- La cliente solicita estos datos, pero pueden ser mas si son necesarios. Cliente: Nombres, Apellidos, Cedula, Teléfono, Dirección, Quien vendio y registro la membresia, Ciudad. Se tiene que guardar los datos de las ventas que realice un cliente y se solicita la siguiente información: Nombre del resturante, ciudad, fecha, hora, valor compra, beneficio/descuento.
+
+Recalco estos datos fueron solicitados por el cliente, pero se que se necesitaran mas, entonces necesito que planifiques todo para que todo este correctamente construido.

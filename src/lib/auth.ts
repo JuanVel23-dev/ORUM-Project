@@ -1,0 +1,82 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import type { RolCodigo } from '@/lib/supabase/database.types'
+
+/**
+ * Información del usuario autenticado y su perfil/rol.
+ */
+export type PerfilActual = {
+  userId: string
+  email: string | null
+  rolId: number
+  rolCodigo: RolCodigo
+  rolNombre: string
+  activo: boolean
+}
+
+/**
+ * Devuelve el usuario autenticado junto con su perfil y rol, o `null` si no hay
+ * sesión válida (o el perfil está inactivo / no existe).
+ *
+ * Se apoya en `supabase.auth.getUser()`, que valida el token contra Supabase
+ * (no confía solo en la cookie).
+ */
+export async function getPerfilActual(): Promise<PerfilActual | null> {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return null
+
+  const { data: perfil } = await supabase
+    .from('perfiles')
+    .select('rol_id, activo')
+    .eq('id', user.id)
+    .single()
+
+  if (!perfil) return null
+
+  const { data: rol } = await supabase
+    .from('roles')
+    .select('codigo, nombre')
+    .eq('id', perfil.rol_id)
+    .single()
+
+  if (!rol) return null
+
+  return {
+    userId: user.id,
+    email: user.email ?? null,
+    rolId: perfil.rol_id,
+    rolCodigo: rol.codigo,
+    rolNombre: rol.nombre,
+    activo: perfil.activo,
+  }
+}
+
+/**
+ * Exige que haya un usuario autenticado, activo y con uno de los roles
+ * permitidos. Si no se cumple, redirige a `/login`. Devuelve el perfil cuando
+ * todo está en orden (útil para usarlo en la misma página).
+ *
+ * Uso típico al inicio de un Server Component:
+ *   const perfil = await requireRol('super_admin')
+ */
+export async function requireRol(
+  ...rolesPermitidos: RolCodigo[]
+): Promise<PerfilActual> {
+  const perfil = await getPerfilActual()
+
+  if (!perfil || !perfil.activo) {
+    redirect('/login')
+  }
+
+  if (rolesPermitidos.length > 0 && !rolesPermitidos.includes(perfil.rolCodigo)) {
+    // Autenticado pero sin permiso para esta sección.
+    redirect('/login?error=sin_permiso')
+  }
+
+  return perfil
+}
