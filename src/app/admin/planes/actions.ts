@@ -63,7 +63,7 @@ export async function editarPlan(_prev: PlanState, formData: FormData): Promise<
   if (!(await exigirSuperAdmin())) return { error: 'No tienes permiso para realizar esta acción.' }
 
   const id = Number(formData.get('id'))
-  if (!Number.isInteger(id)) return { error: 'Falta el identificador del plan.' }
+  if (!Number.isInteger(id) || id < 1) return { error: 'Falta el identificador del plan.' }
 
   const campos = leerCampos(formData)
   if (!campos.ok) return { error: campos.error }
@@ -90,7 +90,7 @@ export async function cambiarEstadoPlan(formData: FormData): Promise<void> {
 
   const id = Number(formData.get('id'))
   const activar = String(formData.get('activar') ?? '') === 'true'
-  if (!Number.isInteger(id)) redirect('/admin/planes')
+  if (!Number.isInteger(id) || id < 1) redirect('/admin/planes')
 
   const admin = createAdminClient()
   await admin.from('planes_membresia').update({ activo: activar }).eq('id', id)
