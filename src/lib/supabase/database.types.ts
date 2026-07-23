@@ -12,6 +12,11 @@
 /** Códigos de rol tal como están en la tabla `roles`. */
 export type RolCodigo = 'super_admin' | 'empleado' | 'comercio' | 'miembro'
 
+/** Valores del enum `tipo_membresia`. */
+export type TipoMembresia = 'nueva' | 'renovada'
+/** Valores del enum `estado_membresia`. */
+export type EstadoMembresia = 'activa' | 'vencida' | 'cancelada' | 'suspendida'
+
 type Timestamp = string // timestamptz llega como ISO string
 
 export type Database = {
@@ -147,12 +152,110 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['ciudades']['Insert']>
         Relationships: []
       }
+      planes_membresia: {
+        Row: {
+          id: number
+          nombre: string
+          descripcion: string | null
+          precio: number
+          duracion_meses: number
+          activo: boolean
+          created_at: Timestamp
+          updated_at: Timestamp
+          deleted_at: Timestamp | null
+        }
+        Insert: {
+          id?: number
+          nombre: string
+          descripcion?: string | null
+          precio: number
+          duracion_meses?: number
+          activo?: boolean
+          created_at?: Timestamp
+          updated_at?: Timestamp
+          deleted_at?: Timestamp | null
+        }
+        Update: Partial<Database['public']['Tables']['planes_membresia']['Insert']>
+        Relationships: []
+      }
+      miembros: {
+        Row: {
+          id: number
+          perfil_id: string | null
+          codigo_publico: string
+          numero_membresia: string
+          nombres: string
+          apellidos: string
+          cedula: string
+          telefono: string | null
+          direccion: string | null
+          ciudad_id: number | null
+          registrado_por: number | null
+          fecha_registro: Timestamp
+          created_at: Timestamp
+          updated_at: Timestamp
+          deleted_at: Timestamp | null
+        }
+        Insert: {
+          id?: number
+          perfil_id?: string | null
+          codigo_publico?: string
+          numero_membresia: string
+          nombres: string
+          apellidos: string
+          cedula: string
+          telefono?: string | null
+          direccion?: string | null
+          ciudad_id?: number | null
+          registrado_por?: number | null
+          fecha_registro?: Timestamp
+          created_at?: Timestamp
+          updated_at?: Timestamp
+          deleted_at?: Timestamp | null
+        }
+        Update: Partial<Database['public']['Tables']['miembros']['Insert']>
+        Relationships: []
+      }
+      membresias: {
+        Row: {
+          id: number
+          miembro_id: number
+          plan_id: number
+          tipo: Database['public']['Enums']['tipo_membresia']
+          estado: Database['public']['Enums']['estado_membresia']
+          fecha_inicio: string
+          fecha_fin: string
+          precio_pagado: number
+          comprobante_url: string | null
+          vendido_por: number | null
+          membresia_anterior_id: number | null
+          created_at: Timestamp
+          updated_at: Timestamp
+        }
+        Insert: {
+          id?: number
+          miembro_id: number
+          plan_id: number
+          tipo: Database['public']['Enums']['tipo_membresia']
+          estado?: Database['public']['Enums']['estado_membresia']
+          fecha_inicio: string
+          fecha_fin: string
+          precio_pagado: number
+          comprobante_url?: string | null
+          vendido_por?: number | null
+          membresia_anterior_id?: number | null
+          created_at?: Timestamp
+          updated_at?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['membresias']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
     Enums: {
-      // Se completarán en fases posteriores (p. ej. tipo_membresia, estado_membresia).
-      [key: string]: never
+      tipo_membresia: 'nueva' | 'renovada'
+      estado_membresia: 'activa' | 'vencida' | 'cancelada' | 'suspendida'
     }
   }
 }
