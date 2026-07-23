@@ -1,7 +1,7 @@
 'use server'
 
-import { randomInt } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
+import { generarPassword } from '@/lib/password'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth'
@@ -16,30 +16,6 @@ export type CrearUsuarioState = {
   ok?: boolean
   email?: string
   password?: string
-}
-
-/**
- * Genera una contraseña aleatoria segura, con al menos una minúscula, una
- * mayúscula, un número y un símbolo. Evita caracteres ambiguos (O/0, l/1).
- */
-function generarPassword(longitud = 14): string {
-  const minus = 'abcdefghijkmnpqrstuvwxyz'
-  const mayus = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
-  const nums = '23456789'
-  const simbolos = '!@#$%*?-_'
-  const todos = minus + mayus + nums + simbolos
-
-  const elegir = (set: string) => set[randomInt(0, set.length)]
-
-  const chars = [elegir(minus), elegir(mayus), elegir(nums), elegir(simbolos)]
-  for (let i = chars.length; i < longitud; i++) chars.push(elegir(todos))
-
-  // Mezcla (Fisher–Yates) para que los obligatorios no queden siempre al inicio.
-  for (let i = chars.length - 1; i > 0; i--) {
-    const j = randomInt(0, i + 1)
-    ;[chars[i], chars[j]] = [chars[j], chars[i]]
-  }
-  return chars.join('')
 }
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
