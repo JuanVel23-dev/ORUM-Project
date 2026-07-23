@@ -40,9 +40,13 @@ export type RegistrarMiembroState = {
   nombre?: string
 }
 
-/** Fecha de hoy en formato 'YYYY-MM-DD' (zona del servidor). */
+/**
+ * Fecha de hoy en formato 'YYYY-MM-DD' en la zona horaria del negocio
+ * (America/Bogota), no la del servidor (que corre en UTC). Así los registros y
+ * renovaciones hechos por la tarde-noche no saltan al día siguiente.
+ */
 function hoyISO(): string {
-  return new Date().toISOString().slice(0, 10)
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
 }
 
 /**
@@ -274,6 +278,7 @@ export async function renovarMembresia(
     }
   }
 
+  revalidatePath('/admin/miembros')
   revalidatePath(`/admin/miembros/${miembro_id}`)
   return {}
 }
@@ -302,8 +307,12 @@ export async function editarMiembro(
   const direccion = String(formData.get('direccion') ?? '').trim() || null
   const ciudadRaw = String(formData.get('ciudad_id') ?? '').trim()
   const ciudad_id = ciudadRaw ? Number(ciudadRaw) : null
+  const correo = String(formData.get('correo') ?? '').trim().toLowerCase()
+  const correoOriginal = String(formData.get('correo_original') ?? '').trim().toLowerCase()
   if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
   if (!cedula) return { error: 'La cédula es obligatoria.' }
+  // Validar el formato del correo ANTES de escribir, para no dejar una edición a medias.
+  if (correo && !correo.includes('@')) return { error: 'El correo electrónico no es válido.' }
 
   const admin = createAdminClient()
 
@@ -323,11 +332,8 @@ export async function editarMiembro(
     .eq('id', miembroId)
   if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
 
-  // Correo (vía Auth), sólo si cambió.
-  const correo = String(formData.get('correo') ?? '').trim().toLowerCase()
-  const correoOriginal = String(formData.get('correo_original') ?? '').trim().toLowerCase()
+  // Correo (vía Auth), sólo si cambió. El formato ya se validó arriba.
   if (perfilId && correo && correo !== correoOriginal) {
-    if (!correo.includes('@')) return { error: 'El correo electrónico no es válido.' }
     const { error: errCorreo } = await admin.auth.admin.updateUserById(perfilId, {
       email: correo,
       email_confirm: true,
@@ -340,6 +346,7 @@ export async function editarMiembro(
     }
   }
 
+  revalidatePath('/admin/miembros')
   revalidatePath(`/admin/miembros/${miembroId}`)
   redirect(`/admin/miembros/${miembroId}`)
 }

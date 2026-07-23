@@ -19,9 +19,13 @@ export default async function MiembrosPage({
     .select('id, numero_membresia, nombres, apellidos, cedula')
     .is('deleted_at', null)
 
-  if (busqueda) {
+  // Quitar caracteres que son estructura del filtro `.or(...)` de PostgREST
+  // (comas, paréntesis y comodines) para que una búsqueda con puntuación
+  // —p. ej. "Pérez, Juan"— no rompa la consulta.
+  const termino = busqueda.replace(/[,()%*\\]/g, ' ').trim()
+  if (termino) {
     consulta = consulta.or(
-      `numero_membresia.ilike.%${busqueda}%,cedula.ilike.%${busqueda}%,nombres.ilike.%${busqueda}%,apellidos.ilike.%${busqueda}%`,
+      `numero_membresia.ilike.%${termino}%,cedula.ilike.%${termino}%,nombres.ilike.%${termino}%,apellidos.ilike.%${termino}%`,
     )
   }
 
