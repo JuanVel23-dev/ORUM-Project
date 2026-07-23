@@ -194,3 +194,71 @@ export async function registrarMiembro(
   revalidatePath('/admin/miembros')
   return { ok: true, numero, password, nombre: `${nombres} ${apellidos}`.trim() }
 }
+
+export type RenovarState = { error?: string }
+
+/**
+ * Renueva la membresía de un miembro: crea una nueva (tipo=renovada) enlazada a
+ * la vigente, marca la anterior como 'vencida' y deja solo una 'activa'.
+ */
+export async function renovarMembresia(
+  _prev: RenovarState,
+  formData: FormData,
+): Promise<RenovarState> {
+  const actor = await exigirEmpleadoOAdmin()
+  if (!actor) return { error: 'No tienes permiso para realizar esta acción.' }
+
+  const miembro_id = Number(formData.get('miembro_id'))
+  const plan_id = Number(formData.get('plan_id'))
+  const precio_pagado = Number(formData.get('precio_pagado'))
+  if (!Number.isInteger(miembro_id)) return { error: 'Falta el identificador del miembro.' }
+  if (!Number.isInteger(plan_id)) return { error: 'Selecciona un plan de membresía.' }
+  if (!Number.isFinite(precio_pagado) || precio_pagado < 0) {
+    return { error: 'El precio pagado debe ser un número mayor o igual a 0.' }
+  }
+
+  const admin = createAdminClient()
+
+  const { data: plan } = await admin
+    .from('planes_membresia')
+    .select('id, duracion_meses, activo')
+    .eq('id', plan_id)
+    .is('deleted_at', null)
+    .maybeSingle()
+  if (!plan || !plan.activo) return { error: 'El plan seleccionado no existe o está inactivo.' }
+
+  // Membresía vigente (activa), si existe.
+  const { data: vigente } = await admin
+    .from('membresias')
+    .select('id, fecha_fin')
+    .eq('miembro_id', miembro_id)
+    .eq('estado', 'activa')
+    .order('fecha_fin', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const empleadoId = await resolverEmpleadoId(admin, actor.userId)
+  const fecha_inicio = calcularFechaInicioRenovacion(hoyISO(), vigente?.fecha_fin ?? null)
+  const fecha_fin = calcularFechaFin(fecha_inicio, plan.duracion_meses)
+
+  const { error: errNueva } = await admin.from('membresias').insert({
+    miembro_id,
+    plan_id,
+    tipo: 'renovada',
+    estado: 'activa',
+    fecha_inicio,
+    fecha_fin,
+    precio_pagado,
+    vendido_por: empleadoId,
+    membresia_anterior_id: vigente?.id ?? null,
+  })
+  if (errNueva) return { error: `No se pudo registrar la renovación: ${errNueva.message}` }
+
+  // La anterior pasa a 'vencida' para mantener una sola activa.
+  if (vigente) {
+    await admin.from('membresias').update({ estado: 'vencida' }).eq('id', vigente.id)
+  }
+
+  revalidatePath(`/admin/miembros/${miembro_id}`)
+  return {}
+}
