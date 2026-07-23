@@ -16,6 +16,7 @@ export function generarPassword(longitud = 14): string {
   const chars = [elegir(minus), elegir(mayus), elegir(nums), elegir(simbolos)]
   for (let i = chars.length; i < longitud; i++) chars.push(elegir(todos))
 
+  // Mezcla (Fisher–Yates) para que los obligatorios no queden siempre al inicio.
   for (let i = chars.length - 1; i > 0; i--) {
     const j = randomInt(0, i + 1)
     ;[chars[i], chars[j]] = [chars[j], chars[i]]
