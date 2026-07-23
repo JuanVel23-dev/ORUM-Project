@@ -211,8 +211,8 @@ export async function renovarMembresia(
   const miembro_id = Number(formData.get('miembro_id'))
   const plan_id = Number(formData.get('plan_id'))
   const precio_pagado = Number(formData.get('precio_pagado'))
-  if (!Number.isInteger(miembro_id)) return { error: 'Falta el identificador del miembro.' }
-  if (!Number.isInteger(plan_id)) return { error: 'Selecciona un plan de membresía.' }
+  if (!Number.isInteger(miembro_id) || miembro_id < 1) return { error: 'Falta el identificador del miembro.' }
+  if (!Number.isInteger(plan_id) || plan_id < 1) return { error: 'Selecciona un plan de membresía.' }
   if (!Number.isFinite(precio_pagado) || precio_pagado < 0) {
     return { error: 'El precio pagado debe ser un número mayor o igual a 0.' }
   }
@@ -241,22 +241,36 @@ export async function renovarMembresia(
   const fecha_inicio = calcularFechaInicioRenovacion(hoyISO(), vigente?.fecha_fin ?? null)
   const fecha_fin = calcularFechaFin(fecha_inicio, plan.duracion_meses)
 
-  const { error: errNueva } = await admin.from('membresias').insert({
-    miembro_id,
-    plan_id,
-    tipo: 'renovada',
-    estado: 'activa',
-    fecha_inicio,
-    fecha_fin,
-    precio_pagado,
-    vendido_por: empleadoId,
-    membresia_anterior_id: vigente?.id ?? null,
-  })
-  if (errNueva) return { error: `No se pudo registrar la renovación: ${errNueva.message}` }
+  const { data: nueva, error: errNueva } = await admin
+    .from('membresias')
+    .insert({
+      miembro_id,
+      plan_id,
+      tipo: 'renovada',
+      estado: 'activa',
+      fecha_inicio,
+      fecha_fin,
+      precio_pagado,
+      vendido_por: empleadoId,
+      membresia_anterior_id: vigente?.id ?? null,
+    })
+    .select('id')
+    .single()
+  if (errNueva || !nueva) {
+    return { error: `No se pudo registrar la renovación: ${errNueva?.message ?? 'error desconocido'}` }
+  }
 
-  // La anterior pasa a 'vencida' para mantener una sola activa.
+  // La anterior pasa a 'vencida' para mantener una sola membresía activa. Si
+  // este paso falla, se revierte la nueva para no dejar dos activas a la vez.
   if (vigente) {
-    await admin.from('membresias').update({ estado: 'vencida' }).eq('id', vigente.id)
+    const { error: errVencer } = await admin
+      .from('membresias')
+      .update({ estado: 'vencida' })
+      .eq('id', vigente.id)
+    if (errVencer) {
+      await admin.from('membresias').delete().eq('id', nueva.id)
+      return { error: `No se pudo completar la renovación: ${errVencer.message}` }
+    }
   }
 
   revalidatePath(`/admin/miembros/${miembro_id}`)
