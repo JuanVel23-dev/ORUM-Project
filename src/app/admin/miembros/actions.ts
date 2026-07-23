@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual, type PerfilActual } from '@/lib/auth'
 import { generarPassword } from '@/lib/password'
@@ -275,4 +276,70 @@ export async function renovarMembresia(
 
   revalidatePath(`/admin/miembros/${miembro_id}`)
   return {}
+}
+
+export type EditarMiembroState = { error?: string }
+
+/**
+ * Edita los datos de un miembro (no cambia número ni perfil_id/UUID). El correo
+ * se actualiza vía Admin API sólo si cambió.
+ */
+export async function editarMiembro(
+  _prev: EditarMiembroState,
+  formData: FormData,
+): Promise<EditarMiembroState> {
+  const actor = await exigirEmpleadoOAdmin()
+  if (!actor) return { error: 'No tienes permiso para realizar esta acción.' }
+
+  const miembroId = Number(formData.get('miembro_id'))
+  const perfilId = String(formData.get('perfil_id') ?? '')
+  if (!Number.isInteger(miembroId) || miembroId < 1) return { error: 'Falta el identificador del miembro.' }
+
+  const nombres = String(formData.get('nombres') ?? '').trim()
+  const apellidos = String(formData.get('apellidos') ?? '').trim()
+  const cedula = String(formData.get('cedula') ?? '').trim()
+  const telefono = String(formData.get('telefono') ?? '').trim() || null
+  const direccion = String(formData.get('direccion') ?? '').trim() || null
+  const ciudadRaw = String(formData.get('ciudad_id') ?? '').trim()
+  const ciudad_id = ciudadRaw ? Number(ciudadRaw) : null
+  if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
+  if (!cedula) return { error: 'La cédula es obligatoria.' }
+
+  const admin = createAdminClient()
+
+  // Cédula única, excluyendo al propio miembro.
+  const { data: cedulaExiste } = await admin
+    .from('miembros')
+    .select('id')
+    .eq('cedula', cedula)
+    .is('deleted_at', null)
+    .neq('id', miembroId)
+    .maybeSingle()
+  if (cedulaExiste) return { error: `Ya existe otro miembro con la cédula ${cedula}.` }
+
+  const { error } = await admin
+    .from('miembros')
+    .update({ nombres, apellidos, cedula, telefono, direccion, ciudad_id })
+    .eq('id', miembroId)
+  if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
+
+  // Correo (vía Auth), sólo si cambió.
+  const correo = String(formData.get('correo') ?? '').trim().toLowerCase()
+  const correoOriginal = String(formData.get('correo_original') ?? '').trim().toLowerCase()
+  if (perfilId && correo && correo !== correoOriginal) {
+    if (!correo.includes('@')) return { error: 'El correo electrónico no es válido.' }
+    const { error: errCorreo } = await admin.auth.admin.updateUserById(perfilId, {
+      email: correo,
+      email_confirm: true,
+    })
+    if (errCorreo) {
+      const msg = /already been registered|already registered|exists/i.test(errCorreo.message)
+        ? 'Ese correo ya está en uso por otro usuario.'
+        : `No se pudo actualizar el correo: ${errCorreo.message}`
+      return { error: msg }
+    }
+  }
+
+  revalidatePath(`/admin/miembros/${miembroId}`)
+  redirect(`/admin/miembros/${miembroId}`)
 }
