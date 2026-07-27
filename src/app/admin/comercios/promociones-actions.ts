@@ -92,6 +92,7 @@ export async function editarPromocion(_prev: PromocionState, formData: FormData)
   const id = Number(formData.get('id'))
   const comercioId = Number(formData.get('comercio_id'))
   if (!Number.isInteger(id) || id < 1) return { error: 'Falta el identificador de la promoción.' }
+  if (!Number.isInteger(comercioId) || comercioId < 1) return { error: 'Falta el identificador del comercio.' }
 
   const campos = leerCamposPromocion(formData)
   if (!campos.ok) return { error: campos.error }
@@ -119,6 +120,7 @@ export async function editarPromocion(_prev: PromocionState, formData: FormData)
       fecha_fin: campos.fecha_fin,
     })
     .eq('id', id)
+    .eq('comercio_id', comercioId)
   if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
 
   revalidatePath(`/admin/comercios/${comercioId}`)

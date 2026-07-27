@@ -77,6 +77,7 @@ export async function editarSucursal(_prev: SucursalState, formData: FormData): 
       ciudad_id: campos.ciudad_id,
     })
     .eq('id', id)
+    .eq('comercio_id', comercioId)
   if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
