@@ -133,10 +133,13 @@ export async function cambiarEstadoPromocion(formData: FormData): Promise<void> 
   const comercioId = Number(formData.get('comercio_id'))
   const activar = String(formData.get('activar') ?? '') === 'true'
   if (!Number.isInteger(id) || id < 1) redirect('/admin/comercios')
+  if (!Number.isInteger(comercioId) || comercioId < 1) redirect('/admin/comercios')
 
   const admin = createAdminClient()
-  await admin.from('promociones').update({ activo: activar }).eq('id', id)
+  const { error } = await admin.from('promociones').update({ activo: activar }).eq('id', id)
 
-  revalidatePath(`/admin/comercios/${comercioId}`)
+  if (!error) {
+    revalidatePath(`/admin/comercios/${comercioId}`)
+  }
   redirect(`/admin/comercios/${comercioId}`)
 }
