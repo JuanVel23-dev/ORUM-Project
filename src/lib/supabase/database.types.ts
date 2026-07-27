@@ -12,6 +12,9 @@
 /** Códigos de rol tal como están en la tabla `roles`. */
 export type RolCodigo = 'super_admin' | 'empleado' | 'comercio' | 'miembro'
 
+/** Códigos de tipo_beneficio tal como están en la tabla `tipos_beneficio`. */
+export type TipoBeneficioCodigo = 'porcentaje' | 'dos_por_uno' | 'monto_fijo' | 'regalo'
+
 /** Valores del enum `tipo_membresia`. */
 export type TipoMembresia = 'nueva' | 'renovada'
 /** Valores del enum `estado_membresia`. */
@@ -248,6 +251,82 @@ export type Database = {
           updated_at?: Timestamp
         }
         Update: Partial<Database['public']['Tables']['membresias']['Insert']>
+        Relationships: []
+      }
+      sucursales: {
+        Row: {
+          id: number
+          comercio_id: number
+          ciudad_id: number
+          nombre: string | null
+          direccion: string | null
+          telefono: string | null
+          activo: boolean
+          created_at: Timestamp
+          updated_at: Timestamp
+          deleted_at: Timestamp | null
+        }
+        Insert: {
+          id?: number
+          comercio_id: number
+          ciudad_id: number
+          nombre?: string | null
+          direccion?: string | null
+          telefono?: string | null
+          activo?: boolean
+          created_at?: Timestamp
+          updated_at?: Timestamp
+          deleted_at?: Timestamp | null
+        }
+        Update: Partial<Database['public']['Tables']['sucursales']['Insert']>
+        Relationships: []
+      }
+      tipos_beneficio: {
+        Row: {
+          id: number
+          codigo: TipoBeneficioCodigo
+          nombre: string
+          descripcion: string | null
+        }
+        Insert: {
+          id?: number
+          codigo: TipoBeneficioCodigo
+          nombre: string
+          descripcion?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['tipos_beneficio']['Insert']>
+        Relationships: []
+      }
+      promociones: {
+        Row: {
+          id: number
+          comercio_id: number
+          tipo_beneficio_id: number
+          titulo: string
+          descripcion: string | null
+          valor: number | null
+          fecha_inicio: string | null
+          fecha_fin: string | null
+          activo: boolean
+          created_at: Timestamp
+          updated_at: Timestamp
+          deleted_at: Timestamp | null
+        }
+        Insert: {
+          id?: number
+          comercio_id: number
+          tipo_beneficio_id: number
+          titulo: string
+          descripcion?: string | null
+          valor?: number | null
+          fecha_inicio?: string | null
+          fecha_fin?: string | null
+          activo?: boolean
+          created_at?: Timestamp
+          updated_at?: Timestamp
+          deleted_at?: Timestamp | null
+        }
+        Update: Partial<Database['public']['Tables']['promociones']['Insert']>
         Relationships: []
       }
     }
