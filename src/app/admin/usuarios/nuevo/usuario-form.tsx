@@ -4,19 +4,11 @@ import { useActionState, useState } from 'react'
 import Link from 'next/link'
 import { crearUsuario, type CrearUsuarioState } from '../actions'
 
-type Opcion = { id: number; nombre: string }
-
 const estadoInicial: CrearUsuarioState = {}
 
-export function UsuarioForm({
-  marcas,
-  categorias,
-}: {
-  marcas: Opcion[]
-  categorias: Opcion[]
-}) {
+export function UsuarioForm() {
   const [state, formAction, pending] = useActionState(crearUsuario, estadoInicial)
-  const [tipo, setTipo] = useState<'empleado' | 'super_admin' | 'comercio'>('empleado')
+  const [tipo, setTipo] = useState<'empleado' | 'super_admin'>('empleado')
   const [copiado, setCopiado] = useState(false)
 
   // Pantalla de éxito: mostramos la contraseña generada UNA sola vez.
@@ -58,15 +50,13 @@ export function UsuarioForm({
           <Link href="/admin/usuarios" className="orum-button">
             Ir a la lista
           </Link>
-          <a href="/admin/usuarios/nuevo" className="orum-button orum-button--secondary">
+          <Link href="/admin/usuarios/nuevo" className="orum-button orum-button--secondary">
             Crear otro
-          </a>
+          </Link>
         </div>
       </div>
     )
   }
-
-  const esComercio = tipo === 'comercio'
 
   return (
     <form action={formAction} className="orum-card">
@@ -89,7 +79,6 @@ export function UsuarioForm({
         >
           <option value="empleado">Empleado</option>
           <option value="super_admin">Administrador</option>
-          <option value="comercio">Comercio aliado</option>
         </select>
       </div>
 
@@ -100,77 +89,32 @@ export function UsuarioForm({
         <input id="email" name="email" type="email" className="orum-input" required />
       </div>
 
-      {esComercio ? (
-        <>
-          <div className="orum-field">
-            <label className="orum-label" htmlFor="comercio_nombre">
-              Nombre del comercio
-            </label>
-            <input id="comercio_nombre" name="comercio_nombre" className="orum-input" required />
-          </div>
-          <div className="orum-field">
-            <label className="orum-label" htmlFor="descripcion">
-              Descripción (opcional)
-            </label>
-            <input id="descripcion" name="descripcion" className="orum-input" />
-          </div>
-          <div className="orum-field">
-            <label className="orum-label" htmlFor="marca_id">
-              Marca (opcional)
-            </label>
-            <select id="marca_id" name="marca_id" className="orum-select" defaultValue="">
-              <option value="">— Sin marca —</option>
-              {marcas.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="orum-field">
-            <label className="orum-label" htmlFor="categoria_id">
-              Categoría (opcional)
-            </label>
-            <select id="categoria_id" name="categoria_id" className="orum-select" defaultValue="">
-              <option value="">— Sin categoría —</option>
-              {categorias.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-        </>
-      ) : (
-        <>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <div className="orum-field" style={{ flex: 1 }}>
-              <label className="orum-label" htmlFor="nombres">
-                Nombres
-              </label>
-              <input id="nombres" name="nombres" className="orum-input" required />
-            </div>
-            <div className="orum-field" style={{ flex: 1 }}>
-              <label className="orum-label" htmlFor="apellidos">
-                Apellidos
-              </label>
-              <input id="apellidos" name="apellidos" className="orum-input" required />
-            </div>
-          </div>
-          <div className="orum-field">
-            <label className="orum-label" htmlFor="cedula">
-              Cédula
-            </label>
-            <input id="cedula" name="cedula" className="orum-input" required />
-          </div>
-          <div className="orum-field">
-            <label className="orum-label" htmlFor="telefono">
-              Teléfono (opcional)
-            </label>
-            <input id="telefono" name="telefono" className="orum-input" />
-          </div>
-        </>
-      )}
+      <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="orum-field" style={{ flex: 1 }}>
+          <label className="orum-label" htmlFor="nombres">
+            Nombres
+          </label>
+          <input id="nombres" name="nombres" className="orum-input" required />
+        </div>
+        <div className="orum-field" style={{ flex: 1 }}>
+          <label className="orum-label" htmlFor="apellidos">
+            Apellidos
+          </label>
+          <input id="apellidos" name="apellidos" className="orum-input" required />
+        </div>
+      </div>
+      <div className="orum-field">
+        <label className="orum-label" htmlFor="cedula">
+          Cédula
+        </label>
+        <input id="cedula" name="cedula" className="orum-input" required />
+      </div>
+      <div className="orum-field">
+        <label className="orum-label" htmlFor="telefono">
+          Teléfono (opcional)
+        </label>
+        <input id="telefono" name="telefono" className="orum-input" />
+      </div>
 
       <p className="orum-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
         El sistema generará una contraseña segura automáticamente y te la mostrará al terminar.

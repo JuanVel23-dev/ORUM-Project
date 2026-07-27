@@ -12,7 +12,6 @@ type Fila = {
   rolNombre: string
   rolCodigo: string
   activo: boolean
-  tipo: 'empleado' | 'comercio'
 }
 
 export default async function UsuariosPage() {
@@ -21,52 +20,31 @@ export default async function UsuariosPage() {
 
   const admin = createAdminClient()
 
-  const [{ data: perfiles }, { data: roles }, { data: empleados }, { data: comercios }, authList] =
-    await Promise.all([
-      admin.from('perfiles').select('id, rol_id, activo'),
-      admin.from('roles').select('id, codigo, nombre'),
-      admin.from('empleados').select('perfil_id, nombres, apellidos').is('deleted_at', null),
-      admin.from('comercios').select('perfil_id, nombre').is('deleted_at', null),
-      admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
-    ])
+  const [{ data: perfiles }, { data: roles }, { data: empleados }, authList] = await Promise.all([
+    admin.from('perfiles').select('id, rol_id, activo'),
+    admin.from('roles').select('id, codigo, nombre'),
+    admin.from('empleados').select('perfil_id, nombres, apellidos').is('deleted_at', null),
+    admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+  ])
 
   const rolPorId = new Map((roles ?? []).map((r) => [r.id, r]))
   const emailPorId = new Map((authList.data?.users ?? []).map((u) => [u.id, u.email ?? '—']))
   const empleadoPorPerfil = new Map((empleados ?? []).map((e) => [e.perfil_id, e]))
-  const comercioPorPerfil = new Map((comercios ?? []).map((c) => [c.perfil_id, c]))
 
   const filas: Fila[] = (perfiles ?? [])
     .map((p): Fila | null => {
       const rol = rolPorId.get(p.rol_id)
-      if (!rol) return null
-
-      // En esta fase listamos empleados/administradores y comercios.
       const emp = empleadoPorPerfil.get(p.id)
-      const com = comercioPorPerfil.get(p.id)
+      if (!rol || !emp) return null
 
-      if (emp) {
-        return {
-          perfilId: p.id,
-          nombre: `${emp.nombres} ${emp.apellidos}`.trim(),
-          email: emailPorId.get(p.id) ?? '—',
-          rolNombre: rol.nombre,
-          rolCodigo: rol.codigo,
-          activo: p.activo,
-          tipo: 'empleado',
-        }
+      return {
+        perfilId: p.id,
+        nombre: `${emp.nombres} ${emp.apellidos}`.trim(),
+        email: emailPorId.get(p.id) ?? '—',
+        rolNombre: rol.nombre,
+        rolCodigo: rol.codigo,
+        activo: p.activo,
       }
-      if (com) {
-        return {
-          perfilId: p.id,
-          nombre: com.nombre,
-          email: emailPorId.get(p.id) ?? '—',
-          rolNombre: rol.nombre,
-          rolCodigo: rol.codigo,
-          activo: p.activo,
-          tipo: 'comercio',
-        }
-      }
-      return null
     })
     .filter((f): f is Fila => f !== null)
     .sort((a, b) => a.nombre.localeCompare(b.nombre))

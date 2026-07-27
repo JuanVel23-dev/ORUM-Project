@@ -7,9 +7,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth'
 import type { RolCodigo } from '@/lib/supabase/database.types'
 
-/** Tipos de usuario que el admin puede crear en esta fase. */
-type TipoUsuario = 'super_admin' | 'empleado' | 'comercio'
-const TIPOS_VALIDOS: TipoUsuario[] = ['super_admin', 'empleado', 'comercio']
+/** Tipos de usuario que el admin puede crear en esta sección. */
+type TipoUsuario = 'super_admin' | 'empleado'
+const TIPOS_VALIDOS: TipoUsuario[] = ['super_admin', 'empleado']
 
 export type CrearUsuarioState = {
   error?: string
@@ -28,9 +28,9 @@ async function exigirSuperAdmin(): Promise<string | null> {
 }
 
 /**
- * Crea un usuario (empleado, administrador o comercio).
- * Flujo: crear usuario en Auth → upsert de `perfiles` → insertar en la tabla
- * específica. Si algo falla, se revierte para no dejar datos a medias.
+ * Crea un usuario (empleado o administrador).
+ * Flujo: crear usuario en Auth → upsert de `perfiles` → insertar en `empleados`.
+ * Si algo falla, se revierte para no dejar datos a medias.
  */
 export async function crearUsuario(
   _prev: CrearUsuarioState,
@@ -48,7 +48,6 @@ export async function crearUsuario(
 
   const admin = createAdminClient()
 
-  // Buscar el id del rol por su código.
   const { data: rol } = await admin
     .from('roles')
     .select('id')
@@ -56,54 +55,30 @@ export async function crearUsuario(
     .single()
   if (!rol) return { error: `No se encontró el rol "${tipo}" en la base de datos.` }
 
-  // Validar campos específicos ANTES de crear el usuario en Auth.
-  let datosEmpleado: { nombres: string; apellidos: string; cedula: string | null; telefono: string | null } | null =
-    null
-  let datosComercio: {
-    nombre: string
-    descripcion: string | null
-    marca_id: number | null
-    categoria_id: number | null
-  } | null = null
+  const nombres = String(formData.get('nombres') ?? '').trim()
+  const apellidos = String(formData.get('apellidos') ?? '').trim()
+  const cedula = String(formData.get('cedula') ?? '').trim()
+  if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
+  if (!cedula) return { error: 'La cédula es obligatoria.' }
 
-  if (tipo === 'comercio') {
-    const nombre = String(formData.get('comercio_nombre') ?? '').trim()
-    if (!nombre) return { error: 'El nombre del comercio es obligatorio.' }
-    const marca = String(formData.get('marca_id') ?? '').trim()
-    const categoria = String(formData.get('categoria_id') ?? '').trim()
-    datosComercio = {
-      nombre,
-      descripcion: String(formData.get('descripcion') ?? '').trim() || null,
-      marca_id: marca ? Number(marca) : null,
-      categoria_id: categoria ? Number(categoria) : null,
-    }
-  } else {
-    const nombres = String(formData.get('nombres') ?? '').trim()
-    const apellidos = String(formData.get('apellidos') ?? '').trim()
-    const cedula = String(formData.get('cedula') ?? '').trim()
-    if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
-    if (!cedula) return { error: 'La cédula es obligatoria.' }
+  // La cédula es el identificador de negocio: no se puede repetir.
+  const { data: yaExiste } = await admin
+    .from('empleados')
+    .select('id')
+    .eq('cedula', cedula)
+    .is('deleted_at', null)
+    .maybeSingle()
+  if (yaExiste) return { error: `Ya existe un empleado registrado con la cédula ${cedula}.` }
 
-    // La cédula es el identificador de negocio: no se puede repetir.
-    const { data: yaExiste } = await admin
-      .from('empleados')
-      .select('id')
-      .eq('cedula', cedula)
-      .is('deleted_at', null)
-      .maybeSingle()
-    if (yaExiste) return { error: `Ya existe un empleado registrado con la cédula ${cedula}.` }
-
-    datosEmpleado = {
-      nombres,
-      apellidos,
-      cedula,
-      telefono: String(formData.get('telefono') ?? '').trim() || null,
-    }
+  const datosEmpleado = {
+    nombres,
+    apellidos,
+    cedula,
+    telefono: String(formData.get('telefono') ?? '').trim() || null,
   }
 
   const password = generarPassword()
 
-  // 1) Crear usuario en Supabase Auth (confirmado, sin necesidad de correo).
   const { data: creado, error: errAuth } = await admin.auth.admin.createUser({
     email,
     password,
@@ -117,13 +92,11 @@ export async function crearUsuario(
   }
   const userId = creado.user.id
 
-  // Limpieza en caso de fallo posterior (borra perfil y usuario de Auth).
   const revertir = async () => {
     await admin.from('perfiles').delete().eq('id', userId)
     await admin.auth.admin.deleteUser(userId)
   }
 
-  // 2) Perfil (upsert: funciona exista o no un trigger que ya lo haya creado).
   const { error: errPerfil } = await admin
     .from('perfiles')
     .upsert({ id: userId, rol_id: rol.id, activo: true }, { onConflict: 'id' })
@@ -132,23 +105,12 @@ export async function crearUsuario(
     return { error: `No se pudo crear el perfil: ${errPerfil.message}` }
   }
 
-  // 3) Fila en la tabla específica.
-  if (tipo === 'comercio' && datosComercio) {
-    const { error: errComercio } = await admin
-      .from('comercios')
-      .insert({ perfil_id: userId, ...datosComercio })
-    if (errComercio) {
-      await revertir()
-      return { error: `No se pudo registrar el comercio: ${errComercio.message}` }
-    }
-  } else if (datosEmpleado) {
-    const { error: errEmpleado } = await admin
-      .from('empleados')
-      .insert({ perfil_id: userId, ...datosEmpleado })
-    if (errEmpleado) {
-      await revertir()
-      return { error: `No se pudo registrar el empleado: ${errEmpleado.message}` }
-    }
+  const { error: errEmpleado } = await admin
+    .from('empleados')
+    .insert({ perfil_id: userId, ...datosEmpleado })
+  if (errEmpleado) {
+    await revertir()
+    return { error: `No se pudo registrar el empleado: ${errEmpleado.message}` }
   }
 
   revalidatePath('/admin/usuarios')
@@ -158,9 +120,8 @@ export async function crearUsuario(
 export type EditarUsuarioState = { error?: string }
 
 /**
- * Edita los datos de un usuario: nombres/cédula/teléfono (empleado) o nombre
- * (comercio), y opcionalmente el correo de acceso. No cambia el rol.
- * El identificador interno (perfil_id / UUID) nunca cambia.
+ * Edita los datos de un empleado/administrador y, opcionalmente, su correo de
+ * acceso. No cambia el rol. El identificador interno (perfil_id / UUID) nunca cambia.
  */
 export async function editarUsuario(
   _prev: EditarUsuarioState,
@@ -171,52 +132,37 @@ export async function editarUsuario(
   }
 
   const perfilId = String(formData.get('perfil_id') ?? '')
-  const tipo = String(formData.get('tipo') ?? '')
   if (!perfilId) return { error: 'Falta el identificador del usuario.' }
 
   const admin = createAdminClient()
 
-  if (tipo === 'comercio') {
-    const nombre = String(formData.get('comercio_nombre') ?? '').trim()
-    if (!nombre) return { error: 'El nombre del comercio es obligatorio.' }
-    const { error } = await admin
-      .from('comercios')
-      .update({
-        nombre,
-        descripcion: String(formData.get('descripcion') ?? '').trim() || null,
-      })
-      .eq('perfil_id', perfilId)
-    if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
-  } else {
-    const nombres = String(formData.get('nombres') ?? '').trim()
-    const apellidos = String(formData.get('apellidos') ?? '').trim()
-    const cedula = String(formData.get('cedula') ?? '').trim()
-    if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
-    if (!cedula) return { error: 'La cédula es obligatoria.' }
+  const nombres = String(formData.get('nombres') ?? '').trim()
+  const apellidos = String(formData.get('apellidos') ?? '').trim()
+  const cedula = String(formData.get('cedula') ?? '').trim()
+  if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
+  if (!cedula) return { error: 'La cédula es obligatoria.' }
 
-    // Unicidad de cédula, excluyendo al propio usuario que se edita.
-    const { data: yaExiste } = await admin
-      .from('empleados')
-      .select('id')
-      .eq('cedula', cedula)
-      .is('deleted_at', null)
-      .neq('perfil_id', perfilId)
-      .maybeSingle()
-    if (yaExiste) return { error: `Ya existe otro empleado con la cédula ${cedula}.` }
+  // Unicidad de cédula, excluyendo al propio usuario que se edita.
+  const { data: yaExiste } = await admin
+    .from('empleados')
+    .select('id')
+    .eq('cedula', cedula)
+    .is('deleted_at', null)
+    .neq('perfil_id', perfilId)
+    .maybeSingle()
+  if (yaExiste) return { error: `Ya existe otro empleado con la cédula ${cedula}.` }
 
-    const { error } = await admin
-      .from('empleados')
-      .update({
-        nombres,
-        apellidos,
-        cedula,
-        telefono: String(formData.get('telefono') ?? '').trim() || null,
-      })
-      .eq('perfil_id', perfilId)
-    if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
-  }
+  const { error } = await admin
+    .from('empleados')
+    .update({
+      nombres,
+      apellidos,
+      cedula,
+      telefono: String(formData.get('telefono') ?? '').trim() || null,
+    })
+    .eq('perfil_id', perfilId)
+  if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
 
-  // Correo (editable): solo se actualiza si cambió.
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
   const emailOriginal = String(formData.get('email_original') ?? '').trim().toLowerCase()
   if (email && email !== emailOriginal) {

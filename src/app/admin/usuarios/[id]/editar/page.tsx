@@ -16,24 +16,18 @@ export default async function EditarUsuarioPage({
 
   const admin = createAdminClient()
 
-  const [{ data: empleado }, { data: comercio }, { data: authUser }] = await Promise.all([
+  const [{ data: empleado }, { data: authUser }] = await Promise.all([
     admin
       .from('empleados')
       .select('nombres, apellidos, cedula, telefono')
       .eq('perfil_id', perfilId)
       .maybeSingle(),
-    admin
-      .from('comercios')
-      .select('nombre, descripcion')
-      .eq('perfil_id', perfilId)
-      .maybeSingle(),
     admin.auth.admin.getUserById(perfilId),
   ])
 
-  if (!empleado && !comercio) notFound()
+  if (!empleado) notFound()
 
   const email = authUser?.user?.email ?? ''
-  const esComercio = Boolean(comercio)
 
   return (
     <div style={{ maxWidth: 560 }}>
@@ -44,13 +38,7 @@ export default async function EditarUsuarioPage({
         Editar usuario
       </h1>
 
-      <EditarForm
-        perfilId={perfilId}
-        esComercio={esComercio}
-        email={email}
-        empleado={empleado}
-        comercio={comercio}
-      />
+      <EditarForm perfilId={perfilId} email={email} empleado={empleado} />
     </div>
   )
 }
