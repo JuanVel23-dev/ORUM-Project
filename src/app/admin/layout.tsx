@@ -33,6 +33,7 @@ export default async function AdminLayout({
         <nav style={{ display: 'flex', gap: '1rem', flex: 1 }}>
           <Link href="/admin">Inicio</Link>
           <Link href="/admin/miembros">Miembros</Link>
+          {esSuperAdmin && <Link href="/admin/comercios">Comercios</Link>}
           {esSuperAdmin && <Link href="/admin/usuarios">Usuarios</Link>}
           {esSuperAdmin && <Link href="/admin/planes">Planes</Link>}
           <Link href="/admin/cuenta/password">Mi contraseña</Link>
