@@ -62,6 +62,7 @@ export async function editarSucursal(_prev: SucursalState, formData: FormData): 
   const id = Number(formData.get('id'))
   const comercioId = Number(formData.get('comercio_id'))
   if (!Number.isInteger(id) || id < 1) return { error: 'Falta el identificador de la sucursal.' }
+  if (!Number.isInteger(comercioId) || comercioId < 1) return { error: 'Falta el identificador del comercio.' }
 
   const campos = leerCamposSucursal(formData)
   if (!campos.ok) return { error: campos.error }
@@ -90,10 +91,13 @@ export async function cambiarEstadoSucursal(formData: FormData): Promise<void> {
   const comercioId = Number(formData.get('comercio_id'))
   const activar = String(formData.get('activar') ?? '') === 'true'
   if (!Number.isInteger(id) || id < 1) redirect('/admin/comercios')
+  if (!Number.isInteger(comercioId) || comercioId < 1) redirect('/admin/comercios')
 
   const admin = createAdminClient()
-  await admin.from('sucursales').update({ activo: activar }).eq('id', id)
+  const { error } = await admin.from('sucursales').update({ activo: activar }).eq('id', id)
 
-  revalidatePath(`/admin/comercios/${comercioId}`)
+  if (!error) {
+    revalidatePath(`/admin/comercios/${comercioId}`)
+  }
   redirect(`/admin/comercios/${comercioId}`)
 }
