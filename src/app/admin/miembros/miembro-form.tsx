@@ -43,7 +43,7 @@ export function MiembroForm({ ciudades, planes }: { ciudades: Opcion[]; planes: 
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
           <Link href="/admin/miembros" className="orum-button">Ir a la lista</Link>
-          <a href="/admin/miembros/nuevo" className="orum-button orum-button--secondary">Registrar otro</a>
+          <Link href="/admin/miembros/nuevo" className="orum-button orum-button--secondary">Registrar otro</Link>
         </div>
       </div>
     )
