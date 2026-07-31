@@ -4,7 +4,7 @@
 > están hechas y cuáles faltan. Sirve como punto único de referencia para retomar el
 > proyecto desde cualquier máquina sin desalinearnos.
 >
-> **Última actualización:** 2026-07-26
+> **Última actualización:** 2026-07-31
 
 ---
 
@@ -114,14 +114,29 @@ Verificado además: 9/9 tests (Vitest), `tsc` limpio, `pnpm build` OK.
 Requisitos cubiertos: **RF-15** (planes) + parte administrativa de **RF-16** (miembros) + los
 cambios de la reunión sobre autoría de venta/registro y tipo de membresía (nueva/renovada).
 
-### ⬜ Fase 3 — Comercios, sucursales y promociones
+### ✅ Fase 3 — Comercios, sucursales y promociones
 
-- Gestión de comercios aliados (crear/ver/editar/eliminar) — **RF-17**.
-- Sucursales por comercio.
-- Gestión de promociones/beneficios con tipo (porcentaje, 2x1, etc.) — **RF-18**.
+**Completa, en `main`.**
+
+- **Comercios** (`/admin/comercios/**`) — solo super_admin: crear (cuenta de Auth + contraseña
+  autogenerada mostrada una vez), listar/buscar por nombre, ficha, editar datos y correo.
+- Dos estados independientes por comercio: `comercios.activo` (¿aliado activo?) y
+  `perfiles.activo` (¿acceso a su cuenta?).
+- **Sucursales** por comercio — CRUD con `ciudad_id` obligatorio, `nombre` obligatorio a nivel
+  de app; "eliminar" = desactivar (`activo = false`).
+- **Promociones/beneficios** por comercio — tipo (`porcentaje`, `dos_por_uno`, `monto_fijo`,
+  `regalo`) vía `tipos_beneficio`; validación de `valor` según tipo en función pura testeada
+  `validarValorPromocion` (`src/lib/promociones.ts`).
+- Se retiró la gestión de comercios de `/admin/usuarios` (ahora vive solo en `/admin/comercios`).
 - Prepara los datos que las métricas (Fase 4) y el Portal de Miembros medirán/mostrarán.
 
-### ⬜ Fase 4 — Métricas y trazabilidad
+**Documentos de diseño/plan de esta fase:**
+- Spec: [`docs/superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md`](superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md)
+- Plan: [`docs/superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md`](superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md)
+
+Requisitos cubiertos: **RF-17** (comercios) + **RF-18** (promociones).
+
+### 🔄 Fase 4 — Métricas y trazabilidad
 
 - Tabla `bitacora_actividad` para trazabilidad fina (quién hizo qué y cuándo) — **RF-19**.
 - Dashboard de métricas (cambios de la reunión): ventas por comercio, miembros nuevos por periodo,
@@ -144,8 +159,8 @@ cambios de la reunión sobre autoría de venta/registro y tipo de membresía (nu
 | RF-06–14 | Portal Miembros (login, perfil, descuentos, filtros, soporte, QR) | Posterior | ⬜ |
 | RF-15 | Gestión de planes de membresía | Fase 2 | ✅ |
 | RF-16 | Gestión de usuarios (staff + miembros) | Fase 1 + 2 | ✅ |
-| RF-17 | Gestión de comercios | Fase 3 | ⬜ |
-| RF-18 | Gestión de promociones | Fase 3 | ⬜ |
+| RF-17 | Gestión de comercios | Fase 3 | ✅ |
+| RF-18 | Gestión de promociones | Fase 3 | ✅ |
 | RF-19 | Trazabilidad / historial de movimientos | Fase 4 | ⬜ |
 | RF-20–22 | Herramienta de comercios (login, venta por QR / número) | Posterior | ⬜ |
 
@@ -227,7 +242,6 @@ pnpm lint           # linter
 
 ## 9. Próximo paso sugerido
 
-Con Fases 1 y 2 cerradas, el siguiente paso natural es **diseñar la Fase 3 (comercios, sucursales
-y promociones)**, que desbloquea RF-17/RF-18 y prepara el terreno para las métricas de la Fase 4.
-Se recomienda repetir el flujo de Fase 2: spec de diseño → plan por tareas → construcción con
-revisión.
+Con Fases 1, 2 y 3 cerradas, el siguiente paso natural es **diseñar la Fase 4 (métricas y
+trazabilidad)**: la tabla `bitacora_actividad` (RF-19) y el dashboard de métricas. Se recomienda
+repetir el flujo de Fases 2 y 3: spec de diseño → plan por tareas → construcción con revisión.
