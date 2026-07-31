@@ -1,4 +1,4 @@
-import { createAdminClient } from './supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 type Admin = ReturnType<typeof createAdminClient>
 
@@ -65,15 +65,19 @@ export type RegistrarActividadInput = {
  * dispara (alta/edición/renovación de un miembro).
  */
 export async function registrarActividad(admin: Admin, input: RegistrarActividadInput): Promise<void> {
-  const { error } = await admin.from('bitacora_actividad').insert({
-    actor_id: input.actorId,
-    accion: input.accion,
-    entidad: 'miembro',
-    entidad_id: input.entidadId,
-    datos_anteriores: input.datosAnteriores ?? null,
-    datos_nuevos: input.datosNuevos ?? null,
-  })
-  if (error) {
-    console.error('No se pudo registrar el evento en bitacora_actividad:', error.message)
+  try {
+    const { error } = await admin.from('bitacora_actividad').insert({
+      actor_id: input.actorId,
+      accion: input.accion,
+      entidad: 'miembro',
+      entidad_id: input.entidadId,
+      datos_anteriores: input.datosAnteriores ?? null,
+      datos_nuevos: input.datosNuevos ?? null,
+    })
+    if (error) {
+      console.error('No se pudo registrar el evento en bitacora_actividad:', error.message)
+    }
+  } catch (err) {
+    console.error('No se pudo registrar el evento en bitacora_actividad:', err)
   }
 }
