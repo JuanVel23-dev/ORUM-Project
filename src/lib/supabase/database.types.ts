@@ -15,6 +15,9 @@ export type RolCodigo = 'super_admin' | 'empleado' | 'comercio' | 'miembro'
 /** Códigos de tipo_beneficio tal como están en la tabla `tipos_beneficio`. */
 export type TipoBeneficioCodigo = 'porcentaje' | 'dos_por_uno' | 'monto_fijo' | 'regalo'
 
+/** Valores del enum `metodo_registro_venta`. */
+export type MetodoRegistroVenta = 'qr' | 'numero'
+
 /** Valores del enum `tipo_membresia`. */
 export type TipoMembresia = 'nueva' | 'renovada'
 /** Valores del enum `estado_membresia`. */
@@ -327,6 +330,62 @@ export type Database = {
           deleted_at?: Timestamp | null
         }
         Update: Partial<Database['public']['Tables']['promociones']['Insert']>
+        Relationships: []
+      }
+      bitacora_actividad: {
+        Row: {
+          id: number
+          actor_id: string | null
+          accion: string
+          entidad: string
+          entidad_id: number | null
+          datos_anteriores: Record<string, unknown> | null
+          datos_nuevos: Record<string, unknown> | null
+          fecha_hora: Timestamp
+        }
+        Insert: {
+          id?: number
+          actor_id?: string | null
+          accion: string
+          entidad: string
+          entidad_id?: number | null
+          datos_anteriores?: Record<string, unknown> | null
+          datos_nuevos?: Record<string, unknown> | null
+          fecha_hora?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['bitacora_actividad']['Insert']>
+        Relationships: []
+      }
+      ventas: {
+        Row: {
+          id: number
+          miembro_id: number
+          membresia_id: number | null
+          sucursal_id: number
+          promocion_id: number | null
+          valor_compra: number
+          valor_descuento: number
+          valor_final: number
+          metodo_registro: MetodoRegistroVenta
+          registrada_por_perfil: string | null
+          fecha_hora: Timestamp
+          created_at: Timestamp
+        }
+        Insert: {
+          id?: number
+          miembro_id: number
+          membresia_id?: number | null
+          sucursal_id: number
+          promocion_id?: number | null
+          valor_compra: number
+          valor_descuento?: number
+          valor_final: number
+          metodo_registro: MetodoRegistroVenta
+          registrada_por_perfil?: string | null
+          fecha_hora?: Timestamp
+          created_at?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['ventas']['Insert']>
         Relationships: []
       }
     }
