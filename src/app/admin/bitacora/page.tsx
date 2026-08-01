@@ -16,15 +16,19 @@ export default async function BitacoraPage({
 
   const admin = createAdminClient()
 
+  // Sanear caracteres especiales de PostgREST (comas, paréntesis y comodines)
+  // para que una búsqueda con puntuación —p. ej. "Pérez, Juan"— no rompa la consulta.
+  const termino = busqueda.replace(/[,()%*\\]/g, ' ').trim()
+
   // Si hay búsqueda por miembro, primero resolvemos qué miembros calzan.
   let miembroIds: number[] | null = null
-  if (busqueda) {
+  if (termino) {
     const { data: miembrosCoincidentes } = await admin
       .from('miembros')
       .select('id')
       .is('deleted_at', null)
       .or(
-        `nombres.ilike.%${busqueda}%,apellidos.ilike.%${busqueda}%,cedula.ilike.%${busqueda}%,numero_membresia.ilike.%${busqueda}%`,
+        `nombres.ilike.%${termino}%,apellidos.ilike.%${termino}%,cedula.ilike.%${termino}%,numero_membresia.ilike.%${termino}%`,
       )
     miembroIds = (miembrosCoincidentes ?? []).map((m) => m.id)
   }
