@@ -36,6 +36,8 @@ export default async function AdminLayout({
           {esSuperAdmin && <Link href="/admin/comercios">Comercios</Link>}
           {esSuperAdmin && <Link href="/admin/usuarios">Usuarios</Link>}
           {esSuperAdmin && <Link href="/admin/planes">Planes</Link>}
+          {esSuperAdmin && <Link href="/admin/bitacora">Bitácora</Link>}
+          {esSuperAdmin && <Link href="/admin/metricas">Métricas</Link>}
           <Link href="/admin/cuenta/password">Mi contraseña</Link>
         </nav>
 
