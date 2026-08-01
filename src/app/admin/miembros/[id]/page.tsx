@@ -120,7 +120,7 @@ export default async function FichaMiembroPage({ params }: { params: Promise<{ i
             <tbody>
               {eventos.map((e) => (
                 <tr key={e.id}>
-                  <td>{new Date(e.fecha_hora).toLocaleString('es-CO')}</td>
+                  <td>{new Date(e.fecha_hora).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</td>
                   <td><span className="orum-badge orum-badge--on">{e.accion}</span></td>
                   <td>{resumirEventoBitacora(e.accion, e.datos_anteriores, e.datos_nuevos)}</td>
                   <td className="orum-muted">{e.actor_id ? (correoActor.get(e.actor_id) ?? '—') : '—'}</td>

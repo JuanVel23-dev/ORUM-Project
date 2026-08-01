@@ -23,7 +23,7 @@ export default async function MetricasPage({
   const admin = createAdminClient()
 
   const [
-    { data: miembrosNuevos },
+    { count: miembrosNuevosCount },
     { data: membresiasVendidas },
     { data: empleados },
     { data: ventas },
@@ -33,7 +33,8 @@ export default async function MetricasPage({
   ] = await Promise.all([
     admin
       .from('miembros')
-      .select('id')
+      .select('id', { count: 'exact', head: true })
+      .is('deleted_at', null)
       .gte('fecha_registro', `${desde} 00:00:00`)
       .lte('fecha_registro', `${hasta} 23:59:59`),
     admin.from('membresias').select('vendido_por, precio_pagado').gte('fecha_inicio', desde).lte('fecha_inicio', hasta),
@@ -45,7 +46,7 @@ export default async function MetricasPage({
       .lte('fecha_hora', `${hasta} 23:59:59`),
     admin.from('sucursales').select('id, comercio_id'),
     admin.from('comercios').select('id, nombre'),
-    admin.from('miembros').select('id, nombres, apellidos'),
+    admin.from('miembros').select('id, nombres, apellidos').is('deleted_at', null),
   ])
 
   const porEmpleado = agruparMembresiasPorEmpleado(membresiasVendidas ?? [], empleados ?? [])
@@ -74,7 +75,7 @@ export default async function MetricasPage({
 
       <div className="orum-card" style={{ marginBottom: '1.25rem' }}>
         <p className="orum-muted" style={{ marginBottom: '0.25rem' }}>Miembros nuevos en el periodo</p>
-        <p style={{ fontSize: '2rem', fontWeight: 700 }}>{miembrosNuevos?.length ?? 0}</p>
+        <p style={{ fontSize: '2rem', fontWeight: 700 }}>{miembrosNuevosCount ?? 0}</p>
       </div>
 
       <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Membresías vendidas por empleado</h2>

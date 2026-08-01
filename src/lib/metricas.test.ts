@@ -13,7 +13,9 @@ describe('rangoUltimosDias', () => {
   })
 
   it('cruza el límite de año correctamente', () => {
-    const rango = rangoUltimosDias(10, new Date('2026-01-05T00:00:00Z'))
+    // 15:00Z = 10:00 en America/Bogota (UTC-5), mismo día calendario en ambas
+    // zonas horarias — evita ambigüedad de límite de día en la aserción.
+    const rango = rangoUltimosDias(10, new Date('2026-01-05T15:00:00Z'))
     expect(rango).toEqual({ desde: '2025-12-26', hasta: '2026-01-05' })
   })
 })

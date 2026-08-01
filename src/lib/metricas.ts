@@ -1,13 +1,16 @@
-function formatearFechaISO(fecha: Date): string {
-  return fecha.toISOString().slice(0, 10)
+// Igual que hoyISO() en src/app/admin/miembros/actions.ts: el servidor corre en
+// UTC pero el negocio opera en America/Bogota, así que las fechas de los
+// rangos deben formatearse en la zona horaria del negocio, no la del servidor.
+function formatearFechaBogota(fecha: Date): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(fecha)
 }
 
-/** Rango [hoy - dias, hoy] en formato 'YYYY-MM-DD', para el filtro por defecto del dashboard. */
+/** Rango [hoy - dias, hoy] en formato 'YYYY-MM-DD' (zona horaria America/Bogota), para el filtro por defecto del dashboard. */
 export function rangoUltimosDias(dias: number, hoy: Date = new Date()): { desde: string; hasta: string } {
-  const hasta = formatearFechaISO(hoy)
+  const hasta = formatearFechaBogota(hoy)
   const desdeDate = new Date(hoy)
   desdeDate.setUTCDate(desdeDate.getUTCDate() - dias)
-  const desde = formatearFechaISO(desdeDate)
+  const desde = formatearFechaBogota(desdeDate)
   return { desde, hasta }
 }
 

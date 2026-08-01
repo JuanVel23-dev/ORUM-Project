@@ -50,9 +50,11 @@ export function resumirEventoBitacora(
   return `Evento: ${accion}`
 }
 
+export type AccionBitacora = 'alta' | 'edicion' | 'renovacion'
+
 export type RegistrarActividadInput = {
   actorId: string | null
-  accion: string
+  accion: AccionBitacora
   entidadId: number
   datosAnteriores?: DatosEvento
   datosNuevos?: DatosEvento

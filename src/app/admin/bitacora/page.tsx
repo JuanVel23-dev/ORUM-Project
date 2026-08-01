@@ -30,6 +30,7 @@ export default async function BitacoraPage({
       .or(
         `nombres.ilike.%${termino}%,apellidos.ilike.%${termino}%,cedula.ilike.%${termino}%,numero_membresia.ilike.%${termino}%`,
       )
+      .limit(100)
     miembroIds = (miembrosCoincidentes ?? []).map((m) => m.id)
   }
 
@@ -38,6 +39,7 @@ export default async function BitacoraPage({
     .select('id, actor_id, entidad_id, accion, datos_anteriores, datos_nuevos, fecha_hora')
     .eq('entidad', 'miembro')
     .order('fecha_hora', { ascending: false })
+    .limit(200)
 
   if (miembroIds) query = query.in('entidad_id', miembroIds.length > 0 ? miembroIds : [-1])
   if (desde) query = query.gte('fecha_hora', `${desde} 00:00:00`)
@@ -96,7 +98,11 @@ export default async function BitacoraPage({
 
       {!eventos || eventos.length === 0 ? (
         <div className="orum-card">
-          <p className="orum-muted">No hay eventos que coincidan con los filtros.</p>
+          <p className="orum-muted">
+            {busqueda || desde || hasta || accion
+              ? 'Ningún evento coincide con los filtros aplicados.'
+              : 'Aún no hay eventos registrados.'}
+          </p>
         </div>
       ) : (
         <div className="orum-card" style={{ overflowX: 'auto', padding: 0 }}>
@@ -107,7 +113,7 @@ export default async function BitacoraPage({
             <tbody>
               {eventos.map((e) => (
                 <tr key={e.id}>
-                  <td>{new Date(e.fecha_hora).toLocaleString('es-CO')}</td>
+                  <td>{new Date(e.fecha_hora).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</td>
                   <td>
                     {e.entidad_id ? (
                       <Link href={`/admin/miembros/${e.entidad_id}`}>
