@@ -136,11 +136,33 @@ cambios de la reunión sobre autoría de venta/registro y tipo de membresía (nu
 
 Requisitos cubiertos: **RF-17** (comercios) + **RF-18** (promociones).
 
-### 🔄 Fase 4 — Métricas y trazabilidad
+### ✅ Fase 4 — Métricas y trazabilidad
 
-- Tabla `bitacora_actividad` para trazabilidad fina (quién hizo qué y cuándo) — **RF-19**.
-- Dashboard de métricas (cambios de la reunión): ventas por comercio, miembros nuevos por periodo,
-  cuántas veces un miembro usó la membresía en cada comercio, membresías vendidas por empleado, etc.
+**Implementada en `worktree-fase4-metricas-trazabilidad`, verificada automáticamente (41/41 tests,
+`tsc` limpio, `pnpm build` OK). Pendiente prueba manual del usuario en navegador antes de dar por
+cerrada del todo** (login como super_admin/empleado, recorrer las pantallas nuevas, y sembrar
+manualmente algunas filas de `ventas` en Supabase para ver las tablas de comercio con datos reales).
+
+- **Bitácora de actividad** (`bitacora_actividad`, ya existía en Supabase sin usar) — acotada a
+  eventos de miembros (D1 del spec): alta, edición y renovación, instrumentados en
+  `miembros/actions.ts` vía `registrarActividad` (`src/lib/bitacora.ts`), best-effort (nunca
+  bloquea la operación principal si falla el insert).
+  - Sección "Historial de actividad" en la ficha del miembro (`/admin/miembros/[id]`).
+  - Listado global `/admin/bitacora` (solo super_admin) con filtros por miembro, fecha y tipo
+    de acción.
+- **Dashboard de métricas** `/admin/metricas` (solo super_admin), filtrable por rango de fechas:
+  miembros nuevos en el periodo, membresías vendidas por empleado, ventas por comercio, uso de
+  membresía por miembro y comercio. Agregaciones en funciones puras testeadas
+  (`src/lib/metricas.ts`); las dos métricas basadas en `ventas` muestran estado vacío hasta que
+  exista la Herramienta para Comercios (fase posterior) que alimenta esa tabla — comportamiento
+  esperado, no un bug (D4 del spec).
+- Se tipó `ventas` en `database.types.ts` (tabla ya existente en Supabase, sin usar hasta ahora).
+
+**Documentos de diseño/plan de esta fase:**
+- Spec: [`docs/superpowers/specs/2026-07-31-fase4-metricas-trazabilidad-design.md`](superpowers/specs/2026-07-31-fase4-metricas-trazabilidad-design.md)
+- Plan: [`docs/superpowers/plans/2026-07-31-fase4-metricas-trazabilidad-plan.md`](superpowers/plans/2026-07-31-fase4-metricas-trazabilidad-plan.md)
+
+Requisitos cubiertos: **RF-19** (trazabilidad) + parte de las métricas pedidas en la reunión.
 
 ### ⬜ Fases posteriores — Portales de cara al usuario final
 
@@ -161,7 +183,7 @@ Requisitos cubiertos: **RF-17** (comercios) + **RF-18** (promociones).
 | RF-16 | Gestión de usuarios (staff + miembros) | Fase 1 + 2 | ✅ |
 | RF-17 | Gestión de comercios | Fase 3 | ✅ |
 | RF-18 | Gestión de promociones | Fase 3 | ✅ |
-| RF-19 | Trazabilidad / historial de movimientos | Fase 4 | ⬜ |
+| RF-19 | Trazabilidad / historial de movimientos | Fase 4 | ✅ |
 | RF-20–22 | Herramienta de comercios (login, venta por QR / número) | Posterior | ⬜ |
 
 ---
@@ -242,6 +264,9 @@ pnpm lint           # linter
 
 ## 9. Próximo paso sugerido
 
-Con Fases 1, 2 y 3 cerradas, el siguiente paso natural es **diseñar la Fase 4 (métricas y
-trazabilidad)**: la tabla `bitacora_actividad` (RF-19) y el dashboard de métricas. Se recomienda
-repetir el flujo de Fases 2 y 3: spec de diseño → plan por tareas → construcción con revisión.
+Con Fases 1-4 implementadas, falta: (1) la prueba manual en navegador de la Fase 4 (login,
+recorrer bitácora/métricas, sembrar `ventas` de prueba), y (2) fusionar la rama
+`worktree-fase4-metricas-trazabilidad` a `main`. Después de eso, el siguiente paso natural son los
+**portales de cara al usuario final** (Público, Miembros, Herramienta para Comercios), empezando
+por la Herramienta para Comercios (RF-20-22) ya que es la que finalmente llena la tabla `ventas`
+que el dashboard de métricas ya consume.
