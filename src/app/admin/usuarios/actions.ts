@@ -1,10 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { generarPassword } from '@/lib/password'
+import { generarPassword } from '@/lib/shared/password'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getPerfilActual } from '@/lib/auth'
+import { getPerfilActual } from '@/lib/auth/auth'
 import type { RolCodigo } from '@/lib/supabase/database.types'
 
 /** Tipos de usuario que el admin puede crear en esta sección. */

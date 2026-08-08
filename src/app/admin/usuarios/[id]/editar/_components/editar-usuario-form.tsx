@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState } from 'react'
-import Link from 'next/link'
-import { editarUsuario, type EditarUsuarioState } from '../../actions'
+import { editarUsuario, type EditarUsuarioState } from '../../../actions'
+import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
 
 const estadoInicial: EditarUsuarioState = {}
 
@@ -12,92 +12,41 @@ type Props = {
   empleado: { nombres: string; apellidos: string; cedula: string | null; telefono: string | null }
 }
 
-export function EditarForm({ perfilId, email, empleado }: Props) {
+export function EditarUsuarioForm({ perfilId, email, empleado }: Props) {
   const [state, formAction, pending] = useActionState(editarUsuario, estadoInicial)
 
   return (
     <form action={formAction} className="orum-card">
-      {state.error && (
-        <p className="orum-alert orum-alert--error" role="alert">
-          {state.error}
-        </p>
-      )}
+      {state.error && <Alert tone="error">{state.error}</Alert>}
 
       <input type="hidden" name="perfil_id" value={perfilId} />
       <input type="hidden" name="email_original" value={email} />
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="email">
-          Correo de acceso
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          className="orum-input"
-          defaultValue={email}
-          required
-        />
-      </div>
+      <Field label="Correo de acceso" htmlFor="email">
+        <input id="email" name="email" type="email" className="orum-input" defaultValue={email} required />
+      </Field>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="nombres">
-            Nombres
-          </label>
-          <input
-            id="nombres"
-            name="nombres"
-            className="orum-input"
-            defaultValue={empleado.nombres}
-            required
-          />
-        </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="apellidos">
-            Apellidos
-          </label>
-          <input
-            id="apellidos"
-            name="apellidos"
-            className="orum-input"
-            defaultValue={empleado.apellidos}
-            required
-          />
-        </div>
-      </div>
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="cedula">
-          Cédula
-        </label>
-        <input
-          id="cedula"
-          name="cedula"
-          className="orum-input"
-          defaultValue={empleado.cedula ?? ''}
-          required
-        />
-      </div>
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="telefono">
-          Teléfono (opcional)
-        </label>
-        <input
-          id="telefono"
-          name="telefono"
-          className="orum-input"
-          defaultValue={empleado.telefono ?? ''}
-        />
-      </div>
+      <Row>
+        <Field label="Nombres" htmlFor="nombres" flex>
+          <input id="nombres" name="nombres" className="orum-input" defaultValue={empleado.nombres} required />
+        </Field>
+        <Field label="Apellidos" htmlFor="apellidos" flex>
+          <input id="apellidos" name="apellidos" className="orum-input" defaultValue={empleado.apellidos} required />
+        </Field>
+      </Row>
+      <Field label="Cédula" htmlFor="cedula">
+        <input id="cedula" name="cedula" className="orum-input" defaultValue={empleado.cedula ?? ''} required />
+      </Field>
+      <Field label="Teléfono (opcional)" htmlFor="telefono">
+        <input id="telefono" name="telefono" className="orum-input" defaultValue={empleado.telefono ?? ''} />
+      </Field>
 
-      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-        <button type="submit" className="orum-button" disabled={pending}>
+      <Row style={{ marginTop: '0.5rem' }}>
+        <Button type="submit" disabled={pending}>
           {pending ? 'Guardando…' : 'Guardar cambios'}
-        </button>
-        <Link href="/admin/usuarios" className="orum-button orum-button--secondary">
-          Cancelar
-        </Link>
-      </div>
+        </Button>
+        <LinkButton href="/admin/usuarios" variant="secondary">Cancelar</LinkButton>
+      </Row>
     </form>
   )
 }

@@ -6,7 +6,7 @@
  * agregando el resto (membresias, ventas, promociones, etc.), o se pueden
  * regenerar con:  `supabase gen types typescript --project-id <ID>`.
  *
- * Referencia: ver `Esquema_BD.txt` en la raíz del proyecto.
+ * Referencia: ver `docs/referencia/Esquema_BD.txt`.
  */
 
 /** Códigos de rol tal como están en la tabla `roles`. */

@@ -1,10 +1,10 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cambiarEstadoComercio, cambiarEstadoAccesoComercio } from '../actions'
 import { cambiarEstadoSucursal } from '../sucursales-actions'
 import { cambiarEstadoPromocion } from '../promociones-actions'
+import { Badge, DataTable, EmptyState, LinkButton, PageHeader, Row } from '@/components/ui'
 
 export const metadata = { title: 'Ficha de comercio · ORUM' }
 
@@ -60,12 +60,10 @@ export default async function FichaComercioPage({ params }: { params: Promise<{ 
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{comercio.nombre}</h1>
-        <Link href={`/admin/comercios/${comercio.id}/editar`} className="orum-button orum-button--secondary">
-          Editar datos
-        </Link>
-      </div>
+      <PageHeader
+        title={comercio.nombre}
+        action={{ href: `/admin/comercios/${comercio.id}/editar`, label: 'Editar datos', variant: 'secondary' }}
+      />
 
       <div className="orum-card" style={{ marginBottom: '1.25rem' }}>
         <p><strong>Correo:</strong> {correo}</p>
@@ -73,11 +71,11 @@ export default async function FichaComercioPage({ params }: { params: Promise<{ 
         <p><strong>Marca:</strong> {marca?.nombre ?? '—'}</p>
         <p><strong>Categoría:</strong> {categoria?.nombre ?? '—'}</p>
 
-        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span className={`orum-badge ${comercio.activo ? 'orum-badge--on' : 'orum-badge--off'}`}>
+        <Row gap="1.5rem" style={{ marginTop: '0.75rem', flexWrap: 'wrap' }}>
+          <Row gap="0.5rem" style={{ alignItems: 'center' }}>
+            <Badge tone={comercio.activo ? 'on' : 'off'}>
               {comercio.activo ? 'Aliado activo' : 'Aliado inactivo'}
-            </span>
+            </Badge>
             <form action={cambiarEstadoComercio}>
               <input type="hidden" name="id" value={comercio.id} />
               <input type="hidden" name="activar" value={comercio.activo ? 'false' : 'true'} />
@@ -85,12 +83,12 @@ export default async function FichaComercioPage({ params }: { params: Promise<{ 
                 {comercio.activo ? 'Desactivar aliado' : 'Activar aliado'}
               </button>
             </form>
-          </div>
+          </Row>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span className={`orum-badge ${perfilActivo ? 'orum-badge--on' : 'orum-badge--off'}`}>
+          <Row gap="0.5rem" style={{ alignItems: 'center' }}>
+            <Badge tone={perfilActivo ? 'on' : 'off'}>
               {perfilActivo ? 'Acceso activo' : 'Acceso desactivado'}
-            </span>
+            </Badge>
             <form action={cambiarEstadoAccesoComercio}>
               <input type="hidden" name="id" value={comercio.id} />
               <input type="hidden" name="perfil_id" value={comercio.perfil_id ?? ''} />
@@ -99,124 +97,110 @@ export default async function FichaComercioPage({ params }: { params: Promise<{ 
                 {perfilActivo ? 'Desactivar acceso' : 'Activar acceso'}
               </button>
             </form>
-          </div>
-        </div>
+          </Row>
+        </Row>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Sucursales</h2>
-        <Link href={`/admin/comercios/${comercio.id}/sucursales/nueva`} className="orum-button orum-button--secondary">
-          + Nueva sucursal
-        </Link>
-      </div>
+      <PageHeader
+        as="h2"
+        title="Sucursales"
+        action={{ href: `/admin/comercios/${comercio.id}/sucursales/nueva`, label: '+ Nueva sucursal', variant: 'secondary' }}
+      />
       {!sucursales || sucursales.length === 0 ? (
-        <div className="orum-card" style={{ marginBottom: '1.25rem' }}>
-          <p className="orum-muted">Este comercio aún no tiene sucursales.</p>
-        </div>
+        <EmptyState marginBottom="1.25rem">Este comercio aún no tiene sucursales.</EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0, marginBottom: '1.25rem' }}>
-          <table className="orum-table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Dirección</th>
-                <th>Teléfono</th>
-                <th>Estado</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
+        <DataTable marginBottom="1.25rem">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Dirección</th>
+              <th>Teléfono</th>
+              <th>Estado</th>
+              <th style={{ textAlign: 'right' }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sucursales.map((s) => (
+              <tr key={s.id}>
+                <td>{s.nombre}</td>
+                <td className="orum-muted">{s.direccion ?? '—'}</td>
+                <td className="orum-muted">{s.telefono ?? '—'}</td>
+                <td>
+                  <Badge tone={s.activo ? 'on' : 'off'}>{s.activo ? 'Activa' : 'Inactiva'}</Badge>
+                </td>
+                <td>
+                  <Row gap="0.5rem" style={{ justifyContent: 'flex-end' }}>
+                    <LinkButton
+                      href={`/admin/comercios/${comercio.id}/sucursales/${s.id}/editar`}
+                      variant="secondary"
+                    >
+                      Editar
+                    </LinkButton>
+                    <form action={cambiarEstadoSucursal}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <input type="hidden" name="comercio_id" value={comercio.id} />
+                      <input type="hidden" name="activar" value={s.activo ? 'false' : 'true'} />
+                      <button type="submit" className={`orum-button ${s.activo ? 'orum-button--danger' : ''}`}>
+                        {s.activo ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </form>
+                  </Row>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {sucursales.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.nombre}</td>
-                  <td className="orum-muted">{s.direccion ?? '—'}</td>
-                  <td className="orum-muted">{s.telefono ?? '—'}</td>
-                  <td>
-                    <span className={`orum-badge ${s.activo ? 'orum-badge--on' : 'orum-badge--off'}`}>
-                      {s.activo ? 'Activa' : 'Inactiva'}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <Link
-                        href={`/admin/comercios/${comercio.id}/sucursales/${s.id}/editar`}
-                        className="orum-button orum-button--secondary"
-                      >
-                        Editar
-                      </Link>
-                      <form action={cambiarEstadoSucursal}>
-                        <input type="hidden" name="id" value={s.id} />
-                        <input type="hidden" name="comercio_id" value={comercio.id} />
-                        <input type="hidden" name="activar" value={s.activo ? 'false' : 'true'} />
-                        <button type="submit" className={`orum-button ${s.activo ? 'orum-button--danger' : ''}`}>
-                          {s.activo ? 'Desactivar' : 'Activar'}
-                        </button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </DataTable>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Promociones</h2>
-        <Link href={`/admin/comercios/${comercio.id}/promociones/nueva`} className="orum-button orum-button--secondary">
-          + Nueva promoción
-        </Link>
-      </div>
+      <PageHeader
+        as="h2"
+        title="Promociones"
+        action={{ href: `/admin/comercios/${comercio.id}/promociones/nueva`, label: '+ Nueva promoción', variant: 'secondary' }}
+      />
       {!promociones || promociones.length === 0 ? (
-        <div className="orum-card">
-          <p className="orum-muted">Este comercio aún no tiene promociones.</p>
-        </div>
+        <EmptyState>Este comercio aún no tiene promociones.</EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0 }}>
-          <table className="orum-table">
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Tipo</th>
-                <th>Valor</th>
-                <th>Estado</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
+        <DataTable>
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Tipo</th>
+              <th>Valor</th>
+              <th>Estado</th>
+              <th style={{ textAlign: 'right' }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {promociones.map((p) => (
+              <tr key={p.id}>
+                <td>{p.titulo}</td>
+                <td>{nombreTipo.get(p.tipo_beneficio_id) ?? `Tipo #${p.tipo_beneficio_id}`}</td>
+                <td>{p.valor ?? '—'}</td>
+                <td>
+                  <Badge tone={p.activo ? 'on' : 'off'}>{p.activo ? 'Activa' : 'Inactiva'}</Badge>
+                </td>
+                <td>
+                  <Row gap="0.5rem" style={{ justifyContent: 'flex-end' }}>
+                    <LinkButton
+                      href={`/admin/comercios/${comercio.id}/promociones/${p.id}/editar`}
+                      variant="secondary"
+                    >
+                      Editar
+                    </LinkButton>
+                    <form action={cambiarEstadoPromocion}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <input type="hidden" name="comercio_id" value={comercio.id} />
+                      <input type="hidden" name="activar" value={p.activo ? 'false' : 'true'} />
+                      <button type="submit" className={`orum-button ${p.activo ? 'orum-button--danger' : ''}`}>
+                        {p.activo ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </form>
+                  </Row>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {promociones.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.titulo}</td>
-                  <td>{nombreTipo.get(p.tipo_beneficio_id) ?? `Tipo #${p.tipo_beneficio_id}`}</td>
-                  <td>{p.valor ?? '—'}</td>
-                  <td>
-                    <span className={`orum-badge ${p.activo ? 'orum-badge--on' : 'orum-badge--off'}`}>
-                      {p.activo ? 'Activa' : 'Inactiva'}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <Link
-                        href={`/admin/comercios/${comercio.id}/promociones/${p.id}/editar`}
-                        className="orum-button orum-button--secondary"
-                      >
-                        Editar
-                      </Link>
-                      <form action={cambiarEstadoPromocion}>
-                        <input type="hidden" name="id" value={p.id} />
-                        <input type="hidden" name="comercio_id" value={comercio.id} />
-                        <input type="hidden" name="activar" value={p.activo ? 'false' : 'true'} />
-                        <button type="submit" className={`orum-button ${p.activo ? 'orum-button--danger' : ''}`}>
-                          {p.activo ? 'Desactivar' : 'Activar'}
-                        </button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </DataTable>
       )}
     </div>
   )

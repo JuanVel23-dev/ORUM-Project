@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { EditarForm } from './editar-form'
+import { EditarUsuarioForm } from './_components/editar-usuario-form'
 
 export const metadata = { title: 'Editar usuario · ORUM' }
 
@@ -38,7 +38,7 @@ export default async function EditarUsuarioPage({
         Editar usuario
       </h1>
 
-      <EditarForm perfilId={perfilId} email={email} empleado={empleado} />
+      <EditarUsuarioForm perfilId={perfilId} email={email} empleado={empleado} />
     </div>
   )
 }

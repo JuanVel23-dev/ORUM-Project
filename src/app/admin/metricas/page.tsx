@@ -1,11 +1,12 @@
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
   rangoUltimosDias,
   agruparMembresiasPorEmpleado,
   agruparVentasPorComercio,
   agruparVentasPorMiembroYComercio,
-} from '@/lib/metricas'
+} from '@/lib/metricas/metricas'
+import { DataTable, EmptyState, PageHeader } from '@/components/ui'
 
 export const metadata = { title: 'Métricas · ORUM' }
 
@@ -55,7 +56,7 @@ export default async function MetricasPage({
 
   return (
     <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>Métricas</h1>
+      <PageHeader title="Métricas" />
 
       <form
         method="get"
@@ -78,71 +79,59 @@ export default async function MetricasPage({
         <p style={{ fontSize: '2rem', fontWeight: 700 }}>{miembrosNuevosCount ?? 0}</p>
       </div>
 
-      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Membresías vendidas por empleado</h2>
+      <PageHeader as="h2" title="Membresías vendidas por empleado" />
       {porEmpleado.length === 0 ? (
-        <div className="orum-card" style={{ marginBottom: '1.25rem' }}>
-          <p className="orum-muted">No hay membresías vendidas en este periodo.</p>
-        </div>
+        <EmptyState marginBottom="1.25rem">No hay membresías vendidas en este periodo.</EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0, marginBottom: '1.25rem' }}>
-          <table className="orum-table">
-            <thead><tr><th>Empleado</th><th>Vendidas</th><th>Monto total</th></tr></thead>
-            <tbody>
-              {porEmpleado.map((r) => (
-                <tr key={r.empleadoId ?? 'super_admin'}>
-                  <td>{r.nombre}</td>
-                  <td>{r.cantidad}</td>
-                  <td>${r.monto.toLocaleString('es-CO')}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable marginBottom="1.25rem">
+          <thead><tr><th>Empleado</th><th>Vendidas</th><th>Monto total</th></tr></thead>
+          <tbody>
+            {porEmpleado.map((r) => (
+              <tr key={r.empleadoId ?? 'super_admin'}>
+                <td>{r.nombre}</td>
+                <td>{r.cantidad}</td>
+                <td>${r.monto.toLocaleString('es-CO')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
       )}
 
-      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Ventas por comercio</h2>
+      <PageHeader as="h2" title="Ventas por comercio" />
       {porComercio.length === 0 ? (
-        <div className="orum-card" style={{ marginBottom: '1.25rem' }}>
-          <p className="orum-muted">Aún no hay ventas registradas en este periodo.</p>
-        </div>
+        <EmptyState marginBottom="1.25rem">Aún no hay ventas registradas en este periodo.</EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0, marginBottom: '1.25rem' }}>
-          <table className="orum-table">
-            <thead><tr><th>Comercio</th><th># Ventas</th><th>Monto total</th><th>Descuento total</th></tr></thead>
-            <tbody>
-              {porComercio.map((r) => (
-                <tr key={r.comercioId}>
-                  <td>{r.nombre}</td>
-                  <td>{r.cantidad}</td>
-                  <td>${r.montoTotal.toLocaleString('es-CO')}</td>
-                  <td>${r.descuentoTotal.toLocaleString('es-CO')}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable marginBottom="1.25rem">
+          <thead><tr><th>Comercio</th><th># Ventas</th><th>Monto total</th><th>Descuento total</th></tr></thead>
+          <tbody>
+            {porComercio.map((r) => (
+              <tr key={r.comercioId}>
+                <td>{r.nombre}</td>
+                <td>{r.cantidad}</td>
+                <td>${r.montoTotal.toLocaleString('es-CO')}</td>
+                <td>${r.descuentoTotal.toLocaleString('es-CO')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
       )}
 
-      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Uso de membresía por miembro y comercio</h2>
+      <PageHeader as="h2" title="Uso de membresía por miembro y comercio" />
       {porMiembroComercio.length === 0 ? (
-        <div className="orum-card">
-          <p className="orum-muted">Aún no hay ventas registradas en este periodo.</p>
-        </div>
+        <EmptyState>Aún no hay ventas registradas en este periodo.</EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0 }}>
-          <table className="orum-table">
-            <thead><tr><th>Miembro</th><th>Comercio</th><th>Veces usada</th></tr></thead>
-            <tbody>
-              {porMiembroComercio.map((r) => (
-                <tr key={`${r.miembroId}-${r.comercioId}`}>
-                  <td>{r.miembroNombre}</td>
-                  <td>{r.comercioNombre}</td>
-                  <td>{r.veces}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable>
+          <thead><tr><th>Miembro</th><th>Comercio</th><th>Veces usada</th></tr></thead>
+          <tbody>
+            {porMiembroComercio.map((r) => (
+              <tr key={`${r.miembroId}-${r.comercioId}`}>
+                <td>{r.miembroNombre}</td>
+                <td>{r.comercioNombre}</td>
+                <td>{r.veces}</td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
       )}
     </div>
   )

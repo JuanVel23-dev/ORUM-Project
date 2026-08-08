@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import Link from 'next/link'
-import { crearUsuario, type CrearUsuarioState } from '../actions'
+import { crearUsuario, type CrearUsuarioState } from '../../actions'
+import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
 
 const estadoInicial: CrearUsuarioState = {}
 
@@ -15,7 +15,7 @@ export function UsuarioForm() {
   if (state.ok && state.password) {
     return (
       <div className="orum-card">
-        <p className="orum-alert orum-alert--success">✓ Usuario creado correctamente.</p>
+        <Alert tone="success">✓ Usuario creado correctamente.</Alert>
         <p style={{ marginBottom: '0.75rem' }}>
           Comparte estos datos con la persona. La contraseña <strong>no se volverá a mostrar</strong>;
           el usuario podrá cambiarla después.
@@ -26,16 +26,16 @@ export function UsuarioForm() {
         </div>
         <div className="orum-field">
           <span className="orum-label">Contraseña temporal</span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Row gap="0.5rem">
             <input
               className="orum-input"
               readOnly
               value={state.password}
               style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}
             />
-            <button
+            <Button
               type="button"
-              className="orum-button orum-button--secondary"
+              variant="secondary"
               onClick={() => {
                 navigator.clipboard?.writeText(state.password ?? '')
                 setCopiado(true)
@@ -43,33 +43,22 @@ export function UsuarioForm() {
               }}
             >
               {copiado ? '¡Copiado!' : 'Copiar'}
-            </button>
-          </div>
+            </Button>
+          </Row>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-          <Link href="/admin/usuarios" className="orum-button">
-            Ir a la lista
-          </Link>
-          <Link href="/admin/usuarios/nuevo" className="orum-button orum-button--secondary">
-            Crear otro
-          </Link>
-        </div>
+        <Row style={{ marginTop: '1rem' }}>
+          <LinkButton href="/admin/usuarios">Ir a la lista</LinkButton>
+          <LinkButton href="/admin/usuarios/nuevo" variant="secondary">Crear otro</LinkButton>
+        </Row>
       </div>
     )
   }
 
   return (
     <form action={formAction} className="orum-card">
-      {state.error && (
-        <p className="orum-alert orum-alert--error" role="alert">
-          {state.error}
-        </p>
-      )}
+      {state.error && <Alert tone="error">{state.error}</Alert>}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="tipo">
-          Tipo de usuario
-        </label>
+      <Field label="Tipo de usuario" htmlFor="tipo">
         <select
           id="tipo"
           name="tipo"
@@ -80,54 +69,37 @@ export function UsuarioForm() {
           <option value="empleado">Empleado</option>
           <option value="super_admin">Administrador</option>
         </select>
-      </div>
+      </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="email">
-          Correo electrónico (para iniciar sesión)
-        </label>
+      <Field label="Correo electrónico (para iniciar sesión)" htmlFor="email">
         <input id="email" name="email" type="email" className="orum-input" required />
-      </div>
+      </Field>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="nombres">
-            Nombres
-          </label>
+      <Row>
+        <Field label="Nombres" htmlFor="nombres" flex>
           <input id="nombres" name="nombres" className="orum-input" required />
-        </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="apellidos">
-            Apellidos
-          </label>
+        </Field>
+        <Field label="Apellidos" htmlFor="apellidos" flex>
           <input id="apellidos" name="apellidos" className="orum-input" required />
-        </div>
-      </div>
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="cedula">
-          Cédula
-        </label>
+        </Field>
+      </Row>
+      <Field label="Cédula" htmlFor="cedula">
         <input id="cedula" name="cedula" className="orum-input" required />
-      </div>
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="telefono">
-          Teléfono (opcional)
-        </label>
+      </Field>
+      <Field label="Teléfono (opcional)" htmlFor="telefono">
         <input id="telefono" name="telefono" className="orum-input" />
-      </div>
+      </Field>
 
       <p className="orum-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
         El sistema generará una contraseña segura automáticamente y te la mostrará al terminar.
       </p>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <button type="submit" className="orum-button" disabled={pending}>
+      <Row>
+        <Button type="submit" disabled={pending}>
           {pending ? 'Creando…' : 'Crear usuario'}
-        </button>
-        <Link href="/admin/usuarios" className="orum-button orum-button--secondary">
-          Cancelar
-        </Link>
-      </div>
+        </Button>
+        <LinkButton href="/admin/usuarios" variant="secondary">Cancelar</LinkButton>
+      </Row>
     </form>
   )
 }

@@ -1,4 +1,4 @@
-import type { TipoBeneficioCodigo } from './supabase/database.types'
+import type { TipoBeneficioCodigo } from '../supabase/database.types'
 
 export type ResultadoValidacion = { ok: true } | { ok: false; error: string }
 

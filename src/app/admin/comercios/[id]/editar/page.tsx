@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { EditarComercioForm } from './editar-comercio-form'
+import { EditarComercioForm } from './_components/editar-comercio-form'
 
 export const metadata = { title: 'Editar comercio · ORUM' }
 

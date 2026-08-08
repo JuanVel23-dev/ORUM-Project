@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState } from 'react'
-import Link from 'next/link'
-import { crearPlan, editarPlan, type PlanState } from './actions'
+import { crearPlan, editarPlan, type PlanState } from '../actions'
+import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
 
 type PlanInicial = {
   id: number
@@ -20,32 +20,20 @@ export function PlanForm({ plan }: { plan?: PlanInicial }) {
 
   return (
     <form action={formAction} className="orum-card">
-      {state.error && (
-        <p className="orum-alert orum-alert--error" role="alert">
-          {state.error}
-        </p>
-      )}
+      {state.error && <Alert tone="error">{state.error}</Alert>}
 
       {plan && <input type="hidden" name="id" value={plan.id} />}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="nombre">Nombre</label>
+      <Field label="Nombre" htmlFor="nombre">
         <input id="nombre" name="nombre" className="orum-input" required defaultValue={plan?.nombre} />
-      </div>
+      </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="descripcion">Descripción (opcional)</label>
-        <input
-          id="descripcion"
-          name="descripcion"
-          className="orum-input"
-          defaultValue={plan?.descripcion ?? ''}
-        />
-      </div>
+      <Field label="Descripción (opcional)" htmlFor="descripcion">
+        <input id="descripcion" name="descripcion" className="orum-input" defaultValue={plan?.descripcion ?? ''} />
+      </Field>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="precio">Precio</label>
+      <Row>
+        <Field label="Precio" htmlFor="precio" flex>
           <input
             id="precio"
             name="precio"
@@ -56,9 +44,8 @@ export function PlanForm({ plan }: { plan?: PlanInicial }) {
             required
             defaultValue={plan?.precio}
           />
-        </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="duracion_meses">Duración (meses)</label>
+        </Field>
+        <Field label="Duración (meses)" htmlFor="duracion_meses" flex>
           <input
             id="duracion_meses"
             name="duracion_meses"
@@ -69,17 +56,15 @@ export function PlanForm({ plan }: { plan?: PlanInicial }) {
             required
             defaultValue={plan?.duracion_meses ?? 1}
           />
-        </div>
-      </div>
+        </Field>
+      </Row>
 
-      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-        <button type="submit" className="orum-button" disabled={pending}>
+      <Row style={{ marginTop: '0.5rem' }}>
+        <Button type="submit" disabled={pending}>
           {pending ? 'Guardando…' : plan ? 'Guardar cambios' : 'Crear plan'}
-        </button>
-        <Link href="/admin/planes" className="orum-button orum-button--secondary">
-          Cancelar
-        </Link>
-      </div>
+        </Button>
+        <LinkButton href="/admin/planes" variant="secondary">Cancelar</LinkButton>
+      </Row>
     </form>
   )
 }

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { SucursalForm } from '../../sucursal-form'
+import { SucursalForm } from '../../_components/sucursal-form'
 
 export const metadata = { title: 'Editar sucursal · ORUM' }
 

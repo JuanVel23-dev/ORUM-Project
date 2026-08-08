@@ -1,5 +1,6 @@
-import { requireRol } from '@/lib/auth'
-import { UsuarioForm } from './usuario-form'
+import { requireRol } from '@/lib/auth/auth'
+import { UsuarioForm } from './_components/usuario-form'
+import { PageHeader } from '@/components/ui'
 
 export const metadata = { title: 'Crear usuario · ORUM' }
 
@@ -8,9 +9,7 @@ export default async function NuevoUsuarioPage() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-        Crear usuario
-      </h1>
+      <PageHeader title="Crear usuario" />
       <UsuarioForm />
     </div>
   )

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getPerfilActual } from '@/lib/auth'
+import { getPerfilActual } from '@/lib/auth/auth'
 
 export default async function AdminInicioPage() {
   // El layout ya garantizó el acceso; aquí solo saludamos con el nombre del rol.

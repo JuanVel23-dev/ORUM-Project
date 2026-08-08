@@ -3,14 +3,14 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getPerfilActual, type PerfilActual } from '@/lib/auth'
-import { generarPassword } from '@/lib/password'
-import { registrarActividad } from '@/lib/bitacora'
+import { getPerfilActual, type PerfilActual } from '@/lib/auth/auth'
+import { generarPassword } from '@/lib/shared/password'
+import { registrarActividad } from '@/lib/bitacora/bitacora'
 import {
   generarNumeroMembresia,
   calcularFechaFin,
   calcularFechaInicioRenovacion,
-} from '@/lib/membresias'
+} from '@/lib/miembros/membresias'
 
 type Admin = ReturnType<typeof createAdminClient>
 

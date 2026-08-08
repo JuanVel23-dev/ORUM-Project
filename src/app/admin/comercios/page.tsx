@@ -1,6 +1,6 @@
-import Link from 'next/link'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { Badge, DataTable, EmptyState, LinkButton, PageHeader, SearchForm } from '@/components/ui'
 
 export const metadata = { title: 'Comercios · ORUM' }
 
@@ -24,59 +24,41 @@ export default async function ComerciosPage({
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Comercios</h1>
-        <Link href="/admin/comercios/nuevo" className="orum-button">+ Crear comercio</Link>
-      </div>
+      <PageHeader title="Comercios" action={{ href: '/admin/comercios/nuevo', label: '+ Crear comercio' }} />
 
-      <form method="get" className="orum-card" style={{ marginBottom: '1.25rem', display: 'flex', gap: '0.75rem' }}>
-        <input
-          type="text"
-          name="q"
-          className="orum-input"
-          placeholder="Buscar por nombre…"
-          defaultValue={busqueda}
-        />
-        <button type="submit" className="orum-button orum-button--secondary">Buscar</button>
-      </form>
+      <SearchForm name="q" placeholder="Buscar por nombre…" defaultValue={busqueda} />
 
       {!comercios || comercios.length === 0 ? (
-        <div className="orum-card">
-          <p className="orum-muted">
-            {busqueda ? 'Ningún comercio coincide con la búsqueda.' : 'Aún no hay comercios. Crea el primero.'}
-          </p>
-        </div>
+        <EmptyState>
+          {busqueda ? 'Ningún comercio coincide con la búsqueda.' : 'Aún no hay comercios. Crea el primero.'}
+        </EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0 }}>
-          <table className="orum-table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Estado</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
+        <DataTable>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th style={{ textAlign: 'right' }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comercios.map((c) => (
+              <tr key={c.id}>
+                <td>{c.nombre}</td>
+                <td className="orum-muted">{c.descripcion ?? '—'}</td>
+                <td>
+                  <Badge tone={c.activo ? 'on' : 'off'}>{c.activo ? 'Activo' : 'Inactivo'}</Badge>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                  <LinkButton href={`/admin/comercios/${c.id}`} variant="secondary">
+                    Ver ficha
+                  </LinkButton>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {comercios.map((c) => (
-                <tr key={c.id}>
-                  <td>{c.nombre}</td>
-                  <td className="orum-muted">{c.descripcion ?? '—'}</td>
-                  <td>
-                    <span className={`orum-badge ${c.activo ? 'orum-badge--on' : 'orum-badge--off'}`}>
-                      {c.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <Link href={`/admin/comercios/${c.id}`} className="orum-button orum-button--secondary">
-                      Ver ficha
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </DataTable>
       )}
     </div>
   )

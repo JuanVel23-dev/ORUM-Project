@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getPerfilActual } from '@/lib/auth'
-import { generarPassword } from '@/lib/password'
+import { getPerfilActual } from '@/lib/auth/auth'
+import { generarPassword } from '@/lib/shared/password'
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
 async function exigirSuperAdmin(): Promise<boolean> {

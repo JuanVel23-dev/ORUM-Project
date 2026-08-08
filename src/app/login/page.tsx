@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { getPerfilActual } from '@/lib/auth'
+import { getPerfilActual } from '@/lib/auth/auth'
 import { LoginForm } from './login-form'
 
 export const metadata = {

@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import Link from 'next/link'
-import { crearPromocion, editarPromocion, type PromocionState } from '../../promociones-actions'
+import { crearPromocion, editarPromocion, type PromocionState } from '../../../promociones-actions'
+import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
 
 type TipoOpcion = { id: number; codigo: string; nombre: string }
 type PromocionInicial = {
@@ -35,23 +35,20 @@ export function PromocionForm({
 
   return (
     <form action={formAction} className="orum-card">
-      {state.error && <p className="orum-alert orum-alert--error" role="alert">{state.error}</p>}
+      {state.error && <Alert tone="error">{state.error}</Alert>}
 
       <input type="hidden" name="comercio_id" value={comercioId} />
       {promocion && <input type="hidden" name="id" value={promocion.id} />}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="titulo">Título</label>
+      <Field label="Título" htmlFor="titulo">
         <input id="titulo" name="titulo" className="orum-input" required defaultValue={promocion?.titulo} />
-      </div>
+      </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="descripcion">Descripción (opcional)</label>
+      <Field label="Descripción (opcional)" htmlFor="descripcion">
         <input id="descripcion" name="descripcion" className="orum-input" defaultValue={promocion?.descripcion ?? ''} />
-      </div>
+      </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="tipo_beneficio_id">Tipo de beneficio</label>
+      <Field label="Tipo de beneficio" htmlFor="tipo_beneficio_id">
         <select
           id="tipo_beneficio_id"
           name="tipo_beneficio_id"
@@ -61,15 +58,19 @@ export function PromocionForm({
           onChange={(e) => setTipoId(e.target.value)}
         >
           {tipos.length === 0 && <option value="">— No hay tipos de beneficio —</option>}
-          {tipos.map((t) => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+          {tipos.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.nombre}
+            </option>
+          ))}
         </select>
-      </div>
+      </Field>
 
       {requiereValor && (
-        <div className="orum-field">
-          <label className="orum-label" htmlFor="valor">
-            Valor {tipoSeleccionado?.codigo === 'porcentaje' ? '(porcentaje, 1-100)' : '(monto)'}
-          </label>
+        <Field
+          label={`Valor ${tipoSeleccionado?.codigo === 'porcentaje' ? '(porcentaje, 1-100)' : '(monto)'}`}
+          htmlFor="valor"
+        >
           <input
             id="valor"
             name="valor"
@@ -79,26 +80,24 @@ export function PromocionForm({
             className="orum-input"
             defaultValue={promocion?.valor ?? ''}
           />
-        </div>
+        </Field>
       )}
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="fecha_inicio">Fecha de inicio (opcional)</label>
+      <Row>
+        <Field label="Fecha de inicio (opcional)" htmlFor="fecha_inicio" flex>
           <input id="fecha_inicio" name="fecha_inicio" type="date" className="orum-input" defaultValue={promocion?.fecha_inicio ?? ''} />
-        </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="fecha_fin">Fecha de fin (opcional)</label>
+        </Field>
+        <Field label="Fecha de fin (opcional)" htmlFor="fecha_fin" flex>
           <input id="fecha_fin" name="fecha_fin" type="date" className="orum-input" defaultValue={promocion?.fecha_fin ?? ''} />
-        </div>
-      </div>
+        </Field>
+      </Row>
 
-      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-        <button type="submit" className="orum-button" disabled={pending || tipos.length === 0}>
+      <Row style={{ marginTop: '0.5rem' }}>
+        <Button type="submit" disabled={pending || tipos.length === 0}>
           {pending ? 'Guardando…' : promocion ? 'Guardar cambios' : 'Crear promoción'}
-        </button>
-        <Link href={`/admin/comercios/${comercioId}`} className="orum-button orum-button--secondary">Cancelar</Link>
-      </div>
+        </Button>
+        <LinkButton href={`/admin/comercios/${comercioId}`} variant="secondary">Cancelar</LinkButton>
+      </Row>
     </form>
   )
 }

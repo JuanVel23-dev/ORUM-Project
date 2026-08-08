@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { cerrarSesion } from '@/app/login/actions'
+import { Row } from '@/components/ui'
 
 export const metadata = {
   title: 'Panel · ORUM',
@@ -17,11 +18,10 @@ export default async function AdminLayout({
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <header
+      <Row
+        gap="1.5rem"
         style={{
-          display: 'flex',
           alignItems: 'center',
-          gap: '1.5rem',
           padding: '0.75rem 1.5rem',
           borderBottom: '1px solid var(--orum-border)',
         }}
@@ -30,7 +30,7 @@ export default async function AdminLayout({
           ORUM
         </Link>
 
-        <nav style={{ display: 'flex', gap: '1rem', flex: 1 }}>
+        <Row gap="1rem" style={{ flex: 1 }}>
           <Link href="/admin">Inicio</Link>
           <Link href="/admin/miembros">Miembros</Link>
           {esSuperAdmin && <Link href="/admin/comercios">Comercios</Link>}
@@ -39,7 +39,7 @@ export default async function AdminLayout({
           {esSuperAdmin && <Link href="/admin/bitacora">Bitácora</Link>}
           {esSuperAdmin && <Link href="/admin/metricas">Métricas</Link>}
           <Link href="/admin/cuenta/password">Mi contraseña</Link>
-        </nav>
+        </Row>
 
         <span className="orum-muted" style={{ fontSize: '0.85rem' }}>
           {perfil.email} · {perfil.rolNombre}
@@ -49,7 +49,7 @@ export default async function AdminLayout({
             Cerrar sesión
           </button>
         </form>
-      </header>
+      </Row>
 
       <main style={{ flex: 1, padding: '1.5rem', maxWidth: 1100, width: '100%', margin: '0 auto' }}>
         {children}

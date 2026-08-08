@@ -1,6 +1,7 @@
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { MiembroForm } from '../miembro-form'
+import { MiembroForm } from '../_components/miembro-form'
+import { PageHeader } from '@/components/ui'
 
 export const metadata = { title: 'Registrar miembro · ORUM' }
 
@@ -15,7 +16,7 @@ export default async function NuevoMiembroPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>Registrar miembro</h1>
+      <PageHeader title="Registrar miembro" />
       <MiembroForm ciudades={ciudades ?? []} planes={planes ?? []} />
     </div>
   )

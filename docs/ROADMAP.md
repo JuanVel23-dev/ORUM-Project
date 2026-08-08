@@ -13,8 +13,8 @@
 ORUM es una plataforma web de **club de beneficios**: conecta a sus **miembros** con una red
 de **comercios aliados** para que accedan a descuentos, ofertas y promociones.
 
-Documento de requisitos original: [`Contexto_ORUM_txt`](../Contexto_ORUM_txt) (raíz del repo).
-Esquema de base de datos: [`Esquema_BD.txt`](../Esquema_BD.txt) y `Esquema_ORUM.png`.
+Documento de requisitos original: [`Contexto_ORUM.txt`](referencia/Contexto_ORUM.txt).
+Esquema de base de datos: [`Esquema_BD.txt`](referencia/Esquema_BD.txt) y [`Esquema_ORUM.png`](referencia/Esquema_ORUM.png).
 
 La plataforma tiene **4 portales**, cada uno para un tipo de usuario:
 

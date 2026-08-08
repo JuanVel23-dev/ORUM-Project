@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ComercioForm } from '../comercio-form'
+import { ComercioForm } from '../_components/comercio-form'
 
 export const metadata = { title: 'Crear comercio · ORUM' }
 

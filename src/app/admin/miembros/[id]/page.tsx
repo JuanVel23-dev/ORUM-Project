@@ -1,9 +1,9 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { resumirEventoBitacora } from '@/lib/bitacora'
-import { RenovarForm } from './renovar-form'
+import { resumirEventoBitacora } from '@/lib/bitacora/bitacora'
+import { RenovarForm } from './_components/renovar-form'
+import { Badge, DataTable, EmptyState, PageHeader } from '@/components/ui'
 
 export const metadata = { title: 'Ficha de miembro · ORUM' }
 
@@ -59,12 +59,10 @@ export default async function FichaMiembroPage({ params }: { params: Promise<{ i
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{`${miembro.nombres} ${miembro.apellidos}`.trim()}</h1>
-        <Link href={`/admin/miembros/${miembro.id}/editar`} className="orum-button orum-button--secondary">
-          Editar datos
-        </Link>
-      </div>
+      <PageHeader
+        title={`${miembro.nombres} ${miembro.apellidos}`.trim()}
+        action={{ href: `/admin/miembros/${miembro.id}/editar`, label: 'Editar datos', variant: 'secondary' }}
+      />
 
       <div className="orum-card" style={{ marginBottom: '1.25rem' }}>
         <p><strong>Número de membresía:</strong> <span style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}>{miembro.numero_membresia}</span></p>
@@ -75,60 +73,50 @@ export default async function FichaMiembroPage({ params }: { params: Promise<{ i
         <p><strong>Ciudad:</strong> {ciudad?.nombre ?? '—'}</p>
       </div>
 
-      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Historial de membresías</h2>
+      <PageHeader as="h2" title="Historial de membresías" />
       {!membresias || membresias.length === 0 ? (
-        <div className="orum-card" style={{ marginBottom: '1.25rem' }}>
-          <p className="orum-muted">Este miembro no tiene membresías registradas.</p>
-        </div>
+        <EmptyState marginBottom="1.25rem">Este miembro no tiene membresías registradas.</EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0, marginBottom: '1.25rem' }}>
-          <table className="orum-table">
-            <thead>
-              <tr><th>Plan</th><th>Tipo</th><th>Estado</th><th>Inicio</th><th>Fin</th><th>Precio</th></tr>
-            </thead>
-            <tbody>
-              {membresias.map((m) => (
-                <tr key={m.id}>
-                  <td>{nombrePlan.get(m.plan_id) ?? `Plan #${m.plan_id}`}</td>
-                  <td>{m.tipo}</td>
-                  <td>
-                    <span className={`orum-badge ${m.estado === 'activa' ? 'orum-badge--on' : 'orum-badge--off'}`}>
-                      {m.estado}
-                    </span>
-                  </td>
-                  <td>{m.fecha_inicio}</td>
-                  <td>{m.fecha_fin}</td>
-                  <td>${m.precio_pagado.toLocaleString('es-CO')}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable marginBottom="1.25rem">
+          <thead>
+            <tr><th>Plan</th><th>Tipo</th><th>Estado</th><th>Inicio</th><th>Fin</th><th>Precio</th></tr>
+          </thead>
+          <tbody>
+            {membresias.map((m) => (
+              <tr key={m.id}>
+                <td>{nombrePlan.get(m.plan_id) ?? `Plan #${m.plan_id}`}</td>
+                <td>{m.tipo}</td>
+                <td>
+                  <Badge tone={m.estado === 'activa' ? 'on' : 'off'}>{m.estado}</Badge>
+                </td>
+                <td>{m.fecha_inicio}</td>
+                <td>{m.fecha_fin}</td>
+                <td>${m.precio_pagado.toLocaleString('es-CO')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
       )}
 
-      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Historial de actividad</h2>
+      <PageHeader as="h2" title="Historial de actividad" />
       {!eventos || eventos.length === 0 ? (
-        <div className="orum-card" style={{ marginBottom: '1.25rem' }}>
-          <p className="orum-muted">Aún no hay eventos registrados para este miembro.</p>
-        </div>
+        <EmptyState marginBottom="1.25rem">Aún no hay eventos registrados para este miembro.</EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0, marginBottom: '1.25rem' }}>
-          <table className="orum-table">
-            <thead>
-              <tr><th>Fecha</th><th>Acción</th><th>Detalle</th><th>Registrado por</th></tr>
-            </thead>
-            <tbody>
-              {eventos.map((e) => (
-                <tr key={e.id}>
-                  <td>{new Date(e.fecha_hora).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</td>
-                  <td><span className="orum-badge orum-badge--on">{e.accion}</span></td>
-                  <td>{resumirEventoBitacora(e.accion, e.datos_anteriores, e.datos_nuevos)}</td>
-                  <td className="orum-muted">{e.actor_id ? (correoActor.get(e.actor_id) ?? '—') : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable marginBottom="1.25rem">
+          <thead>
+            <tr><th>Fecha</th><th>Acción</th><th>Detalle</th><th>Registrado por</th></tr>
+          </thead>
+          <tbody>
+            {eventos.map((e) => (
+              <tr key={e.id}>
+                <td>{new Date(e.fecha_hora).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</td>
+                <td><Badge tone="on">{e.accion}</Badge></td>
+                <td>{resumirEventoBitacora(e.accion, e.datos_anteriores, e.datos_nuevos)}</td>
+                <td className="orum-muted">{e.actor_id ? (correoActor.get(e.actor_id) ?? '—') : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
       )}
 
       <RenovarForm miembroId={miembro.id} planes={planes ?? []} />

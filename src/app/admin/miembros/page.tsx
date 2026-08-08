@@ -1,6 +1,6 @@
-import Link from 'next/link'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { Badge, DataTable, EmptyState, LinkButton, PageHeader, SearchForm } from '@/components/ui'
 
 export const metadata = { title: 'Miembros · ORUM' }
 
@@ -45,58 +45,52 @@ export default async function MiembrosPage({
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Miembros</h1>
-        <Link href="/admin/miembros/nuevo" className="orum-button">+ Registrar miembro</Link>
-      </div>
+      <PageHeader title="Miembros" action={{ href: '/admin/miembros/nuevo', label: '+ Registrar miembro' }} />
 
-      <form method="get" className="orum-card" style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
-        <input name="q" className="orum-input" placeholder="Buscar por número, cédula o nombre" defaultValue={busqueda} />
-        <button type="submit" className="orum-button orum-button--secondary">Buscar</button>
-      </form>
+      <SearchForm
+        name="q"
+        placeholder="Buscar por número, cédula o nombre"
+        defaultValue={busqueda}
+        gap="0.5rem"
+        marginBottom="1rem"
+      />
 
       {!miembros || miembros.length === 0 ? (
-        <div className="orum-card">
-          <p className="orum-muted">
-            {busqueda ? 'No se encontraron miembros con esa búsqueda.' : 'Aún no hay miembros registrados.'}
-          </p>
-        </div>
+        <EmptyState>
+          {busqueda ? 'No se encontraron miembros con esa búsqueda.' : 'Aún no hay miembros registrados.'}
+        </EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0 }}>
-          <table className="orum-table">
-            <thead>
-              <tr>
-                <th>Número</th>
-                <th>Nombre</th>
-                <th>Cédula</th>
-                <th>Membresía</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {miembros.map((m) => {
-                const vigente = estadoPorMiembro.has(m.id)
-                return (
-                  <tr key={m.id}>
-                    <td style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}>{m.numero_membresia}</td>
-                    <td>{`${m.nombres} ${m.apellidos}`.trim()}</td>
-                    <td className="orum-muted">{m.cedula}</td>
-                    <td>
-                      <span className={`orum-badge ${vigente ? 'orum-badge--on' : 'orum-badge--off'}`}>
-                        {vigente ? 'Activa' : 'Sin membresía activa'}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <Link href={`/admin/miembros/${m.id}`} className="orum-button orum-button--secondary">
-                        Ver ficha
-                      </Link>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <DataTable>
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Nombre</th>
+              <th>Cédula</th>
+              <th>Membresía</th>
+              <th style={{ textAlign: 'right' }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {miembros.map((m) => {
+              const vigente = estadoPorMiembro.has(m.id)
+              return (
+                <tr key={m.id}>
+                  <td style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}>{m.numero_membresia}</td>
+                  <td>{`${m.nombres} ${m.apellidos}`.trim()}</td>
+                  <td className="orum-muted">{m.cedula}</td>
+                  <td>
+                    <Badge tone={vigente ? 'on' : 'off'}>{vigente ? 'Activa' : 'Sin membresía activa'}</Badge>
+                  </td>
+                  <td style={{ textAlign: 'right' }}>
+                    <LinkButton href={`/admin/miembros/${m.id}`} variant="secondary">
+                      Ver ficha
+                    </LinkButton>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </DataTable>
       )}
     </div>
   )

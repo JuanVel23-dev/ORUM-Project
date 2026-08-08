@@ -1,4 +1,4 @@
-import { PasswordForm } from './password-form'
+import { PasswordForm } from './_components/password-form'
 
 export const metadata = { title: 'Mi contraseña · ORUM' }
 

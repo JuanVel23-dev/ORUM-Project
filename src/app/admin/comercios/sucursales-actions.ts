@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getPerfilActual } from '@/lib/auth'
+import { getPerfilActual } from '@/lib/auth/auth'
 
 async function exigirSuperAdmin(): Promise<boolean> {
   const actor = await getPerfilActual()

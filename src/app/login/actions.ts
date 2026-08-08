@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getPerfilActual } from '@/lib/auth'
+import { getPerfilActual } from '@/lib/auth/auth'
 
 export type LoginState = { error?: string }
 

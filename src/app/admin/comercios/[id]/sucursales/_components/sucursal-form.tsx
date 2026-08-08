@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState } from 'react'
-import Link from 'next/link'
-import { crearSucursal, editarSucursal, type SucursalState } from '../../sucursales-actions'
+import { crearSucursal, editarSucursal, type SucursalState } from '../../../sucursales-actions'
+import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
 
 type Opcion = { id: number; nombre: string }
 type SucursalInicial = {
@@ -29,28 +29,24 @@ export function SucursalForm({
 
   return (
     <form action={formAction} className="orum-card">
-      {state.error && <p className="orum-alert orum-alert--error" role="alert">{state.error}</p>}
+      {state.error && <Alert tone="error">{state.error}</Alert>}
 
       <input type="hidden" name="comercio_id" value={comercioId} />
       {sucursal && <input type="hidden" name="id" value={sucursal.id} />}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="nombre">Nombre</label>
+      <Field label="Nombre" htmlFor="nombre">
         <input id="nombre" name="nombre" className="orum-input" required defaultValue={sucursal?.nombre} />
-      </div>
+      </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="direccion">Dirección (opcional)</label>
+      <Field label="Dirección (opcional)" htmlFor="direccion">
         <input id="direccion" name="direccion" className="orum-input" defaultValue={sucursal?.direccion ?? ''} />
-      </div>
+      </Field>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="telefono">Teléfono (opcional)</label>
+      <Row>
+        <Field label="Teléfono (opcional)" htmlFor="telefono" flex>
           <input id="telefono" name="telefono" className="orum-input" defaultValue={sucursal?.telefono ?? ''} />
-        </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="ciudad_id">Ciudad</label>
+        </Field>
+        <Field label="Ciudad" htmlFor="ciudad_id" flex>
           <select
             id="ciudad_id"
             name="ciudad_id"
@@ -59,17 +55,21 @@ export function SucursalForm({
             defaultValue={sucursal?.ciudad_id ?? ''}
           >
             <option value="">— Selecciona una ciudad —</option>
-            {ciudades.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            {ciudades.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre}
+              </option>
+            ))}
           </select>
-        </div>
-      </div>
+        </Field>
+      </Row>
 
-      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-        <button type="submit" className="orum-button" disabled={pending}>
+      <Row style={{ marginTop: '0.5rem' }}>
+        <Button type="submit" disabled={pending}>
           {pending ? 'Guardando…' : sucursal ? 'Guardar cambios' : 'Crear sucursal'}
-        </button>
-        <Link href={`/admin/comercios/${comercioId}`} className="orum-button orum-button--secondary">Cancelar</Link>
-      </div>
+        </Button>
+        <LinkButton href={`/admin/comercios/${comercioId}`} variant="secondary">Cancelar</LinkButton>
+      </Row>
     </form>
   )
 }

@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { EditarMiembroForm } from './editar-miembro-form'
+import { EditarMiembroForm } from './_components/editar-miembro-form'
+import { PageHeader } from '@/components/ui'
 
 export const metadata = { title: 'Editar miembro · ORUM' }
 
@@ -29,7 +30,7 @@ export default async function EditarMiembroPage({ params }: { params: Promise<{ 
 
   return (
     <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>Editar miembro</h1>
+      <PageHeader title="Editar miembro" />
       <EditarMiembroForm miembro={{ ...miembro, correo }} ciudades={ciudades ?? []} />
     </div>
   )

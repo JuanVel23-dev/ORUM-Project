@@ -1,8 +1,8 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import Link from 'next/link'
-import { crearComercio, type CrearComercioState } from './actions'
+import { crearComercio, type CrearComercioState } from '../actions'
+import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
 
 type Opcion = { id: number; nombre: string }
 
@@ -15,7 +15,7 @@ export function ComercioForm({ marcas, categorias }: { marcas: Opcion[]; categor
   if (state.ok && state.password) {
     return (
       <div className="orum-card">
-        <p className="orum-alert orum-alert--success">✓ Comercio creado correctamente.</p>
+        <Alert tone="success">✓ Comercio creado correctamente.</Alert>
         <p style={{ marginBottom: '0.75rem' }}>
           Comparte estos datos con el comercio. La contraseña <strong>no se volverá a mostrar</strong>;
           podrá cambiarla después.
@@ -26,16 +26,16 @@ export function ComercioForm({ marcas, categorias }: { marcas: Opcion[]; categor
         </div>
         <div className="orum-field">
           <span className="orum-label">Contraseña temporal</span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Row gap="0.5rem">
             <input
               className="orum-input"
               readOnly
               value={state.password}
               style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}
             />
-            <button
+            <Button
               type="button"
-              className="orum-button orum-button--secondary"
+              variant="secondary"
               onClick={() => {
                 navigator.clipboard?.writeText(state.password ?? '')
                 setCopiado(true)
@@ -43,68 +43,70 @@ export function ComercioForm({ marcas, categorias }: { marcas: Opcion[]; categor
               }}
             >
               {copiado ? '¡Copiado!' : 'Copiar'}
-            </button>
-          </div>
+            </Button>
+          </Row>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-          <Link href="/admin/comercios" className="orum-button">Ir a la lista</Link>
-          <Link href="/admin/comercios/nuevo" className="orum-button orum-button--secondary">Crear otro</Link>
-        </div>
+        <Row style={{ marginTop: '1rem' }}>
+          <LinkButton href="/admin/comercios">Ir a la lista</LinkButton>
+          <LinkButton href="/admin/comercios/nuevo" variant="secondary">Crear otro</LinkButton>
+        </Row>
       </div>
     )
   }
 
   return (
     <form action={formAction} className="orum-card">
-      {state.error && <p className="orum-alert orum-alert--error" role="alert">{state.error}</p>}
+      {state.error && <Alert tone="error">{state.error}</Alert>}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="correo">Correo electrónico (para iniciar sesión)</label>
+      <Field label="Correo electrónico (para iniciar sesión)" htmlFor="correo">
         <input id="correo" name="correo" type="email" className="orum-input" required />
-      </div>
+      </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="nombre">Nombre del comercio</label>
+      <Field label="Nombre del comercio" htmlFor="nombre">
         <input id="nombre" name="nombre" className="orum-input" required />
-      </div>
+      </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="descripcion">Descripción (opcional)</label>
+      <Field label="Descripción (opcional)" htmlFor="descripcion">
         <input id="descripcion" name="descripcion" className="orum-input" />
-      </div>
+      </Field>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="marca_id">Marca (opcional)</label>
+      <Row>
+        <Field label="Marca (opcional)" htmlFor="marca_id" flex>
           <select id="marca_id" name="marca_id" className="orum-select" defaultValue="">
             <option value="">— Sin marca —</option>
-            {marcas.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+            {marcas.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.nombre}
+              </option>
+            ))}
           </select>
-        </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="categoria_id">Categoría (opcional)</label>
+        </Field>
+        <Field label="Categoría (opcional)" htmlFor="categoria_id" flex>
           <select id="categoria_id" name="categoria_id" className="orum-select" defaultValue="">
             <option value="">— Sin categoría —</option>
-            {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre}
+              </option>
+            ))}
           </select>
-        </div>
-      </div>
+        </Field>
+      </Row>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="logo_url">URL del logo (opcional)</label>
+      <Field label="URL del logo (opcional)" htmlFor="logo_url">
         <input id="logo_url" name="logo_url" className="orum-input" placeholder="https://…" />
-      </div>
+      </Field>
 
       <p className="orum-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
         El sistema generará una contraseña segura automáticamente y te la mostrará al terminar.
       </p>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <button type="submit" className="orum-button" disabled={pending}>
+      <Row>
+        <Button type="submit" disabled={pending}>
           {pending ? 'Creando…' : 'Crear comercio'}
-        </button>
-        <Link href="/admin/comercios" className="orum-button orum-button--secondary">Cancelar</Link>
-      </div>
+        </Button>
+        <LinkButton href="/admin/comercios" variant="secondary">Cancelar</LinkButton>
+      </Row>
     </form>
   )
 }
