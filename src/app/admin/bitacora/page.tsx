@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { resumirEventoBitacora } from '@/lib/bitacora'
+import { resumirEventoBitacora } from '@/lib/bitacora/bitacora'
+import { Badge, DataTable, EmptyState, PageHeader } from '@/components/ui'
 
 export const metadata = { title: 'Bitácora · ORUM' }
 
@@ -70,7 +71,7 @@ export default async function BitacoraPage({
 
   return (
     <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>Bitácora de actividad</h1>
+      <PageHeader title="Bitácora de actividad" />
 
       <form
         method="get"
@@ -97,40 +98,36 @@ export default async function BitacoraPage({
       </form>
 
       {!eventos || eventos.length === 0 ? (
-        <div className="orum-card">
-          <p className="orum-muted">
-            {busqueda || desde || hasta || accion
-              ? 'Ningún evento coincide con los filtros aplicados.'
-              : 'Aún no hay eventos registrados.'}
-          </p>
-        </div>
+        <EmptyState>
+          {busqueda || desde || hasta || accion
+            ? 'Ningún evento coincide con los filtros aplicados.'
+            : 'Aún no hay eventos registrados.'}
+        </EmptyState>
       ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0 }}>
-          <table className="orum-table">
-            <thead>
-              <tr><th>Fecha</th><th>Miembro</th><th>Acción</th><th>Detalle</th><th>Registrado por</th></tr>
-            </thead>
-            <tbody>
-              {eventos.map((e) => (
-                <tr key={e.id}>
-                  <td>{new Date(e.fecha_hora).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</td>
-                  <td>
-                    {e.entidad_id ? (
-                      <Link href={`/admin/miembros/${e.entidad_id}`}>
-                        {nombreMiembro.get(e.entidad_id) ?? `Miembro #${e.entidad_id}`}
-                      </Link>
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td><span className="orum-badge orum-badge--on">{e.accion}</span></td>
-                  <td>{resumirEventoBitacora(e.accion, e.datos_anteriores, e.datos_nuevos)}</td>
-                  <td className="orum-muted">{e.actor_id ? (correoActor.get(e.actor_id) ?? '—') : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable>
+          <thead>
+            <tr><th>Fecha</th><th>Miembro</th><th>Acción</th><th>Detalle</th><th>Registrado por</th></tr>
+          </thead>
+          <tbody>
+            {eventos.map((e) => (
+              <tr key={e.id}>
+                <td>{new Date(e.fecha_hora).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</td>
+                <td>
+                  {e.entidad_id ? (
+                    <Link href={`/admin/miembros/${e.entidad_id}`}>
+                      {nombreMiembro.get(e.entidad_id) ?? `Miembro #${e.entidad_id}`}
+                    </Link>
+                  ) : (
+                    '—'
+                  )}
+                </td>
+                <td><Badge tone="on">{e.accion}</Badge></td>
+                <td>{resumirEventoBitacora(e.accion, e.datos_anteriores, e.datos_nuevos)}</td>
+                <td className="orum-muted">{e.actor_id ? (correoActor.get(e.actor_id) ?? '—') : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
       )}
     </div>
   )
