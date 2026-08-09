@@ -16,6 +16,7 @@
 - El QR usa `numero_membresia` como payload (decisión ya tomada en Fase 2, confirmada en spec §7).
 - Las promociones no se filtran por `fecha_inicio`/`fecha_fin` (son informativas, decisión ya tomada en Fase 3) — solo por `activo = true AND deleted_at IS NULL`.
 - `requireRol` (`lib/auth/auth.ts`) **no se modifica** — redirige a `/login`, que es correcto solo para el portal admin. El portal de miembros usa sus propias guardias (Task 5) que redirigen a `/miembros/login`, para no romper el login de `/admin` y evitar un bucle de redirect entre el layout y `/miembros/inactiva`.
+- **Corrección encontrada durante la ejecución (no estaba en el diseño original):** el layout guardado (`requireRolMiembro()`) no puede vivir en `src/app/miembros/layout.tsx` a secas, porque en Next.js App Router un layout envuelve **todas** las rutas anidadas debajo de esa carpeta — incluida `/miembros/login`, creando el mismo tipo de bucle de redirect infinito que la separación de Task 5 evita para `/miembros/inactiva`, pero sin ninguna función que lo prevenga aquí. La solución es un **route group** de Next.js (carpeta entre paréntesis, invisible en la URL): las rutas protegidas viven en `src/app/miembros/(portal)/**` con su propio `layout.tsx` ahí adentro, mientras `src/app/miembros/login/**` (Task 10, ya construido) queda como hermano fuera del grupo, sin heredar ese layout. Las URLs no cambian (`/miembros`, `/miembros/perfil`, `/miembros/inactiva` siguen siendo esas URLs — el segmento `(portal)` no aparece en la ruta pública). Tasks 11 a 14 usan esta estructura; ver cada tarea para las rutas de archivo actualizadas.
 - Patrón de pruebas igual que en fases anteriores: **solo las funciones puras de `src/lib/**` llevan pruebas automatizadas** (Vitest). El resto (server actions, páginas) se verifica manualmente contra los criterios de aceptación del spec (§11).
 - Todas las tablas nuevas que se consultan (`comercios`, `sucursales`, `promociones`, `marcas`, `categorias`, `ciudades`, `tipos_beneficio`, `planes_membresia`, `configuracion`, `miembros`, `membresias`) ya existen en Supabase con RLS — no hay migraciones SQL en este plan.
 
@@ -894,24 +895,26 @@ git commit -m "feat: login de miembros por número de membresía (RF-06)"
 
 ---
 
-## Task 11: `/miembros/layout.tsx` — guardia de rol, header y soporte persistente
+## Task 11: `/miembros/(portal)/layout.tsx` — guardia de rol, header y soporte persistente
 
 **Files:**
-- Create: `src/app/miembros/layout.tsx`
+- Create: `src/app/miembros/(portal)/layout.tsx`
 
 **Interfaces:**
 - Consumes: `requireRolMiembro` (Task 5), `cerrarSesionMiembro` (Task 10), `createClient`, `Row`/`WhatsAppButton` del kit (Task 9).
 
 El botón de soporte (RF-13) vive aquí porque debe ser visible en **todas** las pantallas del portal, no solo en el perfil.
 
+`(portal)` es un **route group** de Next.js (carpeta entre paréntesis) — no aparece en la URL. Existe para que este layout guardado NO envuelva `/miembros/login` (que vive como hermano en `src/app/miembros/login/`, fuera del grupo): si lo envolviera, un visitante no autenticado nunca podría llegar al login (el propio layout lo redirigiría a `/miembros/login` en bucle infinito). Ver la nota en Global Constraints.
+
 - [ ] **Step 1: Crear el layout**
 
-Crea `src/app/miembros/layout.tsx`:
+Crea `src/app/miembros/(portal)/layout.tsx`:
 
 ```tsx
 import Link from 'next/link'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
-import { cerrarSesionMiembro } from './login/actions'
+import { cerrarSesionMiembro } from '../login/actions'
 import { createClient } from '@/lib/supabase/server'
 import { Row, WhatsAppButton } from '@/components/ui'
 
@@ -981,7 +984,7 @@ Con el servidor corriendo (`pnpm dev`), inicia sesión con el miembro de prueba.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/app/miembros/layout.tsx
+git add "src/app/miembros/(portal)/layout.tsx"
 git commit -m "feat: layout del portal de miembros (guardia de rol, header, soporte)"
 ```
 
@@ -990,14 +993,16 @@ git commit -m "feat: layout del portal de miembros (guardia de rol, header, sopo
 ## Task 12: `/miembros/inactiva` — pantalla de bloqueo
 
 **Files:**
-- Create: `src/app/miembros/inactiva/page.tsx`
+- Create: `src/app/miembros/(portal)/inactiva/page.tsx`
 
 **Interfaces:**
 - Consumes: `requireRolMiembro` (Task 5, **no** `requireMiembroVigente` — evita el bucle de redirect descrito en Task 5), `createClient`, `WhatsAppButton`.
 
+Vive dentro del route group `(portal)` (ver Task 11) para heredar el layout guardado — el redirect a esta página lo dispara `requireMiembroVigente()` desde otras páginas del grupo, y esta página en sí solo exige rol (no vigencia) para no crear un bucle.
+
 - [ ] **Step 1: Crear la página**
 
-Crea `src/app/miembros/inactiva/page.tsx`:
+Crea `src/app/miembros/(portal)/inactiva/page.tsx`:
 
 ```tsx
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
@@ -1057,7 +1062,7 @@ UPDATE membresias SET estado = 'activa' WHERE id = <id-de-la-membresia>;
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/app/miembros/inactiva
+git add "src/app/miembros/(portal)/inactiva"
 git commit -m "feat: pantalla de bloqueo para membresía no vigente"
 ```
 
@@ -1066,14 +1071,16 @@ git commit -m "feat: pantalla de bloqueo para membresía no vigente"
 ## Task 13: `/miembros/perfil` — perfil de solo lectura + QR (RF-07, RF-14)
 
 **Files:**
-- Create: `src/app/miembros/perfil/page.tsx`
+- Create: `src/app/miembros/(portal)/perfil/page.tsx`
 
 **Interfaces:**
 - Consumes: `requireMiembroVigente` (Task 5), `createClient`, `QrCode`/`Badge` del kit.
 
+Vive dentro del route group `(portal)` (ver Task 11) para heredar el layout guardado — la URL sigue siendo `/miembros/perfil`.
+
 - [ ] **Step 1: Crear la página**
 
-Crea `src/app/miembros/perfil/page.tsx`:
+Crea `src/app/miembros/(portal)/perfil/page.tsx`:
 
 ```tsx
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
@@ -1146,7 +1153,7 @@ Con el miembro de prueba (membresía activa) autenticado, abre `/miembros/perfil
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/app/miembros/perfil
+git add "src/app/miembros/(portal)/perfil"
 git commit -m "feat: perfil de miembro de solo lectura con QR (RF-07, RF-14)"
 ```
 
@@ -1155,19 +1162,19 @@ git commit -m "feat: perfil de miembro de solo lectura con QR (RF-07, RF-14)"
 ## Task 14: `/miembros` — home con búsqueda, filtros y listado (RF-08 a RF-12)
 
 **Files:**
-- Create: `src/app/miembros/_components/comercio-card.tsx`
-- Create: `src/app/miembros/_components/filtros-form.tsx`
-- Create: `src/app/miembros/page.tsx`
+- Create: `src/app/miembros/(portal)/_components/comercio-card.tsx`
+- Create: `src/app/miembros/(portal)/_components/filtros-form.tsx`
+- Create: `src/app/miembros/(portal)/page.tsx`
 
 **Interfaces:**
 - Consumes: `requireMiembroVigente` (Task 5), `formatearBeneficio` (Task 3), `createClient`, `Card`/`CardGrid`/`EmptyState`/`PageHeader`/`Select`/`Badge` del kit.
 - Produces: `type ComercioListado` (usado internamente por esta página), `<ComercioCard comercio>`, `<FiltrosForm ...>`.
 
-Sin filtros aplicados se ve todo el catálogo activo (RF-08); con búsqueda y/o los tres filtros se acota (RF-09 a RF-12). No se reutiliza el `SearchForm` existente del kit tal cual porque aquí la búsqueda va combinada con tres `<select>` en un único formulario — anidar dos `<form>` no es válido en HTML, así que este formulario de filtros es específico de esta ruta.
+Sin filtros aplicados se ve todo el catálogo activo (RF-08); con búsqueda y/o los tres filtros se acota (RF-09 a RF-12). No se reutiliza el `SearchForm` existente del kit tal cual porque aquí la búsqueda va combinada con tres `<select>` en un único formulario — anidar dos `<form>` no es válido en HTML, así que este formulario de filtros es específico de esta ruta. Vive dentro del route group `(portal)` (ver Task 11) para heredar el layout guardado — la URL sigue siendo `/miembros`.
 
 - [ ] **Step 1: Crear `ComercioCard`**
 
-Crea `src/app/miembros/_components/comercio-card.tsx`:
+Crea `src/app/miembros/(portal)/_components/comercio-card.tsx`:
 
 ```tsx
 import { Badge, Card } from '@/components/ui'
@@ -1220,7 +1227,7 @@ export function ComercioCard({ comercio }: { comercio: ComercioListado }) {
 
 - [ ] **Step 2: Crear `FiltrosForm`**
 
-Crea `src/app/miembros/_components/filtros-form.tsx`:
+Crea `src/app/miembros/(portal)/_components/filtros-form.tsx`:
 
 ```tsx
 import { Select } from '@/components/ui'
@@ -1307,7 +1314,7 @@ export function FiltrosForm({
 
 - [ ] **Step 3: Crear la página del home**
 
-Crea `src/app/miembros/page.tsx`:
+Crea `src/app/miembros/(portal)/page.tsx`:
 
 ```tsx
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
@@ -1500,7 +1507,7 @@ Con el miembro de prueba autenticado:
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/app/miembros/_components src/app/miembros/page.tsx
+git add "src/app/miembros/(portal)/_components" "src/app/miembros/(portal)/page.tsx"
 git commit -m "feat: home de miembros con búsqueda y filtros (RF-08 a RF-12)"
 ```
 
