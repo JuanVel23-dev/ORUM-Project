@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getPerfilActual, type PerfilActual } from '@/lib/auth/auth'
 import { esMembresiaVigente } from './membresia-vigente'
+import type { EstadoMembresia, TipoMembresia } from '@/lib/supabase/database.types'
 
 export type MiembroActual = {
   id: number
@@ -11,8 +12,8 @@ export type MiembroActual = {
   membresiaVigente: {
     id: number
     planId: number
-    tipo: string
-    estado: string
+    tipo: TipoMembresia
+    estado: EstadoMembresia
     fechaInicio: string
     fechaFin: string
   }
@@ -45,23 +46,37 @@ export async function requireMiembroVigente(): Promise<MiembroActual> {
   const perfil = await requireRolMiembro()
 
   const supabase = await createClient()
-  const { data: miembro } = await supabase
+  const { data: miembro, error: miembroError } = await supabase
     .from('miembros')
     .select('id, nombres, apellidos, numero_membresia')
     .eq('perfil_id', perfil.userId)
     .is('deleted_at', null)
     .maybeSingle()
 
+  if (miembroError) {
+    console.error(
+      `[requireMiembroVigente] Error consultando 'miembros' para perfil_id=${perfil.userId}:`,
+      miembroError,
+    )
+  }
+
   if (!miembro) {
     redirect('/miembros/inactiva')
   }
 
-  const { data: membresias } = await supabase
+  const { data: membresias, error: membresiasError } = await supabase
     .from('membresias')
     .select('id, plan_id, tipo, estado, fecha_inicio, fecha_fin')
     .eq('miembro_id', miembro.id)
     .order('fecha_fin', { ascending: false })
     .limit(1)
+
+  if (membresiasError) {
+    console.error(
+      `[requireMiembroVigente] Error consultando 'membresias' para miembro_id=${miembro.id}:`,
+      membresiasError,
+    )
+  }
 
   const ultima = membresias?.[0] ?? null
   const hoy = new Date().toISOString().slice(0, 10)

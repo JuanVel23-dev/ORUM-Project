@@ -4,7 +4,7 @@ import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 export function formatearBeneficio(tipoCodigo: TipoBeneficioCodigo, valor: number | null): string {
   switch (tipoCodigo) {
     case 'porcentaje':
-      return `${valor}% de descuento`
+      return `${valor ?? 0}% de descuento`
     case 'monto_fijo':
       return `$${(valor ?? 0).toLocaleString('es-CO')} de descuento`
     case 'dos_por_uno':
