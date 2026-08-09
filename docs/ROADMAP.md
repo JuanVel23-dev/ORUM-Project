@@ -4,7 +4,7 @@
 > están hechas y cuáles faltan. Sirve como punto único de referencia para retomar el
 > proyecto desde cualquier máquina sin desalinearnos.
 >
-> **Última actualización:** 2026-07-31
+> **Última actualización:** 2026-08-09
 
 ---
 
@@ -164,11 +164,58 @@ manualmente algunas filas de `ventas` en Supabase para ver las tablas de comerci
 
 Requisitos cubiertos: **RF-19** (trazabilidad) + parte de las métricas pedidas en la reunión.
 
+### ✅ Fase 5 — Portal de Miembros
+
+**Implementada en `worktree-portal-miembros`, verificada automáticamente (51/51 tests, `tsc`
+limpio, `pnpm lint` limpio, `pnpm build` OK — rutas públicas confirmadas: `/miembros`,
+`/miembros/login`, `/miembros/perfil`, `/miembros/inactiva`). Pendiente prueba manual del usuario
+en navegador con datos reales de Supabase antes de dar por cerrada del todo** (login con número de
+membresía real, membresía vencida/suspendida → bloqueo, búsqueda + cada filtro, QR escaneado,
+botón de soporte).
+
+- **Login por número de membresía** (`/miembros/login`, RF-06) — resuelve el número al correo real
+  vía `resolverCorreoPorNumeroMembresia` (`src/lib/miembros/auth-miembro.ts`, único punto de este
+  portal que usa el admin client, porque corre antes de que exista sesión) y luego
+  `signInWithPassword`. Mensaje de error genérico ante número inválido o contraseña incorrecta (no
+  revela cuál de los dos falló).
+- **RLS activo en Supabase** para `miembros`, `membresias`, `comercios`, `sucursales`,
+  `promociones` (más lectura abierta de catálogos de referencia) — verificado manualmente por el
+  usuario antes de implementar (miembro ve solo su propia fila/membresía; catálogo de comercios
+  visible completo). Todo el portal usa el cliente de sesión (`createClient()`), nunca
+  `createAdminClient()`, salvo la excepción de login ya mencionada.
+- **Guardias propias del portal** (`src/lib/miembros/requerir-miembro.ts`): `requireRolMiembro`
+  (solo rol) y `requireMiembroVigente` (rol + membresía vigente). Separadas a propósito — el
+  layout guardado y `/miembros/inactiva` usan la primera para no crear un bucle de redirect.
+- **Ruta guardada bajo route group** `src/app/miembros/(portal)/**` (invisible en la URL): se
+  detectó durante la implementación que un layout guardado en `src/app/miembros/layout.tsx` a
+  secas envolvería también a `/miembros/login`, causando un bucle infinito de redirect para
+  visitantes no autenticados. `/miembros/login` vive como hermano fuera del grupo.
+- **Perfil de solo lectura + QR** (`/miembros/perfil`, RF-07 y RF-14) — datos del miembro,
+  membresía vigente (plan, tipo, vigencia) y QR (`react-qr-code`) con `numero_membresia` como
+  payload (decisión ya tomada en Fase 2). Sin formulario de edición.
+- **Home con búsqueda y filtros** (`/miembros`, RF-08 a RF-12) — una sola pantalla: sin filtros
+  se ve todo el catálogo activo; búsqueda libre (nombre de comercio o título de promoción) y tres
+  filtros combinables (comercio, marca, ciudad vía sucursales). Las búsquedas usan siempre
+  llamadas parametrizadas (`.ilike()`/`.eq()`/`.in()`), nunca un `.or()` con texto de usuario
+  interpolado, para evitar inyección de filtros PostgREST.
+- **Pantalla de bloqueo** (`/miembros/inactiva`) — si la membresía no está vigente
+  (`esMembresiaVigente`, función pura testeada en `src/lib/miembros/membresia-vigente.ts`, que
+  chequea `estado` **y** `fecha_fin` porque no hay job que actualice `estado` solo al vencer).
+- **Soporte por WhatsApp** (RF-13) — botón persistente en el layout del portal, leído desde
+  `configuracion.whatsapp_soporte` (tabla ya existente en Supabase, ahora en uso).
+- **Kit de UI ampliado**: `Select`, `Card`/`CardGrid`, `QrCode`, `WhatsAppButton` — nuevos
+  componentes en `src/components/ui/`, reutilizables por los portales futuros (Público,
+  Herramienta de Comercios).
+
+**Documentos de diseño/plan de esta fase:**
+- Spec: [`docs/superpowers/specs/2026-08-09-portal-miembros-design.md`](superpowers/specs/2026-08-09-portal-miembros-design.md)
+- Plan (15 tareas): [`docs/superpowers/plans/2026-08-09-portal-miembros-plan.md`](superpowers/plans/2026-08-09-portal-miembros-plan.md)
+
+Requisitos cubiertos: **RF-06 a RF-14** (login, perfil, descuentos, búsqueda y filtros, soporte, QR).
+
 ### ⬜ Fases posteriores — Portales de cara al usuario final
 
 - **Portal Público** — RF-01 a RF-04 (info, tiendas aliadas, precios, botón WhatsApp para adquirir).
-- **Portal de Miembros** — RF-06 a RF-14 (login por número, perfil, descuentos, búsqueda y filtros,
-  soporte, **QR** que identifica al miembro).
 - **Herramienta para Comercios** — RF-20 a RF-22 (login, venta por QR, venta por número de membresía).
 
 ---
@@ -178,7 +225,7 @@ Requisitos cubiertos: **RF-19** (trazabilidad) + parte de las métricas pedidas 
 | RF | Descripción | Fase | Estado |
 |----|-------------|------|--------|
 | RF-01–04 | Portal Público (info, tiendas, precios, adquirir) | Posterior | ⬜ |
-| RF-06–14 | Portal Miembros (login, perfil, descuentos, filtros, soporte, QR) | Posterior | ⬜ |
+| RF-06–14 | Portal Miembros (login, perfil, descuentos, filtros, soporte, QR) | Fase 5 | ✅ |
 | RF-15 | Gestión de planes de membresía | Fase 2 | ✅ |
 | RF-16 | Gestión de usuarios (staff + miembros) | Fase 1 + 2 | ✅ |
 | RF-17 | Gestión de comercios | Fase 3 | ✅ |
@@ -264,9 +311,10 @@ pnpm lint           # linter
 
 ## 9. Próximo paso sugerido
 
-Con Fases 1-4 implementadas, falta: (1) la prueba manual en navegador de la Fase 4 (login,
-recorrer bitácora/métricas, sembrar `ventas` de prueba), y (2) fusionar la rama
-`worktree-fase4-metricas-trazabilidad` a `main`. Después de eso, el siguiente paso natural son los
-**portales de cara al usuario final** (Público, Miembros, Herramienta para Comercios), empezando
-por la Herramienta para Comercios (RF-20-22) ya que es la que finalmente llena la tabla `ventas`
-que el dashboard de métricas ya consume.
+Con Fases 1-5 implementadas, falta: (1) la prueba manual en navegador de la Fase 5 (login con
+número de membresía real, membresía vencida/suspendida, búsqueda y filtros, QR, soporte), y
+(2) fusionar la rama `worktree-portal-miembros` a `main`. Después de eso, el siguiente paso natural
+es la **Herramienta para Comercios** (RF-20-22): es la que finalmente llena la tabla `ventas` que
+el dashboard de métricas (Fase 4) ya consume, y también donde se usará por primera vez el QR que
+ya muestra el perfil del miembro (Fase 5). El **Portal Público** (RF-01-04) puede ir en paralelo o
+después — es el que menos depende de las fases ya construidas.
