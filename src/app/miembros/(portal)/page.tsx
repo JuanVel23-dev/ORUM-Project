@@ -24,19 +24,28 @@ export default async function MiembrosHomePage({
 
   const [{ data: todosComercios }, { data: todasMarcas }, { data: todasCiudades }, { data: tipos }] =
     await Promise.all([
-      supabase.from('comercios').select('id, nombre').eq('activo', true).is('deleted_at', null).order('nombre'),
-      supabase.from('marcas').select('id, nombre').order('nombre'),
-      supabase.from('ciudades').select('id, nombre').order('nombre'),
-      supabase.from('tipos_beneficio').select('id, codigo'),
+      supabase
+        .from('comercios')
+        .select('id, nombre')
+        .eq('activo', true)
+        .is('deleted_at', null)
+        .order('nombre')
+        .limit(100),
+      supabase.from('marcas').select('id, nombre').order('nombre').limit(100),
+      supabase.from('ciudades').select('id, nombre').order('nombre').limit(100),
+      supabase.from('tipos_beneficio').select('id, codigo').limit(100),
     ])
 
-  // Comercios cuyo nombre coincide con la búsqueda.
+  // Comercios cuyo nombre coincide con la búsqueda (y, si aplica, con los filtros de comercio/marca).
   let queryPorNombre = supabase
     .from('comercios')
     .select('id, nombre, descripcion, marca_id')
     .eq('activo', true)
     .is('deleted_at', null)
   if (busqueda) queryPorNombre = queryPorNombre.ilike('nombre', `%${busqueda}%`)
+  if (comercioIdFiltro) queryPorNombre = queryPorNombre.eq('id', comercioIdFiltro)
+  if (marcaIdFiltro) queryPorNombre = queryPorNombre.eq('marca_id', marcaIdFiltro)
+  queryPorNombre = queryPorNombre.limit(100)
 
   // Comercios con una promoción cuyo título coincide con la búsqueda.
   let idsPorPromocion: number[] = []
@@ -47,19 +56,26 @@ export default async function MiembrosHomePage({
       .eq('activo', true)
       .is('deleted_at', null)
       .ilike('titulo', `%${busqueda}%`)
+      .limit(100)
     idsPorPromocion = Array.from(new Set((promosCoincidentes ?? []).map((p) => p.comercio_id)))
   }
 
   type ComercioBase = { id: number; nombre: string; descripcion: string | null; marca_id: number | null }
 
+  // Comercios cuyo id vino de un match de promoción, acotados también por comercio/marca si aplica.
   const queryPorPromocion =
     idsPorPromocion.length > 0
-      ? supabase
-          .from('comercios')
-          .select('id, nombre, descripcion, marca_id')
-          .eq('activo', true)
-          .is('deleted_at', null)
-          .in('id', idsPorPromocion)
+      ? (() => {
+          let q = supabase
+            .from('comercios')
+            .select('id, nombre, descripcion, marca_id')
+            .eq('activo', true)
+            .is('deleted_at', null)
+            .in('id', idsPorPromocion)
+          if (comercioIdFiltro) q = q.eq('id', comercioIdFiltro)
+          if (marcaIdFiltro) q = q.eq('marca_id', marcaIdFiltro)
+          return q.limit(100)
+        })()
       : Promise.resolve({ data: [] as ComercioBase[] })
 
   // Comercios con al menos una sucursal en la ciudad filtrada.
@@ -71,6 +87,7 @@ export default async function MiembrosHomePage({
       .eq('ciudad_id', ciudadIdFiltro)
       .eq('activo', true)
       .is('deleted_at', null)
+      .limit(100)
     idsPorCiudad = Array.from(new Set((sucursalesEnCiudad ?? []).map((s) => s.comercio_id)))
   }
 
@@ -79,9 +96,10 @@ export default async function MiembrosHomePage({
     ? Array.from(new Map([...(porNombre ?? []), ...(porPromocion ?? [])].map((c) => [c.id, c])).values())
     : (porNombre ?? [])
 
+  // comercioIdFiltro y marcaIdFiltro ya se aplicaron a nivel de base de datos (ver queryPorNombre /
+  // queryPorPromocion arriba). El filtro de ciudad se resuelve aparte vía `sucursales`, así que se
+  // aplica acá en memoria sobre el conjunto ya acotado.
   const comerciosFiltrados = baseComercios.filter((c) => {
-    if (comercioIdFiltro && c.id !== comercioIdFiltro) return false
-    if (marcaIdFiltro && c.marca_id !== marcaIdFiltro) return false
     if (idsPorCiudad && !idsPorCiudad.includes(c.id)) return false
     return true
   })
@@ -100,13 +118,15 @@ export default async function MiembrosHomePage({
             .eq('activo', true)
             .is('deleted_at', null)
             .in('comercio_id', comercioIds)
-            .order('titulo'),
+            .order('titulo')
+            .limit(200),
           supabase
             .from('sucursales')
             .select('comercio_id, ciudad_id')
             .eq('activo', true)
             .is('deleted_at', null)
-            .in('comercio_id', comercioIds),
+            .in('comercio_id', comercioIds)
+            .limit(200),
         ])
       : [{ data: [] as PromocionRow[] }, { data: [] as SucursalRow[] }]
 
