@@ -1,5 +1,6 @@
 export { PageHeader } from './PageHeader'
 export { Field } from './Field'
+export { Select } from './Select'
 export { Button, LinkButton } from './Button'
 export { EmptyState } from './EmptyState'
 export { Badge } from './Badge'
