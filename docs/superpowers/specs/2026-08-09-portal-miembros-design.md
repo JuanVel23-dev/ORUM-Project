@@ -89,8 +89,14 @@ esquema ya vive ahí):
 | `comercios` | `activo = true AND deleted_at IS NULL` |
 | `sucursales` | `activo = true AND deleted_at IS NULL` |
 | `promociones` | `activo = true AND deleted_at IS NULL` |
-| `marcas`, `categorias`, `ciudades`, `tipos_beneficio` | Sin restricción (datos de referencia) |
+| `marcas`, `categorias`, `ciudades`, `tipos_beneficio`, `planes_membresia` | Sin restricción (datos de referencia; `planes_membresia` la necesita el perfil del miembro para mostrar su plan, y sus precios son públicos por RF-03) |
 | `configuracion` | Sin restricción (solo guarda claves como `whatsapp_soporte`, nada sensible) |
+
+**Fuera de esta tarea (a propósito):** `perfiles` y `roles`. Se leen con el cliente de sesión desde
+`getPerfilActual()` (`lib/auth/auth.ts`), usada por **todos** los portales (incluido `/admin`, que
+lleva 4 fases funcionando así). Activarles RLS sin la política correcta de autolectura rompería el
+login de todo el sistema, no solo el de miembros — por eso quedan fuera de este paso y siguen con
+el acceso abierto actual (deuda técnica ya anotada en el ROADMAP, no se resuelve en este pase).
 
 ## 6. Reorganización de `src/lib/`
 
