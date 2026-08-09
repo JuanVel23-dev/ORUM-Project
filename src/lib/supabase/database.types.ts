@@ -388,6 +388,24 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['ventas']['Insert']>
         Relationships: []
       }
+      configuracion: {
+        Row: {
+          id: number
+          clave: string
+          valor: string | null
+          descripcion: string | null
+          updated_at: Timestamp
+        }
+        Insert: {
+          id?: number
+          clave: string
+          valor?: string | null
+          descripcion?: string | null
+          updated_at?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['configuracion']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
