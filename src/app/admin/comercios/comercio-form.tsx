@@ -1,110 +1,132 @@
 'use client'
 
-import { useActionState, useState } from 'react'
-import Link from 'next/link'
+import { useActionState } from 'react'
+import { Store } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Copiar } from '@/components/ui/copiar'
+import { Field } from '@/components/ui/field'
+import { Input, Select } from '@/components/ui/input'
+import { Stack } from '@/components/ui/layout'
 import { crearComercio, type CrearComercioState } from './actions'
+import styles from '../miembros/formulario.module.css'
 
 type Opcion = { id: number; nombre: string }
 
 const estadoInicial: CrearComercioState = {}
 
-export function ComercioForm({ marcas, categorias }: { marcas: Opcion[]; categorias: Opcion[] }) {
+export function ComercioForm({
+  marcas,
+  categorias,
+}: {
+  marcas: Opcion[]
+  categorias: Opcion[]
+}) {
   const [state, formAction, pending] = useActionState(crearComercio, estadoInicial)
-  const [copiado, setCopiado] = useState(false)
 
   if (state.ok && state.password) {
-    return (
-      <div className="orum-card">
-        <p className="orum-alert orum-alert--success">✓ Comercio creado correctamente.</p>
-        <p style={{ marginBottom: '0.75rem' }}>
-          Comparte estos datos con el comercio. La contraseña <strong>no se volverá a mostrar</strong>;
-          podrá cambiarla después.
-        </p>
-        <div className="orum-field">
-          <span className="orum-label">Correo</span>
-          <input className="orum-input" readOnly value={state.email} />
-        </div>
-        <div className="orum-field">
-          <span className="orum-label">Contraseña temporal</span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input
-              className="orum-input"
-              readOnly
-              value={state.password}
-              style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}
-            />
-            <button
-              type="button"
-              className="orum-button orum-button--secondary"
-              onClick={() => {
-                navigator.clipboard?.writeText(state.password ?? '')
-                setCopiado(true)
-                setTimeout(() => setCopiado(false), 2000)
-              }}
-            >
-              {copiado ? '¡Copiado!' : 'Copiar'}
-            </button>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-          <Link href="/admin/comercios" className="orum-button">Ir a la lista</Link>
-          <Link href="/admin/comercios/nuevo" className="orum-button orum-button--secondary">Crear otro</Link>
-        </div>
-      </div>
-    )
+    return <Credenciales estado={state} />
   }
 
   return (
-    <form action={formAction} className="orum-card">
-      {state.error && <p className="orum-alert orum-alert--error" role="alert">{state.error}</p>}
+    <>
+      <form action={formAction} className={styles.formulario} noValidate>
+        {state.error && <Alert tone="danger">{state.error}</Alert>}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="correo">Correo electrónico (para iniciar sesión)</label>
-        <input id="correo" name="correo" type="email" className="orum-input" required />
-      </div>
+        <Stack gap={5}>
+          <Field
+            label="Correo electrónico"
+            help="Será el usuario con el que el comercio inicia sesión en su herramienta."
+          >
+            <Input name="correo" type="email" autoComplete="email" required autoFocus />
+          </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="nombre">Nombre del comercio</label>
-        <input id="nombre" name="nombre" className="orum-input" required />
-      </div>
+          <Field label="Nombre del comercio">
+            <Input name="nombre" required />
+          </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="descripcion">Descripción (opcional)</label>
-        <input id="descripcion" name="descripcion" className="orum-input" />
-      </div>
+          <Field label="Descripción" optional>
+            <Input name="descripcion" />
+          </Field>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="marca_id">Marca (opcional)</label>
-          <select id="marca_id" name="marca_id" className="orum-select" defaultValue="">
-            <option value="">— Sin marca —</option>
-            {marcas.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
-          </select>
+          <div className={styles.pareja}>
+            <Field label="Marca" optional>
+              <Select name="marca_id" defaultValue="">
+                <option value="">Sin marca</option>
+                {marcas.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.nombre}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+
+            <Field label="Categoría" optional>
+              <Select name="categoria_id" defaultValue="">
+                <option value="">Sin categoría</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+
+          <Field label="URL del logo" optional>
+            <Input name="logo_url" type="url" placeholder="https://…" />
+          </Field>
+
+          <p className={styles.nota}>
+            Al guardar se genera una contraseña segura. Se mostrará una sola vez en la
+            siguiente pantalla.
+          </p>
+        </Stack>
+
+        <div className={styles.acciones}>
+          <Button type="submit" loading={pending} icon={<Store size={16} />}>
+            Crear comercio
+          </Button>
+          <Button href="/admin/comercios" variant="secondary">
+            Cancelar
+          </Button>
         </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="categoria_id">Categoría (opcional)</label>
-          <select id="categoria_id" name="categoria_id" className="orum-select" defaultValue="">
-            <option value="">— Sin categoría —</option>
-            {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-          </select>
+      </form>
+    </>
+  )
+}
+
+function Credenciales({ estado }: { estado: CrearComercioState }) {
+  return (
+    <>
+      <div className={styles.credenciales}>
+        <Alert tone="success" title="Comercio creado" />
+
+        <Alert tone="warning" title="Comparte estos datos ahora">
+          La contraseña no se vuelve a mostrar. El comercio podrá cambiarla después.
+        </Alert>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Correo de acceso</span>
+          <Copiar valor={estado.email ?? ''} label="Copiar correo">
+            <span className={styles.credencialValor}>{estado.email}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Contraseña temporal</span>
+          <Copiar valor={estado.password ?? ''} label="Copiar contraseña temporal">
+            <span className={styles.credencialValor}>{estado.password}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.acciones}>
+          <Button href="/admin/comercios">Ir a la lista</Button>
+          <Button href="/admin/comercios/nuevo" variant="secondary">
+            Crear otro
+          </Button>
         </div>
       </div>
-
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="logo_url">URL del logo (opcional)</label>
-        <input id="logo_url" name="logo_url" className="orum-input" placeholder="https://…" />
-      </div>
-
-      <p className="orum-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
-        El sistema generará una contraseña segura automáticamente y te la mostrará al terminar.
-      </p>
-
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <button type="submit" className="orum-button" disabled={pending}>
-          {pending ? 'Creando…' : 'Crear comercio'}
-        </button>
-        <Link href="/admin/comercios" className="orum-button orum-button--secondary">Cancelar</Link>
-      </div>
-    </form>
+    </>
   )
 }

@@ -1,9 +1,75 @@
-import Link from 'next/link'
+import { CreditCard, MoreHorizontal, Pencil } from 'lucide-react'
 import { requireRol } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { AccionEstado } from '@/components/ui/accion-estado'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { DataList, type Column } from '@/components/ui/data-list'
+import { EmptyState } from '@/components/ui/feedback'
+import { PageHeader } from '@/components/ui/layout'
+import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { cambiarEstadoPlan } from './actions'
 
 export const metadata = { title: 'Planes · ORUM' }
+
+type Plan = {
+  id: number
+  nombre: string
+  descripcion: string | null
+  precio: number
+  duracion_meses: number
+  activo: boolean
+}
+
+function formatearPrecio(valor: number): string {
+  return valor.toLocaleString('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  })
+}
+
+const COLUMNAS: ReadonlyArray<Column<Plan>> = [
+  {
+    key: 'nombre',
+    header: 'Plan',
+    primary: true,
+    // Texto plano, sin distintivo de nivel: ORUM vende un único servicio.
+    cell: (p) => p.nombre,
+  },
+  {
+    key: 'descripcion',
+    header: 'Descripción',
+    hideOnMobile: true,
+    cell: (p) => p.descripcion ?? '—',
+  },
+  {
+    key: 'precio',
+    header: 'Precio',
+    numeric: true,
+    width: '150px',
+    cell: (p) => formatearPrecio(p.precio),
+  },
+  {
+    key: 'duracion',
+    header: 'Duración',
+    numeric: true,
+    width: '120px',
+    cell: (p) => `${p.duracion_meses} ${p.duracion_meses === 1 ? 'mes' : 'meses'}`,
+  },
+  {
+    key: 'activo',
+    header: 'Estado',
+    width: '150px',
+    cell: (p) => (
+      // Un plan inactivo NO se puede vender: tiene que distinguirse a simple
+      // vista de uno disponible.
+      <Badge tone={p.activo ? 'success' : 'warning'} size="sm">
+        {p.activo ? 'A la venta' : 'No disponible'}
+      </Badge>
+    ),
+  },
+]
 
 export default async function PlanesPage() {
   await requireRol('super_admin')
@@ -16,59 +82,63 @@ export default async function PlanesPage() {
     .order('nombre')
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Planes de membresía</h1>
-        <Link href="/admin/planes/nuevo" className="orum-button">+ Crear plan</Link>
-      </div>
+    <>
+      <PageHeader
+        title="Planes de membresía"
+        description="Solo los planes a la venta pueden asignarse a un miembro nuevo o a una renovación."
+        actions={
+          <Button href="/admin/planes/nuevo" icon={<CreditCard size={16} />}>
+            Crear plan
+          </Button>
+        }
+      />
 
-      {!planes || planes.length === 0 ? (
-        <div className="orum-card">
-          <p className="orum-muted">Aún no hay planes. Crea el primero para poder vender membresías.</p>
-        </div>
-      ) : (
-        <div className="orum-card" style={{ overflowX: 'auto', padding: 0 }}>
-          <table className="orum-table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Precio</th>
-                <th>Duración</th>
-                <th>Estado</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {planes.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.nombre}</td>
-                  <td>${p.precio.toLocaleString('es-CO')}</td>
-                  <td>{p.duracion_meses} mes(es)</td>
-                  <td>
-                    <span className={`orum-badge ${p.activo ? 'orum-badge--on' : 'orum-badge--off'}`}>
-                      {p.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <Link href={`/admin/planes/${p.id}/editar`} className="orum-button orum-button--secondary">
-                        Editar
-                      </Link>
-                      <form action={cambiarEstadoPlan}>
-                        <input type="hidden" name="id" value={p.id} />
-                        <input type="hidden" name="activar" value={p.activo ? 'false' : 'true'} />
-                        <button type="submit" className={`orum-button ${p.activo ? 'orum-button--danger' : ''}`}>
-                          {p.activo ? 'Desactivar' : 'Activar'}
-                        </button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+      <DataList
+        caption="Planes de membresía"
+        items={(planes ?? []) as Plan[]}
+        columns={COLUMNAS}
+        getKey={(p) => p.id}
+        alwaysShowActions
+        empty={
+          <EmptyState
+            title="Aún no hay planes"
+            description="Crea el primero: sin un plan a la venta no se pueden registrar membresías."
+            actions={
+              <Button href="/admin/planes/nuevo" icon={<CreditCard size={16} />}>
+                Crear plan
+              </Button>
+            }
+          />
+        }
+        actions={(p) => (
+          <>
+            <AccionEstado
+              activo={p.activo}
+              accion={cambiarEstadoPlan}
+              campos={{ id: p.id }}
+              etiquetaDesactivar="Retirar"
+              etiquetaActivar="Poner a la venta"
+            />
+
+            <DropdownMenu
+              trigger={
+                <Button
+                  iconOnly
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`Acciones de ${p.nombre}`}
+                >
+                  <MoreHorizontal size={16} />
+                </Button>
+              }
+            >
+              <MenuItem href={`/admin/planes/${p.id}/editar`} icon={<Pencil size={16} />}>
+                Editar plan
+              </MenuItem>
+            </DropdownMenu>
+          </>
+        )}
+      />
+    </>
   )
 }

@@ -1,0 +1,120 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  /* Un badge nunca debe estirarse. Dentro de un contenedor flex en columna,
+     `align-items: stretch` (el valor por defecto) lo haría ocupar todo el
+     ancho; `fit-content` lo impide sin tocar la alineación transversal. */
+  width: fit-content;
+
+  padding: 3px var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  letter-spacing: var(--t-caption-tracking);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sm {
+  padding: 1px var(--space-2);
+  font-size: var(--t-overline-size);
+  gap: var(--space-1);
+}
+
+/* --- Tonos ----------------------------------------------------------------
+   Fondo atenuado al 8-10% con icono y texto en color pleno. Nunca un bloque
+   saturado: en una lista con cientos de filas, los bloques de color producen
+   fatiga y el badge deja de leerse.                                         */
+
+.neutral {
+  color: var(--text-2);
+  border-color: var(--border);
+  background: var(--surface-sunk);
+}
+
+.success {
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 35%, transparent);
+  background: var(--success-bg);
+}
+
+.warning {
+  color: var(--warning);
+  border-color: color-mix(in srgb, var(--warning) 35%, transparent);
+  background: var(--warning-bg);
+}
+
+.danger {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+  background: var(--danger-bg);
+}
+
+.info {
+  color: var(--info);
+  border-color: color-mix(in srgb, var(--info) 35%, transparent);
+  background: var(--info-bg);
+}
+
+/* Eje de MARCA, no de estado. Solo para el tier del plan. */
+.gold {
+  color: var(--brand);
+  border-color: color-mix(in srgb, var(--brand-edge) 50%, transparent);
+  background: var(--gold-bg);
+}
+
+/* --- Punto de estado ------------------------------------------------------
+   Activo e inactivo NO se distinguen solo por color: el relleno cambia la
+   FORMA (disco lleno vs. anillo hueco), y el texto dice el estado. El color
+   solo refuerza.                                                            */
+
+.punto {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+
+.puntoHueco {
+  background: transparent;
+  border: 2px solid currentColor;
+}
+
+.icono {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
+/* --- Motivo --------------------------------------------------------------- */
+
+.motivo {
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+/* --- Señal de vencimiento próximo -----------------------------------------
+   No es un badge: una membresía a punto de vencer SIGUE ACTIVA. Darle badge
+   propio mentiría sobre el estado.                                          */
+
+.vence {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  font-weight: 500;
+  color: var(--warning);
+}
+
+.venceIcono {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}

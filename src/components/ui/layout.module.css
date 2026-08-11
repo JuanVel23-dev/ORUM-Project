@@ -1,0 +1,134 @@
+/* --- Stack ---------------------------------------------------------------- */
+
+.stack {
+  display: flex;
+  flex-direction: var(--direccion, column);
+  gap: var(--gap, var(--space-4));
+  align-items: var(--alinear, stretch);
+  justify-content: var(--justificar, flex-start);
+  min-width: 0;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+/* --- Grid ----------------------------------------------------------------- */
+
+/*
+  `auto-fit` + `minmax` reparte columnas sin media queries: la rejilla se
+  adapta al ancho disponible en lugar de a puntos de ruptura fijos, así que
+  funciona igual dentro de una sidebar estrecha que a pantalla completa.
+*/
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--min, 240px), 1fr));
+  gap: var(--gap, var(--space-4));
+  min-width: 0;
+}
+
+/* --- Divider -------------------------------------------------------------- */
+
+.divider {
+  border: 0;
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0;
+}
+
+.dividerConTexto {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--text-3);
+
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  letter-spacing: var(--t-overline-tracking);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.dividerConTexto::before,
+.dividerConTexto::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+/* --- Section -------------------------------------------------------------- */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sectionCabecera {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.sectionTitulo {
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* --- PageHeader ----------------------------------------------------------- */
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.pageTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.pageTitulo {
+  font-size: var(--t-display-2-size);
+  line-height: var(--t-display-2-leading);
+  letter-spacing: var(--t-display-2-tracking);
+  font-weight: var(--t-display-2-weight);
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.pageDescripcion {
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+  max-width: 60ch; /* la medida legible manda sobre el ancho del contenedor */
+}
+
+.pageAcciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pageAcciones {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

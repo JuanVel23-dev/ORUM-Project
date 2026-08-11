@@ -3,6 +3,8 @@ import {
   generarNumeroMembresia,
   calcularFechaFin,
   calcularFechaInicioRenovacion,
+  derivarEstadoMembresia,
+  venceProximamente,
 } from './membresias'
 
 describe('generarNumeroMembresia', () => {
@@ -49,3 +51,95 @@ describe('calcularFechaInicioRenovacion', () => {
     expect(calcularFechaInicioRenovacion('2026-07-22', null)).toBe('2026-07-22')
   })
 })
+
+describe('derivarEstadoMembresia', () => {
+  const HOY = '2026-08-06'
+
+  it('activa con fecha futura => activa, con los días que quedan', () => {
+    expect(derivarEstadoMembresia('activa', '2026-09-05', HOY)).toEqual({
+      activa: true,
+      diasRestantes: 30,
+    })
+  })
+
+  it('vence HOY => sigue activa (el día pagado cuenta entero)', () => {
+    expect(derivarEstadoMembresia('activa', HOY, HOY)).toEqual({
+      activa: true,
+      diasRestantes: 0,
+    })
+  })
+
+  it('activa en BD pero con fecha pasada => inactiva por vencida', () => {
+    // El caso que motiva esta función: nada cambia la columna al vencer, así
+    // que sin derivar mostraríamos "Activa" a quien no paga desde mayo.
+    expect(derivarEstadoMembresia('activa', '2026-05-01', HOY)).toEqual({
+      activa: false,
+      motivo: 'vencida',
+    })
+  })
+
+  it('venció ayer => inactiva', () => {
+    expect(derivarEstadoMembresia('activa', '2026-08-05', HOY)).toEqual({
+      activa: false,
+      motivo: 'vencida',
+    })
+  })
+
+  it('cancelada manda aunque le queden días pagados', () => {
+    expect(derivarEstadoMembresia('cancelada', '2026-12-31', HOY)).toEqual({
+      activa: false,
+      motivo: 'cancelada',
+    })
+  })
+
+  it('suspendida manda aunque le queden días pagados', () => {
+    expect(derivarEstadoMembresia('suspendida', '2026-12-31', HOY)).toEqual({
+      activa: false,
+      motivo: 'suspendida',
+    })
+  })
+
+  it('vencida en BD se respeta', () => {
+    expect(derivarEstadoMembresia('vencida', '2026-05-01', HOY)).toEqual({
+      activa: false,
+      motivo: 'vencida',
+    })
+  })
+
+  it('cruza el cambio de año sin desviarse', () => {
+    expect(derivarEstadoMembresia('activa', '2027-01-05', '2026-12-31')).toEqual({
+      activa: true,
+      diasRestantes: 5,
+    })
+  })
+
+  it('cuenta bien sobre un 29 de febrero bisiesto', () => {
+    expect(derivarEstadoMembresia('activa', '2028-03-01', '2028-02-28')).toEqual({
+      activa: true,
+      diasRestantes: 2,
+    })
+  })
+})
+
+describe('venceProximamente', () => {
+  it('avisa dentro del umbral', () => {
+    expect(venceProximamente({ activa: true, diasRestantes: 12 })).toBe(true)
+  })
+
+  it('no avisa si aún falta mucho', () => {
+    expect(venceProximamente({ activa: true, diasRestantes: 90 })).toBe(false)
+  })
+
+  it('el umbral es inclusivo', () => {
+    expect(venceProximamente({ activa: true, diasRestantes: 30 })).toBe(true)
+  })
+
+  it('nunca avisa sobre una membresía inactiva', () => {
+    expect(venceProximamente({ activa: false, motivo: 'vencida' })).toBe(false)
+  })
+
+  it('admite un umbral propio', () => {
+    expect(venceProximamente({ activa: true, diasRestantes: 12 }, 7)).toBe(false)
+  })
+})
+

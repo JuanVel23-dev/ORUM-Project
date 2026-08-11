@@ -1,39 +1,195 @@
 import Link from 'next/link'
-import { getPerfilActual } from '@/lib/auth'
+import {
+  ChevronRight,
+  CreditCard,
+  KeyRound,
+  Store,
+  UserCog,
+  UserPlus,
+  Users,
+} from 'lucide-react'
+import { requireRol } from '@/lib/auth'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Grid, PageHeader, Section, Stack } from '@/components/ui/layout'
+import styles from './inicio.module.css'
+
+export const metadata = { title: 'Inicio · ORUM' }
+
+/** Fecha de hoy en 'YYYY-MM-DD', el formato de las columnas `date`. */
+function hoyISO(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+/**
+ * Cifras del panel.
+ *
+ * Se consultan con `count: 'exact', head: true`: la base de datos devuelve
+ * solo el número, sin traer ninguna fila.
+ *
+ * "Membresías vigentes" filtra por `estado = 'activa'` **y** `fecha_fin >= hoy`,
+ * la misma regla que aplica `derivarEstadoMembresia`. Contar solo por `estado`
+ * daría un número inflado, porque esa columna no se actualiza al vencer.
+ */
+async function obtenerCifras() {
+  const admin = createAdminClient()
+  const hoy = hoyISO()
+
+  const [miembros, vigentes, comercios] = await Promise.all([
+    admin
+      .from('miembros')
+      .select('id', { count: 'exact', head: true })
+      .is('deleted_at', null),
+    admin
+      .from('membresias')
+      .select('id', { count: 'exact', head: true })
+      .eq('estado', 'activa')
+      .gte('fecha_fin', hoy),
+    admin
+      .from('comercios')
+      .select('id', { count: 'exact', head: true })
+      .eq('activo', true)
+      .is('deleted_at', null),
+  ])
+
+  return {
+    miembros: miembros.count ?? 0,
+    vigentes: vigentes.count ?? 0,
+    comercios: comercios.count ?? 0,
+  }
+}
 
 export default async function AdminInicioPage() {
-  // El layout ya garantizó el acceso; aquí solo saludamos con el nombre del rol.
-  const perfil = await getPerfilActual()
-  const esSuperAdmin = perfil?.rolCodigo === 'super_admin'
+  const perfil = await requireRol('super_admin', 'empleado')
+  const esSuperAdmin = perfil.rolCodigo === 'super_admin'
+
+  const cifras = await obtenerCifras()
 
   return (
-    <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-        Bienvenido al Panel de ORUM
-      </h1>
-      <p className="orum-muted" style={{ marginBottom: '1.5rem' }}>
-        Rol actual: <strong>{perfil?.rolNombre}</strong>
-      </p>
+    <>
+      <PageHeader
+        title="Panel de ORUM"
+        description={`Sesión iniciada como ${perfil.rolNombre.toLowerCase()}.`}
+      />
 
-      {esSuperAdmin ? (
-        <div className="orum-card" style={{ maxWidth: 480 }}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-            Gestión de usuarios
-          </h2>
-          <p className="orum-muted" style={{ marginBottom: '1rem' }}>
-            Crea y administra empleados, comercios y otros administradores.
-          </p>
-          <Link href="/admin/usuarios" className="orum-button">
-            Ir a usuarios
-          </Link>
-        </div>
-      ) : (
-        <div className="orum-card" style={{ maxWidth: 480 }}>
-          <p className="orum-muted">
-            Próximamente podrás registrar clientes y vender membresías desde aquí.
-          </p>
-        </div>
-      )}
-    </div>
+      <Stack gap={7}>
+        {/*
+          El flujo estrella, siempre a un clic. Para un empleado es lo que hace
+          todo el día; para el administrador, la acción más frecuente.
+        */}
+        <Card variant="brand" padding="lg" className={styles.destacado}>
+          <div className={styles.destacadoCuerpo}>
+            <div className={styles.destacadoTextos}>
+              <h2 className={styles.destacadoTitulo}>Registrar cliente y vender membresía</h2>
+              <p className={styles.destacadoDescripcion}>
+                Crea el cliente, su cuenta de acceso y su primera membresía en un solo
+                flujo. La contraseña se genera automáticamente y se muestra una única vez.
+              </p>
+            </div>
+
+            <Button href="/admin/miembros/nuevo" size="lg" icon={<UserPlus size={17} />}>
+              Empezar
+            </Button>
+          </div>
+        </Card>
+
+        <Section title="Estado del club">
+          <Grid min="200px">
+            <Card>
+              <div className={styles.cifra}>
+                <span className={styles.cifraEtiqueta}>Miembros registrados</span>
+                <span className={styles.cifraValor}>
+                  {cifras.miembros.toLocaleString('es-CO')}
+                </span>
+              </div>
+            </Card>
+
+            <Card>
+              <div className={styles.cifra}>
+                <span className={styles.cifraEtiqueta}>Membresías vigentes</span>
+                <span className={styles.cifraValor}>
+                  {cifras.vigentes.toLocaleString('es-CO')}
+                </span>
+                <span className={styles.cifraNota}>Al día de hoy</span>
+              </div>
+            </Card>
+
+            <Card>
+              <div className={styles.cifra}>
+                <span className={styles.cifraEtiqueta}>Comercios activos</span>
+                <span className={styles.cifraValor}>
+                  {cifras.comercios.toLocaleString('es-CO')}
+                </span>
+              </div>
+            </Card>
+          </Grid>
+        </Section>
+
+        <Section title="Accesos">
+          <Grid min="280px">
+            <Acceso
+              href="/admin/miembros"
+              icon={<Users />}
+              titulo="Miembros"
+              descripcion="Buscar, consultar estado y renovar"
+            />
+
+            {esSuperAdmin && (
+              <>
+                <Acceso
+                  href="/admin/comercios"
+                  icon={<Store />}
+                  titulo="Comercios aliados"
+                  descripcion="Sucursales y promociones"
+                />
+                <Acceso
+                  href="/admin/planes"
+                  icon={<CreditCard />}
+                  titulo="Planes de membresía"
+                  descripcion="Precios y vigencias"
+                />
+                <Acceso
+                  href="/admin/usuarios"
+                  icon={<UserCog />}
+                  titulo="Usuarios"
+                  descripcion="Empleados y administradores"
+                />
+              </>
+            )}
+
+            <Acceso
+              href="/admin/cuenta/password"
+              icon={<KeyRound />}
+              titulo="Mi contraseña"
+              descripcion="Cambiar la clave de acceso"
+            />
+          </Grid>
+        </Section>
+      </Stack>
+    </>
+  )
+}
+
+function Acceso({
+  href,
+  icon,
+  titulo,
+  descripcion,
+}: {
+  href: string
+  icon: React.ReactNode
+  titulo: string
+  descripcion: string
+}) {
+  return (
+    <Link href={href} className={styles.acceso}>
+      <span className={styles.accesoIcono}>{icon}</span>
+      <span className={styles.accesoTextos}>
+        <span className={styles.accesoTitulo}>{titulo}</span>
+        <span className={styles.accesoDescripcion}>{descripcion}</span>
+      </span>
+      <ChevronRight size={17} className={styles.flecha} />
+    </Link>
   )
 }

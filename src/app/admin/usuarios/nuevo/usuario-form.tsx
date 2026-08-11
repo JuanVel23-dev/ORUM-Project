@@ -1,133 +1,133 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import Link from 'next/link'
+import { UserPlus } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Copiar } from '@/components/ui/copiar'
+import { Field } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Stack } from '@/components/ui/layout'
+import { SegmentedControl } from '@/components/ui/segmented'
 import { crearUsuario, type CrearUsuarioState } from '../actions'
+import styles from '../../miembros/formulario.module.css'
 
 const estadoInicial: CrearUsuarioState = {}
 
+type Tipo = 'empleado' | 'super_admin'
+
 export function UsuarioForm() {
   const [state, formAction, pending] = useActionState(crearUsuario, estadoInicial)
-  const [tipo, setTipo] = useState<'empleado' | 'super_admin'>('empleado')
-  const [copiado, setCopiado] = useState(false)
+  const [tipo, setTipo] = useState<Tipo>('empleado')
 
-  // Pantalla de éxito: mostramos la contraseña generada UNA sola vez.
   if (state.ok && state.password) {
-    return (
-      <div className="orum-card">
-        <p className="orum-alert orum-alert--success">✓ Usuario creado correctamente.</p>
-        <p style={{ marginBottom: '0.75rem' }}>
-          Comparte estos datos con la persona. La contraseña <strong>no se volverá a mostrar</strong>;
-          el usuario podrá cambiarla después.
-        </p>
-        <div className="orum-field">
-          <span className="orum-label">Correo</span>
-          <input className="orum-input" readOnly value={state.email} />
-        </div>
-        <div className="orum-field">
-          <span className="orum-label">Contraseña temporal</span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input
-              className="orum-input"
-              readOnly
-              value={state.password}
-              style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}
-            />
-            <button
-              type="button"
-              className="orum-button orum-button--secondary"
-              onClick={() => {
-                navigator.clipboard?.writeText(state.password ?? '')
-                setCopiado(true)
-                setTimeout(() => setCopiado(false), 2000)
-              }}
-            >
-              {copiado ? '¡Copiado!' : 'Copiar'}
-            </button>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-          <Link href="/admin/usuarios" className="orum-button">
-            Ir a la lista
-          </Link>
-          <Link href="/admin/usuarios/nuevo" className="orum-button orum-button--secondary">
-            Crear otro
-          </Link>
-        </div>
-      </div>
-    )
+    return <Credenciales estado={state} />
   }
 
   return (
-    <form action={formAction} className="orum-card">
-      {state.error && (
-        <p className="orum-alert orum-alert--error" role="alert">
-          {state.error}
-        </p>
-      )}
+    <>
+      <form action={formAction} className={styles.formulario} noValidate>
+        {state.error && <Alert tone="danger">{state.error}</Alert>}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="tipo">
-          Tipo de usuario
-        </label>
-        <select
-          id="tipo"
-          name="tipo"
-          className="orum-select"
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value as typeof tipo)}
-        >
-          <option value="empleado">Empleado</option>
-          <option value="super_admin">Administrador</option>
-        </select>
-      </div>
+        {/* El tipo de usuario es una decisión de permisos: se elige entre dos
+            opciones visibles a la vez, no escondidas en un desplegable. */}
+        <Field label="Tipo de usuario">
+          <input type="hidden" name="tipo" value={tipo} />
+          <SegmentedControl
+            options={[
+              { value: 'empleado', label: 'Empleado' },
+              { value: 'super_admin', label: 'Administrador' },
+            ]}
+            value={tipo}
+            onChange={setTipo}
+            ariaLabel="Tipo de usuario"
+            size="md"
+          />
+        </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="email">
-          Correo electrónico (para iniciar sesión)
-        </label>
-        <input id="email" name="email" type="email" className="orum-input" required />
-      </div>
+        {tipo === 'super_admin' && (
+          <Alert tone="warning" title="Acceso completo">
+            Un administrador puede crear otros usuarios, gestionar comercios y cambiar los
+            planes de membresía.
+          </Alert>
+        )}
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="nombres">
-            Nombres
-          </label>
-          <input id="nombres" name="nombres" className="orum-input" required />
+        <Stack gap={5}>
+          <Field
+            label="Correo electrónico"
+            help="Será su usuario para iniciar sesión en el panel."
+          >
+            <Input name="email" type="email" autoComplete="email" required autoFocus />
+          </Field>
+
+          <div className={styles.pareja}>
+            <Field label="Nombres">
+              <Input name="nombres" autoComplete="given-name" required />
+            </Field>
+            <Field label="Apellidos">
+              <Input name="apellidos" autoComplete="family-name" required />
+            </Field>
+          </div>
+
+          <div className={styles.pareja}>
+            <Field label="Cédula" help="Sin puntos ni espacios.">
+              <Input name="cedula" numeric inputMode="numeric" required />
+            </Field>
+            <Field label="Teléfono" optional>
+              <Input name="telefono" type="tel" numeric inputMode="tel" />
+            </Field>
+          </div>
+
+          <p className={styles.nota}>
+            Al guardar se genera una contraseña segura. Se mostrará una sola vez en la
+            siguiente pantalla.
+          </p>
+        </Stack>
+
+        <div className={styles.acciones}>
+          <Button type="submit" loading={pending} icon={<UserPlus size={16} />}>
+            Crear usuario
+          </Button>
+          <Button href="/admin/usuarios" variant="secondary">
+            Cancelar
+          </Button>
         </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="apellidos">
-            Apellidos
-          </label>
-          <input id="apellidos" name="apellidos" className="orum-input" required />
+      </form>
+    </>
+  )
+}
+
+function Credenciales({ estado }: { estado: CrearUsuarioState }) {
+  return (
+    <>
+      <div className={styles.credenciales}>
+        <Alert tone="success" title="Usuario creado" />
+
+        <Alert tone="warning" title="Comparte estos datos ahora">
+          La contraseña no se vuelve a mostrar. El usuario podrá cambiarla desde su cuenta.
+        </Alert>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Correo de acceso</span>
+          <Copiar valor={estado.email ?? ''} label="Copiar correo">
+            <span className={styles.credencialValor}>{estado.email}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Contraseña temporal</span>
+          <Copiar valor={estado.password ?? ''} label="Copiar contraseña temporal">
+            <span className={styles.credencialValor}>{estado.password}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.acciones}>
+          <Button href="/admin/usuarios">Ir a la lista</Button>
+          <Button href="/admin/usuarios/nuevo" variant="secondary">
+            Crear otro
+          </Button>
         </div>
       </div>
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="cedula">
-          Cédula
-        </label>
-        <input id="cedula" name="cedula" className="orum-input" required />
-      </div>
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="telefono">
-          Teléfono (opcional)
-        </label>
-        <input id="telefono" name="telefono" className="orum-input" />
-      </div>
-
-      <p className="orum-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
-        El sistema generará una contraseña segura automáticamente y te la mostrará al terminar.
-      </p>
-
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <button type="submit" className="orum-button" disabled={pending}>
-          {pending ? 'Creando…' : 'Crear usuario'}
-        </button>
-        <Link href="/admin/usuarios" className="orum-button orum-button--secondary">
-          Cancelar
-        </Link>
-      </div>
-    </form>
+    </>
   )
 }

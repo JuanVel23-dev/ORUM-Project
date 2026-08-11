@@ -1,0 +1,621 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+/* ==========================================================================
+   BARRA LATERAL  ·  ≥768px
+   ========================================================================== */
+
+/*
+  El ancho vive en UNA variable heredada, que consumen a la vez la barra y el
+  padding de la columna: es imposible que se desincronicen.
+
+  SOBRE ANIMAR `width`
+  --------------------
+  La regla general del proyecto es animar solo `transform` y `opacity`, porque
+  todo lo demás recalcula layout en cada fotograma. Aquí se hace una excepción
+  DELIBERADA y acotada: es un único elemento, la dispara el usuario a mano y
+  dura 260ms. El coste es despreciable y la alternativa —un salto seco del
+  layout— se percibe peor.
+
+  No es un descuido: es la excepción, y está justificada aquí para que nadie
+  la copie a una lista o a un gesto, donde sí destrozaría el rendimiento.
+*/
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-drawer);
+
+  display: none;
+  flex-direction: column;
+  width: var(--ancho-lateral);
+
+  /*
+    Contenedor de consulta. El contenido de la barra reacciona a SU ancho
+    real, no al del viewport. Antes había dos juegos de reglas paralelos —uno
+    para "rail por breakpoint" y otro para "rail por preferencia"— que podían
+    desincronizarse; ahora hay uno solo y no puede.
+  */
+  container-type: inline-size;
+  container-name: lateral;
+
+  /* Capa de material: el contenido pasa por debajo, no queda amputado por
+     una franja opaca. */
+  background: var(--material);
+  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  border-right: 1px solid var(--border-subtle);
+
+  /* `@property` permite interpolar la variable, así que barra y columna se
+     animan en el mismo fotograma. */
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex;
+  }
+}
+
+/*
+  Entre 768 y 1023 el rail es obligatorio: no hay ancho que regalar. Esto pisa
+  la preferencia del usuario a propósito, de ahí el `!important` — es la única
+  forma de que una regla de hoja de estilos gane a la variable en línea.
+*/
+@media (max-width: 1023px) {
+  .shell {
+    --ancho-lateral: var(--sidebar-w-rail) !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .sidebar {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+
+/* --- Marca ---------------------------------------------------------------- */
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  height: var(--topbar-h);
+  padding: 0 var(--space-4);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.wordmark {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+
+  /* El oro como material. Es la única superficie dorada del cromo. */
+  background: var(--gold-sheen);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* --- Navegación ----------------------------------------------------------- */
+
+.nav {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-2) var(--space-3) var(--space-4);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.grupoTitulo {
+  padding: 0 var(--space-3) var(--space-2);
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  font-weight: 500;
+  color: var(--text-2);
+  white-space: nowrap;
+
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.item:hover {
+  color: var(--text);
+}
+
+.item[data-activo='true'] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.itemIcono {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.itemTexto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fondo del ítem activo. Es un elemento compartido: se DESLIZA de un destino
+   a otro en vez de parpadear, para no perder de dónde venía la selección. */
+.indicador {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  border-radius: var(--radius-sm);
+  background: var(--surface-hover);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Filo dorado a la izquierda del destino activo: la única marca de marca
+   dentro de la navegación. */
+.indicador::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  border-radius: var(--radius-full);
+  background: var(--brand-edge);
+}
+
+/* --- Pie de la barra lateral ----------------------------------------------
+   Antes había cuatro controles en fila (avatar, perfil, cerrar sesión y
+   colapsar). En rail eso son ~144px metidos en una caja de 72: los botones se
+   salían de la barra. Ahora el avatar ES el disparador de un menú que
+   contiene correo, rol, contraseña y cerrar sesión — un control en vez de
+   tres, y encima menos cosas compitiendo por la atención.               */
+
+.piesidebar {
+  flex-shrink: 0;
+  padding: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.perfilBoton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+
+  padding: var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.perfilBoton:hover {
+  background: var(--surface-hover);
+}
+
+.perfilBoton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.piePerfil {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.pieNombre {
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pieRol {
+  font-size: var(--t-overline-size);
+  letter-spacing: var(--t-overline-tracking);
+  text-transform: uppercase;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colapsar {
+  display: grid;
+  place-items: center;
+
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.colapsar:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.colapsar:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   MODO RAIL  ·  el contenido reacciona al ancho REAL de la barra
+   --------------------------------------------------------------------------
+   Una sola definición, sea el rail por preferencia del usuario o impuesto por
+   el breakpoint. Es imposible que los dos casos se desincronicen porque no
+   hay dos casos.
+   ========================================================================== */
+
+@container lateral (max-width: 140px) {
+  .marcaTexto,
+  .grupoTitulo,
+  .itemTexto,
+  .piePerfil {
+    display: none;
+  }
+
+  .item,
+  .marca {
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* En vertical caben los dos controles sin desbordar los 72px. */
+  .piesidebar {
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-2);
+  }
+
+  .perfilBoton {
+    flex: none;
+    justify-content: center;
+    padding: var(--space-2);
+  }
+}
+
+/* Por debajo de 1024 el rail es forzado: ofrecer el botón de colapsar sería
+   ofrecer un control que no puede hacer nada. */
+@media (max-width: 1023px) {
+  .colapsar {
+    display: none;
+  }
+}
+
+/* --- Menú del perfil ------------------------------------------------------- */
+
+.menuCabecera {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: var(--space-2);
+  min-width: 0;
+}
+
+.menuCorreo {
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.menuRol {
+  font-size: var(--t-overline-size);
+  letter-spacing: var(--t-overline-tracking);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* ==========================================================================
+   COLUMNA PRINCIPAL
+   ========================================================================== */
+
+.columna {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  transition: padding-left var(--dur-base) var(--ease-out);
+}
+
+/* La columna consume la MISMA variable que la barra: no pueden desincronizarse. */
+@media (min-width: 768px) {
+  .columna {
+    padding-left: var(--ancho-lateral);
+  }
+}
+
+/* --- Barra superior ------------------------------------------------------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  min-height: var(--topbar-h);
+  padding: var(--space-2) var(--space-4);
+  padding-top: max(var(--space-2), env(safe-area-inset-top, 0px));
+
+  background: var(--material);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+}
+
+/*
+  Efecto de borde de scroll en vez de una línea divisoria de 1px: el contenido
+  se desvanece justo donde se cruza con el cromo flotante, que es más limpio
+  que un filo duro.
+*/
+.topbar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -16px;
+  height: 16px;
+  pointer-events: none;
+
+  background: linear-gradient(to bottom, var(--bg), transparent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .topbar {
+    background: var(--surface);
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}
+
+.marcaMovil {
+  display: flex;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .marcaMovil {
+    display: none;
+  }
+}
+
+.buscador {
+  flex: 1;
+  max-width: 460px;
+}
+
+.topbarAcciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.themeToggleEscritorio {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .themeToggleEscritorio {
+    display: block;
+  }
+}
+
+/* --- Contenido ------------------------------------------------------------ */
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-10);
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding: var(--space-7) var(--space-6) var(--space-11);
+  }
+}
+
+/* Deja hueco a la tab bar para que no tape el final del contenido. */
+@media (max-width: 767px) {
+  .main {
+    padding-bottom: calc(
+      var(--tabbar-h) + var(--space-8) + env(safe-area-inset-bottom, 0px)
+    );
+  }
+}
+
+/* ==========================================================================
+   BARRA INFERIOR  ·  <768px
+   ========================================================================== */
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-header);
+
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+
+  /* `env(safe-area-inset-bottom)` mantiene los destinos por encima de la
+     barra de gestos del iPhone. Requiere `viewport-fit=cover`. */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+  background: var(--material);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+  border-top: 1px solid var(--border-subtle);
+}
+
+@media (min-width: 768px) {
+  .tabbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .tabbar {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+
+  min-height: var(--tabbar-h);
+  padding: var(--space-2) var(--space-1);
+  border: none;
+  background: none;
+
+  font-family: var(--font-sans);
+  font-size: var(--t-overline-size);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-3);
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.tab[data-activo='true'] {
+  color: var(--text);
+}
+
+.tab:active {
+  color: var(--text-2);
+}
+
+.tabIcono {
+  width: 21px;
+  height: 21px;
+}
+
+/* Barra dorada superior que se desliza entre pestañas. */
+.tabIndicador {
+  position: absolute;
+  top: 0;
+  left: 22%;
+  right: 22%;
+  height: 2px;
+  border-radius: 0 0 var(--radius-full) var(--radius-full);
+  background: var(--gold-sheen);
+}
+
+/* --- Hoja "Más" ----------------------------------------------------------- */
+
+.masLista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.masItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-body-size);
+  font-weight: 500;
+  color: var(--text);
+
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.masItem:hover {
+  background: var(--surface-hover);
+}
+
+.masItem[data-activo='true'] {
+  background: var(--surface-hover);
+}
+
+.masItemIcono {
+  width: 19px;
+  height: 19px;
+  color: var(--text-3);
+  flex-shrink: 0;
+}

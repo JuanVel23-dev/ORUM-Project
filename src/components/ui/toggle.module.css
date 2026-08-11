@@ -1,0 +1,177 @@
+/* Switch, Checkbox y Radio. Los tres envuelven un input nativo oculto:
+   así heredan gratis el rol, el estado, el foco y la activación por teclado. */
+
+.entrada {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.fila {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fila:has(.entrada:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.titulo {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.descripcion {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+/* --- Switch --------------------------------------------------------------- */
+
+.pista {
+  position: relative;
+  flex-shrink: 0;
+
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+
+.fila:has(.entrada:checked) .pista {
+  background: var(--success);
+}
+
+.fila:has(.entrada:focus-visible) .pista {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.pulgar {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  box-shadow:
+    0 2px 4px rgba(10, 10, 12, 0.2),
+    0 0 1px rgba(10, 10, 12, 0.3);
+
+  transition:
+    translate var(--dur-base) var(--ease-out),
+    width var(--dur-fast) var(--ease-out);
+}
+
+.fila:has(.entrada:checked) .pulgar {
+  translate: 18px 0;
+}
+
+/* El pulgar se estira al presionar, como en iOS: acusa recibo del gesto
+   antes incluso de que el interruptor cambie de estado. */
+.fila:active .pulgar {
+  width: 24px;
+}
+
+.fila:has(.entrada:checked):active .pulgar {
+  translate: 14px 0;
+}
+
+/* --- Checkbox y Radio ----------------------------------------------------- */
+
+.caja {
+  position: relative;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
+
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-instant) var(--ease-out);
+}
+
+.cuadrada {
+  border-radius: var(--radius-xs);
+}
+
+.redonda {
+  border-radius: var(--radius-full);
+}
+
+.fila:hover .caja {
+  border-color: var(--text-3);
+}
+
+.fila:active .caja {
+  scale: 0.92;
+}
+
+.fila:has(.entrada:checked) .caja {
+  background: var(--action);
+  border-color: var(--action);
+}
+
+.fila:has(.entrada:focus-visible) .caja {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.marca {
+  width: 13px;
+  height: 13px;
+  color: var(--action-fg);
+
+  /* La marca se dibuja: no aparece de golpe. */
+  stroke-dasharray: 22;
+  stroke-dashoffset: 22;
+  transition: stroke-dashoffset var(--dur-base) var(--ease-out);
+}
+
+.fila:has(.entrada:checked) .marca {
+  stroke-dashoffset: 0;
+}
+
+.punto {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--action-fg);
+
+  scale: 0;
+  transition: scale var(--dur-base) var(--ease-out);
+}
+
+.fila:has(.entrada:checked) .punto {
+  scale: 1;
+}

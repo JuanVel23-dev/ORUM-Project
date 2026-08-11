@@ -1,0 +1,35 @@
+.pantalla {
+  position: fixed;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+  padding-top: max(var(--space-6), env(safe-area-inset-top, 0px));
+  padding-bottom: max(var(--space-6), env(safe-area-inset-bottom, 0px));
+
+  background: var(--bg);
+  color: var(--text);
+  overflow-y: auto;
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 420px;
+  text-align: center;
+}
+
+.wordmark {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  padding-left: 0.22em;
+
+  background: var(--gold-sheen);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}

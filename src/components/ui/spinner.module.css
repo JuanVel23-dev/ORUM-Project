@@ -1,0 +1,34 @@
+.spinner {
+  display: block;
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+.pista {
+  opacity: 0.22;
+}
+
+.arco {
+  transform-origin: center;
+  animation: girar 720ms linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Tamaños */
+.sm {
+  width: 14px;
+  height: 14px;
+}
+.md {
+  width: 18px;
+  height: 18px;
+}
+.lg {
+  width: 24px;
+  height: 24px;
+}

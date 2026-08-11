@@ -1,139 +1,199 @@
 'use client'
 
 import { useActionState, useState } from 'react'
-import Link from 'next/link'
+import { UserPlus } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Copiar } from '@/components/ui/copiar'
+import { Field } from '@/components/ui/field'
+import { Input, Select } from '@/components/ui/input'
+import { Divider, Section, Stack } from '@/components/ui/layout'
 import { registrarMiembro, type RegistrarMiembroState } from './actions'
+import styles from './formulario.module.css'
 
 type Opcion = { id: number; nombre: string }
 type PlanOpcion = { id: number; nombre: string; precio: number }
 
 const estadoInicial: RegistrarMiembroState = {}
 
-export function MiembroForm({ ciudades, planes }: { ciudades: Opcion[]; planes: PlanOpcion[] }) {
+export function MiembroForm({
+  ciudades,
+  planes,
+}: {
+  ciudades: Opcion[]
+  planes: PlanOpcion[]
+  /**
+   * Sin tarjeta contenedora. Dentro de un overlay la superficie ya la pone el
+   * propio overlay: envolver otra vez daría una tarjeta sobre otra.
+   */
+}) {
   const [state, formAction, pending] = useActionState(registrarMiembro, estadoInicial)
-  const [precio, setPrecio] = useState<string>(planes[0] ? String(planes[0].precio) : '')
-  const [copiado, setCopiado] = useState(false)
+  const [precio, setPrecio] = useState(planes[0] ? String(planes[0].precio) : '')
 
+  const sinPlanes = planes.length === 0
+
+  // Registro completado: la pantalla cambia por entero a entregar credenciales.
   if (state.ok && state.numero && state.password) {
-    return (
-      <div className="orum-card">
-        <p className="orum-alert orum-alert--success">✓ Miembro {state.nombre} registrado.</p>
-        <p style={{ marginBottom: '0.75rem' }}>
-          Entrega estos datos al cliente. La contraseña <strong>no se volverá a mostrar</strong>.
-        </p>
-        <div className="orum-field">
-          <span className="orum-label">Número de membresía</span>
-          <input className="orum-input" readOnly value={state.numero}
-            style={{ fontFamily: 'var(--font-geist-mono, monospace)' }} />
-        </div>
-        <div className="orum-field">
-          <span className="orum-label">Contraseña temporal</span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input className="orum-input" readOnly value={state.password}
-              style={{ fontFamily: 'var(--font-geist-mono, monospace)' }} />
-            <button type="button" className="orum-button orum-button--secondary"
-              onClick={() => {
-                navigator.clipboard?.writeText(state.password ?? '')
-                setCopiado(true)
-                setTimeout(() => setCopiado(false), 2000)
-              }}>
-              {copiado ? '¡Copiado!' : 'Copiar'}
-            </button>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-          <Link href="/admin/miembros" className="orum-button">Ir a la lista</Link>
-          <Link href="/admin/miembros/nuevo" className="orum-button orum-button--secondary">Registrar otro</Link>
-        </div>
-      </div>
-    )
+    return <Credenciales estado={state} />
   }
 
+
   return (
-    <form action={formAction} className="orum-card">
-      {state.error && <p className="orum-alert orum-alert--error" role="alert">{state.error}</p>}
+    <>
+      <form action={formAction} className={styles.formulario} noValidate>
+        {state.error && <Alert tone="danger">{state.error}</Alert>}
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="nombres">Nombres</label>
-          <input id="nombres" name="nombres" className="orum-input" required />
-        </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="apellidos">Apellidos</label>
-          <input id="apellidos" name="apellidos" className="orum-input" required />
-        </div>
-      </div>
+        {sinPlanes && (
+          <Alert tone="warning" title="No hay planes activos">
+            Activa al menos un plan de membresía antes de registrar un miembro.
+          </Alert>
+        )}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="cedula">Cédula</label>
-        <input id="cedula" name="cedula" className="orum-input" required />
-      </div>
+        <Section title="Datos del cliente">
+          <Stack gap={5}>
+            <div className={styles.pareja}>
+              <Field label="Nombres">
+                <Input name="nombres" autoComplete="given-name" required autoFocus />
+              </Field>
+              <Field label="Apellidos">
+                <Input name="apellidos" autoComplete="family-name" required />
+              </Field>
+            </div>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="correo">Correo electrónico</label>
-        <input id="correo" name="correo" type="email" className="orum-input" required />
-      </div>
+            <div className={styles.pareja}>
+              <Field label="Cédula" help="Sin puntos ni espacios.">
+                <Input name="cedula" numeric inputMode="numeric" required />
+              </Field>
+              <Field label="Teléfono" optional>
+                <Input name="telefono" type="tel" numeric inputMode="tel" />
+              </Field>
+            </div>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="telefono">Teléfono (opcional)</label>
-          <input id="telefono" name="telefono" className="orum-input" />
-        </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="ciudad_id">Ciudad (opcional)</label>
-          <select id="ciudad_id" name="ciudad_id" className="orum-select" defaultValue="">
-            <option value="">— Sin ciudad —</option>
-            {ciudades.map((c) => (
-              <option key={c.id} value={c.id}>{c.nombre}</option>
-            ))}
-          </select>
-        </div>
-      </div>
+            <Field
+              label="Correo electrónico"
+              help="Será su usuario de acceso al portal de miembros."
+            >
+              <Input name="correo" type="email" autoComplete="email" required />
+            </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="direccion">Dirección (opcional)</label>
-        <input id="direccion" name="direccion" className="orum-input" />
-      </div>
+            <div className={styles.pareja}>
+              <Field label="Ciudad" optional>
+                <Select name="ciudad_id" defaultValue="">
+                  <option value="">Sin ciudad</option>
+                  {ciudades.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Dirección" optional>
+                <Input name="direccion" autoComplete="street-address" />
+              </Field>
+            </div>
+          </Stack>
+        </Section>
 
-      <hr style={{ border: 0, borderTop: '1px solid var(--orum-border)', margin: '1rem 0' }} />
+        <Divider />
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="plan_id">Plan de membresía</label>
-          <select
-            id="plan_id"
-            name="plan_id"
-            className="orum-select"
-            required
-            defaultValue={planes[0]?.id ?? ''}
-            onChange={(e) => {
-              const p = planes.find((x) => x.id === Number(e.target.value))
-              if (p) setPrecio(String(p.precio))
-            }}
+        <Section title="Primera membresía">
+          <Stack gap={5}>
+            <div className={styles.pareja}>
+              <Field label="Plan">
+                <Select
+                  name="plan_id"
+                  required
+                  defaultValue={planes[0]?.id ?? ''}
+                  disabled={sinPlanes}
+                  onChange={(e) => {
+                    const plan = planes.find((p) => p.id === Number(e.target.value))
+                    if (plan) setPrecio(String(plan.precio))
+                  }}
+                >
+                  {planes.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nombre} — {p.precio.toLocaleString('es-CO')}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+
+              <Field label="Precio pagado" help="Ajústalo si hubo un descuento.">
+                <Input
+                  name="precio_pagado"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  numeric
+                  required
+                  value={precio}
+                  onChange={(e) => setPrecio(e.target.value)}
+                  disabled={sinPlanes}
+                />
+              </Field>
+            </div>
+
+            <p className={styles.nota}>
+              Al guardar se generan el número de membresía y una contraseña segura. Se
+              mostrarán una sola vez en la siguiente pantalla.
+            </p>
+          </Stack>
+        </Section>
+
+        <div className={styles.acciones}>
+          <Button
+            type="submit"
+            loading={pending}
+            disabled={sinPlanes}
+            icon={<UserPlus size={16} />}
           >
-            {planes.length === 0 && <option value="">— No hay planes activos —</option>}
-            {planes.map((p) => (
-              <option key={p.id} value={p.id}>{p.nombre} (${p.precio.toLocaleString('es-CO')})</option>
-            ))}
-          </select>
+            Registrar miembro
+          </Button>
+
+          <Button href="/admin/miembros" variant="secondary">
+            Cancelar
+          </Button>
         </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="precio_pagado">Precio pagado</label>
-          <input id="precio_pagado" name="precio_pagado" type="number" min="0" step="0.01"
-            className="orum-input" required value={precio} onChange={(e) => setPrecio(e.target.value)} />
+      </form>
+    </>
+  )
+}
+
+/* ========================================================================== */
+
+function Credenciales({ estado }: { estado: RegistrarMiembroState }) {
+  return (
+    <>
+      <div className={styles.credenciales}>
+        <Alert tone="success" title={`${estado.nombre} quedó registrado`} />
+
+        <Alert tone="warning" title="Entrega estos datos ahora">
+          La contraseña no se vuelve a mostrar. Si se pierde, habrá que generar una
+          nueva.
+        </Alert>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Número de membresía</span>
+          <Copiar valor={estado.numero!} label="Copiar número de membresía">
+            <span className={styles.credencialValor}>{estado.numero}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Contraseña temporal</span>
+          <Copiar valor={estado.password!} label="Copiar contraseña temporal">
+            <span className={styles.credencialValor}>{estado.password}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.acciones}>
+          <Button href="/admin/miembros">Ir a la lista</Button>
+          <Button href="/admin/miembros/nuevo" variant="secondary">
+            Registrar otro
+          </Button>
         </div>
       </div>
-
-      <p className="orum-muted" style={{ fontSize: '0.85rem', margin: '0.5rem 0 1rem' }}>
-        Se generará el número de membresía y una contraseña segura; se mostrarán al terminar.
-      </p>
-
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <button type="submit" className="orum-button" disabled={pending || planes.length === 0}>
-          {pending ? 'Registrando…' : 'Registrar miembro'}
-        </button>
-        <Link href="/admin/miembros" className="orum-button orum-button--secondary">Cancelar</Link>
-      </div>
-    </form>
+    </>
   )
 }

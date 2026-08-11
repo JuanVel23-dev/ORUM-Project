@@ -1,10 +1,17 @@
 'use client'
 
 import { useActionState } from 'react'
-import Link from 'next/link'
+import { Save } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Field } from '@/components/ui/field'
+import { Input, Select } from '@/components/ui/input'
+import { Stack } from '@/components/ui/layout'
 import { editarComercio, type EditarComercioState } from '../../actions'
+import styles from '../../../miembros/formulario.module.css'
 
 type Opcion = { id: number; nombre: string }
+
 type ComercioInicial = {
   id: number
   perfil_id: string | null
@@ -13,6 +20,7 @@ type ComercioInicial = {
   marca_id: number | null
   categoria_id: number | null
   logo_url: string | null
+  /** Correo real de Auth, o cadena vacía si no tiene cuenta. */
   correo: string
 }
 
@@ -30,62 +38,78 @@ export function EditarComercioForm({
   const [state, formAction, pending] = useActionState(editarComercio, estadoInicial)
 
   return (
-    <form action={formAction} className="orum-card">
-      {state.error && <p className="orum-alert orum-alert--error" role="alert">{state.error}</p>}
+    <>
+      <form action={formAction} className={styles.formulario} noValidate>
+        {state.error && <Alert tone="danger">{state.error}</Alert>}
 
-      <input type="hidden" name="id" value={comercio.id} />
-      <input type="hidden" name="perfil_id" value={comercio.perfil_id ?? ''} />
-      <input type="hidden" name="correo_original" value={comercio.correo} />
+        <input type="hidden" name="id" value={comercio.id} />
+        <input type="hidden" name="perfil_id" value={comercio.perfil_id ?? ''} />
+        <input type="hidden" name="correo_original" value={comercio.correo} />
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="correo">Correo electrónico</label>
-        <input
-          id="correo"
-          name="correo"
-          type="email"
-          className="orum-input"
-          defaultValue={comercio.correo === '—' ? '' : comercio.correo}
-        />
-      </div>
+        <Stack gap={5}>
+          <Field
+            label="Correo electrónico"
+            help="Cambiarlo también cambia su usuario de acceso."
+          >
+            <Input
+              name="correo"
+              type="email"
+              defaultValue={comercio.correo}
+              autoComplete="email"
+            />
+          </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="nombre">Nombre</label>
-        <input id="nombre" name="nombre" className="orum-input" required defaultValue={comercio.nombre} />
-      </div>
+          <Field label="Nombre">
+            <Input name="nombre" defaultValue={comercio.nombre} required autoFocus />
+          </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="descripcion">Descripción (opcional)</label>
-        <input id="descripcion" name="descripcion" className="orum-input" defaultValue={comercio.descripcion ?? ''} />
-      </div>
+          <Field label="Descripción" optional>
+            <Input name="descripcion" defaultValue={comercio.descripcion ?? ''} />
+          </Field>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="marca_id">Marca (opcional)</label>
-          <select id="marca_id" name="marca_id" className="orum-select" defaultValue={comercio.marca_id ?? ''}>
-            <option value="">— Sin marca —</option>
-            {marcas.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
-          </select>
+          <div className={styles.pareja}>
+            <Field label="Marca" optional>
+              <Select name="marca_id" defaultValue={comercio.marca_id ?? ''}>
+                <option value="">Sin marca</option>
+                {marcas.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.nombre}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+
+            <Field label="Categoría" optional>
+              <Select name="categoria_id" defaultValue={comercio.categoria_id ?? ''}>
+                <option value="">Sin categoría</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+
+          <Field label="URL del logo" optional>
+            <Input
+              name="logo_url"
+              type="url"
+              defaultValue={comercio.logo_url ?? ''}
+              placeholder="https://…"
+            />
+          </Field>
+        </Stack>
+
+        <div className={styles.acciones}>
+          <Button type="submit" loading={pending} icon={<Save size={16} />}>
+            Guardar cambios
+          </Button>
+          <Button href={`/admin/comercios/${comercio.id}`} variant="secondary">
+            Cancelar
+          </Button>
         </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="categoria_id">Categoría (opcional)</label>
-          <select id="categoria_id" name="categoria_id" className="orum-select" defaultValue={comercio.categoria_id ?? ''}>
-            <option value="">— Sin categoría —</option>
-            {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-          </select>
-        </div>
-      </div>
-
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="logo_url">URL del logo (opcional)</label>
-        <input id="logo_url" name="logo_url" className="orum-input" defaultValue={comercio.logo_url ?? ''} placeholder="https://…" />
-      </div>
-
-      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-        <button type="submit" className="orum-button" disabled={pending}>
-          {pending ? 'Guardando…' : 'Guardar cambios'}
-        </button>
-        <Link href={`/admin/comercios/${comercio.id}`} className="orum-button orum-button--secondary">Cancelar</Link>
-      </div>
-    </form>
+      </form>
+    </>
   )
 }

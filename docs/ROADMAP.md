@@ -4,7 +4,7 @@
 > están hechas y cuáles faltan. Sirve como punto único de referencia para retomar el
 > proyecto desde cualquier máquina sin desalinearnos.
 >
-> **Última actualización:** 2026-07-26
+> **Última actualización:** 2026-08-05
 
 ---
 
@@ -114,12 +114,38 @@ Verificado además: 9/9 tests (Vitest), `tsc` limpio, `pnpm build` OK.
 Requisitos cubiertos: **RF-15** (planes) + parte administrativa de **RF-16** (miembros) + los
 cambios de la reunión sobre autoría de venta/registro y tipo de membresía (nueva/renovada).
 
-### ⬜ Fase 3 — Comercios, sucursales y promociones
+### ✅ Fase 3 — Comercios, sucursales y promociones
 
-- Gestión de comercios aliados (crear/ver/editar/eliminar) — **RF-17**.
+**Implementada y fusionada en `main`** (commits `46f121d`, `7552c62`, `9747f3d`).
+
+- Gestión de comercios aliados (`/admin/comercios/**`), solo super_admin — **RF-17**.
 - Sucursales por comercio.
-- Gestión de promociones/beneficios con tipo (porcentaje, 2x1, etc.) — **RF-18**.
-- Prepara los datos que las métricas (Fase 4) y el Portal de Miembros medirán/mostrarán.
+- Gestión de promociones/beneficios con tipo (porcentaje, 2x1, monto fijo, regalo) — **RF-18**.
+- `comercios.activo` (¿aliado activo?) y `perfiles.activo` (¿acceso a su cuenta?) son
+  estados independientes.
+- Validación de `promociones.valor` según el tipo de beneficio en la función pura
+  `validarValorPromocion` (`src/lib/promociones.ts`).
+- Los comercios salieron de `/admin/usuarios`, que quedó reducido a empleados y admins.
+
+**Documentos de diseño/plan de esta fase:**
+- Spec: [`docs/superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md`](superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md)
+- Plan: [`docs/superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md`](superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md)
+
+### 🔄 Rediseño visual — sistema de diseño, movimiento y PWA
+
+**Transversal a todas las fases.** No cambia funcionalidad: sustituye la capa de
+presentación completa (oro / negro / blanco, estética Apple, movimiento con resortes,
+tres modos de tema) y convierte la app en PWA instalable.
+
+- **Fase A (fundaciones) — hecha:** tipografía Inter Variable, capa de tokens
+  (`src/styles/tokens.css`), `globals.css` reescrito con mapeo semántico por tema,
+  sistema de tres temas sin parpadeo, y utilidades de movimiento (`src/lib/motion.ts`).
+- Fases B–G pendientes: primitivas de UI, app shell, login, pantallas del admin, PWA
+  y auditoría.
+
+**Documentos:**
+- Spec: [`docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md`](superpowers/specs/2026-08-04-rediseno-visual-orum-design.md)
+- Plan: [`docs/superpowers/plans/2026-08-05-rediseno-visual-plan.md`](superpowers/plans/2026-08-05-rediseno-visual-plan.md)
 
 ### ⬜ Fase 4 — Métricas y trazabilidad
 
@@ -144,8 +170,8 @@ cambios de la reunión sobre autoría de venta/registro y tipo de membresía (nu
 | RF-06–14 | Portal Miembros (login, perfil, descuentos, filtros, soporte, QR) | Posterior | ⬜ |
 | RF-15 | Gestión de planes de membresía | Fase 2 | ✅ |
 | RF-16 | Gestión de usuarios (staff + miembros) | Fase 1 + 2 | ✅ |
-| RF-17 | Gestión de comercios | Fase 3 | ⬜ |
-| RF-18 | Gestión de promociones | Fase 3 | ⬜ |
+| RF-17 | Gestión de comercios | Fase 3 | ✅ |
+| RF-18 | Gestión de promociones | Fase 3 | ✅ |
 | RF-19 | Trazabilidad / historial de movimientos | Fase 4 | ⬜ |
 | RF-20–22 | Herramienta de comercios (login, venta por QR / número) | Posterior | ⬜ |
 
@@ -189,11 +215,19 @@ Ninguna es bloqueante hoy, pero conviene tenerlas presentes:
 El código está en `origin/main`. En la máquina nueva:
 
 ```bash
+# 0. Node 22.13 o superior (la versión exacta recomendada está en .nvmrc)
+#    Requisito real: pnpm 11 usa `node:sqlite`, que no existe antes de 22.13.
+#    Node 20 además llegó a fin de vida en abril de 2026.
+node --version      # debe ser >= v22.13
+#    Con gestor de versiones:      nvm use   /   fnm use
+#    Sin gestor, en Windows:       winget install OpenJS.NodeJS.LTS
+
 # 1. Clonar el repo y entrar
 git clone <url-del-repo>
 cd ORUM-Project
 
 # 2. Instalar dependencias (usar pnpm, no npm)
+corepack enable pnpm    # una sola vez por máquina
 pnpm install
 
 # 3. Configurar variables de entorno
@@ -215,6 +249,15 @@ pnpm lint           # linter
 
 **Notas de entorno (ver también los archivos de memoria del proyecto):**
 
+- **La versión de Node importa y está declarada en tres sitios coherentes entre sí:**
+  `engines.node` (`>=22.13.0`), `.nvmrc` y `.node-version` (24.19.0, el LTS activo).
+  Si `node --version` es menor, `pnpm` fallará con
+  `No such built-in module: node:sqlite`.
+- **Corepack antiguo falla al descargar pnpm** con
+  `Error: Cannot find matching keyid`. Es un problema de claves de firma caducadas en
+  las versiones de corepack anteriores a la 0.32, no del proyecto. Se resuelve
+  actualizando Node (trae un corepack nuevo) o con `npm i -g corepack@latest`.
+
 - Las claves de Supabase son del **formato nuevo** (`sb_publishable_` / `sb_secret_`), no los JWT
   legacy `eyJ...`. Los JWT de sesión se firman con **ES256** (claves asimétricas).
 - **Error transitorio conocido** tras rotar a ES256:
@@ -227,7 +270,13 @@ pnpm lint           # linter
 
 ## 9. Próximo paso sugerido
 
-Con Fases 1 y 2 cerradas, el siguiente paso natural es **diseñar la Fase 3 (comercios, sucursales
-y promociones)**, que desbloquea RF-17/RF-18 y prepara el terreno para las métricas de la Fase 4.
-Se recomienda repetir el flujo de Fase 2: spec de diseño → plan por tareas → construcción con
-revisión.
+Con las Fases 1, 2 y 3 cerradas, el trabajo activo es el **rediseño visual**: la funcionalidad
+del portal administrativo está, pero la capa de presentación no transmite la calidad que el
+producto necesita, y los portales de cara al usuario (Público y Miembros) van a heredarla.
+
+La Fase A (fundaciones) está hecha. El siguiente paso es la **Fase B: primitivas de UI**, y tras
+la Fase D hay un punto de evaluación explícito antes de comprometer la migración de las ~20
+pantallas del admin.
+
+En paralelo queda pendiente la **Fase 4 (métricas y trazabilidad)**, que no depende del rediseño
+salvo por los componentes de gráficos.

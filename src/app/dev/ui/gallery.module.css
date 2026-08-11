@@ -1,0 +1,172 @@
+.pagina {
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+
+  padding: var(--space-4) var(--space-6);
+  background: var(--material);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.marca {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.wordmark {
+  font-size: var(--t-title-2-size);
+  letter-spacing: 0.14em;
+  font-weight: 600;
+
+  /* El oro como material, no como color plano. */
+  background: var(--gold-sheen);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.sub {
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+.contenido {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-11);
+}
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.tituloSeccion {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.notaSeccion {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+  max-width: 68ch;
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.etiquetaGrupo {
+  font-size: var(--t-overline-size);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* --- Muestras de color ---------------------------------------------------- */
+
+.rampa {
+  display: flex;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.muestra {
+  flex: 1;
+  min-width: 0;
+  height: 68px;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-1);
+
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* --- Tipografía ----------------------------------------------------------- */
+
+.filaTipo {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+  padding: var(--space-2) 0;
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.tokenTipo {
+  flex-shrink: 0;
+  width: 96px;
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Cajas de demostración ------------------------------------------------ */
+
+.demo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.formulario {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sombras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+.cajaSombra {
+  width: 110px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}

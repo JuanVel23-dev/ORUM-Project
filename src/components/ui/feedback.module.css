@@ -1,0 +1,151 @@
+/* --- Skeleton -------------------------------------------------------------
+   Un esqueleto debe REPLICAR el layout real que va a sustituir. Un spinner
+   genérico centrado no informa de nada y hace que la espera se perciba más
+   larga, porque no anticipa lo que viene.                                   */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+
+  width: var(--ancho, 100%);
+  height: var(--alto, 1em);
+  border-radius: var(--radio, var(--radius-xs));
+  background: var(--surface-sunk);
+}
+
+/* Barrido de luz. Lleva `data-motion-esencial` en el TSX: si se congela,
+   el esqueleto deja de comunicar que hay algo cargando. */
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--text-3) 12%, transparent),
+    transparent
+  );
+
+  animation: barrer 1400ms ease-in-out infinite;
+}
+
+@keyframes barrer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.texto {
+  --alto: 0.85em;
+  --radio: var(--radius-xs);
+  margin: 0.2em 0;
+}
+
+.circulo {
+  --radio: var(--radius-full);
+}
+
+/* --- ProgressBar ---------------------------------------------------------- */
+
+.progreso {
+  width: 100%;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--surface-sunk);
+  overflow: hidden;
+}
+
+.progresoBarra {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--gold-sheen);
+  background-size: 200% 100%;
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+/* Indeterminada: no se conoce el porcentaje, solo que hay actividad. */
+.indeterminada .progresoBarra {
+  width: 40%;
+  animation: recorrer 1200ms var(--ease-in-out) infinite;
+}
+
+@keyframes recorrer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+/* --- Estados vacío y error ------------------------------------------------ */
+
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+
+  padding: var(--space-10) var(--space-6);
+}
+
+.estadoIcono {
+  display: grid;
+  place-items: center;
+
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--surface-sunk);
+  color: var(--text-3);
+}
+
+.estadoIcono svg {
+  width: 24px;
+  height: 24px;
+}
+
+.estadoError .estadoIcono {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.estadoTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 44ch;
+}
+
+.estadoTitulo {
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: var(--t-title-3-weight);
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.estadoDescripcion {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+.estadoAcciones {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+}
+
+.detalle {
+  margin-top: var(--space-2);
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  word-break: break-word;
+}

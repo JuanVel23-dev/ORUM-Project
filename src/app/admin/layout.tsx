@@ -1,6 +1,8 @@
-import Link from 'next/link'
+import { Suspense } from 'react'
 import { requireRol } from '@/lib/auth'
 import { cerrarSesion } from '@/app/login/actions'
+import { AppShell } from '@/components/shell/app-shell'
+import { RouteProgress } from '@/components/shell/route-progress'
 
 export const metadata = {
   title: 'Panel · ORUM',
@@ -11,47 +13,34 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Solo super_admin y empleado pueden entrar al portal administrativo.
+  // Solo super_admin y empleado entran al portal administrativo. El shell
+  // filtra los destinos por rol, pero eso es presentación: la autorización
+  // real la sigue haciendo `requireRol` aquí y en cada página y server action.
   const perfil = await requireRol('super_admin', 'empleado')
-  const esSuperAdmin = perfil.rolCodigo === 'super_admin'
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1.5rem',
-          padding: '0.75rem 1.5rem',
-          borderBottom: '1px solid var(--orum-border)',
+    <>
+      {/*
+        `useSearchParams` obliga a un límite de Suspense. La barra no pinta
+        nada hasta que hay navegación, así que el fallback es vacío.
+      */}
+      <Suspense fallback={null}>
+        <RouteProgress />
+      </Suspense>
+
+      <AppShell
+        user={{
+          // Hasta que el perfil guarde nombre y apellido, el correo es lo
+          // único identificable que hay para las iniciales del avatar.
+          nombre: perfil.email ?? perfil.rolNombre,
+          email: perfil.email,
+          rolNombre: perfil.rolNombre,
+          rolCodigo: perfil.rolCodigo,
         }}
+        cerrarSesion={cerrarSesion}
       >
-        <Link href="/admin" style={{ fontWeight: 700, fontSize: '1.15rem' }}>
-          ORUM
-        </Link>
-
-        <nav style={{ display: 'flex', gap: '1rem', flex: 1 }}>
-          <Link href="/admin">Inicio</Link>
-          <Link href="/admin/miembros">Miembros</Link>
-          {esSuperAdmin && <Link href="/admin/comercios">Comercios</Link>}
-          {esSuperAdmin && <Link href="/admin/usuarios">Usuarios</Link>}
-          {esSuperAdmin && <Link href="/admin/planes">Planes</Link>}
-          <Link href="/admin/cuenta/password">Mi contraseña</Link>
-        </nav>
-
-        <span className="orum-muted" style={{ fontSize: '0.85rem' }}>
-          {perfil.email} · {perfil.rolNombre}
-        </span>
-        <form action={cerrarSesion}>
-          <button type="submit" className="orum-button orum-button--secondary">
-            Cerrar sesión
-          </button>
-        </form>
-      </header>
-
-      <main style={{ flex: 1, padding: '1.5rem', maxWidth: 1100, width: '100%', margin: '0 auto' }}>
         {children}
-      </main>
-    </div>
+      </AppShell>
+    </>
   )
 }

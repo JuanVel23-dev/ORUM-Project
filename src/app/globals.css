@@ -1,17 +1,238 @@
+@import '../styles/tokens.css';
+
+/* ============================================================================
+   ORUM · Estilos globales
+   ----------------------------------------------------------------------------
+   1. Mapeo semántico por tema   4. Utilidades tipográficas
+   2. Reset                      5. Preferencias de accesibilidad
+   3. Base
+   ========================================================================== */
+
+/* ============================================================================
+   1. MAPEO SEMÁNTICO POR TEMA
+   ----------------------------------------------------------------------------
+   Los componentes consumen ESTOS tokens, no los crudos de tokens.css.
+
+   Nota: se evita `light-dark()` a propósito. Es más elegante y eliminaría la
+   duplicación del bloque oscuro, pero en un navegador que no lo soporte las
+   variables quedan sin resolver y la página pierde todo el color. Con la
+   duplicación el fallo es imposible. Revisar cuando el soporte sea universal.
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: var(--w-50);
+  --surface: var(--w-0);
+  --surface-sunk: var(--w-100);
+  --surface-hover: var(--w-100);
+  --border: var(--w-300);
+  --border-subtle: var(--w-200);
+  --border-strong: var(--w-400);
+
+  --text: #141418;
+  --text-2: #5b5b66; /* 6.71:1 sobre blanco */
+  /*
+    Corregido en la auditoría de la Fase G. El valor anterior (#8C8C97) daba
+    3.22:1 sobre blanco y reprobaba AA: se usa en encabezados de sección,
+    etiquetas y metadatos, casi todos a 11-12px, donde el mínimo es 4.5:1.
+    Este da 5.26:1 y conserva el escalón visible frente a --text-2.
+  */
+  --text-3: #6b6b76;
+  --text-on-accent: #ffffff;
+
+  /* Acción = tinta. El oro es marca, no acción. */
+  --action: #141418;
+  --action-hover: #26262c;
+  --action-fg: #ffffff;
+
+  --focus: var(--gold-600); /* 3.66:1 sobre blanco — cumple el mínimo de focus */
+  --brand: var(--gold-700); /* dorado legible sobre claro */
+  --brand-edge: var(--gold-600); /* filos dorados en claro */
+
+  /* El barrido metálico de tokens.css está calibrado para fondo oscuro; sobre
+     blanco se lava y el wordmark pierde presencia. Aquí baja a la mitad
+     oscura de la rampa para conservar el brillo metálico siendo legible. */
+  --gold-sheen: linear-gradient(
+    135deg,
+    #9e8244 0%,
+    #7d6733 38%,
+    #5c4b25 62%,
+    #9e8244 100%
+  );
+
+  --link: var(--info-light);
+
+  --success: var(--success-light);
+  --warning: var(--warning-light);
+  --danger: var(--danger-light);
+  --info: var(--info-light);
+
+  /* Fondos atenuados de estado (8%) — nunca bloques saturados. */
+  --success-bg: rgba(19, 122, 59, 0.08);
+  --warning-bg: rgba(168, 85, 8, 0.08);
+  --danger-bg: rgba(193, 18, 31, 0.08);
+  --info-bg: rgba(29, 95, 209, 0.08);
+  --gold-bg: rgba(125, 103, 51, 0.1);
+
+  --shadow-card: var(--shadow-1);
+  --shadow-raised: var(--shadow-2);
+  --shadow-overlay: var(--shadow-4);
+
+  /*
+    En claro la elevación la da la sombra, así que no hay filo de luz. Pero
+    NO puede valer `none`: estos tokens se combinan en listas como
+    `box-shadow: var(--shadow-2), var(--edge)`, y una lista de sombras
+    separadas por comas no admite `none` — invalida la declaración ENTERA.
+    El resultado era que ninguna tarjeta, lista ni menú tenía sombra.
+    Una sombra transparente ocupa el hueco sin pintar nada.
+  */
+  --edge: 0 0 rgba(0, 0, 0, 0);
+
+  --scrim: rgba(10, 10, 12, 0.4);
+  --material: rgba(255, 255, 255, 0.68);
+
+  color-scheme: light;
 }
 
+[data-theme='dark'] {
+  --bg: var(--n-1000);
+  --surface: var(--n-900);
+  --surface-sunk: var(--n-950);
+  --surface-hover: var(--n-850);
+  --border: var(--n-700);
+  --border-subtle: var(--n-800);
+  --border-strong: var(--n-600);
+
+  --text: var(--n-50);
+  /*
+    Corregido en la auditoría de la Fase G. Antes eran n-400/n-500, y n-500
+    daba 3.77:1 sobre el fondo oscuro: reprobaba AA en los mismos sitios que
+    en claro (encabezados de sección, etiquetas, metadatos a 11-12px).
+    Ahora: n-300 = 8.89:1 y n-400 = 5.88:1, con el escalón intacto.
+  */
+  --text-2: var(--n-300);
+  --text-3: var(--n-400);
+  --text-on-accent: var(--n-1000);
+
+  --action: var(--n-50);
+  --action-hover: var(--n-100);
+  --action-fg: var(--n-1000);
+
+  --focus: var(--gold-400);
+  --brand: var(--gold-300);
+  --brand-edge: var(--gold-500);
+
+  /* Sobre fondo oscuro vuelve el barrido brillante de tokens.css. */
+  --gold-sheen: linear-gradient(
+    135deg,
+    #e3d0a4 0%,
+    #bfa063 38%,
+    #9e8244 62%,
+    #d4bc85 100%
+  );
+
+  --link: var(--info-dark);
+
+  --success: var(--success-dark);
+  --warning: var(--warning-dark);
+  --danger: var(--danger-dark);
+  --info: var(--info-dark);
+
+  --success-bg: rgba(69, 214, 124, 0.1);
+  --warning-bg: rgba(240, 145, 46, 0.1);
+  --danger-bg: rgba(255, 90, 82, 0.1);
+  --info-bg: rgba(91, 157, 255, 0.1);
+  --gold-bg: rgba(191, 160, 99, 0.12);
+
+  /*
+    En oscuro una sombra negra sobre fondo negro no se ve: la elevación la da
+    el filo de luz superior. Sombra TRANSPARENTE, no `none`, por la misma
+    razón que arriba: `none` dentro de una lista la invalida entera y se
+    perdía también el filo.
+  */
+  --shadow-card: 0 0 rgba(0, 0, 0, 0);
+  --shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --edge: var(--edge-light);
+
+  --scrim: rgba(0, 0, 0, 0.6);
+  --material: rgba(22, 22, 26, 0.72);
+
+  color-scheme: dark;
+}
+
+/* Fallback sin JavaScript: si el script anti-flash no llegó a estampar
+   data-theme, se sigue la preferencia del sistema. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme='light']):not([data-theme='dark']) {
+    --bg: var(--n-1000);
+    --surface: var(--n-900);
+    --surface-sunk: var(--n-950);
+    --surface-hover: var(--n-850);
+    --border: var(--n-700);
+    --border-subtle: var(--n-800);
+    --border-strong: var(--n-600);
+
+    --text: var(--n-50);
+    --text-2: var(--n-300);
+    --text-3: var(--n-400);
+    --text-on-accent: var(--n-1000);
+
+    --action: var(--n-50);
+    --action-hover: var(--n-100);
+    --action-fg: var(--n-1000);
+
+    --focus: var(--gold-400);
+    --brand: var(--gold-300);
+    --brand-edge: var(--gold-500);
+
+    --gold-sheen: linear-gradient(
+      135deg,
+      #e3d0a4 0%,
+      #bfa063 38%,
+      #9e8244 62%,
+      #d4bc85 100%
+    );
+
+    --link: var(--info-dark);
+
+    --success: var(--success-dark);
+    --warning: var(--warning-dark);
+    --danger: var(--danger-dark);
+    --info: var(--info-dark);
+
+    --success-bg: rgba(69, 214, 124, 0.1);
+    --warning-bg: rgba(240, 145, 46, 0.1);
+    --danger-bg: rgba(255, 90, 82, 0.1);
+    --info-bg: rgba(91, 157, 255, 0.1);
+    --gold-bg: rgba(191, 160, 99, 0.12);
+
+    --shadow-card: 0 0 rgba(0, 0, 0, 0);
+    --shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.45);
+    --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.6);
+    --edge: var(--edge-light);
+
+    --scrim: rgba(0, 0, 0, 0.6);
+    --material: rgba(22, 22, 26, 0.72);
+
+    color-scheme: dark;
   }
+}
+
+/* ============================================================================
+   2. RESET
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
   height: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 html,
@@ -20,21 +241,69 @@ body {
   overflow-x: hidden;
 }
 
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+}
+
+/* ============================================================================
+   3. BASE
+   ========================================================================== */
+
 body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+
+  background: var(--bg);
+  color: var(--text);
+
+  font-family: var(--font-sans);
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  font-weight: var(--t-body-weight);
+  font-optical-sizing: auto;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+  /* Conmutación de tema: SOLO color. Nunca `transition: all` — animar layout
+     o transform en un cambio de tema produce un salto visible. */
+  transition:
+    background-color var(--dur-theme) var(--ease-out),
+    color var(--dur-theme) var(--ease-out);
 }
 
 a {
@@ -42,166 +311,163 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+/* Anillo de focus dorado. Nunca `outline: none` sin sustituto. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+::selection {
+  background: var(--gold-bg);
+  color: var(--text);
+}
+
+/* Cifras que se alinean en columna: número de membresía, cédula, montos,
+   fechas, contadores. Sin esto las columnas bailan al cambiar de dígito. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* Texto secundario. Utilidad global porque aparece en casi todas las pantallas
+   y no justifica una clase por módulo. */
+.muted {
+  color: var(--text-2);
+}
+
+/* Solo para lectores de pantalla: invisible pero presente en el árbol de
+   accesibilidad. `display: none` lo ocultaría también a los lectores. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================================================
+   4. UTILIDADES TIPOGRÁFICAS
+   ========================================================================== */
+
+.t-display-1,
+.t-display-2,
+.t-title-1,
+.t-title-2,
+.t-title-3,
+.t-body,
+.t-callout,
+.t-footnote,
+.t-caption,
+.t-overline {
+  font-family: var(--font-sans);
+}
+
+.t-display-1 {
+  font-size: var(--t-display-1-size);
+  line-height: var(--t-display-1-leading);
+  letter-spacing: var(--t-display-1-tracking);
+  font-weight: var(--t-display-1-weight);
+}
+.t-display-2 {
+  font-size: var(--t-display-2-size);
+  line-height: var(--t-display-2-leading);
+  letter-spacing: var(--t-display-2-tracking);
+  font-weight: var(--t-display-2-weight);
+}
+.t-title-1 {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+}
+.t-title-2 {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+}
+.t-title-3 {
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: var(--t-title-3-weight);
+}
+.t-body {
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  letter-spacing: var(--t-body-tracking);
+  font-weight: var(--t-body-weight);
+}
+.t-callout {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: var(--t-callout-weight);
+}
+.t-footnote {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+}
+.t-caption {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  letter-spacing: var(--t-caption-tracking);
+  font-weight: var(--t-caption-weight);
+}
+.t-overline {
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+}
+
+/* ============================================================================
+   5. PREFERENCIAS DE ACCESIBILIDAD
+   ----------------------------------------------------------------------------
+   Red de seguridad global. El tratamiento fino vive dentro de cada componente:
+   movimiento reducido NO significa "sin feedback", significa un equivalente
+   no vestibular (cross-fade en vez de desplazamiento, sin overshoot).
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  /* `[data-motion-esencial]` queda excluido a propósito: un spinner o una
+     barra de progreso que se congela deja de informar de que algo ocurre.
+     Movimiento reducido reduce el movimiento decorativo, no el funcional. */
+  *:not([data-motion-esencial]):not([data-motion-esencial] *),
+  *:not([data-motion-esencial]):not([data-motion-esencial] *)::before,
+  *:not([data-motion-esencial]):not([data-motion-esencial] *)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Se conservan opacidad y color: ayudan a comprender y no marean. */
+  body {
+    transition:
+      background-color var(--dur-theme) var(--ease-out),
+      color var(--dur-theme) var(--ease-out) !important;
   }
 }
 
-/* ===== Sistema de estilos reutilizable de ORUM ===== */
-:root {
-  --orum-primary: #2563eb;
-  --orum-primary-hover: #1d4ed8;
-  --orum-border: #d1d5db;
-  --orum-muted: #6b7280;
-  --orum-surface: #ffffff;
-  --orum-danger: #dc2626;
-  --orum-success: #16a34a;
-  --orum-radius: 10px;
-}
-
-@media (prefers-color-scheme: dark) {
+@media (prefers-reduced-transparency: reduce) {
   :root {
-    --orum-border: #374151;
-    --orum-muted: #9ca3af;
-    --orum-surface: #111827;
+    --material: var(--surface);
   }
 }
 
-.orum-card {
-  background: var(--orum-surface);
-  border: 1px solid var(--orum-border);
-  border-radius: var(--orum-radius);
-  padding: 1.5rem;
-}
-
-.orum-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  margin-bottom: 1rem;
-}
-
-.orum-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.orum-input,
-.orum-select {
-  width: 100%;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--orum-border);
-  border-radius: 8px;
-  background: var(--orum-surface);
-  color: var(--foreground);
-  font-size: 1rem;
-}
-
-.orum-input:focus,
-.orum-select:focus {
-  outline: 2px solid var(--orum-primary);
-  outline-offset: 1px;
-}
-
-.orum-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1rem;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: var(--orum-primary);
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.orum-button:hover {
-  background: var(--orum-primary-hover);
-}
-
-.orum-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.orum-button--secondary {
-  background: transparent;
-  color: var(--foreground);
-  border-color: var(--orum-border);
-}
-
-.orum-button--secondary:hover {
-  background: rgba(127, 127, 127, 0.1);
-}
-
-.orum-button--danger {
-  background: var(--orum-danger);
-}
-
-.orum-button--danger:hover {
-  background: #b91c1c;
-}
-
-.orum-alert {
-  padding: 0.7rem 0.9rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  border: 1px solid transparent;
-}
-
-.orum-alert--error {
-  color: var(--orum-danger);
-  border-color: var(--orum-danger);
-  background: rgba(220, 38, 38, 0.08);
-}
-
-.orum-alert--success {
-  color: var(--orum-success);
-  border-color: var(--orum-success);
-  background: rgba(22, 163, 74, 0.08);
-}
-
-.orum-muted {
-  color: var(--orum-muted);
-}
-
-.orum-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.925rem;
-}
-
-.orum-table th,
-.orum-table td {
-  text-align: left;
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid var(--orum-border);
-}
-
-.orum-table th {
-  font-weight: 600;
-  color: var(--orum-muted);
-}
-
-.orum-badge {
-  display: inline-block;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 1px solid var(--orum-border);
-}
-
-.orum-badge--on {
-  color: var(--orum-success);
-  border-color: var(--orum-success);
-}
-
-.orum-badge--off {
-  color: var(--orum-muted);
+@media (prefers-contrast: more) {
+  :root {
+    --border: var(--border-strong);
+    --text-2: var(--text);
+    --material: var(--surface);
+  }
 }

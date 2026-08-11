@@ -1,7 +1,8 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requireRol } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { PageHeader } from '@/components/ui/layout'
+import { FormCard } from '@/components/ui/form-card'
 import { EditarForm } from './editar-form'
 
 export const metadata = { title: 'Editar usuario · ORUM' }
@@ -29,16 +30,12 @@ export default async function EditarUsuarioPage({
 
   const email = authUser?.user?.email ?? ''
 
-  return (
-    <div style={{ maxWidth: 560 }}>
-      <Link href="/admin/usuarios" className="orum-muted" style={{ fontSize: '0.9rem' }}>
-        ← Volver a usuarios
-      </Link>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0 1.25rem' }}>
-        Editar usuario
-      </h1>
+  const nombreCompleto = `${empleado.nombres} ${empleado.apellidos}`.trim()
 
-      <EditarForm perfilId={perfilId} email={email} empleado={empleado} />
-    </div>
+  return (
+    <>
+      <PageHeader title="Editar usuario" description={nombreCompleto} />
+      <FormCard><EditarForm perfilId={perfilId} email={email} empleado={empleado} /></FormCard>
+    </>
   )
 }

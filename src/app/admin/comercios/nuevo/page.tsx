@@ -1,6 +1,7 @@
-import Link from 'next/link'
 import { requireRol } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { PageHeader } from '@/components/ui/layout'
+import { FormCard } from '@/components/ui/form-card'
 import { ComercioForm } from '../comercio-form'
 
 export const metadata = { title: 'Crear comercio · ORUM' }
@@ -15,12 +16,12 @@ export default async function NuevoComercioPage() {
   ])
 
   return (
-    <div style={{ maxWidth: 560 }}>
-      <Link href="/admin/comercios" className="orum-muted" style={{ fontSize: '0.9rem' }}>
-        ← Volver a comercios
-      </Link>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0 1.25rem' }}>Crear comercio</h1>
-      <ComercioForm marcas={marcas ?? []} categorias={categorias ?? []} />
-    </div>
+    <>
+      <PageHeader
+        title="Crear comercio"
+        description="Se crea el comercio y su cuenta de acceso a la herramienta de ventas."
+      />
+      <FormCard><ComercioForm marcas={marcas ?? []} categorias={categorias ?? []} /></FormCard>
+    </>
   )
 }

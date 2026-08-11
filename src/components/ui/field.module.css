@@ -1,0 +1,90 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.opcional {
+  margin-left: var(--space-2);
+  font-weight: 400;
+  color: var(--text-3);
+}
+
+.help {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  color: var(--text-2);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  color: var(--danger);
+
+  animation: entrar var(--dur-base) var(--ease-out);
+}
+
+.errorIcono {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+  Sacudida al aparecer un error.
+
+  Se dispara con `:has()` cuando el mensaje entra en el DOM. Si el usuario
+  reenvía y falla con EXACTAMENTE el mismo mensaje, React reutiliza el nodo y
+  la animación no se repite; en ese caso el error ya está visible, así que
+  volver a sacudir aportaría poco.
+*/
+.field:has(.error) .control {
+  animation: sacudir 280ms var(--ease-out);
+}
+
+@keyframes sacudir {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  80% {
+    transform: translateX(-2px);
+  }
+}
+
+/* Caja real, no `display: contents`: un elemento sin caja no puede animarse. */
+.control {
+  display: block;
+}

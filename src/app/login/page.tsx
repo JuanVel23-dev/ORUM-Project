@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getPerfilActual } from '@/lib/auth'
 import { LoginForm } from './login-form'
+import styles from './login.module.css'
 
 export const metadata = {
   title: 'Iniciar sesión · ORUM',
@@ -17,7 +18,11 @@ export default async function LoginPage({
 }) {
   // Si ya inició sesión y tiene acceso, no mostramos el login.
   const perfil = await getPerfilActual()
-  if (perfil && perfil.activo && (perfil.rolCodigo === 'super_admin' || perfil.rolCodigo === 'empleado')) {
+  if (
+    perfil &&
+    perfil.activo &&
+    (perfil.rolCodigo === 'super_admin' || perfil.rolCodigo === 'empleado')
+  ) {
     redirect('/admin')
   }
 
@@ -25,24 +30,22 @@ export default async function LoginPage({
   const mensajeInicial = error ? MENSAJES[error] : undefined
 
   return (
-    <main
-      style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem 1rem',
-      }}
-    >
-      <div className="orum-card" style={{ width: '100%', maxWidth: 400 }}>
-        <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700 }}>ORUM</h1>
-          <p className="orum-muted" style={{ fontSize: '0.9rem', marginTop: '0.25rem' }}>
-            Portal de Administración
-          </p>
-        </div>
+    // `data-theme="dark"` en el contenedor, no en <html>: redeclara los tokens
+    // para todo este subárbol sin tocar la preferencia del usuario, que sigue
+    // vigente en cuanto entra al panel.
+    <div className={styles.pantalla} data-theme="dark">
+      <div className={styles.tarjeta}>
+        <header className={styles.cabecera}>
+          <span className={styles.wordmark}>ORUM</span>
+          <span className={styles.subtitulo}>Portal de Administración</span>
+        </header>
+
         <LoginForm mensajeInicial={mensajeInicial} />
+
+        <p className={styles.pie}>
+          ¿Problemas para entrar? Contacta al administrador del club.
+        </p>
       </div>
-    </main>
+    </div>
   )
 }

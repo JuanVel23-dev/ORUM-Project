@@ -1,0 +1,10 @@
+/* Un formulario a todo el ancho de la pantalla obliga al ojo a saltar
+   demasiado entre la etiqueta y su campo. */
+
+.ancha {
+  max-width: 640px;
+}
+
+.estrecha {
+  max-width: 560px;
+}

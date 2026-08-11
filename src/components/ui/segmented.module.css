@@ -1,0 +1,132 @@
+.group {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+
+  padding: 3px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--surface-sunk);
+
+  /* Radio interno = radio externo − padding (regla de anidamiento). */
+  --radio-interno: calc(var(--radius-full) - 3px);
+}
+
+/* El indicador SE DESLIZA entre posiciones. Parpadear de una a otra rompe la
+   continuidad espacial: el ojo pierde de dónde vino la selección. */
+.indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / var(--total, 3));
+
+  border-radius: var(--radio-interno);
+  background: var(--surface);
+  box-shadow: var(--shadow-1), var(--edge);
+
+  transform: translateX(calc(var(--indice, 0) * 100%));
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+  will-change: transform;
+}
+
+/* Oculto hasta que se conoce la selección real: así aparece ya en su sitio
+   en vez de deslizarse desde una posición equivocada. */
+.group[data-indicador='oculto'] .indicator {
+  opacity: 0;
+  transition: none;
+}
+
+.option {
+  position: relative;
+  z-index: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  border-radius: var(--radio-interno);
+  color: var(--text-3);
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.option:hover {
+  color: var(--text-2);
+}
+
+.option:has(.radio:checked) {
+  color: var(--text);
+}
+
+.option:has(.radio:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.option:has(.radio:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tamaños */
+.sm .option {
+  min-height: 30px;
+  padding: 0 var(--space-3);
+  font-size: var(--t-caption-size);
+  font-weight: var(--t-caption-weight);
+  letter-spacing: var(--t-caption-tracking);
+}
+
+.md .option {
+  min-height: 38px;
+  padding: 0 var(--space-4);
+  font-size: var(--t-callout-size);
+  font-weight: var(--t-callout-weight);
+  letter-spacing: var(--t-callout-tracking);
+}
+
+/* El radio real se conserva en el DOM: aporta el rol, el estado marcado y la
+   navegación con flechas del grupo. Solo se oculta visualmente. */
+.radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.icono {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* En pantallas estrechas el control puede reducirse a iconos. */
+@media (max-width: 480px) {
+  .group[data-compacto='true'] .etiqueta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .group[data-compacto='true'] .option {
+    padding: 0 var(--space-2);
+  }
+}

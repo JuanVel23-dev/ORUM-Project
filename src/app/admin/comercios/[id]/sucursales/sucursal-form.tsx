@@ -1,10 +1,21 @@
 'use client'
 
 import { useActionState } from 'react'
-import Link from 'next/link'
-import { crearSucursal, editarSucursal, type SucursalState } from '../../sucursales-actions'
+import { MapPin, Save } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Field } from '@/components/ui/field'
+import { Input, Select } from '@/components/ui/input'
+import { Stack } from '@/components/ui/layout'
+import {
+  crearSucursal,
+  editarSucursal,
+  type SucursalState,
+} from '../../sucursales-actions'
+import styles from '../../../miembros/formulario.module.css'
 
 type Opcion = { id: number; nombre: string }
+
 type SucursalInicial = {
   id: number
   nombre: string
@@ -24,52 +35,70 @@ export function SucursalForm({
   ciudades: Opcion[]
   sucursal?: SucursalInicial
 }) {
-  const accion = sucursal ? editarSucursal : crearSucursal
-  const [state, formAction, pending] = useActionState(accion, estadoInicial)
+  const editando = Boolean(sucursal)
+  const [state, formAction, pending] = useActionState(
+    editando ? editarSucursal : crearSucursal,
+    estadoInicial,
+  )
 
   return (
-    <form action={formAction} className="orum-card">
-      {state.error && <p className="orum-alert orum-alert--error" role="alert">{state.error}</p>}
+    <>
+      <form action={formAction} className={styles.formulario} noValidate>
+        {state.error && <Alert tone="danger">{state.error}</Alert>}
 
-      <input type="hidden" name="comercio_id" value={comercioId} />
-      {sucursal && <input type="hidden" name="id" value={sucursal.id} />}
+        <input type="hidden" name="comercio_id" value={comercioId} />
+        {sucursal && <input type="hidden" name="id" value={sucursal.id} />}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="nombre">Nombre</label>
-        <input id="nombre" name="nombre" className="orum-input" required defaultValue={sucursal?.nombre} />
-      </div>
+        <Stack gap={5}>
+          <Field label="Nombre" help="Cómo la reconoce el miembro: «Sede Centro», «Poblado»…">
+            <Input name="nombre" defaultValue={sucursal?.nombre} required autoFocus />
+          </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="direccion">Dirección (opcional)</label>
-        <input id="direccion" name="direccion" className="orum-input" defaultValue={sucursal?.direccion ?? ''} />
-      </div>
+          <Field label="Dirección" optional>
+            <Input
+              name="direccion"
+              defaultValue={sucursal?.direccion ?? ''}
+              autoComplete="street-address"
+            />
+          </Field>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="telefono">Teléfono (opcional)</label>
-          <input id="telefono" name="telefono" className="orum-input" defaultValue={sucursal?.telefono ?? ''} />
-        </div>
-        <div className="orum-field" style={{ flex: 1 }}>
-          <label className="orum-label" htmlFor="ciudad_id">Ciudad</label>
-          <select
-            id="ciudad_id"
-            name="ciudad_id"
-            className="orum-select"
-            required
-            defaultValue={sucursal?.ciudad_id ?? ''}
+          <div className={styles.pareja}>
+            <Field label="Teléfono" optional>
+              <Input
+                name="telefono"
+                defaultValue={sucursal?.telefono ?? ''}
+                type="tel"
+                numeric
+                inputMode="tel"
+              />
+            </Field>
+
+            <Field label="Ciudad">
+              <Select name="ciudad_id" defaultValue={sucursal?.ciudad_id ?? ''} required>
+                <option value="">Selecciona una ciudad</option>
+                {ciudades.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+        </Stack>
+
+        <div className={styles.acciones}>
+          <Button
+            type="submit"
+            loading={pending}
+            icon={editando ? <Save size={16} /> : <MapPin size={16} />}
           >
-            <option value="">— Selecciona una ciudad —</option>
-            {ciudades.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-          </select>
+            {editando ? 'Guardar cambios' : 'Crear sucursal'}
+          </Button>
+          <Button href={`/admin/comercios/${comercioId}`} variant="secondary">
+            Cancelar
+          </Button>
         </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-        <button type="submit" className="orum-button" disabled={pending}>
-          {pending ? 'Guardando…' : sucursal ? 'Guardar cambios' : 'Crear sucursal'}
-        </button>
-        <Link href={`/admin/comercios/${comercioId}`} className="orum-button orum-button--secondary">Cancelar</Link>
-      </div>
-    </form>
+      </form>
+    </>
   )
 }

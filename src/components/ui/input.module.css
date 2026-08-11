@@ -1,0 +1,163 @@
+/* Estilos compartidos por Input, Textarea y Select. */
+
+.control {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-3);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+
+  font-family: var(--font-sans);
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+
+  /*
+    El anillo de focus se dibuja con box-shadow para que CREZCA desde 0 en vez
+    de aparecer de golpe. `outline` no se puede interpolar.
+  */
+  box-shadow: 0 0 0 0 transparent;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.control::placeholder {
+  color: var(--text-3);
+}
+
+.control:hover:not(:disabled):not(:focus-visible) {
+  border-color: var(--border-strong);
+}
+
+.control:focus-visible {
+  outline: none; /* sustituido por el anillo de box-shadow, no eliminado */
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 30%, transparent);
+}
+
+.control:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--surface-sunk);
+}
+
+.control[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.control[aria-invalid='true']:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+/* Cifras que se alinean en columna o se leen dígito a dígito: número de
+   membresía, cédula, teléfono, montos. */
+.numerico {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  letter-spacing: 0.01em;
+}
+
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+/* --- Select --------------------------------------------------------------- */
+
+.selectWrap {
+  position: relative;
+  display: block;
+}
+
+.select {
+  appearance: none;
+  padding-right: var(--space-8); /* hueco para la flecha */
+  cursor: pointer;
+}
+
+.flecha {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  translate: 0 -50%;
+
+  width: 16px;
+  height: 16px;
+  color: var(--text-3);
+  pointer-events: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.selectWrap:hover .flecha {
+  color: var(--text-2);
+}
+
+/* --- Prefijo / sufijo ----------------------------------------------------- */
+
+.conAdorno {
+  position: relative;
+  display: block;
+}
+
+.adorno {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+}
+
+/* El icono de inicio es decorativo: no debe robar el clic al campo. */
+.adornoInicio {
+  left: var(--space-3);
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.conAdorno[data-inicio='true'] .control {
+  padding-left: var(--space-8);
+}
+
+/* El adorno final SÍ es interactivo (mostrar contraseña, limpiar…). */
+.adornoFin {
+  right: 6px;
+  pointer-events: auto;
+}
+
+.conAdorno[data-fin='true'] .control {
+  padding-right: var(--space-9);
+}
+
+.botonAdorno {
+  display: grid;
+  place-items: center;
+
+  /* 36px es el mínimo cómodo dentro de un campo de 44px sin desbordarlo. */
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.botonAdorno:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.botonAdorno:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}

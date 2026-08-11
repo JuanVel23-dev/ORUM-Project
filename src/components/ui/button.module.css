@@ -1,0 +1,195 @@
+.button {
+  position: relative; /* ancla del cargador superpuesto */
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /*
+    Un botón nunca debe encogerse por debajo de su contenido. Dentro de un
+    contenedor flex estrecho —por ejemplo la celda de acciones de `DataList`,
+    que usa `width: 1%` como truco de tabla— el valor por defecto lo aplastaba
+    hasta 2px: seguía existiendo y siendo enfocable, pero era imposible de
+    pulsar. Si hace falta que ocupe el ancho, para eso está `fullWidth`.
+  */
+  flex-shrink: 0;
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: var(--t-callout-tracking);
+  white-space: nowrap;
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-instant) var(--ease-out);
+}
+
+/* Feedback en la PRESIÓN, no al soltar. Esperar al click se siente muerto. */
+.button:active:not(:disabled):not([aria-disabled='true']) {
+  transform: scale(0.97);
+}
+
+.button:disabled,
+.button[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Mientras carga NO se atenúa: sigue siendo el elemento activo de la pantalla. */
+.button[aria-busy='true'] {
+  opacity: 1;
+  cursor: progress;
+}
+
+/* --- Contenido y cargador -------------------------------------------------
+   El texto permanece en el DOM y solo se oculta con opacidad. Así el botón
+   conserva EXACTAMENTE su ancho al pasar a cargando: cero layout shift, sin
+   necesidad de medir nada.                                                  */
+
+.contenido {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.contenido[data-cargando='true'] {
+  opacity: 0;
+}
+
+.cargador {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* --- Tamaños -------------------------------------------------------------- */
+
+.sm {
+  min-height: 36px; /* solo para barras densas de escritorio */
+  padding: 0 var(--space-3);
+  font-size: var(--t-caption-size);
+  gap: var(--space-1);
+}
+
+.md {
+  min-height: var(--tap-min); /* 44px — objetivo táctil */
+  padding: 0 var(--space-4);
+  font-size: var(--t-callout-size);
+}
+
+.lg {
+  min-height: 52px;
+  padding: 0 var(--space-6);
+  font-size: var(--t-body-size);
+}
+
+.iconOnly.sm {
+  width: 36px;
+  padding: 0;
+}
+.iconOnly.md {
+  width: var(--tap-min);
+  padding: 0;
+}
+.iconOnly.lg {
+  width: 52px;
+  padding: 0;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+/* --- Variantes ------------------------------------------------------------ */
+
+/* Primario = TINTA, no oro. El oro es marca, no acción (spec §2.1). */
+.primary {
+  background: var(--action);
+  color: var(--action-fg);
+  box-shadow: var(--shadow-1);
+}
+.primary:hover:not(:disabled) {
+  background: var(--action-hover);
+  box-shadow: var(--shadow-2);
+}
+
+.secondary {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+.secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text-2);
+}
+.ghost:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+/*
+  El texto NO puede ser blanco fijo. El rojo del tema oscuro (#FF5A52) es
+  claro, y blanco sobre él da 3.07:1 — reprueba AA. `--text-on-accent` ya
+  resuelve esto por tema: blanco sobre el rojo oscuro de claro (6.22:1) y
+  casi negro sobre el rojo claro de oscuro (6.44:1).
+*/
+.danger {
+  background: var(--danger);
+  color: var(--text-on-accent);
+}
+.danger:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+/*
+  Variante ceremonial. Reservada al CTA comercial (adquirir membresía).
+  NO usar como botón primario de la app: si el oro aparece en todas partes
+  deja de significar algo.
+
+  El texto va en negro sobre el oro: 7.94:1, cumple AAA.
+*/
+.gold {
+  background-image: var(--gold-sheen);
+  background-size: 200% 100%;
+  background-position: 0% 0;
+  color: var(--n-1000);
+  box-shadow: var(--shadow-2);
+
+  transition:
+    background-position var(--dur-slow) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-instant) var(--ease-out);
+}
+
+/* El brillo VIAJA por el botón al pasar por encima: luz moviéndose sobre metal. */
+.gold:hover:not(:disabled) {
+  background-position: 28% 0;
+  box-shadow: var(--shadow-3);
+}
+
+/* --- Iconos --------------------------------------------------------------- */
+
+.icono {
+  flex-shrink: 0;
+  width: 1.15em;
+  height: 1.15em;
+}

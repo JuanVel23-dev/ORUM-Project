@@ -1,0 +1,69 @@
+.form {
+  display: contents;
+}
+
+.boton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+
+  font-family: var(--font-sans);
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  letter-spacing: var(--t-caption-tracking);
+  white-space: nowrap;
+  color: var(--text-2);
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-instant) var(--ease-out);
+}
+
+.boton:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.boton:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Desactivar es destructivo: el rojo aparece solo al apuntar, para no teñir
+   toda la lista de advertencias en reposo. */
+.boton[data-destructivo='true']:hover:not(:disabled) {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+/*
+  Mientras el servidor confirma NO se atenúa el botón: la interfaz ya está
+  mostrando el resultado, así que atenuar sugeriría que algo va mal. Solo se
+  bloquea el puntero para evitar el doble envío.
+*/
+.boton[data-pendiente='true'] {
+  cursor: progress;
+  pointer-events: none;
+}
+
+.icono {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}

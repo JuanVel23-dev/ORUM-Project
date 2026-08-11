@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...excepto la plantilla, que SÍ debe viajar con el repo: sin ella nadie
+# puede levantar el proyecto en una máquina nueva. No contiene secretos.
+!.env.example
 
 # vercel
 .vercel

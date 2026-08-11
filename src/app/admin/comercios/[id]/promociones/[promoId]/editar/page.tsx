@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import { requireRol } from '@/lib/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { PageHeader } from '@/components/ui/layout'
+import { FormCard } from '@/components/ui/form-card'
 import { PromocionForm } from '../../promocion-form'
 
 export const metadata = { title: 'Editar promoción · ORUM' }
@@ -28,9 +30,9 @@ export default async function EditarPromocionPage({
   if (!promocion) notFound()
 
   return (
-    <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>Editar promoción</h1>
-      <PromocionForm comercioId={comercioId} tipos={tipos ?? []} promocion={promocion} />
-    </div>
+    <>
+      <PageHeader title="Editar promoción" description={promocion.titulo} />
+      <FormCard><PromocionForm comercioId={comercioId} tipos={tipos ?? []} promocion={promocion} /></FormCard>
+    </>
   )
 }
