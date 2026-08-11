@@ -1,6 +1,6 @@
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { Badge, DataTable, EmptyState, LinkButton, PageHeader, SearchForm } from '@/components/ui'
+import { Badge, ComercioLogo, DataTable, EmptyState, LinkButton, PageHeader, SearchForm } from '@/components/ui'
 
 export const metadata = { title: 'Comercios · ORUM' }
 
@@ -16,7 +16,7 @@ export default async function ComerciosPage({
   const admin = createAdminClient()
   let query = admin
     .from('comercios')
-    .select('id, nombre, descripcion, activo')
+    .select('id, nombre, descripcion, activo, logo_url')
     .is('deleted_at', null)
     .order('nombre')
   if (busqueda) query = query.ilike('nombre', `%${busqueda}%`)
@@ -36,6 +36,7 @@ export default async function ComerciosPage({
         <DataTable>
           <thead>
             <tr>
+              <th>Logo</th>
               <th>Nombre</th>
               <th>Descripción</th>
               <th>Estado</th>
@@ -45,6 +46,9 @@ export default async function ComerciosPage({
           <tbody>
             {comercios.map((c) => (
               <tr key={c.id}>
+                <td>
+                  <ComercioLogo logoUrl={c.logo_url} nombre={c.nombre} size={32} />
+                </td>
                 <td>{c.nombre}</td>
                 <td className="orum-muted">{c.descripcion ?? '—'}</td>
                 <td>

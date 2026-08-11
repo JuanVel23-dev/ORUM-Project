@@ -71,7 +71,7 @@ export default async function MiembrosHomePage({
   // Comercios cuyo nombre coincide con la búsqueda (y, si aplica, con los filtros de comercio/marca/ciudad).
   let queryPorNombre = supabase
     .from('comercios')
-    .select('id, nombre, descripcion, marca_id')
+    .select('id, nombre, descripcion, marca_id, logo_url')
     .eq('activo', true)
     .is('deleted_at', null)
   if (busqueda) queryPorNombre = queryPorNombre.ilike('nombre', `%${busquedaLike}%`)
@@ -95,7 +95,13 @@ export default async function MiembrosHomePage({
     idsPorPromocion = Array.from(new Set((promosCoincidentes ?? []).map((p) => p.comercio_id)))
   }
 
-  type ComercioBase = { id: number; nombre: string; descripcion: string | null; marca_id: number | null }
+  type ComercioBase = {
+    id: number
+    nombre: string
+    descripcion: string | null
+    marca_id: number | null
+    logo_url: string | null
+  }
 
   // Comercios cuyo id vino de un match de promoción, acotados también por comercio/marca/ciudad si aplica.
   const queryPorPromocion =
@@ -103,7 +109,7 @@ export default async function MiembrosHomePage({
       ? (() => {
           let q = supabase
             .from('comercios')
-            .select('id, nombre, descripcion, marca_id')
+            .select('id, nombre, descripcion, marca_id, logo_url')
             .eq('activo', true)
             .is('deleted_at', null)
             .in('id', idsPorPromocion)
@@ -170,6 +176,7 @@ export default async function MiembrosHomePage({
     nombre: c.nombre,
     descripcion: c.descripcion,
     marcaNombre: c.marca_id ? (nombreMarca.get(c.marca_id) ?? null) : null,
+    logoUrl: c.logo_url,
     ciudades: Array.from(ciudadesPorComercio.get(c.id) ?? []),
     promociones: promocionesPorComercio.get(c.id) ?? [],
   }))

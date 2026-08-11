@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { cambiarEstadoComercio, cambiarEstadoAccesoComercio } from '../actions'
 import { cambiarEstadoSucursal } from '../sucursales-actions'
 import { cambiarEstadoPromocion } from '../promociones-actions'
-import { Badge, DataTable, EmptyState, LinkButton, PageHeader, Row } from '@/components/ui'
+import { Badge, ComercioLogo, DataTable, EmptyState, LinkButton, PageHeader, Row } from '@/components/ui'
 
 export const metadata = { title: 'Ficha de comercio · ORUM' }
 
@@ -66,10 +66,15 @@ export default async function FichaComercioPage({ params }: { params: Promise<{ 
       />
 
       <div className="orum-card" style={{ marginBottom: '1.25rem' }}>
-        <p><strong>Correo:</strong> {correo}</p>
-        <p><strong>Descripción:</strong> {comercio.descripcion ?? '—'}</p>
-        <p><strong>Marca:</strong> {marca?.nombre ?? '—'}</p>
-        <p><strong>Categoría:</strong> {categoria?.nombre ?? '—'}</p>
+        <Row gap="1rem" style={{ alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+          <ComercioLogo logoUrl={comercio.logo_url} nombre={comercio.nombre} size={72} />
+          <div>
+            <p><strong>Correo:</strong> {correo}</p>
+            <p><strong>Descripción:</strong> {comercio.descripcion ?? '—'}</p>
+            <p><strong>Marca:</strong> {marca?.nombre ?? '—'}</p>
+            <p><strong>Categoría:</strong> {categoria?.nombre ?? '—'}</p>
+          </div>
+        </Row>
 
         <Row gap="1.5rem" style={{ marginTop: '0.75rem', flexWrap: 'wrap' }}>
           <Row gap="0.5rem" style={{ alignItems: 'center' }}>
