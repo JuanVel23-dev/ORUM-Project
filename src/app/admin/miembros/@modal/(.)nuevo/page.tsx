@@ -1,7 +1,7 @@
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { OverlayRuta } from '@/components/shell/overlay-ruta'
-import { MiembroForm } from '../../miembro-form'
+import { MiembroForm } from '../../_components/miembro-form'
 
 /**
  * Registrar miembro, interceptado.

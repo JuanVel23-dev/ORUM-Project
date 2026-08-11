@@ -3,7 +3,7 @@
 import { useOptimistic, useRef, useTransition, type ReactNode } from 'react'
 import { Check, Undo2 } from 'lucide-react'
 import { Spinner } from './spinner'
-import { toque } from '@/lib/haptica'
+import { toque } from '@/lib/shared/haptica'
 import styles from './accion-estado.module.css'
 
 /**

@@ -8,7 +8,7 @@ import {
   UserPlus,
   Users,
 } from 'lucide-react'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'

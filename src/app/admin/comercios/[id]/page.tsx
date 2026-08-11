@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { MapPin, MoreHorizontal, Pencil, Tag } from 'lucide-react'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AccionEstado } from '@/components/ui/accion-estado'
 import { Badge } from '@/components/ui/badge'

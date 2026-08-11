@@ -1,5 +1,5 @@
 import { MoreHorizontal, Pencil, UserPlus } from 'lucide-react'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AccionEstado } from '@/components/ui/accion-estado'
 import { Avatar } from '@/components/ui/avatar'

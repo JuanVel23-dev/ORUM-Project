@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { OverlayRuta } from '@/components/shell/overlay-ruta'
-import { PlanForm } from '../../../plan-form'
+import { PlanForm } from '../../../_components/plan-form'
 
 export default async function EditarPlanInterceptado({
   params,

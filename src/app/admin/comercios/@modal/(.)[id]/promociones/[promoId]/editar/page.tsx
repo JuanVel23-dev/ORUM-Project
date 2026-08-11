@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { OverlayRuta } from '@/components/shell/overlay-ruta'
-import { PromocionForm } from '../../../../../[id]/promociones/promocion-form'
+import { PromocionForm } from '../../../../../[id]/promociones/_components/promocion-form'
 
 export default async function EditarPromocionInterceptada({
   params,

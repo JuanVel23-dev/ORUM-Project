@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Check, Copy } from 'lucide-react'
-import { toque } from '@/lib/haptica'
+import { toque } from '@/lib/shared/haptica'
 import styles from './copiar.module.css'
 
 /**

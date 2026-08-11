@@ -34,7 +34,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { ToastProvider, useToast } from '@/components/ui/toast'
 import { Checkbox, Radio, Switch } from '@/components/ui/toggle'
-import { derivarEstadoMembresia } from '@/lib/membresias'
+import { derivarEstadoMembresia } from '@/lib/miembros/membresias'
 import styles from './gallery.module.css'
 
 /* ========================================================================== */

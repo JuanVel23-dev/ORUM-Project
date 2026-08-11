@@ -1,7 +1,7 @@
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { PageHeader } from '@/components/ui/layout'
 import { FormCard } from '@/components/ui/form-card'
-import { PlanForm } from '../plan-form'
+import { PlanForm } from '../_components/plan-form'
 
 export const metadata = { title: 'Nuevo plan · ORUM' }
 

@@ -1,6 +1,6 @@
 import { CreditCard, MoreHorizontal, Pencil, Search, UserPlus } from 'lucide-react'
-import { requireRol } from '@/lib/auth'
-import { buscarMiembros, type MiembroEncontrado } from '@/lib/miembros'
+import { requireRol } from '@/lib/auth/auth'
+import { buscarMiembros, type MiembroEncontrado } from '@/lib/miembros/buscar-miembros'
 import { Avatar } from '@/components/ui/avatar'
 import { Badge, StatusBadge, VenceEn } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

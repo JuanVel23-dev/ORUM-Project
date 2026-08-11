@@ -1,15 +1,15 @@
 import { notFound } from 'next/navigation'
 import { Pencil } from 'lucide-react'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { derivarEstadoMembresia, type EstadoMembresia } from '@/lib/membresias'
+import { derivarEstadoMembresia, type EstadoMembresia } from '@/lib/miembros/membresias'
 import { Badge, StatusBadge, VenceEn } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Copiar } from '@/components/ui/copiar'
 import { EmptyState } from '@/components/ui/feedback'
 import { PageHeader, Section, Stack } from '@/components/ui/layout'
-import { RenovarForm } from './renovar-form'
+import { RenovarForm } from './_components/renovar-form'
 import styles from './ficha.module.css'
 
 export const metadata = { title: 'Ficha de miembro · ORUM' }
@@ -73,6 +73,11 @@ export default async function FichaMiembroPage({
     miembro.ciudad_id
       ? admin.from('ciudades').select('nombre').eq('id', miembro.ciudad_id).maybeSingle()
       : Promise.resolve({ data: null }),
+    admin.from('bitacora_actividad')
+      .select('id, actor_id, accion, datos_anteriores, datos_nuevos, fecha_hora')
+      .eq('entidad', 'miembro')
+      .eq('entidad_id', miembroId)
+      .order('fecha_hora', { ascending: false }),
   ])
 
   // Los planes activos no bastan para nombrar el historial: una membresía

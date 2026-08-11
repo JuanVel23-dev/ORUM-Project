@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { OverlayRuta } from '@/components/shell/overlay-ruta'
-import { SucursalForm } from '../../../../[id]/sucursales/sucursal-form'
+import { SucursalForm } from '../../../../[id]/sucursales/_components/sucursal-form'
 
 export default async function NuevaSucursalInterceptada({
   params,

@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/ui/layout'
 import { FormCard } from '@/components/ui/form-card'
-import { EditarMiembroForm } from './editar-miembro-form'
+import { EditarMiembroForm } from './_components/editar-miembro-form'
 
 export const metadata = { title: 'Editar miembro · ORUM' }
 

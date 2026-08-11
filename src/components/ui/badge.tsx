@@ -5,7 +5,7 @@ import {
   venceProximamente,
   type EstadoDerivado,
   type MotivoInactiva,
-} from '@/lib/membresias'
+} from '@/lib/miembros/membresias'
 import styles from './badge.module.css'
 
 export type BadgeTone =

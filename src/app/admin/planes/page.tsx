@@ -1,5 +1,5 @@
 import { CreditCard, MoreHorizontal, Pencil } from 'lucide-react'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AccionEstado } from '@/components/ui/accion-estado'
 import { Badge } from '@/components/ui/badge'
@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/feedback'
 import { PageHeader } from '@/components/ui/layout'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { cambiarEstadoPlan } from './actions'
+import { Badge, DataTable, EmptyState, LinkButton, PageHeader, Row } from '@/components/ui'
 
 export const metadata = { title: 'Planes · ORUM' }
 

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { animate } from 'motion'
 import { X } from 'lucide-react'
-import { SPRING_UI, prefiereMovimientoReducido } from '@/lib/motion'
+import { SPRING_UI, prefiereMovimientoReducido } from '@/lib/shared/motion'
 import { Button } from './button'
 import styles from './modal.module.css'
 

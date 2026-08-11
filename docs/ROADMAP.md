@@ -13,8 +13,8 @@
 ORUM es una plataforma web de **club de beneficios**: conecta a sus **miembros** con una red
 de **comercios aliados** para que accedan a descuentos, ofertas y promociones.
 
-Documento de requisitos original: [`Contexto_ORUM_txt`](../Contexto_ORUM_txt) (raíz del repo).
-Esquema de base de datos: [`Esquema_BD.txt`](../Esquema_BD.txt) y `Esquema_ORUM.png`.
+Documento de requisitos original: [`Contexto_ORUM.txt`](referencia/Contexto_ORUM.txt).
+Esquema de base de datos: [`Esquema_BD.txt`](referencia/Esquema_BD.txt) y [`Esquema_ORUM.png`](referencia/Esquema_ORUM.png).
 
 La plataforma tiene **4 portales**, cada uno para un tipo de usuario:
 
@@ -147,17 +147,92 @@ tres modos de tema) y convierte la app en PWA instalable.
 - Spec: [`docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md`](superpowers/specs/2026-08-04-rediseno-visual-orum-design.md)
 - Plan: [`docs/superpowers/plans/2026-08-05-rediseno-visual-plan.md`](superpowers/plans/2026-08-05-rediseno-visual-plan.md)
 
-### ⬜ Fase 4 — Métricas y trazabilidad
+**Documentos de diseño/plan de esta fase:**
+- Spec: [`docs/superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md`](superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md)
+- Plan: [`docs/superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md`](superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md)
 
-- Tabla `bitacora_actividad` para trazabilidad fina (quién hizo qué y cuándo) — **RF-19**.
-- Dashboard de métricas (cambios de la reunión): ventas por comercio, miembros nuevos por periodo,
-  cuántas veces un miembro usó la membresía en cada comercio, membresías vendidas por empleado, etc.
+Requisitos cubiertos: **RF-17** (comercios) + **RF-18** (promociones).
+
+### ✅ Fase 4 — Métricas y trazabilidad
+
+**Implementada en `worktree-fase4-metricas-trazabilidad`, verificada automáticamente (41/41 tests,
+`tsc` limpio, `pnpm build` OK). Pendiente prueba manual del usuario en navegador antes de dar por
+cerrada del todo** (login como super_admin/empleado, recorrer las pantallas nuevas, y sembrar
+manualmente algunas filas de `ventas` en Supabase para ver las tablas de comercio con datos reales).
+
+- **Bitácora de actividad** (`bitacora_actividad`, ya existía en Supabase sin usar) — acotada a
+  eventos de miembros (D1 del spec): alta, edición y renovación, instrumentados en
+  `miembros/actions.ts` vía `registrarActividad` (`src/lib/bitacora.ts`), best-effort (nunca
+  bloquea la operación principal si falla el insert).
+  - Sección "Historial de actividad" en la ficha del miembro (`/admin/miembros/[id]`).
+  - Listado global `/admin/bitacora` (solo super_admin) con filtros por miembro, fecha y tipo
+    de acción.
+- **Dashboard de métricas** `/admin/metricas` (solo super_admin), filtrable por rango de fechas:
+  miembros nuevos en el periodo, membresías vendidas por empleado, ventas por comercio, uso de
+  membresía por miembro y comercio. Agregaciones en funciones puras testeadas
+  (`src/lib/metricas.ts`); las dos métricas basadas en `ventas` muestran estado vacío hasta que
+  exista la Herramienta para Comercios (fase posterior) que alimenta esa tabla — comportamiento
+  esperado, no un bug (D4 del spec).
+- Se tipó `ventas` en `database.types.ts` (tabla ya existente en Supabase, sin usar hasta ahora).
+
+**Documentos de diseño/plan de esta fase:**
+- Spec: [`docs/superpowers/specs/2026-07-31-fase4-metricas-trazabilidad-design.md`](superpowers/specs/2026-07-31-fase4-metricas-trazabilidad-design.md)
+- Plan: [`docs/superpowers/plans/2026-07-31-fase4-metricas-trazabilidad-plan.md`](superpowers/plans/2026-07-31-fase4-metricas-trazabilidad-plan.md)
+
+Requisitos cubiertos: **RF-19** (trazabilidad) + parte de las métricas pedidas en la reunión.
+
+### ✅ Fase 5 — Portal de Miembros
+
+**Implementada en `worktree-portal-miembros`, verificada automáticamente (51/51 tests, `tsc`
+limpio, `pnpm lint` limpio, `pnpm build` OK — rutas públicas confirmadas: `/miembros`,
+`/miembros/login`, `/miembros/perfil`, `/miembros/inactiva`). Pendiente prueba manual del usuario
+en navegador con datos reales de Supabase antes de dar por cerrada del todo** (login con número de
+membresía real, membresía vencida/suspendida → bloqueo, búsqueda + cada filtro, QR escaneado,
+botón de soporte).
+
+- **Login por número de membresía** (`/miembros/login`, RF-06) — resuelve el número al correo real
+  vía `resolverCorreoPorNumeroMembresia` (`src/lib/miembros/auth-miembro.ts`, único punto de este
+  portal que usa el admin client, porque corre antes de que exista sesión) y luego
+  `signInWithPassword`. Mensaje de error genérico ante número inválido o contraseña incorrecta (no
+  revela cuál de los dos falló).
+- **RLS activo en Supabase** para `miembros`, `membresias`, `comercios`, `sucursales`,
+  `promociones` (más lectura abierta de catálogos de referencia) — verificado manualmente por el
+  usuario antes de implementar (miembro ve solo su propia fila/membresía; catálogo de comercios
+  visible completo). Todo el portal usa el cliente de sesión (`createClient()`), nunca
+  `createAdminClient()`, salvo la excepción de login ya mencionada.
+- **Guardias propias del portal** (`src/lib/miembros/requerir-miembro.ts`): `requireRolMiembro`
+  (solo rol) y `requireMiembroVigente` (rol + membresía vigente). Separadas a propósito — el
+  layout guardado y `/miembros/inactiva` usan la primera para no crear un bucle de redirect.
+- **Ruta guardada bajo route group** `src/app/miembros/(portal)/**` (invisible en la URL): se
+  detectó durante la implementación que un layout guardado en `src/app/miembros/layout.tsx` a
+  secas envolvería también a `/miembros/login`, causando un bucle infinito de redirect para
+  visitantes no autenticados. `/miembros/login` vive como hermano fuera del grupo.
+- **Perfil de solo lectura + QR** (`/miembros/perfil`, RF-07 y RF-14) — datos del miembro,
+  membresía vigente (plan, tipo, vigencia) y QR (`react-qr-code`) con `numero_membresia` como
+  payload (decisión ya tomada en Fase 2). Sin formulario de edición.
+- **Home con búsqueda y filtros** (`/miembros`, RF-08 a RF-12) — una sola pantalla: sin filtros
+  se ve todo el catálogo activo; búsqueda libre (nombre de comercio o título de promoción) y tres
+  filtros combinables (comercio, marca, ciudad vía sucursales). Las búsquedas usan siempre
+  llamadas parametrizadas (`.ilike()`/`.eq()`/`.in()`), nunca un `.or()` con texto de usuario
+  interpolado, para evitar inyección de filtros PostgREST.
+- **Pantalla de bloqueo** (`/miembros/inactiva`) — si la membresía no está vigente
+  (`esMembresiaVigente`, función pura testeada en `src/lib/miembros/membresia-vigente.ts`, que
+  chequea `estado` **y** `fecha_fin` porque no hay job que actualice `estado` solo al vencer).
+- **Soporte por WhatsApp** (RF-13) — botón persistente en el layout del portal, leído desde
+  `configuracion.whatsapp_soporte` (tabla ya existente en Supabase, ahora en uso).
+- **Kit de UI ampliado**: `Select`, `Card`/`CardGrid`, `QrCode`, `WhatsAppButton` — nuevos
+  componentes en `src/components/ui/`, reutilizables por los portales futuros (Público,
+  Herramienta de Comercios).
+
+**Documentos de diseño/plan de esta fase:**
+- Spec: [`docs/superpowers/specs/2026-08-09-portal-miembros-design.md`](superpowers/specs/2026-08-09-portal-miembros-design.md)
+- Plan (15 tareas): [`docs/superpowers/plans/2026-08-09-portal-miembros-plan.md`](superpowers/plans/2026-08-09-portal-miembros-plan.md)
+
+Requisitos cubiertos: **RF-06 a RF-14** (login, perfil, descuentos, búsqueda y filtros, soporte, QR).
 
 ### ⬜ Fases posteriores — Portales de cara al usuario final
 
 - **Portal Público** — RF-01 a RF-04 (info, tiendas aliadas, precios, botón WhatsApp para adquirir).
-- **Portal de Miembros** — RF-06 a RF-14 (login por número, perfil, descuentos, búsqueda y filtros,
-  soporte, **QR** que identifica al miembro).
 - **Herramienta para Comercios** — RF-20 a RF-22 (login, venta por QR, venta por número de membresía).
 
 ---
@@ -167,7 +242,7 @@ tres modos de tema) y convierte la app en PWA instalable.
 | RF | Descripción | Fase | Estado |
 |----|-------------|------|--------|
 | RF-01–04 | Portal Público (info, tiendas, precios, adquirir) | Posterior | ⬜ |
-| RF-06–14 | Portal Miembros (login, perfil, descuentos, filtros, soporte, QR) | Posterior | ⬜ |
+| RF-06–14 | Portal Miembros (login, perfil, descuentos, filtros, soporte, QR) | Fase 5 | ✅ |
 | RF-15 | Gestión de planes de membresía | Fase 2 | ✅ |
 | RF-16 | Gestión de usuarios (staff + miembros) | Fase 1 + 2 | ✅ |
 | RF-17 | Gestión de comercios | Fase 3 | ✅ |

@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/ui/layout'
 import { FormCard } from '@/components/ui/form-card'
-import { PromocionForm } from '../../promocion-form'
+import { PromocionForm } from '../../_components/promocion-form'
 
 export const metadata = { title: 'Editar promoción · ORUM' }
 

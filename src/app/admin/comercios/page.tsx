@@ -1,5 +1,5 @@
 import { MoreHorizontal, Pencil, Search, Store } from 'lucide-react'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -60,7 +60,7 @@ export default async function ComerciosPage({
   const admin = createAdminClient()
   let query = admin
     .from('comercios')
-    .select('id, nombre, descripcion, activo')
+    .select('id, nombre, descripcion, activo, logo_url')
     .is('deleted_at', null)
     .order('nombre')
 

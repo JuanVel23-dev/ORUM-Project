@@ -1,8 +1,8 @@
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/ui/layout'
 import { FormCard } from '@/components/ui/form-card'
-import { ComercioForm } from '../comercio-form'
+import { ComercioForm } from '../_components/comercio-form'
 
 export const metadata = { title: 'Crear comercio · ORUM' }
 

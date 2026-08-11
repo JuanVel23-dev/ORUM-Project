@@ -1,6 +1,6 @@
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { OverlayRuta } from '@/components/shell/overlay-ruta'
-import { UsuarioForm } from '../../nuevo/usuario-form'
+import { UsuarioForm } from '../../nuevo/_components/usuario-form'
 
 export default async function NuevoUsuarioInterceptado() {
   await requireRol('super_admin')

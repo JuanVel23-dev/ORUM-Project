@@ -1,7 +1,7 @@
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { PageHeader } from '@/components/ui/layout'
 import { FormCard } from '@/components/ui/form-card'
-import { UsuarioForm } from './usuario-form'
+import { UsuarioForm } from './_components/usuario-form'
 
 export const metadata = { title: 'Crear usuario · ORUM' }
 

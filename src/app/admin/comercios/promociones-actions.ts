@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getPerfilActual } from '@/lib/auth'
-import { validarValorPromocion } from '@/lib/promociones'
+import { getPerfilActual } from '@/lib/auth/auth'
+import { validarValorPromocion } from '@/lib/comercios/promociones'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 
 async function exigirSuperAdmin(): Promise<boolean> {

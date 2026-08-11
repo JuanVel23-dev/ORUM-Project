@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { OverlayRuta } from '@/components/shell/overlay-ruta'
-import { EditarMiembroForm } from '../../../[id]/editar/editar-miembro-form'
+import { EditarMiembroForm } from '../../../[id]/editar/_components/editar-miembro-form'
 
 export default async function EditarMiembroInterceptado({
   params,

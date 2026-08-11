@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardBody, CardHeader } from '@/components/ui/card'
 import { Grid, PageHeader, Section, Stack } from '@/components/ui/layout'
 import { SegmentedControl } from '@/components/ui/segmented'
-import type { MiembroEncontrado } from '@/lib/miembros'
+import type { MiembroEncontrado } from '@/lib/miembros/buscar-miembros'
 import type { RolCodigo } from '@/lib/supabase/database.types'
 
 /*

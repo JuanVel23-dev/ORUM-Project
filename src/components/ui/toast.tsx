@@ -17,7 +17,7 @@ import {
   amortiguarBorde,
   prefiereMovimientoReducido,
   proyectarMomento,
-} from '@/lib/motion'
+} from '@/lib/shared/motion'
 import { useHidratado } from '../use-hidratado'
 import styles from './toast.module.css'
 

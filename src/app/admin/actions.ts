@@ -1,7 +1,7 @@
 'use server'
 
-import { requireRol } from '@/lib/auth'
-import { buscarMiembros, type MiembroEncontrado } from '@/lib/miembros'
+import { requireRol } from '@/lib/auth/auth'
+import { buscarMiembros, type MiembroEncontrado } from '@/lib/miembros/buscar-miembros'
 
 /**
  * Búsqueda de miembros para la paleta de comandos del shell.

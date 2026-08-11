@@ -1,6 +1,6 @@
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { OverlayRuta } from '@/components/shell/overlay-ruta'
-import { PlanForm } from '../../plan-form'
+import { PlanForm } from '../../_components/plan-form'
 
 /**
  * `detent="medium"`: son cuatro campos. Según la HIG, el detent medio permite

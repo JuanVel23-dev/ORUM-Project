@@ -8,7 +8,7 @@ import {
   amortiguarBorde,
   prefiereMovimientoReducido,
   proyectarMomento,
-} from '@/lib/motion'
+} from '@/lib/shared/motion'
 import styles from './sheet.module.css'
 
 /**

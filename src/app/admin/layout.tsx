@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { cerrarSesion } from '@/app/login/actions'
 import { AppShell } from '@/components/shell/app-shell'
 import { RouteProgress } from '@/components/shell/route-progress'

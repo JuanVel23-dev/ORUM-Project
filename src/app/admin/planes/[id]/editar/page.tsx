@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
-import { requireRol } from '@/lib/auth'
+import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/ui/layout'
 import { FormCard } from '@/components/ui/form-card'
-import { PlanForm } from '../../plan-form'
+import { PlanForm } from '../../_components/plan-form'
 
 export const metadata = { title: 'Editar plan · ORUM' }
 

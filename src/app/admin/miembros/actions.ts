@@ -3,13 +3,14 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getPerfilActual, type PerfilActual } from '@/lib/auth'
-import { generarPassword } from '@/lib/password'
+import { getPerfilActual, type PerfilActual } from '@/lib/auth/auth'
+import { generarPassword } from '@/lib/shared/password'
+import { registrarActividad } from '@/lib/bitacora/bitacora'
 import {
   generarNumeroMembresia,
   calcularFechaFin,
   calcularFechaInicioRenovacion,
-} from '@/lib/membresias'
+} from '@/lib/miembros/membresias'
 
 type Admin = ReturnType<typeof createAdminClient>
 
@@ -96,7 +97,7 @@ export async function registrarMiembro(
   // 3) Plan activo y no eliminado.
   const { data: plan } = await admin
     .from('planes_membresia')
-    .select('id, duracion_meses, activo')
+    .select('id, nombre, duracion_meses, activo')
     .eq('id', plan_id)
     .is('deleted_at', null)
     .maybeSingle()
@@ -196,6 +197,19 @@ export async function registrarMiembro(
     return { error: `No se pudo registrar la membresía: ${errMembresia.message}` }
   }
 
+  await registrarActividad(admin, {
+    actorId: actor.userId,
+    accion: 'alta',
+    entidadId: miembroId,
+    datosNuevos: {
+      nombres,
+      apellidos,
+      cedula,
+      plan_nombre: plan.nombre,
+      precio_pagado,
+    },
+  })
+
   revalidatePath('/admin/miembros')
   return { ok: true, numero, password, nombre: `${nombres} ${apellidos}`.trim() }
 }
@@ -226,7 +240,7 @@ export async function renovarMembresia(
 
   const { data: plan } = await admin
     .from('planes_membresia')
-    .select('id, duracion_meses, activo')
+    .select('id, nombre, duracion_meses, activo')
     .eq('id', plan_id)
     .is('deleted_at', null)
     .maybeSingle()
@@ -278,6 +292,18 @@ export async function renovarMembresia(
     }
   }
 
+  await registrarActividad(admin, {
+    actorId: actor.userId,
+    accion: 'renovacion',
+    entidadId: miembro_id,
+    datosNuevos: {
+      plan_nombre: plan.nombre,
+      fecha_inicio,
+      fecha_fin,
+      precio_pagado,
+    },
+  })
+
   revalidatePath('/admin/miembros')
   revalidatePath(`/admin/miembros/${miembro_id}`)
   return {}
@@ -316,6 +342,13 @@ export async function editarMiembro(
 
   const admin = createAdminClient()
 
+  // Snapshot antes de editar, para la bitácora.
+  const { data: miembroAntes } = await admin
+    .from('miembros')
+    .select('nombres, apellidos, cedula, telefono, direccion, ciudad_id')
+    .eq('id', miembroId)
+    .maybeSingle()
+
   // Cédula única, excluyendo al propio miembro.
   const { data: cedulaExiste } = await admin
     .from('miembros')
@@ -331,6 +364,14 @@ export async function editarMiembro(
     .update({ nombres, apellidos, cedula, telefono, direccion, ciudad_id })
     .eq('id', miembroId)
   if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
+
+  await registrarActividad(admin, {
+    actorId: actor.userId,
+    accion: 'edicion',
+    entidadId: miembroId,
+    datosAnteriores: miembroAntes,
+    datosNuevos: { nombres, apellidos, cedula, telefono, direccion, ciudad_id },
+  })
 
   // Correo (vía Auth), sólo si cambió. El formato ya se validó arriba.
   if (perfilId && correo && correo !== correoOriginal) {

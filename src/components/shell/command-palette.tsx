@@ -15,7 +15,7 @@ import {
 import { buscarMiembrosAction } from '@/app/admin/actions'
 import { StatusBadge } from '@/components/ui/badge'
 import { Spinner } from '@/components/ui/spinner'
-import type { MiembroEncontrado } from '@/lib/miembros'
+import type { MiembroEncontrado } from '@/lib/miembros/buscar-miembros'
 import type { RolCodigo } from '@/lib/supabase/database.types'
 import styles from './command-palette.module.css'
 
