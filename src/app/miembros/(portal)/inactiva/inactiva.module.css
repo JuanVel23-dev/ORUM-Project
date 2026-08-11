@@ -1,0 +1,43 @@
+.centro {
+  max-width: 460px;
+  margin: var(--space-9) auto;
+  text-align: center;
+}
+
+.icono {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--space-5);
+  border-radius: var(--radius-full);
+
+  /* Ámbar atenuado, no rojo: la membresía está en pausa, no hay nada roto ni
+     nadie ha hecho nada mal. El rojo aquí leería como sanción. */
+  color: var(--warning);
+  background: var(--warning-bg);
+}
+
+.titulo {
+  margin-bottom: var(--space-3);
+
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+}
+
+.texto {
+  margin-bottom: var(--space-6);
+
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+}
+
+.acciones {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}

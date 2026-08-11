@@ -478,6 +478,17 @@
   max-width: var(--content-max);
   margin: 0 auto;
   padding: var(--space-6) var(--space-4) var(--space-10);
+
+  /*
+    Contenedor de consulta para TODAS las páginas. El ancho útil del contenido
+    no es el del viewport: depende de si la barra lateral está abierta o en
+    rail. Una página que se adapte con `@media` se equivoca en ~200px justo en
+    el rango donde importa (portátiles), así que el sitio correcto para
+    preguntar es aquí. Nombrado para que una página pueda dirigirse a él
+    aunque introduzca contenedores propios más adentro.
+  */
+  container-type: inline-size;
+  container-name: contenido;
 }
 
 @media (min-width: 768px) {

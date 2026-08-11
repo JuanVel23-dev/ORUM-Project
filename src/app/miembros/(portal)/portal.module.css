@@ -1,0 +1,257 @@
+.portal {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* ==========================================================================
+   CABECERA  ·  capa de material
+   ========================================================================== */
+
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+
+  /*
+    Material translúcido, no franja opaca: el contenido pasa por debajo y se
+    ve que sigue habiendo página. Sin esto la cabecera corta la pantalla.
+  */
+  background: var(--material);
+  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+@media (min-width: 768px) {
+  .cabecera {
+    padding: var(--space-3) var(--space-6);
+    gap: var(--space-6);
+  }
+}
+
+/* Si el usuario pide menos transparencia, se vuelve sólida. */
+@media (prefers-reduced-transparency: reduce) {
+  .cabecera {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+
+.marca {
+  flex-shrink: 0;
+  text-decoration: none;
+
+  font-size: var(--t-title-3-size);
+  font-weight: 680;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  /*
+    El wordmark es el único oro de la cabecera. Barrido metálico calibrado por
+    tema en globals.css; el color plano es el respaldo si no hay soporte de
+    background-clip.
+  */
+  color: var(--brand);
+  background: var(--gold-sheen);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .marca {
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.marca:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+  border-radius: var(--radius-xs);
+}
+
+/* Navegación de escritorio: en móvil la reemplaza la barra inferior. */
+.nav {
+  display: none;
+  flex: 1;
+  gap: var(--space-1);
+}
+
+@media (min-width: 768px) {
+  .nav {
+    display: flex;
+  }
+}
+
+.enlace {
+  position: relative;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-callout-size);
+  font-weight: 510;
+  color: var(--text-2);
+  text-decoration: none;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.enlace:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.enlace:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.enlaceActivo {
+  color: var(--text);
+  font-weight: 590;
+}
+
+/* El indicador es una barra, no un cambio de color: sobrevive a la ceguera
+   al color y no depende del peso tipográfico para leerse. */
+.enlaceActivo::after {
+  content: '';
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: 2px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--text);
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+/* El botón de WhatsApp sobra en pantallas estrechas: vive en el menú de cuenta. */
+.soporteEscritorio {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .soporteEscritorio {
+    display: inline-flex;
+  }
+}
+
+.correoMenu {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+/* ==========================================================================
+   CONTENIDO
+   ========================================================================== */
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-10);
+
+  /* Mismo contenedor de consulta que el shell admin, para que los módulos
+     de página se adapten al ancho útil y no al del viewport. */
+  container-type: inline-size;
+  container-name: contenido;
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding: var(--space-7) var(--space-6) var(--space-11);
+  }
+}
+
+/* Hueco para la barra inferior en móvil. */
+@media (max-width: 767px) {
+  .main {
+    padding-bottom: calc(
+      var(--tabbar-h) + var(--space-8) + env(safe-area-inset-bottom, 0px)
+    );
+  }
+}
+
+/* ==========================================================================
+   BARRA INFERIOR  ·  <768px
+   ========================================================================== */
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-sticky);
+
+  display: flex;
+  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+  background: var(--material);
+  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  border-top: 1px solid var(--border-subtle);
+}
+
+@media (min-width: 768px) {
+  .tabbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .tabbar {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+
+  font-size: var(--t-overline-size);
+  font-weight: 510;
+  color: var(--text-3);
+  text-decoration: none;
+
+  /* Retroalimentación en el toque, no al soltar. */
+  transition:
+    color var(--dur-instant) var(--ease-out),
+    transform var(--dur-instant) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab:active {
+  transform: scale(0.94);
+}
+
+.tabActivo {
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab:active {
+    transform: none;
+  }
+}

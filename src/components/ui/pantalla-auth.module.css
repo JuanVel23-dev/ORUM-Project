@@ -1,9 +1,9 @@
 /*
-  El login se sirve SIEMPRE en oscuro, independientemente del tema elegido.
-  Es una superficie de marca con dirección de arte, no una pantalla de trabajo:
-  ocupa la ventana entera durante unos segundos y luego el usuario entra en su
-  tema. El `data-theme="dark"` va en el contenedor, no en <html>, y los tokens
-  se redeclaran para todo este subárbol.
+  Las pantallas de acceso se sirven SIEMPRE en oscuro, independientemente del
+  tema elegido. Son superficies de marca con dirección de arte, no pantallas
+  de trabajo: ocupan la ventana entera unos segundos y luego el usuario entra
+  en su tema. El `data-theme="dark"` va en el contenedor, no en <html>, y los
+  tokens se redeclaran para todo este subárbol.
 */
 
 .pantalla {
@@ -140,7 +140,8 @@
 
 /*
   Sacudida al fallar. Se dispara con `:has()` cuando entra el aviso en el DOM,
-  sin remontar el formulario: los campos conservan lo escrito.
+  sin remontar el formulario: los campos conservan lo escrito. Ninguna
+  animación vale perder lo que el usuario ya tecleó.
 */
 .formulario:has(.alerta) {
   animation: sacudir 320ms var(--ease-out);

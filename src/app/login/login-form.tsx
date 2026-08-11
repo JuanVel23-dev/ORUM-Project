@@ -6,8 +6,8 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, InputButton } from '@/components/ui/input'
+import { estilosAuth } from '@/components/ui/pantalla-auth'
 import { iniciarSesion, type LoginState } from './actions'
-import styles from './login.module.css'
 
 const estadoInicial: LoginState = {}
 
@@ -18,7 +18,7 @@ export function LoginForm({ mensajeInicial }: { mensajeInicial?: string }) {
   const error = state.error ?? mensajeInicial
 
   return (
-    <form action={formAction} className={styles.formulario} noValidate>
+    <form action={formAction} className={estilosAuth.formulario} noValidate>
       {/*
         La sacudida la dispara el CSS con `:has(.alerta)` al aparecer este
         aviso. NO se pone `key` en el <form>: eso lo remontaría y borraría el
@@ -26,7 +26,7 @@ export function LoginForm({ mensajeInicial }: { mensajeInicial?: string }) {
         Ninguna animación vale perder lo que el usuario escribió.
       */}
       {error && (
-        <Alert key={error} tone="danger" className={styles.alerta}>
+        <Alert key={error} tone="danger" className={estilosAuth.alerta}>
           {error}
         </Alert>
       )}

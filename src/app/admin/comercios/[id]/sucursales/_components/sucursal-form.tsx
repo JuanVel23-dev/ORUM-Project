@@ -12,7 +12,7 @@ import {
   editarSucursal,
   type SucursalState,
 } from '../../../sucursales-actions'
-import styles from '../../../miembros/formulario.module.css'
+import styles from '@/styles/formulario.module.css'
 
 type Opcion = { id: number; nombre: string }
 

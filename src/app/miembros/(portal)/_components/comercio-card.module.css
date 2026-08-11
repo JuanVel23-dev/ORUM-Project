@@ -1,0 +1,100 @@
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.titulos {
+  min-width: 0;
+}
+
+.nombre {
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  font-weight: var(--t-title-3-weight);
+  letter-spacing: var(--t-title-3-tracking);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.marca {
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+.descripcion {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+
+  /* Dos líneas máximo: las tarjetas de una rejilla deben poder compararse, y
+     una descripción larga desalinearía las promociones —que es lo que se
+     compara de verdad— a alturas distintas en cada tarjeta. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ciudades {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+.ciudadesTexto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Las promociones son el motivo por el que existe la tarjeta: van al fondo,
+   separadas por una línea, para que el ojo las encuentre en el mismo sitio en
+   todas las tarjetas de la rejilla. */
+.promociones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.promocion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+
+  font-size: var(--t-footnote-size);
+}
+
+.promocionTitulo {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sinPromociones {
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}

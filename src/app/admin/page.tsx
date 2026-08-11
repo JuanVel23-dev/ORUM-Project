@@ -12,6 +12,7 @@ import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Cifra } from '@/components/ui/cifra'
 import { Grid, PageHeader, Section, Stack } from '@/components/ui/layout'
 import styles from './inicio.module.css'
 
@@ -97,31 +98,25 @@ export default async function AdminInicioPage() {
         <Section title="Estado del club">
           <Grid min="200px">
             <Card>
-              <div className={styles.cifra}>
-                <span className={styles.cifraEtiqueta}>Miembros registrados</span>
-                <span className={styles.cifraValor}>
-                  {cifras.miembros.toLocaleString('es-CO')}
-                </span>
-              </div>
+              <Cifra
+                etiqueta="Miembros registrados"
+                valor={cifras.miembros.toLocaleString('es-CO')}
+              />
             </Card>
 
             <Card>
-              <div className={styles.cifra}>
-                <span className={styles.cifraEtiqueta}>Membresías vigentes</span>
-                <span className={styles.cifraValor}>
-                  {cifras.vigentes.toLocaleString('es-CO')}
-                </span>
-                <span className={styles.cifraNota}>Al día de hoy</span>
-              </div>
+              <Cifra
+                etiqueta="Membresías vigentes"
+                valor={cifras.vigentes.toLocaleString('es-CO')}
+                nota="Al día de hoy"
+              />
             </Card>
 
             <Card>
-              <div className={styles.cifra}>
-                <span className={styles.cifraEtiqueta}>Comercios activos</span>
-                <span className={styles.cifraValor}>
-                  {cifras.comercios.toLocaleString('es-CO')}
-                </span>
-              </div>
+              <Cifra
+                etiqueta="Comercios activos"
+                valor={cifras.comercios.toLocaleString('es-CO')}
+              />
             </Card>
           </Grid>
         </Section>

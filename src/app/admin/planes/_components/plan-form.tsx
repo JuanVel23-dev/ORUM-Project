@@ -8,7 +8,7 @@ import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
 import { crearPlan, editarPlan, type PlanState } from '../actions'
-import styles from '../miembros/formulario.module.css'
+import styles from '@/styles/formulario.module.css'
 
 type PlanInicial = {
   id: number

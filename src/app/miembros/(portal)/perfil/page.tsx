@@ -1,8 +1,32 @@
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
-import { QrCode, Badge } from '@/components/ui'
+import { derivarEstadoMembresia } from '@/lib/miembros/membresias'
+import { Card } from '@/components/ui/card'
+import { Copiar } from '@/components/ui/copiar'
+import { PageHeader } from '@/components/ui/layout'
+import { QrCode } from '@/components/ui/qr-code'
+import { StatusBadge, VenceEn } from '@/components/ui/badge'
+import styles from './perfil.module.css'
 
 export const metadata = { title: 'Mi perfil · ORUM' }
+
+const FECHA = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+})
+
+/** 'YYYY-MM-DD' → texto legible, sin que el parseo se desplace un día por UTC. */
+function fechaLegible(iso: string): string {
+  const [a, m, d] = iso.split('-').map(Number)
+  return FECHA.format(new Date(Date.UTC(a, m - 1, d)))
+}
+
+/** Hoy en 'YYYY-MM-DD' según la zona del negocio, no la del servidor. */
+function hoyBogota(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
+}
 
 export default async function PerfilMiembroPage() {
   const miembro = await requireMiembroVigente()
@@ -14,43 +38,67 @@ export default async function PerfilMiembroPage() {
     .eq('id', miembro.membresiaVigente.planId)
     .maybeSingle()
 
+  /*
+    Aunque `requireMiembroVigente` ya garantiza que está vigente, el estado se
+    DERIVA igual: así el carnet puede decir cuántos días quedan, que es lo que
+    de verdad le interesa al miembro, y nunca puede contradecir a la lista del
+    administrador —ambos usan la misma función.
+  */
+  const estado = derivarEstadoMembresia(
+    miembro.membresiaVigente.estado,
+    miembro.membresiaVigente.fechaFin,
+    hoyBogota(),
+  )
+
+  const nombreCompleto = `${miembro.nombres} ${miembro.apellidos}`.trim()
+
   return (
-    <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>Mi perfil</h1>
+    <>
+      <PageHeader
+        title="Mi perfil"
+        description="Tu carnet del club. Muestra el código en el comercio para aplicar tu beneficio."
+      />
 
-      <div
-        className="orum-card"
-        style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'flex-start' }}
-      >
-        <div style={{ flex: 1, minWidth: 240 }}>
-          <p>
-            <strong>Nombre:</strong> {miembro.nombres} {miembro.apellidos}
-          </p>
-          <p>
-            <strong>Número de membresía:</strong>{' '}
-            <span style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}>{miembro.numeroMembresia}</span>
-          </p>
-          <p>
-            <strong>Plan:</strong> {plan?.nombre ?? '—'}
-          </p>
-          <p>
-            <strong>Tipo:</strong> {miembro.membresiaVigente.tipo === 'nueva' ? 'Nueva' : 'Renovada'}
-          </p>
-          <p>
-            <strong>Vigencia:</strong> {miembro.membresiaVigente.fechaInicio} a {miembro.membresiaVigente.fechaFin}
-          </p>
-          <p>
-            <strong>Estado:</strong> <Badge tone="on">Activa</Badge>
-          </p>
-        </div>
+      <Card padding="lg" className={styles.carnet}>
+        <div className={styles.cuerpo}>
+          <div className={styles.datos}>
+            <div>
+              <p className={styles.nombre}>{nombreCompleto}</p>
+              <p className={styles.etiqueta}>{plan?.nombre ?? 'Membresía ORUM'}</p>
+            </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-          <QrCode value={miembro.numeroMembresia} />
-          <p className="orum-muted" style={{ fontSize: '0.8rem' }}>
-            Muestra este código en el comercio
-          </p>
+            <div className={styles.dato}>
+              <span className={styles.etiqueta}>Número de membresía</span>
+              <span className={styles.numero}>
+                <Copiar valor={miembro.numeroMembresia} label="Copiar número de membresía" />
+              </span>
+            </div>
+
+            <div className={styles.dato}>
+              <span className={styles.etiqueta}>Estado</span>
+              <span className={styles.valor}>
+                <StatusBadge estado={estado} />
+                <VenceEn estado={estado} />
+              </span>
+            </div>
+
+            <div className={styles.dato}>
+              <span className={styles.etiqueta}>Vigencia</span>
+              <span className={styles.valor}>
+                Hasta el {fechaLegible(miembro.membresiaVigente.fechaFin)}
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.qr}>
+            <QrCode
+              value={miembro.numeroMembresia}
+              label={`Código de la membresía ${miembro.numeroMembresia} de ${nombreCompleto}`}
+            />
+            <p className={styles.qrNota}>Muestra este código en el comercio</p>
+          </div>
         </div>
-      </div>
-    </div>
+      </Card>
+    </>
   )
 }

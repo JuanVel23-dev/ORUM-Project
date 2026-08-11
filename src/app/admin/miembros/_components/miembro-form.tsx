@@ -9,7 +9,7 @@ import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { Divider, Section, Stack } from '@/components/ui/layout'
 import { registrarMiembro, type RegistrarMiembroState } from '../actions'
-import styles from './formulario.module.css'
+import styles from '@/styles/formulario.module.css'
 
 type Opcion = { id: number; nombre: string }
 type PlanOpcion = { id: number; nombre: string; precio: number }

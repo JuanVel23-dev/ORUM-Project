@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
 import { SegmentedControl } from '@/components/ui/segmented'
 import { crearUsuario, type CrearUsuarioState } from '../../actions'
-import styles from '../../miembros/formulario.module.css'
+import styles from '@/styles/formulario.module.css'
 
 const estadoInicial: CrearUsuarioState = {}
 

@@ -1,10 +1,109 @@
 import Link from 'next/link'
+import { Filter, ScrollText, X } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resumirEventoBitacora } from '@/lib/bitacora/bitacora'
-import { Badge, DataTable, EmptyState, PageHeader } from '@/components/ui'
+import { Badge, type BadgeTone } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { DataList, type Column } from '@/components/ui/data-list'
+import { EmptyState } from '@/components/ui/feedback'
+import { Input, Select } from '@/components/ui/input'
+import { PageHeader } from '@/components/ui/layout'
+import styles from './bitacora.module.css'
 
 export const metadata = { title: 'Bitácora · ORUM' }
+
+type Evento = {
+  id: number
+  fechaISO: string
+  miembroId: number | null
+  miembroNombre: string
+  accion: string
+  detalle: string
+  actor: string
+}
+
+/*
+  El tono NO inventa una semántica de riesgo: un registro no es una alerta.
+  Solo separa los tres tipos de evento lo justo para poder escanear la columna
+  sin leerla. Nada de oro aquí — el oro es marca y esta pantalla es operativa.
+*/
+const TONO_ACCION: Record<string, BadgeTone> = {
+  alta: 'success',
+  renovacion: 'info',
+  edicion: 'neutral',
+}
+
+const ETIQUETA_ACCION: Record<string, string> = {
+  alta: 'Alta',
+  renovacion: 'Renovación',
+  edicion: 'Edición',
+}
+
+/* Bogotá siempre: el negocio es colombiano y el servidor puede no estarlo. */
+const ZONA = 'America/Bogota'
+const FECHA = new Intl.DateTimeFormat('es-CO', {
+  timeZone: ZONA,
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+})
+const HORA = new Intl.DateTimeFormat('es-CO', {
+  timeZone: ZONA,
+  hour: '2-digit',
+  minute: '2-digit',
+})
+
+const COLUMNAS: ReadonlyArray<Column<Evento>> = [
+  {
+    key: 'fecha',
+    header: 'Fecha',
+    width: '150px',
+    cell: (e) => {
+      const d = new Date(e.fechaISO)
+      return (
+        <span className={styles.fecha}>
+          <span>{FECHA.format(d)}</span>
+          <span className={styles.hora}>{HORA.format(d)}</span>
+        </span>
+      )
+    },
+  },
+  {
+    key: 'miembro',
+    header: 'Miembro',
+    primary: true,
+    cell: (e) =>
+      e.miembroId ? (
+        <Link href={`/admin/miembros/${e.miembroId}`} className={styles.enlaceMiembro}>
+          {e.miembroNombre}
+        </Link>
+      ) : (
+        '—'
+      ),
+  },
+  {
+    key: 'accion',
+    header: 'Acción',
+    width: '140px',
+    cell: (e) => (
+      <Badge tone={TONO_ACCION[e.accion] ?? 'neutral'} size="sm">
+        {ETIQUETA_ACCION[e.accion] ?? e.accion}
+      </Badge>
+    ),
+  },
+  {
+    key: 'detalle',
+    header: 'Detalle',
+    cell: (e) => <span className={styles.detalle}>{e.detalle}</span>,
+  },
+  {
+    key: 'actor',
+    header: 'Registrado por',
+    width: '220px',
+    cell: (e) => <span className={styles.actor}>{e.actor}</span>,
+  },
+]
 
 export default async function BitacoraPage({
   searchParams,
@@ -14,6 +113,7 @@ export default async function BitacoraPage({
   await requireRol('super_admin')
   const { q, desde, hasta, accion } = await searchParams
   const busqueda = (q ?? '').trim()
+  const hayFiltros = Boolean(busqueda || desde || hasta || accion)
 
   const admin = createAdminClient()
 
@@ -50,13 +150,19 @@ export default async function BitacoraPage({
   const { data: eventos } = await query
 
   const idsMiembros = Array.from(
-    new Set((eventos ?? []).map((e) => e.entidad_id).filter((idMiembro): idMiembro is number => idMiembro !== null)),
+    new Set(
+      (eventos ?? [])
+        .map((e) => e.entidad_id)
+        .filter((idMiembro): idMiembro is number => idMiembro !== null),
+    ),
   )
   const { data: miembrosInfo } =
     idsMiembros.length > 0
       ? await admin.from('miembros').select('id, nombres, apellidos').in('id', idsMiembros)
       : { data: [] as { id: number; nombres: string; apellidos: string }[] }
-  const nombreMiembro = new Map((miembrosInfo ?? []).map((m) => [m.id, `${m.nombres} ${m.apellidos}`.trim()]))
+  const nombreMiembro = new Map(
+    (miembrosInfo ?? []).map((m) => [m.id, `${m.nombres} ${m.apellidos}`.trim()]),
+  )
 
   const actorIds = Array.from(
     new Set((eventos ?? []).map((e) => e.actor_id).filter((idActor): idActor is string => !!idActor)),
@@ -69,66 +175,114 @@ export default async function BitacoraPage({
     }),
   )
 
-  return (
-    <div>
-      <PageHeader title="Bitácora de actividad" />
+  const filas: Evento[] = (eventos ?? []).map((e) => ({
+    id: e.id,
+    fechaISO: e.fecha_hora,
+    miembroId: e.entidad_id,
+    miembroNombre: e.entidad_id
+      ? (nombreMiembro.get(e.entidad_id) ?? `Miembro #${e.entidad_id}`)
+      : '—',
+    accion: e.accion,
+    detalle: resumirEventoBitacora(e.accion, e.datos_anteriores, e.datos_nuevos),
+    actor: e.actor_id ? (correoActor.get(e.actor_id) ?? '—') : '—',
+  }))
 
-      <form
-        method="get"
-        className="orum-card"
-        style={{ marginBottom: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}
-      >
-        <input
-          type="text"
-          name="q"
-          className="orum-input"
-          placeholder="Buscar miembro (nombre, cédula, número)…"
-          defaultValue={busqueda}
-          style={{ flex: 2, minWidth: 220 }}
-        />
-        <input type="date" name="desde" className="orum-input" defaultValue={desde ?? ''} style={{ flex: 1, minWidth: 140 }} />
-        <input type="date" name="hasta" className="orum-input" defaultValue={hasta ?? ''} style={{ flex: 1, minWidth: 140 }} />
-        <select name="accion" className="orum-select" defaultValue={accion ?? ''} style={{ flex: 1, minWidth: 140 }}>
-          <option value="">Todas las acciones</option>
-          <option value="alta">Alta</option>
-          <option value="edicion">Edición</option>
-          <option value="renovacion">Renovación</option>
-        </select>
-        <button type="submit" className="orum-button orum-button--secondary">Filtrar</button>
+  return (
+    <>
+      <PageHeader
+        title="Bitácora de actividad"
+        description="Quién hizo qué y cuándo sobre los miembros. Se muestran los 200 eventos más recientes que cumplan los filtros."
+      />
+
+      {/*
+        Formulario GET: los filtros quedan en la URL, se pueden compartir y
+        sobreviven a un refresco. Funciona sin JavaScript.
+      */}
+      <form method="get" className={styles.filtros}>
+        <div className={styles.campoAncho}>
+          <label className={styles.etiqueta} htmlFor="f-q">
+            Miembro
+          </label>
+          <Input
+            id="f-q"
+            name="q"
+            defaultValue={busqueda}
+            placeholder="Nombre, cédula o número"
+            autoComplete="off"
+          />
+        </div>
+
+        <div>
+          <label className={styles.etiqueta} htmlFor="f-desde">
+            Desde
+          </label>
+          <Input id="f-desde" type="date" name="desde" defaultValue={desde ?? ''} />
+        </div>
+
+        <div>
+          <label className={styles.etiqueta} htmlFor="f-hasta">
+            Hasta
+          </label>
+          <Input id="f-hasta" type="date" name="hasta" defaultValue={hasta ?? ''} />
+        </div>
+
+        <div>
+          <label className={styles.etiqueta} htmlFor="f-accion">
+            Acción
+          </label>
+          <Select id="f-accion" name="accion" defaultValue={accion ?? ''}>
+            <option value="">Todas</option>
+            <option value="alta">Alta</option>
+            <option value="edicion">Edición</option>
+            <option value="renovacion">Renovación</option>
+          </Select>
+        </div>
+
+        <div className={styles.acciones}>
+          <Button type="submit" variant="secondary" icon={<Filter size={16} />}>
+            Filtrar
+          </Button>
+          {hayFiltros && (
+            <Button href="/admin/bitacora" variant="ghost" icon={<X size={16} />}>
+              Limpiar
+            </Button>
+          )}
+        </div>
       </form>
 
-      {!eventos || eventos.length === 0 ? (
-        <EmptyState>
-          {busqueda || desde || hasta || accion
-            ? 'Ningún evento coincide con los filtros aplicados.'
-            : 'Aún no hay eventos registrados.'}
-        </EmptyState>
-      ) : (
-        <DataTable>
-          <thead>
-            <tr><th>Fecha</th><th>Miembro</th><th>Acción</th><th>Detalle</th><th>Registrado por</th></tr>
-          </thead>
-          <tbody>
-            {eventos.map((e) => (
-              <tr key={e.id}>
-                <td>{new Date(e.fecha_hora).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</td>
-                <td>
-                  {e.entidad_id ? (
-                    <Link href={`/admin/miembros/${e.entidad_id}`}>
-                      {nombreMiembro.get(e.entidad_id) ?? `Miembro #${e.entidad_id}`}
-                    </Link>
-                  ) : (
-                    '—'
-                  )}
-                </td>
-                <td><Badge tone="on">{e.accion}</Badge></td>
-                <td>{resumirEventoBitacora(e.accion, e.datos_anteriores, e.datos_nuevos)}</td>
-                <td className="orum-muted">{e.actor_id ? (correoActor.get(e.actor_id) ?? '—') : '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </DataTable>
+      {filas.length > 0 && (
+        <p className={styles.resumen}>
+          {filas.length} {filas.length === 1 ? 'evento' : 'eventos'}
+          {filas.length === 200 && ' (límite alcanzado: acota el rango de fechas)'}
+        </p>
       )}
-    </div>
+
+      <DataList
+        caption="Eventos registrados sobre miembros"
+        items={filas}
+        columns={COLUMNAS}
+        getKey={(e) => e.id}
+        empty={
+          hayFiltros ? (
+            <EmptyState
+              icon={<ScrollText size={24} />}
+              title="Sin eventos"
+              description="Ningún evento coincide con los filtros aplicados."
+              actions={
+                <Button href="/admin/bitacora" variant="secondary">
+                  Quitar filtros
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              icon={<ScrollText size={24} />}
+              title="Aún no hay actividad"
+              description="Cuando se registren o renueven miembros, el rastro aparecerá aquí."
+            />
+          )
+        }
+      />
+    </>
   )
 }

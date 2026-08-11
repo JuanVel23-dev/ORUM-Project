@@ -1,0 +1,25 @@
+.logo {
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-sunk);
+
+  /* Logos ajenos de proporción impredecible: se recortan al cuadro en vez de
+     deformarse. Un logo estirado es lo primero que delata un catálogo barato. */
+  object-fit: cover;
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: var(--text-3);
+
+  /* Sin logo, la inicial hace de marca. Va en la superficie hundida para que
+     el hueco se lea como intencional y no como una imagen que no cargó. */
+  background: var(--surface-sunk);
+  text-transform: uppercase;
+  user-select: none;
+}

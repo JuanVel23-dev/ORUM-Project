@@ -157,6 +157,16 @@
 
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
 
+  /*
+    Solo para datos que se dictan, se teclean o se comparan carácter a
+    carácter: número de membresía, cédula, contraseña generada. Se pide la
+    monoespaciada del sistema —en macOS/iOS es SF Mono— porque están
+    diseñadas para distinguir 0/O y 1/l, que es exactamente el error que
+    ocurre cuando alguien lee su número en voz alta en una caja.
+  */
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
   /* display-1 — héroes, cifras del dashboard */
   --t-display-1-size: clamp(2rem, 5vw, 2.5rem);
   --t-display-1-leading: 1.05;

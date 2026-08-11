@@ -12,7 +12,7 @@ import {
   editarPromocion,
   type PromocionState,
 } from '../../../promociones-actions'
-import styles from '../../../miembros/formulario.module.css'
+import styles from '@/styles/formulario.module.css'
 
 type TipoOpcion = { id: number; codigo: string; nombre: string }
 

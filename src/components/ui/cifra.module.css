@@ -1,0 +1,40 @@
+.cifra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.valor {
+  font-size: var(--t-display-1-size);
+  line-height: var(--t-display-1-leading);
+  letter-spacing: var(--t-display-1-tracking);
+  font-weight: var(--t-display-1-weight);
+
+  /* Cifras que se comparan entre tarjetas: deben alinearse. */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/*
+  Variante compacta para rejillas de 4+ cifras, donde el display-1 obligaría a
+  la tarjeta a envolver el número.
+*/
+.sm .valor {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+}
+
+.etiqueta {
+  font-size: var(--t-overline-size);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.nota {
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}

@@ -141,6 +141,12 @@ type MenuItemProps = {
    * de un `<button>` sería HTML inválido y no navegaría.
    */
   href?: string
+  /**
+   * Envía el `<form>` que contiene al menú en lugar de ejecutar `onSelect`.
+   * Para server actions —cerrar sesión, por ejemplo—: así la acción sigue
+   * funcionando sin JavaScript, que es justo cuando más importa poder salir.
+   */
+  submit?: boolean
   icon?: ReactNode
   /** Rojo. Reserva `true` para acciones que borran o revocan. */
   destructive?: boolean
@@ -151,6 +157,7 @@ type MenuItemProps = {
 export function MenuItem({
   onSelect,
   href,
+  submit = false,
   icon,
   destructive = false,
   disabled = false,
@@ -187,7 +194,7 @@ export function MenuItem({
 
   return (
     <button
-      type="button"
+      type={submit ? 'submit' : 'button'}
       role="menuitem"
       className={clase}
       disabled={disabled}

@@ -1,0 +1,34 @@
+/*
+  El QR se imprime sobre blanco SIEMPRE, en los dos temas. No es una decisión
+  estética: un lector de códigos necesita contraste alto y polaridad normal
+  (módulos oscuros sobre fondo claro). Invertirlo en modo oscuro haría que
+  parte de los escáneres no lo leyeran, y el fallo ocurriría en la caja del
+  comercio, delante del cliente.
+
+  Por eso aquí hay colores literales y no tokens de tema: el token correcto
+  cambiaría con el tema, que es exactamente lo que NO debe pasar.
+*/
+.marco {
+  display: inline-flex;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+.marco svg {
+  display: block;
+  height: auto;
+  max-width: 100%;
+}
+
+/* En impresión el marco sobra: el papel ya es el fondo blanco. */
+@media print {
+  .marco {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+}

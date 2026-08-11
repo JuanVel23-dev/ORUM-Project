@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { renovarMembresia, type RenovarState } from '../../actions'
-import styles from './ficha.module.css'
+import styles from '../ficha.module.css'
 
 type PlanOpcion = { id: number; nombre: string; precio: number }
 

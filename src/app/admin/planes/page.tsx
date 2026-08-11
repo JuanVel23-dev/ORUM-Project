@@ -9,7 +9,6 @@ import { EmptyState } from '@/components/ui/feedback'
 import { PageHeader } from '@/components/ui/layout'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { cambiarEstadoPlan } from './actions'
-import { Badge, DataTable, EmptyState, LinkButton, PageHeader, Row } from '@/components/ui'
 
 export const metadata = { title: 'Planes · ORUM' }
 

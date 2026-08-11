@@ -8,7 +8,7 @@ import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
 import { editarComercio, type EditarComercioState } from '../../../actions'
-import styles from '../../../miembros/formulario.module.css'
+import styles from '@/styles/formulario.module.css'
 
 type Opcion = { id: number; nombre: string }
 
