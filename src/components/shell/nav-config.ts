@@ -2,7 +2,6 @@ import {
   BarChart3,
   CreditCard,
   Home,
-  KeyRound,
   LayoutGrid,
   Search,
   ScrollText,
@@ -56,11 +55,19 @@ const USUARIOS: NavItem = { href: '/admin/usuarios', label: 'Usuarios', icon: Us
 const PLANES: NavItem = { href: '/admin/planes', label: 'Planes', icon: CreditCard }
 const METRICAS: NavItem = { href: '/admin/metricas', label: 'Métricas', icon: BarChart3 }
 const BITACORA: NavItem = { href: '/admin/bitacora', label: 'Bitácora', icon: ScrollText }
-const PASSWORD: NavItem = {
-  href: '/admin/cuenta/password',
-  label: 'Mi contraseña',
-  icon: KeyRound,
-}
+
+/*
+  "Mi contraseña" NO está aquí a propósito.
+
+  La barra lateral es para los sitios donde se trabaja —miembros, comercios,
+  métricas—, y cambiar la contraseña se hace una vez cada muchos meses. Tenerla
+  fija ocupaba un grupo entero de la barra, con su encabezado, para una tarea
+  que además YA vivía en el menú del avatar: la misma acción listada dos veces
+  en la misma pantalla.
+
+  Vive en el menú de la cuenta (escritorio) y en la hoja "Más" (móvil), que es
+  donde la gente busca lo suyo. Ambos son parte del shell, no de esta lista.
+*/
 
 /** Grupos de la barra lateral, según el rol. */
 export function navegacionPara(rol: RolCodigo): NavGroup[] {
@@ -71,15 +78,11 @@ export function navegacionPara(rol: RolCodigo): NavGroup[] {
       // bitácora solo cuando hay que averiguar quién hizo algo.
       { label: 'Análisis', items: [METRICAS, BITACORA] },
       { label: 'Administración', items: [USUARIOS, PLANES] },
-      { label: 'Cuenta', items: [PASSWORD] },
     ]
   }
 
   // Empleado: solo opera con miembros.
-  return [
-    { items: [INICIO, MIEMBROS] },
-    { label: 'Cuenta', items: [PASSWORD] },
-  ]
+  return [{ items: [INICIO, MIEMBROS] }]
 }
 
 /**

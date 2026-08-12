@@ -111,7 +111,22 @@ Curvas y duraciones en `tokens.css`; resortes en `src/lib/motion.ts`.
 
 ## Formularios: overlay, no página
 
-Un formulario **no navega**. Se abre por encima:
+Un formulario **no navega**. Se abre por encima. **Sin excepciones**: también
+cambiar la contraseña, que durante un tiempo tuvo página propia porque "no era
+un formulario de una lista". Sí lo era.
+
+Corolario: si una acción se hace y se cierra, **no merece un sitio fijo en la
+barra lateral**. La barra es para los lugares donde se trabaja. "Mi contraseña"
+ocupaba un grupo entero, con encabezado, para algo que se hace una vez cada
+muchos meses — y encima ya estaba en el menú del avatar: la misma acción listada
+dos veces en la misma pantalla.
+
+Al sacar algo de la barra lateral, **comprueba el móvil**: allí no hay menú del
+avatar (vive en el pie de la barra, que está oculta), así que la hoja "Más" es la
+única puerta. Si el destino salía de `navegacionPara`, hay que listarlo a mano en
+esa hoja o desaparece del teléfono.
+
+Los dos modos:
 
 - **Escritorio** → diálogo centrado
 - **Móvil** → hoja inferior con detents (`medium` si el contenido cabe y conviene

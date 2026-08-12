@@ -135,6 +135,23 @@ export function AppShell({ user, cerrarSesion, buscar, children }: Props) {
               {item.label}
             </Link>
           ))}
+
+          {/*
+            En móvil no hay menú del avatar —ese vive en el pie de la barra
+            lateral, que está oculta—, así que esta hoja es la ÚNICA puerta a
+            la cuenta. Se lista aquí explícitamente y no a través de
+            `navegacionPara`, para que salir de la barra lateral no la deje
+            inalcanzable en el teléfono.
+          */}
+          <Link
+            href="/admin/cuenta/password"
+            className={styles.masItem}
+            data-activo={pathname.startsWith('/admin/cuenta/password')}
+            onClick={() => setMas(false)}
+          >
+            <KeyRound className={styles.masItemIcono} aria-hidden="true" />
+            Mi contraseña
+          </Link>
         </nav>
 
         <div style={{ marginTop: 'var(--space-5)' }}>
