@@ -8,10 +8,26 @@ export const metadata = {
   title: 'Panel · ORUM',
 }
 
+/**
+ * La ranura `@modal` vive AQUÍ, no en cada sección.
+ *
+ * Una ruta interceptada solo intercepta si el layout que declara su ranura ya
+ * está montado. Cuando cada sección tenía la suya, "Empezar" desde el panel de
+ * inicio —o la pestaña "Vender" del móvil— navegaba a `/admin/miembros/nuevo`
+ * SIN pasar por `/admin/miembros`, así que el layout de miembros no existía
+ * todavía y el formulario se abría como página completa. Desde la lista sí
+ * funcionaba: la misma acción se comportaba de dos formas según de dónde
+ * vinieras.
+ *
+ * Declarada en el layout del panel, la ranura está montada en todo `/admin`,
+ * y cualquier enlace a un formulario lo abre encima venga de donde venga.
+ */
 export default async function AdminLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode
+  modal: React.ReactNode
 }) {
   // Solo super_admin y empleado entran al portal administrativo. El shell
   // filtra los destinos por rol, pero eso es presentación: la autorización
@@ -40,6 +56,7 @@ export default async function AdminLayout({
         cerrarSesion={cerrarSesion}
       >
         {children}
+        {modal}
       </AppShell>
     </>
   )

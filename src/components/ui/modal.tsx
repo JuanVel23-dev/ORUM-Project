@@ -47,8 +47,13 @@ export function Modal({
     if (!dialogo || cerrando.current) return
     cerrando.current = true
 
+    // Marca el cierre para que el ::backdrop se desvanezca a la vez que el
+    // panel. Es un pseudo-elemento: solo CSS puede animarlo.
+    dialogo.classList.add(styles.cerrando)
+
     const fin = () => {
       dialogo.close()
+      dialogo.classList.remove(styles.cerrando)
       cerrando.current = false
     }
 

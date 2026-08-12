@@ -182,3 +182,20 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --- Actividad ------------------------------------------------------------ */
+
+/* Marca de tiempo: cifras tabulares para que la columna baje en línea recta. */
+.selloTiempo {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  white-space: nowrap;
+}
+
+.actor {
+  font-size: var(--t-footnote-size);
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

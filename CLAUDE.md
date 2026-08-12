@@ -123,9 +123,36 @@ Se montan como **rutas interceptadas** (`@modal/(.)ruta`). Eso da gratis: el bot
 atrás cierra, un enlace directo abre a pantalla completa, y la lista de detrás
 conserva scroll y estado.
 
-Cada ranura `@modal` necesita **su propio `loading.tsx`**. Sin él, Next cae al
-`loading.tsx` de la sección y dibuja el esqueleto de la tabla dentro del hueco del
-modal.
+### La ranura `@modal` vive en `app/admin/layout.tsx`. Solo ahí.
+
+Una ruta interceptada **solo intercepta si el layout que declara su ranura ya está
+montado**. Cuando cada sección tenía la suya, el mismo formulario se comportaba de
+dos maneras según de dónde vinieras: desde `/admin/miembros` se abría encima, pero
+desde el panel de inicio —o la pestaña "Vender" del móvil— navegaba a la página
+completa, porque `miembros/layout.tsx` todavía no existía en el árbol.
+
+Por eso hay **una sola ranura**, en el layout del panel, y todos los formularios
+cuelgan de ella:
+
+```
+app/admin/@modal/(.)miembros/nuevo/page.tsx
+app/admin/@modal/(.)comercios/[id]/sucursales/nueva/page.tsx
+```
+
+Al añadir un formulario nuevo: crea la página real **y** su gemela bajo `@modal`.
+Importa el formulario con el alias `@/app/admin/...`, nunca con `../../../..`:
+esas páginas están cuatro niveles por debajo de la sección que las usa.
+
+**Compruébalo en el navegador desde DOS orígenes** —su propia lista y el panel de
+inicio—. La firma de que intercepta es `document.querySelector('dialog[open]')` con
+el contenido anterior todavía montado detrás.
+
+La ranura necesita **su propio `loading.tsx`**. Sin él, Next cae al `loading.tsx` de
+la sección y dibuja el esqueleto de la tabla dentro del hueco del modal.
+
+Tras mover o añadir rutas paralelas, **reinicia el servidor de desarrollo**: el
+manifiesto de rutas queda obsoleto y la interceptación falla en silencio, lo que
+parece un bug de código y no lo es.
 
 ---
 

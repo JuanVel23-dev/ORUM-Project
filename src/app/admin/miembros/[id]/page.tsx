@@ -1,18 +1,77 @@
 import { notFound } from 'next/navigation'
-import { Pencil } from 'lucide-react'
+import { CreditCard, Pencil } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { derivarEstadoMembresia, type EstadoMembresia } from '@/lib/miembros/membresias'
-import { Badge, StatusBadge, VenceEn } from '@/components/ui/badge'
+import { resumirEventoBitacora } from '@/lib/bitacora/bitacora'
+import { Badge, StatusBadge, VenceEn, type BadgeTone } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Copiar } from '@/components/ui/copiar'
+import { DataList, type Column } from '@/components/ui/data-list'
 import { EmptyState } from '@/components/ui/feedback'
 import { PageHeader, Section, Stack } from '@/components/ui/layout'
-import { RenovarForm } from './_components/renovar-form'
 import styles from './ficha.module.css'
 
 export const metadata = { title: 'Ficha de miembro · ORUM' }
+
+/* Mismos tonos y etiquetas que `/admin/bitacora`: el mismo evento no puede
+   verse de dos formas distintas según la pantalla en la que se mire. */
+const TONO_ACCION: Record<string, BadgeTone> = {
+  alta: 'success',
+  renovacion: 'info',
+  edicion: 'neutral',
+}
+
+const ETIQUETA_ACCION: Record<string, string> = {
+  alta: 'Alta',
+  renovacion: 'Renovación',
+  edicion: 'Edición',
+}
+
+/* `fecha_hora` es un timestamptz real: aquí SÍ se formatea en Bogotá. */
+const SELLO = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+})
+
+type EventoFicha = {
+  id: number
+  fechaISO: string
+  accion: string
+  detalle: string
+  actor: string
+}
+
+const COLUMNAS_ACTIVIDAD: ReadonlyArray<Column<EventoFicha>> = [
+  {
+    key: 'fecha',
+    header: 'Cuándo',
+    width: '200px',
+    cell: (e) => <span className={styles.selloTiempo}>{SELLO.format(new Date(e.fechaISO))}</span>,
+  },
+  {
+    key: 'accion',
+    header: 'Acción',
+    width: '140px',
+    cell: (e) => (
+      <Badge tone={TONO_ACCION[e.accion] ?? 'neutral'} size="sm">
+        {ETIQUETA_ACCION[e.accion] ?? e.accion}
+      </Badge>
+    ),
+  },
+  { key: 'detalle', header: 'Detalle', primary: true, cell: (e) => e.detalle },
+  {
+    key: 'actor',
+    header: 'Registrado por',
+    width: '220px',
+    cell: (e) => <span className={styles.actor}>{e.actor}</span>,
+  },
+]
 
 /** Fecha 'YYYY-MM-DD' → '14 feb 2027'. */
 function formatearFecha(iso: string): string {
@@ -58,26 +117,27 @@ export default async function FichaMiembroPage({
 
   if (!miembro) notFound()
 
-  const [{ data: membresias }, { data: planes }, { data: ciudad }] = await Promise.all([
+  /*
+    Aquí había CUATRO consultas y solo tres desestructuradas: la de bitácora se
+    pedía en cada carga y se tiraba. La de planes alimentaba el formulario de
+    renovación incrustado, que ahora es un overlay con su propia consulta.
+  */
+  const [{ data: membresias }, { data: ciudad }, { data: eventos }] = await Promise.all([
     admin
       .from('membresias')
       .select('id, tipo, estado, fecha_inicio, fecha_fin, precio_pagado, plan_id')
       .eq('miembro_id', miembroId)
       .order('fecha_inicio', { ascending: false }),
-    admin
-      .from('planes_membresia')
-      .select('id, nombre, precio')
-      .eq('activo', true)
-      .is('deleted_at', null)
-      .order('nombre'),
     miembro.ciudad_id
       ? admin.from('ciudades').select('nombre').eq('id', miembro.ciudad_id).maybeSingle()
       : Promise.resolve({ data: null }),
-    admin.from('bitacora_actividad')
+    admin
+      .from('bitacora_actividad')
       .select('id, actor_id, accion, datos_anteriores, datos_nuevos, fecha_hora')
       .eq('entidad', 'miembro')
       .eq('entidad_id', miembroId)
-      .order('fecha_hora', { ascending: false }),
+      .order('fecha_hora', { ascending: false })
+      .limit(50),
   ])
 
   // Los planes activos no bastan para nombrar el historial: una membresía
@@ -95,6 +155,26 @@ export default async function FichaMiembroPage({
     const { data: authUser } = await admin.auth.admin.getUserById(miembro.perfil_id)
     correo = authUser.user?.email ?? null
   }
+
+  // Quién hizo cada cosa. Se resuelve una vez por actor distinto, no por evento.
+  const idsActores = [
+    ...new Set((eventos ?? []).map((e) => e.actor_id).filter((a): a is string => !!a)),
+  ]
+  const correoActor = new Map<string, string>()
+  await Promise.all(
+    idsActores.map(async (idActor) => {
+      const { data } = await admin.auth.admin.getUserById(idActor)
+      correoActor.set(idActor, data.user?.email ?? '—')
+    }),
+  )
+
+  const actividad = (eventos ?? []).map((e) => ({
+    id: e.id,
+    fechaISO: e.fecha_hora,
+    accion: e.accion,
+    detalle: resumirEventoBitacora(e.accion, e.datos_anteriores, e.datos_nuevos),
+    actor: e.actor_id ? (correoActor.get(e.actor_id) ?? '—') : '—',
+  }))
 
   const hoy = hoyISO()
   const historial = (membresias ?? []).map((m) => ({
@@ -114,13 +194,26 @@ export default async function FichaMiembroPage({
         title={nombreCompleto}
         description={`Cédula ${miembro.cedula}`}
         actions={
-          <Button
-            href={`/admin/miembros/${miembro.id}/editar`}
-            variant="secondary"
-            icon={<Pencil size={16} />}
-          >
-            Editar datos
-          </Button>
+          <>
+            <Button
+              href={`/admin/miembros/${miembro.id}/editar`}
+              variant="secondary"
+              icon={<Pencil size={16} />}
+            >
+              Editar datos
+            </Button>
+            {/*
+              Renovar es la acción que mueve dinero: va primaria y arriba.
+              Antes era un formulario desplegado al final de la ficha, así que
+              había que bajar hasta el fondo para cobrar.
+            */}
+            <Button
+              href={`/admin/miembros/${miembro.id}/renovar`}
+              icon={<CreditCard size={16} />}
+            >
+              Renovar membresía
+            </Button>
+          </>
         }
       />
 
@@ -218,8 +311,24 @@ export default async function FichaMiembroPage({
           </Card>
         </Section>
 
-        <Section title="Renovar membresía">
-          <RenovarForm miembroId={miembro.id} planes={planes ?? []} />
+        {/*
+          Historial de actividad. Se perdió al fusionar el rediseño con la
+          Fase 4 —la consulta sobrevivió, la sección no— y con ella la
+          trazabilidad por miembro que pide el RF-19.
+        */}
+        <Section title="Actividad">
+          <DataList
+            caption={`Cambios registrados sobre ${nombreCompleto}`}
+            items={actividad}
+            columns={COLUMNAS_ACTIVIDAD}
+            getKey={(e) => e.id}
+            empty={
+              <EmptyState
+                title="Sin actividad"
+                description="Todavía no se ha registrado ningún cambio sobre este miembro."
+              />
+            }
+          />
         </Section>
       </Stack>
     </>

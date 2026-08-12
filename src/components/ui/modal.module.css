@@ -26,9 +26,60 @@
   backdrop-filter: blur(var(--blur-sm));
 }
 
+/*
+  El fondo se atenúa CON el panel, no antes.
+
+  El panel entra con resorte desde `motion`, pero el ::backdrop es un
+  pseudo-elemento: JavaScript no puede animarlo. Sin esto el oscurecido
+  aparecía de golpe mientras el panel todavía estaba creciendo, y el corte
+  seco delataba que son dos cosas distintas en vez de una sola superficie
+  que llega.
+
+  La duración se queda algo por debajo del resorte a propósito: el fondo debe
+  estar asentado cuando el panel termina de acomodarse, no al revés.
+*/
+.dialog[open]::backdrop {
+  animation: entrarFondo var(--dur-base) var(--ease-out);
+}
+
+/* Al cerrar, `motion` anima el panel y luego llama a `close()`. Sin esta clase
+   el fondo desaparecía de golpe un fotograma antes que el panel. */
+.cerrando::backdrop {
+  animation: salirFondo 180ms var(--ease-out) forwards;
+}
+
+@keyframes entrarFondo {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes salirFondo {
+  to {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-transparency: reduce) {
   .dialog::backdrop {
     backdrop-filter: none;
+  }
+}
+
+/*
+  Con movimiento reducido el fondo sigue apareciendo y desapareciendo —una
+  transición de opacidad no es vestibular—, solo que más corta.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open]::backdrop {
+    animation-duration: var(--dur-fast);
+  }
+
+  .cerrando::backdrop {
+    animation-duration: 120ms;
   }
 }
 

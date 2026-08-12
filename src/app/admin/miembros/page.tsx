@@ -174,7 +174,7 @@ export default async function MiembrosPage({
             </MenuItem>
             <MenuSeparator />
             <MenuItem
-              href={`/admin/miembros/${m.id}#renovar`}
+              href={`/admin/miembros/${m.id}/renovar`}
               icon={<CreditCard size={16} />}
             >
               Renovar membresía
