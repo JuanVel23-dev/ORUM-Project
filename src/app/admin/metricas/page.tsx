@@ -28,14 +28,22 @@ const PESOS = new Intl.NumberFormat('es-CO', {
   maximumFractionDigits: 0,
 })
 
+/*
+  `timeZone: 'UTC'` NO es un descuido: `fechaLegible` construye el instante a
+  medianoche UTC, así que hay que leerlo en UTC. Formatearlo en Bogotá (UTC−5)
+  lo retrasaría cinco horas y el día caería al anterior — el rango entero se
+  mostraba desplazado un día respecto a los campos del formulario.
+
+  Aquí no hay hora que convertir: 'YYYY-MM-DD' ya es una fecha civil.
+*/
 const FECHA_LARGA = new Intl.DateTimeFormat('es-CO', {
-  timeZone: 'America/Bogota',
+  timeZone: 'UTC',
   day: 'numeric',
   month: 'long',
   year: 'numeric',
 })
 
-/** 'YYYY-MM-DD' → texto legible, sin que el parseo se desplace un día por UTC. */
+/** 'YYYY-MM-DD' → texto legible, sin desplazarse un día por zona horaria. */
 function fechaLegible(iso: string): string {
   const [a, m, d] = iso.split('-').map(Number)
   return FECHA_LARGA.format(new Date(Date.UTC(a, m - 1, d)))

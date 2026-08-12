@@ -58,7 +58,9 @@ const COLUMNAS: ReadonlyArray<Column<Evento>> = [
   {
     key: 'fecha',
     header: 'Fecha',
-    width: '150px',
+    /* 175px es lo que mide "09 de ago de 2026" sin partirse: por debajo, la
+       fecha cae a dos líneas y descuadra la altura de todas las filas. */
+    width: '175px',
     cell: (e) => {
       const d = new Date(e.fechaISO)
       return (

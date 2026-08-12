@@ -10,14 +10,19 @@ import styles from './perfil.module.css'
 
 export const metadata = { title: 'Mi perfil · ORUM' }
 
+/*
+  UTC a propósito: `fechaLegible` construye el instante a medianoche UTC, así
+  que hay que leerlo en UTC. En Bogotá (UTC−5) retrocedería al día anterior y
+  el carnet anunciaría que la membresía vence un día antes de lo que vence.
+*/
 const FECHA = new Intl.DateTimeFormat('es-CO', {
-  timeZone: 'America/Bogota',
+  timeZone: 'UTC',
   day: 'numeric',
   month: 'long',
   year: 'numeric',
 })
 
-/** 'YYYY-MM-DD' → texto legible, sin que el parseo se desplace un día por UTC. */
+/** 'YYYY-MM-DD' → texto legible, sin desplazarse un día por zona horaria. */
 function fechaLegible(iso: string): string {
   const [a, m, d] = iso.split('-').map(Number)
   return FECHA.format(new Date(Date.UTC(a, m - 1, d)))

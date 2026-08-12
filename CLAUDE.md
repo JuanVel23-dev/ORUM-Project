@@ -135,12 +135,28 @@ Todo vive en `src/components/ui/`, en **kebab-case**. Antes de crear uno, mira s
 
 `Button` `Spinner` · `Field` `Input` `Select` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·
-`Badge` `StatusBadge` `VenceEn` `Avatar` · `Alert` `Toast` · `Modal` `Sheet` `Overlay`
-`DropdownMenu` · `Skeleton` `ProgressBar` `EmptyState` `ErrorState` · `DataList`
-`AccionEstado` `Copiar`
+`Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` · `Alert` `Toast` · `Modal` `Sheet`
+`Overlay` `DropdownMenu` `MenuItem` · `Skeleton` `ProgressBar` `EmptyState` `ErrorState` ·
+`DataList` `AccionEstado` `Copiar` · `PantallaAuth` `ComercioLogo` `QrCode` `WhatsAppButton`
 
 **`DataList` sustituye a toda tabla.** Es una tabla semántica que CSS convierte en
 tarjetas bajo 768px. Nunca scroll horizontal en móvil.
+
+**`Cifra`** para todo número de negocio (etiqueta + valor tabular + nota). No la
+reimplementes en la página: el panel de inicio ya lo hizo y hubo que extraerla.
+
+**`MenuItem submit`** cuando la acción del menú es una server action: renderiza un
+`<button type="submit">` dentro del `<form>` que envuelve al menú, así funciona sin
+JavaScript. `MenuItem href` renderiza un `<Link>` — nunca un `<a>` dentro de un `<button>`.
+
+**`PantallaAuth`** es la envoltura de TODA pantalla de acceso (administración y miembros).
+Son dos puertas al mismo club: si una tuviera dirección de arte propia, parecería otra
+empresa. Sus clases de formulario se toman de `estilosAuth`, no de un módulo local —
+la sacudida al fallar usa `:has(.alerta)` y ambas clases deben salir del mismo módulo CSS.
+
+**`QrCode` va en negro sobre blanco en los dos temas.** No es estética: invertirlo en
+oscuro rompe el escaneo en algunos lectores, y el fallo ocurre en la caja del comercio
+delante del cliente. Ese es el único sitio del sistema con colores literales.
 
 ---
 
@@ -151,6 +167,37 @@ tarjetas bajo 768px. Nunca scroll horizontal en móvil.
 - Estado externo (tema, preferencias, media queries) = `useSyncExternalStore`,
   **nunca** `useState` + `useEffect` (dispara renders en cascada y el linter lo marca).
 - Pruebas automatizadas **solo de funciones puras**. El resto se verifica a mano.
+
+### Dónde va cada cosa
+
+`src/lib/` está organizado **por dominio**: `auth/` `miembros/` `comercios/` `metricas/`
+`bitacora/` `shared/` `supabase/`. Nada suelto en la raíz de `lib`.
+
+Los formularios de una ruta viven en su `_components/`. Los que comparten varias rutas
+—`formulario.module.css`— viven en `src/styles/`: si una hoja compartida se guarda dentro
+de una ruta, la primera reorganización rompe las otras ocho que la importaban.
+
+### Adaptación al ancho: `@container`, no `@media`
+
+`.main` del shell y el `<main>` del portal declaran `container-type: inline-size` con
+`container-name: contenido`. Las páginas se adaptan preguntando por **ese** contenedor:
+
+```css
+@container contenido (max-width: 900px) { … }
+```
+
+El ancho útil del contenido no es el del viewport — cambia según la barra lateral esté
+abierta o en rail. Un `@media` se equivoca en ~200px justo donde importa. Un `@container`
+sin contenedor ancestro **nunca casa**: si escribes uno, comprueba que hay contenedor.
+
+### Fechas
+
+Dos casos distintos, y confundirlos desplaza un día:
+
+- **`timestamptz` de la base** (`fecha_hora`): formatear en `America/Bogota`.
+- **`'YYYY-MM-DD'` civil** (`fecha_fin`, rangos de filtro): construir con `Date.UTC(...)`
+  y formatear en **`timeZone: 'UTC'`**. Leerla en Bogotá (UTC−5) la retrasa al día
+  anterior; el carnet llegó a anunciar el vencimiento un día antes de tiempo.
 
 ---
 
@@ -188,4 +235,8 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    (`experimental.viewTransition`) pero **sin aplicar**.
 2. Sin pruebas automatizadas de interfaz.
 3. Sin verificar en dispositivo real: vista móvil, gestos de la hoja, instalación
-   de la PWA y Core Web Vitals.
+   de la PWA y Core Web Vitals. La automatización de navegador de esta máquina
+   **no consigue redimensionar la ventana** — no lo intentes, ya falló cinco veces;
+   pide al usuario una captura o usa un dispositivo real.
+4. El Portal de Miembros solo se ha visto en su pantalla de acceso: el resto exige un
+   miembro con membresía vigente y esas credenciales no están disponibles aquí.

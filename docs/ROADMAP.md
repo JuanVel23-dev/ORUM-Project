@@ -4,7 +4,7 @@
 > están hechas y cuáles faltan. Sirve como punto único de referencia para retomar el
 > proyecto desde cualquier máquina sin desalinearnos.
 >
-> **Última actualización:** 2026-08-05
+> **Última actualización:** 2026-08-11
 
 ---
 
@@ -131,17 +131,31 @@ cambios de la reunión sobre autoría de venta/registro y tipo de membresía (nu
 - Spec: [`docs/superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md`](superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md)
 - Plan: [`docs/superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md`](superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md)
 
-### 🔄 Rediseño visual — sistema de diseño, movimiento y PWA
+### ✅ Rediseño visual — sistema de diseño, movimiento y PWA
 
 **Transversal a todas las fases.** No cambia funcionalidad: sustituye la capa de
 presentación completa (oro / negro / blanco, estética Apple, movimiento con resortes,
 tres modos de tema) y convierte la app en PWA instalable.
 
-- **Fase A (fundaciones) — hecha:** tipografía Inter Variable, capa de tokens
-  (`src/styles/tokens.css`), `globals.css` reescrito con mapeo semántico por tema,
-  sistema de tres temas sin parpadeo, y utilidades de movimiento (`src/lib/motion.ts`).
-- Fases B–G pendientes: primitivas de UI, app shell, login, pantallas del admin, PWA
-  y auditoría.
+- **Fases A–G completas.** Tipografía Inter Variable, capa de tokens
+  (`src/styles/tokens.css`), `globals.css` con mapeo semántico por tema, tres modos de
+  tema sin parpadeo, kit de UI en `src/components/ui/**`, app shell con barra lateral
+  colapsable y barra inferior en móvil, paleta de comandos, formularios en superposición
+  mediante rutas paralelas + interceptadas (`@modal` / `(.)`), PWA instalable con service
+  worker propio, y auditoría de contraste/accesibilidad.
+- **El kit `.orum-*` quedó eliminado.** Las reglas del sistema —qué es oro, qué es acción,
+  cómo se anima, qué está prohibido— viven en [`CLAUDE.md`](../CLAUDE.md), en la raíz.
+  Cualquier pantalla nueva debe leerlo antes de escribir CSS.
+
+**Cuatro correcciones de fondo que salieron del rediseño** (no eran cosméticas):
+
+- `derivarEstadoMembresia` — `membresias.estado` nunca pasa a `vencida` al llegar
+  `fecha_fin`; la interfaz mostraba "Activa" a quien llevaba meses sin pagar.
+- Contraste: `--text-3` reprobaba AA en ambos temas (3.22:1 y 3.77:1).
+- `box-shadow: var(--shadow-3), var(--edge)` con `--edge: none` — un `none` dentro de una
+  lista de sombras invalida la declaración ENTERA: ninguna tarjeta, lista ni menú tenía
+  sombra. Ahora los tokens vacíos son sombras transparentes.
+- Entorno: pnpm 11 exige Node ≥ 22.13 (`node:sqlite`); `engines` decía ≥ 20.9.
 
 **Documentos:**
 - Spec: [`docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md`](superpowers/specs/2026-08-04-rediseno-visual-orum-design.md)
@@ -247,7 +261,7 @@ Requisitos cubiertos: **RF-06 a RF-14** (login, perfil, descuentos, búsqueda y 
 | RF-16 | Gestión de usuarios (staff + miembros) | Fase 1 + 2 | ✅ |
 | RF-17 | Gestión de comercios | Fase 3 | ✅ |
 | RF-18 | Gestión de promociones | Fase 3 | ✅ |
-| RF-19 | Trazabilidad / historial de movimientos | Fase 4 | ⬜ |
+| RF-19 | Trazabilidad / historial de movimientos | Fase 4 | ✅ |
 | RF-20–22 | Herramienta de comercios (login, venta por QR / número) | Posterior | ⬜ |
 
 ---
@@ -345,13 +359,27 @@ pnpm lint           # linter
 
 ## 9. Próximo paso sugerido
 
-Con las Fases 1, 2 y 3 cerradas, el trabajo activo es el **rediseño visual**: la funcionalidad
-del portal administrativo está, pero la capa de presentación no transmite la calidad que el
-producto necesita, y los portales de cara al usuario (Público y Miembros) van a heredarla.
+Las Fases 1–5 y el rediseño visual están implementados y fusionados: todo el producto —panel
+de administración y Portal de Miembros— corre sobre el mismo sistema de diseño.
 
-La Fase A (fundaciones) está hecha. El siguiente paso es la **Fase B: primitivas de UI**, y tras
-la Fase D hay un punto de evaluación explícito antes de comprometer la migración de las ~20
-pantallas del admin.
+**Antes de seguir construyendo, dos pruebas manuales pendientes** (ninguna se puede automatizar
+desde aquí porque exigen credenciales reales y un dispositivo físico):
 
-En paralelo queda pendiente la **Fase 4 (métricas y trazabilidad)**, que no depende del rediseño
-salvo por los componentes de gráficos.
+1. **Portal de Miembros con un miembro real:** login por número de membresía, membresía
+   vencida o suspendida → pantalla de bloqueo, búsqueda y cada filtro, y el QR escaneado con
+   un lector de verdad.
+2. **Comprobación en móvil físico:** el rediseño está pensado para móvil (barra inferior,
+   hojas con detentes, gestos), pero la automatización de navegador de esta máquina no
+   consigue redimensionar la ventana, así que el comportamiento en pantalla estrecha está
+   verificado por CSS, no visualmente.
+
+**Dos decisiones de datos, no de código, que siguen abiertas:**
+
+- El plan **Premium** tiene duración de 2 meses, lo que contradice "solo existe la membresía
+  mensual". O se retira el plan, o se corrige su duración.
+- La **Membresía ORUM** figura con precio **$0**.
+
+Después de eso, el siguiente paso natural es la **Herramienta para Comercios** (RF-20–22): es
+la que llena la tabla `ventas` que el dashboard de métricas ya consume, y donde se usará por
+primera vez el QR que el perfil del miembro ya muestra. El **Portal Público** (RF-01–04) puede
+ir en paralelo — es el que menos depende de lo ya construido.
