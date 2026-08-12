@@ -95,7 +95,18 @@ pagar.
 
 ## Movimiento
 
-Curvas y duraciones en `tokens.css`; resortes en `src/lib/motion.ts`.
+Curvas y duraciones en `tokens.css`; resortes en `src/lib/shared/motion.ts`.
+
+**Para animar un número** (un desplazamiento, un progreso) la forma correcta de
+`motion` es la de valor único:
+
+```ts
+animate(desde, hasta, { ...SPRING_SHEET, onUpdate: (v) => colocar(v) })
+```
+
+`animate(callback, [desde, hasta], opciones)` **no existe** en motion 12: no lanza
+excepción, simplemente no anima. La hoja inferior se abría y se quedaba en su
+posición cerrada —asomando solo el tirador— y nada en consola lo delataba.
 
 - Por defecto `bounce: 0`. **El rebote se gana, no se regala**: solo tras un gesto
   con momento. Rebote gratuito se lee como juguete.

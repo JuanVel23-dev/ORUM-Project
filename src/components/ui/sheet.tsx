@@ -150,11 +150,18 @@ export function Sheet({
         // Entra desde abajo del todo hasta su detent.
         colocar(panel.offsetHeight)
         if (veloRef.current) animate(veloRef.current, { opacity: [0, 1] }, { duration: 0.25 })
-        animate(
-          (v: number) => colocar(v),
-          [panel.offsetHeight, destino],
-          SPRING_SHEET,
-        )
+        /*
+          Forma de VALOR ÚNICO (`animate(desde, hasta, { onUpdate })`), no
+          `animate(callback, keyframes, …)`: esa segunda forma no existe en
+          motion 12 y fallaba en silencio —sin excepción y sin animación—, así
+          que la hoja se abría y se quedaba en su posición cerrada, asomando
+          solo el tirador. No saltó antes porque el gesto de la hoja nunca se
+          había podido verificar en un dispositivo real.
+        */
+        animate(panel.offsetHeight, destino, {
+          ...SPRING_SHEET,
+          onUpdate: (v) => colocar(v),
+        })
       }
     } else if (dialogo.open) {
       cerrarConAnimacion()
@@ -229,11 +236,13 @@ export function Sheet({
       Math.abs(punto - proyectado) < Math.abs(mejor - proyectado) ? punto : mejor,
     )
 
-    animate((v: number) => colocar(v), [offsetActual.current, destino], {
+    // Misma forma de valor único que en la apertura, por el mismo motivo.
+    animate(offsetActual.current, destino, {
       type: 'spring',
       bounce: 0.2,
       duration: 0.4,
       velocity: velocidad,
+      onUpdate: (v) => colocar(v),
     })
   }
 

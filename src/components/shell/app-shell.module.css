@@ -614,6 +614,30 @@
   color: var(--text);
 
   transition: background-color var(--dur-fast) var(--ease-out);
+
+  /*
+    La lista mezcla enlaces y botones —instalar la app es una acción, no un
+    destino— y ambos tienen que ser indistinguibles. Sin este reseteo el
+    <button> traería el borde, el fondo y la fuente del navegador, y se leería
+    como un cuerpo extraño entre las demás filas.
+  */
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.masItem:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+/* Retroalimentación en el toque, no al soltar. */
+.masItem:active {
+  background: var(--surface-hover);
 }
 
 .masItem:hover {

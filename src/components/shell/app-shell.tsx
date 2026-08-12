@@ -6,7 +6,12 @@ import { useRef, useState, type ComponentProps, type CSSProperties, type ReactNo
 import { motion } from 'motion/react'
 import { KeyRound, LogOut, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
-import { BotonInstalar, InstalarApp } from '@/components/pwa/instalar-app'
+import {
+  BotonInstalar,
+  EntradaInstalar,
+  GuiaInstalacionIOS,
+  InstalarApp,
+} from '@/components/pwa/instalar-app'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
@@ -46,6 +51,7 @@ export function AppShell({ user, cerrarSesion, buscar, children }: Props) {
   const [colapsada, setColapsada] = usePreferenciaLocal('orum-sidebar-colapsada', false)
   const [paleta, setPaleta] = useState(false)
   const [mas, setMas] = useState(false)
+  const [guiaIOS, setGuiaIOS] = useState(false)
 
   useAtajoPaleta(() => setPaleta(true))
 
@@ -88,6 +94,7 @@ export function AppShell({ user, cerrarSesion, buscar, children }: Props) {
         colapsada={colapsada}
         onColapsar={() => setColapsada(!colapsada)}
         cerrarSesion={cerrarSesion}
+        onPedirGuiaIOS={() => setGuiaIOS(true)}
       />
 
       <div className={styles.columna}>
@@ -152,6 +159,23 @@ export function AppShell({ user, cerrarSesion, buscar, children }: Props) {
             <KeyRound className={styles.masItemIcono} aria-hidden="true" />
             Mi contraseña
           </Link>
+
+          {/*
+            Instalar la app. En el teléfono esta hoja es la única entrada
+            permanente: el menú del avatar no existe aquí y el banner es
+            descartable. Se oculta sola si el navegador no permite instalar
+            o si ya se está ejecutando instalada.
+          */}
+          <EntradaInstalar
+            className={styles.masItem}
+            iconClassName={styles.masItemIcono}
+            onInstalar={() => setMas(false)}
+            onPedirGuiaIOS={() => {
+              // Una hoja se va, la otra llega: no se apilan.
+              setMas(false)
+              setGuiaIOS(true)
+            }}
+          />
         </nav>
 
         <div style={{ marginTop: 'var(--space-5)' }}>
@@ -164,6 +188,13 @@ export function AppShell({ user, cerrarSesion, buscar, children }: Props) {
           </Button>
         </form>
       </Sheet>
+
+      {/*
+        HERMANA de la hoja "Más", no hija. Un `<dialog>` cerrado es
+        `display: none` y arrastra a sus descendientes: si la guía viviera
+        dentro, cerrar "Más" para mostrarla la ocultaría con ella.
+      */}
+      <GuiaInstalacionIOS abierta={guiaIOS} onCerrar={() => setGuiaIOS(false)} />
 
       <CommandPalette
         open={paleta}
@@ -202,6 +233,7 @@ function Sidebar({
   colapsada,
   onColapsar,
   cerrarSesion,
+  onPedirGuiaIOS,
 }: {
   grupos: NavGroup[]
   pathname: string
@@ -209,6 +241,7 @@ function Sidebar({
   colapsada: boolean
   onColapsar: () => void
   cerrarSesion: () => void | Promise<void>
+  onPedirGuiaIOS: () => void
 }) {
   const formCerrarSesion = useRef<HTMLFormElement>(null)
 
@@ -294,7 +327,7 @@ function Sidebar({
             se puede descartar, y una vez descartado no había forma de volver
             a encontrarla. Aquí siempre está.
           */}
-          <BotonInstalar />
+          <BotonInstalar onPedirGuiaIOS={onPedirGuiaIOS} />
 
           <MenuSeparator />
 

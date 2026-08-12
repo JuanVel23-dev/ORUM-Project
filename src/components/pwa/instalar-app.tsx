@@ -31,7 +31,34 @@ import styles from './instalar-app.module.css'
  * En ambos casos el banner es descartable y la decisión se recuerda.
  */
 /**
- * Entrada permanente a la instalación, para el menú de la cuenta.
+ * ¿Tiene sentido ofrecer la instalación aquí y ahora?
+ *
+ * Vive en un hook porque hay DOS entradas permanentes —el menú de la cuenta en
+ * escritorio y la hoja "Más" en móvil— y la condición es delicada: depende de
+ * la hidratación, del navegador y de si la app ya corre instalada. Duplicarla
+ * es garantizar que las dos se desincronicen.
+ */
+function useInstalacion() {
+  const hidratado = useHidratado()
+
+  const promptDisponible = useSyncExternalStore(
+    suscribirInstalable,
+    leerInstalable,
+    leerInstalableEnServidor,
+  )
+
+  // Antes de hidratar no se sabe nada del dispositivo: `esStandalone` y
+  // `esSafariEnIOS` leen de `window` y en servidor devuelven `false`.
+  if (!hidratado || esStandalone()) return { disponible: false, enIOS: false }
+
+  const enIOS = esSafariEnIOS()
+
+  // Sin prompt y fuera de iOS, el navegador sencillamente no permite instalar.
+  return { disponible: promptDisponible !== null || enIOS, enIOS }
+}
+
+/**
+ * Entrada permanente a la instalación, para el menú de la cuenta (escritorio).
  *
  * El banner superior se puede descartar, y una vez descartado no había forma
  * de volver a encontrar cómo instalar la app. Esto siempre está disponible.
@@ -39,59 +66,115 @@ import styles from './instalar-app.module.css'
  * Se oculta solo cuando ya se está ejecutando instalada: ofrecer "instalar"
  * dentro de la app instalada no tendría sentido.
  */
-export function BotonInstalar() {
-  const hidratado = useHidratado()
-  const [guiaAbierta, setGuiaAbierta] = useState(false)
+export function BotonInstalar({
+  /**
+   * Igual que en `EntradaInstalar`: la guía NO puede vivir aquí dentro. El
+   * `MenuItem` cierra el popover del menú al pulsarse, y un popover cerrado
+   * oculta a sus descendientes — la guía se abriría invisible. Pasa en iPadOS,
+   * que se identifica como iOS y sí ve la barra lateral.
+   */
+  onPedirGuiaIOS,
+}: {
+  onPedirGuiaIOS?: () => void
+}) {
+  const { disponible, enIOS } = useInstalacion()
 
-  const promptDisponible = useSyncExternalStore(
-    suscribirInstalable,
-    leerInstalable,
-    leerInstalableEnServidor,
-  )
-
-  if (!hidratado || esStandalone()) return null
-
-  const enIOS = esSafariEnIOS()
-  // Sin prompt y fuera de iOS, el navegador no permite instalar.
-  if (!promptDisponible && !enIOS) return null
+  if (!disponible) return null
 
   return (
-    <>
-      <MenuItem
-        icon={enIOS ? <Share size={16} /> : <Download size={16} />}
-        onSelect={() => {
-          if (enIOS) setGuiaAbierta(true)
-          else void lanzarInstalacion()
-        }}
-      >
-        Instalar en este dispositivo
-      </MenuItem>
-
-      <GuiaIOS abierta={guiaAbierta} onCerrar={() => setGuiaAbierta(false)} />
-    </>
+    <MenuItem
+      icon={enIOS ? <Share size={16} /> : <Download size={16} />}
+      onSelect={() => {
+        if (enIOS) onPedirGuiaIOS?.()
+        else void lanzarInstalacion()
+      }}
+    >
+      Instalar en este dispositivo
+    </MenuItem>
   )
 }
 
+/**
+ * La misma entrada, con el aspecto de una fila de lista.
+ *
+ * Existe para la hoja "Más" del móvil, que es la ÚNICA puerta permanente a la
+ * instalación en un teléfono: allí no hay menú del avatar —vive en el pie de
+ * la barra lateral, oculta— y el banner es descartable. Sin esto, quien
+ * cerraba el banner en su móvil se quedaba sin forma de instalar la app, que
+ * es justo el dispositivo donde instalarla tiene sentido.
+ *
+ * Las clases llegan de fuera para que la fila sea indistinguible de las demás
+ * de la hoja; este componente no sabe nada del shell.
+ */
+export function EntradaInstalar({
+  className,
+  iconClassName,
+  onPedirGuiaIOS,
+  onInstalar,
+}: {
+  className?: string
+  iconClassName?: string
+  /**
+   * En iOS no hay diálogo nativo: hay que enseñar el gesto. Quien monte esta
+   * entrada decide dónde vive la guía —ver `GuiaInstalacionIOS`— porque si se
+   * renderizara aquí quedaría ANIDADA dentro de la hoja contenedora, y un
+   * `<dialog>` cerrado es `display: none`: al cerrar la hoja para mostrar la
+   * guía, la guía se ocultaría con ella.
+   */
+  onPedirGuiaIOS?: () => void
+  /** Se llama tras lanzar la instalación, para cerrar la hoja contenedora. */
+  onInstalar?: () => void
+}) {
+  const { disponible, enIOS } = useInstalacion()
+
+  if (!disponible) return null
+
+  const Icono = enIOS ? Share : Download
+
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={() => {
+        if (enIOS) {
+          onPedirGuiaIOS?.()
+        } else {
+          void lanzarInstalacion()
+          onInstalar?.()
+        }
+      }}
+    >
+      <Icono className={iconClassName} aria-hidden="true" />
+      {enIOS ? 'Cómo instalar la app' : 'Instalar en este dispositivo'}
+    </button>
+  )
+}
+
+/**
+ * Guía de instalación para iOS, controlada desde fuera.
+ *
+ * Se exporta para que el shell pueda montarla como HERMANA de la hoja "Más"
+ * y no dentro de ella. Ver `EntradaInstalar` para el porqué.
+ */
+export function GuiaInstalacionIOS({
+  abierta,
+  onCerrar,
+}: {
+  abierta: boolean
+  onCerrar: () => void
+}) {
+  return <GuiaIOS abierta={abierta} onCerrar={onCerrar} />
+}
+
 export function InstalarApp() {
-  const hidratado = useHidratado()
+  const { disponible, enIOS } = useInstalacion()
   const [descartado, setDescartado] = usePreferenciaLocal('orum-instalar-descartado')
   const [guiaAbierta, setGuiaAbierta] = useState(false)
 
-  const promptDisponible = useSyncExternalStore(
-    suscribirInstalable,
-    leerInstalable,
-    leerInstalableEnServidor,
-  )
-
-  // Antes de hidratar no se sabe nada del dispositivo ni de la preferencia:
-  // pintar el banner y quitarlo después sería un parpadeo.
-  if (!hidratado || descartado) return null
-
-  // Ya está instalada: no hay nada que ofrecer.
-  if (esStandalone()) return null
-
-  const enIOS = esSafariEnIOS()
-  if (!promptDisponible && !enIOS) return null
+  // El hook ya cubre hidratación, dispositivo y app instalada. Aquí solo se
+  // añade lo propio del banner: que no se haya descartado. Pintarlo y
+  // quitarlo después sería un parpadeo.
+  if (!disponible || descartado) return null
 
   return (
     <>
