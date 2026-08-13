@@ -154,8 +154,8 @@ manualmente algunas filas de `ventas` en Supabase para ver las tablas de comerci
   miembros nuevos en el periodo, membresías vendidas por empleado, ventas por comercio, uso de
   membresía por miembro y comercio. Agregaciones en funciones puras testeadas
   (`src/lib/metricas.ts`); las dos métricas basadas en `ventas` muestran estado vacío hasta que
-  exista la Herramienta para Comercios (fase posterior) que alimenta esa tabla — comportamiento
-  esperado, no un bug (D4 del spec).
+  la Herramienta para Comercios (Fase 6) alimente esa tabla — comportamiento esperado, no un bug
+  (D4 del spec).
 - Se tipó `ventas` en `database.types.ts` (tabla ya existente en Supabase, sin usar hasta ahora).
 
 **Documentos de diseño/plan de esta fase:**
@@ -204,8 +204,9 @@ botón de soporte).
 - **Soporte por WhatsApp** (RF-13) — botón persistente en el layout del portal, leído desde
   `configuracion.whatsapp_soporte` (tabla ya existente en Supabase, ahora en uso).
 - **Kit de UI ampliado**: `Select`, `Card`/`CardGrid`, `QrCode`, `WhatsAppButton` — nuevos
-  componentes en `src/components/ui/`, reutilizables por los portales futuros (Público,
-  Herramienta de Comercios).
+  componentes en `src/components/ui/`, pensados para reutilizarse en los portales que faltaban:
+  ya se usaron en el Portal de Comercios (Fase 6) y quedan disponibles para el Portal Público
+  (Fase 7, aún pendiente).
 
 **Documentos de diseño/plan de esta fase:**
 - Spec: [`docs/superpowers/specs/2026-08-09-portal-miembros-design.md`](superpowers/specs/2026-08-09-portal-miembros-design.md)
