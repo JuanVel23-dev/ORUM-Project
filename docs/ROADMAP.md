@@ -234,7 +234,7 @@ verificarse automáticamente aquí.
 - **Flujo de verificación + venta** (`/comercios`, RF-21 y RF-22) en una sola pantalla:
   - Búsqueda por número de membresía tecleado a mano o por escaneo de QR con la cámara
     (`_components/escaner-qr.tsx`); ambos resuelven al mismo número y quedan marcados con su
-    método (`manual` / `qr`).
+    método (`numero` / `qr`).
   - Verificación vía la función `buscar_miembro_comercio` (RPC `security definer` en Supabase,
     Task 1 del plan) — solo devuelve nombre, número de membresía, vigencia y plan; nunca cédula,
     teléfono ni dirección del miembro.

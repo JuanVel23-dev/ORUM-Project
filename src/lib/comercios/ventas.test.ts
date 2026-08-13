@@ -7,7 +7,7 @@ describe('calcularDescuento', () => {
   })
 
   it('porcentaje: redondea al entero más cercano', () => {
-    expect(calcularDescuento('porcentaje', 15, 10000)).toBe(1500)
+    expect(calcularDescuento('porcentaje', 15, 3333)).toBe(500)
   })
 
   it('monto_fijo: usa el valor fijo cuando es menor a la compra', () => {
