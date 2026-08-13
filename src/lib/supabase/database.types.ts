@@ -408,7 +408,20 @@ export type Database = {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      buscar_miembro_comercio: {
+        Args: { p_numero: string }
+        Returns: {
+          miembro_id: number
+          nombres: string
+          apellidos: string
+          numero_membresia: string
+          vigente: boolean
+          membresia_id: number | null
+          plan_nombre: string | null
+        }[]
+      }
+    }
     Enums: {
       tipo_membresia: 'nueva' | 'renovada'
       estado_membresia: 'activa' | 'vencida' | 'cancelada' | 'suspendida'
