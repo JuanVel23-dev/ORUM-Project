@@ -1,5 +1,6 @@
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { inicioDiaBogota, finDiaBogota } from '@/lib/shared/fecha'
 import {
   rangoUltimosDias,
   agruparMembresiasPorEmpleado,
@@ -36,15 +37,15 @@ export default async function MetricasPage({
       .from('miembros')
       .select('id', { count: 'exact', head: true })
       .is('deleted_at', null)
-      .gte('fecha_registro', `${desde} 00:00:00`)
-      .lte('fecha_registro', `${hasta} 23:59:59`),
+      .gte('fecha_registro', inicioDiaBogota(desde))
+      .lte('fecha_registro', finDiaBogota(hasta)),
     admin.from('membresias').select('vendido_por, precio_pagado').gte('fecha_inicio', desde).lte('fecha_inicio', hasta),
     admin.from('empleados').select('id, nombres, apellidos').is('deleted_at', null),
     admin
       .from('ventas')
       .select('sucursal_id, miembro_id, valor_final, valor_descuento')
-      .gte('fecha_hora', `${desde} 00:00:00`)
-      .lte('fecha_hora', `${hasta} 23:59:59`),
+      .gte('fecha_hora', inicioDiaBogota(desde))
+      .lte('fecha_hora', finDiaBogota(hasta)),
     admin.from('sucursales').select('id, comercio_id'),
     admin.from('comercios').select('id, nombre'),
     admin.from('miembros').select('id, nombres, apellidos').is('deleted_at', null),
