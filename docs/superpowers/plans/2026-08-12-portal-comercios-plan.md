@@ -29,9 +29,10 @@ from small composable components, using `useActionState` for both server actions
   (`orum-card`, `orum-field`, `orum-label`, `orum-input`, `orum-select`, `orum-button`,
   `orum-button--secondary`, `orum-alert`, `orum-badge`) and the `@/components/ui` kit
   (`PageHeader`, `EmptyState`, `Badge`, `Select`, `Alert`, `Row`) — do not invent new class names.
-- "Today" in business logic is always Bogotá time via
-  `new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())`
-  (returns `'YYYY-MM-DD'`), never `new Date()` directly — matches every prior phase.
+- "Today" in business logic is always Bogotá time via the shared `hoyISO()` helper built in Task 3
+  (`src/lib/shared/fecha.ts`), never `new Date()` directly and never a locally re-declared
+  `function hoyISO()` — Task 3 consolidates the one pre-existing copy (in
+  `src/app/admin/miembros/actions.ts`) plus this plan's two new call sites into a single import.
 - Server actions always re-check authorization themselves (`requireRolComercio()`), even though the
   layout already guards the page — matches the existing `/admin/**` and `/miembros/**` actions.
 - **Out of scope for this plan** (see spec §1): no welcome email, no sales-history screen for the
@@ -45,7 +46,7 @@ from small composable components, using `useActionState` for both server actions
 **This task is not code — it's a manual step in the Supabase SQL Editor**, same as every prior
 phase's RLS/index changes (there are no migration files in this repo). Everything from Task 2
 onward can be written and type-checked without this being live yet, but the **manual browser test
-in Task 15 will not work until this is applied**, so do it now to avoid a late blocker.
+in Task 16 will not work until this is applied**, so do it now to avoid a late blocker.
 
 **Files:** none (no files in the repo track this SQL — it's applied directly against the Supabase
 project).
@@ -119,7 +120,7 @@ Expected: `t` (true).
 
 **Interfaces:**
 - Produces: `Database['public']['Functions']['buscar_miembro_comercio']` — used by
-  `supabase.rpc('buscar_miembro_comercio', { p_numero: string })` in Task 8.
+  `supabase.rpc('buscar_miembro_comercio', { p_numero: string })` in Task 9.
 
 - [ ] **Step 1: Replace the empty `Functions` type**
 
@@ -162,7 +163,79 @@ git commit -m "feat(comercios): tipar función RPC buscar_miembro_comercio"
 
 ---
 
-## Task 3: Pure functions for sale calculations (`src/lib/comercios/ventas.ts`)
+## Task 3: Shared `hoyISO` helper (`src/lib/shared/fecha.ts`)
+
+**Why this task exists:** `src/app/admin/miembros/actions.ts` already has a local
+`function hoyISO()` (Bogotá "today", used for registration/renewal dates). This plan needs the same
+logic in two new files (Tasks 10 and 15). Rather than adding two more local copies, this task
+extracts the one existing copy into a shared helper, and Tasks 10/15 import it instead of
+re-declaring it — no duplication anywhere in the codebase after this plan lands.
+
+**Files:**
+- Create: `src/lib/shared/fecha.ts`
+- Modify: `src/app/admin/miembros/actions.ts:44-51` (remove the local `hoyISO`, import the shared one)
+
+**Interfaces:**
+- Produces: `hoyISO(): string` (returns `'YYYY-MM-DD'` in `America/Bogota`) — consumed by
+  `src/app/admin/miembros/actions.ts` (existing call sites, unchanged behavior), Task 10
+  (`registrarVenta`), and Task 15 (`page.tsx`).
+
+- [ ] **Step 1: Write the implementation**
+
+```ts
+// src/lib/shared/fecha.ts
+
+/**
+ * Fecha de hoy en formato 'YYYY-MM-DD' en la zona horaria del negocio
+ * (America/Bogota), no la del servidor (que corre en UTC). Evita que
+ * registros/renovaciones/ventas hechos por la tarde-noche salten al día
+ * siguiente.
+ */
+export function hoyISO(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
+}
+```
+
+- [ ] **Step 2: Update `src/app/admin/miembros/actions.ts` to use the shared helper**
+
+Remove the local declaration:
+
+```ts
+/**
+ * Fecha de hoy en formato 'YYYY-MM-DD' en la zona horaria del negocio
+ * (America/Bogota), no la del servidor (que corre en UTC). Así los registros y
+ * renovaciones hechos por la tarde-noche no saltan al día siguiente.
+ */
+function hoyISO(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
+}
+```
+
+and add an import for it instead, alongside the file's existing imports:
+
+```ts
+import { hoyISO } from '@/lib/shared/fecha'
+```
+
+The rest of the file (both call sites, `hoyISO()` inside `registrarMiembro` and inside
+`renovarMembresia`) is unchanged — same name, same signature, same behavior.
+
+- [ ] **Step 3: Type-check and run the full test suite**
+
+Run: `pnpm exec tsc --noEmit && pnpm exec vitest run`
+Expected: no new type errors; all existing tests still pass (this task doesn't change behavior,
+only where the function lives).
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/lib/shared/fecha.ts src/app/admin/miembros/actions.ts
+git commit -m "refactor: extraer hoyISO a un helper compartido"
+```
+
+---
+
+## Task 4: Pure functions for sale calculations (`src/lib/comercios/ventas.ts`)
 
 **Files:**
 - Create: `src/lib/comercios/ventas.ts`
@@ -171,7 +244,7 @@ git commit -m "feat(comercios): tipar función RPC buscar_miembro_comercio"
 **Interfaces:**
 - Produces: `calcularDescuento(tipoCodigo: 'porcentaje' | 'monto_fijo', valorPromocion: number, valorCompra: number): number`
 - Produces: `calcularValorFinal(valorCompra: number, valorDescuento: number): number`
-- Consumed by: Task 9 (`registrarVenta` action) and Task 12 (`ConfirmarVentaForm`).
+- Consumed by: Task 10 (`registrarVenta` action) and Task 13 (`ConfirmarVentaForm`).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -259,7 +332,7 @@ git commit -m "feat(comercios): funciones puras de cálculo de venta"
 
 ---
 
-## Task 4: Pure function for promotion validity (`src/lib/comercios/promocion-vigente.ts`)
+## Task 5: Pure function for promotion validity (`src/lib/comercios/promocion-vigente.ts`)
 
 **Files:**
 - Create: `src/lib/comercios/promocion-vigente.ts`
@@ -267,7 +340,7 @@ git commit -m "feat(comercios): funciones puras de cálculo de venta"
 
 **Interfaces:**
 - Produces: `esPromocionVigente(activo: boolean, fechaInicio: string | null, fechaFin: string | null, hoy: string): boolean`
-- Consumed by: Task 9 (`registrarVenta` action) and Task 14 (`page.tsx`, to filter the promotion list).
+- Consumed by: Task 10 (`registrarVenta` action) and Task 15 (`page.tsx`, to filter the promotion list).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -344,15 +417,15 @@ git commit -m "feat(comercios): función pura esPromocionVigente"
 
 ---
 
-## Task 5: `requireRolComercio` guard
+## Task 6: `requireRolComercio` guard
 
 **Files:**
 - Create: `src/lib/comercios/requerir-comercio.ts`
 
 **Interfaces:**
 - Consumes: `getPerfilActual` and `PerfilActual` from `@/lib/auth/auth`.
-- Produces: `requireRolComercio(): Promise<PerfilActual>` — consumed by Task 7 (layout), Task 8, and
-  Task 9 (server actions), Task 14 (`page.tsx`).
+- Produces: `requireRolComercio(): Promise<PerfilActual>` — consumed by Task 8 (layout), Task 9, and
+  Task 10 (server actions), Task 15 (`page.tsx`).
 
 - [ ] **Step 1: Write the implementation**
 
@@ -382,7 +455,7 @@ export async function requireRolComercio(): Promise<PerfilActual> {
 
 No dedicated test for this file — it's a thin `redirect()` wrapper, same as `requireRolMiembro`
 (`src/lib/miembros/requerir-miembro.ts`), which also has no test. It's exercised by the manual
-browser test in Task 15.
+browser test in Task 16.
 
 - [ ] **Step 2: Type-check**
 
@@ -398,7 +471,7 @@ git commit -m "feat(comercios): requireRolComercio"
 
 ---
 
-## Task 6: Login de comercios (`/comercios/login`)
+## Task 7: Login de comercios (`/comercios/login`)
 
 **Files:**
 - Create: `src/app/comercios/login/page.tsx`
@@ -407,7 +480,7 @@ git commit -m "feat(comercios): requireRolComercio"
 
 **Interfaces:**
 - Produces: `iniciarSesionComercio(prevState: LoginComercioState, formData: FormData): Promise<LoginComercioState>`
-  and `cerrarSesionComercio(): Promise<void>` — `cerrarSesionComercio` is consumed by Task 7 (layout).
+  and `cerrarSesionComercio(): Promise<void>` — `cerrarSesionComercio` is consumed by Task 8 (layout).
 - `LoginComercioState = { error?: string }`
 
 - [ ] **Step 1: Write `actions.ts`**
@@ -586,13 +659,13 @@ git commit -m "feat(comercios): login de comercios (RF-20)"
 
 ---
 
-## Task 7: Layout protegido (`/comercios/(portal)/layout.tsx`)
+## Task 8: Layout protegido (`/comercios/(portal)/layout.tsx`)
 
 **Files:**
 - Create: `src/app/comercios/(portal)/layout.tsx`
 
 **Interfaces:**
-- Consumes: `requireRolComercio` (Task 5), `cerrarSesionComercio` (Task 6), `Row` from `@/components/ui`.
+- Consumes: `requireRolComercio` (Task 6), `cerrarSesionComercio` (Task 7), `Row` from `@/components/ui`.
 
 - [ ] **Step 1: Write the implementation**
 
@@ -661,19 +734,19 @@ git commit -m "feat(comercios): layout protegido del portal"
 
 ---
 
-## Task 8: Server action `buscarMiembro`
+## Task 9: Server action `buscarMiembro`
 
 **Files:**
 - Create: `src/app/comercios/(portal)/actions.ts`
 
 **Interfaces:**
-- Consumes: `requireRolComercio` (Task 5), `createClient` from `@/lib/supabase/server`, the
+- Consumes: `requireRolComercio` (Task 6), `createClient` from `@/lib/supabase/server`, the
   `buscar_miembro_comercio` RPC typed in Task 2, `MetodoRegistroVenta` from
   `@/lib/supabase/database.types`.
 - Produces: `type MiembroEncontrado = { id: number; nombreCompleto: string; numeroMembresia: string; vigente: boolean; membresiaId: number | null; planNombre: string | null }`,
   `type BuscarMiembroState = { error?: string; miembro?: MiembroEncontrado; metodo?: MetodoRegistroVenta }`,
   `buscarMiembro(prevState: BuscarMiembroState, formData: FormData): Promise<BuscarMiembroState>` —
-  consumed by Task 13 (`BuscarMiembroForm`).
+  consumed by Task 14 (`BuscarMiembroForm`).
 
 - [ ] **Step 1: Write the implementation**
 
@@ -754,16 +827,17 @@ git commit -m "feat(comercios): server action buscarMiembro"
 
 ---
 
-## Task 9: Server action `registrarVenta`
+## Task 10: Server action `registrarVenta`
 
 **Files:**
-- Modify: `src/app/comercios/(portal)/actions.ts` (append to the file from Task 8)
+- Modify: `src/app/comercios/(portal)/actions.ts` (append to the file from Task 9)
 
 **Interfaces:**
-- Consumes: `calcularDescuento`, `calcularValorFinal` (Task 3), `esPromocionVigente` (Task 4).
+- Consumes: `calcularDescuento`, `calcularValorFinal` (Task 4), `esPromocionVigente` (Task 5),
+  `hoyISO` from `@/lib/shared/fecha` (Task 3).
 - Produces: `type RegistrarVentaState = { error?: string; ok?: boolean }`,
   `registrarVenta(prevState: RegistrarVentaState, formData: FormData): Promise<RegistrarVentaState>` —
-  consumed by Task 12 (`ConfirmarVentaForm`).
+  consumed by Task 13 (`ConfirmarVentaForm`).
 
 - [ ] **Step 1: Add the imports**
 
@@ -772,17 +846,13 @@ At the top of `src/app/comercios/(portal)/actions.ts`, add:
 ```ts
 import { calcularDescuento, calcularValorFinal } from '@/lib/comercios/ventas'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
+import { hoyISO } from '@/lib/shared/fecha'
 ```
 
 - [ ] **Step 2: Append the implementation**
 
 ```ts
 export type RegistrarVentaState = { error?: string; ok?: boolean }
-
-/** Fecha de hoy 'YYYY-MM-DD' en America/Bogota (no la del servidor, que corre en UTC). */
-function hoyISO(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
-}
 
 /**
  * Registra la venta (RF-21/RF-22): valida que la sucursal y la promoción sean
@@ -896,7 +966,7 @@ git commit -m "feat(comercios): server action registrarVenta"
 
 ---
 
-## Task 10: Componente `EscanerQr`
+## Task 11: Componente `EscanerQr`
 
 **Files:**
 - Create: `src/app/comercios/(portal)/_components/escaner-qr.tsx`
@@ -904,7 +974,7 @@ git commit -m "feat(comercios): server action registrarVenta"
 
 **Interfaces:**
 - Produces: `EscanerQr({ onDetectado: (valor: string) => void; onError: () => void })` — consumed
-  by Task 13 (`BuscarMiembroForm`).
+  by Task 14 (`BuscarMiembroForm`).
 
 - [ ] **Step 1: Add the dependency**
 
@@ -961,14 +1031,14 @@ git commit -m "feat(comercios): componente EscanerQr"
 
 ---
 
-## Task 11: Componente `ResultadoMiembro`
+## Task 12: Componente `ResultadoMiembro`
 
 **Files:**
 - Create: `src/app/comercios/(portal)/_components/resultado-miembro.tsx`
 
 **Interfaces:**
-- Consumes: `MiembroEncontrado` (Task 8), `Badge` from `@/components/ui`.
-- Produces: `ResultadoMiembro({ miembro: MiembroEncontrado })` — consumed by Task 13.
+- Consumes: `MiembroEncontrado` (Task 9), `Badge` from `@/components/ui`.
+- Produces: `ResultadoMiembro({ miembro: MiembroEncontrado })` — consumed by Task 14.
 
 - [ ] **Step 1: Write the implementation**
 
@@ -1009,18 +1079,18 @@ git commit -m "feat(comercios): componente ResultadoMiembro"
 
 ---
 
-## Task 12: Componente `ConfirmarVentaForm`
+## Task 13: Componente `ConfirmarVentaForm`
 
 **Files:**
 - Create: `src/app/comercios/(portal)/_components/confirmar-venta-form.tsx`
 
 **Interfaces:**
-- Consumes: `registrarVenta`, `RegistrarVentaState` (Task 9); `calcularDescuento`,
-  `calcularValorFinal` (Task 3); `formatearBeneficio` from `@/lib/comercios/beneficios-formato`
+- Consumes: `registrarVenta`, `RegistrarVentaState` (Task 10); `calcularDescuento`,
+  `calcularValorFinal` (Task 4); `formatearBeneficio` from `@/lib/comercios/beneficios-formato`
   (already exists); `Alert`, `Select` from `@/components/ui`; `MetodoRegistroVenta`,
   `TipoBeneficioCodigo` from `@/lib/supabase/database.types`.
 - Produces: `ConfirmarVentaForm({ miembroId: number; membresiaId: number | null; metodo: MetodoRegistroVenta; sucursales: { id: number; nombre: string | null }[]; promociones: { id: number; titulo: string; tipoCodigo: TipoBeneficioCodigo; valor: number | null }[]; onExito: () => void })` —
-  consumed by Task 13.
+  consumed by Task 14.
 
 - [ ] **Step 1: Write the implementation**
 
@@ -1191,16 +1261,16 @@ git commit -m "feat(comercios): componente ConfirmarVentaForm"
 
 ---
 
-## Task 13: Componente `BuscarMiembroForm`
+## Task 14: Componente `BuscarMiembroForm`
 
 **Files:**
 - Create: `src/app/comercios/(portal)/_components/buscar-miembro-form.tsx`
 
 **Interfaces:**
-- Consumes: `buscarMiembro`, `BuscarMiembroState` (Task 8); `EscanerQr` (Task 10);
-  `ResultadoMiembro` (Task 11); `ConfirmarVentaForm` (Task 12).
+- Consumes: `buscarMiembro`, `BuscarMiembroState` (Task 9); `EscanerQr` (Task 11);
+  `ResultadoMiembro` (Task 12); `ConfirmarVentaForm` (Task 13).
 - Produces: `BuscarMiembroForm({ sucursales: { id: number; nombre: string | null }[]; promociones: { id: number; titulo: string; tipoCodigo: TipoBeneficioCodigo; valor: number | null }[]; onNuevaVerificacion: () => void })` —
-  consumed by Task 14 (`VerificacionTool`).
+  consumed by Task 15 (`VerificacionTool`).
 
 - [ ] **Step 1: Write the implementation**
 
@@ -1320,17 +1390,17 @@ git commit -m "feat(comercios): componente BuscarMiembroForm"
 
 ---
 
-## Task 14: Orquestador `VerificacionTool` + `page.tsx`
+## Task 15: Orquestador `VerificacionTool` + `page.tsx`
 
 **Files:**
 - Create: `src/app/comercios/(portal)/_components/verificacion-tool.tsx`
 - Create: `src/app/comercios/(portal)/page.tsx`
 
 **Interfaces:**
-- `verificacion-tool.tsx` consumes: `BuscarMiembroForm` (Task 13). Produces:
+- `verificacion-tool.tsx` consumes: `BuscarMiembroForm` (Task 14). Produces:
   `VerificacionTool({ sucursales: { id: number; nombre: string | null }[]; promociones: { id: number; titulo: string; tipoCodigo: TipoBeneficioCodigo; valor: number | null }[] })`.
-- `page.tsx` consumes: `requireRolComercio` (Task 5), `esPromocionVigente` (Task 4),
-  `VerificacionTool`, `PageHeader`/`EmptyState` from `@/components/ui`.
+- `page.tsx` consumes: `requireRolComercio` (Task 6), `esPromocionVigente` (Task 5), `hoyISO` from
+  `@/lib/shared/fecha` (Task 3), `VerificacionTool`, `PageHeader`/`EmptyState` from `@/components/ui`.
 
 - [ ] **Step 1: Write `_components/verificacion-tool.tsx`**
 
@@ -1378,14 +1448,11 @@ import { requireRolComercio } from '@/lib/comercios/requerir-comercio'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader, EmptyState } from '@/components/ui'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
+import { hoyISO } from '@/lib/shared/fecha'
 import { VerificacionTool } from './_components/verificacion-tool'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 
 export const metadata = { title: 'Verificar membresía · ORUM Comercios' }
-
-function hoyISO(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
-}
 
 export default async function ComerciosHomePage() {
   const perfil = await requireRolComercio()
@@ -1470,7 +1537,7 @@ git commit -m "feat(comercios): pantalla de verificación y registro de venta"
 
 ---
 
-## Task 15: Verificación final y ROADMAP
+## Task 16: Verificación final y ROADMAP
 
 **Files:**
 - Modify: `docs/ROADMAP.md`
@@ -1498,6 +1565,8 @@ verify by hand:
 - [ ] Comercio con varias sucursales activas: aparece el selector y es obligatorio.
 - [ ] Al confirmar, la fila aparece en `ventas` (verificar en Supabase) con los valores correctos.
 - [ ] "Verificar otro miembro" limpia todo el formulario para una nueva búsqueda.
+- [ ] Registro/renovación de un miembro en `/admin/miembros` sigue funcionando igual que antes
+      (confirma que extraer `hoyISO` en Task 3 no cambió el comportamiento existente).
 - [ ] Prueba de acceso cruzado: con la sesión de un comercio distinto, confirmar que no puede
       insertar una venta con `sucursal_id` de otro comercio (debe fallar por la política RLS del
       Task 1), y que `buscar_miembro_comercio` nunca devuelve cédula/teléfono/dirección.
