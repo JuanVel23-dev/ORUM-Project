@@ -318,3 +318,26 @@ es la **Herramienta para Comercios** (RF-20-22): es la que finalmente llena la t
 el dashboard de métricas (Fase 4) ya consume, y también donde se usará por primera vez el QR que
 ya muestra el perfil del miembro (Fase 5). El **Portal Público** (RF-01-04) puede ir en paralelo o
 después — es el que menos depende de las fases ya construidas.
+
+---
+
+## 10. Ideas pendientes (no priorizadas)
+
+- **Correo de bienvenida con credenciales al registrar un usuario.** Hoy, al registrar un miembro
+  (`/admin/miembros`) o un usuario interno (`/admin/usuarios`), la contraseña autogenerada solo se
+  muestra una vez en pantalla al admin/empleado que hizo el registro; no se le notifica nada al
+  usuario nuevo. La idea: al crear la cuenta, enviarle un correo con sus credenciales de acceso y
+  un botón que lo lleve a la pantalla de login correspondiente (`/login` para staff,
+  `/miembros/login` para miembros).
+  - **Alcance acordado:** solo miembros y usuarios internos (empleados/admins) por ahora.
+    **Comercios queda excluido** hasta que exista su propio portal de login (Herramienta para
+    Comercios, RF-20-22) — hoy `/login` rechaza el rol `comercio`, así que un botón de acceso no
+    tendría a dónde apuntar.
+  - **Pendiente por decidir:** proveedor de envío de correo (no hay ninguno configurado en el
+    proyecto hoy). Se estaba evaluando **Resend** (API key, sin SMTP propio que configurar) vs.
+    **SMTP con un dominio/correo propio de ORUM** si ya existe uno.
+  - Al implementarse, seguir el patrón best-effort ya usado en `registrarActividad`
+    (`src/lib/bitacora/bitacora.ts`): el envío del correo no debe bloquear ni revertir el registro
+    si falla.
+  - Discusión completa: brainstorming de 2026-08-12 (sin spec escrita — se pausó antes de elegir
+    proveedor).
