@@ -16,6 +16,7 @@ const estadoInicial: RegistrarVentaState = {}
 export function ConfirmarVentaForm({
   miembroId,
   membresiaId,
+  numeroMembresia,
   metodo,
   sucursales,
   promociones,
@@ -23,6 +24,7 @@ export function ConfirmarVentaForm({
 }: {
   miembroId: number
   membresiaId: number | null
+  numeroMembresia: string
   metodo: MetodoRegistroVenta
   sucursales: Sucursal[]
   promociones: Promocion[]
@@ -72,6 +74,7 @@ export function ConfirmarVentaForm({
     <form action={formAction} className="orum-card" style={{ marginTop: '1rem' }}>
       <input type="hidden" name="miembro_id" value={miembroId} />
       <input type="hidden" name="membresia_id" value={membresiaId ?? ''} />
+      <input type="hidden" name="numero_membresia" value={numeroMembresia} />
       <input type="hidden" name="metodo_registro" value={metodo} />
 
       {state.error && <Alert tone="error">{state.error}</Alert>}

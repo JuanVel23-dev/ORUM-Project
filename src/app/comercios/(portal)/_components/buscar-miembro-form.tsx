@@ -86,6 +86,7 @@ export function BuscarMiembroForm({
             <ConfirmarVentaForm
               miembroId={state.miembro.id}
               membresiaId={state.miembro.membresiaId}
+              numeroMembresia={state.miembro.numeroMembresia}
               metodo={state.metodo ?? 'numero'}
               sucursales={sucursales}
               promociones={promociones}

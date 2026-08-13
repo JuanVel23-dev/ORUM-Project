@@ -74,9 +74,7 @@ export async function registrarVenta(
 ): Promise<RegistrarVentaState> {
   const actor = await requireRolComercio()
 
-  const miembroId = Number(formData.get('miembro_id'))
-  const membresiaIdRaw = String(formData.get('membresia_id') ?? '')
-  const membresiaId = membresiaIdRaw ? Number(membresiaIdRaw) : null
+  const numeroMembresia = String(formData.get('numero_membresia') ?? '').trim()
   const sucursalId = Number(formData.get('sucursal_id'))
   const promocionIdRaw = String(formData.get('promocion_id') ?? '')
   const promocionId = promocionIdRaw ? Number(promocionIdRaw) : null
@@ -84,8 +82,8 @@ export async function registrarVenta(
   const valorCompra = Number(formData.get('valor_compra'))
   const valorDescuentoInput = Number(formData.get('valor_descuento'))
 
-  if (!Number.isInteger(miembroId) || miembroId < 1) {
-    return { error: 'Falta el identificador del miembro.' }
+  if (!/^\d{8}$/.test(numeroMembresia)) {
+    return { error: 'Número de membresía inválido.' }
   }
   if (!Number.isInteger(sucursalId) || sucursalId < 1) {
     return { error: 'Selecciona la sucursal.' }
@@ -98,6 +96,19 @@ export async function registrarVenta(
   }
 
   const supabase = await createClient()
+
+  const { data: miembroData, error: miembroError } = await supabase
+    .rpc('buscar_miembro_comercio', { p_numero: numeroMembresia })
+    .maybeSingle()
+  if (miembroError || !miembroData) {
+    return { error: 'No se pudo verificar el miembro para esta venta.' }
+  }
+  if (!miembroData.vigente) {
+    return { error: 'La membresía de este miembro ya no está vigente.' }
+  }
+
+  const miembroId = miembroData.miembro_id
+  const membresiaId = miembroData.membresia_id
 
   const { data: comercio } = await supabase
     .from('comercios')
