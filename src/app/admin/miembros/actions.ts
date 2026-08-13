@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual, type PerfilActual } from '@/lib/auth/auth'
 import { generarPassword } from '@/lib/shared/password'
+import { hoyISO } from '@/lib/shared/fecha'
 import { registrarActividad } from '@/lib/bitacora/bitacora'
 import {
   generarNumeroMembresia,
@@ -39,15 +40,6 @@ export type RegistrarMiembroState = {
   numero?: string
   password?: string
   nombre?: string
-}
-
-/**
- * Fecha de hoy en formato 'YYYY-MM-DD' en la zona horaria del negocio
- * (America/Bogota), no la del servidor (que corre en UTC). Así los registros y
- * renovaciones hechos por la tarde-noche no saltan al día siguiente.
- */
-function hoyISO(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
 }
 
 /**

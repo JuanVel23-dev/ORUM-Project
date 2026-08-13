@@ -1,4 +1,4 @@
-// Igual que hoyISO() en src/app/admin/miembros/actions.ts: el servidor corre en
+// Igual que hoyISO() en @/lib/shared/fecha: el servidor corre en
 // UTC pero el negocio opera en America/Bogota, así que las fechas de los
 // rangos deben formatearse en la zona horaria del negocio, no la del servidor.
 function formatearFechaBogota(fecha: Date): string {
