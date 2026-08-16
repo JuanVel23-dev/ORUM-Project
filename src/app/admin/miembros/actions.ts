@@ -7,6 +7,7 @@ import { getPerfilActual, type PerfilActual } from '@/lib/auth/auth'
 import { generarPassword } from '@/lib/shared/password'
 import { hoyISO } from '@/lib/shared/fecha'
 import { registrarActividad } from '@/lib/bitacora/bitacora'
+import { enviarCorreoBienvenida } from '@/lib/correo/correo'
 import {
   generarNumeroMembresia,
   calcularFechaFin,
@@ -200,6 +201,13 @@ export async function registrarMiembro(
       plan_nombre: plan.nombre,
       precio_pagado,
     },
+  })
+
+  await enviarCorreoBienvenida({
+    nombre: `${nombres} ${apellidos}`.trim(),
+    correo,
+    password,
+    rol: 'miembro',
   })
 
   revalidatePath('/admin/miembros')
