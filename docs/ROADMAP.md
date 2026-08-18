@@ -185,8 +185,8 @@ manualmente algunas filas de `ventas` en Supabase para ver las tablas de comerci
   miembros nuevos en el periodo, membresías vendidas por empleado, ventas por comercio, uso de
   membresía por miembro y comercio. Agregaciones en funciones puras testeadas
   (`src/lib/metricas.ts`); las dos métricas basadas en `ventas` muestran estado vacío hasta que
-  exista la Herramienta para Comercios (fase posterior) que alimenta esa tabla — comportamiento
-  esperado, no un bug (D4 del spec).
+  la Herramienta para Comercios (Fase 6) alimente esa tabla — comportamiento esperado, no un bug
+  (D4 del spec).
 - Se tipó `ventas` en `database.types.ts` (tabla ya existente en Supabase, sin usar hasta ahora).
 
 **Documentos de diseño/plan de esta fase:**
@@ -235,8 +235,9 @@ botón de soporte).
 - **Soporte por WhatsApp** (RF-13) — botón persistente en el layout del portal, leído desde
   `configuracion.whatsapp_soporte` (tabla ya existente en Supabase, ahora en uso).
 - **Kit de UI ampliado**: `Select`, `Card`/`CardGrid`, `QrCode`, `WhatsAppButton` — nuevos
-  componentes en `src/components/ui/`, reutilizables por los portales futuros (Público,
-  Herramienta de Comercios).
+  componentes en `src/components/ui/`, pensados para reutilizarse en los portales que faltaban:
+  ya se usaron en el Portal de Comercios (Fase 6) y quedan disponibles para el Portal Público
+  (Fase 7, aún pendiente).
 
 **Documentos de diseño/plan de esta fase:**
 - Spec: [`docs/superpowers/specs/2026-08-09-portal-miembros-design.md`](superpowers/specs/2026-08-09-portal-miembros-design.md)
@@ -244,10 +245,58 @@ botón de soporte).
 
 Requisitos cubiertos: **RF-06 a RF-14** (login, perfil, descuentos, búsqueda y filtros, soporte, QR).
 
-### ⬜ Fases posteriores — Portales de cara al usuario final
+### 🔄 Fase 6 — Portal de Comercios (verificación de membresía + venta)
+
+**Implementada en la rama `portal-comercios`, verificada automáticamente (66/66 tests, `tsc`
+limpio, `pnpm lint` limpio, `pnpm build` OK — rutas confirmadas: `/comercios/login`, `/comercios`).
+Pendiente prueba manual del usuario en navegador con datos reales de Supabase antes de dar por
+cerrada del todo** (login del comercio, búsqueda por número y por escaneo QR con cámara real,
+registro de venta con cada tipo de promoción, selector de sucursal, prueba de acceso cruzado entre
+comercios) **y confirmar que el SQL manual del Task 1 del plan (función `buscar_miembro_comercio` +
+RLS de `ventas`) ya fue aplicado en el proyecto real de Supabase** — igual que en fases previas,
+este repo no rastrea migraciones, así que esa aplicación ocurre fuera del código y no puede
+verificarse automáticamente aquí.
+
+- **Login del comercio** (`/comercios/login`) — mismo patrón que los otros portales: correo +
+  contraseña vía Auth, pero solo acepta perfiles con rol `comercio` (rechaza cualquier otro rol).
+- **Layout protegido del portal** (`src/app/comercios/(portal)/layout.tsx`) bajo route group,
+  mismo patrón que el Portal de Miembros (Fase 5) para evitar que el guard envuelva la página de
+  login y cause un bucle de redirect.
+- **Flujo de verificación + venta** (`/comercios`, RF-21 y RF-22) en una sola pantalla:
+  - Búsqueda por número de membresía tecleado a mano o por escaneo de QR con la cámara
+    (`_components/escaner-qr.tsx`); ambos resuelven al mismo número y quedan marcados con su
+    método (`numero` / `qr`).
+  - Verificación vía la función `buscar_miembro_comercio` (RPC `security definer` en Supabase,
+    Task 1 del plan) — solo devuelve nombre, número de membresía, vigencia y plan; nunca cédula,
+    teléfono ni dirección del miembro.
+  - Miembro sin membresía vigente → badge "Inactiva", sin formulario de venta. Miembro vigente →
+    badge "Activa" y formulario de registro de venta (`_components/confirmar-venta-form.tsx`).
+  - Selector de sucursal: se omite y se usa automáticamente si el comercio tiene una sola
+    sucursal activa; aparece y es obligatorio si tiene varias.
+  - Descuento autocalculado y de solo lectura para promociones `porcentaje` y `monto_fijo`
+    (limitado al valor de la compra); editable a mano para `dos_por_uno` y `regalo`; fijo en 0 y
+    no editable si no hay promoción. Lógica en `src/lib/comercios/ventas.ts` (testeada).
+  - "Verificar otro miembro" limpia el formulario para iniciar una nueva búsqueda.
+- **RLS + RPC en Supabase (Task 1 del plan, aplicación manual)** — habilita RLS en `ventas` (antes
+  sin activar) con la política `ventas_insert_comercio_propio`: un comercio solo puede insertar
+  ventas propias (`registrada_por_perfil = auth.uid()`) en una sucursal de su propio comercio.
+  Complementa la función `buscar_miembro_comercio` ya mencionada. **Este SQL no vive en el repo**
+  (sin archivos de migración, igual que en fases previas); su aplicación en el proyecto real de
+  Supabase debe confirmarse por separado antes de dar la fase por cerrada del todo.
+- Guardia propia del portal: `requireRolComercio` en `src/lib/comercios/requerir-comercio.ts`.
+- Se extrajo `hoyISO` a un helper compartido (`src/lib/shared/fecha.ts`), ahora usado por
+  `admin/miembros/actions.ts` y por el registro de venta de este portal, sin cambiar el
+  comportamiento existente (confirmado por los mismos tests que ya cubrían el flujo de miembros).
+
+**Documentos de diseño/plan de esta fase:**
+- Spec: [`docs/superpowers/specs/2026-08-12-portal-comercios-design.md`](superpowers/specs/2026-08-12-portal-comercios-design.md)
+- Plan (16 tareas): [`docs/superpowers/plans/2026-08-12-portal-comercios-plan.md`](superpowers/plans/2026-08-12-portal-comercios-plan.md)
+
+Requisitos cubiertos: **RF-20 a RF-22** (login, venta por QR, venta por número de membresía).
+
+### ⬜ Fase 7 — Portal Público
 
 - **Portal Público** — RF-01 a RF-04 (info, tiendas aliadas, precios, botón WhatsApp para adquirir).
-- **Herramienta para Comercios** — RF-20 a RF-22 (login, venta por QR, venta por número de membresía).
 
 ---
 
@@ -255,14 +304,14 @@ Requisitos cubiertos: **RF-06 a RF-14** (login, perfil, descuentos, búsqueda y 
 
 | RF | Descripción | Fase | Estado |
 |----|-------------|------|--------|
-| RF-01–04 | Portal Público (info, tiendas, precios, adquirir) | Posterior | ⬜ |
+| RF-01–04 | Portal Público (info, tiendas, precios, adquirir) | Fase 7 | ⬜ |
 | RF-06–14 | Portal Miembros (login, perfil, descuentos, filtros, soporte, QR) | Fase 5 | ✅ |
 | RF-15 | Gestión de planes de membresía | Fase 2 | ✅ |
 | RF-16 | Gestión de usuarios (staff + miembros) | Fase 1 + 2 | ✅ |
 | RF-17 | Gestión de comercios | Fase 3 | ✅ |
 | RF-18 | Gestión de promociones | Fase 3 | ✅ |
 | RF-19 | Trazabilidad / historial de movimientos | Fase 4 | ✅ |
-| RF-20–22 | Herramienta de comercios (login, venta por QR / número) | Posterior | ⬜ |
+| RF-20–22 | Herramienta de comercios (login, venta por QR / número) | Fase 6 | 🔄 |
 
 ---
 

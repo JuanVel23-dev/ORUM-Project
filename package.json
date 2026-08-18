@@ -16,6 +16,7 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
+    "@yudiel/react-qr-scanner": "^2.6.0",
     "lucide-react": "^1.28.0",
     "motion": "^12.43.0",
     "next": "16.2.10",
@@ -29,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "supabase": "^2.113.0",
     "typescript": "^5",
     "vitest": "^4.1.10"
   }

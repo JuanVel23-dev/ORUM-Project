@@ -3,6 +3,7 @@ import { Filter, ScrollText, X } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resumirEventoBitacora } from '@/lib/bitacora/bitacora'
+import { finDiaBogota, inicioDiaBogota } from '@/lib/shared/fecha'
 import { Badge, type BadgeTone } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataList, type Column } from '@/components/ui/data-list'
@@ -145,8 +146,15 @@ export default async function BitacoraPage({
     .limit(200)
 
   if (miembroIds) query = query.in('entidad_id', miembroIds.length > 0 ? miembroIds : [-1])
-  if (desde) query = query.gte('fecha_hora', `${desde} 00:00:00`)
-  if (hasta) query = query.lte('fecha_hora', `${hasta} 23:59:59`)
+  /*
+    Offset explícito de Bogotá, no una cadena suelta: `fecha_hora` es
+    timestamptz y Postgres leería `'2026-08-12 23:59:59'` en la zona de la
+    sesión (UTC). Con Bogotá cinco horas por detrás, todo lo ocurrido después
+    de las 7pm caía en el día siguiente en UTC y se salía del filtro — el
+    mismo fallo que backend encontró en métricas contra la base real.
+  */
+  if (desde) query = query.gte('fecha_hora', inicioDiaBogota(desde))
+  if (hasta) query = query.lte('fecha_hora', finDiaBogota(hasta))
   if (accion) query = query.eq('accion', accion)
 
   const { data: eventos } = await query

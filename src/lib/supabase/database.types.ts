@@ -254,7 +254,26 @@ export type Database = {
           updated_at?: Timestamp
         }
         Update: Partial<Database['public']['Tables']['membresias']['Insert']>
-        Relationships: []
+        /*
+          Este fichero se mantiene a mano y hasta ahora dejaba `Relationships`
+          vacío en todas las tablas. El cliente de Supabase usa esa lista para
+          tipar los embebidos: sin ella, un `select('… , planes_membresia(nombre)')`
+          no compila —devuelve `SelectQueryError<"could not find the relation">`—
+          aunque la clave foránea exista de verdad en la base.
+
+          Se declara la que se usa. Si más adelante se embebe otra relación,
+          hay que añadirla aquí igual (o regenerar el fichero con la CLI de
+          Supabase, que ya está en devDependencies).
+        */
+        Relationships: [
+          {
+            foreignKeyName: 'membresias_plan_id_fkey'
+            columns: ['plan_id']
+            isOneToOne: false
+            referencedRelation: 'planes_membresia'
+            referencedColumns: ['id']
+          },
+        ]
       }
       sucursales: {
         Row: {
@@ -408,7 +427,20 @@ export type Database = {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      buscar_miembro_comercio: {
+        Args: { p_numero: string }
+        Returns: {
+          miembro_id: number
+          nombres: string
+          apellidos: string
+          numero_membresia: string
+          vigente: boolean
+          membresia_id: number | null
+          plan_nombre: string | null
+        }[]
+      }
+    }
     Enums: {
       tipo_membresia: 'nueva' | 'renovada'
       estado_membresia: 'activa' | 'vencida' | 'cancelada' | 'suspendida'
