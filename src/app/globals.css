@@ -472,24 +472,12 @@ a {
   }
 }
 
-.orum-card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem;
-}
+/*
+  Aquí sobrevivían tres reglas del kit provisional —`.orum-card-grid`,
+  `.orum-logo` y su variante— que además apuntaban a `--orum-border`,
+  `--orum-surface` y `--orum-muted`: tokens que ya no existen, así que ni
+  siquiera pintaban lo que decían.
 
-.orum-logo {
-  border-radius: 8px;
-  object-fit: cover;
-  border: 1px solid var(--orum-border);
-  background: var(--orum-surface);
-  flex-shrink: 0;
-}
-
-.orum-logo--placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--orum-muted);
-  font-weight: 700;
-}
+  Sus sustitutos son `Grid` y `ComercioLogo`. Se eliminan para que nadie las
+  encuentre por búsqueda y las dé por vigentes.
+*/

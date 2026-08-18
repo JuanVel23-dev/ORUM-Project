@@ -217,7 +217,10 @@ function BotonBuscar({ onClick }: { onClick: () => void }) {
       fullWidth
       onClick={onClick}
       icon={<Search size={16} />}
-      style={{ justifyContent: 'flex-start', color: 'var(--text-3)', fontWeight: 400 }}
+      /* El disparador de la paleta se disfraza de campo de búsqueda: texto a
+         la izquierda y en tono de marcador de posición. Va en el módulo CSS,
+         no en línea — maquetar con `style` está prohibido en este proyecto. */
+      className={styles.disparadorBusqueda}
     >
       Buscar miembro, comercio o acción…
     </Button>

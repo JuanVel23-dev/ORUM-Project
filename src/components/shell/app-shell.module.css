@@ -654,3 +654,14 @@
   color: var(--text-3);
   flex-shrink: 0;
 }
+
+/*
+  Disparador de la paleta de comandos. Es un botón, pero tiene que leerse como
+  un campo de búsqueda: por eso el texto va alineado a la izquierda y en el
+  tono de un marcador de posición, no en el de una etiqueta de botón.
+*/
+.disparadorBusqueda {
+  justify-content: flex-start;
+  color: var(--text-3);
+  font-weight: 400;
+}
