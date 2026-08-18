@@ -42,3 +42,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Ajustes de herramientas por máquina (rutas locales, binarios instalados).
+# `.claude/settings.json` se comparte; este NO.
+.claude/settings.local.json

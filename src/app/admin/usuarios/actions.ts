@@ -5,6 +5,7 @@ import { generarPassword } from '@/lib/shared/password'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
+import { enviarCorreoBienvenida } from '@/lib/correo/correo'
 import type { RolCodigo } from '@/lib/supabase/database.types'
 
 /** Tipos de usuario que el admin puede crear en esta sección. */
@@ -112,6 +113,13 @@ export async function crearUsuario(
     await revertir()
     return { error: `No se pudo registrar el empleado: ${errEmpleado.message}` }
   }
+
+  await enviarCorreoBienvenida({
+    nombre: `${nombres} ${apellidos}`.trim(),
+    correo: email,
+    password,
+    rol: 'staff',
+  })
 
   revalidatePath('/admin/usuarios')
   return { ok: true, email, password }

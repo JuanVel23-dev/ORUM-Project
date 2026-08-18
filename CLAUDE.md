@@ -286,6 +286,19 @@ transición dio tres diagnósticos falsos seguidos: en una pestaña que el naveg
 pinta, las transiciones no avanzan y siempre se lee el valor inicial. Una captura
 fuerza el pintado; una medición, no.
 
+## Configuración de herramientas
+
+`.claude/settings.json` **se comparte con todo el equipo**, así que no puede contener
+rutas de una máquina concreta. Los hooks invocan `graphify` por nombre, resolviéndolo
+desde el `PATH`; antes apuntaban a `C:/Users/<usuario>/.local/bin/graphify.EXE`, que
+solo existía en un portátil y fallaba en cualquier otro clon del repositorio.
+
+Lo que sea propio de tu máquina va en **`.claude/settings.local.json`**, que está en
+`.gitignore`. Es la convención de Claude Code: `settings.json` compartido,
+`settings.local.json` personal.
+
+---
+
 ## Requisitos de entorno
 
 Node **≥22.13** (declarado en `.nvmrc` y `engines`). pnpm 11 usa `node:sqlite`, que no
