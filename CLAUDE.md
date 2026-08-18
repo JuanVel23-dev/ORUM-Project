@@ -252,6 +252,17 @@ Dos casos distintos, y confundirlos desplaza un día:
   y formatear en **`timeZone: 'UTC'`**. Leerla en Bogotá (UTC−5) la retrasa al día
   anterior; el carnet llegó a anunciar el vencimiento un día antes de tiempo.
 
+Y al **consultar** un rango contra una columna `timestamptz`, nunca una cadena suelta:
+
+```ts
+.gte('fecha_hora', inicioDiaBogota(desde))   // NO `${desde} 00:00:00`
+.lte('fecha_hora', finDiaBogota(hasta))      // src/lib/shared/fecha.ts
+```
+
+Sin offset explícito Postgres la interpreta en la zona de la sesión (UTC), y todo lo
+ocurrido después de las **7pm hora Colombia** cae en el día siguiente y desaparece del
+filtro. No falla ruidosamente: devuelve menos filas. Estuvo vivo en seis sitios.
+
 ---
 
 ## Accesibilidad: mínimos no negociables

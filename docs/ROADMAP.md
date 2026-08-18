@@ -408,19 +408,23 @@ pnpm lint           # linter
 
 ## 9. Próximo paso sugerido
 
-Las Fases 1–5 y el rediseño visual están implementados y fusionados: todo el producto —panel
-de administración y Portal de Miembros— corre sobre el mismo sistema de diseño.
+Las Fases 1–6 y el rediseño visual están implementados y fusionados: los **tres portales
+internos** —administración, miembros y comercios— corren sobre el mismo sistema de diseño.
+Con la Fase 6 el circuito se cierra: el QR que muestra el carnet del miembro ya se escanea en
+la caja, y la venta que se registra alimenta el dashboard de métricas.
 
-**Antes de seguir construyendo, dos pruebas manuales pendientes** (ninguna se puede automatizar
-desde aquí porque exigen credenciales reales y un dispositivo físico):
+**Tres pruebas manuales pendientes.** Ninguna se puede hacer desde el entorno de desarrollo
+porque exigen credenciales reales o un dispositivo físico:
 
-1. **Portal de Miembros con un miembro real:** login por número de membresía, membresía
-   vencida o suspendida → pantalla de bloqueo, búsqueda y cada filtro, y el QR escaneado con
-   un lector de verdad.
-2. **Comprobación en móvil físico:** el rediseño está pensado para móvil (barra inferior,
-   hojas con detentes, gestos), pero la automatización de navegador de esta máquina no
-   consigue redimensionar la ventana, así que el comportamiento en pantalla estrecha está
-   verificado por CSS, no visualmente.
+1. **Herramienta de caja, con un comercio real:** login, escaneo del QR con la cámara,
+   búsqueda por número, y registrar una venta de cada tipo de promoción (porcentaje y monto
+   fijo se calculan solos; 2x1 y regalo los tasa el cajero).
+2. **Portal de Miembros con un miembro real:** login por número de membresía, membresía
+   vencida o suspendida → pantalla de bloqueo, búsqueda y cada filtro.
+3. **Comprobación en móvil físico.** El rediseño está pensado para móvil, pero la
+   automatización de navegador de esta máquina no consigue redimensionar la ventana. Importa
+   especialmente ahora: la herramienta de comercios se usa **en un teléfono, de pie, en la
+   caja**, que es su escenario real y no un caso límite.
 
 **Dos decisiones de datos, no de código, que siguen abiertas:**
 
@@ -428,7 +432,10 @@ desde aquí porque exigen credenciales reales y un dispositivo físico):
   mensual". O se retira el plan, o se corrige su duración.
 - La **Membresía ORUM** figura con precio **$0**.
 
-Después de eso, el siguiente paso natural es la **Herramienta para Comercios** (RF-20–22): es
-la que llena la tabla `ventas` que el dashboard de métricas ya consume, y donde se usará por
-primera vez el QR que el perfil del miembro ya muestra. El **Portal Público** (RF-01–04) puede
-ir en paralelo — es el que menos depende de lo ya construido.
+Después de eso queda el **Portal Público** (RF-01–04), el único portal que falta y el que
+menos depende de lo ya construido.
+
+**Nota sobre fechas.** Las columnas `timestamptz` nunca se comparan contra cadenas sueltas:
+Postgres las interpretaría en UTC y todo lo ocurrido después de las 7pm hora Colombia caería
+fuera del rango. Se usan `inicioDiaBogota` / `finDiaBogota` (`src/lib/shared/fecha.ts`). El
+fallo se descubrió en métricas contra la base real y estaba vivo en seis sitios.
