@@ -1,3 +1,16 @@
+/*
+  Barrera de compilación, no un ruego.
+
+  Debajo hay un comentario que dice "no importes esto desde un Client
+  Component". Un comentario no impide nada: basta un `'use client'` añadido
+  por descuido en la cadena de importaciones para que la `service_role` —que
+  ignora TODAS las políticas RLS— acabe en un bundle del navegador. Sería el
+  fallo más grave posible en este proyecto y no daría ningún síntoma.
+
+  `server-only` convierte ese descuido en un error de build.
+*/
+import 'server-only'
+
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './database.types'
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { Camera, Search, X } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -8,8 +9,8 @@ import { Card } from '@/components/ui/card'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { Spinner } from '@/components/ui/spinner'
 import { buscarMiembro, type BuscarMiembroState } from '../actions'
-import { EscanerQr } from './escaner-qr'
 import { ResultadoMiembro } from './resultado-miembro'
 import { ConfirmarVentaForm } from './confirmar-venta-form'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
@@ -22,6 +23,24 @@ type Promocion = {
   tipoCodigo: TipoBeneficioCodigo
   valor: number | null
 }
+
+/*
+  El escáner pesa medio mega: trae su propio detector de códigos de barras
+  para los navegadores que no lo llevan de serie. Cargarlo con la página
+  significaría descargarlo SIEMPRE, incluso cuando el cajero teclea el número
+  —que es lo que hará cuando el carnet esté rayado o la cámara sucia—.
+
+  Con `dynamic` viaja solo al pulsar "Escanear QR". `ssr: false` porque
+  necesita `navigator.mediaDevices`, que no existe en el servidor.
+*/
+const EscanerQr = dynamic(() => import('./escaner-qr').then((m) => m.EscanerQr), {
+  ssr: false,
+  loading: () => (
+    <p className={styles.cargandoEscaner}>
+      <Spinner size="sm" /> Abriendo la cámara…
+    </p>
+  ),
+})
 
 const estadoInicial: BuscarMiembroState = {}
 

@@ -42,6 +42,21 @@
   flex-shrink: 0;
 }
 
+/*
+  El campo pierde su `outline` (más abajo) porque el anillo del navegador
+  quedaría por dentro del borde inferior y se vería cortado. El sustituto es
+  este: la línea inferior se vuelve dorada al enfocar.
+
+  No sobraba: al abrir la paleta el foco entra solo en el campo, pero quien
+  baja a los resultados con las flechas y vuelve arriba con Tab no tenía
+  ninguna señal de dónde estaba. `outline: none` sin sustituto es un bug en
+  este proyecto, no una preferencia.
+*/
+.campo:focus-within {
+  border-bottom-color: var(--focus);
+  box-shadow: inset 0 -1px 0 var(--focus);
+}
+
 .campoIcono {
   width: 18px;
   height: 18px;
