@@ -1,13 +1,10 @@
 import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend'
+import { escaparHtml } from '../shared/html'
 
-export type RolCorreo = 'miembro' | 'staff'
-
-export type InputCorreoBienvenida = {
+export type InputCorreoInvitacion = {
   nombre: string
   correo: string
-  password: string
-  rol: RolCorreo
-  urlBase: string
+  urlInvitacion: string
 }
 
 type CuerpoCorreo = {
@@ -16,30 +13,28 @@ type CuerpoCorreo = {
   texto: string
 }
 
-export function construirCorreoBienvenida(input: InputCorreoBienvenida): CuerpoCorreo {
-  const rutaLogin = input.rol === 'miembro' ? '/miembros/login' : '/login'
-  const urlLogin = `${input.urlBase}${rutaLogin}`
-  const asunto = 'Bienvenido a ORUM — tus datos de acceso'
+export function construirCorreoInvitacion(input: InputCorreoInvitacion): CuerpoCorreo {
+  const nombre = escaparHtml(input.nombre)
+  const correo = escaparHtml(input.correo)
+  const asunto = 'Bienvenido a ORUM — activa tu cuenta'
 
   const html = `
-    <p>Hola ${input.nombre},</p>
-    <p>Se creó tu cuenta en ORUM. Estos son tus datos de acceso:</p>
-    <ul>
-      <li><strong>Correo:</strong> ${input.correo}</li>
-      <li><strong>Contraseña:</strong> ${input.password}</li>
-    </ul>
-    <p><a href="${urlLogin}">Iniciar sesión</a></p>
+    <p>Hola ${nombre},</p>
+    <p>Se creó tu cuenta en ORUM (${correo}). Activa el acceso y elige tu propia
+    contraseña con este enlace de un solo uso:</p>
+    <p><a href="${input.urlInvitacion}">Activar mi cuenta</a></p>
+    <p>Si no esperabas este correo, puedes ignorarlo.</p>
   `.trim()
 
   const texto = [
     `Hola ${input.nombre},`,
     '',
-    'Se creó tu cuenta en ORUM. Estos son tus datos de acceso:',
+    `Se creó tu cuenta en ORUM (${input.correo}). Activa el acceso y elige tu propia`,
+    'contraseña con este enlace de un solo uso:',
     '',
-    `Correo: ${input.correo}`,
-    `Contraseña: ${input.password}`,
+    input.urlInvitacion,
     '',
-    `Inicia sesión aquí: ${urlLogin}`,
+    'Si no esperabas este correo, puedes ignorarlo.',
   ].join('\n')
 
   return { asunto, html, texto }
@@ -47,11 +42,8 @@ export function construirCorreoBienvenida(input: InputCorreoBienvenida): CuerpoC
 
 const mailerSend = new MailerSend({ apiKey: process.env.MAILERSEND_API_KEY ?? '' })
 
-export async function enviarCorreoBienvenida(
-  input: Omit<InputCorreoBienvenida, 'urlBase'>,
-): Promise<void> {
-  const urlBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-  const { asunto, html, texto } = construirCorreoBienvenida({ ...input, urlBase })
+export async function enviarCorreoInvitacion(input: InputCorreoInvitacion): Promise<void> {
+  const { asunto, html, texto } = construirCorreoInvitacion(input)
 
   try {
     const remitente = new Sender(process.env.MAILERSEND_FROM_EMAIL ?? '', 'ORUM')
@@ -66,6 +58,6 @@ export async function enviarCorreoBienvenida(
 
     await mailerSend.email.send(emailParams)
   } catch (err) {
-    console.error('No se pudo enviar el correo de bienvenida:', err)
+    console.error('No se pudo enviar el correo de invitación:', err)
   }
 }

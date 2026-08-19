@@ -1,42 +1,38 @@
 import { describe, it, expect } from 'vitest'
-import { construirCorreoBienvenida } from './correo'
+import { construirCorreoInvitacion } from './correo'
 
-describe('construirCorreoBienvenida', () => {
+describe('construirCorreoInvitacion', () => {
   const base = {
     nombre: 'Ana Ruiz',
     correo: 'ana@example.com',
-    password: 'Tr0p!c4lFruta',
-    urlBase: 'https://orum.example.com',
+    urlInvitacion: 'https://orum.example.com/activar-cuenta?token=abc123',
   }
 
   it('arma el asunto fijo', () => {
-    const correo = construirCorreoBienvenida({ ...base, rol: 'miembro' })
-    expect(correo.asunto).toBe('Bienvenido a ORUM — tus datos de acceso')
+    const correo = construirCorreoInvitacion(base)
+    expect(correo.asunto).toBe('Bienvenido a ORUM — activa tu cuenta')
   })
 
-  it('incluye el correo y la contraseña en el html y el texto', () => {
-    const correo = construirCorreoBienvenida({ ...base, rol: 'miembro' })
-    expect(correo.html).toContain('ana@example.com')
-    expect(correo.html).toContain('Tr0p!c4lFruta')
-    expect(correo.texto).toContain('ana@example.com')
-    expect(correo.texto).toContain('Tr0p!c4lFruta')
+  it('incluye el enlace de invitación y ninguna contraseña', () => {
+    const correo = construirCorreoInvitacion(base)
+    expect(correo.html).toContain(base.urlInvitacion)
+    expect(correo.texto).toContain(base.urlInvitacion)
+    expect(correo.html).not.toMatch(/contraseña:\s*\S/i)
   })
 
   it('saluda por nombre', () => {
-    const correo = construirCorreoBienvenida({ ...base, rol: 'miembro' })
+    const correo = construirCorreoInvitacion(base)
     expect(correo.html).toContain('Hola Ana Ruiz')
     expect(correo.texto).toContain('Hola Ana Ruiz')
   })
 
-  it('enlaza a /miembros/login cuando rol es miembro', () => {
-    const correo = construirCorreoBienvenida({ ...base, rol: 'miembro' })
-    expect(correo.html).toContain('https://orum.example.com/miembros/login')
-    expect(correo.texto).toContain('https://orum.example.com/miembros/login')
-  })
-
-  it('enlaza a /login cuando rol es staff', () => {
-    const correo = construirCorreoBienvenida({ ...base, rol: 'staff' })
-    expect(correo.html).toContain('https://orum.example.com/login')
-    expect(correo.texto).toContain('https://orum.example.com/login')
+  it('escapa nombre y correo en el html pero no en el texto plano', () => {
+    const correo = construirCorreoInvitacion({
+      ...base,
+      nombre: 'Juan <img src=x onerror=alert(1)>',
+    })
+    expect(correo.html).not.toContain('<img')
+    expect(correo.html).toContain('&lt;img')
+    expect(correo.texto).toContain('Juan <img src=x onerror=alert(1)>')
   })
 })
