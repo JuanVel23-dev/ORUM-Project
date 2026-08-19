@@ -1,10 +1,17 @@
 'use client'
 
 import { useActionState } from 'react'
+import { Save } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Field } from '@/components/ui/field'
+import { Input, Select } from '@/components/ui/input'
+import { Stack } from '@/components/ui/layout'
 import { editarMiembro, type EditarMiembroState } from '../../../actions'
-import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
+import styles from '@/styles/formulario.module.css'
 
 type Opcion = { id: number; nombre: string }
+
 type MiembroInicial = {
   id: number
   perfil_id: string | null
@@ -14,71 +21,114 @@ type MiembroInicial = {
   telefono: string | null
   direccion: string | null
   ciudad_id: number | null
+  /** Correo real de Auth, o cadena vacía si no tiene cuenta. */
   correo: string
 }
 
 const estadoInicial: EditarMiembroState = {}
 
-export function EditarMiembroForm({ miembro, ciudades }: { miembro: MiembroInicial; ciudades: Opcion[] }) {
+export function EditarMiembroForm({
+  miembro,
+  ciudades,
+}: {
+  miembro: MiembroInicial
+  ciudades: Opcion[]
+}) {
   const [state, formAction, pending] = useActionState(editarMiembro, estadoInicial)
 
   return (
-    <form action={formAction} className="orum-card">
-      {state.error && <Alert tone="error">{state.error}</Alert>}
+    <>
+      <form action={formAction} className={styles.formulario} noValidate>
+        {state.error && <Alert tone="danger">{state.error}</Alert>}
 
-      <input type="hidden" name="miembro_id" value={miembro.id} />
-      <input type="hidden" name="perfil_id" value={miembro.perfil_id ?? ''} />
-      <input type="hidden" name="correo_original" value={miembro.correo} />
+        <input type="hidden" name="miembro_id" value={miembro.id} />
+        <input type="hidden" name="perfil_id" value={miembro.perfil_id ?? ''} />
+        <input type="hidden" name="correo_original" value={miembro.correo} />
 
-      <Row>
-        <Field label="Nombres" htmlFor="nombres" flex>
-          <input id="nombres" name="nombres" className="orum-input" required defaultValue={miembro.nombres} />
-        </Field>
-        <Field label="Apellidos" htmlFor="apellidos" flex>
-          <input id="apellidos" name="apellidos" className="orum-input" required defaultValue={miembro.apellidos} />
-        </Field>
-      </Row>
+        <Stack gap={5}>
+          <div className={styles.pareja}>
+            <Field label="Nombres">
+              <Input
+                name="nombres"
+                defaultValue={miembro.nombres}
+                autoComplete="given-name"
+                required
+                autoFocus
+              />
+            </Field>
+            <Field label="Apellidos">
+              <Input
+                name="apellidos"
+                defaultValue={miembro.apellidos}
+                autoComplete="family-name"
+                required
+              />
+            </Field>
+          </div>
 
-      <Field label="Cédula" htmlFor="cedula">
-        <input id="cedula" name="cedula" className="orum-input" required defaultValue={miembro.cedula} />
-      </Field>
+          <div className={styles.pareja}>
+            <Field label="Cédula" help="Debe seguir siendo única.">
+              <Input
+                name="cedula"
+                defaultValue={miembro.cedula}
+                numeric
+                inputMode="numeric"
+                required
+              />
+            </Field>
+            <Field label="Teléfono" optional>
+              <Input
+                name="telefono"
+                defaultValue={miembro.telefono ?? ''}
+                type="tel"
+                numeric
+                inputMode="tel"
+              />
+            </Field>
+          </div>
 
-      <Field label="Correo electrónico" htmlFor="correo">
-        <input
-          id="correo"
-          name="correo"
-          type="email"
-          className="orum-input"
-          defaultValue={miembro.correo === '—' ? '' : miembro.correo}
-        />
-      </Field>
+          <Field
+            label="Correo electrónico"
+            help="Cambiarlo también cambia su usuario de acceso."
+          >
+            <Input
+              name="correo"
+              type="email"
+              defaultValue={miembro.correo}
+              autoComplete="email"
+            />
+          </Field>
 
-      <Row>
-        <Field label="Teléfono (opcional)" htmlFor="telefono" flex>
-          <input id="telefono" name="telefono" className="orum-input" defaultValue={miembro.telefono ?? ''} />
-        </Field>
-        <Field label="Ciudad (opcional)" htmlFor="ciudad_id" flex>
-          <select id="ciudad_id" name="ciudad_id" className="orum-select" defaultValue={miembro.ciudad_id ?? ''}>
-            <option value="">— Sin ciudad —</option>
-            {ciudades.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </Row>
+          <div className={styles.pareja}>
+            <Field label="Ciudad" optional>
+              <Select name="ciudad_id" defaultValue={miembro.ciudad_id ?? ''}>
+                <option value="">Sin ciudad</option>
+                {ciudades.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Dirección" optional>
+              <Input
+                name="direccion"
+                defaultValue={miembro.direccion ?? ''}
+                autoComplete="street-address"
+              />
+            </Field>
+          </div>
+        </Stack>
 
-      <Field label="Dirección (opcional)" htmlFor="direccion">
-        <input id="direccion" name="direccion" className="orum-input" defaultValue={miembro.direccion ?? ''} />
-      </Field>
-
-      <Row>
-        <Button type="submit" disabled={pending}>
-          {pending ? 'Guardando…' : 'Guardar cambios'}
-        </Button>
-        <LinkButton href={`/admin/miembros/${miembro.id}`} variant="secondary">Cancelar</LinkButton>
-      </Row>
-    </form>
+        <div className={styles.acciones}>
+          <Button type="submit" loading={pending} icon={<Save size={16} />}>
+            Guardar cambios
+          </Button>
+          <Button href={`/admin/miembros/${miembro.id}`} variant="secondary">
+            Cancelar
+          </Button>
+        </div>
+      </form>
+    </>
   )
 }

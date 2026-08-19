@@ -1,112 +1,132 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState } from 'react'
+import { Store } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Copiar } from '@/components/ui/copiar'
+import { Field } from '@/components/ui/field'
+import { Input, Select } from '@/components/ui/input'
+import { Stack } from '@/components/ui/layout'
 import { crearComercio, type CrearComercioState } from '../actions'
-import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
+import styles from '@/styles/formulario.module.css'
 
 type Opcion = { id: number; nombre: string }
 
 const estadoInicial: CrearComercioState = {}
 
-export function ComercioForm({ marcas, categorias }: { marcas: Opcion[]; categorias: Opcion[] }) {
+export function ComercioForm({
+  marcas,
+  categorias,
+}: {
+  marcas: Opcion[]
+  categorias: Opcion[]
+}) {
   const [state, formAction, pending] = useActionState(crearComercio, estadoInicial)
-  const [copiado, setCopiado] = useState(false)
 
   if (state.ok && state.password) {
-    return (
-      <div className="orum-card">
-        <Alert tone="success">✓ Comercio creado correctamente.</Alert>
-        <p style={{ marginBottom: '0.75rem' }}>
-          Comparte estos datos con el comercio. La contraseña <strong>no se volverá a mostrar</strong>;
-          podrá cambiarla después.
-        </p>
-        <div className="orum-field">
-          <span className="orum-label">Correo</span>
-          <input className="orum-input" readOnly value={state.email} />
-        </div>
-        <div className="orum-field">
-          <span className="orum-label">Contraseña temporal</span>
-          <Row gap="0.5rem">
-            <input
-              className="orum-input"
-              readOnly
-              value={state.password}
-              style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}
-            />
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                navigator.clipboard?.writeText(state.password ?? '')
-                setCopiado(true)
-                setTimeout(() => setCopiado(false), 2000)
-              }}
-            >
-              {copiado ? '¡Copiado!' : 'Copiar'}
-            </Button>
-          </Row>
-        </div>
-        <Row style={{ marginTop: '1rem' }}>
-          <LinkButton href="/admin/comercios">Ir a la lista</LinkButton>
-          <LinkButton href="/admin/comercios/nuevo" variant="secondary">Crear otro</LinkButton>
-        </Row>
-      </div>
-    )
+    return <Credenciales estado={state} />
   }
 
   return (
-    <form action={formAction} className="orum-card">
-      {state.error && <Alert tone="error">{state.error}</Alert>}
+    <>
+      <form action={formAction} className={styles.formulario} noValidate>
+        {state.error && <Alert tone="danger">{state.error}</Alert>}
 
-      <Field label="Correo electrónico (para iniciar sesión)" htmlFor="correo">
-        <input id="correo" name="correo" type="email" className="orum-input" required />
-      </Field>
+        <Stack gap={5}>
+          <Field
+            label="Correo electrónico"
+            help="Será el usuario con el que el comercio inicia sesión en su herramienta."
+          >
+            <Input name="correo" type="email" autoComplete="email" required autoFocus />
+          </Field>
 
-      <Field label="Nombre del comercio" htmlFor="nombre">
-        <input id="nombre" name="nombre" className="orum-input" required />
-      </Field>
+          <Field label="Nombre del comercio">
+            <Input name="nombre" required />
+          </Field>
 
-      <Field label="Descripción (opcional)" htmlFor="descripcion">
-        <input id="descripcion" name="descripcion" className="orum-input" />
-      </Field>
+          <Field label="Descripción" optional>
+            <Input name="descripcion" />
+          </Field>
 
-      <Row>
-        <Field label="Marca (opcional)" htmlFor="marca_id" flex>
-          <select id="marca_id" name="marca_id" className="orum-select" defaultValue="">
-            <option value="">— Sin marca —</option>
-            {marcas.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.nombre}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Categoría (opcional)" htmlFor="categoria_id" flex>
-          <select id="categoria_id" name="categoria_id" className="orum-select" defaultValue="">
-            <option value="">— Sin categoría —</option>
-            {categorias.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
-        </Field>
-      </Row>
+          <div className={styles.pareja}>
+            <Field label="Marca" optional>
+              <Select name="marca_id" defaultValue="">
+                <option value="">Sin marca</option>
+                {marcas.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.nombre}
+                  </option>
+                ))}
+              </Select>
+            </Field>
 
-      <Field label="URL del logo (opcional)" htmlFor="logo_url">
-        <input id="logo_url" name="logo_url" className="orum-input" placeholder="https://…" />
-      </Field>
+            <Field label="Categoría" optional>
+              <Select name="categoria_id" defaultValue="">
+                <option value="">Sin categoría</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
 
-      <p className="orum-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
-        El sistema generará una contraseña segura automáticamente y te la mostrará al terminar.
-      </p>
+          <Field label="URL del logo" optional>
+            <Input name="logo_url" type="url" placeholder="https://…" />
+          </Field>
 
-      <Row>
-        <Button type="submit" disabled={pending}>
-          {pending ? 'Creando…' : 'Crear comercio'}
-        </Button>
-        <LinkButton href="/admin/comercios" variant="secondary">Cancelar</LinkButton>
-      </Row>
-    </form>
+          <p className={styles.nota}>
+            Al guardar se genera una contraseña segura. Se mostrará una sola vez en la
+            siguiente pantalla.
+          </p>
+        </Stack>
+
+        <div className={styles.acciones}>
+          <Button type="submit" loading={pending} icon={<Store size={16} />}>
+            Crear comercio
+          </Button>
+          <Button href="/admin/comercios" variant="secondary">
+            Cancelar
+          </Button>
+        </div>
+      </form>
+    </>
+  )
+}
+
+function Credenciales({ estado }: { estado: CrearComercioState }) {
+  return (
+    <>
+      <div className={styles.credenciales}>
+        <Alert tone="success" title="Comercio creado" />
+
+        <Alert tone="warning" title="Comparte estos datos ahora">
+          La contraseña no se vuelve a mostrar. El comercio podrá cambiarla después.
+        </Alert>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Correo de acceso</span>
+          <Copiar valor={estado.email ?? ''} label="Copiar correo">
+            <span className={styles.credencialValor}>{estado.email}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Contraseña temporal</span>
+          <Copiar valor={estado.password ?? ''} label="Copiar contraseña temporal">
+            <span className={styles.credencialValor}>{estado.password}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.acciones}>
+          <Button href="/admin/comercios">Ir a la lista</Button>
+          <Button href="/admin/comercios/nuevo" variant="secondary">
+            Crear otro
+          </Button>
+        </div>
+      </div>
+    </>
   )
 }

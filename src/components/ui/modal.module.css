@@ -1,0 +1,184 @@
+.dialog {
+  /*
+    El navegador centra un <dialog> modal con `margin: auto` en su hoja de
+    estilos de usuario. El reset global (`* { margin: 0 }`) lo pisaba, y el
+    diálogo se iba a la esquina superior izquierda. Hay que reponerlo
+    explícitamente.
+  */
+  margin: auto;
+
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-overlay), var(--edge);
+
+  width: min(var(--ancho, 480px), calc(100vw - var(--space-8)));
+  max-height: calc(100dvh - var(--space-10));
+  overflow: visible;
+}
+
+.dialog::backdrop {
+  /* Oscurecer + desenfocar: la tarea modal bloquea, así que el fondo se
+     retira explícitamente en vez de quedarse compitiendo. */
+  background: var(--scrim);
+  backdrop-filter: blur(var(--blur-sm));
+}
+
+/*
+  El fondo se atenúa CON el panel, no antes.
+
+  El panel entra con resorte desde `motion`, pero el ::backdrop es un
+  pseudo-elemento: JavaScript no puede animarlo. Sin esto el oscurecido
+  aparecía de golpe mientras el panel todavía estaba creciendo, y el corte
+  seco delataba que son dos cosas distintas en vez de una sola superficie
+  que llega.
+
+  La duración se queda algo por debajo del resorte a propósito: el fondo debe
+  estar asentado cuando el panel termina de acomodarse, no al revés.
+*/
+.dialog[open]::backdrop {
+  animation: entrarFondo var(--dur-base) var(--ease-out);
+}
+
+/* Al cerrar, `motion` anima el panel y luego llama a `close()`. Sin esta clase
+   el fondo desaparecía de golpe un fotograma antes que el panel. */
+.cerrando::backdrop {
+  animation: salirFondo 180ms var(--ease-out) forwards;
+}
+
+@keyframes entrarFondo {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes salirFondo {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .dialog::backdrop {
+    backdrop-filter: none;
+  }
+}
+
+/*
+  Con movimiento reducido el fondo sigue apareciendo y desapareciendo —una
+  transición de opacidad no es vestibular—, solo que más corta.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open]::backdrop {
+    animation-duration: var(--dur-fast);
+  }
+
+  .cerrando::backdrop {
+    animation-duration: 120ms;
+  }
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - var(--space-10));
+}
+
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-6) var(--space-4);
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.titulo {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  text-wrap: balance;
+}
+
+.descripcion {
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+}
+
+.cuerpo {
+  padding: 0 var(--space-6) var(--space-6);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cuerpoSinCabecera {
+  padding-top: var(--space-6);
+}
+
+.pie {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-sunk);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.cerrar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+
+  width: 32px;
+  height: 32px;
+  margin: -4px -4px 0 0;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.cerrar:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.cerrarIcono {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 640px) {
+  .cabecera,
+  .cuerpo {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .pie {
+    padding: var(--space-4);
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

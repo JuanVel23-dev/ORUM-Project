@@ -1,0 +1,148 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+
+  /* En claro la elevación la da la sombra; en oscuro, el filo de luz superior
+     (`--edge`), porque una sombra negra sobre fondo negro no se ve. */
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+/* --- Relleno -------------------------------------------------------------- */
+
+.pad-none {
+  padding: 0;
+}
+.pad-sm {
+  padding: var(--space-4);
+}
+.pad-md {
+  padding: var(--space-6);
+}
+.pad-lg {
+  padding: var(--space-7);
+}
+
+/* --- Variantes ------------------------------------------------------------ */
+
+/* Hundida: para agrupar contenido secundario sin añadir otra capa elevada. */
+.sunk {
+  background: var(--surface-sunk);
+  box-shadow: none;
+}
+
+/* Realce de marca. El oro va SOLO en el filo, nunca rellenando la tarjeta. */
+.brand {
+  border-color: color-mix(in srgb, var(--brand-edge) 45%, transparent);
+}
+
+.brand::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: var(--gold-hairline);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+/* --- Interactiva ---------------------------------------------------------- */
+
+.interactive {
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-instant) var(--ease-out);
+}
+
+.interactive:hover {
+  border-color: var(--border);
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+.interactive:active {
+  transform: scale(0.99);
+}
+
+.interactive:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --- Secciones ------------------------------------------------------------ */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.headerTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: var(--t-title-3-weight);
+  color: var(--text);
+}
+
+.subtitle {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.body {
+  padding: var(--space-6);
+  flex: 1;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-sunk);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+@media (max-width: 640px) {
+  .header,
+  .body {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .footer {
+    padding: var(--space-4);
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

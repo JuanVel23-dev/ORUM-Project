@@ -1,0 +1,28 @@
+.barra {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-tooltip);
+
+  height: 2px;
+  pointer-events: none;
+
+  /* Sin actividad no ocupa nada visualmente. */
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.barra[data-visible='true'] {
+  opacity: 1;
+}
+
+.progreso {
+  height: 100%;
+  width: 0;
+  background: var(--gold-sheen);
+
+  /* Curva lenta al final: se acerca al 90% y espera ahí. Fingir que ya
+     terminó y luego frenar se percibe como un tirón. */
+  transition: width 600ms cubic-bezier(0.1, 0.6, 0.2, 1);
+}

@@ -1,59 +1,63 @@
-import Link from 'next/link'
+import { Suspense } from 'react'
 import { requireRol } from '@/lib/auth/auth'
 import { cerrarSesion } from '@/app/login/actions'
-import { Row } from '@/components/ui'
+import { AppShell } from '@/components/shell/app-shell'
+import { RouteProgress } from '@/components/shell/route-progress'
 
 export const metadata = {
   title: 'Panel · ORUM',
 }
 
+/**
+ * La ranura `@modal` vive AQUÍ, no en cada sección.
+ *
+ * Una ruta interceptada solo intercepta si el layout que declara su ranura ya
+ * está montado. Cuando cada sección tenía la suya, "Empezar" desde el panel de
+ * inicio —o la pestaña "Vender" del móvil— navegaba a `/admin/miembros/nuevo`
+ * SIN pasar por `/admin/miembros`, así que el layout de miembros no existía
+ * todavía y el formulario se abría como página completa. Desde la lista sí
+ * funcionaba: la misma acción se comportaba de dos formas según de dónde
+ * vinieras.
+ *
+ * Declarada en el layout del panel, la ranura está montada en todo `/admin`,
+ * y cualquier enlace a un formulario lo abre encima venga de donde venga.
+ */
 export default async function AdminLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode
+  modal: React.ReactNode
 }) {
-  // Solo super_admin y empleado pueden entrar al portal administrativo.
+  // Solo super_admin y empleado entran al portal administrativo. El shell
+  // filtra los destinos por rol, pero eso es presentación: la autorización
+  // real la sigue haciendo `requireRol` aquí y en cada página y server action.
   const perfil = await requireRol('super_admin', 'empleado')
-  const esSuperAdmin = perfil.rolCodigo === 'super_admin'
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <Row
-        gap="1.5rem"
-        style={{
-          alignItems: 'center',
-          padding: '0.75rem 1.5rem',
-          borderBottom: '1px solid var(--orum-border)',
+    <>
+      {/*
+        `useSearchParams` obliga a un límite de Suspense. La barra no pinta
+        nada hasta que hay navegación, así que el fallback es vacío.
+      */}
+      <Suspense fallback={null}>
+        <RouteProgress />
+      </Suspense>
+
+      <AppShell
+        user={{
+          // Hasta que el perfil guarde nombre y apellido, el correo es lo
+          // único identificable que hay para las iniciales del avatar.
+          nombre: perfil.email ?? perfil.rolNombre,
+          email: perfil.email,
+          rolNombre: perfil.rolNombre,
+          rolCodigo: perfil.rolCodigo,
         }}
+        cerrarSesion={cerrarSesion}
       >
-        <Link href="/admin" style={{ fontWeight: 700, fontSize: '1.15rem' }}>
-          ORUM
-        </Link>
-
-        <Row gap="1rem" style={{ flex: 1 }}>
-          <Link href="/admin">Inicio</Link>
-          <Link href="/admin/miembros">Miembros</Link>
-          {esSuperAdmin && <Link href="/admin/comercios">Comercios</Link>}
-          {esSuperAdmin && <Link href="/admin/usuarios">Usuarios</Link>}
-          {esSuperAdmin && <Link href="/admin/planes">Planes</Link>}
-          {esSuperAdmin && <Link href="/admin/bitacora">Bitácora</Link>}
-          {esSuperAdmin && <Link href="/admin/metricas">Métricas</Link>}
-          <Link href="/admin/cuenta/password">Mi contraseña</Link>
-        </Row>
-
-        <span className="orum-muted" style={{ fontSize: '0.85rem' }}>
-          {perfil.email} · {perfil.rolNombre}
-        </span>
-        <form action={cerrarSesion}>
-          <button type="submit" className="orum-button orum-button--secondary">
-            Cerrar sesión
-          </button>
-        </form>
-      </Row>
-
-      <main style={{ flex: 1, padding: '1.5rem', maxWidth: 1100, width: '100%', margin: '0 auto' }}>
         {children}
-      </main>
-    </div>
+        {modal}
+      </AppShell>
+    </>
   )
 }

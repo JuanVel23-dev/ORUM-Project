@@ -1,0 +1,329 @@
+/*
+  Sustituye a `.orum-table`.
+
+  Una ÚNICA tabla semántica en el DOM que, por debajo de 768px, CSS convierte
+  en tarjetas apiladas. La alternativa habitual —renderizar tabla y tarjetas y
+  ocultar una— duplica los nodos y el contenido. Aquí el marcado es siempre
+  una tabla accesible.
+*/
+
+.envoltorio {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), var(--edge);
+  overflow: hidden;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-callout-size);
+}
+
+.encabezado {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-sunk);
+}
+
+.th {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.fila {
+  position: relative;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color var(--dur-fast) var(--ease-out);
+
+  /* Listas largas: el navegador se salta el layout de lo que no se ve. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 52px;
+
+  /* Entrada escalonada; el retardo lo fija el TSX por fila. */
+  animation: entrarFila var(--dur-base) var(--ease-out) backwards;
+  animation-delay: var(--retardo, 0ms);
+}
+
+@keyframes entrarFila {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fila {
+    animation: none;
+  }
+}
+
+.tbody .fila:last-child {
+  border-bottom: none;
+}
+
+.fila:hover {
+  background: var(--surface-hover);
+}
+
+/*
+  En táctil no hay hover, así que sin esto la fila no acusa el toque hasta que
+  llega la pantalla siguiente. El feedback va en la PRESIÓN, no al soltar:
+  esperar al `click` se siente muerto.
+*/
+@media (hover: none) {
+  .fila:active {
+    background: var(--surface-hover);
+  }
+}
+
+/* El enlace de fila hereda el mismo acuse en escritorio. */
+.fila:has(.enlace:active) {
+  background: var(--surface-hover);
+}
+
+.td {
+  padding: var(--space-3) var(--space-4);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+/* Cifras que se comparan en columna: sin esto los dígitos bailan al cambiar. */
+.numerico {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  text-align: right;
+}
+
+.principal {
+  font-weight: 600;
+}
+
+/* --- Fila enlazada --------------------------------------------------------
+   Un solo enlace real en la celda principal, con un pseudo-elemento que cubre
+   toda la fila. Da un área de pulsación grande sin duplicar enlaces ni romper
+   la navegación por teclado (que sigue encontrando UNO por fila).          */
+
+.enlace {
+  position: static;
+  color: inherit;
+  text-decoration: none;
+}
+
+.enlace::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
+.enlace:focus-visible::after {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Las acciones se elevan sobre la capa del enlace para seguir siendo pulsables. */
+.acciones {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  white-space: nowrap;
+
+  /*
+    `width: 1%` es el truco clásico para que una columna de tabla se encoja a
+    su contenido. Pero un contenedor flex reporta un ancho mínimo de 0, así
+    que la celda llegaba a colapsar a 32px; y como el contenido no puede
+    encogerse (`flex-shrink: 0` en Button) y está alineado al final, el
+    desbordamiento se iba hacia la IZQUIERDA, montándose sobre la columna
+    anterior. `min-width: max-content` pone el suelo que faltaba.
+  */
+  width: 1%;
+  min-width: max-content;
+}
+
+/* En escritorio las acciones aparecen al pasar por encima: reducen el ruido
+   visual de una lista larga sin esconderse del teclado. */
+@media (min-width: 768px) and (hover: hover) {
+  .accionesOcultables {
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-out);
+  }
+
+  .fila:hover .accionesOcultables,
+  .fila:focus-within .accionesOcultables {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   MÓVIL · la tabla se convierte en tarjetas
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  .envoltorio {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .tabla,
+  .tbody,
+  .fila,
+  .td {
+    display: block;
+    width: auto;
+  }
+
+  /* El encabezado desaparece: su información pasa a las etiquetas de cada
+     celda vía `data-label`. */
+  .encabezado {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .fila {
+    position: relative;
+    margin-bottom: var(--space-3);
+    padding: var(--space-4);
+
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-card), var(--edge);
+
+    /* Con las acciones al pie la tarjeta es más alta. Una estimación corta
+       hace que la barra de scroll salte al entrar cada fila en pantalla. */
+    contain-intrinsic-size: auto 190px;
+  }
+
+  .tbody .fila:last-child {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-1) 0;
+    text-align: left;
+  }
+
+  /* La cabecera de la columna se convierte en etiqueta de la fila. */
+  .td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+
+    font-size: var(--t-caption-size);
+    letter-spacing: var(--t-caption-tracking);
+    font-weight: 500;
+    color: var(--text-3);
+  }
+
+  /* La columna principal encabeza la tarjeta, sin etiqueta. */
+  .td.principal {
+    display: block;
+    padding: 0 0 var(--space-2);
+    font-size: var(--t-title-3-size);
+    line-height: var(--t-title-3-leading);
+    letter-spacing: var(--t-title-3-tracking);
+  }
+
+  .td.principal::before {
+    display: none;
+  }
+
+  .numerico {
+    text-align: right;
+  }
+
+  /*
+    Las acciones van al PIE de la tarjeta, en flujo normal.
+
+    Antes se anclaban en absoluto arriba a la derecha, con 40px reservados en
+    el título. Eso valía cuando la acción era un icono de 36px, pero al añadir
+    botones con etiqueta ("Desactivar", "Poner a la venta") el bloque pasa de
+    140px y se montaba encima del nombre.
+
+    Al pie, además, quedan en la zona del pulgar y pueden crecer sin pelearse
+    con nada.
+  */
+  .acciones {
+    /*
+      `relative`, NO `static`: el `z-index: 1` que las mantiene por encima del
+      pseudo-elemento del enlace de fila solo surte efecto en un elemento
+      posicionado. Con `static` los botones quedarían debajo de la capa
+      invisible del enlace y no se podrían pulsar.
+    */
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+
+    width: auto;
+    /* Se anula el suelo de escritorio: aquí forzaría el ancho de la tarjeta. */
+    min-width: 0;
+
+    margin-top: var(--space-3);
+    padding: var(--space-3) 0 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .acciones::before {
+    display: none;
+  }
+
+  .accionesOcultables {
+    opacity: 1;
+  }
+
+  /* Columnas secundarias que no aportan en una tarjeta. */
+  .ocultarEnMovil {
+    display: none;
+  }
+}
+
+/* --- Estados -------------------------------------------------------------- */
+
+.estado {
+  padding: var(--space-6);
+}
+
+.filasCarga {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.filaCarga {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}

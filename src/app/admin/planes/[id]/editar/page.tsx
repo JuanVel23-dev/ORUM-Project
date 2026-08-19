@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { PageHeader } from '@/components/ui/layout'
+import { FormCard } from '@/components/ui/form-card'
 import { PlanForm } from '../../_components/plan-form'
-import { PageHeader } from '@/components/ui'
 
 export const metadata = { title: 'Editar plan · ORUM' }
 
@@ -21,9 +22,9 @@ export default async function EditarPlanPage({ params }: { params: Promise<{ id:
   if (!plan) notFound()
 
   return (
-    <div>
-      <PageHeader title="Editar plan" />
-      <PlanForm plan={plan} />
-    </div>
+    <>
+      <PageHeader title="Editar plan" description={plan.nombre} />
+      <FormCard><PlanForm plan={plan} /></FormCard>
+    </>
   )
 }

@@ -1,0 +1,281 @@
+/* ============================================================================
+   ORUM · Capa de tokens
+   ----------------------------------------------------------------------------
+   Valores crudos del sistema de diseño. NADA en esta capa depende del tema.
+   El mapeo por tema (claro/oscuro) vive en `globals.css`.
+
+   Regla dura del proyecto: ningún componente escribe un literal de color,
+   espaciado, radio, duración o curva. Todo se consume vía var(--…).
+
+   Referencia: docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md
+   ========================================================================== */
+
+:root {
+  /* ==========================================================================
+     1. NEUTRALES  ·  matiz ~240°, saturación 4–8%
+     --------------------------------------------------------------------------
+     Neutros con un susurro de frío, NO cálidos. Sobre grises cálidos el oro
+     se lee beige/sepia (relación análoga); sobre neutros fríos se lee metal.
+     ======================================================================== */
+
+  /* Oscuros */
+  --n-1000: #0a0a0c; /* fondo raíz (dark) */
+  --n-950: #101013; /* superficie nivel 1 */
+  --n-900: #16161a; /* tarjeta */
+  --n-850: #1d1d22; /* elevada / hover */
+  --n-800: #26262c; /* borde sutil */
+  --n-700: #33333a; /* borde */
+  --n-600: #4a4a53; /* borde fuerte, deshabilitado */
+  --n-500: #6b6b76; /* texto terciario */
+  --n-400: #8c8c97; /* texto secundario (dark) */
+  --n-300: #adadb8;
+  --n-200: #ceced6;
+  --n-100: #e6e6eb;
+  --n-50: #f4f4f7; /* texto primario (dark) — nunca blanco puro */
+
+  /* Claros */
+  --w-0: #ffffff; /* tarjeta (light) */
+  --w-50: #fbfbfc; /* fondo raíz (light) */
+  --w-100: #f4f4f6; /* superficie hundida */
+  --w-200: #e9e9ed; /* borde sutil */
+  --w-300: #dcdce2; /* borde */
+  --w-400: #c4c4cc; /* borde fuerte */
+
+  /* ==========================================================================
+     2. ORO  ·  color de MARCA, nunca color de acción
+     --------------------------------------------------------------------------
+     Contrastes verificados (spec §2.3):
+       gold-300 sobre n-1000 ....... 13.0:1  ✓ AAA
+       gold-500 sobre n-1000 ........ 7.94:1 ✓ AAA
+       n-1000  sobre gold-500 ....... 7.94:1 ✓ AAA  (texto negro sobre oro)
+       gold-700 sobre w-0 ........... 5.44:1 ✓ AA
+       gold-600 sobre w-0 ........... 3.66:1 ✓ 3:1  (focus/filos, NO texto)
+       gold-500 sobre w-0 ........... 2.49:1 ✗ PROHIBIDO en modo claro
+     ======================================================================== */
+
+  --gold-200: #efe0bc; /* halos, fondo de badge en dark */
+  --gold-300: #e3d0a4; /* texto dorado sobre negro */
+  --gold-400: #d4bc85; /* anillo de focus en dark */
+  --gold-500: #bfa063; /* ORO DE MARCA */
+  --gold-600: #9e8244; /* focus y filos en light */
+  --gold-700: #7d6733; /* texto dorado sobre blanco */
+  --gold-800: #5c4b25; /* dorado enfático en light */
+
+  /* Oro como material: barrido que simula luz sobre metal. */
+  --gold-sheen: linear-gradient(
+    135deg,
+    #e3d0a4 0%,
+    /* luz */ #bfa063 38%,
+    /* cuerpo */ #9e8244 62%,
+    /* sombra */ #d4bc85 100% /* reflejo de retorno */
+  );
+
+  /* Filo de luz de 1px, como el chaflán pulido de un iPhone. */
+  --gold-hairline: linear-gradient(
+    90deg,
+    transparent,
+    rgba(227, 208, 164, 0.55) 20%,
+    rgba(227, 208, 164, 0.55) 80%,
+    transparent
+  );
+
+  /* ==========================================================================
+     3. SEMÁNTICOS  ·  brecha de croma frente al oro
+     --------------------------------------------------------------------------
+     El oro es de baja saturación; los semánticos, alta. Aun así:
+     NINGÚN estado se codifica solo con color (gold-500 y warning-dark tienen
+     luminancia casi idéntica: 0.371 vs 0.390 — indistinguibles en grises).
+     ======================================================================== */
+
+  /* Light — verificados sobre blanco */
+  --success-light: #137a3b; /* 5.42:1 */
+  --warning-light: #a85508; /* 5.29:1 — naranja quemado, más rojo que el oro */
+  --danger-light: #c1121f; /* 6.22:1 */
+  --info-light: #1d5fd1;
+
+  /* Dark — sobre --n-1000 */
+  --success-dark: #45d67c;
+  --warning-dark: #f0912e; /* 8.29:1 */
+  --danger-dark: #ff5a52;
+  --info-dark: #5b9dff;
+
+  /* ==========================================================================
+     4. ESPACIADO  ·  rejilla de 4pt
+     --------------------------------------------------------------------------
+     Ningún valor de espaciado fuera de esta escala. Si un diseño "necesita"
+     13px, el diseño está mal, no la escala.
+     ======================================================================== */
+
+  --space-1: 0.25rem; /*  4px */
+  --space-2: 0.5rem; /*  8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-7: 2rem; /* 32px */
+  --space-8: 2.5rem; /* 40px */
+  --space-9: 3rem; /* 48px */
+  --space-10: 4rem; /* 64px */
+  --space-11: 5rem; /* 80px */
+  --space-12: 6rem; /* 96px */
+
+  /* ==========================================================================
+     5. RADIOS
+     --------------------------------------------------------------------------
+     Regla de anidamiento: radio_interno = radio_externo − padding.
+     ======================================================================== */
+
+  --radius-xs: 6px; /* chips, badges */
+  --radius-sm: 10px; /* inputs, botones */
+  --radius-md: 14px; /* tarjetas */
+  --radius-lg: 20px; /* modales, hojas */
+  --radius-xl: 28px; /* superficies héroe */
+  --radius-full: 999px; /* píldoras, avatares */
+
+  /* ==========================================================================
+     6. SOMBRAS  ·  en capas (una cercana y nítida + una lejana y difusa)
+     --------------------------------------------------------------------------
+     Valores para tema claro. En oscuro las sombras no funcionan (negro sobre
+     negro); globals.css las sustituye por superficie + filo de luz.
+     ======================================================================== */
+
+  --shadow-1: 0 1px 2px rgba(10, 10, 12, 0.06), 0 1px 1px rgba(10, 10, 12, 0.04);
+  --shadow-2: 0 2px 4px rgba(10, 10, 12, 0.06), 0 4px 12px rgba(10, 10, 12, 0.08);
+  --shadow-3: 0 8px 24px rgba(10, 10, 12, 0.12), 0 2px 6px rgba(10, 10, 12, 0.08);
+  --shadow-4: 0 24px 64px rgba(10, 10, 12, 0.18), 0 8px 20px rgba(10, 10, 12, 0.1);
+
+  /* Filo de luz superior: cómo se comunica la elevación en tema oscuro. */
+  --edge-light: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  /* ==========================================================================
+     7. TIPOGRAFÍA
+     --------------------------------------------------------------------------
+     Cada tamaño lleva SU PROPIO tracking y leading. Un letter-spacing único
+     para toda la app está mal en algún sitio, siempre: los títulos grandes
+     necesitan tracking negativo, el texto pequeño ligeramente positivo.
+     ======================================================================== */
+
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /*
+    Solo para datos que se dictan, se teclean o se comparan carácter a
+    carácter: número de membresía, cédula, contraseña generada. Se pide la
+    monoespaciada del sistema —en macOS/iOS es SF Mono— porque están
+    diseñadas para distinguir 0/O y 1/l, que es exactamente el error que
+    ocurre cuando alguien lee su número en voz alta en una caja.
+  */
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  /* display-1 — héroes, cifras del dashboard */
+  --t-display-1-size: clamp(2rem, 5vw, 2.5rem);
+  --t-display-1-leading: 1.05;
+  --t-display-1-tracking: -0.022em;
+  --t-display-1-weight: 600;
+
+  /* display-2 — título de página */
+  --t-display-2-size: clamp(1.5rem, 3.5vw, 2rem);
+  --t-display-2-leading: 1.1;
+  --t-display-2-tracking: -0.02em;
+  --t-display-2-weight: 600;
+
+  /* title-1 — encabezado de sección */
+  --t-title-1-size: 1.5rem;
+  --t-title-1-leading: 1.2;
+  --t-title-1-tracking: -0.015em;
+  --t-title-1-weight: 600;
+
+  /* title-2 — título de tarjeta */
+  --t-title-2-size: 1.25rem;
+  --t-title-2-leading: 1.25;
+  --t-title-2-tracking: -0.01em;
+  --t-title-2-weight: 600;
+
+  /* title-3 — subtítulo, encabezado de lista */
+  --t-title-3-size: 1.0625rem;
+  --t-title-3-leading: 1.35;
+  --t-title-3-tracking: -0.005em;
+  --t-title-3-weight: 600;
+
+  /* body — texto general */
+  --t-body-size: 0.9375rem;
+  --t-body-leading: 1.55;
+  --t-body-tracking: 0;
+  --t-body-weight: 400;
+
+  /* callout — etiquetas, botones */
+  --t-callout-size: 0.875rem;
+  --t-callout-leading: 1.5;
+  --t-callout-tracking: 0;
+  --t-callout-weight: 500;
+
+  /* footnote — texto de apoyo */
+  --t-footnote-size: 0.8125rem;
+  --t-footnote-leading: 1.45;
+  --t-footnote-tracking: 0.005em;
+  --t-footnote-weight: 400;
+
+  /* caption — metadatos */
+  --t-caption-size: 0.75rem;
+  --t-caption-leading: 1.35;
+  --t-caption-tracking: 0.01em;
+  --t-caption-weight: 500;
+
+  /* overline — encabezados de sección en mayúsculas */
+  --t-overline-size: 0.6875rem;
+  --t-overline-leading: 1.2;
+  --t-overline-tracking: 0.06em;
+  --t-overline-weight: 600;
+
+  /* ==========================================================================
+     8. MOVIMIENTO
+     --------------------------------------------------------------------------
+     Estas curvas son para lo NO gestual (hover, color, aparición simple).
+     Todo lo que el usuario pueda tocar usa resortes desde src/lib/motion.ts:
+     los resortes son interrumpibles y conocen la velocidad; las curvas no.
+     ======================================================================== */
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* deceleración fuerte — el sello Apple */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* overshoot leve, solo tras gesto */
+
+  --dur-instant: 100ms; /* feedback de presión */
+  --dur-fast: 180ms; /* hover, color, opacidad */
+  --dur-base: 260ms; /* entradas de UI */
+  --dur-slow: 400ms; /* hojas, modales */
+  --dur-page: 500ms; /* transición de ruta */
+  --dur-theme: 220ms; /* conmutación de tema */
+
+  /* ==========================================================================
+     9. CAPAS Y MATERIALES
+     ======================================================================== */
+
+  --z-base: 0;
+  --z-sticky: 100;
+  --z-header: 200;
+  --z-drawer: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-toast: 700;
+  --z-tooltip: 800;
+
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-lg: 24px; /* cromo translúcido estándar */
+  --blur-xl: 40px; /* superficies grandes: más blur = más grosor percibido */
+
+  /* ==========================================================================
+     10. LAYOUT
+     ======================================================================== */
+
+  --sidebar-w: 264px;
+  --sidebar-w-rail: 72px;
+  --topbar-h: 56px;
+  --tabbar-h: 56px;
+  --content-max: 1100px;
+
+  /* Objetivo táctil mínimo. No bajar de aquí en ningún interactivo. */
+  --tap-min: 44px;
+}

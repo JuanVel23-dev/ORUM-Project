@@ -1,0 +1,131 @@
+.destacado {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Filo dorado superior: esta es la tarjeta de marca de la pantalla, y la única. */
+.destacado::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: var(--gold-hairline);
+}
+
+.destacadoCuerpo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+@media (max-width: 640px) {
+  .destacadoCuerpo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.destacadoTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.destacadoTitulo {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  text-wrap: balance;
+}
+
+.destacadoDescripcion {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+  max-width: 52ch;
+}
+
+/* --- Cifras ---------------------------------------------------------------- */
+
+/* --- Accesos --------------------------------------------------------------- */
+
+.acceso {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+
+  padding: var(--space-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), var(--edge);
+  color: var(--text);
+
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-instant) var(--ease-out);
+}
+
+.acceso:hover {
+  border-color: var(--border);
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+.acceso:active {
+  transform: scale(0.99);
+}
+
+.acceso:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.accesoIcono {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunk);
+  color: var(--text-2);
+}
+
+.accesoIcono svg {
+  width: 19px;
+  height: 19px;
+}
+
+.accesoTextos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.accesoTitulo {
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+}
+
+.accesoDescripcion {
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+.flecha {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--text-3);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+/* Apunta en la dirección del gesto: telegrafía a dónde lleva. */
+.acceso:hover .flecha {
+  transform: translateX(3px);
+}

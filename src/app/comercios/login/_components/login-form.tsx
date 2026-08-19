@@ -1,53 +1,66 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
+import { Eye, EyeOff, LogIn } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Field } from '@/components/ui/field'
+import { Input, InputButton } from '@/components/ui/input'
+import { estilosAuth } from '@/components/ui/pantalla-auth'
 import { iniciarSesionComercio, type LoginComercioState } from '../actions'
 
 const estadoInicial: LoginComercioState = {}
 
 export function LoginComercioForm({ mensajeInicial }: { mensajeInicial?: string }) {
   const [state, formAction, pending] = useActionState(iniciarSesionComercio, estadoInicial)
+  const [verPassword, setVerPassword] = useState(false)
+
   const error = state.error ?? mensajeInicial
 
   return (
-    <form action={formAction}>
+    <form action={formAction} className={estilosAuth.formulario} noValidate>
+      {/*
+        Igual que los otros dos accesos: la sacudida la dispara el CSS con
+        `:has(.alerta)`. Sin `key` en el <form>, para no remontarlo y borrar
+        el correo ya escrito tras cada fallo.
+      */}
       {error && (
-        <p className="orum-alert orum-alert--error" role="alert">
+        <Alert key={error} tone="danger" className={estilosAuth.alerta}>
           {error}
-        </p>
+        </Alert>
       )}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="email">
-          Correo electrónico
-        </label>
-        <input
-          id="email"
+      <Field label="Correo electrónico">
+        <Input
           name="email"
           type="email"
-          className="orum-input"
           autoComplete="username"
+          placeholder="comercio@ejemplo.com"
           required
+          autoFocus
         />
-      </div>
+      </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="password">
-          Contraseña
-        </label>
-        <input
-          id="password"
+      <Field label="Contraseña">
+        <Input
           name="password"
-          type="password"
-          className="orum-input"
+          type={verPassword ? 'text' : 'password'}
           autoComplete="current-password"
           required
+          endAdornment={
+            <InputButton
+              label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              onClick={() => setVerPassword((v) => !v)}
+            >
+              {verPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+            </InputButton>
+          }
         />
-      </div>
+      </Field>
 
-      <button type="submit" className="orum-button" disabled={pending} style={{ width: '100%' }}>
-        {pending ? 'Ingresando…' : 'Iniciar sesión'}
-      </button>
+      <Button type="submit" size="lg" fullWidth loading={pending} icon={<LogIn size={17} />}>
+        Iniciar sesión
+      </Button>
     </form>
   )
 }

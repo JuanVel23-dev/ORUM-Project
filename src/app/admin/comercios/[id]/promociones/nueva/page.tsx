@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { PageHeader } from '@/components/ui/layout'
+import { FormCard } from '@/components/ui/form-card'
 import { PromocionForm } from '../_components/promocion-form'
 
 export const metadata = { title: 'Nueva promoción · ORUM' }
@@ -12,15 +14,20 @@ export default async function NuevaPromocionPage({ params }: { params: Promise<{
 
   const admin = createAdminClient()
   const [{ data: comercio }, { data: tipos }] = await Promise.all([
-    admin.from('comercios').select('id').eq('id', comercioId).is('deleted_at', null).maybeSingle(),
+    admin
+      .from('comercios')
+      .select('id, nombre')
+      .eq('id', comercioId)
+      .is('deleted_at', null)
+      .maybeSingle(),
     admin.from('tipos_beneficio').select('id, codigo, nombre').order('id'),
   ])
   if (!comercio) notFound()
 
   return (
-    <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>Nueva promoción</h1>
-      <PromocionForm comercioId={comercioId} tipos={tipos ?? []} />
-    </div>
+    <>
+      <PageHeader title="Nueva promoción" description={comercio.nombre} />
+      <FormCard><PromocionForm comercioId={comercioId} tipos={tipos ?? []} /></FormCard>
+    </>
   )
 }

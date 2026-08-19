@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { PageHeader } from '@/components/ui/layout'
+import { FormCard } from '@/components/ui/form-card'
 import { SucursalForm } from '../../_components/sucursal-form'
 
 export const metadata = { title: 'Editar sucursal · ORUM' }
@@ -28,13 +30,15 @@ export default async function EditarSucursalPage({
   if (!sucursal) notFound()
 
   return (
-    <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>Editar sucursal</h1>
-      <SucursalForm
-        comercioId={comercioId}
-        ciudades={ciudades ?? []}
-        sucursal={{ ...sucursal, nombre: sucursal.nombre ?? '' }}
-      />
-    </div>
+    <>
+      <PageHeader title="Editar sucursal" description={sucursal.nombre ?? undefined} />
+      <FormCard>
+        <SucursalForm
+          comercioId={comercioId}
+          ciudades={ciudades ?? []}
+          sucursal={{ ...sucursal, nombre: sucursal.nombre ?? '' }}
+        />
+      </FormCard>
+    </>
   )
 }

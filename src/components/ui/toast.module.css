@@ -1,0 +1,137 @@
+.viewport {
+  position: fixed;
+  z-index: var(--z-toast);
+
+  display: flex;
+  flex-direction: column-reverse; /* el más nuevo, abajo del todo */
+  gap: var(--space-3);
+
+  /* Escritorio: esquina inferior derecha. */
+  right: var(--space-6);
+  bottom: var(--space-6);
+  width: min(380px, calc(100vw - var(--space-8)));
+
+  pointer-events: none; /* solo los toasts capturan el puntero */
+}
+
+.viewport > * {
+  pointer-events: auto;
+}
+
+@media (max-width: 640px) {
+  .viewport {
+    /* Móvil: ancho completo sobre la barra de gestos y la futura tab bar. */
+    left: var(--space-4);
+    right: var(--space-4);
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    width: auto;
+  }
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-3), var(--edge);
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  color: var(--text);
+
+  touch-action: pan-y; /* el arrastre horizontal lo gestionamos nosotros */
+  cursor: grab;
+  will-change: transform, opacity;
+}
+
+.toast:active {
+  cursor: grabbing;
+}
+
+.icono {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.success .icono {
+  color: var(--success);
+}
+.danger .icono {
+  color: var(--danger);
+}
+.warning .icono {
+  color: var(--warning);
+}
+.info .icono {
+  color: var(--info);
+}
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.titulo {
+  font-weight: 600;
+}
+
+.descripcion {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+.accion {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  padding: 0;
+
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--link);
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.accion:hover {
+  text-decoration: underline;
+}
+
+.cerrar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+
+  width: 24px;
+  height: 24px;
+  margin: -2px -2px 0 0;
+  border-radius: var(--radius-xs);
+  color: var(--text-3);
+  cursor: pointer;
+  background: none;
+  border: none;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.cerrar:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.cerrarIcono {
+  width: 15px;
+  height: 15px;
+}

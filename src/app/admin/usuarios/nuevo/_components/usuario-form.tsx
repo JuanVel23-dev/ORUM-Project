@@ -1,105 +1,133 @@
 'use client'
 
 import { useActionState, useState } from 'react'
+import { UserPlus } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Copiar } from '@/components/ui/copiar'
+import { Field } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Stack } from '@/components/ui/layout'
+import { SegmentedControl } from '@/components/ui/segmented'
 import { crearUsuario, type CrearUsuarioState } from '../../actions'
-import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
+import styles from '@/styles/formulario.module.css'
 
 const estadoInicial: CrearUsuarioState = {}
 
+type Tipo = 'empleado' | 'super_admin'
+
 export function UsuarioForm() {
   const [state, formAction, pending] = useActionState(crearUsuario, estadoInicial)
-  const [tipo, setTipo] = useState<'empleado' | 'super_admin'>('empleado')
-  const [copiado, setCopiado] = useState(false)
+  const [tipo, setTipo] = useState<Tipo>('empleado')
 
-  // Pantalla de éxito: mostramos la contraseña generada UNA sola vez.
   if (state.ok && state.password) {
-    return (
-      <div className="orum-card">
-        <Alert tone="success">✓ Usuario creado correctamente.</Alert>
-        <p style={{ marginBottom: '0.75rem' }}>
-          Comparte estos datos con la persona. La contraseña <strong>no se volverá a mostrar</strong>;
-          el usuario podrá cambiarla después.
-        </p>
-        <div className="orum-field">
-          <span className="orum-label">Correo</span>
-          <input className="orum-input" readOnly value={state.email} />
-        </div>
-        <div className="orum-field">
-          <span className="orum-label">Contraseña temporal</span>
-          <Row gap="0.5rem">
-            <input
-              className="orum-input"
-              readOnly
-              value={state.password}
-              style={{ fontFamily: 'var(--font-geist-mono, monospace)' }}
-            />
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                navigator.clipboard?.writeText(state.password ?? '')
-                setCopiado(true)
-                setTimeout(() => setCopiado(false), 2000)
-              }}
-            >
-              {copiado ? '¡Copiado!' : 'Copiar'}
-            </Button>
-          </Row>
-        </div>
-        <Row style={{ marginTop: '1rem' }}>
-          <LinkButton href="/admin/usuarios">Ir a la lista</LinkButton>
-          <LinkButton href="/admin/usuarios/nuevo" variant="secondary">Crear otro</LinkButton>
-        </Row>
-      </div>
-    )
+    return <Credenciales estado={state} />
   }
 
   return (
-    <form action={formAction} className="orum-card">
-      {state.error && <Alert tone="error">{state.error}</Alert>}
+    <>
+      <form action={formAction} className={styles.formulario} noValidate>
+        {state.error && <Alert tone="danger">{state.error}</Alert>}
 
-      <Field label="Tipo de usuario" htmlFor="tipo">
-        <select
-          id="tipo"
-          name="tipo"
-          className="orum-select"
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value as typeof tipo)}
-        >
-          <option value="empleado">Empleado</option>
-          <option value="super_admin">Administrador</option>
-        </select>
-      </Field>
-
-      <Field label="Correo electrónico (para iniciar sesión)" htmlFor="email">
-        <input id="email" name="email" type="email" className="orum-input" required />
-      </Field>
-
-      <Row>
-        <Field label="Nombres" htmlFor="nombres" flex>
-          <input id="nombres" name="nombres" className="orum-input" required />
+        {/* El tipo de usuario es una decisión de permisos: se elige entre dos
+            opciones visibles a la vez, no escondidas en un desplegable. */}
+        <Field label="Tipo de usuario">
+          <input type="hidden" name="tipo" value={tipo} />
+          <SegmentedControl
+            options={[
+              { value: 'empleado', label: 'Empleado' },
+              { value: 'super_admin', label: 'Administrador' },
+            ]}
+            value={tipo}
+            onChange={setTipo}
+            ariaLabel="Tipo de usuario"
+            size="md"
+          />
         </Field>
-        <Field label="Apellidos" htmlFor="apellidos" flex>
-          <input id="apellidos" name="apellidos" className="orum-input" required />
-        </Field>
-      </Row>
-      <Field label="Cédula" htmlFor="cedula">
-        <input id="cedula" name="cedula" className="orum-input" required />
-      </Field>
-      <Field label="Teléfono (opcional)" htmlFor="telefono">
-        <input id="telefono" name="telefono" className="orum-input" />
-      </Field>
 
-      <p className="orum-muted" style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
-        El sistema generará una contraseña segura automáticamente y te la mostrará al terminar.
-      </p>
+        {tipo === 'super_admin' && (
+          <Alert tone="warning" title="Acceso completo">
+            Un administrador puede crear otros usuarios, gestionar comercios y cambiar los
+            planes de membresía.
+          </Alert>
+        )}
 
-      <Row>
-        <Button type="submit" disabled={pending}>
-          {pending ? 'Creando…' : 'Crear usuario'}
-        </Button>
-        <LinkButton href="/admin/usuarios" variant="secondary">Cancelar</LinkButton>
-      </Row>
-    </form>
+        <Stack gap={5}>
+          <Field
+            label="Correo electrónico"
+            help="Será su usuario para iniciar sesión en el panel."
+          >
+            <Input name="email" type="email" autoComplete="email" required autoFocus />
+          </Field>
+
+          <div className={styles.pareja}>
+            <Field label="Nombres">
+              <Input name="nombres" autoComplete="given-name" required />
+            </Field>
+            <Field label="Apellidos">
+              <Input name="apellidos" autoComplete="family-name" required />
+            </Field>
+          </div>
+
+          <div className={styles.pareja}>
+            <Field label="Cédula" help="Sin puntos ni espacios.">
+              <Input name="cedula" numeric inputMode="numeric" required />
+            </Field>
+            <Field label="Teléfono" optional>
+              <Input name="telefono" type="tel" numeric inputMode="tel" />
+            </Field>
+          </div>
+
+          <p className={styles.nota}>
+            Al guardar se genera una contraseña segura. Se mostrará una sola vez en la
+            siguiente pantalla.
+          </p>
+        </Stack>
+
+        <div className={styles.acciones}>
+          <Button type="submit" loading={pending} icon={<UserPlus size={16} />}>
+            Crear usuario
+          </Button>
+          <Button href="/admin/usuarios" variant="secondary">
+            Cancelar
+          </Button>
+        </div>
+      </form>
+    </>
+  )
+}
+
+function Credenciales({ estado }: { estado: CrearUsuarioState }) {
+  return (
+    <>
+      <div className={styles.credenciales}>
+        <Alert tone="success" title="Usuario creado" />
+
+        <Alert tone="warning" title="Comparte estos datos ahora">
+          La contraseña no se vuelve a mostrar. El usuario podrá cambiarla desde su cuenta.
+        </Alert>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Correo de acceso</span>
+          <Copiar valor={estado.email ?? ''} label="Copiar correo">
+            <span className={styles.credencialValor}>{estado.email}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.credencial}>
+          <span className={styles.credencialEtiqueta}>Contraseña temporal</span>
+          <Copiar valor={estado.password ?? ''} label="Copiar contraseña temporal">
+            <span className={styles.credencialValor}>{estado.password}</span>
+          </Copiar>
+        </div>
+
+        <div className={styles.acciones}>
+          <Button href="/admin/usuarios">Ir a la lista</Button>
+          <Button href="/admin/usuarios/nuevo" variant="secondary">
+            Crear otro
+          </Button>
+        </div>
+      </div>
+    </>
   )
 }

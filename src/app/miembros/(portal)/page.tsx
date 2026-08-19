@@ -1,6 +1,9 @@
+import { Store } from 'lucide-react'
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
-import { CardGrid, EmptyState, PageHeader } from '@/components/ui'
+import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/feedback'
+import { Grid, PageHeader } from '@/components/ui/layout'
 import { FiltrosForm } from './_components/filtros-form'
 import { ComercioCard, type ComercioListado } from './_components/comercio-card'
 
@@ -181,9 +184,14 @@ export default async function MiembrosHomePage({
     promociones: promocionesPorComercio.get(c.id) ?? [],
   }))
 
+  const hayFiltros = Boolean(busqueda || comercio_id || marca_id || ciudad_id)
+
   return (
-    <div>
-      <PageHeader title="Comercios y beneficios" />
+    <>
+      <PageHeader
+        title="Comercios y beneficios"
+        description="Todo lo que incluye tu membresía. Muestra tu código en el comercio para aplicar el beneficio."
+      />
 
       <FiltrosForm
         q={busqueda}
@@ -196,14 +204,29 @@ export default async function MiembrosHomePage({
       />
 
       {comerciosListado.length === 0 ? (
-        <EmptyState>Ningún comercio coincide con la búsqueda o los filtros.</EmptyState>
+        <EmptyState
+          icon={<Store size={24} />}
+          title={hayFiltros ? 'Sin resultados' : 'Aún no hay comercios'}
+          description={
+            hayFiltros
+              ? 'Ningún comercio coincide con la búsqueda o los filtros aplicados.'
+              : 'Estamos sumando aliados al club. Vuelve pronto.'
+          }
+          actions={
+            hayFiltros ? (
+              <Button href="/miembros" variant="secondary">
+                Ver todos
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
-        <CardGrid>
+        <Grid min="290px">
           {comerciosListado.map((c) => (
             <ComercioCard key={c.id} comercio={c} />
           ))}
-        </CardGrid>
+        </Grid>
       )}
-    </div>
+    </>
   )
 }

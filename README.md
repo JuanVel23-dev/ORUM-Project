@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ORUM
 
-## Getting Started
+Plataforma web de **club de beneficios**: conecta a los **miembros** con una red de
+**comercios aliados** para que accedan a descuentos y promociones.
 
-First, run the development server:
+Hay un solo producto: **la membresía mensual**. No existen niveles ni planes premium;
+el estado de un miembro es **binario — paga o no paga**.
+
+---
+
+## Antes de escribir código
+
+> ### 📐 Lee [`CLAUDE.md`](CLAUDE.md)
+>
+> Contiene las reglas del sistema de diseño: qué es oro y qué no, qué está prohibido,
+> cómo se anima, dónde va cada archivo. **No es documentación opcional ni es solo para
+> herramientas de IA** — es el contrato de la capa de presentación.
+>
+> Existe porque ya pasó: dos sesiones trabajando en paralelo construyeron dos sistemas
+> de diseño incompatibles sobre los mismos archivos.
+
+Los cinco puntos que más se rompen sin querer:
+
+1. **No hay clases `.orum-*`.** Esa capa se eliminó. Todo sale de `src/components/ui/`.
+2. **Nada de valores literales** de color, espaciado o duración: van por `var(--…)` desde
+   `src/styles/tokens.css`.
+3. **Un formulario no navega.** Se abre encima, como ruta interceptada bajo
+   `src/app/admin/@modal/`.
+4. **Nunca leas `membresias.estado` en crudo.** Esa columna no se actualiza al vencer.
+   Usa `derivarEstadoMembresia`.
+5. **Rangos de fecha contra columnas `timestamptz`** van con `inicioDiaBogota` /
+   `finDiaBogota` (`src/lib/shared/fecha.ts`), nunca con una cadena suelta.
+
+---
+
+## Requisitos
+
+| | |
+|---|---|
+| **Node** | **≥ 22.13** — declarado en `.nvmrc` y en `engines` |
+| **Gestor** | **pnpm** (no npm, no yarn) |
+| **Backend** | Supabase — el esquema ya existe, no se crea desde aquí |
+
+Node 20 **no sirve**: pnpm 11 usa `node:sqlite`, que no existe antes de la 22.13, y el
+instalador falla con `No such built-in module`.
+
+## Puesta en marcha
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+corepack enable pnpm     # una sola vez por máquina
+pnpm install
+
+cp .env.example .env.local   # y rellena las tres claves de Supabase
+
+pnpm dev                 # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env.local` está en `.gitignore` y **nunca** debe subirse.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Comandos
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm dev      # desarrollo
+pnpm build    # compilación de producción
+pnpm lint     # ESLint
+pnpm test     # Vitest — solo funciones puras
+```
 
-## Learn More
+**Antes de dar algo por hecho**, los cuatro juntos:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm exec tsc --noEmit && pnpm lint && pnpm test && pnpm build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Y **míralo renderizado**. Medir con `getComputedStyle` durante una transición da
+resultados falsos: en una pestaña que el navegador no pinta, la transición no avanza.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Los cuatro portales
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Portal | Ruta | Quién entra |
+|---|---|---|
+| Público | `/` | Cualquiera *(pendiente)* |
+| Administración | `/admin` | `super_admin`, `empleado` |
+| Miembros | `/miembros` | `miembro` |
+| Comercios | `/comercios` | `comercio` |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Dónde vive cada cosa
+
+```
+src/
+  app/            rutas (Server Components por defecto)
+    admin/@modal/ formularios en superposición (rutas interceptadas)
+  components/ui/  el kit de diseño — kebab-case + CSS Modules
+  lib/            por dominio: auth · miembros · comercios · metricas
+                  bitacora · shared · supabase
+  styles/         tokens.css y hojas compartidas
+docs/ROADMAP.md   estado por fases y próximos pasos
+```
+
+## Reglas de arquitectura
+
+- Páginas = **Server Components** protegidos con `requireRol`.
+- Mutaciones = **server actions**, que verifican el rol al entrar.
+  Ocultar un enlace no protege nada: la autorización va en el servidor, siempre.
+- `src/lib/supabase/admin.ts` usa la `service_role`, que **ignora RLS**. Lleva
+  `import 'server-only'`: importarlo desde un componente cliente rompe la compilación
+  a propósito.
+- Pruebas automatizadas **solo de funciones puras**. El resto se verifica a mano.
+
+---
+
+## Frontend y backend van en paralelo
+
+Dos personas trabajan sobre este repositorio a la vez. Para no pisarse:
+
+- **El backend manda en la lógica.** Server actions, consultas, RPC y `database.types.ts`
+  son suyos. Un cambio de presentación nunca debe alterarlos.
+- **El frontend manda en la presentación.** Componentes, CSS, rutas interceptadas y
+  tokens.
+- **La frontera es el `FormData`.** Si un formulario se rediseña, los atributos `name`
+  deben seguir coincidiendo exactamente con lo que lee su `actions.ts`. Es lo primero
+  que hay que comprobar tras tocar un formulario.
+- Si una pantalla nueva se construye "provisional para probar", déjala anotada en
+  `docs/ROADMAP.md` para que se rehaga sobre el sistema de diseño antes de publicarse.

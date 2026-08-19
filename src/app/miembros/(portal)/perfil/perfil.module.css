@@ -1,0 +1,126 @@
+/* ==========================================================================
+   CARNET
+   --------------------------------------------------------------------------
+   Es lo que el miembro enseña en la caja. Se diseña como una tarjeta física:
+   una sola pieza, el nombre grande, el código legible a un brazo de distancia
+   y el QR sin nada que compita con él.
+   ========================================================================== */
+
+.carnet {
+  position: relative;
+  overflow: hidden;
+}
+
+/*
+  Filo dorado superior. Es el único oro estructural del portal y mide 2px:
+  suficiente para que la tarjeta se lea como "la buena" sin gastar el
+  presupuesto de oro de toda la pantalla.
+*/
+.carnet::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-sheen);
+}
+
+.cuerpo {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-7);
+  align-items: start;
+}
+
+/* El QR baja debajo de los datos, centrado, cuando no caben en paralelo. */
+@container contenido (max-width: 620px) {
+  .cuerpo {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .datos {
+    justify-items: center;
+  }
+}
+
+.datos {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.nombre {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+}
+
+.dato {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.etiqueta {
+  font-size: var(--t-overline-size);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.valor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+
+  font-size: var(--t-body-size);
+}
+
+@container contenido (max-width: 620px) {
+  .valor {
+    justify-content: center;
+  }
+}
+
+/*
+  El número es un dato que se dicta y se teclea: monoespaciado, tabular y con
+  tracking abierto, para que 0/O y 1/l no se confundan al leerlo en voz alta.
+*/
+.numero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  font-family: var(--font-mono);
+  font-size: var(--t-title-3-size);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+.qr {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+}
+
+.qrNota {
+  max-width: 22ch;
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  color: var(--text-3);
+  text-align: center;
+}
+
+/* Al imprimir sobra todo lo que no sea el carnet. */
+@media print {
+  .carnet {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}

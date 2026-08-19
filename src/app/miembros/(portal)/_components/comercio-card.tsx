@@ -1,6 +1,10 @@
-import { Badge, Card, ComercioLogo, Row } from '@/components/ui'
+import { MapPin } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
+import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
+import styles from './comercio-card.module.css'
 
 export type ComercioListado = {
   id: number
@@ -9,44 +13,57 @@ export type ComercioListado = {
   marcaNombre: string | null
   logoUrl: string | null
   ciudades: string[]
-  promociones: { id: number; titulo: string; tipoCodigo: TipoBeneficioCodigo; valor: number | null }[]
+  promociones: {
+    id: number
+    titulo: string
+    tipoCodigo: TipoBeneficioCodigo
+    valor: number | null
+  }[]
 }
 
 export function ComercioCard({ comercio }: { comercio: ComercioListado }) {
   return (
     <Card>
-      <Row gap="0.75rem" style={{ alignItems: 'center', marginBottom: '0.25rem' }}>
-        <ComercioLogo logoUrl={comercio.logoUrl} nombre={comercio.nombre} size={40} />
-        <div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{comercio.nombre}</h3>
-          {comercio.marcaNombre && (
-            <p className="orum-muted" style={{ fontSize: '0.85rem' }}>
-              {comercio.marcaNombre}
-            </p>
-          )}
-        </div>
-      </Row>
-      {comercio.descripcion && <p style={{ margin: '0.5rem 0' }}>{comercio.descripcion}</p>}
-      {comercio.ciudades.length > 0 && (
-        <p className="orum-muted" style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-          {comercio.ciudades.join(', ')}
-        </p>
-      )}
+      <div className={styles.tarjeta}>
+        <div className={styles.cabecera}>
+          <ComercioLogo logoUrl={comercio.logoUrl} nombre={comercio.nombre} size={44} />
 
-      {comercio.promociones.length === 0 ? (
-        <p className="orum-muted" style={{ fontSize: '0.85rem' }}>
-          Sin promociones activas por ahora.
-        </p>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.5rem' }}>
-          {comercio.promociones.map((p) => (
-            <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
-              <span>{p.titulo}</span>
-              <Badge tone="on">{formatearBeneficio(p.tipoCodigo, p.valor)}</Badge>
-            </div>
-          ))}
+          <div className={styles.titulos}>
+            <h3 className={styles.nombre}>{comercio.nombre}</h3>
+            {comercio.marcaNombre && <p className={styles.marca}>{comercio.marcaNombre}</p>}
+          </div>
         </div>
-      )}
+
+        {comercio.descripcion && <p className={styles.descripcion}>{comercio.descripcion}</p>}
+
+        {comercio.ciudades.length > 0 && (
+          <p className={styles.ciudades}>
+            {/* El texto que sigue ya dice las ciudades. */}
+            <MapPin size={13} aria-hidden />
+            <span className={styles.ciudadesTexto}>{comercio.ciudades.join(' · ')}</span>
+          </p>
+        )}
+
+        {comercio.promociones.length === 0 ? (
+          <p className={styles.sinPromociones}>Sin promociones activas por ahora.</p>
+        ) : (
+          <ul className={styles.promociones}>
+            {comercio.promociones.map((p) => (
+              <li key={p.id} className={styles.promocion}>
+                <span className={styles.promocionTitulo}>{p.titulo}</span>
+                {/*
+                  El beneficio es la cifra que el miembro busca: va en oro.
+                  Es el único uso ceremonial del oro en esta pantalla, y cabe
+                  en el presupuesto porque ocupa una píldora por promoción.
+                */}
+                <Badge tone="gold" size="sm">
+                  {formatearBeneficio(p.tipoCodigo, p.valor)}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </Card>
   )
 }

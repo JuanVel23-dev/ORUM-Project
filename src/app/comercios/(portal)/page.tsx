@@ -1,6 +1,8 @@
 import { requireRolComercio } from '@/lib/comercios/requerir-comercio'
 import { createClient } from '@/lib/supabase/server'
-import { PageHeader, EmptyState } from '@/components/ui'
+import { Store, TriangleAlert } from 'lucide-react'
+import { EmptyState } from '@/components/ui/feedback'
+import { PageHeader } from '@/components/ui/layout'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { hoyISO } from '@/lib/shared/fecha'
 import { VerificacionTool } from './_components/verificacion-tool'
@@ -20,10 +22,14 @@ export default async function ComerciosHomePage() {
 
   if (!comercio) {
     return (
-      <div>
+      <>
         <PageHeader title="Verificar membresía" />
-        <EmptyState>No se encontró el comercio asociado a esta cuenta. Contacta al administrador.</EmptyState>
-      </div>
+        <EmptyState
+          icon={<TriangleAlert size={24} />}
+          title="Cuenta sin comercio asociado"
+          description="Esta cuenta no está vinculada a ningún comercio. Escribe al administrador del club para que la conecte."
+        />
+      </>
     )
   }
 
@@ -48,10 +54,14 @@ export default async function ComerciosHomePage() {
 
   if (!sucursales || sucursales.length === 0) {
     return (
-      <div>
+      <>
         <PageHeader title="Verificar membresía" />
-        <EmptyState>Este comercio no tiene sucursales activas. Contacta al administrador.</EmptyState>
-      </div>
+        <EmptyState
+          icon={<Store size={24} />}
+          title="Sin sucursales activas"
+          description="Una venta se registra siempre contra una sucursal, y este comercio no tiene ninguna activa. Escribe al administrador del club."
+        />
+      </>
     )
   }
 
@@ -69,9 +79,12 @@ export default async function ComerciosHomePage() {
     }))
 
   return (
-    <div>
-      <PageHeader title="Verificar membresía" />
+    <>
+      <PageHeader
+        title="Verificar membresía"
+        description="Escanea el código del carnet o escribe el número. Si la membresía está vigente, podrás registrar la venta."
+      />
       <VerificacionTool sucursales={sucursales} promociones={promociones} />
-    </div>
+    </>
   )
 }

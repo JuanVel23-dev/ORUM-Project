@@ -1,0 +1,198 @@
+/*
+  Hoja inferior con detents, al modo de iOS.
+
+  El <dialog> ocupa todo el viewport y es transparente: aporta focus trap,
+  capa superior y Escape, mientras que el velo y el panel son elementos
+  propios, para poder oscurecer el fondo EN PROPORCIÓN al arrastre.
+
+  CLAVE DEL MECANISMO: el panel SIEMPRE mide la altura del detent grande. Las
+  alturas intermedias se consiguen desplazándolo hacia abajo con `translateY`,
+  nunca cambiando su altura. Así todo el gesto se anima con `transform` —cero
+  recálculo de layout— y el contenido no se reflowea al arrastrar.
+*/
+
+.dialog {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.dialog::backdrop {
+  background: transparent;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+  will-change: opacity;
+}
+
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  /* Altura fija = detent grande. Los detents menores son desplazamiento. */
+  height: var(--alto-hoja, min(92dvh, 920px));
+
+  background: var(--surface);
+  border-top: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-overlay);
+
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  will-change: transform;
+}
+
+/* En escritorio la hoja se centra y se limita en ancho: a pantalla completa
+   una hoja de borde a borde se lee como un error de maquetación. */
+@media (min-width: 768px) {
+  .panel {
+    left: 50%;
+    right: auto;
+    margin-left: calc(min(560px, calc(100vw - var(--space-8))) / -2);
+    width: min(560px, calc(100vw - var(--space-8)));
+    border-radius: var(--radius-lg);
+    height: auto;
+    max-height: min(88dvh, 780px);
+    bottom: var(--space-6);
+    border: 1px solid var(--border-subtle);
+  }
+}
+
+/* --- Zona de agarre -------------------------------------------------------
+   El arrastre vive SOLO aquí. Si todo el panel arrastrase, el gesto pelearía
+   con el scroll del contenido y ninguno de los dos se sentiría fiable.     */
+
+.agarre {
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-6) var(--space-2);
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agarre:active {
+  cursor: grabbing;
+}
+
+.tirador {
+  width: 36px;
+  height: 5px;
+  margin: 0 auto;
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+
+  /* Se ensancha al agarrarlo: acusa recibo del gesto antes de que la hoja
+     se haya movido un solo píxel. */
+  transition:
+    width var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.agarre:active .tirador {
+  width: 48px;
+  background: var(--text-3);
+}
+
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6) var(--space-4);
+  flex-shrink: 0;
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.titulo {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  text-wrap: balance;
+}
+
+.descripcion {
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+}
+
+.cuerpo {
+  padding: 0 var(--space-6) var(--space-6);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+}
+
+/* Mientras se arrastra, el scroll interno se congela: si no, el contenido se
+   desliza bajo el dedo y el gesto pierde el anclaje. */
+.panel[data-arrastrando='true'] .cuerpo {
+  overflow: hidden;
+}
+
+.pie {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-sunk);
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .pie {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+.cerrar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.cerrar:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.cerrarIcono {
+  width: 18px;
+  height: 18px;
+}

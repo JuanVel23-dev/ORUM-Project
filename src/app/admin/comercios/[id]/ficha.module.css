@@ -1,0 +1,70 @@
+.datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-5);
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.datoEtiqueta {
+  font-size: var(--t-overline-size);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.datoValor {
+  font-size: var(--t-body-size);
+  overflow-wrap: break-word;
+}
+
+.datoVacio {
+  color: var(--text-3);
+}
+
+/* --- Los dos interruptores independientes ---------------------------------
+   `comercios.activo` responde a "¿sigue siendo aliado?" y `perfiles.activo` a
+   "¿puede entrar a su herramienta?". Son decisiones distintas y se presentan
+   por separado, con su explicación: mezclarlas lleva a desactivar el acceso
+   creyendo que se retira al aliado.                                        */
+
+.interruptores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.interruptor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunk);
+}
+
+.interruptorCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.interruptorTitulo {
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+}
+
+.interruptorNota {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-3);
+}

@@ -1,45 +1,66 @@
+import type { ReactNode } from 'react'
 import Link from 'next/link'
+import { LogOut } from 'lucide-react'
 import { requireRolComercio } from '@/lib/comercios/requerir-comercio'
+import { createClient } from '@/lib/supabase/server'
+import { Avatar } from '@/components/ui/avatar'
+import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { cerrarSesionComercio } from '../login/actions'
-import { Row } from '@/components/ui'
+import styles from './portal.module.css'
 
 export const metadata = { title: 'Portal de Comercios · ORUM' }
 
-export default async function ComerciosLayout({ children }: { children: React.ReactNode }) {
+export default async function ComerciosLayout({ children }: { children: ReactNode }) {
   const perfil = await requireRolComercio()
 
+  const supabase = await createClient()
+  const { data: comercio } = await supabase
+    .from('comercios')
+    .select('nombre')
+    .eq('perfil_id', perfil.userId)
+    .maybeSingle()
+
+  const correo = perfil.email ?? 'Mi cuenta'
+
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <Row
-        gap="1.5rem"
-        style={{
-          alignItems: 'center',
-          padding: '0.75rem 1.5rem',
-          borderBottom: '1px solid var(--orum-border)',
-          flexWrap: 'wrap',
-        }}
-      >
-        <Link href="/comercios" style={{ fontWeight: 700, fontSize: '1.15rem' }}>
+    <div className={styles.portal}>
+      <header className={styles.cabecera}>
+        <Link href="/comercios" className={styles.marca}>
           ORUM
         </Link>
 
-        <Row gap="1rem" style={{ flex: 1 }}>
-          <Link href="/comercios">Verificar membresía</Link>
-        </Row>
+        {comercio?.nombre && <span className={styles.comercio}>{comercio.nombre}</span>}
 
-        <span className="orum-muted" style={{ fontSize: '0.85rem' }}>
-          {perfil.email}
-        </span>
-        <form action={cerrarSesionComercio}>
-          <button type="submit" className="orum-button orum-button--secondary">
-            Cerrar sesión
-          </button>
-        </form>
-      </Row>
+        <div className={styles.acciones}>
+          <ThemeToggle />
 
-      <main style={{ flex: 1, padding: '1.5rem', maxWidth: 1100, width: '100%', margin: '0 auto' }}>
-        {children}
-      </main>
+          {/*
+            El formulario envuelve el menú: así "Cerrar sesión" es un submit
+            real dentro de él y la server action se dispara aunque no haya
+            JavaScript. En una caja, poder salir siempre importa.
+          */}
+          <form action={cerrarSesionComercio}>
+            <DropdownMenu
+              trigger={
+                <button type="button" aria-label="Mi cuenta">
+                  <Avatar nombre={comercio?.nombre ?? correo} size="sm" decorativo />
+                </button>
+              }
+            >
+              <p className={styles.correoMenu}>{correo}</p>
+
+              <MenuSeparator />
+
+              <MenuItem submit destructive icon={<LogOut size={16} />}>
+                Cerrar sesión
+              </MenuItem>
+            </DropdownMenu>
+          </form>
+        </div>
+      </header>
+
+      <main className={styles.main}>{children}</main>
     </div>
   )
 }

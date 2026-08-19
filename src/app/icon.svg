@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="oroFav" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E3D0A4" />
+      <stop offset="38%" stop-color="#BFA063" />
+      <stop offset="62%" stop-color="#9E8244" />
+      <stop offset="100%" stop-color="#D4BC85" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="#0A0A0C" />
+
+  <!-- Trazo más grueso que en el icono de la app: a 16px de favicon, un
+       anillo fino desaparece. -->
+  <circle cx="256" cy="256" r="140" fill="none" stroke="url(#oroFav)" stroke-width="46" />
+</svg>

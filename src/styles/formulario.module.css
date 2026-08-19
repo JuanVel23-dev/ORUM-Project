@@ -1,0 +1,82 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Anchos de la tarjeta contenedora. Un formulario a todo el ancho de la
+   pantalla obliga al ojo a saltar demasiado entre etiqueta y campo. */
+.tarjeta {
+  max-width: 640px;
+}
+
+.tarjetaEstrecha {
+  max-width: 560px;
+}
+
+.pareja {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .pareja {
+    grid-template-columns: 1fr;
+  }
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .acciones {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
+
+.nota {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+/* --- Credenciales generadas ------------------------------------------------
+   Momento crítico: la contraseña se muestra UNA sola vez. Si se pierde hay
+   que regenerarla, así que la pantalla lo advierte y copiar cuesta un clic. */
+
+.credenciales {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 560px;
+}
+
+.credencial {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunk);
+}
+
+.credencialEtiqueta {
+  font-size: var(--t-overline-size);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.credencialValor {
+  font-size: var(--t-title-3-size);
+  font-weight: 600;
+}

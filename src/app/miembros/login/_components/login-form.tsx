@@ -1,55 +1,69 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
+import { Eye, EyeOff, LogIn } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Field } from '@/components/ui/field'
+import { Input, InputButton } from '@/components/ui/input'
+import { estilosAuth } from '@/components/ui/pantalla-auth'
 import { iniciarSesionMiembro, type LoginMiembroState } from '../actions'
 
 const estadoInicial: LoginMiembroState = {}
 
 export function LoginMiembroForm({ mensajeInicial }: { mensajeInicial?: string }) {
   const [state, formAction, pending] = useActionState(iniciarSesionMiembro, estadoInicial)
+  const [verPassword, setVerPassword] = useState(false)
+
   const error = state.error ?? mensajeInicial
 
   return (
-    <form action={formAction}>
+    <form action={formAction} className={estilosAuth.formulario} noValidate>
+      {/*
+        Igual que en el acceso de administración: la sacudida la dispara el CSS
+        con `:has(.alerta)`. Sin `key` en el <form>, para no remontarlo y
+        borrar el número ya tecleado tras cada fallo.
+      */}
       {error && (
-        <p className="orum-alert orum-alert--error" role="alert">
+        <Alert key={error} tone="danger" className={estilosAuth.alerta}>
           {error}
-        </p>
+        </Alert>
       )}
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="numero_membresia">
-          Número de membresía
-        </label>
-        <input
-          id="numero_membresia"
+      <Field label="Número de membresía">
+        <Input
           name="numero_membresia"
           type="text"
+          /* Teclado numérico en móvil, pero `type="text"`: el número puede
+             llevar ceros a la izquierda y `type="number"` los descarta. */
           inputMode="numeric"
-          className="orum-input"
           autoComplete="username"
-          required
           placeholder="00012345"
+          required
+          autoFocus
         />
-      </div>
+      </Field>
 
-      <div className="orum-field">
-        <label className="orum-label" htmlFor="password">
-          Contraseña
-        </label>
-        <input
-          id="password"
+      <Field label="Contraseña">
+        <Input
           name="password"
-          type="password"
-          className="orum-input"
+          type={verPassword ? 'text' : 'password'}
           autoComplete="current-password"
           required
+          endAdornment={
+            <InputButton
+              label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              onClick={() => setVerPassword((v) => !v)}
+            >
+              {verPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+            </InputButton>
+          }
         />
-      </div>
+      </Field>
 
-      <button type="submit" className="orum-button" disabled={pending} style={{ width: '100%' }}>
-        {pending ? 'Ingresando…' : 'Iniciar sesión'}
-      </button>
+      <Button type="submit" size="lg" fullWidth loading={pending} icon={<LogIn size={17} />}>
+        Iniciar sesión
+      </Button>
     </form>
   )
 }

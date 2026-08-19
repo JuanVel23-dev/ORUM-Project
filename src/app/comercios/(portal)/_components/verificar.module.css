@@ -1,0 +1,232 @@
+/*
+  Herramienta de caja. Se usa de pie, con una mano, con el cliente delante y
+  cola detrás. Todo aquí está calibrado para eso: objetivos grandes, una
+  decisión por pantalla y el veredicto legible a un brazo de distancia.
+*/
+
+.paso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.acciones {
+  display: flex;
+  gap: var(--space-3);
+}
+
+@container contenido (max-width: 420px) {
+  .acciones {
+    flex-direction: column-reverse;
+  }
+}
+
+/* --- Escáner --------------------------------------------------------------- */
+
+.escaner {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--n-1000);
+  aspect-ratio: 1;
+}
+
+.escaner video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/*
+  Mira de encuadre. No es decoración: sin una guía, la gente acerca el teléfono
+  demasiado y el código se sale del cuadro. Va en oro porque es marca sobre una
+  superficie que no es del sistema (la imagen de la cámara).
+*/
+.mira {
+  position: absolute;
+  inset: 18%;
+  border-radius: var(--radius-sm);
+  /*
+    Literal a propósito, como el blanco del QR: esta sombra no cae sobre una
+    superficie del sistema sino sobre la imagen de la cámara, que no tiene
+    tema. Un token de tema la aclararía en modo claro y dejaría de oscurecer
+    el encuadre, que es justo su función.
+  */
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.mira::before,
+.mira::after {
+  content: '';
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--gold-400);
+}
+
+.mira::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: var(--radius-sm) 0 0 0;
+}
+
+.mira::after {
+  right: -2px;
+  bottom: -2px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) 0;
+}
+
+.escanerNota {
+  margin-top: var(--space-3);
+  text-align: center;
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+/* --- Veredicto ------------------------------------------------------------- */
+
+/*
+  El momento de la verdad. Se lee de un vistazo o no sirve: nombre grande,
+  estado con punto Y texto (nunca solo color), y el número en monoespaciada
+  para poder cotejarlo con el carnet carácter a carácter.
+*/
+.veredicto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.nombre {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+  text-wrap: balance;
+}
+
+.numero {
+  font-family: var(--font-mono);
+  font-size: var(--t-footnote-size);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.estadoFila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.plan {
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+/* --- Venta ----------------------------------------------------------------- */
+
+.campos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@container contenido (max-width: 420px) {
+  .campos {
+    grid-template-columns: 1fr;
+  }
+}
+
+.anchoCompleto {
+  grid-column: 1 / -1;
+}
+
+/*
+  El valor final es la cifra que se le canta al cliente. Va aparte, en su
+  propia franja, para que no se confunda con los dos campos que la producen.
+*/
+.total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunk);
+}
+
+.totalEtiqueta {
+  font-size: var(--t-overline-size);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.totalValor {
+  font-size: var(--t-title-1-size);
+  font-weight: var(--t-title-1-weight);
+  letter-spacing: var(--t-title-1-tracking);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.ahorro {
+  font-size: var(--t-caption-size);
+  color: var(--success);
+}
+
+/* --- Éxito ----------------------------------------------------------------- */
+
+.exito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+  padding: var(--space-4) 0;
+}
+
+.exitoIcono {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.exitoTitulo {
+  font-size: var(--t-title-2-size);
+  font-weight: var(--t-title-2-weight);
+  letter-spacing: var(--t-title-2-tracking);
+}
+
+.exitoNota {
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+/* Mientras el escáner se descarga. Sin esto, pulsar "Escanear QR" con mala
+   cobertura no daría ninguna señal y el cajero volvería a pulsar. */
+.cargandoEscaner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  min-height: 120px;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunk);
+
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}

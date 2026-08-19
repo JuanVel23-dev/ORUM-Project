@@ -1,0 +1,193 @@
+/*
+  Las pantallas de acceso se sirven SIEMPRE en oscuro, independientemente del
+  tema elegido. Son superficies de marca con dirección de arte, no pantallas
+  de trabajo: ocupan la ventana entera unos segundos y luego el usuario entra
+  en su tema. El `data-theme="dark"` va en el contenedor, no en <html>, y los
+  tokens se redeclaran para todo este subárbol.
+*/
+
+.pantalla {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-base);
+
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+  padding-top: max(var(--space-6), env(safe-area-inset-top, 0px));
+  padding-bottom: max(var(--space-6), env(safe-area-inset-bottom, 0px));
+
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+/*
+  Halo dorado muy tenue detrás de la tarjeta. Es la única superficie dorada
+  grande del sistema, y funciona porque su opacidad es casi imperceptible:
+  no se ve como color, se siente como luz.
+*/
+.pantalla::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+
+  width: min(760px, 120vw);
+  height: min(760px, 120vw);
+  border-radius: 50%;
+  pointer-events: none;
+
+  background: radial-gradient(
+    circle,
+    rgba(191, 160, 99, 0.09) 0%,
+    rgba(191, 160, 99, 0.03) 42%,
+    transparent 68%
+  );
+}
+
+.tarjeta {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+
+  padding: var(--space-8) var(--space-7);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  box-shadow: var(--shadow-overlay);
+
+  animation: entrar var(--dur-slow) var(--ease-out) backwards;
+}
+
+/* Filo de luz superior: el chaflán que atrapa la luz en el borde de la tarjeta. */
+.tarjeta::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: var(--gold-hairline);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta {
+    animation: fundir var(--dur-base) var(--ease-out) backwards;
+  }
+
+  @keyframes fundir {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .tarjeta {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-7);
+}
+
+.wordmark {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  /* El tracking positivo compensa: en mayúsculas y a este tamaño, las letras
+     se leen apretadas si no se abren. */
+  padding-left: 0.22em;
+
+  background: var(--gold-sheen);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.subtitulo {
+  font-size: var(--t-footnote-size);
+  letter-spacing: var(--t-footnote-tracking);
+  color: var(--text-3);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/*
+  Sacudida al fallar. Se dispara con `:has()` cuando entra el aviso en el DOM,
+  sin remontar el formulario: los campos conservan lo escrito. Ninguna
+  animación vale perder lo que el usuario ya tecleó.
+*/
+.formulario:has(.alerta) {
+  animation: sacudir 320ms var(--ease-out);
+}
+
+.alerta {
+  animation: entrarAviso var(--dur-base) var(--ease-out);
+}
+
+@keyframes entrarAviso {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sacudir {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  18% {
+    transform: translateX(-8px);
+  }
+  46% {
+    transform: translateX(7px);
+  }
+  74% {
+    transform: translateX(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .formulario:has(.alerta) {
+    animation: none;
+  }
+}
+
+.pie {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+  text-wrap: balance;
+}

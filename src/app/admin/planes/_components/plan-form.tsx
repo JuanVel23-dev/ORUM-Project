@@ -1,8 +1,14 @@
 'use client'
 
 import { useActionState } from 'react'
+import { CreditCard, Save } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Field } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Stack } from '@/components/ui/layout'
 import { crearPlan, editarPlan, type PlanState } from '../actions'
-import { Alert, Button, Field, LinkButton, Row } from '@/components/ui'
+import styles from '@/styles/formulario.module.css'
 
 type PlanInicial = {
   id: number
@@ -15,56 +21,73 @@ type PlanInicial = {
 const estadoInicial: PlanState = {}
 
 export function PlanForm({ plan }: { plan?: PlanInicial }) {
-  const accion = plan ? editarPlan : crearPlan
-  const [state, formAction, pending] = useActionState(accion, estadoInicial)
+  const editando = Boolean(plan)
+  const [state, formAction, pending] = useActionState(
+    editando ? editarPlan : crearPlan,
+    estadoInicial,
+  )
 
   return (
-    <form action={formAction} className="orum-card">
-      {state.error && <Alert tone="error">{state.error}</Alert>}
+    <>
+      <form action={formAction} className={styles.formulario} noValidate>
+        {state.error && <Alert tone="danger">{state.error}</Alert>}
 
-      {plan && <input type="hidden" name="id" value={plan.id} />}
+        {plan && <input type="hidden" name="id" value={plan.id} />}
 
-      <Field label="Nombre" htmlFor="nombre">
-        <input id="nombre" name="nombre" className="orum-input" required defaultValue={plan?.nombre} />
-      </Field>
+        <Stack gap={5}>
+          <Field
+            label="Nombre"
+            help="Un plan llamado «Oro» o «Premium» se muestra con el distintivo dorado."
+          >
+            <Input name="nombre" defaultValue={plan?.nombre} required autoFocus />
+          </Field>
 
-      <Field label="Descripción (opcional)" htmlFor="descripcion">
-        <input id="descripcion" name="descripcion" className="orum-input" defaultValue={plan?.descripcion ?? ''} />
-      </Field>
+          <Field label="Descripción" optional>
+            <Input name="descripcion" defaultValue={plan?.descripcion ?? ''} />
+          </Field>
 
-      <Row>
-        <Field label="Precio" htmlFor="precio" flex>
-          <input
-            id="precio"
-            name="precio"
-            type="number"
-            min="0"
-            step="0.01"
-            className="orum-input"
-            required
-            defaultValue={plan?.precio}
-          />
-        </Field>
-        <Field label="Duración (meses)" htmlFor="duracion_meses" flex>
-          <input
-            id="duracion_meses"
-            name="duracion_meses"
-            type="number"
-            min="1"
-            step="1"
-            className="orum-input"
-            required
-            defaultValue={plan?.duracion_meses ?? 1}
-          />
-        </Field>
-      </Row>
+          <div className={styles.pareja}>
+            <Field label="Precio" help="En pesos, sin puntos ni símbolo.">
+              <Input
+                name="precio"
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                numeric
+                required
+                defaultValue={plan?.precio}
+              />
+            </Field>
 
-      <Row style={{ marginTop: '0.5rem' }}>
-        <Button type="submit" disabled={pending}>
-          {pending ? 'Guardando…' : plan ? 'Guardar cambios' : 'Crear plan'}
-        </Button>
-        <LinkButton href="/admin/planes" variant="secondary">Cancelar</LinkButton>
-      </Row>
-    </form>
+            <Field label="Duración" help="En meses.">
+              <Input
+                name="duracion_meses"
+                type="number"
+                min="1"
+                step="1"
+                inputMode="numeric"
+                numeric
+                required
+                defaultValue={plan?.duracion_meses ?? 12}
+              />
+            </Field>
+          </div>
+        </Stack>
+
+        <div className={styles.acciones}>
+          <Button
+            type="submit"
+            loading={pending}
+            icon={editando ? <Save size={16} /> : <CreditCard size={16} />}
+          >
+            {editando ? 'Guardar cambios' : 'Crear plan'}
+          </Button>
+          <Button href="/admin/planes" variant="secondary">
+            Cancelar
+          </Button>
+        </div>
+      </form>
+    </>
   )
 }

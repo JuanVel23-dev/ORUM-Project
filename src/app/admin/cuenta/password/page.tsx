@@ -1,18 +1,24 @@
+import { FormCard } from '@/components/ui/form-card'
+import { PageHeader } from '@/components/ui/layout'
 import { PasswordForm } from './_components/password-form'
 
 export const metadata = { title: 'Mi contraseña · ORUM' }
 
+/**
+ * Página completa: solo se ve al llegar por enlace directo o al recargar.
+ * Desde dentro del panel, el menú de la cuenta abre la versión interceptada.
+ */
 export default function CambiarPasswordPage() {
   // La protección la aplica el layout de /admin.
   return (
-    <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>
-        Mi contraseña
-      </h1>
-      <p className="orum-muted" style={{ marginBottom: '1.25rem' }}>
-        Cambia tu contraseña de acceso. Deberás usar la nueva la próxima vez que inicies sesión.
-      </p>
-      <PasswordForm />
-    </div>
+    <>
+      <PageHeader
+        title="Mi contraseña"
+        description="Cambia tu contraseña de acceso. Deberás usar la nueva la próxima vez que inicies sesión."
+      />
+      <FormCard>
+        <PasswordForm />
+      </FormCard>
+    </>
   )
 }

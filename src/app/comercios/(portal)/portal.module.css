@@ -1,0 +1,113 @@
+/*
+  Shell del Portal de Comercios.
+
+  NO reutiliza el del Portal de Miembros a propósito: aquel tiene navegación y
+  barra inferior porque tiene dos destinos. Este tiene UNO —verificar una
+  membresía— y se usa de pie, en la caja, con el cliente esperando. Añadirle
+  navegación sería inventar sitios a los que ir.
+*/
+
+.portal {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+
+  background: var(--material);
+  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+@media (min-width: 768px) {
+  .cabecera {
+    padding: var(--space-3) var(--space-6);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .cabecera {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+
+.marca {
+  flex-shrink: 0;
+  text-decoration: none;
+
+  font-size: var(--t-title-3-size);
+  font-weight: 680;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  color: var(--brand);
+  background: var(--gold-sheen);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .marca {
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.marca:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+  border-radius: var(--radius-xs);
+}
+
+/* Nombre del comercio: quién está operando. Importa cuando una cadena tiene
+   varias sedes y cada una entra con su cuenta. */
+.comercio {
+  min-width: 0;
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.correoMenu {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-10);
+
+  container-type: inline-size;
+  container-name: contenido;
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding: var(--space-7) var(--space-6) var(--space-11);
+  }
+}

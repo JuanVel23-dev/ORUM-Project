@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { PageHeader } from '@/components/ui/layout'
+import { FormCard } from '@/components/ui/form-card'
 import { EditarComercioForm } from './_components/editar-comercio-form'
 
 export const metadata = { title: 'Editar comercio · ORUM' }
@@ -23,16 +25,24 @@ export default async function EditarComercioPage({ params }: { params: Promise<{
   ])
   if (!comercio) notFound()
 
-  let correo = '—'
+  // Cadena vacía y no '—': el valor va directo a un campo de formulario, y un
+  // guión se enviaría como si fuera un correo real.
+  let correo = ''
   if (comercio.perfil_id) {
     const { data: authUser } = await admin.auth.admin.getUserById(comercio.perfil_id)
-    correo = authUser.user?.email ?? '—'
+    correo = authUser.user?.email ?? ''
   }
 
   return (
-    <div style={{ maxWidth: 560 }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>Editar comercio</h1>
-      <EditarComercioForm comercio={{ ...comercio, correo }} marcas={marcas ?? []} categorias={categorias ?? []} />
-    </div>
+    <>
+      <PageHeader title="Editar comercio" description={comercio.nombre} />
+      <FormCard>
+        <EditarComercioForm
+          comercio={{ ...comercio, correo }}
+          marcas={marcas ?? []}
+          categorias={categorias ?? []}
+        />
+      </FormCard>
+    </>
   )
 }

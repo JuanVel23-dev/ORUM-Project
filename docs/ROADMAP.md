@@ -4,7 +4,7 @@
 > están hechas y cuáles faltan. Sirve como punto único de referencia para retomar el
 > proyecto desde cualquier máquina sin desalinearnos.
 >
-> **Última actualización:** 2026-08-12
+> **Última actualización:** 2026-08-11
 
 ---
 
@@ -116,19 +116,50 @@ cambios de la reunión sobre autoría de venta/registro y tipo de membresía (nu
 
 ### ✅ Fase 3 — Comercios, sucursales y promociones
 
-**Completa, en `main`.**
+**Implementada y fusionada en `main`** (commits `46f121d`, `7552c62`, `9747f3d`).
 
-- **Comercios** (`/admin/comercios/**`) — solo super_admin: crear (cuenta de Auth + contraseña
-  autogenerada mostrada una vez), listar/buscar por nombre, ficha, editar datos y correo.
-- Dos estados independientes por comercio: `comercios.activo` (¿aliado activo?) y
-  `perfiles.activo` (¿acceso a su cuenta?).
-- **Sucursales** por comercio — CRUD con `ciudad_id` obligatorio, `nombre` obligatorio a nivel
-  de app; "eliminar" = desactivar (`activo = false`).
-- **Promociones/beneficios** por comercio — tipo (`porcentaje`, `dos_por_uno`, `monto_fijo`,
-  `regalo`) vía `tipos_beneficio`; validación de `valor` según tipo en función pura testeada
+- Gestión de comercios aliados (`/admin/comercios/**`), solo super_admin — **RF-17**.
+- Sucursales por comercio.
+- Gestión de promociones/beneficios con tipo (porcentaje, 2x1, monto fijo, regalo) — **RF-18**.
+- `comercios.activo` (¿aliado activo?) y `perfiles.activo` (¿acceso a su cuenta?) son
+  estados independientes.
+- Validación de `promociones.valor` según el tipo de beneficio en la función pura
   `validarValorPromocion` (`src/lib/promociones.ts`).
-- Se retiró la gestión de comercios de `/admin/usuarios` (ahora vive solo en `/admin/comercios`).
-- Prepara los datos que las métricas (Fase 4) y el Portal de Miembros medirán/mostrarán.
+- Los comercios salieron de `/admin/usuarios`, que quedó reducido a empleados y admins.
+
+**Documentos de diseño/plan de esta fase:**
+- Spec: [`docs/superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md`](superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md)
+- Plan: [`docs/superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md`](superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md)
+
+### ✅ Rediseño visual — sistema de diseño, movimiento y PWA
+
+**Transversal a todas las fases.** No cambia funcionalidad: sustituye la capa de
+presentación completa (oro / negro / blanco, estética Apple, movimiento con resortes,
+tres modos de tema) y convierte la app en PWA instalable.
+
+- **Fases A–G completas.** Tipografía Inter Variable, capa de tokens
+  (`src/styles/tokens.css`), `globals.css` con mapeo semántico por tema, tres modos de
+  tema sin parpadeo, kit de UI en `src/components/ui/**`, app shell con barra lateral
+  colapsable y barra inferior en móvil, paleta de comandos, formularios en superposición
+  mediante rutas paralelas + interceptadas (`@modal` / `(.)`), PWA instalable con service
+  worker propio, y auditoría de contraste/accesibilidad.
+- **El kit `.orum-*` quedó eliminado.** Las reglas del sistema —qué es oro, qué es acción,
+  cómo se anima, qué está prohibido— viven en [`CLAUDE.md`](../CLAUDE.md), en la raíz.
+  Cualquier pantalla nueva debe leerlo antes de escribir CSS.
+
+**Cuatro correcciones de fondo que salieron del rediseño** (no eran cosméticas):
+
+- `derivarEstadoMembresia` — `membresias.estado` nunca pasa a `vencida` al llegar
+  `fecha_fin`; la interfaz mostraba "Activa" a quien llevaba meses sin pagar.
+- Contraste: `--text-3` reprobaba AA en ambos temas (3.22:1 y 3.77:1).
+- `box-shadow: var(--shadow-3), var(--edge)` con `--edge: none` — un `none` dentro de una
+  lista de sombras invalida la declaración ENTERA: ninguna tarjeta, lista ni menú tenía
+  sombra. Ahora los tokens vacíos son sombras transparentes.
+- Entorno: pnpm 11 exige Node ≥ 22.13 (`node:sqlite`); `engines` decía ≥ 20.9.
+
+**Documentos:**
+- Spec: [`docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md`](superpowers/specs/2026-08-04-rediseno-visual-orum-design.md)
+- Plan: [`docs/superpowers/plans/2026-08-05-rediseno-visual-plan.md`](superpowers/plans/2026-08-05-rediseno-visual-plan.md)
 
 **Documentos de diseño/plan de esta fase:**
 - Spec: [`docs/superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md`](superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md)
@@ -322,11 +353,19 @@ Ninguna es bloqueante hoy, pero conviene tenerlas presentes:
 El código está en `origin/main`. En la máquina nueva:
 
 ```bash
+# 0. Node 22.13 o superior (la versión exacta recomendada está en .nvmrc)
+#    Requisito real: pnpm 11 usa `node:sqlite`, que no existe antes de 22.13.
+#    Node 20 además llegó a fin de vida en abril de 2026.
+node --version      # debe ser >= v22.13
+#    Con gestor de versiones:      nvm use   /   fnm use
+#    Sin gestor, en Windows:       winget install OpenJS.NodeJS.LTS
+
 # 1. Clonar el repo y entrar
 git clone <url-del-repo>
 cd ORUM-Project
 
 # 2. Instalar dependencias (usar pnpm, no npm)
+corepack enable pnpm    # una sola vez por máquina
 pnpm install
 
 # 3. Configurar variables de entorno
@@ -348,6 +387,15 @@ pnpm lint           # linter
 
 **Notas de entorno (ver también los archivos de memoria del proyecto):**
 
+- **La versión de Node importa y está declarada en tres sitios coherentes entre sí:**
+  `engines.node` (`>=22.13.0`), `.nvmrc` y `.node-version` (24.19.0, el LTS activo).
+  Si `node --version` es menor, `pnpm` fallará con
+  `No such built-in module: node:sqlite`.
+- **Corepack antiguo falla al descargar pnpm** con
+  `Error: Cannot find matching keyid`. Es un problema de claves de firma caducadas en
+  las versiones de corepack anteriores a la 0.32, no del proyecto. Se resuelve
+  actualizando Node (trae un corepack nuevo) o con `npm i -g corepack@latest`.
+
 - Las claves de Supabase son del **formato nuevo** (`sb_publishable_` / `sb_secret_`), no los JWT
   legacy `eyJ...`. Los JWT de sesión se firman con **ES256** (claves asimétricas).
 - **Error transitorio conocido** tras rotar a ES256:
@@ -360,21 +408,34 @@ pnpm lint           # linter
 
 ## 9. Próximo paso sugerido
 
-Con Fases 1-6 implementadas en código y ya fusionadas en `main`, falta: (1) confirmar que el SQL
-manual del Task 1 de la Fase 6 (función `buscar_miembro_comercio` + RLS de `ventas`) fue aplicado
-en el proyecto real de Supabase, y (2) la prueba manual en navegador de la Fase 6 (login del
-comercio, búsqueda por número y por QR con cámara real, venta con cada tipo de promoción, selector
-de sucursal, acceso cruzado entre comercios). Con eso, la **Herramienta para Comercios** queda
-cerrada del todo: es la que finalmente llena la tabla `ventas` que el dashboard de métricas
-(Fase 4) ya consume, y donde se usa por primera vez el QR que muestra el perfil del miembro
-(Fase 5).
+Las Fases 1–6 y el rediseño visual están implementados y fusionados: los **tres portales
+internos** —administración, miembros y comercios— corren sobre el mismo sistema de diseño.
+Con la Fase 6 el circuito se cierra: el QR que muestra el carnet del miembro ya se escanea en
+la caja, y la venta que se registra alimenta el dashboard de métricas.
 
-Después de confirmar la Fase 6, el siguiente paso completamente sin empezar es el **Portal
-Público** (RF-01-04): es el que menos depende de las fases ya construidas y cierra los 4 portales
-de la plataforma.
+**Tres pruebas manuales pendientes.** Ninguna se puede hacer desde el entorno de desarrollo
+porque exigen credenciales reales o un dispositivo físico:
 
----
+1. **Herramienta de caja, con un comercio real:** login, escaneo del QR con la cámara,
+   búsqueda por número, y registrar una venta de cada tipo de promoción (porcentaje y monto
+   fijo se calculan solos; 2x1 y regalo los tasa el cajero).
+2. **Portal de Miembros con un miembro real:** login por número de membresía, membresía
+   vencida o suspendida → pantalla de bloqueo, búsqueda y cada filtro.
+3. **Comprobación en móvil físico.** El rediseño está pensado para móvil, pero la
+   automatización de navegador de esta máquina no consigue redimensionar la ventana. Importa
+   especialmente ahora: la herramienta de comercios se usa **en un teléfono, de pie, en la
+   caja**, que es su escenario real y no un caso límite.
 
-## 10. Ideas pendientes (no priorizadas)
+**Dos decisiones de datos, no de código, que siguen abiertas:**
 
-No hay ideas pendientes registradas por ahora.
+- El plan **Premium** tiene duración de 2 meses, lo que contradice "solo existe la membresía
+  mensual". O se retira el plan, o se corrige su duración.
+- La **Membresía ORUM** figura con precio **$0**.
+
+Después de eso queda el **Portal Público** (RF-01–04), el único portal que falta y el que
+menos depende de lo ya construido.
+
+**Nota sobre fechas.** Las columnas `timestamptz` nunca se comparan contra cadenas sueltas:
+Postgres las interpretaría en UTC y todo lo ocurrido después de las 7pm hora Colombia caería
+fuera del rango. Se usan `inicioDiaBogota` / `finDiaBogota` (`src/lib/shared/fecha.ts`). El
+fallo se descubrió en métricas contra la base real y estaba vivo en seis sitios.
