@@ -1,11 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { generarPassword } from '@/lib/shared/password'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
-import { enviarCorreoBienvenida } from '@/lib/correo/correo'
+import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 import type { RolCodigo } from '@/lib/supabase/database.types'
 
 /** Tipos de usuario que el admin puede crear en esta sección. */
@@ -16,7 +15,6 @@ export type CrearUsuarioState = {
   error?: string
   ok?: boolean
   email?: string
-  password?: string
 }
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
@@ -78,12 +76,12 @@ export async function crearUsuario(
     telefono: String(formData.get('telefono') ?? '').trim() || null,
   }
 
-  const password = generarPassword()
+  const urlBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
-  const { data: creado, error: errAuth } = await admin.auth.admin.createUser({
+  const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
+    type: 'invite',
     email,
-    password,
-    email_confirm: true,
+    options: { redirectTo: `${urlBase}/activar-cuenta?rol=staff` },
   })
   if (errAuth || !creado?.user) {
     const msg = /already been registered|already registered|exists/i.test(errAuth?.message ?? '')
@@ -114,15 +112,14 @@ export async function crearUsuario(
     return { error: `No se pudo registrar el empleado: ${errEmpleado.message}` }
   }
 
-  await enviarCorreoBienvenida({
+  await enviarCorreoInvitacion({
     nombre: `${nombres} ${apellidos}`.trim(),
     correo: email,
-    password,
-    rol: 'staff',
+    urlInvitacion: creado.properties.action_link,
   })
 
   revalidatePath('/admin/usuarios')
-  return { ok: true, email, password }
+  return { ok: true, email }
 }
 
 export type EditarUsuarioState = { error?: string }
