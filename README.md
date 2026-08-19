@@ -33,6 +33,17 @@ Los cinco puntos que más se rompen sin querer:
 
 ---
 
+## Documentos del proyecto
+
+| | |
+|---|---|
+| [`CLAUDE.md`](CLAUDE.md) | Reglas del sistema de diseño |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Estado por fases y próximos pasos |
+| [`docs/AUDITORIA-SEGURIDAD.md`](docs/AUDITORIA-SEGURIDAD.md) | Revisión de seguridad y OWASP Top 10 |
+| [`docs/BACKEND-PENDIENTE.md`](docs/BACKEND-PENDIENTE.md) | Lo que necesita backend: qué se observó y por qué importa |
+
+---
+
 ## Requisitos
 
 | | |
