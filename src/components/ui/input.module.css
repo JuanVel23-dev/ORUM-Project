@@ -22,7 +22,8 @@
   transition:
     border-color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .control::placeholder {
@@ -89,7 +90,8 @@
   height: 16px;
   color: var(--text-3);
   pointer-events: none;
-  transition: color var(--dur-fast) var(--ease-out);
+  transition: color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .selectWrap:hover .flecha {
@@ -153,7 +155,8 @@
 
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 /*

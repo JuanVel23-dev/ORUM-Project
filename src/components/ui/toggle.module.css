@@ -58,7 +58,8 @@
   border-radius: var(--radius-full);
   background: var(--border-strong);
 
-  transition: background-color var(--dur-base) var(--ease-out);
+  transition: background-color var(--dur-base) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .fila:has(.entrada:checked) .pista {
@@ -85,7 +86,8 @@
 
   transition:
     translate var(--dur-base) var(--ease-out),
-    width var(--dur-fast) var(--ease-out);
+    width var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .fila:has(.entrada:checked) .pulgar {
@@ -118,7 +120,8 @@
   transition:
     background-color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
-    scale var(--dur-instant) var(--ease-out);
+    scale var(--dur-instant) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .cuadrada {
@@ -155,7 +158,8 @@
   /* La marca se dibuja: no aparece de golpe. */
   stroke-dasharray: 22;
   stroke-dashoffset: 22;
-  transition: stroke-dashoffset var(--dur-base) var(--ease-out);
+  transition: stroke-dashoffset var(--dur-base) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .fila:has(.entrada:checked) .marca {
@@ -169,7 +173,8 @@
   background: var(--action-fg);
 
   scale: 0;
-  transition: scale var(--dur-base) var(--ease-out);
+  transition: scale var(--dur-base) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .fila:has(.entrada:checked) .punto {

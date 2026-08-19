@@ -242,6 +242,27 @@
 
   --dur-instant: 100ms; /* feedback de presión */
   --dur-fast: 180ms; /* hover, color, opacidad */
+
+  /* ------------------------------------------------------------------------
+     RESPUESTA AL PULSAR
+
+     Ida y vuelta NO son simétricas, y ahí está todo el efecto.
+
+     - Al pulsar, el elemento se encoge YA (`--dur-press`, casi imperceptible).
+       Esperar aquí es lo que hace que una interfaz se sienta muerta.
+     - Al soltar, vuelve con una curva que se pasa un poco de 1 y regresa
+       (`--ease-rebote`). Ese sobreimpulso es el "rebote" que se percibe en
+       iOS: vive en la VUELTA, no en la ida. Si se pusiera también al pulsar,
+       el elemento titubearía bajo el dedo y se leería como juguete.
+     ---------------------------------------------------------------------- */
+  --dur-press: 90ms; /* ida: instantánea */
+  --dur-rebote: 440ms; /* vuelta: elástica */
+  --ease-rebote: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Cuanto más pequeño el control, más porcentaje necesita para notarse:
+     un 4% en un botón grande se ve; en un icono de 30px, no. */
+  --escala-press: 0.97;
+  --escala-press-sm: 0.92;
   --dur-base: 260ms; /* entradas de UI */
   --dur-slow: 400ms; /* hojas, modales */
   --dur-page: 500ms; /* transición de ruta */

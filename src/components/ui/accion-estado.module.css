@@ -28,7 +28,8 @@
   transition:
     color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-instant) var(--ease-out);
+    transform var(--dur-instant) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .boton:hover:not(:disabled) {
@@ -37,7 +38,7 @@
 }
 
 .boton:active:not(:disabled) {
-  transform: scale(0.96);
+  scale: 0.96;
 }
 
 .boton:focus-visible {

@@ -53,7 +53,8 @@
 
   /* `@property` permite interpolar la variable, así que barra y columna se
      animan en el mismo fotograma. */
-  transition: width var(--dur-base) var(--ease-out);
+  transition: width var(--dur-base) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 @media (min-width: 768px) {
@@ -153,7 +154,8 @@
   color: var(--text-2);
   white-space: nowrap;
 
-  transition: color var(--dur-fast) var(--ease-out);
+  transition: color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .item:hover {
@@ -238,7 +240,8 @@
   cursor: pointer;
   text-align: left;
 
-  transition: background-color var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .perfilBoton:hover {
@@ -291,7 +294,8 @@
 
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .colapsar:hover {
@@ -383,7 +387,8 @@
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  transition: padding-left var(--dur-base) var(--ease-out);
+  transition: padding-left var(--dur-base) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 /* La columna consume la MISMA variable que la barra: no pueden desincronizarse. */
@@ -565,7 +570,8 @@
 
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: color var(--dur-fast) var(--ease-out);
+  transition: color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .tab[data-activo='true'] {
@@ -613,7 +619,8 @@
   font-weight: 500;
   color: var(--text);
 
-  transition: background-color var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 
   /*
     La lista mezcla enlaces y botones —instalar la app es una acción, no un

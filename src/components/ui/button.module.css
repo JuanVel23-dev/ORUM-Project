@@ -31,12 +31,13 @@
     border-color var(--dur-fast) var(--ease-out),
     color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
-    transform var(--dur-instant) var(--ease-out);
+    transform var(--dur-instant) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 /* Feedback en la PRESIÓN, no al soltar. Esperar al click se siente muerto. */
 .button:active:not(:disabled):not([aria-disabled='true']) {
-  transform: scale(0.97);
+  scale: 0.97;
 }
 
 .button:disabled,
@@ -62,7 +63,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  transition: opacity var(--dur-fast) var(--ease-out);
+  transition: opacity var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .contenido[data-cargando='true'] {
@@ -177,7 +179,8 @@
   transition:
     background-position var(--dur-slow) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
-    transform var(--dur-instant) var(--ease-out);
+    transform var(--dur-instant) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 /* El brillo VIAJA por el botón al pasar por encima: luz moviéndose sobre metal. */

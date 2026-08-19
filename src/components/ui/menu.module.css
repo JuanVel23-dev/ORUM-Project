@@ -112,7 +112,8 @@
   white-space: nowrap;
 
   cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .item:hover:not(:disabled),
@@ -128,7 +129,7 @@
 }
 
 .item:active:not(:disabled) {
-  transform: scale(0.985);
+  scale: 0.985;
 }
 
 .item:focus-visible {
@@ -159,7 +160,8 @@
 
   transition:
     opacity var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
+    transform var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .separador {

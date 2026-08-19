@@ -99,7 +99,8 @@
 
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .enlace:hover {
@@ -238,12 +239,13 @@
   /* Retroalimentación en el toque, no al soltar. */
   transition:
     color var(--dur-instant) var(--ease-out),
-    transform var(--dur-instant) var(--ease-out);
+    transform var(--dur-instant) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
   -webkit-tap-highlight-color: transparent;
 }
 
 .tab:active {
-  transform: scale(0.94);
+  scale: 0.94;
 }
 
 .tabActivo {

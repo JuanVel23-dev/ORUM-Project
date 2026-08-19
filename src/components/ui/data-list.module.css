@@ -45,7 +45,8 @@
 .fila {
   position: relative;
   border-bottom: 1px solid var(--border-subtle);
-  transition: background-color var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 
   /* Listas largas: el navegador se salta el layout de lo que no se ve. */
   content-visibility: auto;
@@ -125,6 +126,16 @@
   text-decoration: none;
 }
 
+/*
+  Este enlace cubre la fila entera con un `::after`, así que la respuesta al
+  pulsar NO puede ser el encogido global: escalar un `<a>` de ancho completo
+  deformaría la fila y arrastraría las columnas vecinas. El acuse aquí es el
+  cambio de fondo de `.fila:active`, que es más sutil y no toca la maquetación.
+*/
+.enlace:active {
+  scale: 1;
+}
+
 .enlace::after {
   content: '';
   position: absolute;
@@ -165,7 +176,8 @@
 @media (min-width: 768px) and (hover: hover) {
   .accionesOcultables {
     opacity: 0;
-    transition: opacity var(--dur-fast) var(--ease-out);
+    transition: opacity var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
   }
 
   .fila:hover .accionesOcultables,

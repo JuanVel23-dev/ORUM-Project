@@ -303,7 +303,8 @@ body {
      o transform en un cambio de tema produce un salto visible. */
   transition:
     background-color var(--dur-theme) var(--ease-out),
-    color var(--dur-theme) var(--ease-out);
+    color var(--dur-theme) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
 a {
@@ -427,6 +428,71 @@ a {
   letter-spacing: var(--t-overline-tracking);
   font-weight: var(--t-overline-weight);
   text-transform: uppercase;
+}
+
+/* ============================================================================
+   4b. RESPUESTA AL PULSAR  ·  toda la interfaz
+   ----------------------------------------------------------------------------
+   Todo lo que se pueda tocar responde al tacto, haga lo que haga —incluso si
+   no hace nada—. Un control que no acusa el toque deja al usuario sin saber
+   si el dispositivo lo registró, y es lo primero que se pulsa dos veces.
+
+   Va aquí y no componente a componente por dos motivos: alcanza también a lo
+   que se escriba mañana, y garantiza que el gesto sea EL MISMO en toda la
+   aplicación. Trece módulos tenían su propia versión con valores distintos
+   (0.9, 0.94, 0.96, 0.97, 0.985, 0.99); ahora todos heredan de aquí.
+
+   Se anima `scale`, que es propiedad independiente de `transform`: así no
+   pisa las transformaciones que ya usen los componentes (el desplazamiento
+   de una hoja, el deslizamiento de un toast) y ambas se componen solas.
+   Además `scale` corre en el compositor: no recalcula maquetación.
+   ========================================================================== */
+
+button,
+summary,
+[role='button'],
+[role='menuitem'],
+[role='tab'],
+[role='switch'],
+a[href] {
+  /* Vuelta elástica. La ida se acorta abajo, en :active. */
+  transition: scale var(--dur-rebote) var(--ease-rebote);
+}
+
+button:active:not(:disabled),
+summary:active,
+[role='button']:active:not([aria-disabled='true']),
+[role='menuitem']:active:not(:disabled),
+[role='tab']:active,
+[role='switch']:active,
+a[href]:active {
+  scale: var(--escala-press);
+  /* La ida es instantánea: el retardo aquí es lo que mata la sensación. */
+  transition-duration: var(--dur-press);
+}
+
+/*
+  Los controles pequeños necesitan más porcentaje para que el gesto se note:
+  un 3% en un icono de 30px es invisible.
+*/
+[data-pulsable='sm']:active:not(:disabled) {
+  scale: var(--escala-press-sm);
+}
+
+/*
+  Excepciones. No todo lo pulsable debe encogerse:
+
+  - Un campo de texto o un desplegable no son botones; encogerlos al escribir
+    o al desplegar se lee como un fallo.
+  - Las filas de una lista larga ya tienen su propio tratamiento, más sutil,
+    porque escalar una fila de ancho completo deforma la tabla entera.
+  - Lo que se marca `data-sin-press` renuncia explícitamente.
+*/
+input:active,
+select:active,
+textarea:active,
+[data-sin-press]:active {
+  scale: 1;
 }
 
 /* ============================================================================

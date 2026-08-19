@@ -57,6 +57,7 @@ export function Copiar({
       <button
         type="button"
         className={styles.boton}
+      data-pulsable="sm"
         onClick={copiar}
         data-copiado={copiado}
         aria-label={copiado ? 'Copiado' : label}
