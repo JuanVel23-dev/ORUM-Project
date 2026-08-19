@@ -15,12 +15,15 @@
 }
 
 .boton {
+  position: relative;
   display: grid;
   place-items: center;
   flex-shrink: 0;
 
+  /* Se ve de 30px para no competir con el número que acompaña… */
   width: 30px;
   height: 30px;
+  -webkit-tap-highlight-color: transparent;
   border: none;
   border-radius: var(--radius-xs);
   background: none;
@@ -31,6 +34,22 @@
     color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out),
     transform var(--dur-instant) var(--ease-out);
+}
+
+/*
+  …pero se toca de 44px. El número de membresía se copia sobre todo desde el
+  móvil, en la caja de un comercio, y 30px es la mitad de lo que un pulgar
+  acierta con fiabilidad. El área crece con un pseudo-elemento para no alterar
+  la maquetación de la fila.
+*/
+.boton::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
 }
 
 .boton:hover {

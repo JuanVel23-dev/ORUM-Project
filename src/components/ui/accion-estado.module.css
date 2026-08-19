@@ -67,3 +67,10 @@
   height: 14px;
   flex-shrink: 0;
 }
+
+/* Mismo criterio que el menú: 44px donde se toca con el dedo. */
+@media (pointer: coarse) {
+  .boton {
+    min-height: var(--tap-min);
+  }
+}

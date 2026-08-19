@@ -178,3 +178,16 @@
   text-transform: uppercase;
   color: var(--text-3);
 }
+
+/*
+  En un dispositivo táctil las filas suben a 44px, el mínimo de la guía.
+  En escritorio se quedan en 38: allí apunta un ratón y la densidad es una
+  virtud —un menú de seis opciones no debe ocupar media pantalla—. La
+  distinción la hace el tipo de puntero, no el ancho: un portátil táctil
+  necesita los 44px aunque tenga pantalla grande.
+*/
+@media (pointer: coarse) {
+  .item {
+    min-height: var(--tap-min);
+  }
+}

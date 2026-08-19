@@ -269,7 +269,17 @@ filtro. No falla ruidosamente: devuelve menos filas. Estuvo vivo en seis sitios.
 
 - Contraste AA en todo texto (4.5:1; 3:1 en texto grande). Auditado: 0 fallos.
 - `:focus-visible` visible en todo interactivo.
-- Objetivos táctiles ≥44px.
+- Objetivos táctiles ≥44px. **Lo que se ve y lo que se toca son cosas distintas**: si
+  el control debe verse pequeño (el ojo de la contraseña, el botón de copiar), amplía
+  el área con un `::after` centrado de `var(--tap-min)` en vez de agrandar el botón.
+  Para filas anchas —menús, interruptores— sube el `min-height` bajo
+  `@media (pointer: coarse)`: en escritorio la densidad es una virtud.
+- **Un botón dentro de un campo no debe robarle el foco.** `onPointerDown` con
+  `preventDefault`. Sin eso, en un móvil el teclado se cierra al tocarlo y parece que
+  el control está roto.
+- **Nunca `tabIndex={-1}` en algo accionable.** No lo "mueve al final" del orden de
+  tabulación: lo saca por completo. El ojo de la contraseña estuvo así, y con teclado
+  no había forma de revelarla.
 - Un `<h1>` por pantalla, sin saltos de nivel.
 - Un avatar junto a un nombre visible va `decorativo` (si no, el lector lo repite).
 

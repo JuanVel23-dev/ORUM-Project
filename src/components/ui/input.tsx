@@ -92,11 +92,26 @@ export function InputButton({
     <button
       type="button"
       className={styles.botonAdorno}
+      /*
+        En un móvil, tocar este botón sacaba el foco del campo: el teclado se
+        cerraba de golpe, la página daba un salto y había que volver a tocar
+        la contraseña para seguir escribiendo. Se leía como que el ojo "no
+        funciona".
+
+        `preventDefault` en el pointerdown impide que el navegador mueva el
+        foco. El campo lo conserva, el teclado no se mueve y solo cambia el
+        tipo del input, que es lo único que debía pasar.
+      */
+      onPointerDown={(e) => e.preventDefault()}
       onClick={onClick}
       aria-label={label}
-      // Evita que el botón robe el foco al tabular por el formulario: se
-      // alcanza igualmente, pero después del campo al que pertenece.
-      tabIndex={-1}
+      /*
+        Sin `tabIndex={-1}`. Lo llevaba con un comentario que afirmaba que
+        "se alcanza igualmente, después del campo": es falso — `-1` lo saca
+        del orden de tabulación POR COMPLETO, así que quien navega con
+        teclado no podía revelar nunca su contraseña. Va justo después del
+        campo en el DOM, que es exactamente donde debe estar.
+      */
     >
       {children}
     </button>

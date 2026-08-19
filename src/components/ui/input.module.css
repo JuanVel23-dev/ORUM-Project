@@ -135,10 +135,11 @@
 }
 
 .botonAdorno {
+  position: relative;
   display: grid;
   place-items: center;
 
-  /* 36px es el mínimo cómodo dentro de un campo de 44px sin desbordarlo. */
+  /* Lo que se VE: 36px, para no desbordar un campo de 44. */
   width: 36px;
   height: 36px;
   border: none;
@@ -147,14 +148,46 @@
   color: var(--text-3);
   cursor: pointer;
 
+  /* Nada de resaltado azul del navegador al tocar: ya damos respuesta propia. */
+  -webkit-tap-highlight-color: transparent;
+
   transition:
     color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out);
 }
 
+/*
+  Lo que se TOCA: 44px, el mínimo de la guía y el que este proyecto declara en
+  `--tap-min`. Se amplía con un pseudo-elemento en vez de agrandando el botón
+  para que el área crezca sin mover ni un píxel el aspecto del campo. Un dedo
+  no acierta 36px en el borde de una pantalla; el ojo fallaba una de cada
+  tres veces por esto.
+*/
+.botonAdorno::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+}
+
 .botonAdorno:hover {
   color: var(--text);
   background: var(--surface-hover);
+}
+
+/* Retroalimentación en el toque, no al soltar. */
+.botonAdorno:active {
+  color: var(--text);
+  scale: 0.92;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botonAdorno:active {
+    scale: 1;
+  }
 }
 
 .botonAdorno:focus-visible {
