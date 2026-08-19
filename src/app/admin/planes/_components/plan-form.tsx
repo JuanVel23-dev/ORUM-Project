@@ -35,10 +35,15 @@ export function PlanForm({ plan }: { plan?: PlanInicial }) {
         {plan && <input type="hidden" name="id" value={plan.id} />}
 
         <Stack gap={5}>
-          <Field
-            label="Nombre"
-            help="Un plan llamado «Oro» o «Premium» se muestra con el distintivo dorado."
-          >
+          {/*
+            La ayuda anterior prometía que un plan llamado «Oro» o «Premium»
+            saldría con un distintivo dorado. Ese distintivo —`PlanTierBadge`,
+            junto con la heurística `esPlanDestacado`— se eliminó al confirmar
+            que ORUM vende un único servicio. El texto sobrevivió y prometía
+            algo que no ocurre: quien leyera eso pondría un nombre por un
+            efecto inexistente.
+          */}
+          <Field label="Nombre" help="Cómo lo verá el miembro en su carnet.">
             <Input name="nombre" defaultValue={plan?.nombre} required autoFocus />
           </Field>
 
