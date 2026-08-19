@@ -260,6 +260,20 @@ export async function renovarMembresia(
   const fecha_inicio = calcularFechaInicioRenovacion(hoyISO(), vigente?.fecha_fin ?? null)
   const fecha_fin = calcularFechaFin(fecha_inicio, plan.duracion_meses)
 
+  // La anterior pasa a 'vencida' ANTES de insertar la nueva: uq_membresia_activa
+  // (índice único sobre membresias(miembro_id) WHERE estado='activa') rechaza el
+  // INSERT si sigue habiendo una fila 'activa' para este miembro. Si el INSERT de
+  // abajo falla, se revierte este UPDATE para no dejar al miembro sin membresía.
+  if (vigente) {
+    const { error: errVencer } = await admin
+      .from('membresias')
+      .update({ estado: 'vencida' })
+      .eq('id', vigente.id)
+    if (errVencer) {
+      return { error: `No se pudo completar la renovación: ${errVencer.message}` }
+    }
+  }
+
   const { data: nueva, error: errNueva } = await admin
     .from('membresias')
     .insert({
@@ -276,20 +290,10 @@ export async function renovarMembresia(
     .select('id')
     .single()
   if (errNueva || !nueva) {
-    return { error: `No se pudo registrar la renovación: ${errNueva?.message ?? 'error desconocido'}` }
-  }
-
-  // La anterior pasa a 'vencida' para mantener una sola membresía activa. Si
-  // este paso falla, se revierte la nueva para no dejar dos activas a la vez.
-  if (vigente) {
-    const { error: errVencer } = await admin
-      .from('membresias')
-      .update({ estado: 'vencida' })
-      .eq('id', vigente.id)
-    if (errVencer) {
-      await admin.from('membresias').delete().eq('id', nueva.id)
-      return { error: `No se pudo completar la renovación: ${errVencer.message}` }
+    if (vigente) {
+      await admin.from('membresias').update({ estado: 'activa' }).eq('id', vigente.id)
     }
+    return { error: `No se pudo registrar la renovación: ${errNueva?.message ?? 'error desconocido'}` }
   }
 
   await registrarActividad(admin, {
