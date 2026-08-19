@@ -4,10 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual, type PerfilActual } from '@/lib/auth/auth'
-import { generarPassword } from '@/lib/shared/password'
 import { hoyISO } from '@/lib/shared/fecha'
 import { registrarActividad } from '@/lib/bitacora/bitacora'
-import { enviarCorreoBienvenida } from '@/lib/correo/correo'
+import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 import {
   generarNumeroMembresia,
   calcularFechaFin,
@@ -39,7 +38,7 @@ export type RegistrarMiembroState = {
   error?: string
   ok?: boolean
   numero?: string
-  password?: string
+  correo?: string
   nombre?: string
 }
 
@@ -101,13 +100,14 @@ export async function registrarMiembro(
   if (!rolMiembro) return { error: 'No se encontró el rol "miembro" en la base de datos.' }
 
   const empleadoId = await resolverEmpleadoId(admin, actor.userId)
-  const password = generarPassword()
+  const urlBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
-  // 5) Crear usuario en Auth con el correo real.
-  const { data: creado, error: errAuth } = await admin.auth.admin.createUser({
+  // 5) Crear usuario en Auth vía invitación: no se genera ni se envía
+  // contraseña, el miembro elige la suya al abrir el enlace de un solo uso.
+  const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
+    type: 'invite',
     email: correo,
-    password,
-    email_confirm: true,
+    options: { redirectTo: `${urlBase}/activar-cuenta?rol=miembro` },
   })
   if (errAuth || !creado?.user) {
     const msg = /already been registered|already registered|exists/i.test(errAuth?.message ?? '')
@@ -203,15 +203,14 @@ export async function registrarMiembro(
     },
   })
 
-  await enviarCorreoBienvenida({
+  await enviarCorreoInvitacion({
     nombre: `${nombres} ${apellidos}`.trim(),
     correo,
-    password,
-    rol: 'miembro',
+    urlInvitacion: creado.properties.action_link,
   })
 
   revalidatePath('/admin/miembros')
-  return { ok: true, numero, password, nombre: `${nombres} ${apellidos}`.trim() }
+  return { ok: true, numero, correo, nombre: `${nombres} ${apellidos}`.trim() }
 }
 
 export type RenovarState = { error?: string }
