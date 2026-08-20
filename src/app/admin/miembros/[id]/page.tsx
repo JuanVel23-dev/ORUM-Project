@@ -143,30 +143,34 @@ export default async function FichaMiembroPage({
   // Los planes activos no bastan para nombrar el historial: una membresía
   // antigua puede apuntar a un plan ya desactivado.
   const idsPlanes = [...new Set((membresias ?? []).map((m) => m.plan_id))]
-  const { data: planesHistoricos } = idsPlanes.length
-    ? await admin.from('planes_membresia').select('id, nombre').in('id', idsPlanes)
-    : { data: [] }
-
-  const nombrePlan = new Map((planesHistoricos ?? []).map((p) => [p.id, p.nombre]))
-
-  // Correo de Auth (informativo), como en la gestión de usuarios.
-  let correo: string | null = null
-  if (miembro.perfil_id) {
-    const { data: authUser } = await admin.auth.admin.getUserById(miembro.perfil_id)
-    correo = authUser.user?.email ?? null
-  }
 
   // Quién hizo cada cosa. Se resuelve una vez por actor distinto, no por evento.
   const idsActores = [
     ...new Set((eventos ?? []).map((e) => e.actor_id).filter((a): a is string => !!a)),
   ]
-  const correoActor = new Map<string, string>()
-  await Promise.all(
-    idsActores.map(async (idActor) => {
-      const { data } = await admin.auth.admin.getUserById(idActor)
-      correoActor.set(idActor, data.user?.email ?? '—')
-    }),
-  )
+
+  // Ninguna de estas tres depende de las otras dos: el historial de planes
+  // sale de `membresias`, el correo de `miembro.perfil_id`, y los autores de
+  // `eventos` — los tres ya resueltos por el Promise.all de arriba.
+  const [{ data: planesHistoricos }, authUser, correoActorEntries] = await Promise.all([
+    idsPlanes.length
+      ? admin.from('planes_membresia').select('id, nombre').in('id', idsPlanes)
+      : Promise.resolve({ data: [] as { id: number; nombre: string }[] }),
+    miembro.perfil_id
+      ? admin.auth.admin.getUserById(miembro.perfil_id)
+      : Promise.resolve({ data: { user: null } }),
+    Promise.all(
+      idsActores.map(async (idActor) => {
+        const { data } = await admin.auth.admin.getUserById(idActor)
+        return [idActor, data.user?.email ?? '—'] as const
+      }),
+    ),
+  ])
+
+  const nombrePlan = new Map((planesHistoricos ?? []).map((p) => [p.id, p.nombre]))
+  // Correo de Auth (informativo), como en la gestión de usuarios.
+  const correo = authUser.data.user?.email ?? null
+  const correoActor = new Map(correoActorEntries)
 
   const actividad = (eventos ?? []).map((e) => ({
     id: e.id,

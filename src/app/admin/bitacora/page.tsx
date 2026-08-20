@@ -166,24 +166,27 @@ export default async function BitacoraPage({
         .filter((idMiembro): idMiembro is number => idMiembro !== null),
     ),
   )
-  const { data: miembrosInfo } =
-    idsMiembros.length > 0
-      ? await admin.from('miembros').select('id, nombres, apellidos').in('id', idsMiembros)
-      : { data: [] as { id: number; nombres: string; apellidos: string }[] }
-  const nombreMiembro = new Map(
-    (miembrosInfo ?? []).map((m) => [m.id, `${m.nombres} ${m.apellidos}`.trim()]),
-  )
-
   const actorIds = Array.from(
     new Set((eventos ?? []).map((e) => e.actor_id).filter((idActor): idActor is string => !!idActor)),
   )
-  const correoActor = new Map<string, string>()
-  await Promise.all(
-    actorIds.map(async (idActor) => {
-      const { data } = await admin.auth.admin.getUserById(idActor)
-      correoActor.set(idActor, data.user?.email ?? '—')
-    }),
+
+  // Los nombres de miembro y los correos de los autores salen ambos de
+  // `eventos`, ya resuelto, pero no dependen entre sí: se piden en paralelo.
+  const [{ data: miembrosInfo }, correoActorEntries] = await Promise.all([
+    idsMiembros.length > 0
+      ? admin.from('miembros').select('id, nombres, apellidos').in('id', idsMiembros)
+      : Promise.resolve({ data: [] as { id: number; nombres: string; apellidos: string }[] }),
+    Promise.all(
+      actorIds.map(async (idActor) => {
+        const { data } = await admin.auth.admin.getUserById(idActor)
+        return [idActor, data.user?.email ?? '—'] as const
+      }),
+    ),
+  ])
+  const nombreMiembro = new Map(
+    (miembrosInfo ?? []).map((m) => [m.id, `${m.nombres} ${m.apellidos}`.trim()]),
   )
+  const correoActor = new Map(correoActorEntries)
 
   const filas: Evento[] = (eventos ?? []).map((e) => ({
     id: e.id,

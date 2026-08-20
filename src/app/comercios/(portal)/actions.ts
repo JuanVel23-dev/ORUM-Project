@@ -97,9 +97,21 @@ export async function registrarVenta(
 
   const supabase = await createClient()
 
-  const { data: miembroData, error: miembroError } = await supabase
-    .rpc('buscar_miembro_comercio', { p_numero: numeroMembresia })
-    .maybeSingle()
+  // El miembro, el comercio propio y (si aplica) la promoción no dependen
+  // entre sí: se piden en paralelo en vez de uno tras otro.
+  const [{ data: miembroData, error: miembroError }, { data: comercio }, { data: promo }] =
+    await Promise.all([
+      supabase.rpc('buscar_miembro_comercio', { p_numero: numeroMembresia }).maybeSingle(),
+      supabase.from('comercios').select('id').eq('perfil_id', actor.userId).maybeSingle(),
+      promocionId
+        ? supabase
+            .from('promociones')
+            .select('id, comercio_id, tipo_beneficio_id, valor, activo, fecha_inicio, fecha_fin')
+            .eq('id', promocionId)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+    ])
+
   if (miembroError || !miembroData) {
     return { error: 'No se pudo verificar el miembro para esta venta.' }
   }
@@ -110,39 +122,30 @@ export async function registrarVenta(
   const miembroId = miembroData.miembro_id
   const membresiaId = miembroData.membresia_id
 
-  const { data: comercio } = await supabase
-    .from('comercios')
-    .select('id')
-    .eq('perfil_id', actor.userId)
-    .maybeSingle()
   if (!comercio) return { error: 'No se encontró el comercio asociado a esta cuenta.' }
 
-  const { data: sucursal } = await supabase
-    .from('sucursales')
-    .select('id')
-    .eq('id', sucursalId)
-    .eq('comercio_id', comercio.id)
-    .eq('activo', true)
-    .maybeSingle()
+  if (promocionId && (!promo || promo.comercio_id !== comercio.id)) {
+    return { error: 'La promoción seleccionada no es válida.' }
+  }
+
+  // La sucursal (depende del comercio) y el tipo de beneficio (depende de la
+  // promoción) tampoco dependen entre sí: van juntas en este segundo tramo.
+  const [{ data: sucursal }, { data: tipo }] = await Promise.all([
+    supabase
+      .from('sucursales')
+      .select('id')
+      .eq('id', sucursalId)
+      .eq('comercio_id', comercio.id)
+      .eq('activo', true)
+      .maybeSingle(),
+    promo
+      ? supabase.from('tipos_beneficio').select('codigo').eq('id', promo.tipo_beneficio_id).single()
+      : Promise.resolve({ data: null }),
+  ])
   if (!sucursal) return { error: 'La sucursal seleccionada no es válida.' }
 
   let valorDescuento = 0
-  if (promocionId) {
-    const { data: promo } = await supabase
-      .from('promociones')
-      .select('id, comercio_id, tipo_beneficio_id, valor, activo, fecha_inicio, fecha_fin')
-      .eq('id', promocionId)
-      .maybeSingle()
-    if (!promo || promo.comercio_id !== comercio.id) {
-      return { error: 'La promoción seleccionada no es válida.' }
-    }
-
-    const { data: tipo } = await supabase
-      .from('tipos_beneficio')
-      .select('codigo')
-      .eq('id', promo.tipo_beneficio_id)
-      .single()
-
+  if (promo) {
     if (!tipo || !esPromocionVigente(promo.activo, promo.fecha_inicio, promo.fecha_fin, hoyISO())) {
       return { error: 'Esa promoción ya no está vigente.' }
     }

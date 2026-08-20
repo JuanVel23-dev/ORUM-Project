@@ -45,28 +45,21 @@ export async function crearUsuario(
   if (!TIPOS_VALIDOS.includes(tipo)) return { error: 'Selecciona un tipo de usuario válido.' }
   if (!email || !email.includes('@')) return { error: 'Ingresa un correo electrónico válido.' }
 
-  const admin = createAdminClient()
-
-  const { data: rol } = await admin
-    .from('roles')
-    .select('id')
-    .eq('codigo', tipo as RolCodigo)
-    .single()
-  if (!rol) return { error: `No se encontró el rol "${tipo}" en la base de datos.` }
-
   const nombres = String(formData.get('nombres') ?? '').trim()
   const apellidos = String(formData.get('apellidos') ?? '').trim()
   const cedula = String(formData.get('cedula') ?? '').trim()
   if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
   if (!cedula) return { error: 'La cédula es obligatoria.' }
 
-  // La cédula es el identificador de negocio: no se puede repetir.
-  const { data: yaExiste } = await admin
-    .from('empleados')
-    .select('id')
-    .eq('cedula', cedula)
-    .is('deleted_at', null)
-    .maybeSingle()
+  const admin = createAdminClient()
+
+  // El rol y la unicidad de la cédula no dependen entre sí: se piden en paralelo.
+  const [{ data: rol }, { data: yaExiste }] = await Promise.all([
+    admin.from('roles').select('id').eq('codigo', tipo as RolCodigo).single(),
+    // La cédula es el identificador de negocio: no se puede repetir.
+    admin.from('empleados').select('id').eq('cedula', cedula).is('deleted_at', null).maybeSingle(),
+  ])
+  if (!rol) return { error: `No se encontró el rol "${tipo}" en la base de datos.` }
   if (yaExiste) return { error: `Ya existe un empleado registrado con la cédula ${cedula}.` }
 
   const datosEmpleado = {

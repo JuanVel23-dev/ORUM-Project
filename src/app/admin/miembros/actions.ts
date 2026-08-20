@@ -77,29 +77,23 @@ export async function registrarMiembro(
 
   const admin = createAdminClient()
 
-  // 2) Cédula única entre miembros no eliminados.
-  const { data: cedulaExiste } = await admin
-    .from('miembros')
-    .select('id')
-    .eq('cedula', cedula)
-    .is('deleted_at', null)
-    .maybeSingle()
+  // 2-4) Cédula única, plan activo, rol "miembro" y empleado del actor: ninguna
+  // depende del resultado de otra, así que se piden en paralelo.
+  const [{ data: cedulaExiste }, { data: plan }, { data: rolMiembro }, empleadoId] =
+    await Promise.all([
+      admin.from('miembros').select('id').eq('cedula', cedula).is('deleted_at', null).maybeSingle(),
+      admin
+        .from('planes_membresia')
+        .select('id, nombre, duracion_meses, activo')
+        .eq('id', plan_id)
+        .is('deleted_at', null)
+        .maybeSingle(),
+      admin.from('roles').select('id').eq('codigo', 'miembro').single(),
+      resolverEmpleadoId(admin, actor.userId),
+    ])
   if (cedulaExiste) return { error: `Ya existe un miembro con la cédula ${cedula}.` }
-
-  // 3) Plan activo y no eliminado.
-  const { data: plan } = await admin
-    .from('planes_membresia')
-    .select('id, nombre, duracion_meses, activo')
-    .eq('id', plan_id)
-    .is('deleted_at', null)
-    .maybeSingle()
   if (!plan || !plan.activo) return { error: 'El plan seleccionado no existe o está inactivo.' }
-
-  // 4) Rol miembro.
-  const { data: rolMiembro } = await admin.from('roles').select('id').eq('codigo', 'miembro').single()
   if (!rolMiembro) return { error: 'No se encontró el rol "miembro" en la base de datos.' }
-
-  const empleadoId = await resolverEmpleadoId(admin, actor.userId)
   const urlBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
   // 5) Crear usuario en Auth vía invitación: no se genera ni se envía
@@ -237,25 +231,27 @@ export async function renovarMembresia(
 
   const admin = createAdminClient()
 
-  const { data: plan } = await admin
-    .from('planes_membresia')
-    .select('id, nombre, duracion_meses, activo')
-    .eq('id', plan_id)
-    .is('deleted_at', null)
-    .maybeSingle()
+  // El plan, la membresía vigente (si existe) y el empleado del actor no
+  // dependen entre sí: se piden en paralelo.
+  const [{ data: plan }, { data: vigente }, empleadoId] = await Promise.all([
+    admin
+      .from('planes_membresia')
+      .select('id, nombre, duracion_meses, activo')
+      .eq('id', plan_id)
+      .is('deleted_at', null)
+      .maybeSingle(),
+    admin
+      .from('membresias')
+      .select('id, fecha_fin')
+      .eq('miembro_id', miembro_id)
+      .eq('estado', 'activa')
+      .order('fecha_fin', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    resolverEmpleadoId(admin, actor.userId),
+  ])
   if (!plan || !plan.activo) return { error: 'El plan seleccionado no existe o está inactivo.' }
 
-  // Membresía vigente (activa), si existe.
-  const { data: vigente } = await admin
-    .from('membresias')
-    .select('id, fecha_fin')
-    .eq('miembro_id', miembro_id)
-    .eq('estado', 'activa')
-    .order('fecha_fin', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  const empleadoId = await resolverEmpleadoId(admin, actor.userId)
   const fecha_inicio = calcularFechaInicioRenovacion(hoyISO(), vigente?.fecha_fin ?? null)
   const fecha_fin = calcularFechaFin(fecha_inicio, plan.duracion_meses)
 
@@ -345,21 +341,22 @@ export async function editarMiembro(
 
   const admin = createAdminClient()
 
-  // Snapshot antes de editar, para la bitácora.
-  const { data: miembroAntes } = await admin
-    .from('miembros')
-    .select('nombres, apellidos, cedula, telefono, direccion, ciudad_id')
-    .eq('id', miembroId)
-    .maybeSingle()
-
-  // Cédula única, excluyendo al propio miembro.
-  const { data: cedulaExiste } = await admin
-    .from('miembros')
-    .select('id')
-    .eq('cedula', cedula)
-    .is('deleted_at', null)
-    .neq('id', miembroId)
-    .maybeSingle()
+  // Snapshot para la bitácora y la verificación de cédula única no dependen
+  // entre sí: se piden en paralelo.
+  const [{ data: miembroAntes }, { data: cedulaExiste }] = await Promise.all([
+    admin
+      .from('miembros')
+      .select('nombres, apellidos, cedula, telefono, direccion, ciudad_id')
+      .eq('id', miembroId)
+      .maybeSingle(),
+    admin
+      .from('miembros')
+      .select('id')
+      .eq('cedula', cedula)
+      .is('deleted_at', null)
+      .neq('id', miembroId)
+      .maybeSingle(),
+  ])
   if (cedulaExiste) return { error: `Ya existe otro miembro con la cédula ${cedula}.` }
 
   const { error } = await admin
