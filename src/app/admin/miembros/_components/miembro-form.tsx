@@ -33,7 +33,7 @@ export function MiembroForm({
   const sinPlanes = planes.length === 0
 
   // Registro completado: la pantalla cambia por entero a entregar credenciales.
-  if (state.ok && state.numero && state.password) {
+  if (state.ok && state.numero) {
     return <Credenciales estado={state} />
   }
 
@@ -135,8 +135,8 @@ export function MiembroForm({
             </div>
 
             <p className={styles.nota}>
-              Al guardar se generan el número de membresía y una contraseña segura. Se
-              mostrarán una sola vez en la siguiente pantalla.
+              Al guardar se genera el número de membresía y se envía un correo para
+              que el cliente active su acceso.
             </p>
           </Stack>
         </Section>
@@ -168,22 +168,15 @@ function Credenciales({ estado }: { estado: RegistrarMiembroState }) {
       <div className={styles.credenciales}>
         <Alert tone="success" title={`${estado.nombre} quedó registrado`} />
 
-        <Alert tone="warning" title="Entrega estos datos ahora">
-          La contraseña no se vuelve a mostrar. Si se pierde, habrá que generar una
-          nueva.
+        <Alert tone="success" title="Correo de activación enviado">
+          Se envió un enlace de un solo uso a {estado.correo} para que el cliente
+          elija su propia contraseña.
         </Alert>
 
         <div className={styles.credencial}>
           <span className={styles.credencialEtiqueta}>Número de membresía</span>
           <Copiar valor={estado.numero!} label="Copiar número de membresía">
             <span className={styles.credencialValor}>{estado.numero}</span>
-          </Copiar>
-        </div>
-
-        <div className={styles.credencial}>
-          <span className={styles.credencialEtiqueta}>Contraseña temporal</span>
-          <Copiar valor={estado.password!} label="Copiar contraseña temporal">
-            <span className={styles.credencialValor}>{estado.password}</span>
           </Copiar>
         </div>
 

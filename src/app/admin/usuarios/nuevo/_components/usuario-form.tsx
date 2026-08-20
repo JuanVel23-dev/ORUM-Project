@@ -20,7 +20,7 @@ export function UsuarioForm() {
   const [state, formAction, pending] = useActionState(crearUsuario, estadoInicial)
   const [tipo, setTipo] = useState<Tipo>('empleado')
 
-  if (state.ok && state.password) {
+  if (state.ok && state.email) {
     return <Credenciales estado={state} />
   }
 
@@ -79,8 +79,8 @@ export function UsuarioForm() {
           </div>
 
           <p className={styles.nota}>
-            Al guardar se genera una contraseña segura. Se mostrará una sola vez en la
-            siguiente pantalla.
+            Al guardar se envía un correo con un enlace de un solo uso para activar
+            el acceso.
           </p>
         </Stack>
 
@@ -103,21 +103,15 @@ function Credenciales({ estado }: { estado: CrearUsuarioState }) {
       <div className={styles.credenciales}>
         <Alert tone="success" title="Usuario creado" />
 
-        <Alert tone="warning" title="Comparte estos datos ahora">
-          La contraseña no se vuelve a mostrar. El usuario podrá cambiarla desde su cuenta.
+        <Alert tone="success" title="Correo de activación enviado">
+          Se envió un enlace de un solo uso para que el usuario elija su propia
+          contraseña.
         </Alert>
 
         <div className={styles.credencial}>
           <span className={styles.credencialEtiqueta}>Correo de acceso</span>
           <Copiar valor={estado.email ?? ''} label="Copiar correo">
             <span className={styles.credencialValor}>{estado.email}</span>
-          </Copiar>
-        </div>
-
-        <div className={styles.credencial}>
-          <span className={styles.credencialEtiqueta}>Contraseña temporal</span>
-          <Copiar valor={estado.password ?? ''} label="Copiar contraseña temporal">
-            <span className={styles.credencialValor}>{estado.password}</span>
           </Copiar>
         </div>
 
