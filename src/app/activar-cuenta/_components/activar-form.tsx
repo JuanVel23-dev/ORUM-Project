@@ -12,10 +12,15 @@ import { createClient } from '@/lib/supabase/client'
 
 type Estado = 'verificando' | 'listo' | 'invalido' | 'guardando'
 
+const DESTINO_POR_ROL: Record<string, string> = {
+  staff: '/admin',
+  comercio: '/comercios',
+}
+
 export function ActivarForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const destino = searchParams.get('rol') === 'staff' ? '/admin' : '/miembros'
+  const destino = DESTINO_POR_ROL[searchParams.get('rol') ?? ''] ?? '/miembros'
 
   const [estado, setEstado] = useState<Estado>('verificando')
   const [error, setError] = useState('')

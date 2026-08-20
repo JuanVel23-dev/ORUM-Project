@@ -85,7 +85,7 @@ export default async function AdminInicioPage() {
               <h2 className={styles.destacadoTitulo}>Registrar cliente y vender membresía</h2>
               <p className={styles.destacadoDescripcion}>
                 Crea el cliente, su cuenta de acceso y su primera membresía en un solo
-                flujo. La contraseña se genera automáticamente y se muestra una única vez.
+                flujo. Se le envía un correo para que active su acceso.
               </p>
             </div>
 

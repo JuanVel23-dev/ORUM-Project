@@ -94,15 +94,14 @@ Se agregó `escaparHtml` (`src/lib/shared/html.ts`, función pura con tests) y s
 
 **OWASP:** A02 Cryptographic Failures (exposición de credenciales en un canal persistente).
 
-`registrarMiembro` y `crearUsuario` (los dos flujos que emailaban una contraseña generada) ya no
-generan ni envían contraseña alguna: usan `admin.auth.admin.generateLink({ type: 'invite' })`, que
-crea el usuario y devuelve un enlace de un solo uso. El correo (`enviarCorreoInvitacion`) solo
-lleva ese enlace. Una nueva pantalla, `/activar-cuenta`, confirma la sesión que deja el enlace y
-deja que la persona elija su propia contraseña con `supabase.auth.updateUser`.
-
-**Fuera de alcance, a propósito:** `crearComercio` (`src/app/admin/comercios/actions.ts`) sigue
-generando una contraseña y mostrándola una sola vez en pantalla — no la envía por correo, así que
-este punto no le aplicaba. Queda como mejora de consistencia a futuro, no como hallazgo OWASP.
+`registrarMiembro`, `crearUsuario` y `crearComercio` (las tres altas que generaban o emailaban una
+contraseña) ya no generan ni envían contraseña alguna: usan
+`admin.auth.admin.generateLink({ type: 'invite' })`, que crea el usuario y devuelve un enlace de un
+solo uso. El correo (`enviarCorreoInvitacion`) solo lleva ese enlace. Una pantalla compartida,
+`/activar-cuenta`, confirma la sesión que deja el enlace y deja que la persona elija su propia
+contraseña con `supabase.auth.updateUser`, antes de redirigirla a su portal (`/admin`, `/comercios`
+o `/miembros` según el rol). `generarPassword` (`src/lib/shared/password.ts`) quedó sin ningún
+llamador y se eliminó.
 
 ---
 

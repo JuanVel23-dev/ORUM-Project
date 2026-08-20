@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
-import { generarPassword } from '@/lib/shared/password'
+import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
 async function exigirSuperAdmin(): Promise<boolean> {
@@ -16,7 +16,6 @@ export type CrearComercioState = {
   error?: string
   ok?: boolean
   email?: string
-  password?: string
 }
 
 /** Lee y valida los campos comunes de un comercio desde el formulario. */
@@ -36,9 +35,9 @@ function leerCamposComercio(formData: FormData) {
 }
 
 /**
- * Crea un comercio: cuenta de Auth (correo + contraseña autogenerada, mostrada
- * una sola vez) → upsert de `perfiles` (rol comercio) → insert en `comercios`.
- * Si algo falla, se revierte lo anterior.
+ * Crea un comercio: invitación de Auth (enlace de un solo uso, sin contraseña
+ * que emailar ni mostrar) → upsert de `perfiles` (rol comercio) → insert en
+ * `comercios`. Si algo falla, se revierte lo anterior.
  */
 export async function crearComercio(
   _prev: CrearComercioState,
@@ -57,12 +56,12 @@ export async function crearComercio(
   const { data: rol } = await admin.from('roles').select('id').eq('codigo', 'comercio').single()
   if (!rol) return { error: 'No se encontró el rol "comercio" en la base de datos.' }
 
-  const password = generarPassword()
+  const urlBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
-  const { data: creado, error: errAuth } = await admin.auth.admin.createUser({
+  const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
+    type: 'invite',
     email,
-    password,
-    email_confirm: true,
+    options: { redirectTo: `${urlBase}/activar-cuenta?rol=comercio` },
   })
   if (errAuth || !creado?.user) {
     const msg = /already been registered|already registered|exists/i.test(errAuth?.message ?? '')
@@ -99,8 +98,14 @@ export async function crearComercio(
     return { error: `No se pudo registrar el comercio: ${errComercio.message}` }
   }
 
+  await enviarCorreoInvitacion({
+    nombre: campos.nombre,
+    correo: email,
+    urlInvitacion: creado.properties.action_link,
+  })
+
   revalidatePath('/admin/comercios')
-  return { ok: true, email, password }
+  return { ok: true, email }
 }
 
 export type EditarComercioState = { error?: string }
