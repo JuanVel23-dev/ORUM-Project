@@ -85,26 +85,29 @@ describe un árbol que ya no existe. Citarlo produce afirmaciones falsas.
 
 ---
 
-## 3b. Permisos de shell — atención requerida
+## 3b. Permisos de shell — resuelto
 
 La garantía de «un solo escritor» depende de que los auditores no puedan escribir.
 
-**En este equipo, ningún auditor tiene `Bash`.** Solo lo tienen
-`frontend-implementer`, `qa-tester` y `codebase-analyst`. La garantía se sostiene.
+**En este equipo, ningún auditor tiene `Bash` ni `PowerShell`.** Solo los tienen
+`frontend-implementer`, `qa-tester` y `codebase-analyst`. La garantía se sostiene por
+construcción.
 
-Aun así, `.claude/settings.local.json` **preaprueba hoy dos comandos de escritura
-arbitraria, sin ruta acotada**:
+`.claude/settings.local.json` preaprobaba además dos comandos de escritura y borrado
+arbitrarios sin ruta acotada. **Corregido el 27/08/2026:**
 
-```
-PowerShell(Remove-Item *)     ← borrado arbitrario
-PowerShell(Set-Content *)     ← escritura arbitraria
-```
+| Antes | Ahora |
+|---|---|
+| `PowerShell(Remove-Item *)` | `Remove-Item .next*` · `Remove-Item -Recurse -Force .next*` · `Remove-Item -Recurse -Force node_modules*` |
+| `PowerShell(Set-Content *)` | **Eliminado.** Las escrituras van por `Write`/`Edit`, que muestran diff y piden aprobación |
 
-Es un riesgo por sí mismo, con agentes o sin ellos. **Recomendación**: acotarlos a
-rutas concretas o quitarlos y aprobar caso por caso. Pendiente de decisión del
-propietario del repositorio.
+Cualquier `Remove-Item` fuera de artefactos de build, y cualquier `Set-Content`, pedirá
+aprobación explícita. Es el comportamiento buscado, no una molestia a suprimir: si un
+comando legítimo se queda fuera, se añade **acotado a su ruta**, nunca con `*`.
 
----
+> **Observación pendiente, no corregida**: el allowlist conserva `PowerShell(git *)`,
+> que abarca también `git push --force` y `git reset --hard`. Ningún auditor lo
+> alcanza, pero conviene revisarlo cuando toques este archivo.
 
 ## 4. Regla de propuestas que cruzan la frontera
 
@@ -173,19 +176,29 @@ propuesta para backend, no una decisión de diseño.
 
 ---
 
-## 7. Supuesto declarado — confírmalo o corrígelo
+## 7. `src/lib/`: decidido y confirmado
 
-La instrucción de configuración nombraba `src/lib/server/**`, que **no existe** en
-este repositorio: `src/lib/` está organizado por dominio (`auth/`, `comercios/`,
-`correo/`, `metricas/`, `miembros/`, `bitacora/`, `shared/`, `supabase/`).
+La instrucción original de configuración nombraba `src/lib/server/**`, que **no existe**
+en este repositorio: `src/lib/` está organizado por dominio.
 
-Interpretando la intención —proteger el código de servidor—, se han clasificado como
-solo lectura **`src/lib/auth/`, `src/lib/supabase/` y `src/lib/correo/`**: manejan
-sesión y roles, acceso a datos y el envío de invitaciones, y los tres fueron tocados
-por la tanda OWASP.
+Interpretando la intención —proteger el código de servidor—, se clasificaron como solo
+lectura los tres módulos que manejan sesión y roles, acceso a datos y envío de correo,
+y que además fueron tocados por la tanda OWASP. **Confirmado por el propietario del
+repositorio el 27/08/2026:**
 
-`src/lib/shared/`, `src/lib/miembros/`, `src/lib/comercios/`, `src/lib/metricas/` y
-`src/lib/bitacora/` quedan **legibles y modificables por `frontend-implementer`** en
-su parte pura, y son la zona de tests de `qa-tester`.
+| Solo lectura | Zona de trabajo (parte pura) |
+|---|---|
+| `src/lib/auth/` — sesión, roles, `requireRol` | `src/lib/shared/` |
+| `src/lib/supabase/` — clientes y acceso a datos | `src/lib/miembros/` |
+| `src/lib/correo/` — invitaciones y escapado de HTML | `src/lib/comercios/` |
+| | `src/lib/metricas/` |
+| | `src/lib/bitacora/` |
 
-Si esta división no es la que querías, corrígela aquí antes de ejecutar ningún agente.
+Los cinco módulos de la derecha son también la zona de tests de `qa-tester`
+(`src/lib/**/*.test.ts`, solo funciones puras).
+
+Cuidado con un caso concreto: **`derivarEstadoMembresia` vive en
+`src/lib/miembros/membresias.ts`**, que es zona de trabajo. Es una función pura y puede
+modificarse — pero su regla la fija `CLAUDE.md` (`esActiva = estado === 'activa' &&
+fecha_fin >= hoy`) y cambiarla afecta a lo que ve todo miembro. Tocarla es una
+propuesta a `tech-lead`, no un ajuste de interfaz.
