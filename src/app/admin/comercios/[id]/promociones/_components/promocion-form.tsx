@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import {
   crearPromocion,
   editarPromocion,
@@ -45,6 +46,8 @@ export function PromocionForm({
     editando ? editarPromocion : crearPromocion,
     estadoInicial,
   )
+  const cerrar = useCerrarOverlay()
+  useCerrarCuando(state.ok)
 
   const [tipoId, setTipoId] = useState(
     String(promocion?.tipo_beneficio_id ?? tipos[0]?.id ?? ''),
@@ -157,7 +160,7 @@ export function PromocionForm({
           >
             {editando ? 'Guardar cambios' : 'Crear promoción'}
           </Button>
-          <Button href={`/admin/comercios/${comercioId}`} variant="secondary">
+          <Button type="button" variant="secondary" onClick={cerrar}>
             Cancelar
           </Button>
         </div>

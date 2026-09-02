@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { editarMiembro, type EditarMiembroState } from '../../../actions'
 import styles from '@/styles/formulario.module.css'
 
@@ -35,6 +36,8 @@ export function EditarMiembroForm({
   ciudades: Opcion[]
 }) {
   const [state, formAction, pending] = useActionState(editarMiembro, estadoInicial)
+  const cerrar = useCerrarOverlay()
+  useCerrarCuando(state.ok)
 
   return (
     <>
@@ -124,7 +127,7 @@ export function EditarMiembroForm({
           <Button type="submit" loading={pending} icon={<Save size={16} />}>
             Guardar cambios
           </Button>
-          <Button href={`/admin/miembros/${miembro.id}`} variant="secondary">
+          <Button type="button" variant="secondary" onClick={cerrar}>
             Cancelar
           </Button>
         </div>

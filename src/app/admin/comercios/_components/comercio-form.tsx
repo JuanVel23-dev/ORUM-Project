@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { Store } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { Copiar } from '@/components/ui/copiar'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { crearComercio, type CrearComercioState } from '../actions'
 import styles from '@/styles/formulario.module.css'
 
@@ -15,17 +16,35 @@ type Opcion = { id: number; nombre: string }
 
 const estadoInicial: CrearComercioState = {}
 
-export function ComercioForm({
+/**
+ * El estado vive en `FormularioComercio`; esta capa solo lo remonta (vía `key`)
+ * al pulsar «Crear otro», para volver a un formulario limpio sin navegar.
+ */
+export function ComercioForm(props: { marcas: Opcion[]; categorias: Opcion[] }) {
+  const [instancia, setInstancia] = useState(0)
+  return (
+    <FormularioComercio
+      key={instancia}
+      {...props}
+      onCrearOtro={() => setInstancia((n) => n + 1)}
+    />
+  )
+}
+
+function FormularioComercio({
   marcas,
   categorias,
+  onCrearOtro,
 }: {
   marcas: Opcion[]
   categorias: Opcion[]
+  onCrearOtro: () => void
 }) {
+  const cerrar = useCerrarOverlay()
   const [state, formAction, pending] = useActionState(crearComercio, estadoInicial)
 
   if (state.ok && state.email) {
-    return <Credenciales estado={state} />
+    return <Credenciales estado={state} onCerrar={cerrar} onCrearOtro={onCrearOtro} />
   }
 
   return (
@@ -87,7 +106,7 @@ export function ComercioForm({
           <Button type="submit" loading={pending} icon={<Store size={16} />}>
             Crear comercio
           </Button>
-          <Button href="/admin/comercios" variant="secondary">
+          <Button type="button" variant="secondary" onClick={cerrar}>
             Cancelar
           </Button>
         </div>
@@ -96,7 +115,15 @@ export function ComercioForm({
   )
 }
 
-function Credenciales({ estado }: { estado: CrearComercioState }) {
+function Credenciales({
+  estado,
+  onCerrar,
+  onCrearOtro,
+}: {
+  estado: CrearComercioState
+  onCerrar: () => void
+  onCrearOtro: () => void
+}) {
   return (
     <>
       <div className={styles.credenciales}>
@@ -115,8 +142,10 @@ function Credenciales({ estado }: { estado: CrearComercioState }) {
         </div>
 
         <div className={styles.acciones}>
-          <Button href="/admin/comercios">Ir a la lista</Button>
-          <Button href="/admin/comercios/nuevo" variant="secondary">
+          <Button type="button" onClick={onCerrar}>
+            Ir a la lista
+          </Button>
+          <Button type="button" variant="secondary" onClick={onCrearOtro}>
             Crear otro
           </Button>
         </div>

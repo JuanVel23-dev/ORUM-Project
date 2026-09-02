@@ -108,7 +108,7 @@ export async function crearComercio(
   return { ok: true, email }
 }
 
-export type EditarComercioState = { error?: string }
+export type EditarComercioState = { error?: string; ok?: boolean }
 
 /** Edita nombre, descripción, marca, categoría, logo_url y (si cambió) el correo. */
 export async function editarComercio(
@@ -156,7 +156,7 @@ export async function editarComercio(
 
   revalidatePath('/admin/comercios')
   revalidatePath(`/admin/comercios/${id}`)
-  redirect(`/admin/comercios/${id}`)
+  return { ok: true }
 }
 
 /** Activa o desactiva el comercio como aliado (`comercios.activo`, D2). */

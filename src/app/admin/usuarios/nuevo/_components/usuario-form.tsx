@@ -9,6 +9,7 @@ import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
 import { SegmentedControl } from '@/components/ui/segmented'
+import { useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { crearUsuario, type CrearUsuarioState } from '../../actions'
 import styles from '@/styles/formulario.module.css'
 
@@ -16,12 +17,27 @@ const estadoInicial: CrearUsuarioState = {}
 
 type Tipo = 'empleado' | 'super_admin'
 
+/**
+ * El estado vive en `FormularioUsuario`; esta capa solo lo remonta (vía `key`)
+ * al pulsar «Crear otro», para volver a un formulario limpio sin navegar.
+ */
 export function UsuarioForm() {
+  const [instancia, setInstancia] = useState(0)
+  return (
+    <FormularioUsuario
+      key={instancia}
+      onCrearOtro={() => setInstancia((n) => n + 1)}
+    />
+  )
+}
+
+function FormularioUsuario({ onCrearOtro }: { onCrearOtro: () => void }) {
+  const cerrar = useCerrarOverlay()
   const [state, formAction, pending] = useActionState(crearUsuario, estadoInicial)
   const [tipo, setTipo] = useState<Tipo>('empleado')
 
   if (state.ok && state.email) {
-    return <Credenciales estado={state} />
+    return <Credenciales estado={state} onCerrar={cerrar} onCrearOtro={onCrearOtro} />
   }
 
   return (
@@ -88,7 +104,7 @@ export function UsuarioForm() {
           <Button type="submit" loading={pending} icon={<UserPlus size={16} />}>
             Crear usuario
           </Button>
-          <Button href="/admin/usuarios" variant="secondary">
+          <Button type="button" variant="secondary" onClick={cerrar}>
             Cancelar
           </Button>
         </div>
@@ -97,7 +113,15 @@ export function UsuarioForm() {
   )
 }
 
-function Credenciales({ estado }: { estado: CrearUsuarioState }) {
+function Credenciales({
+  estado,
+  onCerrar,
+  onCrearOtro,
+}: {
+  estado: CrearUsuarioState
+  onCerrar: () => void
+  onCrearOtro: () => void
+}) {
   return (
     <>
       <div className={styles.credenciales}>
@@ -116,8 +140,10 @@ function Credenciales({ estado }: { estado: CrearUsuarioState }) {
         </div>
 
         <div className={styles.acciones}>
-          <Button href="/admin/usuarios">Ir a la lista</Button>
-          <Button href="/admin/usuarios/nuevo" variant="secondary">
+          <Button type="button" onClick={onCerrar}>
+            Ir a la lista
+          </Button>
+          <Button type="button" variant="secondary" onClick={onCrearOtro}>
             Crear otro
           </Button>
         </div>

@@ -8,6 +8,7 @@ import { Copiar } from '@/components/ui/copiar'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { Divider, Section, Stack } from '@/components/ui/layout'
+import { useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { registrarMiembro, type RegistrarMiembroState } from '../actions'
 import styles from '@/styles/formulario.module.css'
 
@@ -16,17 +17,35 @@ type PlanOpcion = { id: number; nombre: string; precio: number }
 
 const estadoInicial: RegistrarMiembroState = {}
 
-export function MiembroForm({
+/**
+ * Sin tarjeta contenedora. Dentro de un overlay la superficie ya la pone el
+ * propio overlay: envolver otra vez daría una tarjeta sobre otra.
+ *
+ * El estado del formulario vive en `FormularioMiembro`; esta capa solo lo
+ * remonta (vía `key`) cuando se pulsa «Registrar otro», para volver a un
+ * formulario limpio sin navegar.
+ */
+export function MiembroForm(props: { ciudades: Opcion[]; planes: PlanOpcion[] }) {
+  const [instancia, setInstancia] = useState(0)
+  return (
+    <FormularioMiembro
+      key={instancia}
+      {...props}
+      onRegistrarOtro={() => setInstancia((n) => n + 1)}
+    />
+  )
+}
+
+function FormularioMiembro({
   ciudades,
   planes,
+  onRegistrarOtro,
 }: {
   ciudades: Opcion[]
   planes: PlanOpcion[]
-  /**
-   * Sin tarjeta contenedora. Dentro de un overlay la superficie ya la pone el
-   * propio overlay: envolver otra vez daría una tarjeta sobre otra.
-   */
+  onRegistrarOtro: () => void
 }) {
+  const cerrar = useCerrarOverlay()
   const [state, formAction, pending] = useActionState(registrarMiembro, estadoInicial)
   const [precio, setPrecio] = useState(planes[0] ? String(planes[0].precio) : '')
 
@@ -34,9 +53,10 @@ export function MiembroForm({
 
   // Registro completado: la pantalla cambia por entero a entregar credenciales.
   if (state.ok && state.numero) {
-    return <Credenciales estado={state} />
+    return (
+      <Credenciales estado={state} onCerrar={cerrar} onRegistrarOtro={onRegistrarOtro} />
+    )
   }
-
 
   return (
     <>
@@ -151,7 +171,7 @@ export function MiembroForm({
             Registrar miembro
           </Button>
 
-          <Button href="/admin/miembros" variant="secondary">
+          <Button type="button" variant="secondary" onClick={cerrar}>
             Cancelar
           </Button>
         </div>
@@ -162,7 +182,15 @@ export function MiembroForm({
 
 /* ========================================================================== */
 
-function Credenciales({ estado }: { estado: RegistrarMiembroState }) {
+function Credenciales({
+  estado,
+  onCerrar,
+  onRegistrarOtro,
+}: {
+  estado: RegistrarMiembroState
+  onCerrar: () => void
+  onRegistrarOtro: () => void
+}) {
   return (
     <>
       <div className={styles.credenciales}>
@@ -181,8 +209,10 @@ function Credenciales({ estado }: { estado: RegistrarMiembroState }) {
         </div>
 
         <div className={styles.acciones}>
-          <Button href="/admin/miembros">Ir a la lista</Button>
-          <Button href="/admin/miembros/nuevo" variant="secondary">
+          <Button type="button" onClick={onCerrar}>
+            Ir a la lista
+          </Button>
+          <Button type="button" variant="secondary" onClick={onRegistrarOtro}>
             Registrar otro
           </Button>
         </div>

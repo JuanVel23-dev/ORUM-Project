@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { editarUsuario, type EditarUsuarioState } from '../../../actions'
 import styles from '@/styles/formulario.module.css'
 
@@ -25,6 +26,8 @@ type Props = {
 
 export function EditarForm({ perfilId, email, empleado }: Props) {
   const [state, formAction, pending] = useActionState(editarUsuario, estadoInicial)
+  const cerrar = useCerrarOverlay()
+  useCerrarCuando(state.ok)
 
   return (
     <>
@@ -94,7 +97,7 @@ export function EditarForm({ perfilId, email, empleado }: Props) {
           <Button type="submit" loading={pending} icon={<Save size={16} />}>
             Guardar cambios
           </Button>
-          <Button href="/admin/usuarios" variant="secondary">
+          <Button type="button" variant="secondary" onClick={cerrar}>
             Cancelar
           </Button>
         </div>
