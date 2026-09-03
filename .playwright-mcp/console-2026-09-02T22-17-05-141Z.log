@@ -1,0 +1,6 @@
+[     511ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/1g_p_next_dist_18_6z9s._.js:2489
+[     698ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/1g_p_next_dist_18_6z9s._.js:2489
+[   16454ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1g_p_next_dist_18_6z9s._.js:2489
+[   16569ms] [LOG] [Fast Refresh] done in 218ms @ http://localhost:3000/_next/static/chunks/1g_p_next_dist_18_6z9s._.js:2489
+[   17704ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ http://localhost:3000/admin:0
+[   20940ms] [WARNING] The resource http://localhost:3000/_next/static/chunks/src_components_ui_02awvav._.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3000/admin:0

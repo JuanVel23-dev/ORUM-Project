@@ -1,0 +1,52 @@
+- generic [active] [ref=f56e1]:
+  - generic [ref=f56e2]:
+    - complementary [ref=f56e3]:
+      - link "ORUM" [ref=f56e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f56e6]:
+        - generic [ref=f56e7]:
+          - link "Inicio" [ref=f56e8] [cursor=pointer]:
+            - /url: /admin
+          - link "Miembros" [ref=f56e13] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link "Comercios" [ref=f56e20] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f56e27]:
+          - generic [ref=f56e28]: Análisis
+          - link "Métricas" [ref=f56e29] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link "Bitácora" [ref=f56e33] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f56e38]:
+          - generic [ref=f56e39]: Administración
+          - link "Usuarios" [ref=f56e40] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link "Planes" [ref=f56e54] [cursor=pointer]:
+            - /url: /admin/planes
+      - generic [ref=f56e58]:
+        - button "Cuenta y sesión" [ref=f56e60] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f56e62]: JU
+          - generic [ref=f56e63]:
+            - generic [ref=f56e64]: juan07veloza23@gmail.com
+            - generic [ref=f56e65]: Administrador mayor
+        - button "Contraer menú" [ref=f56e66] [cursor=pointer]
+    - generic [ref=f56e70]:
+      - banner [ref=f56e71]:
+        - button "Buscar miembro, comercio o acción…" [ref=f56e73] [cursor=pointer]
+        - generic [ref=f56e78]:
+          - radiogroup "Tema de la interfaz" [ref=f56e80]:
+            - generic [ref=f56e82] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f56e83]
+              - generic [ref=f56e86]: Auto
+            - generic [ref=f56e87] [cursor=pointer]:
+              - radio "Claro" [ref=f56e88]
+              - generic [ref=f56e95]: Claro
+            - generic [ref=f56e96] [cursor=pointer]:
+              - radio "Oscuro" [ref=f56e97]
+              - generic [ref=f56e100]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f56e101]:
+            - generic [aria-hidden] [ref=f56e102]: JU
+      - main [ref=f56e104]
+  - button "Open Next.js Dev Tools" [ref=f56e155] [cursor=pointer]
+  - alert [ref=f56e159]
+  - region "Notificaciones"

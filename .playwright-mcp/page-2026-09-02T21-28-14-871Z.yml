@@ -1,0 +1,111 @@
+- generic [ref=f23e1]:
+  - generic [ref=f23e2]:
+    - complementary [ref=f23e3]:
+      - link [ref=f23e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f23e5]:
+        - generic [ref=f23e6]:
+          - link [ref=f23e7] [cursor=pointer]:
+            - /url: /admin
+          - link [ref=f23e12] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link [ref=f23e18] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f23e23]:
+          - link [ref=f23e24] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link [ref=f23e27] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f23e31]:
+          - link [ref=f23e32] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link [ref=f23e45] [cursor=pointer]:
+            - /url: /admin/planes
+      - generic [ref=f23e48]:
+        - button "Cuenta y sesión" [ref=f23e50] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f23e52]: JU
+        - menu [ref=f23e204]:
+          - generic [ref=f23e205]:
+            - generic [ref=f23e206]: juan07veloza23@gmail.com
+            - generic [ref=f23e207]: Administrador mayor
+          - menuitem [active] [ref=f23e208] [cursor=pointer]
+          - menuitem [ref=f23e213] [cursor=pointer]
+          - separator [ref=f23e218]
+          - menuitem [ref=f23e219] [cursor=pointer]
+    - generic [ref=f23e53]:
+      - banner [ref=f23e54]:
+        - button "Buscar miembro, comercio o acción…" [ref=f23e56] [cursor=pointer]
+        - generic [ref=f23e61]:
+          - radiogroup "Tema de la interfaz" [ref=f23e63]:
+            - generic [ref=f23e65] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f23e66]
+              - generic [ref=f23e69]: Auto
+            - generic [ref=f23e70] [cursor=pointer]:
+              - radio "Claro" [ref=f23e71]
+              - generic [ref=f23e78]: Claro
+            - generic [ref=f23e79] [cursor=pointer]:
+              - radio "Oscuro" [ref=f23e80]
+              - generic [ref=f23e83]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f23e84]:
+            - generic [aria-hidden] [ref=f23e85]: JU
+      - main [ref=f23e87]:
+        - generic [ref=f23e88]:
+          - generic [ref=f23e92]:
+            - generic [ref=f23e93]: Instala ORUM en este dispositivo
+            - generic [ref=f23e94]: Se abre a pantalla completa, sin barra del navegador, y queda en tu pantalla de inicio.
+          - generic [ref=f23e95]:
+            - button "Instalar" [ref=f23e96] [cursor=pointer]
+            - button "No mostrar más" [ref=f23e101] [cursor=pointer]
+        - generic [ref=f23e107]:
+          - heading "Panel de ORUM" [level=1] [ref=f23e108]
+          - paragraph [ref=f23e109]: Sesión iniciada como administrador mayor.
+        - generic [ref=f23e110]:
+          - generic [ref=f23e112]:
+            - generic [ref=f23e113]:
+              - heading "Registrar cliente y vender membresía" [level=2] [ref=f23e114]
+              - paragraph [ref=f23e115]: Crea el cliente, su cuenta de acceso y su primera membresía en un solo flujo. Se le envía un correo para que active su acceso.
+            - link "Empezar" [ref=f23e116] [cursor=pointer]:
+              - /url: /admin/miembros/nuevo
+          - generic [ref=f23e121]:
+            - heading "Estado del club" [level=2] [ref=f23e123]
+            - generic [ref=f23e124]:
+              - generic [ref=f23e126]:
+                - generic [ref=f23e127]: Miembros registrados
+                - generic [ref=f23e128]: "4"
+              - generic [ref=f23e130]:
+                - generic [ref=f23e131]: Membresías vigentes
+                - generic [ref=f23e132]: "2"
+                - generic [ref=f23e133]: Al día de hoy
+              - generic [ref=f23e135]:
+                - generic [ref=f23e136]: Comercios activos
+                - generic [ref=f23e137]: "8"
+          - generic [ref=f23e138]:
+            - heading "Accesos" [level=2] [ref=f23e140]
+            - generic [ref=f23e141]:
+              - link "Miembros Buscar, consultar estado y renovar" [ref=f23e142] [cursor=pointer]:
+                - /url: /admin/miembros
+                - generic [ref=f23e149]:
+                  - generic [ref=f23e150]: Miembros
+                  - generic [ref=f23e151]: Buscar, consultar estado y renovar
+              - link "Comercios aliados Sucursales y promociones" [ref=f23e154] [cursor=pointer]:
+                - /url: /admin/comercios
+                - generic [ref=f23e160]:
+                  - generic [ref=f23e161]: Comercios aliados
+                  - generic [ref=f23e162]: Sucursales y promociones
+              - link "Planes de membresía Precios y vigencias" [ref=f23e165] [cursor=pointer]:
+                - /url: /admin/planes
+                - generic [ref=f23e169]:
+                  - generic [ref=f23e170]: Planes de membresía
+                  - generic [ref=f23e171]: Precios y vigencias
+              - link "Usuarios Empleados y administradores" [ref=f23e174] [cursor=pointer]:
+                - /url: /admin/usuarios
+                - generic [ref=f23e188]:
+                  - generic [ref=f23e189]: Usuarios
+                  - generic [ref=f23e190]: Empleados y administradores
+              - link "Mi contraseña Cambiar la clave de acceso" [ref=f23e193] [cursor=pointer]:
+                - /url: /admin/cuenta/password
+                - generic [ref=f23e198]:
+                  - generic [ref=f23e199]: Mi contraseña
+                  - generic [ref=f23e200]: Cambiar la clave de acceso
+  - alert [ref=f23e203]
+  - region "Notificaciones"

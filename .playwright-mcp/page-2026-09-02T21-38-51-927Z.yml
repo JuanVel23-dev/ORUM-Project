@@ -1,0 +1,151 @@
+- generic [ref=f35e1]:
+  - generic [ref=f35e2]:
+    - complementary [ref=f35e3]:
+      - link "ORUM" [ref=f35e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f35e6]:
+        - generic [ref=f35e7]:
+          - link "Inicio" [ref=f35e8] [cursor=pointer]:
+            - /url: /admin
+          - link "Miembros" [ref=f35e13] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link "Comercios" [ref=f35e20] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f35e27]:
+          - generic [ref=f35e28]: Análisis
+          - link "Métricas" [ref=f35e29] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link "Bitácora" [ref=f35e33] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f35e38]:
+          - generic [ref=f35e39]: Administración
+          - link "Usuarios" [ref=f35e40] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link "Planes" [ref=f35e54] [cursor=pointer]:
+            - /url: /admin/planes
+      - generic [ref=f35e58]:
+        - button "Cuenta y sesión" [ref=f35e60] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f35e62]: JU
+          - generic [ref=f35e63]:
+            - generic [ref=f35e64]: juan07veloza23@gmail.com
+            - generic [ref=f35e65]: Administrador mayor
+        - button "Contraer menú" [ref=f35e66] [cursor=pointer]
+    - generic [ref=f35e70]:
+      - banner [ref=f35e71]:
+        - button "Buscar miembro, comercio o acción…" [ref=f35e73] [cursor=pointer]
+        - generic [ref=f35e78]:
+          - radiogroup "Tema de la interfaz" [ref=f35e80]:
+            - generic [ref=f35e82] [cursor=pointer]:
+              - radio "Auto" [ref=f35e83]
+              - generic [ref=f35e86]: Auto
+            - generic [ref=f35e87] [cursor=pointer]:
+              - radio "Claro" [ref=f35e88]
+              - generic [ref=f35e95]: Claro
+            - generic [ref=f35e96] [cursor=pointer]:
+              - radio "Oscuro" [checked] [ref=f35e97]
+              - generic [ref=f35e100]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f35e101]:
+            - generic [aria-hidden] [ref=f35e102]: JU
+      - main [ref=f35e104]:
+        - generic [ref=f35e105]:
+          - generic [ref=f35e109]:
+            - generic [ref=f35e110]: Instala ORUM en este dispositivo
+            - generic [ref=f35e111]: Se abre a pantalla completa, sin barra del navegador, y queda en tu pantalla de inicio.
+          - generic [ref=f35e112]:
+            - button "Instalar" [ref=f35e113] [cursor=pointer]
+            - button "No mostrar más" [ref=f35e118] [cursor=pointer]
+        - generic [ref=f35e123]:
+          - 'heading "Comercio de prueba # nose" [level=1] [ref=f35e125]'
+          - link "Editar datos" [ref=f35e127] [cursor=pointer]:
+            - /url: /admin/comercios/8/editar
+        - generic [ref=f35e132]:
+          - generic [ref=f35e134]:
+            - generic [ref=f35e135]:
+              - generic [ref=f35e136]: Correo
+              - generic [ref=f35e137]: pruebacomercio@comercio.com
+            - generic [ref=f35e138]:
+              - generic [ref=f35e139]: Marca
+              - generic [ref=f35e140]: Sin registrar
+            - generic [ref=f35e141]:
+              - generic [ref=f35e142]: Categoría
+              - generic [ref=f35e143]: Sin registrar
+          - generic [ref=f35e144]:
+            - heading "Estado del aliado" [level=2] [ref=f35e146]
+            - generic [ref=f35e147]:
+              - generic [ref=f35e148]:
+                - generic [ref=f35e149]:
+                  - generic [ref=f35e150]: Aliado del club
+                  - generic [ref=f35e151]: Activo
+                - paragraph [ref=f35e152]: Determina si el comercio y sus promociones aparecen para los miembros.
+                - button "Retirar del club" [ref=f35e154] [cursor=pointer]
+              - generic [ref=f35e156]:
+                - generic [ref=f35e157]:
+                  - generic [ref=f35e158]: Acceso a su cuenta
+                  - generic [ref=f35e159]: Activo
+                - paragraph [ref=f35e160]: Determina si el comercio puede iniciar sesión en su herramienta para registrar ventas. Es independiente de seguir siendo aliado.
+                - button "Desactivar acceso" [ref=f35e162] [cursor=pointer]
+          - generic [ref=f35e164]:
+            - generic [ref=f35e165]:
+              - heading "Sucursales" [level=2] [ref=f35e166]
+              - link "Nueva sucursal" [ref=f35e167] [cursor=pointer]:
+                - /url: /admin/comercios/8/sucursales/nueva
+            - table [ref=f35e251]:
+              - caption [ref=f35e252]: "Sucursales de Comercio de prueba # nose"
+              - rowgroup [ref=f35e253]:
+                - row [ref=f35e254]:
+                  - columnheader "Sucursal" [ref=f35e255]
+                  - columnheader "Dirección" [ref=f35e256]
+                  - columnheader "Teléfono" [ref=f35e257]
+                  - columnheader "Estado" [ref=f35e258]
+                  - columnheader "Acciones" [ref=f35e259]
+              - rowgroup [ref=f35e261]:
+                - row [ref=f35e262]:
+                  - cell "Sede Prueba QA" [ref=f35e263]
+                  - 'cell "Calle 100 #15-20" [ref=f35e264]'
+                  - cell "3001234567" [ref=f35e265]
+                  - cell "Activa" [ref=f35e266]
+                  - cell [ref=f35e268]:
+                    - button "Desactivar" [ref=f35e270] [cursor=pointer]
+                    - button "Acciones de Sede Prueba QA" [ref=f35e275] [cursor=pointer]
+          - generic [ref=f35e187]:
+            - generic [ref=f35e188]:
+              - heading "Promociones" [level=2] [ref=f35e189]
+              - link "Nueva promoción" [ref=f35e190] [cursor=pointer]:
+                - /url: /admin/comercios/8/promociones/nueva
+            - generic [ref=f35e196]:
+              - generic [ref=f35e201]:
+                - paragraph [ref=f35e202]: Sin promociones
+                - paragraph [ref=f35e203]: Las promociones son el beneficio que ve el miembro. Crea la primera.
+              - link "Nueva promoción" [ref=f35e205] [cursor=pointer]:
+                - /url: /admin/comercios/8/promociones/nueva
+        - dialog [ref=f35e281]:
+          - generic [ref=f35e282]:
+            - generic [ref=f35e283]:
+              - generic [ref=f35e284]:
+                - heading "Nueva sucursal" [level=2] [ref=f35e285]
+                - paragraph [ref=f35e286]: "Comercio de prueba # nose"
+              - button "Cerrar" [active] [ref=f35e287] [cursor=pointer]
+            - generic [ref=f35e292]:
+              - generic [ref=f35e293]:
+                - generic [ref=f35e294]:
+                  - generic [ref=f35e295]: Nombre
+                  - textbox "Nombre" [ref=f35e297]
+                  - paragraph [ref=f35e298]: "Cómo la reconoce el miembro: «Sede Centro», «Poblado»…"
+                - generic [ref=f35e299]:
+                  - generic [ref=f35e300]: Direcciónopcional
+                  - textbox "Direcciónopcional" [ref=f35e302]
+                - generic [ref=f35e303]:
+                  - generic [ref=f35e304]:
+                    - generic [ref=f35e305]: Teléfonoopcional
+                    - textbox "Teléfonoopcional" [ref=f35e307]
+                  - generic [ref=f35e308]:
+                    - generic [ref=f35e309]: Ciudad
+                    - combobox "Ciudad" [ref=f35e312] [cursor=pointer]:
+                      - option "Selecciona una ciudad" [selected]
+                      - option "Bogotá"
+              - generic [ref=f35e313]:
+                - button "Crear sucursal" [ref=f35e314] [cursor=pointer]
+                - link "Cancelar" [ref=f35e319] [cursor=pointer]:
+                  - /url: /admin/comercios/8
+  - alert [ref=f35e210]
+  - region "Notificaciones"

@@ -1,0 +1,129 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - complementary [ref=f5e3]:
+      - link [ref=f5e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f5e5]:
+        - generic [ref=f5e6]:
+          - link [ref=f5e7] [cursor=pointer]:
+            - /url: /admin
+          - link [ref=f5e11] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link [ref=f5e18] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f5e23]:
+          - link [ref=f5e24] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link [ref=f5e27] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f5e31]:
+          - link [ref=f5e32] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link [ref=f5e45] [cursor=pointer]:
+            - /url: /admin/planes
+      - button "Cuenta y sesión" [ref=f5e50] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f5e52]: JU
+    - generic [ref=f5e53]:
+      - banner [ref=f5e54]:
+        - button "Buscar miembro, comercio o acción…" [ref=f5e56] [cursor=pointer]
+        - generic [ref=f5e61]:
+          - radiogroup "Tema de la interfaz" [ref=f5e63]:
+            - generic [ref=f5e65] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f5e66]
+              - generic [ref=f5e69]: Auto
+            - generic [ref=f5e70] [cursor=pointer]:
+              - radio "Claro" [ref=f5e71]
+              - generic [ref=f5e78]: Claro
+            - generic [ref=f5e79] [cursor=pointer]:
+              - radio "Oscuro" [ref=f5e80]
+              - generic [ref=f5e83]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f5e84]:
+            - generic [aria-hidden] [ref=f5e85]: JU
+      - main [ref=f5e87]:
+        - generic [ref=f5e88]:
+          - generic [ref=f5e92]:
+            - generic [ref=f5e93]: Instala ORUM en este dispositivo
+            - generic [ref=f5e94]: Se abre a pantalla completa, sin barra del navegador, y queda en tu pantalla de inicio.
+          - generic [ref=f5e95]:
+            - button "Instalar" [ref=f5e96] [cursor=pointer]
+            - button "No mostrar más" [ref=f5e101] [cursor=pointer]
+        - generic [ref=f5e106]:
+          - generic [ref=f5e107]:
+            - heading "Miembros" [level=1] [ref=f5e108]
+            - paragraph [ref=f5e109]: Busca por número de membresía, cédula o nombre. El estado que ves ya tiene en cuenta la fecha de vencimiento.
+          - link "Registrar miembro" [ref=f5e111] [cursor=pointer]:
+            - /url: /admin/miembros/nuevo
+        - generic [ref=f5e116]:
+          - textbox "Buscar miembros" [ref=f5e119]:
+            - /placeholder: Número, cédula o nombre
+          - button "Buscar" [ref=f5e120] [cursor=pointer]
+        - paragraph [ref=f5e122]: 4 miembros · 2 con membresía vigente
+        - table [ref=f5e124]:
+          - caption [ref=f5e125]: Miembros del club
+          - rowgroup [ref=f5e126]:
+            - row [ref=f5e127]:
+              - columnheader "Miembro" [ref=f5e128]
+              - columnheader "Nº membresía" [ref=f5e129]
+              - columnheader "Cédula" [ref=f5e130]
+              - columnheader "Estado" [ref=f5e131]
+              - columnheader "Acciones" [ref=f5e132]
+          - rowgroup [ref=f5e134]:
+            - row [ref=f5e135]:
+              - cell [ref=f5e136]:
+                - link "Pruebas Prueba" [ref=f5e137] [cursor=pointer]:
+                  - /url: /admin/miembros/4
+                  - generic [ref=f5e138]:
+                    - generic [aria-hidden] [ref=f5e140]: PP
+                    - generic [ref=f5e141]: Pruebas Prueba
+              - cell "00044150" [ref=f5e142]
+              - cell "123456789" [ref=f5e143]
+              - cell [ref=f5e144]:
+                - generic [ref=f5e145]:
+                  - generic [ref=f5e146]: Activa
+                  - generic [ref=f5e148]: Vence en 30 días
+              - cell [ref=f5e152]:
+                - button "Acciones de Pruebas Prueba" [ref=f5e154] [cursor=pointer]
+            - row [ref=f5e160]:
+              - cell [ref=f5e161]:
+                - link "Daniel Usaquen" [ref=f5e162] [cursor=pointer]:
+                  - /url: /admin/miembros/3
+                  - generic [ref=f5e163]:
+                    - generic [aria-hidden] [ref=f5e165]: DU
+                    - generic [ref=f5e166]: Daniel Usaquen
+              - cell "00031324" [ref=f5e167]
+              - cell "1234545234" [ref=f5e168]
+              - cell "Activa" [ref=f5e169]
+              - cell [ref=f5e173]:
+                - button "Acciones de Daniel Usaquen" [ref=f5e175] [cursor=pointer]
+            - row [ref=f5e181]:
+              - cell [ref=f5e182]:
+                - link "Juan Veloza" [ref=f5e183] [cursor=pointer]:
+                  - /url: /admin/miembros/2
+                  - generic [ref=f5e184]:
+                    - generic [aria-hidden] [ref=f5e186]: JV
+                    - generic [ref=f5e187]: Juan Veloza
+              - cell "00029417" [ref=f5e188]
+              - cell "102542345" [ref=f5e189]
+              - cell "Inactiva · vencida" [ref=f5e190]:
+                - generic [ref=f5e192]:
+                  - text: Inactiva
+                  - generic [ref=f5e194]: · vencida
+              - cell [ref=f5e195]:
+                - button "Acciones de Juan Veloza" [ref=f5e197] [cursor=pointer]
+            - row [ref=f5e203]:
+              - cell [ref=f5e204]:
+                - link "Daniel Veloza" [ref=f5e205] [cursor=pointer]:
+                  - /url: /admin/miembros/1
+                  - generic [ref=f5e206]:
+                    - generic [aria-hidden] [ref=f5e208]: DV
+                    - generic [ref=f5e209]: Daniel Veloza
+              - cell "00016977" [ref=f5e210]
+              - cell "1025460900" [ref=f5e211]
+              - cell "Inactiva · vencida" [ref=f5e212]:
+                - generic [ref=f5e214]:
+                  - text: Inactiva
+                  - generic [ref=f5e216]: · vencida
+              - cell [ref=f5e217]:
+                - button "Acciones de Daniel Veloza" [ref=f5e219] [cursor=pointer]
+  - alert [ref=f5e225]
+  - region "Notificaciones"

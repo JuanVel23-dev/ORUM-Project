@@ -1,0 +1,106 @@
+- generic [active] [ref=f15e1]:
+  - generic [ref=f15e2]:
+    - complementary [ref=f15e3]:
+      - link [ref=f15e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f15e5]:
+        - generic [ref=f15e6]:
+          - link [ref=f15e7] [cursor=pointer]:
+            - /url: /admin
+          - link [ref=f15e11] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link [ref=f15e17] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f15e22]:
+          - link [ref=f15e23] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link [ref=f15e26] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f15e31]:
+          - link [ref=f15e32] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link [ref=f15e45] [cursor=pointer]:
+            - /url: /admin/planes
+      - button "Cuenta y sesión" [ref=f15e50] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f15e52]: JU
+    - generic [ref=f15e53]:
+      - banner [ref=f15e54]:
+        - button "Buscar miembro, comercio o acción…" [ref=f15e56] [cursor=pointer]
+        - generic [ref=f15e61]:
+          - radiogroup "Tema de la interfaz" [ref=f15e63]:
+            - generic [ref=f15e65] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f15e66]
+              - generic [ref=f15e69]: Auto
+            - generic [ref=f15e70] [cursor=pointer]:
+              - radio "Claro" [ref=f15e71]
+              - generic [ref=f15e78]: Claro
+            - generic [ref=f15e79] [cursor=pointer]:
+              - radio "Oscuro" [ref=f15e80]
+              - generic [ref=f15e83]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f15e84]:
+            - generic [aria-hidden] [ref=f15e85]: JU
+      - main [ref=f15e87]:
+        - generic [ref=f15e88]:
+          - generic [ref=f15e92]:
+            - generic [ref=f15e93]: Instala ORUM en este dispositivo
+            - generic [ref=f15e94]: Se abre a pantalla completa, sin barra del navegador, y queda en tu pantalla de inicio.
+          - generic [ref=f15e95]:
+            - button "Instalar" [ref=f15e96] [cursor=pointer]
+            - button "No mostrar más" [ref=f15e101] [cursor=pointer]
+        - generic [ref=f15e107]:
+          - heading "Bitácora de actividad" [level=1] [ref=f15e108]
+          - paragraph [ref=f15e109]: Quién hizo qué y cuándo sobre los miembros. Se muestran los 200 eventos más recientes que cumplan los filtros.
+        - generic [ref=f15e110]:
+          - generic [ref=f15e111]:
+            - generic [ref=f15e112]: Miembro
+            - textbox "Miembro" [ref=f15e113]:
+              - /placeholder: Nombre, cédula o número
+          - generic [ref=f15e114]:
+            - generic [ref=f15e115]: Desde
+            - textbox "Desde" [ref=f15e116]
+          - generic [ref=f15e117]:
+            - generic [ref=f15e118]: Hasta
+            - textbox "Hasta" [ref=f15e119]
+          - generic [ref=f15e120]:
+            - generic [ref=f15e121]: Acción
+            - combobox "Acción" [ref=f15e123] [cursor=pointer]:
+              - option "Todas" [selected]
+              - option "Alta"
+              - option "Edición"
+              - option "Renovación"
+          - button "Filtrar" [ref=f15e125] [cursor=pointer]
+        - paragraph [ref=f15e129]: 2 eventos
+        - table [ref=f15e131]:
+          - caption [ref=f15e132]: Eventos registrados sobre miembros
+          - rowgroup [ref=f15e133]:
+            - row [ref=f15e134]:
+              - columnheader "Fecha" [ref=f15e135]
+              - columnheader "Miembro" [ref=f15e136]
+              - columnheader "Acción" [ref=f15e137]
+              - columnheader "Detalle" [ref=f15e138]
+              - columnheader "Registrado por" [ref=f15e139]
+          - rowgroup [ref=f15e140]:
+            - row [ref=f15e141]:
+              - cell "02 de sept de 2026 03:29 p. m." [ref=f15e142]:
+                - generic [ref=f15e143]:
+                  - generic [ref=f15e144]: 02 de sept de 2026
+                  - generic [ref=f15e145]: 03:29 p. m.
+              - cell [ref=f15e146]:
+                - link "Pruebas Prueba" [ref=f15e147] [cursor=pointer]:
+                  - /url: /admin/miembros/4
+              - cell "Alta" [ref=f15e148]
+              - cell "Miembro registrado — plan Membresía ORUM, $0" [ref=f15e150]
+              - cell "juan07veloza23@gmail.com" [ref=f15e151]
+            - row [ref=f15e152]:
+              - cell "09 de ago de 2026 06:17 p. m." [ref=f15e153]:
+                - generic [ref=f15e154]:
+                  - generic [ref=f15e155]: 09 de ago de 2026
+                  - generic [ref=f15e156]: 06:17 p. m.
+              - cell [ref=f15e157]:
+                - link "Daniel Usaquen" [ref=f15e158] [cursor=pointer]:
+                  - /url: /admin/miembros/3
+              - cell "Alta" [ref=f15e159]
+              - cell "Miembro registrado — plan plan premiun, $500" [ref=f15e161]
+              - cell "correo@ejemplo.com" [ref=f15e162]
+  - alert [ref=f15e163]
+  - region "Notificaciones"

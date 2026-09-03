@@ -1,0 +1,58 @@
+- generic [ref=f21e1]:
+  - generic [ref=f21e2]:
+    - complementary [ref=f21e3]:
+      - link [ref=f21e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f21e5]:
+        - generic [ref=f21e6]:
+          - link [ref=f21e7] [cursor=pointer]:
+            - /url: /admin
+          - link [ref=f21e11] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link [ref=f21e17] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f21e22]:
+          - link [ref=f21e23] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link [ref=f21e26] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f21e30]:
+          - link [ref=f21e31] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link [ref=f21e44] [cursor=pointer]:
+            - /url: /admin/planes
+      - button "Cuenta y sesión" [ref=f21e49] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f21e51]: JU
+    - generic [ref=f21e52]:
+      - banner [ref=f21e53]:
+        - button "Buscar miembro, comercio o acción…" [ref=f21e55] [cursor=pointer]
+        - generic [ref=f21e60]:
+          - radiogroup "Tema de la interfaz" [ref=f21e62]:
+            - generic [ref=f21e64] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f21e65]
+              - generic [ref=f21e68]: Auto
+            - generic [ref=f21e69] [cursor=pointer]:
+              - radio "Claro" [ref=f21e70]
+              - generic [ref=f21e77]: Claro
+            - generic [ref=f21e78] [cursor=pointer]:
+              - radio "Oscuro" [ref=f21e79]
+              - generic [ref=f21e82]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f21e83]:
+            - generic [aria-hidden] [ref=f21e84]: JU
+      - main [ref=f21e86]:
+        - generic [ref=f21e88]:
+          - heading "Mi contraseña" [level=1] [ref=f21e89]
+          - paragraph [ref=f21e90]: Cambia tu contraseña de acceso. Deberás usar la nueva la próxima vez que inicies sesión.
+        - generic [ref=f21e92]:
+          - generic [ref=f21e93]:
+            - generic [ref=f21e94]: Nueva contraseña
+            - generic [ref=f21e96]:
+              - textbox "Nueva contraseña" [active] [ref=f21e97]
+              - button "Mostrar contraseñas" [ref=f21e99] [cursor=pointer]
+            - paragraph [ref=f21e103]: Mínimo 8 caracteres.
+          - generic [ref=f21e104]:
+            - generic [ref=f21e105]: Confirmar nueva contraseña
+            - textbox "Confirmar nueva contraseña" [ref=f21e107]
+          - button "Cambiar contraseña" [disabled] [ref=f21e109]
+  - alert [ref=f21e114]
+  - region "Notificaciones"

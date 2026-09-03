@@ -1,0 +1,50 @@
+- generic [ref=f27e1]:
+  - generic [ref=f27e2]:
+    - banner [ref=f27e3]:
+      - link "ORUM" [ref=f27e4] [cursor=pointer]:
+        - /url: /miembros
+      - navigation "Secciones del portal" [ref=f27e5]:
+        - link "Inicio" [ref=f27e6] [cursor=pointer]:
+          - /url: /miembros
+        - link "Mi perfil" [ref=f27e7] [cursor=pointer]:
+          - /url: /miembros/perfil
+      - generic [ref=f27e8]:
+        - link "Soporte por WhatsApp" [ref=f27e10] [cursor=pointer]:
+          - /url: https://wa.me/573505641071?text=Hola%2C%20necesito%20ayuda%20con%20mi%20membres%C3%ADa%20ORUM.
+        - radiogroup "Tema de la interfaz" [ref=f27e14]:
+          - generic [ref=f27e16] [cursor=pointer]:
+            - radio "Auto" [ref=f27e17]
+            - generic [ref=f27e20]: Auto
+          - generic [ref=f27e21] [cursor=pointer]:
+            - radio "Claro" [ref=f27e22]
+            - generic [ref=f27e29]: Claro
+          - generic [ref=f27e30] [cursor=pointer]:
+            - radio "Oscuro" [checked] [active] [ref=f27e31]
+            - generic [ref=f27e34]: Oscuro
+        - button "Mi cuenta" [ref=f27e37]:
+          - generic [aria-hidden] [ref=f27e39]: DA
+    - main [ref=f27e40]:
+      - generic [ref=f27e42]:
+        - heading "Mi perfil" [level=1] [ref=f27e43]
+        - paragraph [ref=f27e44]: Tu carnet del club. Muestra el código en el comercio para aplicar tu beneficio.
+      - generic [ref=f27e46]:
+        - generic [ref=f27e47]:
+          - generic [ref=f27e48]:
+            - paragraph [ref=f27e49]: Daniel Usaquen
+            - paragraph [ref=f27e50]: Premium
+          - generic [ref=f27e51]:
+            - generic [ref=f27e52]: Número de membresía
+            - generic [ref=f27e54]:
+              - generic [ref=f27e55]: "00031324"
+              - button "Copiar número de membresía" [ref=f27e56] [cursor=pointer]
+              - status [ref=f27e60]
+          - generic [ref=f27e61]:
+            - generic [ref=f27e62]: Estado
+            - generic [ref=f27e63]: Activa
+          - generic [ref=f27e66]:
+            - generic [ref=f27e67]: Vigencia
+            - generic [ref=f27e68]: Hasta el 9 de octubre de 2026
+        - generic [ref=f27e69]:
+          - img "Código de la membresía 00031324 de Daniel Usaquen" [ref=f27e70]
+          - paragraph [ref=f27e74]: Muestra este código en el comercio
+  - alert [ref=f27e75]

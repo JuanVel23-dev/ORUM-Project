@@ -1,0 +1,25 @@
+- generic [active] [ref=f31e1]:
+  - alert [ref=f31e28]: Verificar membresía · ORUM Comercios
+  - generic [ref=f31e29]:
+    - banner [ref=f31e30]:
+      - link "ORUM" [ref=f31e31] [cursor=pointer]:
+        - /url: /comercios
+      - generic [ref=f31e32]: "Comercio de prueba # nose"
+      - generic [ref=f31e33]:
+        - radiogroup "Tema de la interfaz" [ref=f31e34]:
+          - generic [ref=f31e36] [cursor=pointer]:
+            - radio "Auto" [ref=f31e37]
+            - generic [ref=f31e40]: Auto
+          - generic [ref=f31e41] [cursor=pointer]:
+            - radio "Claro" [ref=f31e42]
+            - generic [ref=f31e49]: Claro
+          - generic [ref=f31e50] [cursor=pointer]:
+            - radio "Oscuro" [checked] [ref=f31e51]
+            - generic [ref=f31e54]: Oscuro
+        - button "Mi cuenta" [ref=f31e57]:
+          - generic [aria-hidden] [ref=f31e59]: CN
+    - main [ref=f31e60]:
+      - heading "Verificar membresía" [level=1] [ref=f31e63]
+      - generic [ref=f31e70]:
+        - paragraph [ref=f31e71]: Sin sucursales activas
+        - paragraph [ref=f31e72]: Una venta se registra siempre contra una sucursal, y este comercio no tiene ninguna activa. Escribe al administrador del club.

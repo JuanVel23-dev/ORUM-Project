@@ -1,0 +1,134 @@
+- generic [active] [ref=f9e1]:
+  - generic [ref=f9e2]:
+    - complementary [ref=f9e3]:
+      - link [ref=f9e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f9e5]:
+        - generic [ref=f9e6]:
+          - link [ref=f9e7] [cursor=pointer]:
+            - /url: /admin
+          - link [ref=f9e11] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link [ref=f9e17] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f9e23]:
+          - link [ref=f9e24] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link [ref=f9e27] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f9e31]:
+          - link [ref=f9e32] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link [ref=f9e45] [cursor=pointer]:
+            - /url: /admin/planes
+      - button "Cuenta y sesión" [ref=f9e50] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f9e52]: JU
+    - generic [ref=f9e53]:
+      - banner [ref=f9e54]:
+        - button "Buscar miembro, comercio o acción…" [ref=f9e56] [cursor=pointer]
+        - generic [ref=f9e61]:
+          - radiogroup "Tema de la interfaz" [ref=f9e63]:
+            - generic [ref=f9e65] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f9e66]
+              - generic [ref=f9e69]: Auto
+            - generic [ref=f9e70] [cursor=pointer]:
+              - radio "Claro" [ref=f9e71]
+              - generic [ref=f9e78]: Claro
+            - generic [ref=f9e79] [cursor=pointer]:
+              - radio "Oscuro" [ref=f9e80]
+              - generic [ref=f9e83]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f9e84]:
+            - generic [aria-hidden] [ref=f9e85]: JU
+      - main [ref=f9e87]:
+        - generic [ref=f9e88]:
+          - generic [ref=f9e92]:
+            - generic [ref=f9e93]: Instala ORUM en este dispositivo
+            - generic [ref=f9e94]: Se abre a pantalla completa, sin barra del navegador, y queda en tu pantalla de inicio.
+          - generic [ref=f9e95]:
+            - button "Instalar" [ref=f9e96] [cursor=pointer]
+            - button "No mostrar más" [ref=f9e101] [cursor=pointer]
+        - generic [ref=f9e106]:
+          - generic [ref=f9e107]:
+            - heading "Comercios aliados" [level=1] [ref=f9e108]
+            - paragraph [ref=f9e109]: La red de comercios donde los miembros usan sus beneficios.
+          - link "Crear comercio" [ref=f9e111] [cursor=pointer]:
+            - /url: /admin/comercios/nuevo
+        - generic [ref=f9e117]:
+          - textbox "Buscar comercios" [ref=f9e120]:
+            - /placeholder: Buscar por nombre
+          - button "Buscar" [ref=f9e121] [cursor=pointer]
+        - table [ref=f9e124]:
+          - caption [ref=f9e125]: Comercios aliados
+          - rowgroup [ref=f9e126]:
+            - row [ref=f9e127]:
+              - columnheader "Comercio" [ref=f9e128]
+              - columnheader "Descripción" [ref=f9e129]
+              - columnheader "Aliado" [ref=f9e130]
+              - columnheader "Acciones" [ref=f9e131]
+          - rowgroup [ref=f9e133]:
+            - row [ref=f9e134]:
+              - cell [ref=f9e135]:
+                - 'link "Comercio de prueba # nose" [ref=f9e136] [cursor=pointer]':
+                  - /url: /admin/comercios/8
+              - cell "—" [ref=f9e137]
+              - cell "Activo" [ref=f9e138]
+              - cell [ref=f9e140]:
+                - 'button "Acciones de Comercio de prueba # nose" [ref=f9e142] [cursor=pointer]'
+            - row [ref=f9e148]:
+              - cell [ref=f9e149]:
+                - link "Comercio Prueba 2" [ref=f9e150] [cursor=pointer]:
+                  - /url: /admin/comercios/4
+              - cell "Pruebas" [ref=f9e151]
+              - cell "Activo" [ref=f9e152]
+              - cell [ref=f9e154]:
+                - button "Acciones de Comercio Prueba 2" [ref=f9e156] [cursor=pointer]
+            - row [ref=f9e162]:
+              - cell [ref=f9e163]:
+                - link "Comida" [ref=f9e164] [cursor=pointer]:
+                  - /url: /admin/comercios/2
+              - cell "asdf" [ref=f9e165]
+              - cell "Activo" [ref=f9e166]
+              - cell [ref=f9e168]:
+                - button "Acciones de Comida" [ref=f9e170] [cursor=pointer]
+            - row [ref=f9e176]:
+              - cell [ref=f9e177]:
+                - link "Pequeño cesar" [ref=f9e178] [cursor=pointer]:
+                  - /url: /admin/comercios/1
+              - cell "Tienda de comida" [ref=f9e179]
+              - cell "Activo" [ref=f9e180]
+              - cell [ref=f9e182]:
+                - button "Acciones de Pequeño cesar" [ref=f9e184] [cursor=pointer]
+            - row [ref=f9e190]:
+              - cell [ref=f9e191]:
+                - link "Prueba" [ref=f9e192] [cursor=pointer]:
+                  - /url: /admin/comercios/3
+              - cell "—" [ref=f9e193]
+              - cell "Activo" [ref=f9e194]
+              - cell [ref=f9e196]:
+                - button "Acciones de Prueba" [ref=f9e198] [cursor=pointer]
+            - row [ref=f9e204]:
+              - cell [ref=f9e205]:
+                - link "Prueba 3" [ref=f9e206] [cursor=pointer]:
+                  - /url: /admin/comercios/5
+              - cell "—" [ref=f9e207]
+              - cell "Activo" [ref=f9e208]
+              - cell [ref=f9e210]:
+                - button "Acciones de Prueba 3" [ref=f9e212] [cursor=pointer]
+            - row [ref=f9e218]:
+              - cell [ref=f9e219]:
+                - link "prueba 5" [ref=f9e220] [cursor=pointer]:
+                  - /url: /admin/comercios/7
+              - cell "—" [ref=f9e221]
+              - cell "Activo" [ref=f9e222]
+              - cell [ref=f9e224]:
+                - button "Acciones de prueba 5" [ref=f9e226] [cursor=pointer]
+            - row [ref=f9e232]:
+              - cell [ref=f9e233]:
+                - link "Prueba4" [ref=f9e234] [cursor=pointer]:
+                  - /url: /admin/comercios/6
+              - cell "—" [ref=f9e235]
+              - cell "Activo" [ref=f9e236]
+              - cell [ref=f9e238]:
+                - button "Acciones de Prueba4" [ref=f9e240] [cursor=pointer]
+  - alert [ref=f9e246]
+  - region "Notificaciones"

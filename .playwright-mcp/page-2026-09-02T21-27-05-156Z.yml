@@ -1,0 +1,133 @@
+- generic [active] [ref=f17e1]:
+  - generic [ref=f17e2]:
+    - complementary [ref=f17e3]:
+      - link [ref=f17e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f17e5]:
+        - generic [ref=f17e6]:
+          - link [ref=f17e7] [cursor=pointer]:
+            - /url: /admin
+          - link [ref=f17e11] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link [ref=f17e17] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f17e22]:
+          - link [ref=f17e23] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link [ref=f17e26] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f17e30]:
+          - link [ref=f17e31] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link [ref=f17e45] [cursor=pointer]:
+            - /url: /admin/planes
+      - button "Cuenta y sesión" [ref=f17e50] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f17e52]: JU
+    - generic [ref=f17e53]:
+      - banner [ref=f17e54]:
+        - button "Buscar miembro, comercio o acción…" [ref=f17e56] [cursor=pointer]
+        - generic [ref=f17e61]:
+          - radiogroup "Tema de la interfaz" [ref=f17e63]:
+            - generic [ref=f17e65] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f17e66]
+              - generic [ref=f17e69]: Auto
+            - generic [ref=f17e70] [cursor=pointer]:
+              - radio "Claro" [ref=f17e71]
+              - generic [ref=f17e78]: Claro
+            - generic [ref=f17e79] [cursor=pointer]:
+              - radio "Oscuro" [ref=f17e80]
+              - generic [ref=f17e83]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f17e84]:
+            - generic [aria-hidden] [ref=f17e85]: JU
+      - main [ref=f17e87]:
+        - generic [ref=f17e88]:
+          - generic [ref=f17e92]:
+            - generic [ref=f17e93]: Instala ORUM en este dispositivo
+            - generic [ref=f17e94]: Se abre a pantalla completa, sin barra del navegador, y queda en tu pantalla de inicio.
+          - generic [ref=f17e95]:
+            - button "Instalar" [ref=f17e96] [cursor=pointer]
+            - button "No mostrar más" [ref=f17e101] [cursor=pointer]
+        - generic [ref=f17e106]:
+          - generic [ref=f17e107]:
+            - heading "Usuarios" [level=1] [ref=f17e108]
+            - paragraph [ref=f17e109]: Empleados y administradores con acceso al panel.
+          - link "Crear usuario" [ref=f17e111] [cursor=pointer]:
+            - /url: /admin/usuarios/nuevo
+        - table [ref=f17e117]:
+          - caption [ref=f17e118]: Usuarios del panel
+          - rowgroup [ref=f17e119]:
+            - row [ref=f17e120]:
+              - columnheader "Usuario" [ref=f17e121]
+              - columnheader "Correo" [ref=f17e122]
+              - columnheader "Rol" [ref=f17e123]
+              - columnheader "Acceso" [ref=f17e124]
+              - columnheader "Acciones" [ref=f17e125]
+          - rowgroup [ref=f17e127]:
+            - row [ref=f17e128]:
+              - cell "Daniel Bulla" [ref=f17e129]:
+                - generic [ref=f17e130]:
+                  - generic [aria-hidden] [ref=f17e132]: DB
+                  - generic [ref=f17e133]: Daniel Bulla
+              - cell "danbu737@gmail.com" [ref=f17e134]
+              - cell "Empleado administrativo" [ref=f17e135]
+              - cell "Inactivo" [ref=f17e137]
+              - cell [ref=f17e139]:
+                - button "Activar" [ref=f17e141] [cursor=pointer]
+                - button "Acciones de Daniel Bulla" [ref=f17e145] [cursor=pointer]
+            - row [ref=f17e151]:
+              - cell "Juan Niño" [ref=f17e152]:
+                - generic [ref=f17e153]:
+                  - generic [aria-hidden] [ref=f17e155]: JN
+                  - generic [ref=f17e156]: Juan Niño
+              - cell "jkl@jl.com" [ref=f17e157]
+              - cell "Administrador mayor" [ref=f17e158]
+              - cell "Activo" [ref=f17e160]
+              - cell [ref=f17e162]:
+                - button "Desactivar" [ref=f17e164] [cursor=pointer]
+                - button "Acciones de Juan Niño" [ref=f17e169] [cursor=pointer]
+            - row [ref=f17e175]:
+              - cell "Juan Veloza" [ref=f17e176]:
+                - generic [ref=f17e177]:
+                  - generic [aria-hidden] [ref=f17e179]: JV
+                  - generic [ref=f17e180]: Juan Veloza
+              - cell "correo@ejemplo.com" [ref=f17e181]
+              - cell "Administrador mayor" [ref=f17e182]
+              - cell "Activo" [ref=f17e184]
+              - cell [ref=f17e186]:
+                - button "Desactivar" [ref=f17e188] [cursor=pointer]
+                - button "Acciones de Juan Veloza" [ref=f17e193] [cursor=pointer]
+            - row [ref=f17e199]:
+              - cell "Pedro Pruebas" [ref=f17e200]:
+                - generic [ref=f17e201]:
+                  - generic [aria-hidden] [ref=f17e203]: PP
+                  - generic [ref=f17e204]: Pedro Pruebas
+              - cell "prueba@prueba.com" [ref=f17e205]
+              - cell "Empleado administrativo" [ref=f17e206]
+              - cell "Activo" [ref=f17e208]
+              - cell [ref=f17e210]:
+                - button "Desactivar" [ref=f17e212] [cursor=pointer]
+                - button "Acciones de Pedro Pruebas" [ref=f17e217] [cursor=pointer]
+            - row [ref=f17e223]:
+              - cell "Pedro Rodriguez" [ref=f17e224]:
+                - generic [ref=f17e225]:
+                  - generic [aria-hidden] [ref=f17e227]: PR
+                  - generic [ref=f17e228]: Pedro Rodriguez
+              - cell "juan@prueba.com" [ref=f17e229]
+              - cell "Empleado administrativo" [ref=f17e230]
+              - cell "Activo" [ref=f17e232]
+              - cell [ref=f17e234]:
+                - button "Desactivar" [ref=f17e236] [cursor=pointer]
+                - button "Acciones de Pedro Rodriguez" [ref=f17e241] [cursor=pointer]
+            - row [ref=f17e247]:
+              - cell "Pruebas Ejemplo" [ref=f17e248]:
+                - generic [ref=f17e249]:
+                  - generic [aria-hidden] [ref=f17e251]: PE
+                  - generic [ref=f17e252]: Pruebas Ejemplo
+              - cell "jsebastianvel23@gmail.com" [ref=f17e253]
+              - cell "Empleado administrativo" [ref=f17e254]
+              - cell "Activo" [ref=f17e256]
+              - cell [ref=f17e258]:
+                - button "Desactivar" [ref=f17e260] [cursor=pointer]
+                - button "Acciones de Pruebas Ejemplo" [ref=f17e265] [cursor=pointer]
+  - alert [ref=f17e271]
+  - region "Notificaciones"

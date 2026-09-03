@@ -1,0 +1,18 @@
+- generic [ref=f23e1]:
+  - alert [ref=f23e203]: Iniciar sesión · ORUM
+  - generic [ref=f23e225]:
+    - banner [ref=f23e226]:
+      - generic [ref=f23e227]: ORUM
+      - generic [ref=f23e228]: Portal de Administración
+    - generic [ref=f23e229]:
+      - generic [ref=f23e230]:
+        - generic [ref=f23e231]: Correo electrónico
+        - textbox "Correo electrónico" [active] [ref=f23e233]:
+          - /placeholder: tucorreo@ejemplo.com
+      - generic [ref=f23e234]:
+        - generic [ref=f23e235]: Contraseña
+        - generic [ref=f23e237]:
+          - textbox "Contraseña" [ref=f23e238]
+          - button "Mostrar contraseña" [ref=f23e240] [cursor=pointer]
+      - button "Iniciar sesión" [ref=f23e244] [cursor=pointer]
+    - paragraph [ref=f23e249]: ¿Problemas para entrar? Contacta al administrador del club.

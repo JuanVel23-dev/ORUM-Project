@@ -1,0 +1,111 @@
+- generic [active] [ref=f25e1]:
+  - alert [ref=f25e28]: Comercios y beneficios · ORUM
+  - generic [ref=f25e29]:
+    - banner [ref=f25e30]:
+      - link "ORUM" [ref=f25e31] [cursor=pointer]:
+        - /url: /miembros
+      - navigation "Secciones del portal" [ref=f25e32]:
+        - link "Inicio" [ref=f25e33] [cursor=pointer]:
+          - /url: /miembros
+        - link "Mi perfil" [ref=f25e34] [cursor=pointer]:
+          - /url: /miembros/perfil
+      - generic [ref=f25e35]:
+        - link "Soporte por WhatsApp" [ref=f25e37] [cursor=pointer]:
+          - /url: https://wa.me/573505641071?text=Hola%2C%20necesito%20ayuda%20con%20mi%20membres%C3%ADa%20ORUM.
+        - radiogroup "Tema de la interfaz" [ref=f25e41]:
+          - generic [ref=f25e43] [cursor=pointer]:
+            - radio "Auto" [checked] [ref=f25e44]
+            - generic [ref=f25e47]: Auto
+          - generic [ref=f25e48] [cursor=pointer]:
+            - radio "Claro" [ref=f25e49]
+            - generic [ref=f25e56]: Claro
+          - generic [ref=f25e57] [cursor=pointer]:
+            - radio "Oscuro" [ref=f25e58]
+            - generic [ref=f25e61]: Oscuro
+        - button "Mi cuenta" [ref=f25e64]:
+          - generic [aria-hidden] [ref=f25e66]: DA
+    - main [ref=f25e67]:
+      - generic [ref=f25e69]:
+        - heading "Comercios y beneficios" [level=1] [ref=f25e70]
+        - paragraph [ref=f25e71]: Todo lo que incluye tu membresía. Muestra tu código en el comercio para aplicar el beneficio.
+      - generic [ref=f25e72]:
+        - generic [ref=f25e73]:
+          - generic [ref=f25e74]: Buscar
+          - textbox "Buscar" [ref=f25e76]:
+            - /placeholder: Comercio o promoción
+        - generic [ref=f25e77]:
+          - generic [ref=f25e78]: Comercio
+          - combobox "Comercio" [ref=f25e80] [cursor=pointer]:
+            - option "Todos" [selected]
+            - 'option "Comercio de prueba # nose"'
+            - option "Comercio Prueba 2"
+            - option "Comida"
+            - option "Pequeño cesar"
+            - option "Prueba"
+            - option "Prueba 3"
+            - option "prueba 5"
+            - option "Prueba4"
+        - generic [ref=f25e81]:
+          - generic [ref=f25e82]: Marca
+          - combobox "Marca" [ref=f25e84] [cursor=pointer]:
+            - option "Todas" [selected]
+        - generic [ref=f25e85]:
+          - generic [ref=f25e86]: Ciudad
+          - combobox "Ciudad" [ref=f25e88] [cursor=pointer]:
+            - option "Todas" [selected]
+            - option "Bogotá"
+        - button "Filtrar" [ref=f25e90] [cursor=pointer]
+      - generic [ref=f25e92]:
+        - generic [ref=f25e94]:
+          - generic [ref=f25e95]:
+            - generic [aria-hidden] [ref=f25e96]: C
+            - 'heading "Comercio de prueba # nose" [level=3] [ref=f25e98]'
+          - paragraph [ref=f25e99]: Sin promociones activas por ahora.
+        - generic [ref=f25e101]:
+          - generic [ref=f25e102]:
+            - generic [aria-hidden] [ref=f25e103]: C
+            - heading "Comercio Prueba 2" [level=3] [ref=f25e105]
+          - paragraph [ref=f25e106]: Pruebas
+          - paragraph [ref=f25e107]: Sin promociones activas por ahora.
+        - generic [ref=f25e109]:
+          - generic [ref=f25e110]:
+            - generic [aria-hidden] [ref=f25e111]: C
+            - heading "Comida" [level=3] [ref=f25e113]
+          - paragraph [ref=f25e114]: asdf
+          - paragraph [ref=f25e115]: Sin promociones activas por ahora.
+        - generic [ref=f25e117]:
+          - generic [ref=f25e118]:
+            - img "Logo de Pequeño cesar" [ref=f25e119]
+            - heading "Pequeño cesar" [level=3] [ref=f25e121]
+          - paragraph [ref=f25e122]: Tienda de comida
+          - paragraph [ref=f25e123]:
+            - generic [ref=f25e127]: Bogotá
+          - list [ref=f25e128]:
+            - listitem [ref=f25e129]:
+              - generic [ref=f25e130]: Prueba
+              - generic [ref=f25e131]: 2x1
+        - generic [ref=f25e133]:
+          - generic [ref=f25e134]:
+            - generic [aria-hidden] [ref=f25e135]: P
+            - heading "Prueba" [level=3] [ref=f25e137]
+          - paragraph [ref=f25e138]:
+            - generic [ref=f25e142]: Bogotá
+          - list [ref=f25e143]:
+            - listitem [ref=f25e144]:
+              - generic [ref=f25e145]: Promoción de Prueba
+              - generic [ref=f25e146]: 20% de descuento
+        - generic [ref=f25e148]:
+          - generic [ref=f25e149]:
+            - generic [aria-hidden] [ref=f25e150]: P
+            - heading "Prueba 3" [level=3] [ref=f25e152]
+          - paragraph [ref=f25e153]: Sin promociones activas por ahora.
+        - generic [ref=f25e155]:
+          - generic [ref=f25e156]:
+            - generic [aria-hidden] [ref=f25e157]: p
+            - heading "prueba 5" [level=3] [ref=f25e159]
+          - paragraph [ref=f25e160]: Sin promociones activas por ahora.
+        - generic [ref=f25e162]:
+          - generic [ref=f25e163]:
+            - generic [aria-hidden] [ref=f25e164]: P
+            - heading "Prueba4" [level=3] [ref=f25e166]
+          - paragraph [ref=f25e167]: Sin promociones activas por ahora.

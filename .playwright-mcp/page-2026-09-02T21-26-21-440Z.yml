@@ -1,0 +1,122 @@
+- generic [active] [ref=f11e1]:
+  - generic [ref=f11e2]:
+    - complementary [ref=f11e3]:
+      - link [ref=f11e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f11e5]:
+        - generic [ref=f11e6]:
+          - link [ref=f11e7] [cursor=pointer]:
+            - /url: /admin
+          - link [ref=f11e11] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link [ref=f11e17] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f11e23]:
+          - link [ref=f11e24] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link [ref=f11e27] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f11e31]:
+          - link [ref=f11e32] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link [ref=f11e45] [cursor=pointer]:
+            - /url: /admin/planes
+      - button "Cuenta y sesión" [ref=f11e50] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f11e52]: JU
+    - generic [ref=f11e53]:
+      - banner [ref=f11e54]:
+        - button "Buscar miembro, comercio o acción…" [ref=f11e56] [cursor=pointer]
+        - generic [ref=f11e61]:
+          - radiogroup "Tema de la interfaz" [ref=f11e63]:
+            - generic [ref=f11e65] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f11e66]
+              - generic [ref=f11e69]: Auto
+            - generic [ref=f11e70] [cursor=pointer]:
+              - radio "Claro" [ref=f11e71]
+              - generic [ref=f11e78]: Claro
+            - generic [ref=f11e79] [cursor=pointer]:
+              - radio "Oscuro" [ref=f11e80]
+              - generic [ref=f11e83]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f11e84]:
+            - generic [aria-hidden] [ref=f11e85]: JU
+      - main [ref=f11e87]:
+        - generic [ref=f11e88]:
+          - generic [ref=f11e89]:
+            - heading "Pequeño cesar" [level=1] [ref=f11e90]
+            - paragraph [ref=f11e91]: Tienda de comida
+          - link "Editar datos" [ref=f11e93] [cursor=pointer]:
+            - /url: /admin/comercios/1/editar
+        - generic [ref=f11e98]:
+          - generic [ref=f11e100]:
+            - generic [ref=f11e101]:
+              - generic [ref=f11e102]: Correo
+              - generic [ref=f11e103]: tienda@tienda.com
+            - generic [ref=f11e104]:
+              - generic [ref=f11e105]: Marca
+              - generic [ref=f11e106]: Sin registrar
+            - generic [ref=f11e107]:
+              - generic [ref=f11e108]: Categoría
+              - generic [ref=f11e109]: Sin registrar
+          - generic [ref=f11e110]:
+            - heading "Estado del aliado" [level=2] [ref=f11e112]
+            - generic [ref=f11e113]:
+              - generic [ref=f11e114]:
+                - generic [ref=f11e115]:
+                  - generic [ref=f11e116]: Aliado del club
+                  - generic [ref=f11e117]: Activo
+                - paragraph [ref=f11e118]: Determina si el comercio y sus promociones aparecen para los miembros.
+                - button "Retirar del club" [ref=f11e120] [cursor=pointer]
+              - generic [ref=f11e122]:
+                - generic [ref=f11e123]:
+                  - generic [ref=f11e124]: Acceso a su cuenta
+                  - generic [ref=f11e125]: Activo
+                - paragraph [ref=f11e126]: Determina si el comercio puede iniciar sesión en su herramienta para registrar ventas. Es independiente de seguir siendo aliado.
+                - button "Desactivar acceso" [ref=f11e128] [cursor=pointer]
+          - generic [ref=f11e130]:
+            - generic [ref=f11e131]:
+              - heading "Sucursales" [level=2] [ref=f11e132]
+              - link "Nueva sucursal" [ref=f11e133] [cursor=pointer]:
+                - /url: /admin/comercios/1/sucursales/nueva
+            - table [ref=f11e139]:
+              - caption [ref=f11e140]: Sucursales de Pequeño cesar
+              - rowgroup [ref=f11e141]:
+                - row [ref=f11e142]:
+                  - columnheader "Sucursal" [ref=f11e143]
+                  - columnheader "Dirección" [ref=f11e144]
+                  - columnheader "Teléfono" [ref=f11e145]
+                  - columnheader "Estado" [ref=f11e146]
+                  - columnheader "Acciones" [ref=f11e147]
+              - rowgroup [ref=f11e149]:
+                - row [ref=f11e150]:
+                  - cell "Calle 170" [ref=f11e151]
+                  - cell "Calle 170" [ref=f11e152]
+                  - cell "—" [ref=f11e153]
+                  - cell "Activa" [ref=f11e154]
+                  - cell [ref=f11e156]:
+                    - button "Desactivar" [ref=f11e158] [cursor=pointer]
+                    - button "Acciones de Calle 170" [ref=f11e163] [cursor=pointer]
+          - generic [ref=f11e169]:
+            - generic [ref=f11e170]:
+              - heading "Promociones" [level=2] [ref=f11e171]
+              - link "Nueva promoción" [ref=f11e172] [cursor=pointer]:
+                - /url: /admin/comercios/1/promociones/nueva
+            - table [ref=f11e178]:
+              - caption [ref=f11e179]: Promociones de Pequeño cesar
+              - rowgroup [ref=f11e180]:
+                - row [ref=f11e181]:
+                  - columnheader "Promoción" [ref=f11e182]
+                  - columnheader "Tipo" [ref=f11e183]
+                  - columnheader "Valor" [ref=f11e184]
+                  - columnheader "Estado" [ref=f11e185]
+                  - columnheader "Acciones" [ref=f11e186]
+              - rowgroup [ref=f11e188]:
+                - row [ref=f11e189]:
+                  - cell "Prueba" [ref=f11e190]
+                  - cell "2x1" [ref=f11e191]
+                  - cell "—" [ref=f11e192]
+                  - cell "Activa" [ref=f11e193]
+                  - cell [ref=f11e195]:
+                    - button "Desactivar" [ref=f11e197] [cursor=pointer]
+                    - button "Acciones de Prueba" [ref=f11e202] [cursor=pointer]
+  - alert [ref=f11e208]
+  - region "Notificaciones"
