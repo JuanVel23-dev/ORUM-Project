@@ -5,9 +5,8 @@ import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/avatar'
 import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
-import { WhatsAppButton } from '@/components/ui/whatsapp-button'
-import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { cerrarSesionMiembro } from '../login/actions'
+import { MenuTema } from './_components/menu-tema'
 import { PortalNav, PortalTabBar } from './_components/portal-nav'
 import styles from './portal.module.css'
 
@@ -39,15 +38,19 @@ export default async function MiembrosLayout({ children }: { children: ReactNode
 
         <PortalNav />
 
+        {/*
+          La cabecera se queda con el wordmark, la navegación de escritorio y
+          UNA sola puerta: el avatar.
+
+          Salieron dos cosas. El botón de WhatsApp, porque la misma acción ya
+          estaba dentro del menú y `CLAUDE.md` condena listarla dos veces en la
+          misma pantalla. Y el conmutador de tema, que competía con las dos
+          únicas pestañas que importan; baja al menú, donde Apple lo entierra.
+          El corolario de la norma —"al sacar algo, comprueba el móvil"— está
+          cubierto: la cabecera y el avatar se renderizan a todos los anchos,
+          así que el destino no desaparece del teléfono.
+        */}
         <div className={styles.acciones}>
-          {soporte && (
-            <span className={styles.soporteEscritorio}>
-              <WhatsAppButton telefono={soporte} mensaje={MENSAJE_SOPORTE} size="sm" />
-            </span>
-          )}
-
-          <ThemeToggle />
-
           {/*
             El formulario envuelve el menú, no al revés: así el elemento
             "Cerrar sesión" es un submit real dentro de él y la server action
@@ -62,6 +65,15 @@ export default async function MiembrosLayout({ children }: { children: ReactNode
               }
             >
               <p className={styles.correoMenu}>{correo}</p>
+
+              <MenuSeparator />
+
+              {/*
+                El único componente de cliente del cromo. No es un
+                `SegmentedControl`: sus radios, dentro de este `<form>`, hacían
+                que Enter cerrase la sesión. El porqué completo, en el archivo.
+              */}
+              <MenuTema />
 
               <MenuSeparator />
 

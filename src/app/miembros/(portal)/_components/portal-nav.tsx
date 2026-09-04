@@ -3,20 +3,13 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, User } from 'lucide-react'
+import { esDestinoActivo } from '@/lib/miembros/navegacion-portal'
 import styles from '../portal.module.css'
 
 const DESTINOS = [
   { href: '/miembros', etiqueta: 'Inicio', Icono: Home },
   { href: '/miembros/perfil', etiqueta: 'Mi perfil', Icono: User },
 ] as const
-
-/**
- * `/miembros` solo está activo en coincidencia exacta; si no, quedaría marcado
- * también estando en `/miembros/perfil`, que es su hijo.
- */
-function esActivo(pathname: string, href: string): boolean {
-  return href === '/miembros' ? pathname === href : pathname.startsWith(href)
-}
 
 /** Navegación de escritorio, en la cabecera. */
 export function PortalNav() {
@@ -25,7 +18,7 @@ export function PortalNav() {
   return (
     <nav className={styles.nav} aria-label="Secciones del portal">
       {DESTINOS.map(({ href, etiqueta }) => {
-        const activo = esActivo(pathname, href)
+        const activo = esDestinoActivo(pathname, href)
         return (
           <Link
             key={href}
@@ -48,7 +41,7 @@ export function PortalTabBar() {
   return (
     <nav className={styles.tabbar} aria-label="Secciones del portal">
       {DESTINOS.map(({ href, etiqueta, Icono }) => {
-        const activo = esActivo(pathname, href)
+        const activo = esDestinoActivo(pathname, href)
         return (
           <Link
             key={href}

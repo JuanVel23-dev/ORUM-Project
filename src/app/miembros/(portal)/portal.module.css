@@ -2,6 +2,21 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+
+  /*
+    Alto real que ocupa la barra inferior, EN UN SOLO SITIO.
+
+    Lo consumen dos reglas que tienen que decir lo mismo siempre: la propia
+    `.tabbar` (como `min-height`) y la reserva de `.main` (que además le suma
+    aire). Antes cada una repetía `var(--tabbar-h) + env(safe-area-inset-bottom)`
+    por su cuenta: dos copias de la misma composición, y la primera que alguien
+    tocase dejaría la última fila del catálogo debajo de la barra sin que nada
+    fallara de forma visible.
+
+    `.tabbar` es `position: fixed`, pero sigue siendo descendiente de `.portal`
+    en el árbol, así que hereda la custom property con normalidad.
+  */
+  --tabbar-alto: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
 }
 
 /* ==========================================================================
@@ -16,20 +31,43 @@
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
+
+  /*
+    ZONAS SEGURAS. `src/app/layout.tsx` declara `statusBarStyle:
+    'black-translucent'` y `viewportFit: 'cover'`: en PWA instalada el
+    contenido llega hasta arriba del todo y el hueco de la barra de estado hay
+    que reservarlo a mano. Sin este `padding-top`, el wordmark y el AVATAR
+    quedaban debajo de la hora y la batería — y el avatar es la única puerta al
+    menú en móvil. El shell del panel ya lo hacía (`app-shell.module.css:414`);
+    este portal, no.
+
+    Los insets laterales cubren el otro caso: teléfono con muesca en
+    horizontal, donde el contenido se mete bajo el bisel. Se usan las
+    propiedades físicas, como en `pantalla-auth.module.css:30-31`.
+  */
+  padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
+  padding-bottom: var(--space-3);
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
   /*
     Material translúcido, no franja opaca: el contenido pasa por debajo y se
     ve que sigue habiendo página. Sin esto la cabecera corta la pantalla.
+
+    `--blur-lg` (24px) y no `--blur-xl` (40px), por paridad con el panel: son
+    dos superficies desenfocadas fijas sobre la lista más larga del producto, y
+    el desenfoque se recalcula en cada fotograma de scroll. La diferencia de
+    grosor percibido entre 24 y 40 no se ve; la de coste en gama media, sí.
   */
   background: var(--material);
-  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
   border-bottom: 1px solid var(--border-subtle);
 }
 
 @media (min-width: 768px) {
   .cabecera {
-    padding: var(--space-3) var(--space-6);
+    padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
     gap: var(--space-6);
   }
 }
@@ -138,16 +176,13 @@
   margin-left: auto;
 }
 
-/* El botón de WhatsApp sobra en pantallas estrechas: vive en el menú de cuenta. */
-.soporteEscritorio {
-  display: none;
-}
-
-@media (min-width: 900px) {
-  .soporteEscritorio {
-    display: inline-flex;
-  }
-}
+/*
+  Aquí vivía `.soporteEscritorio`, que sacaba el botón de WhatsApp a la
+  cabecera a partir de 900px. Se retiró: la misma acción no puede estar dos
+  veces en la misma pantalla, y ya está en el menú de la cuenta (es el
+  precedente de "Mi contraseña" que documenta CLAUDE.md). Con eso el wordmark
+  vuelve a ser el único oro del cromo.
+*/
 
 .correoMenu {
   padding: var(--space-2) var(--space-3);
@@ -167,7 +202,20 @@
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-10);
+
+  /*
+    `--pad-contenido` es el relleno lateral de ESTE layout, publicado para que
+    un carril pueda sangrar hasta el borde sin duplicar el número. No es un
+    token del sistema a propósito: si viviera en `tokens.css` habría que
+    mantener sincronizados dos sitios, y el sangrado se desincroniza en el
+    primer cambio de densidad. Lo consume `carril.module.css`.
+  */
+  --pad-contenido: var(--space-4);
+
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-10);
+  padding-left: max(var(--pad-contenido), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
 
   /* Mismo contenedor de consulta que el shell admin, para que los módulos
      de página se adapten al ancho útil y no al del viewport. */
@@ -177,16 +225,18 @@
 
 @media (min-width: 768px) {
   .main {
-    padding: var(--space-7) var(--space-6) var(--space-11);
+    --pad-contenido: var(--space-6);
+
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-11);
   }
 }
 
-/* Hueco para la barra inferior en móvil. */
+/* Hueco para la barra inferior en móvil. Sale del mismo `--tabbar-alto` que
+   dimensiona la barra: una sola definición, dos consumidores. */
 @media (max-width: 767px) {
   .main {
-    padding-bottom: calc(
-      var(--tabbar-h) + var(--space-8) + env(safe-area-inset-bottom, 0px)
-    );
+    padding-bottom: calc(var(--tabbar-alto) + var(--space-8));
   }
 }
 
@@ -202,11 +252,19 @@
   z-index: var(--z-sticky);
 
   display: flex;
-  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+
+  /*
+    `min-height`, NUNCA `height`. iOS aplica Dynamic Type como zoom de página:
+    la etiqueta crece y, con un alto fijo, se recorta. Es no-op en el caso
+    base y la única defensa cuando el socio sube el tamaño de texto.
+  */
+  min-height: var(--tabbar-alto);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 
   background: var(--material);
-  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
   border-top: 1px solid var(--border-subtle);
 }
 
@@ -224,12 +282,17 @@
 }
 
 .tab {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
+
+  /* Con `min-height` la barra puede crecer; el relleno evita que la etiqueta
+     toque el filo cuando lo hace. */
+  padding: var(--space-2) var(--space-1);
 
   font-size: var(--t-overline-size);
   font-weight: 510;
@@ -239,7 +302,6 @@
   /* Retroalimentación en el toque, no al soltar. */
   transition:
     color var(--dur-instant) var(--ease-out),
-    transform var(--dur-instant) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
   -webkit-tap-highlight-color: transparent;
 }
@@ -250,10 +312,42 @@
 
 .tabActivo {
   color: var(--text);
+  font-weight: 620;
 }
 
+/*
+  El destino activo NO puede distinguirse solo por color. La navegación de
+  escritorio ya lo resuelve con una barra bajo el enlace (`.enlaceActivo::after`);
+  esta es la misma barra, arriba, encajada en el filo superior de la barra
+  inferior. Suma a los otros dos portadores que ya había —el trazo más grueso
+  del icono y `aria-current="page"`— y sobrevive a la ceguera al color.
+
+  Ancho fijo y centrada con `translateX`, no con `left/right`: es más barato de
+  componer y no depende del ancho de la etiqueta.
+*/
+.tabActivo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+
+  width: var(--space-6);
+  height: 2px;
+  border-radius: 0 0 1px 1px;
+  background: var(--text);
+}
+
+/*
+  Movimiento reducido NO es ausencia de feedback, es un equivalente no
+  vestibular: se anula el escalado y el toque se acusa con color.
+
+  Hay que anular `scale`, no `transform`: son propiedades independientes y
+  `transform: none` no toca a `scale`, así que el rebote seguía viéndose.
+*/
 @media (prefers-reduced-motion: reduce) {
   .tab:active {
-    transform: none;
+    scale: 1;
+    color: var(--text);
   }
 }
