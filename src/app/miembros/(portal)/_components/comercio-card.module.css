@@ -90,11 +90,64 @@
   white-space: nowrap;
 }
 
-.sinPromociones {
+.masBeneficios {
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+/*
+  El bloque de "sin beneficio" ocupa exactamente el hueco que ocuparían las
+  promociones: mismo `margin-top: auto` y misma divisoria. LA ALINEACIÓN NO SE
+  SACRIFICA — es lo que permite comparar tarjetas de un vistazo, y es el caso
+  más frecuente del catálogo, no una excepción que se disculpa.
+
+  Sin icono y sin color de aviso: un triángulo ámbar convertiría una situación
+  normal en una alarma.
+*/
+.sinBeneficio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+
   margin-top: auto;
   padding-top: var(--space-3);
   border-top: 1px solid var(--border-subtle);
 
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+.categoria {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   TARJETA DE ESTANTERÍA
+   ========================================================================== */
+
+.compacta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  height: 100%;
+}
+
+.compacta .nombre {
+  max-width: 100%;
+}
+
+/* El beneficio se ancla al fondo: es lo que alinea todas las tarjetas del
+   carril entre sí, igual que la divisoria hace en la rejilla. */
+.compacta > :last-child {
+  margin-top: auto;
+}
+
+.sinBeneficioCompacta {
   font-size: var(--t-caption-size);
   color: var(--text-3);
 }

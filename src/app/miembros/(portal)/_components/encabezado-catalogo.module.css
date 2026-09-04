@@ -1,0 +1,37 @@
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/*
+  Tres niveles distintos en tres líneas seguidas. Es la regla que gobierna toda
+  la jerarquía de este rediseño: dos bloques consecutivos nunca comparten
+  nivel; si lo comparten, uno de los dos está mal jerarquizado.
+*/
+.overline {
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.titulo {
+  font-size: var(--t-display-2-size);
+  line-height: var(--t-display-2-leading);
+  letter-spacing: var(--t-display-2-tracking);
+  font-weight: var(--t-display-2-weight);
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.lede {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+
+  /* Un lede a todo el ancho de un escritorio se lee como pie de página. */
+  max-width: 46ch;
+}

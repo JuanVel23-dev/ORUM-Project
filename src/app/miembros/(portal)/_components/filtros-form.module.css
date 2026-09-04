@@ -1,26 +1,21 @@
+/* ==========================================================================
+   FILTROS DEL CATÁLOGO
+   --------------------------------------------------------------------------
+   Aquí vivía una plantilla de rejilla con `--columnas` inyectado y treinta
+   líneas de aritmética del mínimo intrínseco, porque el formulario tenía
+   CUATRO desplegables en línea y había que demostrar en qué franja de anchos
+   desbordaban. Ese cálculo ya no aplica y por eso no se conserva: los
+   desplegables son como mucho dos, viven dentro de un `<details>` y nunca
+   comparten fila con la búsqueda.
+
+   Lo que queda es más simple a propósito. A 375px el formulario anterior
+   ponía CINCO campos apilados antes del primer comercio; ahora pone uno.
+   ========================================================================== */
+
 .filtros {
-  display: grid;
-  grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(140px, 1fr)) auto;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
-  align-items: end;
-  margin-bottom: var(--space-6);
-}
-
-@container contenido (max-width: 860px) {
-  .filtros {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .campoBusqueda,
-  .acciones {
-    grid-column: 1 / -1;
-  }
-}
-
-@container contenido (max-width: 460px) {
-  .filtros {
-    grid-template-columns: 1fr;
-  }
 }
 
 .etiqueta {
@@ -31,6 +26,96 @@
   font-weight: 590;
   letter-spacing: var(--t-caption-tracking);
   color: var(--text-3);
+}
+
+/*
+  En escritorio la búsqueda se topa y se alinea a la izquierda. Un `<input>` de
+  1052px para escribir "pizza" es la señal más barata de que nadie diseñó esta
+  pantalla.
+*/
+@container contenido (min-width: 900px) {
+  .campoBusqueda {
+    max-width: 420px;
+  }
+}
+
+/* ==========================================================================
+   MÁS FILTROS
+   ========================================================================== */
+
+.masFiltros {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-3);
+}
+
+.resumen {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  /* El disparador es una fila entera de menú: en táctil no puede medir menos
+     que el mínimo. En escritorio la densidad es una virtud. */
+  min-height: var(--space-8);
+  padding: 0 var(--space-2);
+  margin-left: calc(var(--space-2) * -1);
+  border-radius: var(--radius-xs);
+
+  font-size: var(--t-callout-size);
+  font-weight: 510;
+  color: var(--text-2);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+/* Safari pinta su propio triángulo si no se retira el marcador nativo. */
+.resumen::-webkit-details-marker {
+  display: none;
+}
+
+.resumen:hover {
+  color: var(--text);
+}
+
+.resumen:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .resumen {
+    min-height: var(--tap-min);
+  }
+}
+
+/* Gira el triángulo, NO anima el alto del bloque: animar `height` recalcula
+   layout en cada fotograma y está prohibido. */
+.triangulo {
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+
+.masFiltros[open] .triangulo {
+  rotate: 180deg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .triangulo {
+    transition: none;
+  }
+}
+
+.cuerpo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  align-items: end;
+  padding-top: var(--space-3);
+}
+
+@container contenido (min-width: 560px) {
+  .cuerpo {
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  }
 }
 
 .acciones {

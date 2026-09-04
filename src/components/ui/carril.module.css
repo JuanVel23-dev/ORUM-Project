@@ -1,0 +1,112 @@
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.titulo {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text);
+}
+
+.apoyo {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-3);
+}
+
+/* ==========================================================================
+   LA PISTA
+   ========================================================================== */
+
+.pista {
+  display: grid;
+  grid-auto-flow: column;
+  gap: var(--space-3);
+
+  overflow-x: auto;
+
+  /* El deslizamiento que llega al final de la pista NO se propaga a la
+     página ni dispara el "atrás" por gesto del navegador. */
+  overscroll-behavior-inline: contain;
+
+  /* `proximity`, no `mandatory`: mandatory pelea con el momento en listas
+     largas y frena el desplazamiento donde el dedo no lo pidió. */
+  scroll-snap-type: x proximity;
+
+  /*
+    SANGRADO SOLO HACIA `inline-end`, y esto no es una preferencia estética.
+
+    Un sangrado simétrico —el reflejo obvio— mete contenido deslizable dentro
+    de la banda del gesto de "atrás" del sistema, que en iOS vive en el borde
+    izquierdo y en Android en los dos. El socio arrastra donde el diseño le
+    invita y SALE DE LA PANTALLA.
+
+    Con el sangrado a un solo lado: el primer elemento queda alineado con el
+    h1, con el h2 y con la rejilla —que es lo que hace que la estantería se lea
+    como parte de la página y no como un widget pegado encima— y la tarjeta
+    cortada, la que dice "hay más", sigue apareciendo en el borde derecho, que
+    es hacia donde se va, no desde donde se arrastra.
+
+    `--pad-contenido` lo publica `.main` del portal, en la misma regla donde
+    declara su relleno. Si un consumidor no lo define, el sangrado es cero: se
+    ve peor, nunca roto.
+  */
+  margin-inline-start: 0;
+  margin-inline-end: calc(var(--pad-contenido, 0px) * -1);
+  padding-inline-end: var(--pad-contenido, 0px);
+
+  /*
+    El anclaje del snap se mide contra este relleno. Vale CERO porque el
+    sangrado de arranque también es cero: así la tarjeta anclada cae exactamente
+    donde empieza el texto de la página. Si algún día el sangrado volviera a ser
+    simétrico, este valor tiene que pasar a `var(--pad-contenido)` a la vez, o
+    la tarjeta anclada queda pegada al borde físico de la pantalla.
+  */
+  scroll-padding-inline-start: 0;
+
+  /* 4px arriba y abajo para que el `overflow` no recorte el anillo de foco
+     (2px de trazo + 2px de desplazamiento). Es la diferencia entre un carril
+     navegable con teclado y uno que parece que no lo es. */
+  padding-block: var(--space-1);
+
+  scrollbar-width: none;
+}
+
+.pista::-webkit-scrollbar {
+  display: none;
+}
+
+.pista > * {
+  scroll-snap-align: start;
+}
+
+/*
+  NINGÚN `touch-action` y NINGÚN `backdrop-filter`.
+
+  Lo primero, porque el fallo clásico —que la fila atrape el desplazamiento
+  vertical de la página— viene de gestos propios en JavaScript; con scroll
+  nativo el navegador reparte el gesto solo, y tocar `touch-action` es lo que
+  lo rompería.
+
+  Lo segundo, porque una estantería es una fila de lista, y ahí el desenfoque
+  destroza el scroll en gama media. Prohibición dura de CLAUDE.md.
+*/
+
+.tarjeta {
+  grid-auto-columns: var(--carril-tarjeta-w);
+}
+
+/* Cada hijo mide lo suyo: el ancho de un chip es el de su etiqueta. */
+.auto {
+  grid-auto-columns: max-content;
+}

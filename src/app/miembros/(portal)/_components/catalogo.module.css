@@ -1,0 +1,29 @@
+/* Ritmo vertical de la pantalla, en un solo sitio. Cada bloque —encabezado,
+   búsqueda, chips, estanterías, rejilla— es un hijo directo y ninguno declara
+   márgenes propios: así el orden se puede cambiar sin recolocar espaciados. */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.rejilla {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/*
+  El `h2` de la rejilla es visible y no está solo por accesibilidad.
+
+  Con estanterías encima, una rejilla sin cabecera se lee como "lo que sobró":
+  le da nombre y CIERRA la lista. Y de paso le da al lector de pantalla un
+  destino de salto que hoy no tenía.
+*/
+.tituloRejilla {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text);
+}

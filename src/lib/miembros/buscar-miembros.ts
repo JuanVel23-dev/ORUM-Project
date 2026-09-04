@@ -4,6 +4,7 @@ import {
   type EstadoDerivado,
   type EstadoMembresia,
 } from '@/lib/miembros/membresias'
+import { hoyISO } from '@/lib/shared/fecha'
 
 /*
   Búsqueda de miembros compartida por la paleta de comandos y la lista de
@@ -30,11 +31,6 @@ export type MiembroEncontrado = {
  */
 export function limpiarTermino(entrada: string): string {
   return entrada.replace(/[,()%*\\]/g, ' ').trim()
-}
-
-/** Fecha de hoy en 'YYYY-MM-DD', que es el formato de las columnas `date`. */
-function hoyISO(): string {
-  return new Date().toISOString().slice(0, 10)
 }
 
 /**

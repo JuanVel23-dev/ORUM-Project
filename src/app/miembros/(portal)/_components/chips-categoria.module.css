@@ -1,0 +1,80 @@
+/*
+  EL CHIP MIDE EL MÍNIMO TÁCTIL DE VERDAD: `var(--tap-min)`, 44px.
+
+  La alternativa era dejarlo en 36px y ampliar el área con un `::after`, la
+  técnica que el sistema usa para el ojo de la contraseña y el botón de copiar.
+  Ahí es la correcta, porque esos controles DEBEN verse pequeños. Un chip de
+  filtro no: es el control principal de la pantalla. Medir 44 de verdad elimina
+  un literal de alto, elimina la técnica de ampliación y elimina la posibilidad
+  de que quede vivo un objetivo de 36px. Cuesta 8px del primer pantallazo.
+*/
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  font-weight: var(--t-callout-weight);
+  color: var(--text-2);
+  text-decoration: none;
+  white-space: nowrap;
+
+  background: var(--surface);
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
+}
+
+.chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.chip:active {
+  scale: var(--escala-press);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  EL CHIP ACTIVO ES TINTA, NO ORO.
+
+  Un chip activo codifica un estado de filtro, y el oro no codifica estado
+  —regla C del presupuesto de oro—. El precedente en el sistema es
+  `toggle.module.css:144`, que ya pinta lo marcado con `--action`.
+
+  Y no se confía al color: relleno lleno + peso 590 + el check antes de la
+  etiqueta + `aria-current="true"`. Cuatro portadores, uno de ellos de forma.
+*/
+.activo {
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--action-fg);
+  font-weight: 590;
+}
+
+.activo:hover {
+  background: var(--action-hover);
+  border-color: var(--action-hover);
+  color: var(--action-fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip:active {
+    scale: 1;
+  }
+}
