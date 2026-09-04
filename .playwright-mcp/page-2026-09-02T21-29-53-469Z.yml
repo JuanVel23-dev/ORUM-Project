@@ -1,0 +1,18 @@
+- generic [ref=f27e1]:
+  - alert [ref=f27e75]: Iniciar sesión · ORUM Miembros
+  - generic [ref=f27e89]:
+    - banner [ref=f27e90]:
+      - generic [ref=f27e91]: ORUM
+      - generic [ref=f27e92]: Portal de Miembros
+    - generic [ref=f27e93]:
+      - generic [ref=f27e94]:
+        - generic [ref=f27e95]: Número de membresía
+        - textbox "Número de membresía" [active] [ref=f27e97]:
+          - /placeholder: "00012345"
+      - generic [ref=f27e98]:
+        - generic [ref=f27e99]: Contraseña
+        - generic [ref=f27e101]:
+          - textbox "Contraseña" [ref=f27e102]
+          - button "Mostrar contraseña" [ref=f27e104] [cursor=pointer]
+      - button "Iniciar sesión" [ref=f27e108] [cursor=pointer]
+    - paragraph [ref=f27e113]: ¿No recuerdas tu número de membresía? Está en tu carnet o pídelo en el punto donde te inscribiste.

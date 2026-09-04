@@ -1,0 +1,134 @@
+- generic [active] [ref=f41e1]:
+  - generic [ref=f41e2]:
+    - complementary [ref=f41e3]:
+      - link "ORUM" [ref=f41e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f41e6]:
+        - generic [ref=f41e7]:
+          - link "Inicio" [ref=f41e8] [cursor=pointer]:
+            - /url: /admin
+          - link "Miembros" [ref=f41e13] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link "Comercios" [ref=f41e20] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f41e27]:
+          - generic [ref=f41e28]: Análisis
+          - link "Métricas" [ref=f41e29] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link "Bitácora" [ref=f41e33] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f41e38]:
+          - generic [ref=f41e39]: Administración
+          - link "Usuarios" [ref=f41e40] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link "Planes" [ref=f41e54] [cursor=pointer]:
+            - /url: /admin/planes
+      - generic [ref=f41e58]:
+        - button "Cuenta y sesión" [ref=f41e60] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f41e62]: JU
+          - generic [ref=f41e63]:
+            - generic [ref=f41e64]: juan07veloza23@gmail.com
+            - generic [ref=f41e65]: Administrador mayor
+        - button "Contraer menú" [ref=f41e66] [cursor=pointer]
+    - generic [ref=f41e70]:
+      - banner [ref=f41e71]:
+        - button "Buscar miembro, comercio o acción…" [ref=f41e73] [cursor=pointer]
+        - generic [ref=f41e78]:
+          - radiogroup "Tema de la interfaz" [ref=f41e80]:
+            - generic [ref=f41e82] [cursor=pointer]:
+              - radio "Auto" [ref=f41e83]
+              - generic [ref=f41e86]: Auto
+            - generic [ref=f41e87] [cursor=pointer]:
+              - radio "Claro" [ref=f41e88]
+              - generic [ref=f41e95]: Claro
+            - generic [ref=f41e96] [cursor=pointer]:
+              - radio "Oscuro" [checked] [ref=f41e97]
+              - generic [ref=f41e100]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f41e101]:
+            - generic [aria-hidden] [ref=f41e102]: JU
+      - main [ref=f41e104]:
+        - generic [ref=f41e105]:
+          - generic [ref=f41e109]:
+            - generic [ref=f41e110]: Instala ORUM en este dispositivo
+            - generic [ref=f41e111]: Se abre a pantalla completa, sin barra del navegador, y queda en tu pantalla de inicio.
+          - generic [ref=f41e112]:
+            - button "Instalar" [ref=f41e113] [cursor=pointer]
+            - button "No mostrar más" [ref=f41e118] [cursor=pointer]
+        - generic [ref=f41e123]:
+          - 'heading "Comercio de prueba # nose" [level=1] [ref=f41e125]'
+          - link "Editar datos" [ref=f41e127] [cursor=pointer]:
+            - /url: /admin/comercios/8/editar
+        - generic [ref=f41e132]:
+          - generic [ref=f41e134]:
+            - generic [ref=f41e135]:
+              - generic [ref=f41e136]: Correo
+              - generic [ref=f41e137]: pruebacomercio@comercio.com
+            - generic [ref=f41e138]:
+              - generic [ref=f41e139]: Marca
+              - generic [ref=f41e140]: Sin registrar
+            - generic [ref=f41e141]:
+              - generic [ref=f41e142]: Categoría
+              - generic [ref=f41e143]: Sin registrar
+          - generic [ref=f41e144]:
+            - heading "Estado del aliado" [level=2] [ref=f41e146]
+            - generic [ref=f41e147]:
+              - generic [ref=f41e148]:
+                - generic [ref=f41e149]:
+                  - generic [ref=f41e150]: Aliado del club
+                  - generic [ref=f41e151]: Activo
+                - paragraph [ref=f41e152]: Determina si el comercio y sus promociones aparecen para los miembros.
+                - button "Retirar del club" [ref=f41e154] [cursor=pointer]
+              - generic [ref=f41e156]:
+                - generic [ref=f41e157]:
+                  - generic [ref=f41e158]: Acceso a su cuenta
+                  - generic [ref=f41e159]: Activo
+                - paragraph [ref=f41e160]: Determina si el comercio puede iniciar sesión en su herramienta para registrar ventas. Es independiente de seguir siendo aliado.
+                - button "Desactivar acceso" [ref=f41e162] [cursor=pointer]
+          - generic [ref=f41e164]:
+            - generic [ref=f41e165]:
+              - heading "Sucursales" [level=2] [ref=f41e166]
+              - link "Nueva sucursal" [ref=f41e167] [cursor=pointer]:
+                - /url: /admin/comercios/8/sucursales/nueva
+            - table [ref=f41e173]:
+              - caption [ref=f41e174]: "Sucursales de Comercio de prueba # nose"
+              - rowgroup [ref=f41e175]:
+                - row [ref=f41e176]:
+                  - columnheader "Sucursal" [ref=f41e177]
+                  - columnheader "Dirección" [ref=f41e178]
+                  - columnheader "Teléfono" [ref=f41e179]
+                  - columnheader "Estado" [ref=f41e180]
+                  - columnheader "Acciones" [ref=f41e181]
+              - rowgroup [ref=f41e183]:
+                - row [ref=f41e184]:
+                  - cell "Sede Prueba QA" [ref=f41e185]
+                  - 'cell "Calle 100 #15-20" [ref=f41e186]'
+                  - cell "3001234567" [ref=f41e187]
+                  - cell "Activa" [ref=f41e188]
+                  - cell [ref=f41e190]:
+                    - button "Desactivar" [ref=f41e192] [cursor=pointer]
+                    - button "Acciones de Sede Prueba QA" [ref=f41e197] [cursor=pointer]
+          - generic [ref=f41e203]:
+            - generic [ref=f41e204]:
+              - heading "Promociones" [level=2] [ref=f41e205]
+              - link "Nueva promoción" [ref=f41e206] [cursor=pointer]:
+                - /url: /admin/comercios/8/promociones/nueva
+            - table [ref=f41e212]:
+              - caption [ref=f41e213]: "Promociones de Comercio de prueba # nose"
+              - rowgroup [ref=f41e214]:
+                - row [ref=f41e215]:
+                  - columnheader "Promoción" [ref=f41e216]
+                  - columnheader "Tipo" [ref=f41e217]
+                  - columnheader "Valor" [ref=f41e218]
+                  - columnheader "Estado" [ref=f41e219]
+                  - columnheader "Acciones" [ref=f41e220]
+              - rowgroup [ref=f41e222]:
+                - row [ref=f41e223]:
+                  - cell "20% en toda la carta" [ref=f41e224]
+                  - cell "Descuento por porcentaje" [ref=f41e225]
+                  - cell "20" [ref=f41e226]
+                  - cell "Activa" [ref=f41e227]
+                  - cell [ref=f41e229]:
+                    - button "Desactivar" [ref=f41e231] [cursor=pointer]
+                    - button "Acciones de 20% en toda la carta" [ref=f41e236] [cursor=pointer]
+  - alert [ref=f41e242]
+  - region "Notificaciones"

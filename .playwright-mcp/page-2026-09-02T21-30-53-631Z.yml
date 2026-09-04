@@ -1,0 +1,18 @@
+- generic [ref=f31e1]:
+  - alert [ref=f31e28]: Iniciar sesión · ORUM Comercios
+  - generic [ref=f31e82]:
+    - banner [ref=f31e83]:
+      - generic [ref=f31e84]: ORUM
+      - generic [ref=f31e85]: Portal de Comercios
+    - generic [ref=f31e86]:
+      - generic [ref=f31e87]:
+        - generic [ref=f31e88]: Correo electrónico
+        - textbox "Correo electrónico" [active] [ref=f31e90]:
+          - /placeholder: comercio@ejemplo.com
+      - generic [ref=f31e91]:
+        - generic [ref=f31e92]: Contraseña
+        - generic [ref=f31e94]:
+          - textbox "Contraseña" [ref=f31e95]
+          - button "Mostrar contraseña" [ref=f31e97] [cursor=pointer]
+      - button "Iniciar sesión" [ref=f31e101] [cursor=pointer]
+    - paragraph [ref=f31e106]: ¿Problemas para entrar? Escribe al administrador del club.

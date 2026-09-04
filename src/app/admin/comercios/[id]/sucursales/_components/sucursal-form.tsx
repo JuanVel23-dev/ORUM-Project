@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import {
   crearSucursal,
   editarSucursal,
@@ -40,6 +41,8 @@ export function SucursalForm({
     editando ? editarSucursal : crearSucursal,
     estadoInicial,
   )
+  const cerrar = useCerrarOverlay()
+  useCerrarCuando(state.ok)
 
   return (
     <>
@@ -94,7 +97,7 @@ export function SucursalForm({
           >
             {editando ? 'Guardar cambios' : 'Crear sucursal'}
           </Button>
-          <Button href={`/admin/comercios/${comercioId}`} variant="secondary">
+          <Button type="button" variant="secondary" onClick={cerrar}>
             Cancelar
           </Button>
         </div>

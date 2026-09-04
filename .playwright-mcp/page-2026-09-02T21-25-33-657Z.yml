@@ -1,0 +1,108 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e2]:
+    - complementary [ref=f7e3]:
+      - link [ref=f7e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f7e5]:
+        - generic [ref=f7e6]:
+          - link [ref=f7e7] [cursor=pointer]:
+            - /url: /admin
+          - link [ref=f7e11] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link [ref=f7e18] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f7e23]:
+          - link [ref=f7e24] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link [ref=f7e27] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f7e31]:
+          - link [ref=f7e32] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link [ref=f7e45] [cursor=pointer]:
+            - /url: /admin/planes
+      - button "Cuenta y sesión" [ref=f7e50] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f7e52]: JU
+    - generic [ref=f7e53]:
+      - banner [ref=f7e54]:
+        - button "Buscar miembro, comercio o acción…" [ref=f7e56] [cursor=pointer]
+        - generic [ref=f7e61]:
+          - radiogroup "Tema de la interfaz" [ref=f7e63]:
+            - generic [ref=f7e65] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f7e66]
+              - generic [ref=f7e69]: Auto
+            - generic [ref=f7e70] [cursor=pointer]:
+              - radio "Claro" [ref=f7e71]
+              - generic [ref=f7e78]: Claro
+            - generic [ref=f7e79] [cursor=pointer]:
+              - radio "Oscuro" [ref=f7e80]
+              - generic [ref=f7e83]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f7e84]:
+            - generic [aria-hidden] [ref=f7e85]: JU
+      - main [ref=f7e87]:
+        - generic [ref=f7e88]:
+          - generic [ref=f7e89]:
+            - heading "Pruebas Prueba" [level=1] [ref=f7e90]
+            - paragraph [ref=f7e91]: Cédula 123456789
+          - generic [ref=f7e92]:
+            - link "Editar datos" [ref=f7e93] [cursor=pointer]:
+              - /url: /admin/miembros/4/editar
+            - link "Renovar membresía" [ref=f7e98] [cursor=pointer]:
+              - /url: /admin/miembros/4/renovar
+        - generic [ref=f7e102]:
+          - generic [ref=f7e104]:
+            - generic [ref=f7e105]:
+              - generic [ref=f7e106]:
+                - generic [ref=f7e107]: Activa
+                - generic [ref=f7e109]: Vence en 30 días
+              - paragraph [ref=f7e113]: Vigente hasta el 2 de oct de 2026.
+            - generic [ref=f7e114]:
+              - generic [ref=f7e115]: Nº de membresía
+              - generic [ref=f7e116]:
+                - generic [ref=f7e117]: "00044150"
+                - button "Copiar número de membresía" [ref=f7e118] [cursor=pointer]
+                - status [ref=f7e122]
+          - generic [ref=f7e123]:
+            - heading "Datos del miembro" [level=2] [ref=f7e125]
+            - generic [ref=f7e127]:
+              - generic [ref=f7e128]:
+                - generic [ref=f7e129]: Correo
+                - generic [ref=f7e130]: pruebas@prueba.com
+              - generic [ref=f7e131]:
+                - generic [ref=f7e132]: Teléfono
+                - generic [ref=f7e133]: Sin registrar
+              - generic [ref=f7e134]:
+                - generic [ref=f7e135]: Ciudad
+                - generic [ref=f7e136]: Bogotá
+              - generic [ref=f7e137]:
+                - generic [ref=f7e138]: Dirección
+                - generic [ref=f7e139]: calle 1
+          - generic [ref=f7e140]:
+            - heading "Historial de membresías" [level=2] [ref=f7e142]
+            - list [ref=f7e144]:
+              - listitem [ref=f7e145]:
+                - generic [ref=f7e147]:
+                  - generic [ref=f7e148]:
+                    - generic [ref=f7e149]: Membresía ORUM
+                    - generic [ref=f7e150]: Activa
+                    - generic [ref=f7e152]: nueva
+                  - generic [ref=f7e153]: 2 de sept de 2026 — 2 de oct de 2026
+                  - generic [ref=f7e154]: $ 0
+          - generic [ref=f7e156]:
+            - heading "Actividad" [level=2] [ref=f7e158]
+            - table [ref=f7e160]:
+              - caption [ref=f7e161]: Cambios registrados sobre Pruebas Prueba
+              - rowgroup [ref=f7e162]:
+                - row [ref=f7e163]:
+                  - columnheader "Cuándo" [ref=f7e164]
+                  - columnheader "Acción" [ref=f7e165]
+                  - columnheader "Detalle" [ref=f7e166]
+                  - columnheader "Registrado por" [ref=f7e167]
+              - rowgroup [ref=f7e168]:
+                - row [ref=f7e169]:
+                  - cell "02 de sept de 2026, 03:29 p. m." [ref=f7e170]
+                  - cell "Alta" [ref=f7e171]
+                  - cell "Miembro registrado — plan Membresía ORUM, $0" [ref=f7e173]
+                  - cell "juan07veloza23@gmail.com" [ref=f7e174]
+  - alert [ref=f7e175]
+  - region "Notificaciones"

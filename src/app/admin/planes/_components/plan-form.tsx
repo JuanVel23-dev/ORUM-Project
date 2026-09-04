@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { crearPlan, editarPlan, type PlanState } from '../actions'
 import styles from '@/styles/formulario.module.css'
 
@@ -26,6 +27,8 @@ export function PlanForm({ plan }: { plan?: PlanInicial }) {
     editando ? editarPlan : crearPlan,
     estadoInicial,
   )
+  const cerrar = useCerrarOverlay()
+  useCerrarCuando(state.ok)
 
   return (
     <>
@@ -88,7 +91,7 @@ export function PlanForm({ plan }: { plan?: PlanInicial }) {
           >
             {editando ? 'Guardar cambios' : 'Crear plan'}
           </Button>
-          <Button href="/admin/planes" variant="secondary">
+          <Button type="button" variant="secondary" onClick={cerrar}>
             Cancelar
           </Button>
         </div>

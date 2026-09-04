@@ -1,0 +1,134 @@
+- generic [active] [ref=f37e1]:
+  - generic [ref=f37e2]:
+    - complementary [ref=f37e3]:
+      - link "ORUM" [ref=f37e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f37e6]:
+        - generic [ref=f37e7]:
+          - link "Inicio" [ref=f37e8] [cursor=pointer]:
+            - /url: /admin
+          - link "Miembros" [ref=f37e13] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link "Comercios" [ref=f37e20] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f37e27]:
+          - generic [ref=f37e28]: Análisis
+          - link "Métricas" [ref=f37e29] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link "Bitácora" [ref=f37e33] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f37e38]:
+          - generic [ref=f37e39]: Administración
+          - link "Usuarios" [ref=f37e40] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link "Planes" [ref=f37e54] [cursor=pointer]:
+            - /url: /admin/planes
+      - generic [ref=f37e58]:
+        - button "Cuenta y sesión" [ref=f37e60] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f37e62]: JU
+          - generic [ref=f37e63]:
+            - generic [ref=f37e64]: juan07veloza23@gmail.com
+            - generic [ref=f37e65]: Administrador mayor
+        - button "Contraer menú" [ref=f37e66] [cursor=pointer]
+    - generic [ref=f37e70]:
+      - banner [ref=f37e71]:
+        - button "Buscar miembro, comercio o acción…" [ref=f37e73] [cursor=pointer]
+        - generic [ref=f37e78]:
+          - radiogroup "Tema de la interfaz" [ref=f37e80]:
+            - generic [ref=f37e82] [cursor=pointer]:
+              - radio "Auto" [ref=f37e83]
+              - generic [ref=f37e86]: Auto
+            - generic [ref=f37e87] [cursor=pointer]:
+              - radio "Claro" [ref=f37e88]
+              - generic [ref=f37e95]: Claro
+            - generic [ref=f37e96] [cursor=pointer]:
+              - radio "Oscuro" [checked] [ref=f37e97]
+              - generic [ref=f37e100]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f37e101]:
+            - generic [aria-hidden] [ref=f37e102]: JU
+      - main [ref=f37e104]:
+        - generic [ref=f37e105]:
+          - generic [ref=f37e106]:
+            - heading "Comercios aliados" [level=1] [ref=f37e107]
+            - paragraph [ref=f37e108]: La red de comercios donde los miembros usan sus beneficios.
+          - link "Crear comercio" [ref=f37e110] [cursor=pointer]:
+            - /url: /admin/comercios/nuevo
+        - generic [ref=f37e116]:
+          - textbox "Buscar comercios" [ref=f37e119]:
+            - /placeholder: Buscar por nombre
+          - button "Buscar" [ref=f37e120] [cursor=pointer]
+        - table [ref=f37e123]:
+          - caption [ref=f37e124]: Comercios aliados
+          - rowgroup [ref=f37e125]:
+            - row [ref=f37e126]:
+              - columnheader "Comercio" [ref=f37e127]
+              - columnheader "Descripción" [ref=f37e128]
+              - columnheader "Aliado" [ref=f37e129]
+              - columnheader "Acciones" [ref=f37e130]
+          - rowgroup [ref=f37e132]:
+            - row [ref=f37e133]:
+              - cell [ref=f37e134]:
+                - 'link "Comercio de prueba # nose" [ref=f37e135] [cursor=pointer]':
+                  - /url: /admin/comercios/8
+              - cell "—" [ref=f37e136]
+              - cell "Activo" [ref=f37e137]
+              - cell [ref=f37e139]:
+                - 'button "Acciones de Comercio de prueba # nose" [ref=f37e141] [cursor=pointer]'
+            - row [ref=f37e147]:
+              - cell [ref=f37e148]:
+                - link "Comercio Prueba 2" [ref=f37e149] [cursor=pointer]:
+                  - /url: /admin/comercios/4
+              - cell "Pruebas" [ref=f37e150]
+              - cell "Activo" [ref=f37e151]
+              - cell [ref=f37e153]:
+                - button "Acciones de Comercio Prueba 2" [ref=f37e155] [cursor=pointer]
+            - row [ref=f37e161]:
+              - cell [ref=f37e162]:
+                - link "Comida" [ref=f37e163] [cursor=pointer]:
+                  - /url: /admin/comercios/2
+              - cell "asdf" [ref=f37e164]
+              - cell "Activo" [ref=f37e165]
+              - cell [ref=f37e167]:
+                - button "Acciones de Comida" [ref=f37e169] [cursor=pointer]
+            - row [ref=f37e175]:
+              - cell [ref=f37e176]:
+                - link "Pequeño cesar" [ref=f37e177] [cursor=pointer]:
+                  - /url: /admin/comercios/1
+              - cell "Tienda de comida" [ref=f37e178]
+              - cell "Activo" [ref=f37e179]
+              - cell [ref=f37e181]:
+                - button "Acciones de Pequeño cesar" [ref=f37e183] [cursor=pointer]
+            - row [ref=f37e189]:
+              - cell [ref=f37e190]:
+                - link "Prueba" [ref=f37e191] [cursor=pointer]:
+                  - /url: /admin/comercios/3
+              - cell "—" [ref=f37e192]
+              - cell "Activo" [ref=f37e193]
+              - cell [ref=f37e195]:
+                - button "Acciones de Prueba" [ref=f37e197] [cursor=pointer]
+            - row [ref=f37e203]:
+              - cell [ref=f37e204]:
+                - link "Prueba 3" [ref=f37e205] [cursor=pointer]:
+                  - /url: /admin/comercios/5
+              - cell "—" [ref=f37e206]
+              - cell "Activo" [ref=f37e207]
+              - cell [ref=f37e209]:
+                - button "Acciones de Prueba 3" [ref=f37e211] [cursor=pointer]
+            - row [ref=f37e217]:
+              - cell [ref=f37e218]:
+                - link "prueba 5" [ref=f37e219] [cursor=pointer]:
+                  - /url: /admin/comercios/7
+              - cell "—" [ref=f37e220]
+              - cell "Activo" [ref=f37e221]
+              - cell [ref=f37e223]:
+                - button "Acciones de prueba 5" [ref=f37e225] [cursor=pointer]
+            - row [ref=f37e231]:
+              - cell [ref=f37e232]:
+                - link "Prueba4" [ref=f37e233] [cursor=pointer]:
+                  - /url: /admin/comercios/6
+              - cell "—" [ref=f37e234]
+              - cell "Activo" [ref=f37e235]
+              - cell [ref=f37e237]:
+                - button "Acciones de Prueba4" [ref=f37e239] [cursor=pointer]
+  - alert [ref=f37e245]
+  - region "Notificaciones"

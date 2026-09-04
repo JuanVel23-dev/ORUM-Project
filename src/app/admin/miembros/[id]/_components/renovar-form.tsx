@@ -6,6 +6,7 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
+import { useCerrarCuando } from '@/components/shell/overlay-ruta'
 import { renovarMembresia, type RenovarState } from '../../actions'
 import styles from '../ficha.module.css'
 
@@ -22,6 +23,8 @@ export function RenovarForm({
 }) {
   const [state, formAction, pending] = useActionState(renovarMembresia, estadoInicial)
   const [precio, setPrecio] = useState(planes[0] ? String(planes[0].precio) : '')
+
+  useCerrarCuando(state.ok)
 
   const sinPlanes = planes.length === 0
 

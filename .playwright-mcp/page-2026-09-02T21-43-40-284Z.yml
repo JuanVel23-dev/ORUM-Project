@@ -1,0 +1,47 @@
+- generic [active] [ref=f43e1]:
+  - alert [ref=f43e28]: Verificar membresía · ORUM Comercios
+  - generic [ref=f43e29]:
+    - banner [ref=f43e30]:
+      - link "ORUM" [ref=f43e31] [cursor=pointer]:
+        - /url: /comercios
+      - generic [ref=f43e32]: "Comercio de prueba # nose"
+      - generic [ref=f43e33]:
+        - radiogroup "Tema de la interfaz" [ref=f43e34]:
+          - generic [ref=f43e36] [cursor=pointer]:
+            - radio "Auto" [ref=f43e37]
+            - generic [ref=f43e40]: Auto
+          - generic [ref=f43e41] [cursor=pointer]:
+            - radio "Claro" [ref=f43e42]
+            - generic [ref=f43e49]: Claro
+          - generic [ref=f43e50] [cursor=pointer]:
+            - radio "Oscuro" [checked] [ref=f43e51]
+            - generic [ref=f43e54]: Oscuro
+        - button "Mi cuenta" [ref=f43e57]:
+          - generic [aria-hidden] [ref=f43e59]: CN
+    - main [ref=f43e60]:
+      - generic [ref=f43e62]:
+        - heading "Verificar membresía" [level=1] [ref=f43e63]
+        - paragraph [ref=f43e64]: Escanea el código del carnet o escribe el número. Si la membresía está vigente, podrás registrar la venta.
+      - generic [ref=f43e65]:
+        - generic [ref=f43e67]:
+          - generic [ref=f43e68]:
+            - generic [ref=f43e69]: Número de membresía
+            - textbox "Número de membresía" [ref=f43e71]:
+              - /placeholder: "00012345"
+              - text: "00031324"
+            - paragraph [ref=f43e72]: Está bajo el código del carnet.
+          - generic [ref=f43e73]:
+            - button "Escanear QR" [ref=f43e74] [cursor=pointer]
+            - button "Verificar" [ref=f43e79] [cursor=pointer]
+        - generic [ref=f43e85]:
+          - generic [ref=f43e86]:
+            - paragraph [ref=f43e87]: Daniel Usaquen
+            - paragraph [ref=f43e88]: N.º 00031324
+          - generic [ref=f43e89]:
+            - generic [ref=f43e90]: Membresía activa
+            - generic [ref=f43e91]: Premium
+        - generic [ref=f43e120]:
+          - generic [ref=f43e124]:
+            - paragraph [ref=f43e125]: Venta registrada
+            - paragraph [ref=f43e126]: Quedó anotada a nombre del miembro 00031324.
+          - button "Verificar otro miembro" [ref=f43e127] [cursor=pointer]

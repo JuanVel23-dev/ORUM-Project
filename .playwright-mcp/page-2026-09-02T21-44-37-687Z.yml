@@ -1,0 +1,36 @@
+- generic [active] [ref=f43e1]:
+  - alert [ref=f43e28]: Verificar membresía · ORUM Comercios
+  - generic [ref=f43e29]:
+    - banner [ref=f43e30]:
+      - link "ORUM" [ref=f43e31] [cursor=pointer]:
+        - /url: /comercios
+      - generic [ref=f43e32]: "Comercio de prueba # nose"
+      - generic [ref=f43e33]:
+        - radiogroup "Tema de la interfaz" [ref=f43e34]:
+          - generic [ref=f43e36] [cursor=pointer]:
+            - radio "Auto" [ref=f43e37]
+            - generic [ref=f43e40]: Auto
+          - generic [ref=f43e41] [cursor=pointer]:
+            - radio "Claro" [ref=f43e42]
+            - generic [ref=f43e49]: Claro
+          - generic [ref=f43e50] [cursor=pointer]:
+            - radio "Oscuro" [checked] [ref=f43e51]
+            - generic [ref=f43e54]: Oscuro
+        - button "Mi cuenta" [ref=f43e57]:
+          - generic [aria-hidden] [ref=f43e59]: CN
+    - main [ref=f43e60]:
+      - generic [ref=f43e62]:
+        - heading "Verificar membresía" [level=1] [ref=f43e63]
+        - paragraph [ref=f43e64]: Escanea el código del carnet o escribe el número. Si la membresía está vigente, podrás registrar la venta.
+      - generic [ref=f43e134]:
+        - alert [ref=f43e159]:
+          - generic [ref=f43e164]: No se encontró un miembro con ese número.
+        - generic [ref=f43e135]:
+          - generic [ref=f43e136]: Número de membresía
+          - textbox "Número de membresía" [ref=f43e138]:
+            - /placeholder: "00012345"
+            - text: "99999999"
+          - paragraph [ref=f43e139]: Está bajo el código del carnet.
+        - generic [ref=f43e140]:
+          - button "Escanear QR" [ref=f43e141] [cursor=pointer]
+          - button "Verificar" [ref=f43e146] [cursor=pointer]

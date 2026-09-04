@@ -12,7 +12,7 @@ async function exigirSuperAdmin(): Promise<boolean> {
   return !!actor && actor.activo && actor.rolCodigo === 'super_admin'
 }
 
-export type PromocionState = { error?: string }
+export type PromocionState = { error?: string; ok?: boolean }
 
 function leerCamposPromocion(formData: FormData):
   | {
@@ -83,7 +83,7 @@ export async function crearPromocion(_prev: PromocionState, formData: FormData):
   if (error) return { error: `No se pudo crear la promoción: ${error.message}` }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
-  redirect(`/admin/comercios/${comercioId}`)
+  return { ok: true }
 }
 
 export async function editarPromocion(_prev: PromocionState, formData: FormData): Promise<PromocionState> {
@@ -124,7 +124,7 @@ export async function editarPromocion(_prev: PromocionState, formData: FormData)
   if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
-  redirect(`/admin/comercios/${comercioId}`)
+  return { ok: true }
 }
 
 /** Activa o desactiva una promoción (`promociones.activo`). */

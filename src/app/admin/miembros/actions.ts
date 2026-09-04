@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual, type PerfilActual } from '@/lib/auth/auth'
 import { hoyISO } from '@/lib/shared/fecha'
@@ -207,7 +206,7 @@ export async function registrarMiembro(
   return { ok: true, numero, correo, nombre: `${nombres} ${apellidos}`.trim() }
 }
 
-export type RenovarState = { error?: string }
+export type RenovarState = { error?: string; ok?: boolean }
 
 /**
  * Renueva la membresía de un miembro: crea una nueva (tipo=renovada) enlazada a
@@ -305,10 +304,10 @@ export async function renovarMembresia(
 
   revalidatePath('/admin/miembros')
   revalidatePath(`/admin/miembros/${miembro_id}`)
-  return {}
+  return { ok: true }
 }
 
-export type EditarMiembroState = { error?: string }
+export type EditarMiembroState = { error?: string; ok?: boolean }
 
 /**
  * Edita los datos de un miembro (no cambia número ni perfil_id/UUID). El correo
@@ -389,5 +388,5 @@ export async function editarMiembro(
 
   revalidatePath('/admin/miembros')
   revalidatePath(`/admin/miembros/${miembroId}`)
-  redirect(`/admin/miembros/${miembroId}`)
+  return { ok: true }
 }

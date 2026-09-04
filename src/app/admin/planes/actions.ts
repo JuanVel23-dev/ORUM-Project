@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
 
-export type PlanState = { error?: string }
+export type PlanState = { error?: string; ok?: boolean }
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
 async function exigirSuperAdmin(): Promise<boolean> {
@@ -56,7 +56,7 @@ export async function crearPlan(_prev: PlanState, formData: FormData): Promise<P
   if (error) return { error: `No se pudo crear el plan: ${error.message}` }
 
   revalidatePath('/admin/planes')
-  redirect('/admin/planes')
+  return { ok: true }
 }
 
 export async function editarPlan(_prev: PlanState, formData: FormData): Promise<PlanState> {
@@ -81,7 +81,7 @@ export async function editarPlan(_prev: PlanState, formData: FormData): Promise<
   if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
 
   revalidatePath('/admin/planes')
-  redirect('/admin/planes')
+  return { ok: true }
 }
 
 /** Activa o desactiva un plan (planes_membresia.activo). */

@@ -1,0 +1,133 @@
+- generic [active] [ref=f13e1]:
+  - generic [ref=f13e2]:
+    - complementary [ref=f13e3]:
+      - link [ref=f13e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f13e5]:
+        - generic [ref=f13e6]:
+          - link [ref=f13e7] [cursor=pointer]:
+            - /url: /admin
+          - link [ref=f13e11] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link [ref=f13e17] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f13e22]:
+          - link [ref=f13e23] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link [ref=f13e27] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f13e31]:
+          - link [ref=f13e32] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link [ref=f13e45] [cursor=pointer]:
+            - /url: /admin/planes
+      - button "Cuenta y sesión" [ref=f13e50] [cursor=pointer]:
+        - generic [aria-hidden] [ref=f13e52]: JU
+    - generic [ref=f13e53]:
+      - banner [ref=f13e54]:
+        - button "Buscar miembro, comercio o acción…" [ref=f13e56] [cursor=pointer]
+        - generic [ref=f13e61]:
+          - radiogroup "Tema de la interfaz" [ref=f13e63]:
+            - generic [ref=f13e65] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f13e66]
+              - generic [ref=f13e69]: Auto
+            - generic [ref=f13e70] [cursor=pointer]:
+              - radio "Claro" [ref=f13e71]
+              - generic [ref=f13e78]: Claro
+            - generic [ref=f13e79] [cursor=pointer]:
+              - radio "Oscuro" [ref=f13e80]
+              - generic [ref=f13e83]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f13e84]:
+            - generic [aria-hidden] [ref=f13e85]: JU
+      - main [ref=f13e87]:
+        - generic [ref=f13e88]:
+          - generic [ref=f13e92]:
+            - generic [ref=f13e93]: Instala ORUM en este dispositivo
+            - generic [ref=f13e94]: Se abre a pantalla completa, sin barra del navegador, y queda en tu pantalla de inicio.
+          - generic [ref=f13e95]:
+            - button "Instalar" [ref=f13e96] [cursor=pointer]
+            - button "No mostrar más" [ref=f13e101] [cursor=pointer]
+        - generic [ref=f13e107]:
+          - heading "Métricas" [level=1] [ref=f13e108]
+          - paragraph [ref=f13e109]: "Cómo se comportó el club en un periodo: cuánto se vendió, quién lo vendió y cuánto ahorro recibieron los miembros."
+        - generic [ref=f13e110]:
+          - generic [ref=f13e111]:
+            - generic [ref=f13e112]: Desde
+            - textbox "Desde" [ref=f13e113]: 2026-08-03
+          - generic [ref=f13e114]:
+            - generic [ref=f13e115]: Hasta
+            - textbox "Hasta" [ref=f13e116]: 2026-09-02
+          - button "Aplicar" [ref=f13e117] [cursor=pointer]
+        - generic [ref=f13e121]:
+          - link "Últimos 7 días" [ref=f13e122] [cursor=pointer]:
+            - /url: /admin/metricas?desde=2026-08-26&hasta=2026-09-02
+          - link "Últimos 30 días" [ref=f13e124] [cursor=pointer]:
+            - /url: /admin/metricas?desde=2026-08-03&hasta=2026-09-02
+          - link "Últimos 90 días" [ref=f13e126] [cursor=pointer]:
+            - /url: /admin/metricas?desde=2026-06-04&hasta=2026-09-02
+        - paragraph [ref=f13e128]: Del 3 de agosto de 2026 al 2 de septiembre de 2026
+        - generic [ref=f13e129]:
+          - generic [ref=f13e130]:
+            - generic [ref=f13e132]:
+              - generic [ref=f13e133]: Miembros nuevos
+              - generic [ref=f13e134]: "2"
+            - generic [ref=f13e136]:
+              - generic [ref=f13e137]: Membresías vendidas
+              - generic [ref=f13e138]: "2"
+            - generic [ref=f13e140]:
+              - generic [ref=f13e141]: Ingreso por membresías
+              - generic [ref=f13e142]: $ 500
+            - generic [ref=f13e144]:
+              - generic [ref=f13e145]: Ahorro entregado
+              - generic [ref=f13e146]: $ 20.000
+              - generic [ref=f13e147]: Lo que los miembros dejaron de pagar
+          - generic [ref=f13e148]:
+            - heading "Membresías vendidas por empleado" [level=2] [ref=f13e150]
+            - table [ref=f13e152]:
+              - caption [ref=f13e153]: Membresías vendidas por empleado en el periodo
+              - rowgroup [ref=f13e154]:
+                - row [ref=f13e155]:
+                  - columnheader "Empleado" [ref=f13e156]
+                  - columnheader "Vendidas" [ref=f13e157]
+                  - columnheader "Monto total" [ref=f13e158]
+              - rowgroup [ref=f13e159]:
+                - row [ref=f13e160]:
+                  - cell "Juan Veloza" [ref=f13e161]
+                  - cell "1" [ref=f13e162]
+                  - cell "$ 500" [ref=f13e163]
+                - row [ref=f13e164]:
+                  - cell "Super admin" [ref=f13e165]
+                  - cell "1" [ref=f13e166]
+                  - cell "$ 0" [ref=f13e167]
+          - generic [ref=f13e168]:
+            - heading "Ventas por comercio" [level=2] [ref=f13e170]
+            - table [ref=f13e172]:
+              - caption [ref=f13e173]: Ventas registradas por comercio aliado en el periodo
+              - rowgroup [ref=f13e174]:
+                - row [ref=f13e175]:
+                  - columnheader "Comercio" [ref=f13e176]
+                  - columnheader "Ventas" [ref=f13e177]
+                  - columnheader "Monto total" [ref=f13e178]
+                  - columnheader "Ahorro entregado" [ref=f13e179]
+              - rowgroup [ref=f13e180]:
+                - row [ref=f13e181]:
+                  - cell "Prueba" [ref=f13e182]
+                  - cell "1" [ref=f13e183]
+                  - cell "$ 80.000" [ref=f13e184]
+                  - cell "$ 20.000" [ref=f13e185]
+          - generic [ref=f13e186]:
+            - heading "Uso de la membresía" [level=2] [ref=f13e188]
+            - table [ref=f13e190]:
+              - caption [ref=f13e191]: Veces que cada miembro usó su membresía en cada comercio (20 primeros)
+              - rowgroup [ref=f13e192]:
+                - row [ref=f13e193]:
+                  - columnheader "Miembro" [ref=f13e194]
+                  - columnheader "Comercio" [ref=f13e195]
+                  - columnheader "Veces usada" [ref=f13e196]
+              - rowgroup [ref=f13e197]:
+                - row [ref=f13e198]:
+                  - cell "Daniel Usaquen" [ref=f13e199]
+                  - cell "Prueba" [ref=f13e200]
+                  - cell "1" [ref=f13e201]
+  - alert [ref=f13e202]
+  - region "Notificaciones"

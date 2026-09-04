@@ -115,7 +115,7 @@ export async function crearUsuario(
   return { ok: true, email }
 }
 
-export type EditarUsuarioState = { error?: string }
+export type EditarUsuarioState = { error?: string; ok?: boolean }
 
 /**
  * Edita los datos de un empleado/administrador y, opcionalmente, su correo de
@@ -178,7 +178,7 @@ export async function editarUsuario(
   }
 
   revalidatePath('/admin/usuarios')
-  redirect('/admin/usuarios')
+  return { ok: true }
 }
 
 /** Activa o desactiva el acceso de un usuario (perfiles.activo). */

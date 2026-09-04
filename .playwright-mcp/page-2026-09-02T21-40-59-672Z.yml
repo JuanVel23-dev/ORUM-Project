@@ -1,0 +1,161 @@
+- generic [ref=f39e1]:
+  - generic [ref=f39e2]:
+    - complementary [ref=f39e3]:
+      - link "ORUM" [ref=f39e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f39e6]:
+        - generic [ref=f39e7]:
+          - link "Inicio" [ref=f39e8] [cursor=pointer]:
+            - /url: /admin
+          - link "Miembros" [ref=f39e13] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link "Comercios" [ref=f39e20] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f39e27]:
+          - generic [ref=f39e28]: Análisis
+          - link "Métricas" [ref=f39e29] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link "Bitácora" [ref=f39e33] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f39e38]:
+          - generic [ref=f39e39]: Administración
+          - link "Usuarios" [ref=f39e40] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link "Planes" [ref=f39e54] [cursor=pointer]:
+            - /url: /admin/planes
+      - generic [ref=f39e58]:
+        - button "Cuenta y sesión" [ref=f39e60] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f39e62]: JU
+          - generic [ref=f39e63]:
+            - generic [ref=f39e64]: juan07veloza23@gmail.com
+            - generic [ref=f39e65]: Administrador mayor
+        - button "Contraer menú" [ref=f39e66] [cursor=pointer]
+    - generic [ref=f39e70]:
+      - banner [ref=f39e71]:
+        - button "Buscar miembro, comercio o acción…" [ref=f39e73] [cursor=pointer]
+        - generic [ref=f39e78]:
+          - radiogroup "Tema de la interfaz" [ref=f39e80]:
+            - generic [ref=f39e82] [cursor=pointer]:
+              - radio "Auto" [ref=f39e83]
+              - generic [ref=f39e86]: Auto
+            - generic [ref=f39e87] [cursor=pointer]:
+              - radio "Claro" [ref=f39e88]
+              - generic [ref=f39e95]: Claro
+            - generic [ref=f39e96] [cursor=pointer]:
+              - radio "Oscuro" [checked] [ref=f39e97]
+              - generic [ref=f39e100]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f39e101]:
+            - generic [aria-hidden] [ref=f39e102]: JU
+      - main [ref=f39e104]:
+        - generic [ref=f39e209]:
+          - generic [ref=f39e213]:
+            - generic [ref=f39e214]: Instala ORUM en este dispositivo
+            - generic [ref=f39e215]: Se abre a pantalla completa, sin barra del navegador, y queda en tu pantalla de inicio.
+          - generic [ref=f39e216]:
+            - button "Instalar" [ref=f39e217] [cursor=pointer]
+            - button "No mostrar más" [ref=f39e222] [cursor=pointer]
+        - generic [ref=f39e105]:
+          - 'heading "Comercio de prueba # nose" [level=1] [ref=f39e107]'
+          - link "Editar datos" [ref=f39e109] [cursor=pointer]:
+            - /url: /admin/comercios/8/editar
+        - generic [ref=f39e114]:
+          - generic [ref=f39e116]:
+            - generic [ref=f39e117]:
+              - generic [ref=f39e118]: Correo
+              - generic [ref=f39e119]: pruebacomercio@comercio.com
+            - generic [ref=f39e120]:
+              - generic [ref=f39e121]: Marca
+              - generic [ref=f39e122]: Sin registrar
+            - generic [ref=f39e123]:
+              - generic [ref=f39e124]: Categoría
+              - generic [ref=f39e125]: Sin registrar
+          - generic [ref=f39e126]:
+            - heading "Estado del aliado" [level=2] [ref=f39e128]
+            - generic [ref=f39e129]:
+              - generic [ref=f39e130]:
+                - generic [ref=f39e131]:
+                  - generic [ref=f39e132]: Aliado del club
+                  - generic [ref=f39e133]: Activo
+                - paragraph [ref=f39e134]: Determina si el comercio y sus promociones aparecen para los miembros.
+                - button "Retirar del club" [ref=f39e136] [cursor=pointer]
+              - generic [ref=f39e138]:
+                - generic [ref=f39e139]:
+                  - generic [ref=f39e140]: Acceso a su cuenta
+                  - generic [ref=f39e141]: Activo
+                - paragraph [ref=f39e142]: Determina si el comercio puede iniciar sesión en su herramienta para registrar ventas. Es independiente de seguir siendo aliado.
+                - button "Desactivar acceso" [ref=f39e144] [cursor=pointer]
+          - generic [ref=f39e146]:
+            - generic [ref=f39e147]:
+              - heading "Sucursales" [level=2] [ref=f39e148]
+              - link "Nueva sucursal" [ref=f39e149] [cursor=pointer]:
+                - /url: /admin/comercios/8/sucursales/nueva
+            - table [ref=f39e155]:
+              - caption [ref=f39e156]: "Sucursales de Comercio de prueba # nose"
+              - rowgroup [ref=f39e157]:
+                - row [ref=f39e158]:
+                  - columnheader "Sucursal" [ref=f39e159]
+                  - columnheader "Dirección" [ref=f39e160]
+                  - columnheader "Teléfono" [ref=f39e161]
+                  - columnheader "Estado" [ref=f39e162]
+                  - columnheader "Acciones" [ref=f39e163]
+              - rowgroup [ref=f39e165]:
+                - row [ref=f39e166]:
+                  - cell "Sede Prueba QA" [ref=f39e167]
+                  - 'cell "Calle 100 #15-20" [ref=f39e168]'
+                  - cell "3001234567" [ref=f39e169]
+                  - cell "Activa" [ref=f39e170]
+                  - cell [ref=f39e172]:
+                    - button "Desactivar" [ref=f39e174] [cursor=pointer]
+                    - button "Acciones de Sede Prueba QA" [ref=f39e179] [cursor=pointer]
+          - generic [ref=f39e185]:
+            - generic [ref=f39e186]:
+              - heading "Promociones" [level=2] [ref=f39e187]
+              - link "Nueva promoción" [ref=f39e188] [cursor=pointer]:
+                - /url: /admin/comercios/8/promociones/nueva
+            - generic [ref=f39e194]:
+              - generic [ref=f39e199]:
+                - paragraph [ref=f39e200]: Sin promociones
+                - paragraph [ref=f39e201]: Las promociones son el beneficio que ve el miembro. Crea la primera.
+              - link "Nueva promoción" [ref=f39e203] [cursor=pointer]:
+                - /url: /admin/comercios/8/promociones/nueva
+        - dialog [ref=f39e227]:
+          - generic [ref=f39e228]:
+            - generic [ref=f39e229]:
+              - generic [ref=f39e230]:
+                - heading "Nueva promoción" [level=2] [ref=f39e231]
+                - paragraph [ref=f39e232]: "Comercio de prueba # nose"
+              - button "Cerrar" [active] [ref=f39e233] [cursor=pointer]
+            - generic [ref=f39e238]:
+              - generic [ref=f39e239]:
+                - generic [ref=f39e240]:
+                  - generic [ref=f39e241]: Título
+                  - textbox "Título" [ref=f39e243]:
+                    - /placeholder: 20% en toda la carta
+                  - paragraph [ref=f39e244]: Es lo que ve el miembro. Sé concreto.
+                - generic [ref=f39e245]:
+                  - generic [ref=f39e246]: Descripciónopcional
+                  - textbox "Descripciónopcional" [ref=f39e248]
+                - generic [ref=f39e249]:
+                  - generic [ref=f39e250]: Tipo de beneficio
+                  - combobox "Tipo de beneficio" [ref=f39e253] [cursor=pointer]:
+                    - option "Descuento por porcentaje" [selected]
+                    - option "2x1"
+                    - option "Monto fijo"
+                    - option "Regalo/cortesía"
+                - generic [ref=f39e254]:
+                  - generic [ref=f39e255]: Porcentaje de descuento
+                  - spinbutton "Porcentaje de descuento" [ref=f39e257]
+                  - paragraph [ref=f39e258]: Entre 1 y 100.
+                - generic [ref=f39e259]:
+                  - generic [ref=f39e260]:
+                    - generic [ref=f39e261]: Fecha de inicioopcional
+                    - textbox "Fecha de inicioopcional" [ref=f39e263]
+                  - generic [ref=f39e264]:
+                    - generic [ref=f39e265]: Fecha de finopcional
+                    - textbox "Fecha de finopcional" [ref=f39e267]
+              - generic [ref=f39e268]:
+                - button "Crear promoción" [ref=f39e269] [cursor=pointer]
+                - link "Cancelar" [ref=f39e274] [cursor=pointer]:
+                  - /url: /admin/comercios/8
+  - alert [ref=f39e208]
+  - region "Notificaciones"
