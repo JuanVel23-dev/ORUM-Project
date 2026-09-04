@@ -1,25 +1,121 @@
-.logo {
-  flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-sunk);
+/* ==========================================================================
+   LA PLACA DEL LOGO
+   --------------------------------------------------------------------------
+   Aquí decía: "logos ajenos de proporción impredecible: se recortan al cuadro
+   en vez de deformarse. Un logo estirado es lo primero que delata un catálogo
+   barato."
 
-  /* Logos ajenos de proporción impredecible: se recortan al cuadro en vez de
-     deformarse. Un logo estirado es lo primero que delata un catálogo barato. */
-  object-fit: cover;
-}
+   EL DIAGNÓSTICO ERA CORRECTO Y EL REMEDIO NO. Un logo estirado delata, sí,
+   pero `object-fit: cover` no evita ese defecto: lo cambia por otro peor. Un
+   logotipo apaisado 4:1 metido en un cuadro pierde los lados —es decir, pierde
+   el nombre de la marca—. Para una fotografía `cover` es la regla correcta;
+   para un logo la regla es `contain`: SE MUESTRA ENTERO O NO SE MUESTRA.
 
-.placeholder {
+   Se deja escrito para que nadie lo revierta creyendo que corrige la
+   deformación: la deformación no vuelve, porque `contain` tampoco deforma.
+
+   La caja es apaisada 3:2 y no cuadrada por lo mismo: con `contain`, un
+   logotipo 4:1 se pinta al 25 % de su alto en un cuadro 1:1 y al ~50 % en 3:2.
+   Y una inicial centrada en un rectángulo se lee como placa de marca, no como
+   avatar: un comercio no es una persona.
+
+   El fondo y el filo NO SIGUEN EL TEMA (ver `tokens.css` §11). Es el mismo
+   caso de `QrCode`: el activo no es nuestro y asume fondo claro. Un PNG
+   transparente con logotipo oscuro desaparecía sobre la placa oscura.
+   ========================================================================== */
+
+.placa {
+  /* Relleno interior. Local, no token del sistema: es la geometría de esta
+     pieza. En 4pt, porque los 6px que se barajaron están fuera de la rejilla,
+     que es la única regla que la escala tiene. */
+  --placa-pad: var(--space-1);
+
+  flex-shrink: 0; /* Una placa de 68px junto a otra de 72px destroza la
+                     rejilla antes que cualquier logo feo. */
+
   display: grid;
   place-items: center;
+  overflow: hidden;
 
+  width: var(--placa-logo-w);
+  aspect-ratio: var(--placa-logo-ratio);
+  padding: var(--placa-pad);
+
+  border-radius: var(--radius-xs);
+  background: var(--placa-logo-bg);
+
+  /*
+    El filo va como sombra interior y no como `border` a propósito: un borde
+    consume caja y dejaría el interior en 62x38 en vez de los 64x40 que la
+    dirección de arte fija. Con `inset` la aritmética sale exacta —72-2x4 y
+    48-2x4— y el filo se ve idéntico, recortado por el mismo radio.
+    En tema claro esto es lo ÚNICO que dibuja la placa: su cuerpo blanco da
+    1,00:1 contra la tarjeta.
+  */
+  box-shadow: inset 0 0 0 1px var(--placa-logo-borde);
+
+  /*
+    Centra verticalmente el texto alternativo cuando la imagen falla. Es el
+    alto interior: ancho x 2/3 (el inverso de --placa-logo-ratio, que CSS no
+    sabe invertir por sí solo) menos los dos rellenos. SI CAMBIA LA PROPORCIÓN
+    DEL TOKEN, CAMBIA TAMBIÉN ESTE 2/3.
+  */
+  line-height: calc(var(--placa-logo-w) * 2 / 3 - var(--placa-pad) * 2);
+}
+
+.imagen {
+  width: 100%;
+  height: 100%;
+
+  /* Un logo se muestra entero o no se muestra. */
+  object-fit: contain;
+  object-position: center;
+
+  /*
+    Tipografía DEL TEXTO ALTERNATIVO. No se ve mientras la imagen carga bien;
+    es lo que aparece, ya con su aspecto definitivo, cuando el `logo_url`
+    está muerto. Debe coincidir con `.inicial`.
+  */
   font-weight: 620;
+  font-size: calc(var(--placa-logo-w) * 0.26);
   letter-spacing: -0.01em;
-  color: var(--text-3);
-
-  /* Sin logo, la inicial hace de marca. Va en la superficie hundida para que
-     el hueco se lea como intencional y no como una imagen que no cargó. */
-  background: var(--surface-sunk);
+  text-align: center;
   text-transform: uppercase;
+  color: var(--placa-logo-inicial);
+  overflow: hidden;
+}
+
+/* Sin logo propio ni de marca: la inicial hace de marca. Mismo aspecto que el
+   texto alternativo de `.imagen`, para que los dos caminos sean el mismo. */
+.inicial {
+  font-weight: 620;
+  font-size: calc(var(--placa-logo-w) * 0.26);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--placa-logo-inicial);
   user-select: none;
+}
+
+/* ==========================================================================
+   VARIANTE HERO  ·  la placa de la ficha del comercio
+   --------------------------------------------------------------------------
+   144x96 con 12px de relleno: caja interior de 120x72, el doble exacto de la
+   de la tarjeta. La altura NO se declara aquí tampoco — la sigue derivando el
+   mismo `aspect-ratio`, así que la proporción no puede divergir entre las dos
+   escalas.
+
+   El radio sube un escalón (--radius-xs -> --radius-sm) porque el radio no es
+   una constante de la pieza sino una proporción de su tamaño: 6px sobre 144px
+   se lee como una esquina viva, no como la misma placa más grande.
+
+   Va DESPUÉS de `.placa` en este archivo y sobre el mismo elemento: la
+   cascada la resuelve el orden del propio módulo, no el orden en que Next
+   inyecte dos hojas distintas.
+   ========================================================================== */
+
+.hero {
+  --placa-pad: var(--space-3);
+  --placa-logo-w: 144px;
+
+  border-radius: var(--radius-sm);
 }

@@ -3,42 +3,67 @@ import styles from './comercio-logo.module.css'
 type ComercioLogoProps = {
   logoUrl: string | null
   nombre: string
-  size?: number
   className?: string
 }
 
 /**
- * Logo de un comercio aliado, con respaldo tipográfico cuando no hay imagen.
+ * El logotipo de un comercio aliado, dentro de su placa.
  *
- * El respaldo NO es un icono genérico: es la inicial del comercio, igual que
+ * LA PLACA ES LO QUE HACE COLECCIÓN. Con `object-fit: contain` un logotipo 1:1
+ * y uno 4:1 acaban con tamaños ópticos distintos, y eso es geometría, no un
+ * defecto que se pueda pintar. Lo que los une es el marco: mismo tamaño, mismo
+ * relleno, mismo filo, mismo fondo y mismo radio para todos.
+ *
+ * EL RESPALDO NO ES UN ICONO GENÉRICO: es la inicial del comercio, igual que
  * `Avatar` hace con las personas. Un catálogo donde la mitad de las tarjetas
  * muestran el mismo icono de tienda se lee como incompleto; con la inicial,
  * cada tarjeta sigue siendo distinguible de un vistazo.
+ *
+ * ── Por qué el `alt` es la inicial y no el nombre ──────────────────────────
+ *
+ * Un `logo_url` muerto pintaba el icono de imagen rota, que destruye
+ * exactamente la confianza que el catálogo busca. Los dos remedios evidentes
+ * se excluyen entre sí: si el `<img>` es transparente para dejar ver una
+ * inicial pintada detrás, un logo transparente legítimo la deja ver entre sus
+ * trazos; y si lleva fondo opaco para taparla, una imagen rota también la tapa
+ * y queda una placa vacía. El servidor no puede distinguir "cargó" de "falló",
+ * y no hay selector de CSS para eso.
+ *
+ * La salida es el propio texto alternativo: el `alt` ES la inicial, y el
+ * `<img>` lleva su tipografía, su color y su centrado. Cuando la imagen falla,
+ * el navegador pinta el alternativo YA ESTILADO, en su sitio. Coste cero,
+ * sigue siendo Server Component, cero JavaScript.
+ *
+ * La placa entera va `aria-hidden`, así que ese `alt` no llega al lector: el
+ * nombre del comercio está siempre visible al lado y no se anuncia dos veces.
+ *
+ * PENDIENTE DE VERIFICAR EN NAVEGADOR (T12): Chrome puede pintar un glifo de
+ * rotura JUNTO al texto alternativo cuando el `<img>` tiene dimensiones
+ * explícitas. Si ocurre, se documenta cuál y se pasa al camino de fondo opaco,
+ * cuyo peor caso es placa vacía —feo, nunca icono de rotura—.
+ *
+ * El tamaño sale de `--placa-logo-w` y la altura la deriva `--placa-logo-ratio`:
+ * no hay `style={{ width, height }}`. Un consumidor que necesite otra escala
+ * —el hero de una ficha— sobrescribe ese token en su propia clase.
  */
-export function ComercioLogo({ logoUrl, nombre, size = 48, className }: ComercioLogoProps) {
-  const clases = [styles.logo, className].filter(Boolean).join(' ')
-
-  if (logoUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
-      <img
-        src={logoUrl}
-        alt={`Logo de ${nombre}`}
-        className={clases}
-        style={{ width: size, height: size }}
-        loading="lazy"
-        decoding="async"
-      />
-    )
-  }
+export function ComercioLogo({ logoUrl, nombre, className }: ComercioLogoProps) {
+  const inicial = nombre.trim().charAt(0).toUpperCase()
+  const clases = [styles.placa, className].filter(Boolean).join(' ')
 
   return (
-    <div
-      className={[clases, styles.placeholder].join(' ')}
-      style={{ width: size, height: size, fontSize: size * 0.4 }}
-      aria-hidden
-    >
-      {nombre.charAt(0)}
-    </div>
+    <span className={clases} aria-hidden="true">
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+        <img
+          src={logoUrl}
+          alt={inicial}
+          className={styles.imagen}
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <span className={styles.inicial}>{inicial}</span>
+      )}
+    </span>
   )
 }
