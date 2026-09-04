@@ -164,6 +164,17 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
+/* El check de la opción elegida. `margin-left: auto` lo empuja al filo derecho
+   sin necesidad de que la fila sepa cuántas columnas tiene. */
+.itemMarca {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  padding-left: var(--space-3);
+  color: var(--text-2);
+}
+
 .separador {
   height: 1px;
   margin: var(--space-2) calc(var(--space-2) * -1);

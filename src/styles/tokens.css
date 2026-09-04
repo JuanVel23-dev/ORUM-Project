@@ -79,6 +79,26 @@
     transparent
   );
 
+  /*
+    Halo de las pantallas de acceso: la única superficie dorada grande del
+    sistema. Funciona porque su opacidad es casi imperceptible — no se ve como
+    color, se siente como luz.
+
+    Vive aquí y no en `pantalla-auth.module.css` porque allí estaba escrito
+    `rgba(191, 160, 99, …)`, que es --gold-500 copiado a mano: un literal de
+    color, y de los peores, porque el día que la marca cambie de oro el halo se
+    queda con el anterior sin que nada avise (D7 del plan de rediseño).
+
+    Las paradas se derivan del token con `color-mix`, que el proyecto ya usa en
+    Card, Input y la propia tarjeta de acceso.
+  */
+  --gold-halo: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--gold-500) 9%, transparent) 0%,
+    color-mix(in srgb, var(--gold-500) 3%, transparent) 42%,
+    transparent 68%
+  );
+
   /* ==========================================================================
      3. SEMÁNTICOS  ·  brecha de croma frente al oro
      --------------------------------------------------------------------------
@@ -203,6 +223,24 @@
   --t-body-tracking: 0;
   --t-body-weight: 400;
 
+  /*
+    Texto DENTRO de un control de formulario (Input, Textarea, Select).
+
+    Es --t-body-size, salvo bajo puntero grueso, donde sube a 16px. No es una
+    preferencia estética: Safari en iOS HACE ZOOM al enfocar cualquier campo
+    cuyo font-size computado sea menor de 16px, y no hay forma de desactivarlo
+    sin `user-scalable=no` o `maximum-scale=1`, que matan el pinch-zoom y
+    reprueban WCAG 1.4.4. Por eso el remedio es el tamaño, no el viewport.
+
+    Dónde muerde: el acceso tiene `autoFocus` en el primer campo, así que el
+    salto de zoom es literalmente lo primero que ve un socio nuevo, antes de
+    tocar nada, y deja la tarjeta descentrada y el halo recortado.
+
+    En escritorio (`pointer: fine`) el valor no cambia: el control se ve
+    exactamente igual que antes.
+  */
+  --t-control-size: var(--t-body-size);
+
   /* callout — etiquetas, botones */
   --t-callout-size: 0.875rem;
   --t-callout-leading: 1.5;
@@ -297,6 +335,68 @@
   --tabbar-h: 56px;
   --content-max: 1100px;
 
+  /* Ancho de la tarjeta de un carril. Es una MEDIDA DE COMPONENTE, como
+     --sidebar-w, no un espaciado: por eso vive aquí y no en la escala de 4pt.
+     A 343px de contenedor muestra 1,71 tarjetas —la cortada es la que dice
+     "hay más"— y a 720px, 3,5. Un solo valor sirve a todos los anchos. */
+  --carril-tarjeta-w: 200px;
+
   /* Objetivo táctil mínimo. No bajar de aquí en ningún interactivo. */
   --tap-min: 44px;
+
+  /* ==========================================================================
+     11. SUPERFICIES QUE NO SIGUEN EL TEMA
+     --------------------------------------------------------------------------
+     Precedente: QrCode (negro sobre blanco en los dos temas). La causa es la
+     misma en los dos casos: el activo NO ES NUESTRO y asume fondo claro. Un
+     PNG transparente con logotipo oscuro desaparece sobre una placa oscura,
+     igual que un QR invertido deja de escanearse.
+
+     Diferencia con QrCode: allí son literales por excepción sancionada; aquí
+     son tokens, y se consumen con var(--…) como todo lo demás.
+
+     Contrastes (método de T5, WCAG 2.1):
+       filo --n-400 vs tarjeta clara #ffffff ........ 3,33:1  ok 1.4.11
+       filo --n-400 vs fondo claro   #fbfbfc ........ 3,22:1  ok 1.4.11
+       filo --n-400 vs tarjeta oscura #16161a ....... 5,42:1  ok 1.4.11
+       filo --n-400 vs fondo oscuro  #0a0a0c ........ 5,95:1  ok 1.4.11
+       inicial --n-500 sobre placa blanca ........... 5,26:1  ok (texto grande)
+     En tema claro la placa la dibuja el filo, y SOLO el filo: su cuerpo da
+     1,00:1 contra la tarjeta.
+     ======================================================================== */
+
+  /* Blanco puro, no --w-100: un logotipo en color se calibró contra blanco, y
+     medio escalón de gris no compra separación (1,10:1) pero sí lo ensucia. */
+  --placa-logo-bg: var(--w-0);
+
+  /* El único valor de la rampa neutra con ≥3:1 contra las cuatro superficies
+     donde vive la placa, en los dos temas. --w-400 da 1,73:1 en claro. */
+  --placa-logo-borde: var(--n-400);
+
+  /* La inicial vive sobre un fondo constante, así que su color también lo es.
+     Con --text-3 el mismo píxel daría 5,26:1 en claro y 3,33:1 en oscuro. */
+  --placa-logo-inicial: var(--n-500);
+
+  /* Apaisada, no cuadrada: con `contain` un logotipo 4:1 se pinta al 25 % de
+     su alto en un cuadro 1:1, y al ~50 % en 3:2. */
+  --placa-logo-ratio: 3 / 2;
+
+  /* Ancho en tarjeta. La ALTURA NO SE DECLARA: la deriva el aspect-ratio.
+     El hero de la ficha sobrescribe este token localmente a 144px. */
+  --placa-logo-w: 72px;
+}
+
+/*
+  La única consulta de medio de esta capa, y la razón está arriba, en
+  --t-control-size: en un dispositivo táctil un campo por debajo de 16px
+  dispara el zoom automático de Safari iOS.
+
+  Se consulta `pointer`, no el ancho: lo que importa es con qué se toca, no
+  cuánto mide la ventana. Una tableta ancha necesita los 16px; un portátil
+  estrecho, no.
+*/
+@media (pointer: coarse) {
+  :root {
+    --t-control-size: 1rem; /* 16px — el umbral exacto de Safari iOS */
+  }
 }

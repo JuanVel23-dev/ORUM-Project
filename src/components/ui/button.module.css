@@ -162,12 +162,68 @@
   filter: brightness(0.92);
 }
 
-/*
-  Variante ceremonial. Reservada al CTA comercial (adquirir membresía).
-  NO usar como botón primario de la app: si el oro aparece en todas partes
-  deja de significar algo.
+/* --- brand: la acción ceremonial ------------------------------------------
 
-  El texto va en negro sobre el oro: 7.94:1, cumple AAA.
+   Relleno dorado PLANO con texto en tinta. Es el primario del recorrido del
+   cliente y de las seis pantallas de acceso; dentro del panel y de la
+   herramienta de comercios el primario sigue siendo `.primary`, que es tinta.
+
+   Por qué plano y no el barrido de `.gold`: en tema claro `--gold-sheen` se
+   remapea a la mitad oscura de la rampa y su parada del 62% (#5c4b25) da
+   2,34:1 contra la tinta. Un botón de 277px reprobaría 1.4.3 en ~172px de su
+   recorrido. Plano da 5,40:1 en todo el relleno.
+
+   El relleno NO cambia de color en ningún estado, y no es pereza: aclararlo
+   hunde el borde por debajo de 3:1 contra la superficie clara (1.4.11) y
+   oscurecerlo hunde el texto por debajo de 4,5:1 (1.4.3). El intervalo legal
+   entre los dos muros es de 0,05 de luminancia — cualquier tono de hover
+   aterrizaría al borde de un umbral, donde deciden el antialiasing y el
+   monitor, no el diseño. Es además lo correcto en el idioma de Apple: un
+   botón de iOS no cambia de tono al pulsarse.
+   -------------------------------------------------------------------------- */
+.brand {
+  background: var(--action-gold);
+  color: var(--action-gold-fg);
+  box-shadow: var(--shadow-2);
+}
+
+/*
+  El hover se comunica con MATERIAL, no con color: sube la elevación y aparece
+  el filo de luz superior. En claro manda la sombra —el filo apenas se lee
+  sobre el oro—; en oscuro es al revés, porque una sombra negra sobre fondo
+  negro no se ve y el chaflán sí. Las dos señales conviven sin preguntar por
+  el tema, que es una condicional menos.
+*/
+.brand::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--gold-hairline);
+
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.brand:hover:not(:disabled) {
+  box-shadow: var(--shadow-3);
+}
+
+.brand:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+/*
+  Variante ceremonial de MATERIAL: el barrido metálico.
+
+  ⚠️ NO admite texto encima. En tema claro `globals.css` remapea el barrido a
+  #9e8244 → #7d6733 → #5c4b25 → #9e8244, y la parada del 62% da 2,34:1 contra
+  `--n-1000`: reprueba WCAG 1.4.3 por más del doble, en el 62% del recorrido
+  del botón. Para un botón con etiqueta está `.brand`, que es plano.
+
+  Lo que sí sirve: superficies ceremoniales sin texto —el filo del carnet, el
+  wordmark con `background-clip: text`, la barra de `ProgressBar`—.
 */
 .gold {
   background-image: var(--gold-sheen);

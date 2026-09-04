@@ -287,6 +287,7 @@ function Contenido() {
           <Button variant="secondary">Secundario</Button>
           <Button variant="ghost">Fantasma</Button>
           <Button variant="danger">Peligro</Button>
+          <Button variant="brand">Acción ceremonial</Button>
           <Button variant="gold">Adquirir membresía</Button>
         </Grupo>
 

@@ -44,6 +44,43 @@
   --action-hover: #26262c;
   --action-fg: #ffffff;
 
+  /* --------------------------------------------------------------------------
+     ACCIÓN CEREMONIAL  ·  el par dorado de `Button variant=brand`
+
+     Habilitado para el recorrido del cliente y las SEIS pantallas de acceso.
+     Dentro del panel y de la herramienta de comercios el primario sigue
+     siendo tinta: lo que cambia es la puerta, no la sala.
+
+     Relleno PLANO. Nunca --gold-sheen: en tema claro el barrido se remapea
+     más abajo en este mismo archivo a #9e8244 → #7d6733 → #5c4b25 → #9e8244,
+     y la parada del 62% da 2,34:1 contra el texto tinta. Son ~172px de un
+     botón de 277px reprobando 1.4.3 por más del doble.
+
+     Ratios firmados (.claude/docs/T5-validacion-contraste.md):
+       texto --action-gold-fg sobre --action-gold ....... 5,40:1  ok 1.4.3
+       borde contra --surface claro ..................... 3,66:1  ok 1.4.11
+       borde contra --surface oscuro .................... 4,92:1  ok 1.4.11
+       borde contra la tarjeta de acceso ................ 5,02:1  ok 1.4.11
+       borde contra --bg claro .......................... 3,54:1  ok 1.4.11
+
+     `--gold-600` es el único tono que cumple los dos criterios en tema CLARO:
+     `--gold-500` sobre blanco da 2,49:1 de filo y reprueba 1.4.11. Esa es la
+     restricción que fija el valor aquí, y no se toca.
+
+     En OSCURO esa restricción no existe, y el tono claro salía mostaza en vez
+     de metal. Ahí se usa el oro de marca, auditado por tema como exigía la
+     nota anterior de este bloque:
+       texto --n-1000 sobre --gold-500 ................... 7,94:1  ok 1.4.3
+       filo --gold-500 contra --n-900 (tarjeta) .......... 7,24:1  ok 1.4.11
+     Ambos con MÁS holgura que el par de tema claro. L(gold-500) = 0,371, que
+     es el valor que documenta tokens.css.
+
+     Si cambias uno de los dos valores, audita ESE tema: los criterios se
+     comprueban por tema, no una vez para los dos.
+     -------------------------------------------------------------------------- */
+  --action-gold: var(--gold-600);
+  --action-gold-fg: var(--n-1000);
+
   --focus: var(--gold-600); /* 3.66:1 sobre blanco — cumple el mínimo de focus */
   --brand: var(--gold-700); /* dorado legible sobre claro */
   --brand-edge: var(--gold-600); /* filos dorados en claro */
@@ -121,6 +158,11 @@
   --brand: var(--gold-300);
   --brand-edge: var(--gold-500);
 
+  /* Oro de marca: en oscuro no rige la restricción del tema claro, y aquí
+     `--gold-600` se leía mostaza. Auditado: 7,94:1 de texto, 7,24:1 de filo
+     contra la tarjeta. Ver el bloque de ACCIÓN CEREMONIAL arriba. */
+  --action-gold: var(--gold-500);
+
   /* Sobre fondo oscuro vuelve el barrido brillante de tokens.css. */
   --gold-sheen: linear-gradient(
     135deg,
@@ -184,6 +226,9 @@
     --focus: var(--gold-400);
     --brand: var(--gold-300);
     --brand-edge: var(--gold-500);
+
+    /* Misma razón que en [data-theme='dark']: oro de marca, auditado. */
+    --action-gold: var(--gold-500);
 
     --gold-sheen: linear-gradient(
       135deg,

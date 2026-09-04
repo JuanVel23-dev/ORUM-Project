@@ -19,10 +19,16 @@
   `auto-fit` + `minmax` reparte columnas sin media queries: la rejilla se
   adapta al ancho disponible en lugar de a puntos de ruptura fijos, así que
   funciona igual dentro de una sidebar estrecha que a pantalla completa.
+
+  El `min(…, 100%)` es la guarda imprescindible: sin ella, `minmax(290px, 1fr)`
+  crea una pista de 290px aunque el contenedor mida menos —no encoge— y la
+  rejilla desborda. Medido: 42px de desbordamiento a 280px de viewport, 2px a
+  320px, 0 desde 344px. Con la guarda la pista nunca supera el ancho
+  disponible; por encima de `--min` no cambia nada.
 */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--min, 240px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--min, 240px), 100%), 1fr));
   gap: var(--gap, var(--space-4));
   min-width: 0;
 }

@@ -11,7 +11,14 @@
   color: var(--text);
 
   font-family: var(--font-sans);
-  font-size: var(--t-body-size);
+  /*
+    NO es --t-body-size. Bajo puntero grueso este token sube a 16px porque
+    Safari iOS hace zoom al enfocar cualquier campo por debajo de ese umbral,
+    y el acceso —que lleva `autoFocus`— se descentraba solo al abrirse.
+    El razonamiento completo está en tokens.css, junto al token.
+    En escritorio vale exactamente lo mismo que antes: 15px.
+  */
+  font-size: var(--t-control-size);
   line-height: var(--t-body-leading);
 
   /*
@@ -52,6 +59,28 @@
 
 .control[aria-invalid='true']:focus-visible {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+/*
+  `type="search"` hereda en Safari y en iOS el aspecto nativo `searchfield`,
+  que reimpone su propio borde, su radio y su relleno: el mismo campo se vería
+  de dos maneras según el navegador. Se neutraliza SOLO para ese tipo —`Select`
+  ya tiene su propia regla y `Textarea` no necesita ninguna—.
+
+  El botón nativo de limpiar se devuelve a mano, porque `appearance: none` se
+  lo lleva por delante y es un toque menos para el socio que no tenemos que
+  construir. PENDIENTE DE VERIFICAR EN IPHONE REAL: en las versiones recientes
+  de Safari la reactivación del pseudo-elemento no siempre surte efecto; si no
+  aparece, el campo se limpia igual borrando el texto y no hay regresión, solo
+  un atajo que no está.
+*/
+.control[type='search'] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.control[type='search']::-webkit-search-cancel-button {
+  -webkit-appearance: searchfield-cancel-button;
 }
 
 /* Cifras que se alinean en columna o se leen dígito a dígito: número de

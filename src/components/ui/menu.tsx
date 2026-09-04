@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Check } from 'lucide-react'
 import {
   Children,
   cloneElement,
@@ -25,6 +26,15 @@ import styles from './menu.module.css'
 
 const MARGEN = 6 // separación entre disparador y menú, en px
 const BORDE = 8 // margen mínimo respecto al borde de la ventana
+
+/*
+  Qué cuenta como opción navegable con flechas. Incluye `menuitemradio` porque
+  una opción de un grupo excluyente —el tema— sigue siendo una fila del menú:
+  si el selector solo mirase `menuitem`, las flechas la saltarían y el foco
+  inicial al abrir caería en otra parte.
+*/
+const SELECTOR_OPCIONES =
+  '[role="menuitem"]:not(:disabled), [role="menuitemradio"]:not(:disabled)'
 
 type DropdownMenuProps = {
   /** Elemento que abre el menú. Recibe los atributos de popover. */
@@ -77,15 +87,13 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
 
     colocar()
     // Enfocar el primer elemento deja el menú listo para el teclado.
-    menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]:not(:disabled)')?.focus()
+    menuRef.current?.querySelector<HTMLElement>(SELECTOR_OPCIONES)?.focus()
   }
 
   /** Navegación con flechas, Inicio y Fin dentro del menú. */
   const alPulsarTecla = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const opciones = Array.from(
-      menuRef.current?.querySelectorAll<HTMLElement>(
-        '[role="menuitem"]:not(:disabled)',
-      ) ?? [],
+      menuRef.current?.querySelectorAll<HTMLElement>(SELECTOR_OPCIONES) ?? [],
     )
     if (opciones.length === 0) return
 
@@ -148,6 +156,15 @@ type MenuItemProps = {
    */
   submit?: boolean
   icon?: ReactNode
+  /**
+   * Opción elegida dentro de un grupo excluyente (el tema, por ejemplo).
+   *
+   * Cuando se pasa —incluso `false`— el elemento deja de ser `menuitem` y pasa
+   * a `menuitemradio` con `aria-checked`: es lo que le dice al lector de
+   * pantalla que hay una elección y cuál está activa. El check visible es el
+   * segundo portador; sin él la única señal sería el estado ARIA, invisible.
+   */
+  selected?: boolean
   /** Rojo. Reserva `true` para acciones que borran o revocan. */
   destructive?: boolean
   disabled?: boolean
@@ -159,6 +176,7 @@ export function MenuItem({
   href,
   submit = false,
   icon,
+  selected,
   destructive = false,
   disabled = false,
   children,
@@ -172,10 +190,18 @@ export function MenuItem({
     elemento.closest<HTMLElement>('[popover]')?.hidePopover()
   }
 
+  const excluyente = selected !== undefined
+
   const contenido = (
     <>
       {icon && <span className={styles.itemIcono}>{icon}</span>}
       {children}
+      {/* Decorativo: quien lo necesita ya lo tiene en `aria-checked`. */}
+      {selected && (
+        <span className={styles.itemMarca} aria-hidden="true">
+          <Check size={15} />
+        </span>
+      )}
     </>
   )
 
@@ -195,7 +221,8 @@ export function MenuItem({
   return (
     <button
       type={submit ? 'submit' : 'button'}
-      role="menuitem"
+      role={excluyente ? 'menuitemradio' : 'menuitem'}
+      aria-checked={excluyente ? selected : undefined}
       className={clase}
       disabled={disabled}
       onClick={(e) => {
@@ -212,6 +239,18 @@ export function MenuSeparator() {
   return <hr className={styles.separador} />
 }
 
-export function MenuLabel({ children }: { children: ReactNode }) {
-  return <div className={styles.etiquetaGrupo}>{children}</div>
+/**
+ * Encabezado de un grupo de opciones.
+ *
+ * El `id` es opcional y existe para poder referenciarlo desde el
+ * `aria-labelledby` de un `role="group"`: así el lector anuncia "Tema, Claro,
+ * marcado" en vez de solo "Claro, marcado", sin repetir el texto en un
+ * `aria-label` que podría desincronizarse del visible.
+ */
+export function MenuLabel({ id, children }: { id?: string; children: ReactNode }) {
+  return (
+    <div id={id} className={styles.etiquetaGrupo}>
+      {children}
+    </div>
+  )
 }
