@@ -13,8 +13,15 @@
 
 ## Lo que ORUM es
 
-Club de beneficios. Un solo producto: **la membresía mensual**. No hay niveles ni
-planes premium. El estado de un miembro es **binario: paga o no paga**.
+Club de beneficios por membresía. Dos ejes que no se deben confundir:
+
+- **El producto no es binario.** `planes_membresia` sostiene varios planes con
+  precio y duración propios (`precio numeric`, `duracion_meses integer`), y
+  `membresias.plan_id` apunta a uno de ellos. Que el carnet muestre `plan.nombre`
+  (`src/app/miembros/(portal)/perfil/page.tsx:72`) es correcto, no un defecto.
+- **El estado de la membresía sí es binario: vigente o no.** Se deriva siempre
+  con `derivarEstadoMembresia` — ver "Estado de membresía" más abajo, que **no
+  cambia** con esta revisión.
 
 Cuatro portales: Público, Miembros, Administración y Herramienta de Comercios.
 
@@ -51,11 +58,29 @@ Romper cualquiera de estas es un bug, no una preferencia.
 
 ## El oro
 
-**El oro es color de MARCA, no de acción, y jamás codifica datos.**
+**El oro es color de MARCA siempre.** Es color de acción **solo** donde se
+indica abajo, y solo mientras el par relleno/texto cumpla los dos ratios de
+contraste de esta sección. Donde no se cumplan, sigue siendo tinta.
 
-- Botón primario = **tinta**: negro sobre claro, blanco sobre oscuro.
-- El oro vive en: wordmark, indicador de ruta activa, anillo de focus, hairlines,
-  y el CTA comercial del Portal Público.
+**Jamás codifica datos.**
+
+- **Panel de Administración y Herramienta de Comercios**: botón primario =
+  **tinta**, negro sobre claro, blanco sobre oscuro. No cambia.
+- **Portal de Miembros y las seis pantallas de acceso**: el botón primario
+  puede usar relleno dorado con texto en tinta, **condicionado** a que el par
+  concreto cumpla a la vez:
+  - **4.5:1** entre el texto y el relleno (WCAG 1.4.3).
+  - **3:1** entre el borde del relleno y la superficie que lo rodea, en **los
+    dos temas** donde se use (WCAG 1.4.11).
+
+  Si el par no llega a esos dos números, el primario de esa pantalla **vuelve
+  a tinta**. No hay apaño de borde que sustituya la medición, y no se aprueba
+  con una estimación: solo con el ratio firmado por `accessibility-auditor`.
+- El oro vive en: wordmark, indicador de ruta activa, anillo de focus,
+  hairlines, y —donde el punto anterior lo habilite— la acción principal del
+  recorrido del cliente. (La versión anterior citaba "el CTA comercial del
+  Portal Público" como única excepción: ese portal y ese CTA nunca se
+  construyeron. Se retira la referencia).
 - Presupuesto: **≤5% del área visible** por pantalla.
 
 Contrastes verificados — no los cambies sin recalcular:
@@ -64,10 +89,11 @@ Contrastes verificados — no los cambies sin recalcular:
 |---|---|---|
 | Texto dorado sobre oscuro | `--gold-300` | 13.0:1 |
 | Marca sobre oscuro | `--gold-500` | 7.94:1 |
-| Texto negro sobre oro (CTA) | `--n-1000` | 7.94:1 |
+| Texto negro sobre oro | `--n-1000` | 7.94:1 |
 | Texto dorado sobre claro | `--gold-700` | 5.44:1 |
 | Focus/filos en claro | `--gold-600` | 3.66:1 |
 | ⛔ `--gold-500` sobre blanco | | **2.49:1 — prohibido** |
+| ✅ Relleno de acción `--gold-600` + texto tinta (`--n-1000`) | `--gold-600` | **5.40:1** texto/relleno — cumple 1.4.3. Borde/superficie: **3.66:1** en claro, **4.92:1** en oscuro, **5.02:1** en la tarjeta de acceso — cumple 1.4.11 en ambos temas. Firmado por `accessibility-auditor`, T5, 30/08/2026. Cálculo en `.claude/docs/T5-validacion-contraste.md`. **Ojo al presupuesto**: un CTA de ancho completo a 44-52px ronda el 6-8% del viewport móvil por sí solo — mídelo sobre captura real antes de dar el ≤5% por cumplido. |
 
 Los neutrales llevan un susurro de **frío** (matiz ~240°). Sobre grises cálidos el
 oro se lee beige y el conjunto envejece; sobre neutros fríos se lee metal.
