@@ -4,6 +4,11 @@
   de trabajo: ocupan la ventana entera unos segundos y luego el usuario entra
   en su tema. El `data-theme="dark"` va en el contenedor, no en <html>, y los
   tokens se redeclaran para todo este subárbol.
+
+  Sirven a las SEIS pantallas de acceso —administración, comercios, miembros y
+  los tres estados de la activación de cuenta—. Cambian todas a la vez: son
+  puertas al mismo club, y una con dirección de arte propia parecería de otra
+  empresa.
 */
 
 .pantalla {
@@ -16,8 +21,24 @@
   padding: var(--space-6) var(--space-4);
   padding-top: max(var(--space-6), env(safe-area-inset-top, 0px));
   padding-bottom: max(var(--space-6), env(safe-area-inset-bottom, 0px));
+  /*
+    Y también los laterales. En PWA instalada el layout declara
+    `viewportFit: cover`, así que en horizontal sobre un teléfono con muesca la
+    tarjeta se metería bajo el bisel. En vertical el env() vale 0 y esta línea
+    no hace nada, que es exactamente lo que debe hacer.
+  */
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
   background: var(--bg);
+
+  /*
+    Se conserva a propósito. Con el teclado abierto en 667px de alto, el botón
+    de «Activar cuenta» puede quedar por debajo del pliegue: desplazando
+    siempre se alcanza. No se sustituye por un scrollIntoView automático —
+    mover la vista bajo los dedos de quien escribe es peor que un
+    desplazamiento voluntario.
+  */
   overflow-y: auto;
 }
 
@@ -25,6 +46,11 @@
   Halo dorado muy tenue detrás de la tarjeta. Es la única superficie dorada
   grande del sistema, y funciona porque su opacidad es casi imperceptible:
   no se ve como color, se siente como luz.
+
+  El gradiente vive en tokens.css como --gold-halo. Antes estaba aquí escrito
+  rgba(191, 160, 99, …), que es --gold-500 copiado a mano: un literal de color
+  prohibido, y de los peores, porque el día que la marca cambie de oro el halo
+  se queda con el anterior sin que nada avise.
 */
 .pantalla::before {
   content: '';
@@ -38,18 +64,37 @@
   border-radius: 50%;
   pointer-events: none;
 
-  background: radial-gradient(
-    circle,
-    rgba(191, 160, 99, 0.09) 0%,
-    rgba(191, 160, 99, 0.03) 42%,
-    transparent 68%
-  );
+  background: var(--gold-halo);
+}
+
+/*
+  La tarjeta de marca: filo de luz dorado arriba, radio héroe y material.
+
+  Es el mismo lenguaje que Card variant="brand" —filo dorado de 1px, y el oro
+  SOLO en el filo, nunca rellenando— pero se mantiene como clase propia porque
+  añade tres cosas que Card no sabe expresar: el radio héroe, el material
+  translúcido con su rama de prefers-reduced-transparency, y la animación de
+  entrada. Envolverla en Card obligaría a pisar .brand::before desde otro
+  módulo CSS, con la misma especificidad y sin garantía de orden de inyección:
+  el filo se quedaría con el radio equivocado, o no, según la build. Es
+  exactamente el tipo de fallo silencioso que este proyecto ya pagó una vez
+  con :has(.alerta).
+*/
+/*
+  Ancho de la columna de acceso: la tarjeta y el pie miden lo mismo. 400px y
+  no más, también en escritorio. La tarea es de dos campos: ensancharla no
+  ahorra un clic ni un movimiento del ojo, y unos campos de 700px son la forma
+  más rápida de que un formulario de dos parezca uno de veinte. Además el halo
+  necesita fondo alrededor para leerse como luz: su efecto depende de la
+  proporción entre la tarjeta y el vacío.
+*/
+.marco {
+  width: 100%;
+  max-width: 400px;
 }
 
 .tarjeta {
   position: relative;
-  width: 100%;
-  max-width: 400px;
 
   padding: var(--space-8) var(--space-7);
   border: 1px solid var(--border);
@@ -104,44 +149,84 @@
   }
 }
 
+/* --- Cabecera -------------------------------------------------------------
+   Tres niveles de la rampa, uno por pregunta: dónde estoy (wordmark), qué
+   puerta es esta (h1) y con qué se entra (apoyo). Con la etiqueta de campo, el
+   botón y el pie son seis niveles distintos en una pantalla de dos campos.
+   Eso es lo que la separa de un formulario administrativo, no el color.    */
+
 .cabecera {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
   margin-bottom: var(--space-7);
 }
 
 .wordmark {
-  font-size: 1.75rem;
-  font-weight: 600;
+  /*
+    Toma su tamaño de la rampa (--t-display-2) en vez del 1.75rem literal que
+    llevaba, que estaba fuera de la escala sin motivo. Al ser un clamp crece en
+    escritorio, que es donde el halo también crece.
+
+    El tracking SÍ es propio y no sale de la rampa: en mayúsculas y a este
+    tamaño las letras se leen apretadas si no se abren, y la rampa declara
+    explícitamente que cada tamaño lleva el suyo. CLAUDE.md prohíbe literales
+    de color, espaciado, radio y duración; el tracking no está en esa lista, y
+    dos tokens con un solo uso cada uno serían ruido.
+  */
+  font-size: var(--t-display-2-size);
+  line-height: var(--t-display-2-leading);
+  font-weight: var(--t-display-2-weight);
   letter-spacing: 0.22em;
-  /* El tracking positivo compensa: en mayúsculas y a este tamaño, las letras
-     se leen apretadas si no se abren. */
+  /* Compensa el tracking del último carácter: sin esto el conjunto queda
+     ópticamente descentrado hacia la izquierda. */
   padding-left: 0.22em;
 
   background: var(--gold-sheen);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+
+  margin-bottom: var(--space-8);
 }
 
-.subtitulo {
+.titular {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.apoyo {
+  margin-top: var(--space-2);
   font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
   letter-spacing: var(--t-footnote-tracking);
   color: var(--text-3);
+  text-align: center;
+  text-wrap: balance;
 }
 
-.formulario {
+/* --- Contenido ------------------------------------------------------------ */
+
+.formulario,
+.pila {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
 }
 
 /*
-  Sacudida al fallar. Se dispara con `:has()` cuando entra el aviso en el DOM,
+  Sacudida al fallar. Se dispara con :has() cuando entra el aviso en el DOM,
   sin remontar el formulario: los campos conservan lo escrito. Ninguna
   animación vale perder lo que el usuario ya tecleó.
+
+  Va SOLO en .formulario. .pila es la misma columna sin sacudida, para los
+  estados que no son un envío fallido: el enlace de activación caducado llega
+  ya roto, y sacudir al aterrizar regaña al usuario por algo que no hizo.
 */
 .formulario:has(.alerta) {
   animation: sacudir 320ms var(--ease-out);
@@ -182,6 +267,45 @@
   .formulario:has(.alerta) {
     animation: none;
   }
+}
+
+/*
+  Estado «comprobando el enlace» de /activar-cuenta.
+
+  Reserva la altura del formulario al que sustituye, para que la tarjeta no dé
+  un salto al resolverse. Aritmética a 375px con puntero grueso, que es el caso
+  alto:
+
+    Field «Elige tu contraseña»
+      etiqueta   --t-callout 14px x 1.5 ....................... 21px
+      hueco      --space-2 ....................................  8px
+      control    12 + 12 de relleno + 16px x 1,55 + 2 de borde  51px
+      hueco      --space-2 ....................................  8px
+      ayuda      --t-footnote 13px x 1,45 ..................... 19px
+    hueco        --space-5 .................................... 20px
+    Field «Confirma tu contraseña»   21 + 8 + 51 .............. 80px
+    hueco        --space-5 .................................... 20px
+    Botón grande ............................................... 52px
+                                                        total = 279px
+
+  Con puntero fino el control mide 1,5px menos por campo: 276px. Se toma 276px,
+  que además cae en la rejilla de 4pt, y se declara como MÍNIMO: si el cálculo
+  se queda corto el bloque crece, y el salto que importa evitar —la tarjeta
+  encogiendo sola bajo la vista— no llega a ocurrir.
+*/
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: 276px;
+
+  color: var(--text-2);
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  text-align: center;
 }
 
 .pie {

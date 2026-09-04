@@ -24,7 +24,8 @@ export default async function LoginMiembroPage({
 
   return (
     <PantallaAuth
-      subtitulo="Portal de Miembros"
+      titular="Portal de Miembros"
+      apoyo="Entra con tu número de membresía."
       pie="¿No recuerdas tu número de membresía? Está en tu carnet o pídelo en el punto donde te inscribiste."
     >
       <LoginMiembroForm mensajeInicial={mensajeInicial} />

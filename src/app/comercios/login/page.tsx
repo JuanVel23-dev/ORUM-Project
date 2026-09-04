@@ -24,7 +24,8 @@ export default async function LoginComercioPage({
 
   return (
     <PantallaAuth
-      subtitulo="Portal de Comercios"
+      titular="Herramienta de comercios"
+      apoyo="Entra con el correo de tu comercio."
       pie="¿Problemas para entrar? Escribe al administrador del club."
     >
       <LoginComercioForm mensajeInicial={mensajeInicial} />

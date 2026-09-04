@@ -4,7 +4,7 @@ import { ActivarForm } from './_components/activar-form'
 
 export default function ActivarCuentaPage() {
   return (
-    <PantallaAuth subtitulo="Activa tu cuenta">
+    <PantallaAuth titular="Activa tu cuenta" apoyo="Elige una contraseña y entra al club.">
       <Suspense>
         <ActivarForm />
       </Suspense>

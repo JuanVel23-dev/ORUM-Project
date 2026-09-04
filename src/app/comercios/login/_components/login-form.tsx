@@ -58,7 +58,16 @@ export function LoginComercioForm({ mensajeInicial }: { mensajeInicial?: string 
         />
       </Field>
 
-      <Button type="submit" size="lg" fullWidth loading={pending} icon={<LogIn size={17} />}>
+      {/* Relleno dorado PLANO (`brand`), nunca el barrido (`gold`): ver la
+          nota del acceso de administración. */}
+      <Button
+        type="submit"
+        variant="brand"
+        size="lg"
+        fullWidth
+        loading={pending}
+        icon={<LogIn size={17} />}
+      >
         Iniciar sesión
       </Button>
     </form>
