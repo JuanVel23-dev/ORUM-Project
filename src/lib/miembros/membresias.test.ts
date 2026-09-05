@@ -1,28 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import {
-  generarNumeroMembresia,
   calcularFechaFin,
   calcularFechaInicioRenovacion,
   derivarEstadoMembresia,
   venceProximamente,
 } from './membresias'
-
-describe('generarNumeroMembresia', () => {
-  it('produce 8 dígitos: 4 secuenciales + 4 aleatorios', () => {
-    const n = generarNumeroMembresia(42, () => 7318)
-    expect(n).toBe('00427318')
-  })
-
-  it('rellena la parte aleatoria con ceros a la izquierda', () => {
-    const n = generarNumeroMembresia(1, () => 5)
-    expect(n).toBe('00010005')
-  })
-
-  it('mantiene 8 dígitos cuando la secuencia tiene 4 cifras', () => {
-    const n = generarNumeroMembresia(9999, () => 1234)
-    expect(n).toBe('99991234')
-  })
-})
 
 describe('calcularFechaFin', () => {
   it('suma meses en un caso simple', () => {

@@ -25,7 +25,11 @@ const estadoInicial: RegistrarMiembroState = {}
  * remonta (vía `key`) cuando se pulsa «Registrar otro», para volver a un
  * formulario limpio sin navegar.
  */
-export function MiembroForm(props: { ciudades: Opcion[]; planes: PlanOpcion[] }) {
+export function MiembroForm(props: {
+  ciudades: Opcion[]
+  planes: PlanOpcion[]
+  numerosDisponibles: string[]
+}) {
   const [instancia, setInstancia] = useState(0)
   return (
     <FormularioMiembro
@@ -39,10 +43,12 @@ export function MiembroForm(props: { ciudades: Opcion[]; planes: PlanOpcion[] })
 function FormularioMiembro({
   ciudades,
   planes,
+  numerosDisponibles,
   onRegistrarOtro,
 }: {
   ciudades: Opcion[]
   planes: PlanOpcion[]
+  numerosDisponibles: string[]
   onRegistrarOtro: () => void
 }) {
   const cerrar = useCerrarOverlay()
@@ -50,6 +56,8 @@ function FormularioMiembro({
   const [precio, setPrecio] = useState(planes[0] ? String(planes[0].precio) : '')
 
   const sinPlanes = planes.length === 0
+  const sinNumeros = numerosDisponibles.length === 0
+  const bloqueado = sinPlanes || sinNumeros
 
   // Registro completado: la pantalla cambia por entero a entregar credenciales.
   if (state.ok && state.numero) {
@@ -66,6 +74,13 @@ function FormularioMiembro({
         {sinPlanes && (
           <Alert tone="warning" title="No hay planes activos">
             Activa al menos un plan de membresía antes de registrar un miembro.
+          </Alert>
+        )}
+
+        {sinNumeros && (
+          <Alert tone="warning" title="No hay números de registro disponibles">
+            Un administrador debe cargar un rango de números en «Miembros →
+            Números de registro» antes de poder registrar un miembro.
           </Alert>
         )}
 
@@ -118,6 +133,24 @@ function FormularioMiembro({
 
         <Section title="Primera membresía">
           <Stack gap={5}>
+            <Field
+              label="Número de registro"
+              help="El número impreso en el carné que vas a entregar."
+            >
+              <Select
+                name="numero_registro"
+                required
+                defaultValue={numerosDisponibles[0] ?? ''}
+                disabled={sinNumeros}
+              >
+                {numerosDisponibles.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+
             <div className={styles.pareja}>
               <Field label="Plan">
                 <Select
@@ -155,8 +188,8 @@ function FormularioMiembro({
             </div>
 
             <p className={styles.nota}>
-              Al guardar se genera el número de membresía y se envía un correo para
-              que el cliente active su acceso.
+              Al guardar se asigna el número elegido y se envía un correo para que
+              el cliente active su acceso.
             </p>
           </Stack>
         </Section>
@@ -165,7 +198,7 @@ function FormularioMiembro({
           <Button
             type="submit"
             loading={pending}
-            disabled={sinPlanes}
+            disabled={bloqueado}
             icon={<UserPlus size={16} />}
           >
             Registrar miembro

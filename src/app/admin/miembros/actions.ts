@@ -7,10 +7,10 @@ import { hoyISO } from '@/lib/shared/fecha'
 import { registrarActividad } from '@/lib/bitacora/bitacora'
 import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 import {
-  generarNumeroMembresia,
   calcularFechaFin,
   calcularFechaInicioRenovacion,
 } from '@/lib/miembros/membresias'
+import { esNumeroRegistroValido } from '@/lib/miembros/numeros-registro'
 
 type Admin = ReturnType<typeof createAdminClient>
 
@@ -65,10 +65,12 @@ export async function registrarMiembro(
   const ciudad_id = ciudadRaw ? Number(ciudadRaw) : null
   const plan_id = Number(formData.get('plan_id'))
   const precio_pagado = Number(formData.get('precio_pagado'))
+  const numero_registro = String(formData.get('numero_registro') ?? '').trim()
 
   if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
   if (!cedula) return { error: 'La cédula es obligatoria.' }
   if (!correo || !correo.includes('@')) return { error: 'Ingresa un correo electrónico válido.' }
+  if (!esNumeroRegistroValido(numero_registro)) return { error: 'Selecciona un número de registro.' }
   if (!Number.isInteger(plan_id)) return { error: 'Selecciona un plan de membresía.' }
   if (!Number.isFinite(precio_pagado) || precio_pagado < 0) {
     return { error: 'El precio pagado debe ser un número mayor o igual a 0.' }
@@ -76,23 +78,37 @@ export async function registrarMiembro(
 
   const admin = createAdminClient()
 
-  // 2-4) Cédula única, plan activo, rol "miembro" y empleado del actor: ninguna
-  // depende del resultado de otra, así que se piden en paralelo.
-  const [{ data: cedulaExiste }, { data: plan }, { data: rolMiembro }, empleadoId] =
-    await Promise.all([
-      admin.from('miembros').select('id').eq('cedula', cedula).is('deleted_at', null).maybeSingle(),
-      admin
-        .from('planes_membresia')
-        .select('id, nombre, duracion_meses, activo')
-        .eq('id', plan_id)
-        .is('deleted_at', null)
-        .maybeSingle(),
-      admin.from('roles').select('id').eq('codigo', 'miembro').single(),
-      resolverEmpleadoId(admin, actor.userId),
-    ])
+  // 2-5) Cédula única, plan activo, rol "miembro", número de registro libre y
+  // empleado del actor: ninguna depende de otra, así que van en paralelo.
+  const [
+    { data: cedulaExiste },
+    { data: plan },
+    { data: rolMiembro },
+    { data: numeroLibre },
+    empleadoId,
+  ] = await Promise.all([
+    admin.from('miembros').select('id').eq('cedula', cedula).is('deleted_at', null).maybeSingle(),
+    admin
+      .from('planes_membresia')
+      .select('id, nombre, duracion_meses, activo')
+      .eq('id', plan_id)
+      .is('deleted_at', null)
+      .maybeSingle(),
+    admin.from('roles').select('id').eq('codigo', 'miembro').single(),
+    admin
+      .from('numeros_registro')
+      .select('numero')
+      .eq('numero', numero_registro)
+      .is('miembro_id', null)
+      .maybeSingle(),
+    resolverEmpleadoId(admin, actor.userId),
+  ])
   if (cedulaExiste) return { error: `Ya existe un miembro con la cédula ${cedula}.` }
   if (!plan || !plan.activo) return { error: 'El plan seleccionado no existe o está inactivo.' }
   if (!rolMiembro) return { error: 'No se encontró el rol "miembro" en la base de datos.' }
+  if (!numeroLibre) {
+    return { error: 'El número de registro seleccionado ya no está disponible. Elige otro.' }
+  }
   const urlBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
   // 5) Crear usuario en Auth vía invitación: no se genera ni se envía
@@ -110,8 +126,19 @@ export async function registrarMiembro(
   }
   const userId = creado.user.id
 
-  // Compensación ante fallos posteriores.
+  // Compensación ante fallos posteriores. Solo se libera el número del pozo si
+  // ESTA alta llegó a asignárselo (`numeroAsignado`): sin ese guard, un fallo
+  // en una alta que perdió la carrera borraría la asignación legítima de otra.
+  // Y se libera ANTES de borrar el miembro: la FK numeros_registro.miembro_id
+  // es ON DELETE RESTRICT, así que con la fila aún asignada el delete fallaría.
+  let numeroAsignado = false
   const revertir = async () => {
+    if (numeroAsignado) {
+      await admin
+        .from('numeros_registro')
+        .update({ miembro_id: null, asignado_at: null })
+        .eq('numero', numero_registro)
+    }
     await admin.from('miembros').delete().eq('perfil_id', userId)
     await admin.from('perfiles').delete().eq('id', userId)
     await admin.auth.admin.deleteUser(userId)
@@ -126,44 +153,50 @@ export async function registrarMiembro(
     return { error: `No se pudo crear el perfil: ${errPerfil.message}` }
   }
 
-  // 7) Insertar miembro con número único (reintentar ante colisión 23505).
-  const { count } = await admin.from('miembros').select('id', { count: 'exact', head: true })
-  const seq = (count ?? 0) + 1
-
-  let numero = ''
-  let miembroId: number | null = null
-  for (let intento = 0; intento < 5; intento++) {
-    numero = generarNumeroMembresia(seq)
-    const { data: filaMiembro, error: errMiembro } = await admin
-      .from('miembros')
-      .insert({
-        perfil_id: userId,
-        numero_membresia: numero,
-        nombres,
-        apellidos,
-        cedula,
-        telefono,
-        direccion,
-        ciudad_id,
-        registrado_por: empleadoId,
-      })
-      .select('id')
-      .single()
-
-    if (!errMiembro && filaMiembro) {
-      miembroId = filaMiembro.id
-      break
-    }
-    // 23505 = unique_violation (número repetido): reintentar con otra parte aleatoria.
-    if (errMiembro && errMiembro.code !== '23505') {
-      await revertir()
-      return { error: `No se pudo registrar el miembro: ${errMiembro.message}` }
-    }
-  }
-  if (miembroId === null) {
+  // 7) Insertar miembro con el número de registro elegido del pozo.
+  const numero = numero_registro
+  const { data: filaMiembro, error: errMiembro } = await admin
+    .from('miembros')
+    .insert({
+      perfil_id: userId,
+      numero_membresia: numero,
+      nombres,
+      apellidos,
+      cedula,
+      telefono,
+      direccion,
+      ciudad_id,
+      registrado_por: empleadoId,
+    })
+    .select('id')
+    .single()
+  if (errMiembro || !filaMiembro) {
     await revertir()
-    return { error: 'No se pudo generar un número de membresía único. Intenta de nuevo.' }
+    // 23505 = unique_violation: entre la comprobación de arriba y este insert,
+    // otra alta tomó el mismo número (o la misma cédula).
+    const msg =
+      errMiembro?.code === '23505'
+        ? 'Ese número de registro acaba de asignarse a otro miembro. Elige otro.'
+        : `No se pudo registrar el miembro: ${errMiembro?.message ?? 'error desconocido'}`
+    return { error: msg }
   }
+  const miembroId = filaMiembro.id
+
+  // Marcar el número como asignado. El guard `.is('miembro_id', null)` cierra la
+  // ventana de carrera: si otra alta lo tomó primero, aquí no afecta ninguna
+  // fila y se revierte.
+  const { data: asignado, error: errAsignar } = await admin
+    .from('numeros_registro')
+    .update({ miembro_id: miembroId, asignado_at: new Date().toISOString() })
+    .eq('numero', numero)
+    .is('miembro_id', null)
+    .select('numero')
+    .maybeSingle()
+  if (errAsignar || !asignado) {
+    await revertir()
+    return { error: 'Ese número de registro acaba de asignarse a otro miembro. Elige otro.' }
+  }
+  numeroAsignado = true
 
   // 8) Primera membresía (nueva).
   const fecha_inicio = hoyISO()
@@ -191,6 +224,7 @@ export async function registrarMiembro(
       nombres,
       apellidos,
       cedula,
+      numero_membresia: numero,
       plan_nombre: plan.nombre,
       precio_pagado,
     },

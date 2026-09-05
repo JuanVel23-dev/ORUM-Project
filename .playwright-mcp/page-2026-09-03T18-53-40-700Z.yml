@@ -1,0 +1,116 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - complementary [ref=f5e3]:
+      - link "ORUM" [ref=f5e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f5e6]:
+        - generic [ref=f5e7]:
+          - link "Inicio" [ref=f5e8] [cursor=pointer]:
+            - /url: /admin
+          - link "Miembros" [ref=f5e13] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link "Comercios" [ref=f5e21] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f5e27]:
+          - generic [ref=f5e28]: Análisis
+          - link "Métricas" [ref=f5e29] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link "Bitácora" [ref=f5e33] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f5e38]:
+          - generic [ref=f5e39]: Administración
+          - link "Usuarios" [ref=f5e40] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link "Planes" [ref=f5e54] [cursor=pointer]:
+            - /url: /admin/planes
+      - generic [ref=f5e58]:
+        - button "Cuenta y sesión" [ref=f5e60] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f5e62]: JU
+          - generic [ref=f5e63]:
+            - generic [ref=f5e64]: juan07veloza23@gmail.com
+            - generic [ref=f5e65]: Administrador mayor
+        - button "Contraer menú" [ref=f5e66] [cursor=pointer]
+    - generic [ref=f5e70]:
+      - banner [ref=f5e71]:
+        - button "Buscar miembro, comercio o acción…" [ref=f5e73] [cursor=pointer]
+        - generic [ref=f5e78]:
+          - radiogroup "Tema de la interfaz" [ref=f5e80]:
+            - generic [ref=f5e82] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f5e83]
+              - generic [ref=f5e86]: Auto
+            - generic [ref=f5e87] [cursor=pointer]:
+              - radio "Claro" [ref=f5e88]
+              - generic [ref=f5e95]: Claro
+            - generic [ref=f5e96] [cursor=pointer]:
+              - radio "Oscuro" [ref=f5e97]
+              - generic [ref=f5e100]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f5e101]:
+            - generic [aria-hidden] [ref=f5e102]: JU
+      - main [ref=f5e104]:
+        - generic [ref=f5e106]:
+          - heading "Registrar miembro" [level=1] [ref=f5e107]
+          - paragraph [ref=f5e108]: Crea el cliente, su cuenta de acceso y su primera membresía en un solo paso.
+        - generic [ref=f5e110]:
+          - generic [ref=f5e111]:
+            - heading "Datos del cliente" [level=2] [ref=f5e113]
+            - generic [ref=f5e114]:
+              - generic [ref=f5e115]:
+                - generic [ref=f5e116]:
+                  - generic [ref=f5e117]: Nombres
+                  - textbox "Nombres" [ref=f5e119]
+                - generic [ref=f5e120]:
+                  - generic [ref=f5e121]: Apellidos
+                  - textbox "Apellidos" [ref=f5e123]
+              - generic [ref=f5e124]:
+                - generic [ref=f5e125]:
+                  - generic [ref=f5e126]: Cédula
+                  - textbox "Cédula" [ref=f5e128]
+                  - paragraph [ref=f5e129]: Sin puntos ni espacios.
+                - generic [ref=f5e130]:
+                  - generic [ref=f5e131]: Teléfonoopcional
+                  - textbox "Teléfonoopcional" [ref=f5e133]
+              - generic [ref=f5e134]:
+                - generic [ref=f5e135]: Correo electrónico
+                - textbox "Correo electrónico" [ref=f5e137]
+                - paragraph [ref=f5e138]: Será su usuario de acceso al portal de miembros.
+              - generic [ref=f5e139]:
+                - generic [ref=f5e140]:
+                  - generic [ref=f5e141]: Ciudadopcional
+                  - combobox "Ciudadopcional" [ref=f5e144] [cursor=pointer]:
+                    - option "Sin ciudad" [selected]
+                    - option "Bogotá"
+                - generic [ref=f5e145]:
+                  - generic [ref=f5e146]: Direcciónopcional
+                  - textbox "Direcciónopcional" [ref=f5e148]
+          - separator [ref=f5e149]
+          - generic [ref=f5e150]:
+            - heading "Primera membresía" [level=2] [ref=f5e152]
+            - generic [ref=f5e153]:
+              - generic [ref=f5e154]:
+                - generic [ref=f5e155]: Número de registro
+                - combobox "Número de registro" [ref=f5e158] [cursor=pointer]:
+                  - option "00090001" [selected]
+                  - option "00090002"
+                  - option "00090003"
+                  - option "00090004"
+                  - option "00090005"
+                  - option "00090006"
+                  - option "00090007"
+                  - option "00090008"
+                  - option "00090009"
+                  - option "00090010"
+                - paragraph [ref=f5e159]: El número impreso en el carné que vas a entregar.
+              - generic [ref=f5e160]:
+                - generic [ref=f5e161]:
+                  - generic [ref=f5e162]: Plan
+                  - combobox "Plan" [ref=f5e165] [cursor=pointer]:
+                    - option "Membresía ORUM — 0" [selected]
+                - generic [ref=f5e166]:
+                  - generic [ref=f5e167]: Precio pagado
+                  - spinbutton "Precio pagado" [ref=f5e169]: "0"
+                  - paragraph [ref=f5e170]: Ajústalo si hubo un descuento.
+              - paragraph [ref=f5e171]: Al guardar se asigna el número elegido y se envía un correo para que el cliente active su acceso.
+          - generic [ref=f5e172]:
+            - button "Registrar miembro" [ref=f5e173] [cursor=pointer]
+            - button "Cancelar" [ref=f5e178] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=f5e185] [cursor=pointer]
