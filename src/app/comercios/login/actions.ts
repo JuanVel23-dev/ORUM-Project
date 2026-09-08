@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getPerfilActual } from '@/lib/auth/auth'
+import { ERROR_TURNSTILE, verificarTurnstileDeFormulario } from '@/lib/auth/turnstile-request'
 
 export type LoginComercioState = { error?: string }
 
@@ -16,6 +17,11 @@ export async function iniciarSesionComercio(
 
   if (!email || !password) {
     return { error: 'Ingresa tu correo y tu contraseña.' }
+  }
+
+  const captcha = await verificarTurnstileDeFormulario(formData)
+  if (!captcha.valido) {
+    return { error: ERROR_TURNSTILE }
   }
 
   const supabase = await createClient()

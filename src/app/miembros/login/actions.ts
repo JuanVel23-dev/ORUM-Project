@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getPerfilActual } from '@/lib/auth/auth'
+import { ERROR_TURNSTILE, verificarTurnstileDeFormulario } from '@/lib/auth/turnstile-request'
 import { resolverCorreoPorNumeroMembresia } from '@/lib/miembros/auth-miembro'
 
 export type LoginMiembroState = { error?: string }
@@ -20,6 +21,11 @@ export async function iniciarSesionMiembro(
 
   if (!numeroMembresia || !password) {
     return { error: 'Ingresa tu número de membresía y tu contraseña.' }
+  }
+
+  const captcha = await verificarTurnstileDeFormulario(formData)
+  if (!captcha.valido) {
+    return { error: ERROR_TURNSTILE }
   }
 
   const correo = await resolverCorreoPorNumeroMembresia(numeroMembresia)

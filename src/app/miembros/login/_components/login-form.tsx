@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, InputButton } from '@/components/ui/input'
 import { estilosAuth } from '@/components/ui/pantalla-auth'
+import { Turnstile } from '@/components/ui/turnstile'
 import { iniciarSesionMiembro, type LoginMiembroState } from '../actions'
 
 const estadoInicial: LoginMiembroState = {}
@@ -60,6 +61,8 @@ export function LoginMiembroForm({ mensajeInicial }: { mensajeInicial?: string }
           }
         />
       </Field>
+
+      <Turnstile />
 
       <Button type="submit" size="lg" fullWidth loading={pending} icon={<LogIn size={17} />}>
         Iniciar sesión

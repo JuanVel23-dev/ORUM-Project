@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, InputButton } from '@/components/ui/input'
 import { estilosAuth } from '@/components/ui/pantalla-auth'
+import { Turnstile } from '@/components/ui/turnstile'
 import { iniciarSesionComercio, type LoginComercioState } from '../actions'
 
 const estadoInicial: LoginComercioState = {}
@@ -57,6 +58,8 @@ export function LoginComercioForm({ mensajeInicial }: { mensajeInicial?: string 
           }
         />
       </Field>
+
+      <Turnstile />
 
       <Button type="submit" size="lg" fullWidth loading={pending} icon={<LogIn size={17} />}>
         Iniciar sesión

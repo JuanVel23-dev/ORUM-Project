@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, InputButton } from '@/components/ui/input'
 import { estilosAuth } from '@/components/ui/pantalla-auth'
+import { Turnstile } from '@/components/ui/turnstile'
 import { iniciarSesion, type LoginState } from './actions'
 
 const estadoInicial: LoginState = {}
@@ -60,6 +61,8 @@ export function LoginForm({ mensajeInicial }: { mensajeInicial?: string }) {
           }
         />
       </Field>
+
+      <Turnstile />
 
       <Button
         type="submit"
