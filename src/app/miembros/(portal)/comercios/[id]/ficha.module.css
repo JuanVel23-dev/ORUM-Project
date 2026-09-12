@@ -1,0 +1,539 @@
+/*
+  FICHA DE COMERCIO — hoja de la pantalla.
+
+  Orden de lectura que manda sobre el layout (`SPEC §5.1`): qué me descuentan,
+  dónde queda, cómo lo cobro. El ritmo vertical vive aquí y ningún bloque
+  declara márgenes propios, igual que en `catalogo.module.css`: así el orden se
+  puede cambiar sin recolocar espaciados.
+*/
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ==========================================================================
+   BARRA DE VUELTA  ·  pegajosa bajo la cabecera  (SPEC §5.4)
+   ========================================================================== */
+
+/*
+  Sangra hasta los dos bordes y anula el relleno superior de `.main`, para
+  quedar pegada a la cabecera sin un hueco entre las dos.
+
+  Los tres márgenes negativos repiten la aritmética de `.main` con los MISMOS
+  nombres —`--pad-contenido`, `--pad-contenido-top` y los `env()` de área
+  segura—, que es justo para lo que `portal.module.css` los publica. Si alguien
+  cambia la densidad del portal, esta barra le sigue sola.
+
+  `top: var(--cabecera-alto)` la ancla justo debajo del cromo. Ese número lo
+  publica `.portal`, un ancestro, así que la custom property se hereda: la
+  barra no repite la suma del relleno de la cabecera, que es exactamente el
+  fallo silencioso que `portal.module.css` documenta al declararlo.
+
+  Fondo SÓLIDO (`--surface`) y sin `backdrop-filter`: apilar una segunda capa
+  de material sobre la cabecera es caro en gama media, y con fondo opaco la
+  prohibición de `CLAUDE.md` ni siquiera entra en juego.
+
+  Un escalón por debajo de la cabecera en el eje Z: cuando las dos se cruzan
+  durante el desplazamiento, la que gana es el cromo del portal.
+*/
+.barraVuelta {
+  position: sticky;
+  top: var(--cabecera-alto);
+  z-index: calc(var(--z-sticky) - 1);
+
+  margin-top: calc(-1 * var(--pad-contenido-top));
+  margin-left: calc(-1 * max(var(--pad-contenido), env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(var(--pad-contenido), env(safe-area-inset-right, 0px)));
+
+  /* El hueco hasta el hero lo pone la barra y no el `gap` de `.pagina`: el
+     `gap` mediría desde el borde sangrado y quedaría descompensado. */
+  margin-bottom: calc(var(--space-2) - var(--space-6));
+
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+  padding-left: max(var(--pad-contenido), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
+
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/*
+  «Comercios», no «Volver»: es el destino, como en la vista empujada de iOS, y
+  no promete devolver a unos resultados que puede que no existan.
+
+  Es una acción TERCIARIA —la única acción dorada de la pantalla es «Mostrar mi
+  carnet»—, así que va en tinta secundaria y solo el icono la acompaña.
+*/
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  /* El relleno lateral se compensa con un margen negativo del mismo tamaño:
+     el área táctil crece hacia fuera y el texto queda alineado con el resto
+     del contenido de la página, no sangrado dos espacios. */
+  padding: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: var(--t-callout-weight);
+  color: var(--text-2);
+
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.volver:hover {
+  color: var(--text);
+}
+
+/* Feedback en `pointerdown`, no en `click`: `:active` es lo que da esa
+   inmediatez sin una línea de JavaScript. Solo `transform`. */
+.volver:active {
+  transform: scale(var(--escala-press-sm));
+}
+
+.volver:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  En escritorio la densidad es una virtud, así que el alto mínimo de 44px se
+  pide SOLO donde se toca con el dedo. Es la regla de `CLAUDE.md`: lo que se ve
+  y lo que se toca son cosas distintas.
+*/
+@media (pointer: coarse) {
+  .volver {
+    min-height: var(--tap-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .volver {
+    transition-duration: var(--dur-instant);
+  }
+
+  .volver:active {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   HERO  ·  placa + nombre + marca + meta
+   ========================================================================== */
+
+/*
+  Rejilla de dos columnas: la placa manda su ancho (144px, `variante="hero"`) y
+  los textos ocupan lo que queda. La meta —categoría y ciudades— cae en una
+  tercera fila a lo ancho de las dos columnas, porque a 375px no cabe junto a
+  la placa sin partirse en cuatro líneas.
+*/
+.hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: var(--space-3);
+}
+
+.heroTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  /* `minmax(0, 1fr)` en la columna permite encoger; esto permite que el texto
+     largo se parta en vez de desbordar la rejilla. */
+  min-width: 0;
+}
+
+/*
+  `--t-title-1` (24px FIJO) y no `--t-display-2`: junto a una placa de 144px, a
+  375px al nombre le quedan 187px, y un tamaño que creciera a 32px lo partiría
+  en cuatro líneas. Es el único `h1` de la pantalla.
+*/
+.nombre {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+  color: var(--text);
+
+  /* Nombres largos parten por palabras; uno sin espacios parte por donde sea
+     antes que desbordar. */
+  overflow-wrap: anywhere;
+}
+
+/*
+  V4 · Es lo que explica por qué se ve ESE logotipo cuando el comercio no tiene
+  uno propio y hereda el de su marca. Sin esta línea la herencia parecería un
+  error de datos.
+*/
+.marca {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text-3);
+}
+
+.meta {
+  grid-column: 1 / -1;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  letter-spacing: var(--t-caption-tracking);
+  font-weight: var(--t-caption-weight);
+  color: var(--text-2);
+}
+
+/*
+  La categoría va en píldora y las ciudades en texto con icono: son dos ejes
+  distintos —qué tipo de negocio es, y dónde está— y darles la misma forma los
+  haría leer como una sola lista de etiquetas.
+
+  Hairline dorado, que es uso de MARCA y no de dato: la categoría no cambia de
+  color según cuál sea.
+*/
+.categoria {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--gold-hairline);
+  border-radius: var(--radius-full);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.ciudades {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* ==========================================================================
+   DESCRIPCIÓN
+   ========================================================================== */
+
+/*
+  V3 · Si no hay descripción el bloque no se renderiza y no deja hueco, así que
+  aquí no hace falta ningún estado vacío: un «Sin descripción» de relleno sería
+  peor que el silencio.
+
+  Completa, sin recorte: el socio está decidiendo si entra al local.
+*/
+.descripcion {
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  letter-spacing: var(--t-body-tracking);
+  font-weight: var(--t-body-weight);
+  color: var(--text-2);
+}
+
+/* ==========================================================================
+   SECCIONES  ·  «Tus beneficios» y «Dónde usarlo»
+   ========================================================================== */
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tituloSeccion {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text);
+}
+
+/* --- Beneficios ----------------------------------------------------------- */
+
+/*
+  Filas dentro de UNA tarjeta, separadas por hairline y sin hueco entre ellas:
+  son variantes del mismo beneficio en el mismo comercio, y una tarjeta por
+  promoción las haría leer como comercios distintos.
+
+  Sin `backdrop-filter` en las filas: `CLAUDE.md` lo prohíbe en listas porque
+  destroza el scroll en gama media.
+*/
+.listaBeneficios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.beneficio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.beneficio + .beneficio {
+  border-top: 1px solid var(--border-subtle);
+}
+
+/*
+  El título y la cifra en la misma línea, con la cifra alineada arriba: cuando
+  el título ocupa dos líneas la píldora se queda junto a la primera, que es
+  donde el ojo la busca.
+*/
+.beneficioCabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.beneficioTitulo {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: var(--t-callout-weight);
+  color: var(--text);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.beneficioDetalle {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text-2);
+}
+
+/* --- Sedes ---------------------------------------------------------------- */
+
+.listaSedes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.sede {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  /* La tarjeta ocupa el alto de su celda: con dos columnas, dos sedes de texto
+     desigual quedan alineadas por arriba y por abajo. */
+  height: 100%;
+}
+
+.sedeNombre {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: var(--t-callout-weight);
+  color: var(--text);
+}
+
+.sedeDato {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text-2);
+}
+
+/*
+  El número se conserva LEGIBLE y es un enlace `tel:`: en el teléfono abre el
+  marcador, en escritorio no estorba. No se disfraza de botón —no es la acción
+  principal de la pantalla— pero sí tiene su propia área táctil.
+*/
+.sedeTelefono {
+  align-self: flex-start;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  padding: var(--space-1) var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text);
+
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.sedeTelefono:hover {
+  color: var(--text-2);
+}
+
+.sedeTelefono:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .sedeTelefono {
+    min-height: var(--tap-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sedeTelefono {
+    transition-duration: var(--dur-instant);
+  }
+}
+
+/* ==========================================================================
+   ACCIÓN PRINCIPAL
+   ========================================================================== */
+
+/*
+  Va entre los beneficios y las sedes (`SPEC §5.3`): el socio lee lo que le
+  descuentan y en ese momento exacto tiene delante el botón que lo hace
+  efectivo.
+
+  Es un contenedor sin estilo visual propio a propósito. Existe para que el
+  botón sea un hijo directo identificable de `.pagina` y pueda recolocarse en
+  el carril de escritorio sin que el marcado cambie de orden.
+*/
+.accion {
+  display: flex;
+}
+
+/* ==========================================================================
+   TABLETA  ·  contenedor >= 600px
+   ========================================================================== */
+
+/*
+  `@container contenido`, NUNCA `@media`: el ancho útil no es el del viewport
+  —cambia con el cromo del portal— y un `@media` se equivoca justo donde
+  importa. El contenedor lo declara `.main` de `portal.module.css`
+  (`container-name: contenido`).
+*/
+@container contenido (min-width: 600px) {
+  /* Dos columnas de sedes en cuanto caben: tres sedes en una sola columna
+     obligan a desplazarse para ver la tercera. */
+  .listaSedes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/*
+  Topada a 700px y alineada a la IZQUIERDA, no centrada (`SPEC §5.5`): pasados
+  los ~75 caracteres por línea el texto se lee peor, y la alineación izquierda
+  mantiene la relación con la barra de vuelta, que sí ocupa el ancho completo.
+
+  El tope se retira en el tramo de dos columnas, donde la rejilla manda.
+*/
+@container contenido (min-width: 600px) and (max-width: 899px) {
+  .pagina {
+    max-width: 700px;
+  }
+}
+
+/* ==========================================================================
+   ESCRITORIO  ·  contenedor >= 900px  ·  dos columnas reales  (SPEC §5.6)
+   ========================================================================== */
+
+/*
+  Columna principal `1fr` con hero, descripción y beneficios; carril derecho de
+  320px con las sedes y, al fondo, la acción principal.
+
+  EL ORDEN VISUAL CAMBIA, EL DEL DOM NO. El carril se coloca con áreas de
+  rejilla, así que lectura y tabulación siguen siendo beneficios → acción →
+  sedes: un lector de pantalla y un teclado recorren la ficha en el orden de
+  importancia, no en el de las columnas.
+
+  `row-gap: 0` y el ritmo vertical por márgenes, no por `gap`: la descripción
+  es opcional (V3) y su área queda vacía cuando no hay ninguna. Con `row-gap`
+  esa fila vacía dejaría un hueco doble; con márgenes en cada bloque, colapsa a
+  cero y no se nota.
+*/
+@container contenido (min-width: 900px) {
+  .pagina {
+    /*
+      320px es geometría de ESTA pieza, como `--cabecera-contenido` lo es del
+      cromo: no es un espaciado del sistema y no va en `tokens.css`. A 1052px
+      de contenedor deja 700px para la columna principal, que es el ancho de
+      lectura correcto.
+    */
+    --carril-ficha-w: 320px;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--carril-ficha-w);
+    grid-template-areas:
+      'vuelta vuelta'
+      'hero   sedes'
+      'desc   sedes'
+      'benef  sedes'
+      'resto  accion';
+    column-gap: var(--space-8);
+    row-gap: 0;
+    align-content: start;
+
+    /* El tope del tramo de una columna no aplica aquí. */
+    max-width: none;
+  }
+
+  .barraVuelta {
+    grid-area: vuelta;
+    /* Ocupa el ancho completo, por encima de las dos columnas, así que el
+       margen inferior vuelve a ser un margen normal y no una resta del `gap`
+       que este tramo ya no tiene. */
+    margin-bottom: var(--space-6);
+  }
+
+  .hero {
+    grid-area: hero;
+    margin-bottom: var(--space-6);
+  }
+
+  .descripcion {
+    grid-area: desc;
+    margin-bottom: var(--space-6);
+  }
+
+  /*
+    Las dos secciones comparten la clase `.seccion`, así que se distinguen por
+    el `aria-labelledby` que ya las identifica en el marcado. No se añade una
+    clase de layout: el atributo es la misma verdad y no puede desincronizarse
+    del `h2` al que apunta.
+  */
+  .pagina > section[aria-labelledby='titulo-beneficios'] {
+    grid-area: benef;
+  }
+
+  .pagina > section[aria-labelledby='titulo-sedes'] {
+    grid-area: sedes;
+    /* Se alinea arriba y conserva su alto de contenido: sin esto se estiraría
+       a lo alto de las tres filas que abarca el área. */
+    align-self: start;
+  }
+
+  .accion {
+    grid-area: accion;
+    align-self: start;
+    margin-top: var(--space-6);
+  }
+
+  /* Con el carril a 320px caben de sobra dos columnas de texto, pero no dos
+     tarjetas de sede: vuelven a una. */
+  .listaSedes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -41,6 +41,43 @@ function numeroONulo(valor: string | undefined): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+/**
+ * El catálogo tal y como el socio lo dejó, para que la ficha de un comercio
+ * pueda devolverlo exactamente aquí sin guardar estado en ningún sitio.
+ *
+ * Se construye con los valores YA NORMALIZADOS, no con `searchParams` en
+ * crudo: así un `?comercio_id=` de una URL antigua —que esta pantalla ignora
+ * a propósito— no viaja de vuelta, y un `?categoria_id=abc` se queda fuera en
+ * vez de reaparecer al volver. Lo que se devuelve es lo que el catálogo de
+ * verdad está mostrando.
+ *
+ * `null` cuando no hay ningún filtro: la ficha ya cae al catálogo limpio por
+ * defecto, y un `?volver=%2Fmiembros` es ruido en una URL que el socio puede
+ * pasarle a otro por WhatsApp.
+ *
+ * El destino se valida OTRA VEZ al llegar, con `resolverVolverAlCatalogo`.
+ * Que el origen sea de confianza no hace de confianza al parámetro: viaja en
+ * una URL que cualquiera puede reescribir.
+ */
+function urlDelCatalogo(
+  busqueda: string,
+  marcaId: number | null,
+  ciudadId: number | null,
+  categoriaId: number | null,
+): string | null {
+  const params = new URLSearchParams()
+  if (busqueda) params.set('q', busqueda)
+  /* `Number.isFinite` y no solo `!== null`: `marcaIdFiltro` y `ciudadIdFiltro`
+     salen de un `Number()` sin guarda, así que un `?marca_id=abc` llega como
+     NaN. Sin este filtro volvería en la URL como el literal «NaN». */
+  if (Number.isFinite(marcaId)) params.set('marca_id', String(marcaId))
+  if (Number.isFinite(ciudadId)) params.set('ciudad_id', String(ciudadId))
+  if (categoriaId !== null) params.set('categoria_id', String(categoriaId))
+
+  const consulta = params.toString()
+  return consulta ? `/miembros?${consulta}` : null
+}
+
 export default async function MiembrosHomePage({
   searchParams,
 }: {
@@ -72,6 +109,10 @@ export default async function MiembrosHomePage({
      marcado, ni siquiera "Todas". Normalizado a `null`, una categoría
      inventada en la URL deja el catálogo completo y "Todas" encendida. */
   const categoriaIdFiltro = numeroONulo(categoria_id)
+
+  /* Viaja en el `href` de cada tarjeta. Es lo que hace que el botón
+     «‹ Comercios» de la ficha devuelva al catálogo filtrado y no al completo. */
+  const volver = urlDelCatalogo(busqueda, marcaIdFiltro, ciudadIdFiltro, categoriaIdFiltro)
 
   const supabase = await createClient()
   // Fecha civil 'YYYY-MM-DD'. `fecha_inicio`/`fecha_fin` de promociones son fechas civiles,
@@ -327,7 +368,7 @@ export default async function MiembrosHomePage({
       {novedades.length > 0 && (
         <Carril titulo="Nuevos en el club" apoyo="Los últimos aliados que se sumaron">
           {novedades.map((c) => (
-            <ComercioCardCompacta key={c.id} comercio={c} />
+            <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
           ))}
         </Carril>
       )}
@@ -335,7 +376,7 @@ export default async function MiembrosHomePage({
       {beneficiosDelMomento.length > 0 && (
         <Carril titulo="Beneficios del momento" apoyo="Lo que puedes usar esta semana">
           {beneficiosDelMomento.map((c) => (
-            <ComercioCardCompacta key={c.id} comercio={c} />
+            <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
           ))}
         </Carril>
       )}
@@ -366,7 +407,12 @@ export default async function MiembrosHomePage({
 
           <Grid min="290px">
             {comerciosListado.map((c) => (
-              <ComercioCard key={c.id} comercio={c} mostrarCiudades={mostrarCiudades} />
+              <ComercioCard
+                key={c.id}
+                comercio={c}
+                mostrarCiudades={mostrarCiudades}
+                volver={volver}
+              />
             ))}
           </Grid>
         </section>

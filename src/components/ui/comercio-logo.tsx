@@ -1,8 +1,20 @@
 import styles from './comercio-logo.module.css'
 
+export type ComercioLogoVariante = 'tarjeta' | 'hero'
+
 type ComercioLogoProps = {
   logoUrl: string | null
   nombre: string
+  /**
+   * `tarjeta` (72px) es la del catálogo; `hero` (144px) la de la ficha.
+   *
+   * Es una prop y NO un `className` que el consumidor traiga de su propio
+   * módulo: `.hero` sobrescribe `--placa-logo-w` y el radio de `.placa`, y las
+   * dos reglas tienen que resolverse por el orden de ESTA hoja. Con dos hojas
+   * distintas el ganador lo decidiría el orden en que Next las inyecte, que
+   * cambia entre desarrollo y producción.
+   */
+  variante?: ComercioLogoVariante
   className?: string
 }
 
@@ -43,12 +55,20 @@ type ComercioLogoProps = {
  * cuyo peor caso es placa vacía —feo, nunca icono de rotura—.
  *
  * El tamaño sale de `--placa-logo-w` y la altura la deriva `--placa-logo-ratio`:
- * no hay `style={{ width, height }}`. Un consumidor que necesite otra escala
- * —el hero de una ficha— sobrescribe ese token en su propia clase.
+ * no hay `style={{ width, height }}`. La otra escala —el hero de la ficha de
+ * comercio, 144px— se pide con `variante="hero"`, que sobrescribe ese token
+ * desde este mismo módulo CSS.
  */
-export function ComercioLogo({ logoUrl, nombre, className }: ComercioLogoProps) {
+export function ComercioLogo({
+  logoUrl,
+  nombre,
+  variante = 'tarjeta',
+  className,
+}: ComercioLogoProps) {
   const inicial = nombre.trim().charAt(0).toUpperCase()
-  const clases = [styles.placa, className].filter(Boolean).join(' ')
+  const clases = [styles.placa, variante === 'hero' && styles.hero, className]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <span className={clases} aria-hidden="true">

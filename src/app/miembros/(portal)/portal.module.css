@@ -17,6 +17,43 @@
     en el árbol, así que hereda la custom property con normalidad.
   */
   --tabbar-alto: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+
+  /*
+    Alto real que ocupa la CABECERA, por la misma razón y con el mismo patrón.
+
+    Lo consume la barra de vuelta de la ficha de comercio, que es
+    `position: sticky` y tiene que anclarse JUSTO DEBAJO de la cabecera. Sin un
+    número publicado, esa barra tendría que repetir aquí la aritmética del
+    relleno de `.cabecera`, y la primera vez que alguien tocase el relleno la
+    barra quedaría flotando o escondida sin que nada fallara de forma visible.
+
+    `--cabecera-contenido` es el alto del hijo MÁS ALTO del cromo. Es una
+    medida de componente, no un espaciado, así que vive aquí y no en
+    `tokens.css`: es geometría de esta pieza, como `--placa-pad` lo es de la
+    placa del logo.
+
+      móvil     28px — el avatar (`avatar.module.css:19-20`); el wordmark mide
+                26,4 (17px x 1,55) y la navegación está oculta.
+      >=768px   38px — un enlace de la navegación: 14px x 1,55 = 21,7 más los
+                dos `--space-2` de su relleno.
+
+    `.cabecera` lo aplica además como `min-height`, para que el número
+    publicado no pueda quedarse por debajo del real. El caso contrario —que el
+    contenido crezca, por ejemplo con Dynamic Type— degrada bien: la cabecera
+    se hace más alta y la barra de vuelta se desliza por debajo de ella, que es
+    el fallo inofensivo de los dos posibles.
+  */
+  --cabecera-contenido: 28px;
+  --cabecera-alto: calc(
+    max(var(--space-3), env(safe-area-inset-top, 0px)) + var(--cabecera-contenido) +
+      var(--space-3)
+  );
+}
+
+@media (min-width: 768px) {
+  .portal {
+    --cabecera-contenido: 38px;
+  }
 }
 
 /* ==========================================================================
@@ -27,6 +64,10 @@
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
+
+  /* No cambia el alto de hoy: es exactamente el que ya tenía. Existe para que
+     `--cabecera-alto` no pueda mentir por debajo. */
+  min-height: var(--cabecera-alto);
 
   display: flex;
   align-items: center;
@@ -212,7 +253,12 @@
   */
   --pad-contenido: var(--space-4);
 
-  padding-top: var(--space-6);
+  /* Y el relleno superior, publicado por el mismo motivo: la barra de vuelta
+     de la ficha lo anula con un margen negativo para quedar pegada a la
+     cabecera. Un número, dos consumidores. */
+  --pad-contenido-top: var(--space-6);
+
+  padding-top: var(--pad-contenido-top);
   padding-bottom: var(--space-10);
   padding-left: max(var(--pad-contenido), env(safe-area-inset-left, 0px));
   padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
@@ -226,8 +272,8 @@
 @media (min-width: 768px) {
   .main {
     --pad-contenido: var(--space-6);
+    --pad-contenido-top: var(--space-7);
 
-    padding-top: var(--space-7);
     padding-bottom: var(--space-11);
   }
 }

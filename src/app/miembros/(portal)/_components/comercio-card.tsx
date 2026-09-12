@@ -39,11 +39,15 @@ const TOPE_PROMOCIONES = 2
   enlace: un enlace dentro de otro es marcado inválido y el lector lo anunciaría
   dos veces.
 
-  Aquí decía "PENDIENTE (T15)", y explicaba por qué la tarjeta todavía no
-  navegaba: la ruta `/miembros/comercios/[id]` no existía, y un catálogo entero
-  de enlaces a un 404 es peor defecto que una tarjeta inerte. La ruta ya existe
-  y la deuda queda saldada; el porqué se deja escrito para que nadie vuelva a
-  publicar enlaces antes que su destino.
+  La ruta `/miembros/comercios/[id]` ya existe (T15), así que el enlace es
+  válido. No siempre lo fue, y ese es el motivo de que esto siga escrito: estos
+  dos `<Link>` se publicaron ANTES que su destino, y durante varios commits
+  cada tarjeta del catálogo llevó al socio a un 404. Un catálogo entero de
+  enlaces roto es peor defecto que una tarjeta inerte.
+
+  Nada lo delataba: compila, pasa el lint y el tipo de `href` es `string`.
+  Solo lo ve quien abre la pantalla o busca la carpeta. Si vuelves a enlazar
+  hacia algo que aún no has construido, deja la tarjeta sin `href`.
 
   `Card interactive` aporta hover, `:active` y la elevación. El anillo de foco,
   en cambio, lo pone el `<Link>`: el foco vive en el enlace y no en el `div` de
