@@ -72,16 +72,17 @@
   object-position: center;
 
   /*
-    Tipografía DEL TEXTO ALTERNATIVO. No se ve mientras la imagen carga bien;
-    es lo que aparece, ya con su aspecto definitivo, cuando el `logo_url`
-    está muerto. Debe coincidir con `.inicial`.
+    AQUÍ VIVÍA LA TIPOGRAFÍA DEL TEXTO ALTERNATIVO, y se retira con D9.
+
+    Mientras el `alt` era la inicial, estas reglas eran lo que hacía que un
+    `logo_url` muerto pintase una inicial con el aspecto correcto. Con `alt=""`
+    —el camino 2 de `T4 §4.5`, ver el porqué en `comercio-logo.tsx`— el `<img>`
+    roto no pinta texto ninguno, así que la tipografía aquí no tenía efecto y
+    dejarla sugeriría un mecanismo que ya no existe.
+
+    NO se borra `.inicial`: ese sigue siendo el respaldo cuando no hay logotipo
+    que resolver, que es un elemento real y no un texto alternativo.
   */
-  font-weight: 620;
-  font-size: calc(var(--placa-logo-w) * 0.26);
-  letter-spacing: -0.01em;
-  text-align: center;
-  text-transform: uppercase;
-  color: var(--placa-logo-inicial);
   overflow: hidden;
 }
 
@@ -118,4 +119,34 @@
   --placa-logo-w: 144px;
 
   border-radius: var(--radius-sm);
+}
+
+/* ==========================================================================
+   VARIANTE PORTADA  ·  la placa del carrusel de destacados
+   --------------------------------------------------------------------------
+   Aquí la placa NO acompaña a un nombre: ES la cubierta de la tarjeta. Sin
+   fotografía en la base de datos, el logotipo a tamaño completo es el único
+   activo visual que un aliado tiene, y el trabajo de una portada es enseñar lo
+   mejor que hay, no lamentar lo que falta.
+
+   Se mide en `cqi` y no en px porque la cubierta es responsiva —de 220px en
+   horizontal a 320px en escritorio—: una placa de tamaño fijo pasaría de
+   ahogada a diminuta en el mismo componente. El 60 % deja la placa como
+   protagonista sin tocar los bordes de la cubierta, y el tope de 196px impide
+   que en escritorio el logotipo se agrande por encima de su resolución.
+
+   EXIGE `container-type: inline-size` en la cubierta que la envuelve. Sin
+   contenedor ancestro, `cqi` mide el viewport pequeño y la placa se descuadra:
+   es el mismo aviso que `CLAUDE.md` da para `@container`.
+
+   El radio sube dos escalones respecto a la tarjeta por la misma razón que en
+   el hero: el radio no es una constante de la pieza, es una proporción de su
+   tamaño.
+   ========================================================================== */
+
+.portada {
+  --placa-pad: var(--space-4);
+  --placa-logo-w: min(60cqi, 196px);
+
+  border-radius: var(--radius-md);
 }

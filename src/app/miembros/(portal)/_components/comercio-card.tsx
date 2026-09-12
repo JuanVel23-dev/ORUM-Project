@@ -55,8 +55,15 @@ const TOPE_PROMOCIONES = 2
   dispararse.
 */
 
-/** `/miembros/comercios/[id]`, conservando a dónde hay que volver. */
-function hrefFicha(id: number, volver: string | null): string {
+/**
+ * `/miembros/comercios/[id]`, conservando a dónde hay que volver.
+ *
+ * EXPORTADO, y no por comodidad: el carrusel de portada enlaza al mismo sitio,
+ * y dos funciones que construyen el mismo enlace se desincronizan a la primera
+ * reorganización. Quien enlace a una ficha usa esta; nadie monta el `?volver=`
+ * a mano.
+ */
+export function hrefFicha(id: number, volver: string | null): string {
   const base = `/miembros/comercios/${id}`
   /*
     Sin filtros no se añade el parámetro: la ficha ya cae al catálogo limpio

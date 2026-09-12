@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/feedback'
 import { Grid, Stack } from '@/components/ui/layout'
+import { CarruselDestacadosEsqueleto } from './_components/carrusel-destacados'
 import estilos from './_components/catalogo.module.css'
 import tarjeta from './_components/comercio-card.module.css'
 
@@ -92,6 +93,25 @@ export default function Loading() {
           <Skeleton width="64px" height="13px" />
           <Skeleton height="44px" radius="var(--radius-sm)" />
         </Stack>
+
+        {/*
+          LA PORTADA SÍ SE DIBUJA, y es la excepción argumentada a la regla de
+          arriba —no dibujar lo que luego no llega—.
+
+          Este archivo no recibe props, así que no puede saber si habrá filtros
+          y por tanto si el carrusel se renderizará. Se dibuja siempre porque la
+          entrada SIN filtros es la dominante: es la pestaña "Inicio", el
+          destino de la PWA y el de cada toque de la barra de navegación. No
+          dibujarlo haría saltar el caso dominante para evitar un salto en el
+          caso raro.
+
+          Y con filtros el desplazamiento es barato: lo que se mueve al
+          resolverse es la rejilla, mientras la búsqueda —donde está mirando
+          quien filtra— se queda quieta, porque el carrusel va debajo de ella.
+
+          La silueta la pone el propio componente, con sus clases reales.
+        */}
+        <CarruselDestacadosEsqueleto />
 
         <div className={estilos.rejilla}>
           <Skeleton width="180px" height="24px" />

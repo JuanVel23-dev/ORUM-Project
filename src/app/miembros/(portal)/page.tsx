@@ -5,6 +5,7 @@ import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
 import {
   seleccionarBeneficiosDelMomento,
+  seleccionarDestacados,
   seleccionarNovedades,
 } from '@/lib/comercios/estanterias'
 import { hoyISO } from '@/lib/shared/fecha'
@@ -14,6 +15,7 @@ import { EmptyState } from '@/components/ui/feedback'
 import { Grid } from '@/components/ui/layout'
 import { EncabezadoCatalogo } from './_components/encabezado-catalogo'
 import { ChipsCategoria } from './_components/chips-categoria'
+import { CarruselDestacados } from './_components/carrusel-destacados'
 import { FiltrosForm } from './_components/filtros-form'
 import {
   ComercioCard,
@@ -320,6 +322,24 @@ export default async function MiembrosHomePage({
     habría a dónde ir que no fuera esta misma URL— y por eso deslizar nunca es
     el único camino a nada.
   */
+  /*
+    LA PORTADA, con la MISMA puerta que las estanterías y por la misma razón:
+    con filtros activos el resultado ES el contenido, y una selección curada al
+    lado es una distracción. Tres bloques deslizables con tres condiciones
+    distintas serían imposibles de predecir.
+
+    Cero consultas nuevas: se calcula en memoria sobre `comerciosListado`, que
+    esta página ya construye. Si alguien añade una consulta para esta pieza,
+    algo se entendió mal.
+
+    Y no hay deduplicación con las estanterías ni con la rejilla: un comercio
+    puede salir en la portada y también en "Nuevos en el club". Quitarlo de la
+    estantería haría que la estantería MINTIERA sobre su criterio, y un aliado
+    recién sumado ausente de "Nuevos en el club" es peor defecto que un nombre
+    repetido.
+  */
+  const destacados = hayFiltros ? [] : seleccionarDestacados(comerciosListado)
+
   const novedades = hayFiltros ? [] : seleccionarNovedades(comerciosListado, new Date())
   const beneficiosDelMomento = hayFiltros
     ? []
@@ -363,6 +383,25 @@ export default async function MiembrosHomePage({
         categorias={categoriasConComercios}
         activaId={categoriaIdFiltro}
         paramsBase={paramsBase}
+      />
+
+      {/*
+        La portada va AQUÍ: después de la búsqueda y de los chips, y antes de
+        cualquier contenido curado —ninguna estantería la precede—.
+
+        Las dos cosas se cumplen a la vez, y era el punto difícil. Puesta antes
+        de la búsqueda, la portada empujaría el campo a ~610px y el socio
+        recurrente —el que abre la aplicación para buscar "pizza"— tendría que
+        desplazar media pantalla para encontrarlo: eso es un paso añadido, y la
+        regla nº1 manda. La búsqueda es herramienta, no contenido; una portada
+        de revista no va antes del índice por estar antes en el papel, va antes
+        de los artículos.
+      */}
+      <CarruselDestacados
+        destacados={destacados}
+        comerciosDelResultado={comerciosListado.length}
+        mostrarCiudades={mostrarCiudades}
+        volver={volver}
       />
 
       {novedades.length > 0 && (

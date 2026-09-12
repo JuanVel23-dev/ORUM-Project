@@ -57,6 +57,20 @@ type CarrilProps = {
   apoyo?: string
   columnas?: 'tarjeta' | 'auto'
   className?: string
+  /**
+   * Clase para la PISTA, no para la sección.
+   *
+   * Existe para que un consumidor pueda sobrescribir `--carril-tarjeta-w` o el
+   * tipo de snap EN SU INSTANCIA sin duplicar el CSS de la pista, que trae
+   * geometría auditada: sangrado asimétrico, `overscroll-behavior`, reserva del
+   * anillo de foco y la ausencia deliberada de `touch-action`.
+   *
+   * Lo usa el carrusel de portada del catálogo, cuya tarjeta es responsiva y
+   * necesita `x mandatory` en vez de `x proximity`. Es una ampliación aditiva a
+   * propósito: duplicar `.pista` en otro módulo garantiza que los dos se
+   * desincronicen.
+   */
+  pistaClassName?: string
   children: ReactNode
 }
 
@@ -77,6 +91,7 @@ export function Carril({
   apoyo,
   columnas = 'tarjeta',
   className,
+  pistaClassName,
   children,
 }: CarrilProps) {
   return (
@@ -86,7 +101,9 @@ export function Carril({
         {apoyo && <p className={styles.apoyo}>{apoyo}</p>}
       </div>
 
-      <CarrilPista columnas={columnas}>{children}</CarrilPista>
+      <CarrilPista columnas={columnas} className={pistaClassName}>
+        {children}
+      </CarrilPista>
     </section>
   )
 }
