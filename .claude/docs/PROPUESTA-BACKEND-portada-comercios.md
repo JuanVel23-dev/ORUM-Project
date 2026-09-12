@@ -81,7 +81,39 @@ create table comercio_imagenes (
 Cuando los comercios estén subiendo portadas y pidan más de una, la tabla se añade sin tocar
 `portada_url`: la portada sigue siendo la imagen canónica y la galería es adicional.
 
-## Lo que esto NO resuelve, y es una dependencia real
+## DECISIÓN DEL PROPIETARIO · 12/09/2026
+
+> *«Las imágenes las vamos a manejar por link como estaba antes.»*
+
+**El bucket queda descartado, no aplazado.** `portada_url` guarda una URL externa, igual que
+`logo_url` hoy. La sección siguiente deja de ser «una dependencia real» y pasa a ser **la
+lista de lo que se acepta a cambio**:
+
+| Se acepta | Consecuencia concreta |
+|---|---|
+| La portada puede desaparecer | Cuando el comercio reorganice su web, la cubierta de su tarjeta se queda vacía. La interfaz **ya lo resuelve**: cae al estado I2 (logotipo sobre material), nunca al icono de rotura — eso se cerró con D9 en el commit `585eb23` |
+| Sin control de peso | Un JPG de 3 MB se descarga entero para pintarse en una tarjeta de 300px. En el carrusel, **hasta seis veces, en la primera pantalla del socio** |
+| Sin control de formato | Un comercio puede mandar un BMP o un TIFF y el navegador no lo pinta |
+| `next/image` sigue inviable | Exigiría declarar cada host de cada comercio en `remotePatterns`. Se usa `<img loading="lazy" decoding="async">`, como ya hace `ComercioLogo` |
+
+**Lo que esta decisión hace obligatorio**, y antes era solo recomendable:
+
+1. **`loading="lazy"` y `decoding="async"` en toda portada**, sin excepción. Es lo único que
+   impide que seis imágenes sin optimizar bloqueen el primer pintado.
+2. **El presupuesto de rendimiento de `V9-requisitos-dispositivo.md` F12 pasa de holgado a
+   ajustado.** El orden de recorte —paralaje primero— deja de ser teórico.
+3. **Una nota para quien dé de alta comercios**: pedir la portada a 1200px de ancho como
+   máximo y en WebP o JPG. Es una convención humana, no una restricción técnica, porque sin
+   bucket no hay dónde imponerla.
+
+La propuesta del bucket (`PROPUESTA-BACKEND-imagenes.md`) **no se borra**: queda como la
+salida si el peso de las imágenes acaba doliendo en móvil. Esta decisión se puede revertir
+sin tocar la interfaz, porque `portada_url` seguiría siendo una URL — solo cambiaría a qué
+dominio apunta.
+
+---
+
+## Lo que esto NO resuelve · **ahora es la lista de riesgos aceptados, arriba**
 
 `portada_url` guarda una URL. **Si esa URL apunta al servidor del comercio, hereda los tres
 problemas que los logos ya tienen**, y multiplicados, porque una portada pesa mucho más que
