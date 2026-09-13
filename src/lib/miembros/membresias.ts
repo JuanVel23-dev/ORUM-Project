@@ -1,21 +1,10 @@
-import { randomInt } from 'node:crypto'
-
-/**
- * Número de membresía de 8 dígitos: 4 secuenciales (orden del miembro) + 4
- * aleatorios. La parte secuencial identifica al miembro; la aleatoria evita que
- * sea adivinable. La unicidad se garantiza en BD (índice único) + reintento.
- *
- * @param seq        Correlativo del miembro (1, 2, 3, …).
- * @param aleatorio  Generador de la parte aleatoria (0–9999). Inyectable para pruebas.
- */
-export function generarNumeroMembresia(
-  seq: number,
-  aleatorio: () => number = () => randomInt(0, 10000),
-): string {
-  const parteSeq = String(seq).padStart(4, '0').slice(-4)
-  const parteRand = String(aleatorio() % 10000).padStart(4, '0')
-  return parteSeq + parteRand
-}
+/*
+  Aquí vivía `generarNumeroMembresia`, que fabricaba el número al vuelo (4
+  dígitos secuenciales + 4 aleatorios) durante el alta. Se retiró: ahora el
+  número sale del pozo de números de registro que el administrador precarga por
+  rango (ver `numeros-registro.ts` y `/admin/miembros/numeros`). Si el pozo está
+  vacío, el alta se bloquea; no se vuelve a inventar ninguno.
+*/
 
 /** Suma `dias` a una fecha 'YYYY-MM-DD' y devuelve 'YYYY-MM-DD'. */
 function sumarDias(fecha: string, dias: number): string {

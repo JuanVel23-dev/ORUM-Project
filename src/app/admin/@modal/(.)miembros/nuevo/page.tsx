@@ -1,5 +1,6 @@
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { listarNumerosDisponibles } from '@/lib/miembros/pozo-numeros'
 import { OverlayRuta } from '@/components/shell/overlay-ruta'
 // Alias, no ruta relativa: estas páginas viven a cuatro niveles de la sección
 // que las usa, y un `../../../..` se rompe en silencio al mover un archivo.
@@ -19,7 +20,7 @@ export default async function NuevoMiembroInterceptado() {
   await requireRol('super_admin', 'empleado')
 
   const admin = createAdminClient()
-  const [{ data: ciudades }, { data: planes }] = await Promise.all([
+  const [{ data: ciudades }, { data: planes }, numerosDisponibles] = await Promise.all([
     admin.from('ciudades').select('id, nombre').order('nombre'),
     admin
       .from('planes_membresia')
@@ -27,6 +28,7 @@ export default async function NuevoMiembroInterceptado() {
       .eq('activo', true)
       .is('deleted_at', null)
       .order('nombre'),
+    listarNumerosDisponibles(),
   ])
 
   return (
@@ -38,7 +40,11 @@ export default async function NuevoMiembroInterceptado() {
     >
       {/* Sin `FormCard`: dentro de un overlay la superficie ya la pone el
           propio overlay. Los formularios no ponen la suya nunca. */}
-      <MiembroForm ciudades={ciudades ?? []} planes={planes ?? []} />
+      <MiembroForm
+        ciudades={ciudades ?? []}
+        planes={planes ?? []}
+        numerosDisponibles={numerosDisponibles}
+      />
     </OverlayRuta>
   )
 }

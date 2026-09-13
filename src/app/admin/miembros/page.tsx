@@ -1,4 +1,4 @@
-import { CreditCard, MoreHorizontal, Pencil, Search, UserPlus } from 'lucide-react'
+import { CreditCard, Hash, MoreHorizontal, Pencil, Search, UserPlus } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { buscarMiembros, type MiembroEncontrado } from '@/lib/miembros/buscar-miembros'
 import { Avatar } from '@/components/ui/avatar'
@@ -68,7 +68,8 @@ export default async function MiembrosPage({
 }: {
   searchParams: Promise<{ q?: string }>
 }) {
-  await requireRol('super_admin', 'empleado')
+  const perfil = await requireRol('super_admin', 'empleado')
+  const esSuperAdmin = perfil.rolCodigo === 'super_admin'
 
   const { q } = await searchParams
   const busqueda = (q ?? '').trim()
@@ -86,9 +87,20 @@ export default async function MiembrosPage({
         title="Miembros"
         description="Busca por número de membresía, cédula o nombre. El estado que ves ya tiene en cuenta la fecha de vencimiento."
         actions={
-          <Button href="/admin/miembros/nuevo" icon={<UserPlus size={16} />}>
-            Registrar miembro
-          </Button>
+          <>
+            {esSuperAdmin && (
+              <Button
+                href="/admin/miembros/numeros"
+                variant="secondary"
+                icon={<Hash size={16} />}
+              >
+                Números de registro
+              </Button>
+            )}
+            <Button href="/admin/miembros/nuevo" icon={<UserPlus size={16} />}>
+              Registrar miembro
+            </Button>
+          </>
         }
       />
 

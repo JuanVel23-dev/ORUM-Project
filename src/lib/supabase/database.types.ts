@@ -222,6 +222,34 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['miembros']['Insert']>
         Relationships: []
       }
+      numeros_registro: {
+        Row: {
+          numero: string
+          miembro_id: number | null
+          creado_por: number | null
+          creado_at: Timestamp
+          asignado_at: Timestamp | null
+        }
+        Insert: {
+          numero: string
+          miembro_id?: number | null
+          creado_por?: number | null
+          creado_at?: Timestamp
+          asignado_at?: Timestamp | null
+        }
+        Update: Partial<Database['public']['Tables']['numeros_registro']['Insert']>
+        // La pantalla de gestión embebe el miembro para mostrar a quién se
+        // asignó cada número (`numeros_registro(..., miembros(nombres,…))`).
+        Relationships: [
+          {
+            foreignKeyName: 'numeros_registro_miembro_id_fkey'
+            columns: ['miembro_id']
+            isOneToOne: false
+            referencedRelation: 'miembros'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       membresias: {
         Row: {
           id: number

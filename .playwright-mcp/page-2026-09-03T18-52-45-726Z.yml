@@ -1,0 +1,70 @@
+- generic [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - complementary [ref=f3e3]:
+      - link "ORUM" [ref=f3e4] [cursor=pointer]:
+        - /url: /admin
+      - navigation "Navegación principal" [ref=f3e6]:
+        - generic [ref=f3e7]:
+          - link "Inicio" [ref=f3e8] [cursor=pointer]:
+            - /url: /admin
+          - link "Miembros" [ref=f3e13] [cursor=pointer]:
+            - /url: /admin/miembros
+          - link "Comercios" [ref=f3e21] [cursor=pointer]:
+            - /url: /admin/comercios
+        - generic [ref=f3e27]:
+          - generic [ref=f3e28]: Análisis
+          - link "Métricas" [ref=f3e29] [cursor=pointer]:
+            - /url: /admin/metricas
+          - link "Bitácora" [ref=f3e33] [cursor=pointer]:
+            - /url: /admin/bitacora
+        - generic [ref=f3e38]:
+          - generic [ref=f3e39]: Administración
+          - link "Usuarios" [ref=f3e40] [cursor=pointer]:
+            - /url: /admin/usuarios
+          - link "Planes" [ref=f3e54] [cursor=pointer]:
+            - /url: /admin/planes
+      - generic [ref=f3e58]:
+        - button "Cuenta y sesión" [ref=f3e60] [cursor=pointer]:
+          - generic [aria-hidden] [ref=f3e62]: JU
+          - generic [ref=f3e63]:
+            - generic [ref=f3e64]: juan07veloza23@gmail.com
+            - generic [ref=f3e65]: Administrador mayor
+        - button "Contraer menú" [ref=f3e66] [cursor=pointer]
+    - generic [ref=f3e70]:
+      - banner [ref=f3e71]:
+        - button "Buscar miembro, comercio o acción…" [ref=f3e73] [cursor=pointer]
+        - generic [ref=f3e78]:
+          - radiogroup "Tema de la interfaz" [ref=f3e80]:
+            - generic [ref=f3e82] [cursor=pointer]:
+              - radio "Auto" [checked] [ref=f3e83]
+              - generic [ref=f3e86]: Auto
+            - generic [ref=f3e87] [cursor=pointer]:
+              - radio "Claro" [ref=f3e88]
+              - generic [ref=f3e95]: Claro
+            - generic [ref=f3e96] [cursor=pointer]:
+              - radio "Oscuro" [ref=f3e97]
+              - generic [ref=f3e100]: Oscuro
+          - generic "juan07veloza23@gmail.com" [ref=f3e101]:
+            - generic [aria-hidden] [ref=f3e102]: JU
+      - main [ref=f3e104]:
+        - generic [ref=f3e106]:
+          - heading "Cargar rango de números" [level=1] [ref=f3e107]
+          - paragraph [ref=f3e108]: Añade al pozo toda una secuencia de números de carné de una vez.
+        - generic [ref=f3e110]:
+          - generic [ref=f3e111]:
+            - paragraph [ref=f3e112]: Escribe el primer y el último número impresos en los carnés. Se crea toda la secuencia. Máximo 2000 por carga; los que ya existan se omiten.
+            - generic [ref=f3e113]:
+              - generic [ref=f3e114]:
+                - generic [ref=f3e115]: Desde
+                - textbox "Desde" [active] [ref=f3e117]:
+                  - /placeholder: "00000001"
+                - paragraph [ref=f3e118]: 8 dígitos.
+              - generic [ref=f3e119]:
+                - generic [ref=f3e120]: Hasta
+                - textbox "Hasta" [ref=f3e122]:
+                  - /placeholder: "00000500"
+                - paragraph [ref=f3e123]: 8 dígitos.
+          - generic [ref=f3e124]:
+            - button "Cargar rango" [ref=f3e125] [cursor=pointer]
+            - button "Cancelar" [ref=f3e130] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=f3e137] [cursor=pointer]
