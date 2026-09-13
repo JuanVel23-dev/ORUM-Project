@@ -34,7 +34,8 @@ export function RouteProgress() {
 
   useEffect(() => {
     const pintar = () => {
-      if (progresoRef.current) progresoRef.current.style.width = `${ancho.current}%`
+      if (progresoRef.current)
+        progresoRef.current.style.setProperty('--avance', String(ancho.current / 100))
     }
 
     const detenerTemporizadores = () => {
@@ -101,14 +102,14 @@ export function RouteProgress() {
     if (barra.getAttribute('data-visible') !== 'true') return
 
     ancho.current = 100
-    progreso.style.width = '100%'
+    progreso.style.setProperty('--avance', '1')
 
     ocultado.current = setTimeout(() => {
       barra.setAttribute('data-visible', 'false')
       // Se reinicia tras el desvanecido para que no se vea rebobinar.
       ocultado.current = setTimeout(() => {
         ancho.current = 0
-        progreso.style.width = '0%'
+        progreso.style.setProperty('--avance', '0')
       }, 200)
     }, 220)
 
