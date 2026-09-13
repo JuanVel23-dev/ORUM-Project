@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useMemo, useState } from 'react'
+import { useActionState, useId, useMemo, useState } from 'react'
 import { Check, Receipt, RotateCcw } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,13 @@ const PESOS = new Intl.NumberFormat('es-CO', {
   maximumFractionDigits: 0,
 })
 
+/*
+  Los montos viajan como cadena de dígitos y el servidor los lee con `Number()`.
+  Cualquier separador o signo que se cuele daría `NaN` y la venta se rechazaría
+  con un error que el cajero no sabría corregir, así que se filtra al teclear.
+*/
+const soloDigitos = (valor: string) => valor.replace(/\D+/g, '')
+
 export function ConfirmarVentaForm({
   miembroId,
   membresiaId,
@@ -47,6 +54,7 @@ export function ConfirmarVentaForm({
   onExito: () => void
 }) {
   const [state, formAction, pending] = useActionState(registrarVenta, estadoInicial)
+  const idDescuento = useId()
   const [promocionId, setPromocionId] = useState('')
   const [valorCompra, setValorCompra] = useState('0')
   const [descuentoManual, setDescuentoManual] = useState('0')
@@ -148,39 +156,60 @@ export function ConfirmarVentaForm({
           <Field label="Valor de la compra">
             <Input
               name="valor_compra"
-              type="number"
-              min={0}
-              step="1"
+              /*
+                `text` con `inputMode="numeric"`, no `type="number"`: en Android
+                el teclado de `number` trae `+`, `-` y coma —ninguno vale aquí,
+                son pesos enteros— y los spinners nativos son un blanco de toque
+                parásito para quien maneja el móvil de pie y con una mano. El
+                saneado deja solo dígitos, que es lo que el servidor parsea con
+                `Number()`.
+              */
+              type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="off"
               numeric
               value={valorCompra}
-              onChange={(e) => setValorCompra(e.target.value)}
+              onChange={(e) => setValorCompra(soloDigitos(e.target.value))}
               required
             />
           </Field>
 
-          <Field
-            label="Descuento"
-            help={
-              calculoAutomatico
-                ? 'Lo calcula la promoción.'
-                : editable
-                  ? 'Escribe cuánto se descontó.'
-                  : 'Elige una promoción primero.'
-            }
-          >
-            <Input
-              name="valor_descuento"
-              type="number"
-              min={0}
-              step="1"
-              inputMode="numeric"
-              numeric
-              value={valorDescuento}
-              onChange={(e) => setDescuentoManual(e.target.value)}
-              readOnly={!editable}
-            />
-          </Field>
+          {editable ? (
+            <Field label="Descuento" help="Escribe cuánto se descontó.">
+              <Input
+                name="valor_descuento"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete="off"
+                numeric
+                value={descuentoManual}
+                onChange={(e) => setDescuentoManual(soloDigitos(e.target.value))}
+              />
+            </Field>
+          ) : (
+            /*
+              Cuando lo calcula la promoción esto NO es un campo: era un
+              `readOnly` que seguía siendo enfocable, así que el cajero lo
+              tocaba, se abría el teclado numérico sin poder escribir nada y
+              tapaba el total justo cuando hay que leerlo en voz alta. Ahora es
+              un dato mostrado —y un `hidden` que lo lleva en el envío—.
+              `<output>` se anuncia solo al cambiar de promoción.
+            */
+            <div className={styles.campoLeido}>
+              <span className={styles.campoLeidoEtiqueta} id={idDescuento}>
+                Descuento
+              </span>
+              <output className={styles.campoLeidoValor} aria-labelledby={idDescuento}>
+                {PESOS.format(valorDescuento)}
+              </output>
+              <span className={styles.campoLeidoAyuda}>
+                {calculoAutomatico ? 'Lo calcula la promoción.' : 'Elige una promoción primero.'}
+              </span>
+              <input type="hidden" name="valor_descuento" value={valorDescuento} />
+            </div>
+          )}
         </div>
 
         {/*

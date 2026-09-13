@@ -207,7 +207,10 @@
 */
 .categoria {
   padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--gold-hairline);
+  /* `--brand-edge`, no `--gold-hairline`: ese token es un `linear-gradient` y
+     `border` solo acepta un COLOR, así que la declaración entera se descartaba
+     y el filo no se pintaba nunca. El degradado solo vale como `background`. */
+  border: 1px solid var(--brand-edge);
   border-radius: var(--radius-full);
   color: var(--text);
   white-space: nowrap;

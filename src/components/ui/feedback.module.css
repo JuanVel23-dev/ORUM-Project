@@ -49,6 +49,11 @@
 
 /* --- ProgressBar ---------------------------------------------------------- */
 
+/*
+  El carril es quien redondea y quien recorta. La barra de dentro ocupa el
+  100% y se encoge con `scaleX`, que deformaría sus propias esquinas
+  redondeadas al escalarse: el `overflow: hidden` de aquí las dibuja por ella.
+*/
 .progreso {
   width: 100%;
   height: 3px;
@@ -57,17 +62,27 @@
   overflow: hidden;
 }
 
+/*
+  El progreso se anima con `transform`, NUNCA con `width`: animar `width`
+  recalcula el layout en cada fotograma y es una prohibición dura del proyecto.
+  El porcentaje llega como token dinámico (`--progreso`, de 0 a 1) desde el TSX.
+*/
 .progresoBarra {
+  width: 100%;
   height: 100%;
-  border-radius: var(--radius-full);
   background: var(--gold-sheen);
   background-size: 200% 100%;
-  transition: width var(--dur-base) var(--ease-out);
+
+  transform: scaleX(var(--progreso, 0));
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-out);
 }
 
 /* Indeterminada: no se conoce el porcentaje, solo que hay actividad. */
 .indeterminada .progresoBarra {
   width: 40%;
+  /* Aquí el `transform` lo escribe la animación: no hay porcentaje que escalar. */
+  transform: none;
   animation: recorrer 1200ms var(--ease-in-out) infinite;
 }
 

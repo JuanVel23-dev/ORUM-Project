@@ -87,6 +87,31 @@
   gap: var(--space-1);
 }
 
+/*
+  Lo que se VE y lo que se TOCA son cosas distintas.
+
+  36px es la densidad correcta en una barra de escritorio, pero se queda corto
+  para el dedo. En vez de agrandar el botón —que descuadraría la fila de
+  acciones de `DataList`—, se amplía el área sensible con un `::after` centrado
+  de `var(--tap-min)`: el mismo patrón que ya usan `Copiar` e `InputButton`.
+
+  Es transparente y `content: ''`, así que no tapa nada ni añade nodo al árbol
+  de accesibilidad; y al ser pseudoelemento DEL PROPIO botón, el toque que
+  recibe lo recibe el botón. No colisiona con `.brand::before`, que es el otro
+  pseudo en uso.
+*/
+.sm::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+
+  width: 100%;
+  min-width: var(--tap-min);
+  height: var(--tap-min);
+}
+
 .md {
   min-height: var(--tap-min); /* 44px — objetivo táctil */
   padding: 0 var(--space-4);

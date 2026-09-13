@@ -251,16 +251,21 @@ export function Sheet({
     onClose()
   }
 
+  /*
+    `aria-labelledby` va en el <dialog>, que es quien tiene el rol de diálogo:
+    colgado del `div role="document"` de dentro no nombra a nada, y al abrir la
+    hoja el lector puede anunciar "diálogo" sin decir cuál.
+  */
   return (
-    <dialog ref={dialogRef} className={styles.dialog} onCancel={alCancelar}>
+    <dialog
+      ref={dialogRef}
+      className={styles.dialog}
+      onCancel={alCancelar}
+      aria-labelledby={title ? 'sheet-titulo' : undefined}
+    >
       <div ref={veloRef} className={styles.velo} onClick={onClose} aria-hidden="true" />
 
-      <div
-        ref={panelRef}
-        className={styles.panel}
-        role="document"
-        aria-labelledby={title ? 'sheet-titulo' : undefined}
-      >
+      <div ref={panelRef} className={styles.panel} role="document">
         <div
           className={styles.agarre}
           onPointerDown={alBajar}

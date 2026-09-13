@@ -11,7 +11,12 @@
   max-width: 460px;
 }
 
-@media (max-width: 640px) {
+/*
+  `@container`, no `@media`: la lista vive dentro de `.main` del shell
+  (`container-name: contenido`), cuyo ancho depende del estado de la barra
+  lateral y no del viewport.
+*/
+@container contenido (max-width: 640px) {
   .buscador {
     flex-direction: column;
   }

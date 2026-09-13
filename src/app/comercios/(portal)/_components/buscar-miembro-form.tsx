@@ -62,7 +62,14 @@ export function BuscarMiembroForm({
     <Stack gap={5}>
       <Card padding="lg">
         <form action={formAction} className={styles.paso}>
-          {state.error && <Alert tone="danger">{state.error}</Alert>}
+          {/* `key` con el propio mensaje: si el cajero reintenta y falla con
+              EXACTAMENTE el mismo error, React reutilizaría el nodo y el lector
+              de pantalla no volvería a anunciarlo. Remontarlo lo re-anuncia. */}
+          {state.error && (
+            <Alert key={state.error} tone="danger">
+              {state.error}
+            </Alert>
+          )}
 
           <Field label="Número de membresía" help="Está bajo el código del carnet.">
             <Input
@@ -124,23 +131,32 @@ export function BuscarMiembroForm({
         </form>
       </Card>
 
-      {state.miembro && (
-        <>
-          <ResultadoMiembro miembro={state.miembro} />
+      {/*
+        El veredicto es un MENSAJE DE ESTADO (WCAG 4.1.3): aparece sin que el
+        foco se mueva, así que sin región en vivo un cajero con lector de
+        pantalla no se entera de si la membresía vale — tendría que ir a
+        buscarlo. La región se monta VACÍA desde el primer render: si naciera
+        junto con el resultado, el lector no la habría registrado todavía y no
+        anunciaría nada. `aria-atomic` hace que se lea el veredicto entero
+        —nombre, número y estado—, no solo el trozo que cambió.
+      */}
+      <div aria-live="polite" aria-atomic="true">
+        {state.miembro && <ResultadoMiembro miembro={state.miembro} />}
+      </div>
 
-          {/* La venta solo se ofrece si hay derecho a beneficio. */}
-          {state.miembro.vigente && (
-            <ConfirmarVentaForm
-              miembroId={state.miembro.id}
-              membresiaId={state.miembro.membresiaId}
-              numeroMembresia={state.miembro.numeroMembresia}
-              metodo={state.metodo ?? 'numero'}
-              sucursales={sucursales}
-              promociones={promociones}
-              onExito={onNuevaVerificacion}
-            />
-          )}
-        </>
+      {/* La venta solo se ofrece si hay derecho a beneficio. Queda FUERA de la
+          región en vivo: anunciar el formulario entero al abrirse sepultaría
+          el veredicto, que es lo único que hay que oír. */}
+      {state.miembro?.vigente && (
+        <ConfirmarVentaForm
+          miembroId={state.miembro.id}
+          membresiaId={state.miembro.membresiaId}
+          numeroMembresia={state.miembro.numeroMembresia}
+          metodo={state.metodo ?? 'numero'}
+          sucursales={sucursales}
+          promociones={promociones}
+          onExito={onNuevaVerificacion}
+        />
       )}
     </Stack>
   )

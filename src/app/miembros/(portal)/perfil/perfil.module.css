@@ -121,6 +121,14 @@
 @media print {
   .carnet {
     box-shadow: none;
-    border: 1px solid #000;
+    /*
+      `--n-1000` y no `--border`: sobre papel no hay tema. Un alias de tema se
+      resolvería con el tema ACTIVO al imprimir, y en oscuro `--border` es un
+      gris claro que desaparece contra el blanco del folio. `--n-1000` es
+      pigmento de la paleta cruda —no lo remapea ningún tema—, que es justo lo
+      que pide la tinta, el mismo motivo por el que el QR se imprime en negro
+      sobre blanco pase lo que pase.
+    */
+    border: 1px solid var(--n-1000);
   }
 }

@@ -79,10 +79,10 @@
   width: 20px;
   height: 20px;
   border-radius: var(--radius-full);
-  background: #fff;
-  box-shadow:
-    0 2px 4px rgba(10, 10, 12, 0.2),
-    0 0 1px rgba(10, 10, 12, 0.3);
+  /* El pulgar es blanco en los DOS temas —es el material del control, no una
+     superficie del tema—, así que sale de `--w-0` y no de `--surface`. */
+  background: var(--w-0);
+  box-shadow: var(--shadow-2);
 
   transition:
     translate var(--dur-base) var(--ease-out),

@@ -241,6 +241,11 @@ function Toast({ item, onCerrar }: { item: ToastItem; onCerrar: () => void }) {
       // debería ser una carrera contra el temporizador.
       onMouseEnter={cancelarCierre}
       onMouseLeave={programarCierre}
+      // Y con teclado igual (WCAG 2.2.1): quien llega al botón de acción del
+      // aviso tabulando no tiene ratón que dejar encima, y sin esto el aviso
+      // se le cierra debajo del foco mientras decide.
+      onFocus={cancelarCierre}
+      onBlur={programarCierre}
     >
       <Icono className={styles.icono} aria-hidden="true" />
 

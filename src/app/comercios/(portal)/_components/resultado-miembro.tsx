@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge'
+import { StatusBadge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import type { MiembroEncontrado } from '../actions'
 import styles from './verificar.module.css'
@@ -20,11 +20,15 @@ export function ResultadoMiembro({ miembro }: { miembro: MiembroEncontrado }) {
         </div>
 
         <div className={styles.estadoFila}>
-          {miembro.vigente ? (
-            <Badge tone="success">Membresía activa</Badge>
-          ) : (
-            <Badge tone="danger">Membresía inactiva</Badge>
-          )}
+          {/*
+            `StatusBadge` y no un `Badge` suelto: trae el punto lleno / punto
+            hueco, que es la diferencia de FORMA que sostiene el veredicto
+            cuando el color no llega —daltonismo, sol sobre la pantalla del
+            móvil en una caja—. El motivo se omite a propósito: la búsqueda del
+            comercio solo devuelve `vigente`, y no se inventa un "vencida" que
+            podría ser "suspendida".
+          */}
+          <StatusBadge estado={miembro.vigente ? { activa: true } : { activa: false }} />
 
           {miembro.vigente && miembro.planNombre && (
             <span className={styles.plan}>{miembro.planNombre}</span>

@@ -19,7 +19,13 @@
   gap: var(--space-6);
 }
 
-@media (max-width: 640px) {
+/*
+  `@container`, no `@media`: esta pantalla se pinta dentro de `.main` del shell
+  (`app-shell.module.css`, `container-name: contenido`), y su ancho útil cambia
+  según la barra lateral esté abierta o en rail. Un `@media` se equivoca en
+  ~200px justo en el rango de los portátiles.
+*/
+@container contenido (max-width: 640px) {
   .destacadoCuerpo {
     flex-direction: column;
     align-items: stretch;

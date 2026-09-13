@@ -69,7 +69,13 @@ function FormularioMiembro({
   return (
     <>
       <form action={formAction} className={styles.formulario} noValidate>
-        {state.error && <Alert tone="danger">{state.error}</Alert>}
+        {/* `key` con el mensaje: si el alta vuelve a fallar con el MISMO error,
+            React reutilizaría el nodo y el lector no lo re-anunciaría. */}
+        {state.error && (
+          <Alert key={state.error} tone="danger">
+            {state.error}
+          </Alert>
+        )}
 
         {sinPlanes && (
           <Alert tone="warning" title="No hay planes activos">

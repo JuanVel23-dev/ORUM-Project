@@ -148,6 +148,53 @@
 }
 
 /*
+  Dato mostrado con forma de campo.
+
+  El descuento calculado por la promoción NO es un campo: si fuera un `input`
+  readOnly seguiría siendo enfocable y en el móvil abriría el teclado para nada,
+  tapando el total. Se copia la métrica de `Field` —etiqueta, control, ayuda—
+  para que en la rejilla quede a la misma altura que "Valor de la compra".
+*/
+.campoLeido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.campoLeidoEtiqueta {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.campoLeidoValor {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: var(--space-3);
+
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunk);
+  color: var(--text);
+
+  /* Filo discontinuo y fondo hundido: la forma dice "esto no se escribe"
+     antes de que nadie intente escribirlo. */
+  font-size: var(--t-control-size);
+  line-height: var(--t-body-leading);
+  font-variant-numeric: tabular-nums;
+}
+
+.campoLeidoAyuda {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  color: var(--text-2);
+}
+
+/*
   El valor final es la cifra que se le canta al cliente. Va aparte, en su
   propia franja, para que no se confunda con los dos campos que la producen.
 */

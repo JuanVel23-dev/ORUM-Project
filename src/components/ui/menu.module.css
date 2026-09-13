@@ -119,7 +119,6 @@
 .item:hover:not(:disabled),
 .item:focus-visible {
   background: var(--surface-hover);
-  outline: none;
 }
 
 /* El icono se desplaza un pelo en la dirección de la acción al apuntar. */
@@ -132,7 +131,15 @@
   scale: 0.985;
 }
 
+/*
+  El foco se dibuja POR DENTRO. Las filas ocupan casi todo el ancho del panel,
+  que solo tiene `--space-2` de relleno: un `outline` con desplazamiento se
+  saldría del menú y se comería el hueco de la fila vecina. La sombra interior
+  es el SUSTITUTO del outline —nunca se suprime uno sin el otro—, y por eso las
+  dos declaraciones viven en la misma regla: quien borre una ve la otra.
+*/
 .item:focus-visible {
+  outline: none;
   box-shadow: inset 0 0 0 2px var(--focus);
 }
 

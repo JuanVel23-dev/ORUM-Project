@@ -21,7 +21,20 @@
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
+
+  /*
+    Zonas seguras, igual que en el Portal de Miembros
+    (`miembros/(portal)/portal.module.css`). El manifiesto declara
+    `viewport-fit: cover` y `statusBarStyle: 'black-translucent'`, así que en
+    un iPhone la aplicación instalada se dibuja BAJO la barra de estado: sin
+    reservar el inset, la marca y el menú del comercio quedan debajo de la hora
+    y la batería, y esto se usa de pie en la caja con el cliente esperando.
+    Los laterales cubren el teléfono con muesca en horizontal.
+  */
+  padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
+  padding-bottom: var(--space-3);
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
   background: var(--material);
   backdrop-filter: blur(var(--blur-xl)) saturate(180%);
@@ -30,7 +43,8 @@
 
 @media (min-width: 768px) {
   .cabecera {
-    padding: var(--space-3) var(--space-6);
+    padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
   }
 }
 
@@ -100,7 +114,13 @@
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-10);
+
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-10);
+  /* Mismo motivo que en la cabecera: en horizontal con muesca, el formulario
+     se metía bajo el bisel. */
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
   container-type: inline-size;
   container-name: contenido;
@@ -108,6 +128,9 @@
 
 @media (min-width: 768px) {
   .main {
-    padding: var(--space-7) var(--space-6) var(--space-11);
+    padding-top: var(--space-7);
+    padding-bottom: var(--space-11);
+    padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
   }
 }
