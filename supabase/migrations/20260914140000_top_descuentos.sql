@@ -48,8 +48,15 @@ as $$
          count(v.id) as usos
   from public.promociones p
   join public.comercios c on c.id = p.comercio_id
-  -- LEFT: una promoción vigente que todavía nadie ha usado tiene que poder
-  -- aparecer con cero. Con INNER, el «top» del primer mes sería una lista vacía.
+  -- LEFT y no INNER: la función devuelve un SUPERCONJUNTO a propósito, con las
+  -- promociones de cero usos incluidas. Quién entra en el «top» lo decide la
+  -- aplicación (`prepararTopDescuentos`), que descarta las de cero porque una
+  -- lista de «los más usados» con algo que nadie usó es una mentira pequeña y
+  -- constante.
+  --
+  -- Se deja aquí el superconjunto para no tener que volver a tocar la base el
+  -- día que se quiera una variante «vitrina» que sí los muestre. La base da los
+  -- datos; el criterio editorial vive en un módulo puro y con pruebas.
   left join public.ventas v on v.promocion_id = p.id
   where p.activo
     and p.deleted_at is null
@@ -68,7 +75,12 @@ $$;
 comment on function public.top_descuentos(integer) is
   'Descuentos más usados del club, global. Agrega ventas de todos los socios y devuelve solo el recuento, nunca quién los usó.';
 
-revoke all on function public.top_descuentos(integer) from public;
+-- `revoke ... from public` NO basta en Supabase, y es una trampa fácil de pisar.
+-- Al crear una función, Postgres concede EXECUTE a PUBLIC, pero Supabase además
+-- concede a `anon` y `authenticated` por separado: quitar el de PUBLIC deja los
+-- individuales en pie, y la función sigue siendo llamable sin sesión. Hay que
+-- revocar de los tres.
+revoke all on function public.top_descuentos(integer) from public, anon, authenticated;
 grant execute on function public.top_descuentos(integer) to authenticated;
 
 -- El índice que hace barato el recuento. Sin él, cada carga del catálogo
