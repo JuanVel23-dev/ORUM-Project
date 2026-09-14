@@ -12,6 +12,18 @@
   gap: var(--space-6);
 }
 
+/*
+  La misma ficha dentro del overlay. La superficie, el relleno y la sombra los
+  pone el overlay, así que aquí solo queda el ritmo vertical — y algo menos,
+  porque una hoja tiene menos alto útil que una página y el aire de sobra se
+  convierte en desplazamiento.
+*/
+.enOverlay {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
 /* ==========================================================================
    BARRA DE VUELTA  ·  pegajosa bajo la cabecera  (SPEC §5.4)
    ========================================================================== */
@@ -596,4 +608,70 @@
   .listaSedes {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* ==========================================================================
+   GALERÍA DE FOTOS  ·  encargo nº 7
+   --------------------------------------------------------------------------
+   Carril horizontal con anclaje, no rejilla. Dos razones: en el teléfono una
+   rejilla de fotos obliga a desplazar la página entera para ver la tercera,
+   y el carril deja claro de un vistazo que hay MÁS a la derecha — una rejilla
+   cortada por el borde inferior no lo dice.
+
+   `@container contenido`, nunca `@media`: esta ficha se pinta en dos anchos
+   muy distintos —la hoja del overlay y la página completa— y el viewport no
+   distingue entre ellos.
+   ========================================================================== */
+
+.galeria {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Sin scroll encadenado: al llegar al final del carril no arrastra la página
+     de detrás, que en una hoja modal se siente como si el overlay se cerrara. */
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none;
+}
+
+.galeria::-webkit-scrollbar {
+  display: none;
+}
+
+.foto {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+
+  width: 72%;
+  max-width: 320px;
+  aspect-ratio: 4 / 3;
+
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+
+  /* La foto flota: es contenido que el dedo puede levantar. El resto de la
+     ficha se apoya en la superficie que ya la contiene. */
+  background: var(--surface-hueco);
+  box-shadow: var(--shadow-card);
+}
+
+@container contenido (min-width: 560px) {
+  .foto {
+    width: 46%;
+  }
+}
+
+.fotoImagen {
+  width: 100%;
+  height: 100%;
+  /* `cover` y no `contain`: son fotografías de un local, no logotipos. Aquí el
+     recorte es preferible a la banda vacía. */
+  object-fit: cover;
+  display: block;
 }

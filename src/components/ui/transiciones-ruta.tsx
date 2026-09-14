@@ -36,13 +36,24 @@ import { usePathname, useRouter } from 'next/navigation'
 /** Milisegundos que se espera a que la ruta nueva aparezca antes de rendirse. */
 const PLAZO_MAXIMO = 1200
 
-/** Sale `true` en las rutas entre las que SÍ hay continuidad de objeto. */
-function esParAprobado(desde: string, hasta: string): boolean {
-  const ficha = /^\/miembros\/comercios\/\d+$/
-  const catalogo = '/miembros'
-  return (
-    (desde === catalogo && ficha.test(hasta)) || (ficha.test(desde) && hasta === catalogo)
-  )
+/**
+ * Sale `true` en las rutas entre las que SÍ hay continuidad de objeto.
+ *
+ * HOY NO HAY NINGUNA, y es una decisión de diseño, no un olvido.
+ *
+ * El único par aprobado era catálogo ↔ ficha del comercio. Desde el 14/09/2026
+ * la ficha se abre como OVERLAY sobre el catálogo, así que ese movimiento lo
+ * hace ahora el propio overlay, naciendo de la tarjeta que se tocó. Y además ya
+ * no podría hacerlo una View Transition: con la ficha encima, el catálogo sigue
+ * montado detrás, los dos nombres estarían vivos por duplicado en el mismo
+ * documento, y eso anula la transición entera en silencio.
+ *
+ * El mecanismo se conserva entero —y probado— porque el dictamen de qué pares
+ * merecen transición sigue siendo válido y el día que aparezca uno solo hay que
+ * nombrarlo aquí. Ver `.claude/docs/log/m5-view-transitions.md`.
+ */
+function esParAprobado(): boolean {
+  return false
 }
 
 export function TransicionesDeRuta() {
@@ -88,7 +99,7 @@ export function TransicionesDeRuta() {
       if (url.origin !== location.origin) return
 
       // Solo los pares con continuidad real. Lo demás navega sin transición.
-      if (!esParAprobado(location.pathname, url.pathname)) return
+      if (!esParAprobado()) return
 
       // Si ya hay una en vuelo, se deja pasar la navegación tal cual: encadenar
       // dos transiciones deja la segunda instantánea tomada a mitad de la

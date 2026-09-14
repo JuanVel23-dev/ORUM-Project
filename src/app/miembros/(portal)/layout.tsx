@@ -15,7 +15,22 @@ export const metadata = { title: 'Portal de Miembros · ORUM' }
 
 const MENSAJE_SOPORTE = 'Hola, necesito ayuda con mi membresía ORUM.'
 
-export default async function MiembrosLayout({ children }: { children: ReactNode }) {
+/*
+  La ranura `@modal` vive AQUÍ y solo aquí.
+
+  Una ruta interceptada solo intercepta si el layout que declara su ranura ya
+  está montado. En el panel de administración se aprendió por las malas: con una
+  ranura por sección, el mismo destino se abría encima o navegaba entero según de
+  dónde vinieras. Una sola ranura, en el layout del portal, y todos los overlays
+  cuelgan de ella.
+*/
+export default async function MiembrosLayout({
+  children,
+  modal,
+}: {
+  children: ReactNode
+  modal: ReactNode
+}) {
   const perfil = await requireRolMiembro()
 
   const supabase = await createClient()
@@ -103,6 +118,8 @@ export default async function MiembrosLayout({ children }: { children: ReactNode
       <TransicionesDeRuta />
 
       <main className={styles.main}>{children}</main>
+
+      {modal}
 
       <PortalTabBar />
     </div>

@@ -1,7 +1,7 @@
 import { cache } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ChevronLeft, MapPin, Phone, Store } from 'lucide-react'
+import { ChevronLeft, ImageOff, MapPin, Phone, Store } from 'lucide-react'
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
 import { resolverVolverAlCatalogo } from '@/lib/miembros/volver-catalogo'
 import { createClient } from '@/lib/supabase/server'
@@ -143,12 +143,32 @@ type Sede = {
   ciudadNombre: string | null
 }
 
+/*
+  LA MISMA FICHA EN DOS SUPERFICIES.
+
+  Desde el catálogo se abre ENCIMA, como overlay (ruta interceptada). Llegando
+  por enlace directo —WhatsApp, un buscador, recargar la página— se pinta a
+  pantalla completa. Es el mismo componente en las dos: duplicarlo en 456 líneas
+  habría garantizado que se desincronicen a la primera corrección.
+
+  Antes era solo página, y el comentario de este archivo defendía esa decisión
+  («no es un formulario: es contenido, y el contenido se empuja»). El propietario
+  decidió lo contrario el 14/09/2026: el catálogo se queda detrás, atenuado, y el
+  socio no pierde de vista de dónde salió. El razonamiento viejo no se borra
+  porque explica por qué la página completa SIGUE existiendo y no es un respaldo
+  de segunda: es la que recibe los enlaces compartidos.
+
+  `enOverlay` no lo pasa Next —solo entrega `params` y `searchParams`—; lo pasa
+  la página de la ranura `@modal` cuando importa este componente.
+*/
 export default async function FichaComercioPage({
   params,
   searchParams,
+  enOverlay = false,
 }: {
   params: Promise<{ id: string }>
   searchParams: Promise<{ volver?: string | string[] }>
+  enOverlay?: boolean
 }) {
   /*
     SIN EXCEPCIÓN, y antes de leer nada. Un socio con la membresía vencida no
@@ -202,6 +222,30 @@ export default async function FichaComercioPage({
       .select('valor')
       .eq('clave', 'whatsapp_soporte')
       .maybeSingle(),
+    /*
+      LA GALERÍA. `comercio_imagenes` llega con la migración
+      `20260914090000_favoritos_y_mas_usados.sql`, que puede no estar aplicada
+      todavía: contra una base sin la tabla, PostgREST devuelve error y `data`
+      queda en `null`. Eso NO puede tumbar la ficha, así que el error se trata
+      igual que «este comercio no ha subido fotos» — que es además la verdad
+      desde el punto de vista del socio.
+    */
+    supabase
+      .from('comercio_imagenes')
+      .select('id, url, descripcion, orden')
+      .eq('comercio_id', numero)
+      .order('orden')
+      .limit(24),
+    /*
+      La portada va APARTE y no en `cargarComercio`, y esto costó un 404.
+
+      `comercios.portada_url` llega con la migración `20260913120000`, que puede
+      no estar aplicada. Si se pide esa columna en la consulta que decide si el
+      comercio EXISTE, PostgREST devuelve error, `data` queda en `null`, y la
+      ficha entera cae en `notFound()`: una columna que falta se convierte en
+      «este comercio no existe». Aislada aquí, el peor caso es no tener foto.
+    */
+    supabase.from('comercios').select('portada_url').eq('id', numero).maybeSingle(),
   ])
 
   const [
@@ -211,11 +255,25 @@ export default async function FichaComercioPage({
     { data: sucursales },
     { data: ciudades },
     { data: configSoporte },
+    { data: imagenesCrudas },
+    { data: portada },
   ] = await datos
 
   /* No existe, está inactivo o tiene `deleted_at`: los tres dan exactamente la
      misma pantalla (`not-found.tsx` de esta carpeta). */
   if (!comercio) notFound()
+
+  /* `portada_url` va primero: es la foto que el comercio eligió como cara. */
+  const imagenes = [
+    ...(portada?.portada_url
+      ? [{ id: -1, url: portada.portada_url, descripcion: null as string | null }]
+      : []),
+    ...(imagenesCrudas ?? []).map((i) => ({
+      id: i.id,
+      url: i.url,
+      descripcion: i.descripcion,
+    })),
+  ]
 
   const codigoTipo = new Map((tipos ?? []).map((t) => [t.id, t.codigo]))
   const nombreCiudad = new Map((ciudades ?? []).map((c) => [c.id, c.nombre]))
@@ -279,10 +337,24 @@ export default async function FichaComercioPage({
     no hay nada que emparejar y no hay transición. Un nombre huérfano es inerte,
     no un error.
   */
-  const transicion = transicionComercio(comercio.id)
+  /*
+    EN OVERLAY NO HAY NOMBRES DE TRANSICIÓN, y es una decisión, no un olvido.
+
+    Con la ficha abierta encima, el catálogo SIGUE montado detrás: los mismos dos
+    nombres estarían vivos dos veces en el mismo documento, y eso anula la
+    transición entera en silencio —ni error, ni consola—. Además ya no hace
+    falta: el movimiento de ese par lo hace ahora el propio overlay, que nace de
+    la tarjeta que se tocó.
+
+    En página completa se conservan. No estorban: si no hay un elemento anterior
+    con ese nombre, no hay nada que emparejar y el nombre queda inerte.
+  */
+  const transicion = enOverlay
+    ? { placa: undefined, titulos: undefined }
+    : transicionComercio(comercio.id)
 
   return (
-    <div className={estilos.pagina}>
+    <div className={enOverlay ? estilos.enOverlay : estilos.pagina}>
       {/*
         LA VUELTA ES CROMO DE LA FICHA, no un enlace dentro del contenido:
         barra pegajosa anclada justo bajo la cabecera, con fondo sólido y su
@@ -299,12 +371,20 @@ export default async function FichaComercioPage({
         La etiqueta es «Comercios» —el destino, como en iOS— y no «Volver»: no
         promete devolver a unos resultados que puede que no existan.
       */}
-      <div className={estilos.barraVuelta}>
-        <Link href={hrefVolver} className={estilos.volver}>
-          <ChevronLeft size={18} aria-hidden />
-          Comercios
-        </Link>
-      </div>
+      {/*
+        Dentro del overlay NO se pinta: el overlay ya tiene su cierre, el
+        `Escape`, el scrim y el arrastre. Dos salidas que hacen lo mismo, una
+        encima de la otra, es ruido — y la barra pegajosa se comería el alto
+        útil de la hoja en móvil.
+      */}
+      {!enOverlay && (
+        <div className={estilos.barraVuelta}>
+          <Link href={hrefVolver} className={estilos.volver}>
+            <ChevronLeft size={18} aria-hidden />
+            Comercios
+          </Link>
+        </div>
+      )}
 
       <header className={estilos.hero}>
         <ComercioLogo
@@ -314,7 +394,10 @@ export default async function FichaComercioPage({
           nombreTransicion={transicion.placa}
         />
 
-        <div className={estilos.heroTextos} style={{ viewTransitionName: transicion.titulos }}>
+        <div
+          className={estilos.heroTextos}
+          style={transicion.titulos ? { viewTransitionName: transicion.titulos } : undefined}
+        >
             {/* Único `h1` de la pantalla. `--t-title-1` (24px FIJO) y no
                 `--t-display-2`: junto a una placa de 144px, a 375px le quedan
                 187px, y un tamaño que creciera a 32px partiría el nombre en
@@ -426,6 +509,56 @@ export default async function FichaComercioPage({
           Mostrar mi carnet
         </Button>
       </div>
+
+      {/* ==================================================================
+          FOTOS  ·  encargo nº 7
+
+          Va DESPUÉS de los beneficios y ANTES de las sedes: el socio primero
+          decide si le interesa (el beneficio), luego quiere ver el sitio, y solo
+          entonces dónde queda.
+
+          El estado vacío es parte del encargo, no un respaldo: cuando no hay
+          fotos se dice con todas las letras. Un hueco mudo deja al socio
+          creyendo que la pantalla se rompió.
+          ================================================================== */}
+      <section className={estilos.seccion} aria-labelledby="titulo-fotos">
+        <h2 id="titulo-fotos" className={estilos.tituloSeccion}>
+          Fotos
+        </h2>
+
+        {imagenes.length > 0 ? (
+          <ul className={estilos.galeria}>
+            {imagenes.map((img) => (
+              <li key={img.id} className={estilos.foto}>
+                {/*
+                  Sin `next/image`: `next.config.ts` no declara `images` y estas
+                  URLs son externas y arbitrarias.
+
+                  `descripcion` vacía ⇒ `alt=""`, imagen decorativa. NUNCA el
+                  nombre del archivo ni el del comercio: repetiría al lector de
+                  pantalla lo que el `h1` ya dijo, una vez por foto.
+                */}
+                {/* eslint-disable-next-line @next/next/no-img-element -- URL externa, no un asset local */}
+                <img
+                  src={img.url}
+                  alt={img.descripcion ?? ''}
+                  loading="lazy"
+                  decoding="async"
+                  className={estilos.fotoImagen}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Card>
+            <EmptyState
+              icon={<ImageOff size={22} />}
+              title="Todavía no hay fotos"
+              description="Este aliado aún no ha compartido imágenes de su local. En cuanto las suba, aparecerán aquí."
+            />
+          </Card>
+        )}
+      </section>
 
       <section className={estilos.seccion} aria-labelledby="titulo-sedes">
         <h2 id="titulo-sedes" className={estilos.tituloSeccion}>
