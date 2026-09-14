@@ -99,7 +99,6 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-sm);
-  background: var(--surface-sunk);
   color: var(--text-2);
 }
 

@@ -75,7 +75,7 @@
   width: var(--space-9);
   height: var(--space-9);
 
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
   border-radius: var(--radius-full);
   background: var(--surface-sunk);
 

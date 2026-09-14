@@ -8,7 +8,6 @@
   gap: var(--space-6);
 
   border-top: 1px solid var(--border-subtle);
-  background: var(--surface-sunk);
 
   padding-top: var(--space-8);
   padding-bottom: max(var(--space-8), env(safe-area-inset-bottom, 0px));

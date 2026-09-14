@@ -177,7 +177,7 @@
 
   border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
-  background: var(--surface-sunk);
+  background: var(--surface-hueco);
   color: var(--text);
 
   /* Filo discontinuo y fondo hundido: la forma dice "esto no se escribe"
@@ -205,6 +205,7 @@
   gap: var(--space-3);
 
   padding: var(--space-4);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--surface-sunk);
 }
@@ -272,7 +273,7 @@
 
   min-height: 120px;
   border-radius: var(--radius-md);
-  background: var(--surface-sunk);
+  background: var(--surface-hueco);
 
   font-size: var(--t-footnote-size);
   color: var(--text-2);
