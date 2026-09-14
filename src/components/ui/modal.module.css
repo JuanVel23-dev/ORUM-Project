@@ -8,7 +8,9 @@
   margin: auto;
 
   padding: 0;
-  border: 1px solid var(--border-subtle);
+  /* Superficie flotante sobre papel del mismo blanco: el trazo pleno es lo
+     que la recorta del fondo, aunque el velo ya la aísle. */
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   background: var(--surface);
   color: var(--text);
@@ -135,7 +137,8 @@
   gap: var(--space-3);
 
   padding: var(--space-4) var(--space-6);
-  border-top: 1px solid var(--border-subtle);
+  /* El pie perdió su relleno distinto: la línea lo separa sola. */
+  border-top: 1px solid var(--border);
   background: var(--surface-sunk);
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
@@ -162,6 +165,7 @@
 .cerrar:hover {
   color: var(--text);
   background: var(--surface-hover);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
 .cerrarIcono {

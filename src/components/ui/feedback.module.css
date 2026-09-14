@@ -10,7 +10,17 @@
   width: var(--ancho, 100%);
   height: var(--alto, 1em);
   border-radius: var(--radio, var(--radius-xs));
-  background: var(--surface-sunk);
+
+  /*
+    `--surface-hueco`, no `--surface-sunk`: el hundido dejó de teñir y un
+    esqueleto blanco sobre papel blanco no es un esqueleto, es nada.
+
+    Y aquí NO se resuelve con trazo, que es lo que hace el resto de la
+    fundación: perfilar el esqueleto dibujaría el CONTORNO exacto del
+    contenido que aún no ha llegado, y un esqueleto no debe prometer una forma
+    que puede no cumplirse. En un hueco el relleno sí es información.
+  */
+  background: var(--surface-hueco);
 }
 
 /* Barrido de luz. Lleva `data-motion-esencial` en el TSX: si se congela,
@@ -58,7 +68,8 @@
   width: 100%;
   height: 3px;
   border-radius: var(--radius-full);
-  background: var(--surface-sunk);
+  /* Tres píxeles no tienen sitio para un borde: el carril se tiñe. */
+  background: var(--surface-hueco);
   overflow: hidden;
 }
 
@@ -114,7 +125,9 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-full);
+  /* El disco sí se dibuja: es un contenedor, no un hueco. Papel + trazo. */
   background: var(--surface-sunk);
+  border: 1px solid var(--border);
   color: var(--text-3);
 }
 
@@ -126,6 +139,7 @@
 .estadoError .estadoIcono {
   color: var(--danger);
   background: var(--danger-bg);
+  border-color: var(--danger);
 }
 
 .estadoTextos {

@@ -14,6 +14,16 @@ type StackProps = HTMLAttributes<HTMLDivElement> & {
   align?: CSSProperties['alignItems']
   justify?: CSSProperties['justifyContent']
   wrap?: boolean
+  /**
+ * Entrada escalonada de los hijos directos (§4.2 de la dirección de arte):
+ * 35 ms entre piezas, con tope de 8.
+ *
+ * Opcional a propósito. Escalonar una lista que el usuario ya tenía delante
+ * —tras filtrar, tras paginar— vuelve a hacerle esperar por algo que ya
+ * había leído, y eso se percibe como lentitud, no como elegancia. Úsalo en
+ * la primera pintura de una rejilla, no en cada actualización.
+ */
+  escalonado?: boolean
   children: ReactNode
 }
 
@@ -24,6 +34,7 @@ export function Stack({
   align,
   justify,
   wrap = false,
+  escalonado = false,
   className,
   style,
   children,
@@ -31,7 +42,14 @@ export function Stack({
 }: StackProps) {
   return (
     <div
-      className={[styles.stack, wrap && styles.wrap, className].filter(Boolean).join(' ')}
+      className={[
+        styles.stack,
+        wrap && styles.wrap,
+        escalonado && styles.escalonado,
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={
         {
           '--direccion': direction,
@@ -54,12 +72,23 @@ type GridProps = HTMLAttributes<HTMLDivElement> & {
   /** Ancho mínimo de columna. La rejilla se adapta sola, sin media queries. */
   min?: string
   gap?: SpaceStep
+  /**
+ * Entrada escalonada de los hijos directos (§4.2 de la dirección de arte):
+ * 35 ms entre piezas, con tope de 8.
+ *
+ * Opcional a propósito. Escalonar una lista que el usuario ya tenía delante
+ * —tras filtrar, tras paginar— vuelve a hacerle esperar por algo que ya
+ * había leído, y eso se percibe como lentitud, no como elegancia. Úsalo en
+ * la primera pintura de una rejilla, no en cada actualización.
+ */
+  escalonado?: boolean
   children: ReactNode
 }
 
 export function Grid({
   min = '240px',
   gap = 4,
+  escalonado = false,
   className,
   style,
   children,
@@ -67,7 +96,9 @@ export function Grid({
 }: GridProps) {
   return (
     <div
-      className={[styles.grid, className].filter(Boolean).join(' ')}
+      className={[styles.grid, escalonado && styles.escalonado, className]
+        .filter(Boolean)
+        .join(' ')}
       style={{ '--min': min, '--gap': gapVar(gap), ...style } as CSSProperties}
       {...props}
     >

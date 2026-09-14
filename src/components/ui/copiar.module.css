@@ -53,9 +53,11 @@
   height: var(--tap-min);
 }
 
+/* El relleno del hover no se ve sobre papel (1,02:1): el trazo lo acompaña. */
 .boton:hover {
   color: var(--text);
   background: var(--surface-hover);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
 .boton:active {

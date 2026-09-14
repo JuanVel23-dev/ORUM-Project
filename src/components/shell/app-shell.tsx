@@ -136,6 +136,10 @@ export function AppShell({ user, cerrarSesion, buscar, children }: Props) {
               href={item.href}
               className={styles.masItem}
               data-activo={esRutaActiva(item, pathname)}
+              /* El destino actual no puede decirse solo con el relleno: la
+                 barra lateral ya marcaba el suyo con `aria-current` y esta
+                 hoja es la ÚNICA puerta a estos destinos en móvil. */
+              aria-current={esRutaActiva(item, pathname) ? 'page' : undefined}
               onClick={() => setMas(false)}
             >
               <item.icon className={styles.masItemIcono} aria-hidden="true" />

@@ -6,8 +6,16 @@
 > porque ya pasó una vez: dos sesiones trabajaron en paralelo y construyeron dos
 > sistemas de diseño incompatibles sobre los mismos archivos.
 >
-> Detalle completo del porqué de cada decisión:
-> [`docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md`](docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md)
+> **Dirección de arte vigente: v2 — «papel blanco, trazo de tinta, sombra real
+> y un filo de oro»**, fijada el 13/09/2026 en
+> [`.claude/docs/DIRECCION-ARTE-claro.md`](.claude/docs/DIRECCION-ARTE-claro.md).
+> Sustituye a la anterior **solo en lo que ese documento dice**; lo que no
+> nombra sigue vigente. El detalle del porqué de cada decisión previa está en
+> [`docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md`](docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md).
+>
+> Si algo de este archivo y algo de ese documento se contradicen, **gana este
+> archivo**: aquí es donde la dirección se traduce a reglas, y aquí es donde se
+> arregla la contradicción.
 
 ---
 
@@ -53,6 +61,105 @@ Romper cualquiera de estas es un bug, no una preferencia.
 | Color como único portador de significado | Siempre punto/icono **+ texto**. |
 | `backdrop-filter` en filas de lista | Destroza el scroll en gama media. Solo en cromo fijo. |
 | Que un formulario ponga su propia tarjeta | La superficie la pone quien lo usa. |
+| Una superficie **sin trazo** | En claro el fondo y la tarjeta son el MISMO blanco: sin borde, la tarjeta no existe. |
+| Distinguir superficies con **un gris más claro** | Esa jerarquía se retiró. `--w-100..400` ya no tienen consumidor. |
+| Un **tercer grosor** de trazo | Solo hay dos: 1px por defecto, 2px en la superficie principal y en `:focus-visible`. |
+| **Más de un** elemento con trazo de 2px por pantalla | El borde deja de significar «esto es lo importante». |
+| Sombra o desplazamiento animados en **filas de lista** | Se paga en móvil de gama media, que es donde más filas hay. Ahí el feedback es **opacidad**. |
+| `:hover` **fuera de** `@media (hover: hover)` | En táctil el hover se queda pegado tras el toque. |
+
+---
+
+## Papel, tinta y sombra
+
+La frase entera: **papel blanco, trazo de tinta, sombra real y un filo de oro.**
+No es minimalismo suave, es una página impresa. El blanco no es un fondo, es el
+material.
+
+### El blanco no tiene escalones
+
+En tema claro **`--bg`, `--surface` y `--surface-sunk` son el mismo `--w-0`**.
+La separación entre superficies **no la da un gris más claro**: la dan el trazo
+y la sombra.
+
+Consecuencia directa y buscada: **si una tarjeta no tiene borde, desaparece.**
+Cuando algo «se pierde» sobre el fondo no es un fallo del token, es que a esa
+superficie le falta declararse.
+
+La única excepción que conserva tinte es `--surface-hover` (`--w-50`). **Es
+deliberadamente tenue: 1,02:1 sobre papel.** Por eso, donde el hover o la
+selección sean la ÚNICA señal —fila de menú, opción de la paleta de comandos,
+destino activo—, **hace falta un segundo canal**: el trazo que aparece
+(`box-shadow: inset`, que no mueve la caja), las acciones que se revelan, o
+`aria-current`. Nunca el color solo.
+
+Un hundido **se dibuja, no se tiñe**. Los dos únicos sitios donde el relleno
+sigue siendo información —y por eso existe `--surface-hueco`— son el esqueleto
+de carga y el carril de la barra de progreso: perfilar un esqueleto dibujaría
+el contorno exacto del contenido que aún no ha llegado, y un esqueleto no debe
+prometer una forma que puede no cumplirse.
+
+### El trazo es tinta, a tres presencias del MISMO color
+
+| Token | Valor en claro | Ratio sobre papel | Para qué |
+|---|---|---|---|
+| `--border-strong` | `--n-1000` | 20,4:1 | **Define una superficie**: tarjetas, campos, botones con contorno, modales, hojas, menús, toasts |
+| `--border` | tinta al 55 % | 4,42:1 | Separa **dentro** de una superficie ya definida: cabeceras, pies, `Divider`, cromo fijo del shell |
+| `--border-subtle` | tinta al 22 % | 1,67:1 | Filas de lista y hairlines de hover. **No sirve para definir una superficie** |
+
+Un borde gris y otro negro en la misma pantalla se leen como dos sistemas de
+diseño. Por eso los tres salen de `--n-1000` con `color-mix`, no de la rampa
+`--w-*`.
+
+**Grosor: 1px por defecto. 2px SOLO** en la superficie principal de la pantalla
+y en `:focus-visible`.
+
+### La disciplina del trazo: el riesgo real
+
+El trazo negro sobre blanco tiene un modo de fallo propio: **la pantalla se
+convierte en una cuadrícula de cajas**. Si todo lleva borde, el borde deja de
+significar «esto es una superficie».
+
+**Una cosa a la vez lleva el trazo de 2px.** Lo pone `<Card principal>`, y hay
+exactamente una por pantalla. Si al mirar una captura no sabes cuál es el
+elemento principal, **sobran bordes — y la respuesta es quitar, no añadir oro.**
+
+Sabido y pendiente: una pantalla de `/admin` con tabla lleva hoy marco de
+`DataList` + botones secundarios + campos, los tres con tinta plena. Son tres
+pesos iguales compitiendo. Lo resuelve quien rediseñe la pantalla eligiendo su
+`principal` y bajando el resto; la capa de primitivas no puede decidirlo por
+ella.
+
+### La sombra se ve
+
+La escala **desplaza, desenfoca poco y no es negra pura** (lleva el mismo
+susurro frío, rgb 20/20/28; con negro neutro el conjunto envejece). El primer
+plano de cada escalón es un `0 Npx 0` sin desenfoque: el canto duro de una hoja
+sobre otra.
+
+`--shadow-1` → `--shadow-4`, más `--shadow-0` (la mitad del escalón base, que
+es lo que queda bajo el dedo al pulsar). En semántico: `--shadow-card`,
+`--shadow-raised`, `--shadow-overlay` y `--shadow-press`.
+
+**La prohibición de `none` en listas de sombras importa ahora más**, porque los
+escalones 2, 3 y 4 tienen **dos entradas**. Un `none` dentro invalida la
+declaración ENTERA en silencio y la pantalla se queda sin una sola sombra.
+`--edge` sigue valiendo `0 0 rgba(0,0,0,0)`. Un `box-shadow: none` que sea el
+valor **completo** de la declaración sí es legal.
+
+### El tema oscuro NO se retira
+
+Priorizar el claro no es eliminar el oscuro: el menú de tema existe, hay
+usuarios con la preferencia puesta y `prefers-color-scheme` sigue mandando en
+quien no ha elegido.
+
+**El claro es donde se diseña y se juzga.** En oscuro el trazo de tinta no
+funciona —negro sobre negro—, así que allí el borde sigue siendo el filo claro
+de siempre y la elevación la sigue dando `--edge`. Los cambios de superficie,
+trazo y sombra son **del bloque claro**.
+
+**Cada cambio se audita en SU tema.** Los criterios de contraste se comprueban
+por tema, nunca una vez para los dos.
 
 ---
 
@@ -82,6 +189,10 @@ contraste de esta sección. Donde no se cumplan, sigue siendo tinta.
   Portal Público" como única excepción: ese portal y ese CTA nunca se
   construyeron. Se retira la referencia).
 - Presupuesto: **≤5% del área visible** por pantalla.
+- La dirección v2 **no habilita más oro**. Lo que cambia es que sobre papel
+  blanco con trazo negro el oro **resalta más con menos cantidad**: donde antes
+  hacía falta un filo de 2px, ahora basta 1px. Y que el fondo sea ahora más
+  blanco **empeora** `--gold-500`, no lo mejora: sigue prohibido sobre blanco.
 
 Contrastes verificados — no los cambies sin recalcular:
 
@@ -134,15 +245,50 @@ animate(desde, hasta, { ...SPRING_SHEET, onUpdate: (v) => colocar(v) })
 excepción, simplemente no anima. La hoja inferior se abría y se quedaba en su
 posición cerrada —asomando solo el tirador— y nada en consola lo delataba.
 
-- Por defecto `bounce: 0`. **El rebote se gana, no se regala**: solo tras un gesto
-  con momento. Rebote gratuito se lee como juguete.
-- Feedback en `pointerdown`, no en `click`.
+- Feedback en `pointerdown`, no en `click`. En CSS eso es `:active`.
 - Gestos: seguimiento 1:1, resistencia elástica en los bordes, y al soltar se
   decide por **dónde iba** el gesto (`proyectarMomento`), no por dónde se soltó.
 - Entrada y salida por el **mismo camino**.
 - `prefers-reduced-motion` ≠ sin feedback: es un equivalente no vestibular.
   Lo que debe seguir animando (spinner, esqueleto, progreso) lleva
   `data-motion-esencial`.
+
+### Presionar hunde, apuntar levanta
+
+La sombra desplazada da un vocabulario que la sombra difusa no tenía. Un botón
+que al pulsarse baja 2px y pierde la mitad de su sombra comunica **físicamente**
+lo que un cambio de color solo comunica por convención.
+
+- **Pulsación**: `translate: 0 2px` + `--shadow-press`. En `:active`.
+- **Hover**: `translate: 0 -2px` + el escalón siguiente de sombra, **solo bajo
+  `@media (hover: hover)`**. En táctil el hover se queda pegado tras el toque.
+- Se anima `translate`, que es propiedad independiente de `transform`: así no
+  pisa las transformaciones que ya use el componente y ambas se componen solas.
+  Y **no se acumula con `scale`**: quien use `translate` repone `scale: 1`, que
+  además desactiva la regla global de `globals.css` §4b.
+- **Solo se levanta lo que ya estaba elevado.** `Button secondary` y `ghost` son
+  tinta sobre papel: darles sombra al pulsar los haría subir justo cuando se les
+  empuja.
+- **Techo, y no es negociable**: nada de sombra ni desplazamiento animados en
+  filas de lista largas. Ahí el feedback es **opacidad**, porque el que paga la
+  factura es un móvil de gama media y es donde más filas hay.
+
+### El rebote
+
+Por defecto `bounce: 0`. **`bounce: 0.2` está permitido** en entradas de
+overlay, confirmaciones y aparición de tarjetas. **Sigue prohibido** en
+navegación y en cambios de estado de datos: ahí el rebote se lee como juguete.
+
+### Entrada escalonada de listas y rejillas
+
+30–40 ms entre elementos, **tope de 8**. El tope es la parte importante, no el
+paso: a partir de ahí el último llega tarde y se percibe como lentitud, no como
+elegancia.
+
+Ya resuelto y listo para usar: prop `escalonado` en `Stack` y `Grid`, y por
+filas en `DataList` (`PASO_MS` / `MAX_ESCALONADAS`). Úsalo en la **primera
+pintura** de una rejilla, no en cada actualización: escalonar una lista que el
+usuario ya tenía delante le hace esperar otra vez por algo que ya había leído.
 
 ---
 
@@ -220,6 +366,14 @@ Todo vive en `src/components/ui/`, en **kebab-case**. Antes de crear uno, mira s
 
 **`DataList` sustituye a toda tabla.** Es una tabla semántica que CSS convierte en
 tarjetas bajo 768px. Nunca scroll horizontal en móvil.
+
+**`<Card principal>`** es el trazo de 2px. Una por pantalla, y solo la que de
+verdad es el elemento principal. No lo pongas «porque queda bien»: si dos
+tarjetas lo llevan, ninguna lo lleva.
+
+**`escalonado` en `Stack` y `Grid`** da la entrada escalonada de §4.2 sin
+plumbing: 35 ms de paso y tope de 8, resuelto con `nth-child`, así que funciona
+con cualquier hijo sin clonar elementos.
 
 **`Cifra`** para todo número de negocio (etiqueta + valor tabular + nota). No la
 reimplementes en la página: el panel de inicio ya lo hizo y hubo que extraerla.
@@ -314,7 +468,21 @@ filtro. No falla ruidosamente: devuelve menos filas. Estuvo vivo en seis sitios.
 ## Antes de dar algo por hecho
 
 ```bash
-pnpm exec tsc --noEmit && pnpm lint && pnpm test && pnpm build
+pnpm exec tsc --noEmit && pnpm exec eslint . && pnpm test && pnpm build
+```
+
+**`next lint` ya no existe en Next 16.** El comando es `pnpm exec eslint .` —el
+script `lint` de `package.json` ya apunta a `eslint`, pero sin la ruta no
+recorre el proyecto entero, así que el `.` no es opcional—.
+
+Si `pnpm` no está en el `PATH` (es el caso en la máquina de desarrollo actual),
+los cuatro binarios se invocan desde `node_modules`:
+
+```powershell
+.\node_modules\.bin\tsc.cmd --noEmit
+.\node_modules\.bin\eslint.cmd .
+.\node_modules\.bin\vitest.cmd run --reporter=dot
+.\node_modules\.bin\next.cmd build
 ```
 
 Y **míralo renderizado**. En esta sesión, medir con `getComputedStyle` durante una

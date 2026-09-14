@@ -40,28 +40,40 @@
   margin-top: var(--space-2);
 }
 
-/* Tonos: fondo atenuado, icono y texto en color pleno. */
+/* --- Tonos ----------------------------------------------------------------
+
+   Fondo atenuado, icono y texto en color pleno — y el TRAZO en color pleno
+   también.
+
+   El 30 % anterior funcionaba cuando el fondo de página era gris (`--w-50`) y
+   el tinte del 8 % se recortaba contra él. Sobre papel blanco ese tinte da
+   1,05:1: el aviso se quedaba sin contorno y sin relleno perceptible, o sea
+   sin caja. Al 100 % el filo ronda 5,3–6,2:1 según el tono, muy por encima
+   del 3:1 de 1.4.11, y el aviso vuelve a ser un objeto delimitado.
+
+   El color no va solo en ningún caso: cada tono lleva su propio icono, y el
+   texto dice qué pasa. */
 
 .info {
   color: var(--info);
-  border-color: color-mix(in srgb, var(--info) 30%, transparent);
+  border-color: var(--info);
   background: var(--info-bg);
 }
 
 .success {
   color: var(--success);
-  border-color: color-mix(in srgb, var(--success) 30%, transparent);
+  border-color: var(--success);
   background: var(--success-bg);
 }
 
 .warning {
   color: var(--warning);
-  border-color: color-mix(in srgb, var(--warning) 30%, transparent);
+  border-color: var(--warning);
   background: var(--warning-bg);
 }
 
 .danger {
   color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+  border-color: var(--danger);
   background: var(--danger-bg);
 }

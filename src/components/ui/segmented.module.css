@@ -5,7 +5,8 @@
   grid-auto-columns: 1fr;
 
   padding: 3px;
-  border: 1px solid var(--border-subtle);
+  /* El carril ya no se tiñe: lo dibuja su trazo. */
+  border: 1px solid var(--border);
   border-radius: var(--radius-full);
   background: var(--surface-sunk);
 
@@ -24,6 +25,12 @@
 
   border-radius: var(--radio-interno);
   background: var(--surface);
+  /*
+    Carril y pastilla son el MISMO papel, así que lo que dice cuál está
+    seleccionada es el trazo pleno más la sombra desplazada: la pastilla es
+    una ficha apoyada sobre el carril, no una zona más clara.
+  */
+  border: 1px solid var(--border-strong);
   box-shadow: var(--shadow-1), var(--edge);
 
   transform: translateX(calc(var(--indice, 0) * 100%));

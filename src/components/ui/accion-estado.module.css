@@ -28,12 +28,19 @@
   transition:
     color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
     transform var(--dur-instant) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
+/*
+  `--surface-hover` sobre papel blanco da 1,02:1: como única señal de hover no
+  existiría. El trazo es el segundo canal, y va en `box-shadow: inset` y no en
+  `border` para no cambiar la caja ni desplazar el icono un píxel.
+*/
 .boton:hover:not(:disabled) {
   background: var(--surface-hover);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
   color: var(--text);
 }
 

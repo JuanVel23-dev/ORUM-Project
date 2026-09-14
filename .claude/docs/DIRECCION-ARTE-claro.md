@@ -30,7 +30,7 @@ Hoy la jerarquía en claro se construye con tres grises (`--bg` gris muy claro,
 | `--bg` | `--w-50` | `--w-0` | El suelo es papel, no gris |
 | `--surface` | `--w-0` | `--w-0` | Sin cambio: ya era blanco |
 | `--surface-sunk` | `--w-100` | `--w-0` con trazo | Un hundido se dibuja, no se tiñe |
-| `--surface-hover` | `--w-100` | `--w-50` | **Única excepción**: el hover necesita un cambio de relleno perceptible sin mover nada |
+| `--surface-hover` | `--w-100` | tinta al 6 % | **Única excepción**: el hover necesita un cambio de relleno perceptible sin mover nada. **Corregido tras M1**: la primera versión decía `--w-50`, que sobre papel da un 1,5 % de diferencia de luminosidad —menos visible que el `--w-100` que sustituía—. Tinta al 6 % da ~6 %, y pertenece a la familia de los tres trazos |
 
 Consecuencia directa y buscada: **si una tarjeta no tiene borde, desaparece.**
 Eso obliga a que toda superficie se declare, que es justo el punto.
@@ -135,7 +135,9 @@ tenía: **presionar hunde**. Un botón que al pulsarse baja 2px y pierde su somb
 comunica físicamente lo que un cambio de color solo comunica por convención.
 
 - **Pulsación**: `translateY(2px)` + sombra a la mitad. En `pointerdown`, nunca
-  en `click`.
+  en `click` —**cuando lo resuelve JavaScript**. En CSS puro el equivalente es
+  `:active`, que es lo que ya usaba el repositorio y lo que aplican las
+  primitivas: no existe un selector de `pointerdown`.
 - **Hover en escritorio**: `translateY(-2px)` + sombra al siguiente escalón.
   **Solo bajo `@media (hover: hover)`** — en táctil el hover se queda pegado.
 - **Techo**: en móvil de gama media esto se paga. Nada de sombra animada en

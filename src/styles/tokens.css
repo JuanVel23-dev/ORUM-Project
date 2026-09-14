@@ -33,13 +33,24 @@
   --n-100: #e6e6eb;
   --n-50: #f4f4f7; /* texto primario (dark) — nunca blanco puro */
 
-  /* Claros */
-  --w-0: #ffffff; /* tarjeta (light) */
-  --w-50: #fbfbfc; /* fondo raíz (light) */
-  --w-100: #f4f4f6; /* superficie hundida */
-  --w-200: #e9e9ed; /* borde sutil */
-  --w-300: #dcdce2; /* borde */
-  --w-400: #c4c4cc; /* borde fuerte */
+  /* Claros
+     --------------------------------------------------------------------------
+     Tras la dirección de arte v2 el tema claro usa DOS de estos seis: --w-0 es
+     el papel (fondo, tarjeta y hundido a la vez) y --w-50 el único tinte que
+     sobrevive, en el hover.
+
+     Los cuatro grises restantes NO tienen consumidor: los escalones de
+     superficie desaparecieron (§2.1) y los bordes pasaron a ser tinta a tres
+     presencias (§2.2). Se conservan como rampa —son la paleta cruda, no el
+     mapeo— pero si escribes `var(--w-300)` en un componente estás volviendo a
+     la dirección anterior. El borde se pide con --border / --border-subtle /
+     --border-strong, siempre. */
+  --w-0: #ffffff; /* PAPEL: fondo, tarjeta y hundido en claro */
+  --w-50: #fbfbfc; /* sin consumidor: --surface-hover pasó a tinta diluida */
+  --w-100: #f4f4f6; /* sin consumidor desde la dirección v2 */
+  --w-200: #e9e9ed; /* sin consumidor desde la dirección v2 */
+  --w-300: #dcdce2; /* sin consumidor desde la dirección v2 */
+  --w-400: #c4c4cc; /* sin consumidor desde la dirección v2 */
 
   /* ==========================================================================
      2. ORO  ·  color de MARCA, nunca color de acción
@@ -153,16 +164,35 @@
   --radius-full: 999px; /* píldoras, avatares */
 
   /* ==========================================================================
-     6. SOMBRAS  ·  en capas (una cercana y nítida + una lejana y difusa)
+     6. SOMBRAS  ·  desplazada, no difusa  (dirección de arte v2, §2.3)
      --------------------------------------------------------------------------
+     La escala anterior era sombra de interfaz translúcida: mucho desenfoque,
+     poca opacidad y CERO desplazamiento. Sobre papel blanco con trazo de tinta
+     no se veía nada, así que la jerarquía la acababa cargando el gris del
+     fondo — que es justo lo que la dirección v2 retira.
+
+     La escala nueva DESPLAZA (el primer plano de cada escalón es un `0 Npx 0`,
+     sin desenfoque: el canto duro de una hoja sobre otra) y desenfoca poco en
+     el segundo plano, que solo da el asiento.
+
+     No es negro puro: lleva el mismo susurro frío de los neutrales (matiz
+     ~240°, rgb 20/20/28). Con negro neutro el conjunto envejece.
+
+     ⚠️ Cada escalón a partir del 2 tiene DOS entradas. Un `none` dentro de una
+     lista de sombras invalida la declaración ENTERA en silencio: para "sin
+     sombra" se usa una sombra transparente (`--edge` vale 0 0 rgba(0,0,0,0)).
+
      Valores para tema claro. En oscuro las sombras no funcionan (negro sobre
      negro); globals.css las sustituye por superficie + filo de luz.
      ======================================================================== */
 
-  --shadow-1: 0 1px 2px rgba(10, 10, 12, 0.06), 0 1px 1px rgba(10, 10, 12, 0.04);
-  --shadow-2: 0 2px 4px rgba(10, 10, 12, 0.06), 0 4px 12px rgba(10, 10, 12, 0.08);
-  --shadow-3: 0 8px 24px rgba(10, 10, 12, 0.12), 0 2px 6px rgba(10, 10, 12, 0.08);
-  --shadow-4: 0 24px 64px rgba(10, 10, 12, 0.18), 0 8px 20px rgba(10, 10, 12, 0.1);
+  /* Lo que queda bajo el dedo al pulsar: la mitad del escalón base. §4.3. */
+  --shadow-0: 0 1px 0 rgba(20, 20, 28, 0.1);
+
+  --shadow-1: 0 2px 0 rgba(20, 20, 28, 0.1);
+  --shadow-2: 0 3px 0 rgba(20, 20, 28, 0.14), 0 6px 16px rgba(20, 20, 28, 0.08);
+  --shadow-3: 0 6px 0 rgba(20, 20, 28, 0.16), 0 12px 28px rgba(20, 20, 28, 0.1);
+  --shadow-4: 0 10px 0 rgba(20, 20, 28, 0.18), 0 24px 56px rgba(20, 20, 28, 0.14);
 
   /* Filo de luz superior: cómo se comunica la elevación en tema oscuro. */
   --edge-light: inset 0 1px 0 rgba(255, 255, 255, 0.04);

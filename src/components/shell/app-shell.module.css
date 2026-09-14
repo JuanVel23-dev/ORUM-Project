@@ -49,7 +49,13 @@
      una franja opaca. */
   background: var(--material);
   backdrop-filter: blur(var(--blur-xl)) saturate(180%);
-  border-right: 1px solid var(--border-subtle);
+  /*
+    Cromo fijo sobre papel blanco. El material translúcido ya no se recorta
+    contra un fondo gris —fondo y barra son el mismo blanco—, así que el filo
+    es LO ÚNICO que dice dónde acaba la barra y empieza el contenido. Sube de
+    `--border-subtle` (1,67:1) a `--border` (4,42:1).
+  */
+  border-right: 1px solid var(--border);
 
   /* `@property` permite interpolar la variable, así que barra y columna se
      animan en el mismo fotograma. */
@@ -191,8 +197,14 @@
   z-index: -1;
 
   border-radius: var(--radius-sm);
+  /*
+    Indicador de ruta activa. Su relleno (`--surface-hover`) da 1,02:1 sobre
+    papel: como única señal no existiría. Lo dicen tres cosas a la vez — el
+    trazo, el filo dorado de la izquierda y el peso 600 del texto—, que es
+    justo lo que exige "el color nunca como único portador".
+  */
   background: var(--surface-hover);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
 }
 
 /* Filo dorado a la izquierda del destino activo: la única marca de marca
@@ -218,7 +230,7 @@
 .piesidebar {
   flex-shrink: 0;
   padding: var(--space-3);
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--border);
 
   display: flex;
   align-items: center;
@@ -241,11 +253,15 @@
   text-align: left;
 
   transition: background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
+/* El relleno del hover no se ve sobre papel (1,02:1): el trazo lo acompaña.
+   Va en `inset`, no en `border`, para no mover ni un píxel el avatar. */
 .perfilBoton:hover {
   background: var(--surface-hover);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
 .perfilBoton:focus-visible {
@@ -295,12 +311,14 @@
   transition:
     color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .colapsar:hover {
   color: var(--text);
   background: var(--surface-hover);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
 .colapsar:focus-visible {
@@ -359,7 +377,8 @@
   flex-direction: column;
   gap: 2px;
   padding: var(--space-2) var(--space-3) var(--space-3);
-  border-bottom: 1px solid var(--border-subtle);
+  /* Separador dentro de una superficie ya definida (§2.2). */
+  border-bottom: 1px solid var(--border);
   margin-bottom: var(--space-2);
   min-width: 0;
 }
@@ -415,12 +434,21 @@
 
   background: var(--material);
   backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+
+  /*
+    El filo vuelve. El efecto de borde por desvanecido (abajo) bastaba cuando
+    el fondo era gris y el material blanco se recortaba contra él; con papel
+    blanco a los dos lados, cromo y contenido son el mismo color y la barra
+    dejaba de tener límite. Los dos conviven: la línea dice DÓNDE acaba, el
+    desvanecido evita que el texto se corte en seco al pasar por debajo.
+  */
+  border-bottom: 1px solid var(--border);
 }
 
 /*
-  Efecto de borde de scroll en vez de una línea divisoria de 1px: el contenido
-  se desvanece justo donde se cruza con el cromo flotante, que es más limpio
-  que un filo duro.
+  Efecto de borde de scroll, ahora POR DEBAJO de la línea: el contenido se
+  desvanece justo donde se cruza con el cromo flotante, para que no aparezca
+  cortado en seco.
 */
 .topbar::after {
   content: '';
@@ -438,7 +466,7 @@
   .topbar {
     background: var(--surface);
     backdrop-filter: none;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border);
   }
 }
 
@@ -532,7 +560,9 @@
 
   background: var(--material);
   backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  border-top: 1px solid var(--border-subtle);
+  /* Mismo motivo que la barra superior: sobre papel blanco el filo es lo
+     único que separa el cromo fijo del contenido que pasa por debajo. */
+  border-top: 1px solid var(--border);
 }
 
 @media (min-width: 768px) {
@@ -620,6 +650,8 @@
   color: var(--text);
 
   transition: background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-press) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 
   /*
@@ -642,17 +674,29 @@
   outline-offset: -2px;
 }
 
-/* Retroalimentación en el toque, no al soltar. */
+/*
+  Retroalimentación en el toque, no al soltar. La hoja «Más» es una LISTA, así
+  que el acuse es opacidad, no sombra ni desplazamiento (§4.3): es una pantalla
+  de móvil y puede ser de gama media.
+*/
 .masItem:active {
   background: var(--surface-hover);
+  opacity: 0.62;
 }
 
 .masItem:hover {
   background: var(--surface-hover);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
+/*
+  El destino en el que ya estás. El relleno no basta (1,02:1 sobre papel): lo
+  dicen el trazo Y el `aria-current` que pone el TSX, que es lo que oye un
+  lector de pantalla. El color nunca va solo.
+*/
 .masItem[data-activo='true'] {
   background: var(--surface-hover);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .masItemIcono {

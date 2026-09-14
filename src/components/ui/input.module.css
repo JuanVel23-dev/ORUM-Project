@@ -5,7 +5,15 @@
   min-height: var(--tap-min);
   padding: var(--space-3);
 
-  border: 1px solid var(--border);
+  /*
+    Trazo de tinta plena. §2.2 de la dirección v2 asigna `--border-strong` a
+    «tarjetas, CAMPOS y botones con contorno», y aquí el cambio no es
+    cosmético: el campo comparte papel con el fondo, con la tarjeta que lo
+    contiene y con el formulario entero. Con el filo gris anterior (#dcdce2,
+    1,3:1 sobre blanco) un formulario se veía como una lista de etiquetas
+    flotando, sin cajas donde escribir.
+  */
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text);
@@ -37,8 +45,14 @@
   color: var(--text-3);
 }
 
+/*
+  El borde ya está al máximo de presencia en reposo, así que el hover cambia
+  el relleno. Es deliberadamente tenue: en un campo la afordancia real es el
+  cursor de texto, no el hover — y ensanchar el trazo aquí gastaría el único
+  grosor que la direccion reserva para la superficie principal y el foco.
+*/
 .control:hover:not(:disabled):not(:focus-visible) {
-  border-color: var(--border-strong);
+  background: var(--surface-hover);
 }
 
 .control:focus-visible {
@@ -47,10 +61,17 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 30%, transparent);
 }
 
+/*
+  Deshabilitado. `--surface-sunk` ya no tiñe nada —es el mismo papel—, así que
+  el relleno pasa a `--surface-hueco`: aquí el color SÍ es información (no hay
+  nada que escribir), no decoración de superficie. No va solo: lo acompañan la
+  opacidad, el cursor y el atributo `disabled`, que es lo que oyen los
+  lectores de pantalla.
+*/
 .control:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-  background: var(--surface-sunk);
+  background: var(--surface-hueco);
 }
 
 .control[aria-invalid='true'] {

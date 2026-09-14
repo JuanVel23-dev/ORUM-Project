@@ -53,6 +53,22 @@ export const SPRING_SHEET: SpringPreset = {
   duration: 0.35,
 }
 
+/**
+ * Aparecer por encima: overlay que entra, confirmación que se resuelve, tarjeta
+ * que llega a una lista.
+ *
+ * Lleva rebote, y es la excepción que la dirección de arte v2 abrió a la regla
+ * «el rebote se gana». Sigue habiendo una frontera, y está donde estaba: esto
+ * es para algo que APARECE. En navegación entre pantallas y en cambios de
+ * estado de un dato el rebote sigue prohibido — allí no celebra nada, solo
+ * retrasa la lectura y hace dudar de si el valor terminó de cambiar.
+ */
+export const SPRING_POP: SpringPreset = {
+  type: 'spring',
+  bounce: 0.2,
+  duration: 0.3,
+}
+
 /** Tras un gesto con momento (flick, lanzamiento). Aquí el rebote sí se ganó. */
 export const SPRING_FLICK: SpringPreset = {
   type: 'spring',

@@ -11,7 +11,7 @@
 | # | Tarea | Agente | Estado | Log |
 |---|---|---|---|---|
 | M1 | Fundación: tokens, sombras, trazo y movimiento de la dirección v2 | frontend-implementer | EN CURSO | [m1-fundacion.md](./log/m1-fundacion.md) |
-| M2 | Pruebas de los cuatro módulos puros sin cobertura (H5) | frontend-implementer | EN CURSO | [m2-pruebas-puras.md](./log/m2-pruebas-puras.md) |
+| M2 | Pruebas de los cuatro módulos puros sin cobertura (H5) | frontend-implementer | **HECHA** · 71 pruebas, 218 totales, `70d24ee` | [m2-pruebas-puras.md](./log/m2-pruebas-puras.md) |
 | M3 | Carnet (H1) y pantalla de pausa (H3) sobre la dirección v2 | frontend-implementer | PENDIENTE — depende de M1 | [m3-carnet-pausa.md](./log/m3-carnet-pausa.md) |
 | M4 | Catálogo, ficha y cromo del portal sobre la dirección v2 | frontend-implementer | PENDIENTE — depende de M1 | [m4-catalogo-ficha.md](./log/m4-catalogo-ficha.md) |
 | M5 | View Transitions entre lista y ficha (H6) | frontend-implementer | PENDIENTE — depende de M4 | [m5-view-transitions.md](./log/m5-view-transitions.md) |

@@ -7,8 +7,12 @@
   una tabla accesible.
 */
 
+/*
+  La tabla es una superficie, y sobre papel blanco una superficie sin trazo no
+  existe: sube a `--border-strong`. Es el marco de la hoja.
+*/
 .envoltorio {
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-card), var(--edge);
@@ -28,10 +32,16 @@
   background: var(--surface-sunk);
 }
 
+/*
+  El encabezado ya no se distingue por relleno —es el mismo papel que las
+  filas, y además es `sticky`, así que el contenido pasa por debajo—, de modo
+  que la regla inferior tiene que llevar el peso sola: `--border`, no el 22 %
+  de una división de fila.
+*/
 .th {
   text-align: left;
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border);
 
   font-size: var(--t-overline-size);
   line-height: var(--t-overline-leading);
@@ -46,6 +56,7 @@
   position: relative;
   border-bottom: 1px solid var(--border-subtle);
   transition: background-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-press) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 
   /* Listas largas: el navegador se salta el layout de lo que no se ve. */
@@ -83,19 +94,59 @@
 }
 
 /*
+  El segundo canal del hover de fila: una marca de tinta en el filo izquierdo.
+
+  `--surface-hover` sobre papel blanco da 1,02:1, así que como única señal no
+  existiría — y en una tabla saber QUÉ fila está bajo el cursor es la mitad de
+  poder usarla.
+
+  Va en la primera celda y no en la `<tr>` porque la tabla es
+  `border-collapse: collapse`, y con los bordes colapsados el navegador no
+  pinta `box-shadow` sobre una fila. Es pintura pura: ni cambia la caja ni
+  lleva transición, que es la prohibición de §4.3 para filas de lista.
+
+  Solo en escritorio: en móvil la fila es una tarjeta y ya tiene su propio
+  trazo completo.
+*/
+@media (min-width: 768px) and (hover: hover) {
+  .fila:hover .td:first-child {
+    box-shadow: inset 2px 0 0 var(--border-strong);
+  }
+}
+
+/*
   En táctil no hay hover, así que sin esto la fila no acusa el toque hasta que
   llega la pantalla siguiente. El feedback va en la PRESIÓN, no al soltar:
   esperar al `click` se siente muerto.
 */
+/*
+  El acuse de una fila es OPACIDAD, nunca sombra ni desplazamiento.
+
+  Es la excepción explícita de §4.3: una lista larga en un móvil de gama media
+  paga cada sombra animada en fotogramas, y son justo las pantallas donde más
+  filas hay. La opacidad corre en el compositor y no recalcula nada.
+
+  Y tiene que ser opacidad y no solo el fondo: `--surface-hover` sobre papel
+  blanco da 1,02:1, o sea que como única señal no existiría.
+*/
 @media (hover: none) {
   .fila:active {
     background: var(--surface-hover);
+    opacity: 0.62;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fila:active {
+    /* La opacidad NO es movimiento vestibular: el acuse se conserva entero. */
+    transition: none;
   }
 }
 
 /* El enlace de fila hereda el mismo acuse en escritorio. */
 .fila:has(.enlace:active) {
   background: var(--surface-hover);
+  opacity: 0.62;
 }
 
 .td {
@@ -222,7 +273,9 @@
     margin-bottom: var(--space-3);
     padding: var(--space-4);
 
-    border: 1px solid var(--border-subtle);
+    /* En móvil cada fila ES una superficie independiente, así que aquí sí
+       lleva el trazo que la declara. */
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-md);
     background: var(--surface);
     box-shadow: var(--shadow-card), var(--edge);
@@ -233,7 +286,7 @@
   }
 
   .tbody .fila:last-child {
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-strong);
   }
 
   .td {

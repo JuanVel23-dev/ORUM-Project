@@ -20,13 +20,72 @@
    ========================================================================== */
 
 :root {
-  --bg: var(--w-50);
+  /* --------------------------------------------------------------------------
+     PAPEL  ·  dirección de arte v2, §2.1
+
+     El blanco deja de tener escalones. Antes la jerarquía en claro la daban
+     tres grises (fondo gris muy claro, tarjeta blanca, hundido gris); ahora
+     fondo, tarjeta y hundido son EL MISMO papel, y lo que separa una
+     superficie de otra es el trazo de tinta (§2.2) y la sombra (§2.3).
+
+     Consecuencia directa y buscada: una tarjeta sin borde DESAPARECE. Toda
+     superficie tiene que declararse. Si al añadir una pantalla algo se
+     "pierde" sobre el fondo, no es un bug del token: es que a esa superficie
+     le falta su trazo.
+
+     `--surface-hover` es la ÚNICA excepción que conserva tinte: el hover
+     necesita cambiar de relleno sin mover nada.
+
+     Y es TINTA DILUIDA, no un gris de la rampa `--w-*`. La primera versión de
+     la dirección v2 lo fijó en `--w-50` (#fbfbfc), que sobre papel es un 1,5 %
+     de diferencia de luminosidad: literalmente imperceptible, y menos visible
+     que el `--w-100` al que sustituía. Tinta al 6 % da ~6 % de diferencia —
+     cuatro veces más— y además pertenece a la misma familia que los tres
+     trazos, que es la coherencia que persigue toda la dirección.
+
+     Aun así sigue siendo tenue a propósito: donde el hover o la selección sean
+     la ÚNICA señal —fila de menú, opción de la paleta, destino activo—, hace
+     falta un segundo canal (el trazo que aparece con `box-shadow: inset`, las
+     acciones que se revelan, `aria-current`). Nunca el color solo.
+     -------------------------------------------------------------------------- */
+  --bg: var(--w-0);
   --surface: var(--w-0);
-  --surface-sunk: var(--w-100);
-  --surface-hover: var(--w-100);
-  --border: var(--w-300);
-  --border-subtle: var(--w-200);
-  --border-strong: var(--w-400);
+  --surface-sunk: var(--w-0);
+  --surface-hover: color-mix(in srgb, var(--n-1000) 6%, var(--w-0));
+
+  /*
+    El relleno de un HUECO: lo que todavía no hay. Esqueleto de carga y carril
+    de una barra de progreso.
+
+    Existe porque son los dos únicos sitios donde `--surface-sunk` NO se podía
+    resolver con un trazo: un esqueleto blanco perfilado sobre papel blanco
+    dibuja el contorno del contenido que aún no ha llegado —y eso es
+    exactamente lo que un esqueleto no debe hacer, porque promete una forma
+    que puede no cumplirse—; y un carril de 3px no tiene sitio para un borde.
+    Aquí el relleno SÍ es información, así que se tiñe.
+  */
+  --surface-hueco: color-mix(in srgb, var(--n-1000) 7%, transparent);
+
+  /* --------------------------------------------------------------------------
+     TINTA  ·  §2.2
+
+     Los tres bordes son EL MISMO color a distinta presencia. Un borde gris y
+     otro negro en la misma pantalla se leen como dos sistemas de diseño.
+
+       --border-strong   tinta plena ..... define una superficie (21,0:1)
+       --border          tinta al 55 % ... separa dentro de una superficie ya
+                                           definida (4,42:1 sobre papel)
+       --border-subtle   tinta al 22 % ... hairline de fila (1,67:1 — el
+                                           anterior, #e9e9ed, daba 1,17:1)
+
+     GROSOR: 1px por defecto. 2px SOLO en la superficie principal de la
+     pantalla y en :focus-visible. Tres grosores convierten el trazo en ruido,
+     y si todo lleva borde el borde deja de significar "esto es una
+     superficie" (§6).
+     -------------------------------------------------------------------------- */
+  --border: color-mix(in srgb, var(--n-1000) 55%, transparent);
+  --border-subtle: color-mix(in srgb, var(--n-1000) 22%, transparent);
+  --border-strong: var(--n-1000);
 
   --text: #141418;
   --text-2: #5b5b66; /* 6.71:1 sobre blanco */
@@ -115,6 +174,15 @@
   --shadow-overlay: var(--shadow-4);
 
   /*
+    Lo que queda bajo el dedo al PULSAR: la mitad del escalón base (§4.3).
+    La sombra desplazada da un vocabulario que la difusa no tenía —presionar
+    hunde—: el elemento baja 2px y pierde la mitad de su sombra, que es lo que
+    físicamente ocurriría. En oscuro no hay sombra que perder, así que este
+    token vale transparente y el acuse allí lo da el `scale` global.
+  */
+  --shadow-press: var(--shadow-0);
+
+  /*
     En claro la elevación la da la sombra, así que no hay filo de luz. Pero
     NO puede valer `none`: estos tokens se combinan en listas como
     `box-shadow: var(--shadow-2), var(--edge)`, y una lista de sombras
@@ -130,11 +198,25 @@
   color-scheme: light;
 }
 
+/*
+  EL TEMA OSCURO NO SE RETIRA (dirección v2, §3).
+
+  Priorizar el claro no es eliminar el oscuro: el menú de tema existe, hay
+  usuarios con la preferencia puesta y `prefers-color-scheme` sigue mandando
+  en quien no ha elegido.
+
+  Lo que NO se traslada aquí: el trazo de tinta (§2.2) y la sombra desplazada
+  (§2.3). Negro sobre negro no dibuja nada y una sombra negra sobre fondo
+  negro no se ve. En oscuro el borde sigue siendo el FILO CLARO de siempre y
+  la elevación la sigue dando `--edge`. Los cambios de §2 son del bloque
+  claro, y cada uno se audita en SU tema.
+*/
 [data-theme='dark'] {
   --bg: var(--n-1000);
   --surface: var(--n-900);
   --surface-sunk: var(--n-950);
   --surface-hover: var(--n-850);
+  --surface-hueco: var(--n-850);
   --border: var(--n-700);
   --border-subtle: var(--n-800);
   --border-strong: var(--n-600);
@@ -194,6 +276,8 @@
   --shadow-card: 0 0 rgba(0, 0, 0, 0);
   --shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.45);
   --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.6);
+  /* No hay sombra que perder al pulsar: aquí el acuse lo da el `scale`. */
+  --shadow-press: 0 0 rgba(0, 0, 0, 0);
   --edge: var(--edge-light);
 
   --scrim: rgba(0, 0, 0, 0.6);
@@ -210,6 +294,7 @@
     --surface: var(--n-900);
     --surface-sunk: var(--n-950);
     --surface-hover: var(--n-850);
+    --surface-hueco: var(--n-850);
     --border: var(--n-700);
     --border-subtle: var(--n-800);
     --border-strong: var(--n-600);
@@ -254,6 +339,7 @@
     --shadow-card: 0 0 rgba(0, 0, 0, 0);
     --shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.45);
     --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.6);
+    --shadow-press: 0 0 rgba(0, 0, 0, 0);
     --edge: var(--edge-light);
 
     --scrim: rgba(0, 0, 0, 0.6);

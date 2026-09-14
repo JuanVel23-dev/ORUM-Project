@@ -28,7 +28,12 @@
 /* --- Tonos ----------------------------------------------------------------
    Fondo atenuado al 8-10% con icono y texto en color pleno. Nunca un bloque
    saturado: en una lista con cientos de filas, los bloques de color producen
-   fatiga y el badge deja de leerse.                                         */
+   fatiga y el badge deja de leerse.
+
+   El filo sube del 35 % al 70 %: sobre papel blanco el tinte del 8 % ya no se
+   recorta contra nada (el fondo dejó de ser gris), así que el contorno es lo
+   único que delimita la píldora. Al 70 % ronda 3,4–4,0:1 — cumple 1.4.11 sin
+   llegar al bloque saturado que la nota de arriba prohíbe.                  */
 
 .neutral {
   color: var(--text-2);
@@ -38,32 +43,38 @@
 
 .success {
   color: var(--success);
-  border-color: color-mix(in srgb, var(--success) 35%, transparent);
+  border-color: color-mix(in srgb, var(--success) 70%, transparent);
   background: var(--success-bg);
 }
 
 .warning {
   color: var(--warning);
-  border-color: color-mix(in srgb, var(--warning) 35%, transparent);
+  border-color: color-mix(in srgb, var(--warning) 70%, transparent);
   background: var(--warning-bg);
 }
 
 .danger {
   color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 70%, transparent);
   background: var(--danger-bg);
 }
 
 .info {
   color: var(--info);
-  border-color: color-mix(in srgb, var(--info) 35%, transparent);
+  border-color: color-mix(in srgb, var(--info) 70%, transparent);
   background: var(--info-bg);
 }
 
-/* Eje de MARCA, no de estado. Solo para el tier del plan. */
+/*
+  Eje de MARCA, no de estado. Solo para el tier del plan.
+
+  El oro se queda al 70 % y NO sube a pleno: `--brand-edge` es `--gold-600`,
+  que sobre papel blanco da 3,66:1 justo. Subirlo no mejora el filo y sí gasta
+  presupuesto de oro (≤5 % del área visible), que esta dirección no amplía.
+*/
 .gold {
   color: var(--brand);
-  border-color: color-mix(in srgb, var(--brand-edge) 50%, transparent);
+  border-color: color-mix(in srgb, var(--brand-edge) 70%, transparent);
   background: var(--gold-bg);
 }
 

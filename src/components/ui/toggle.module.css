@@ -82,26 +82,48 @@
   /* El pulgar es blanco en los DOS temas —es el material del control, no una
      superficie del tema—, así que sale de `--w-0` y no de `--surface`. */
   background: var(--w-0);
-  box-shadow: var(--shadow-2);
+  /*
+    Sombra mínima: la escala nueva DESPLAZA, y `--shadow-2` son 3px de canto
+    duro. En un pulgar de 20px dentro de una pista de 26 con 3px de holgura,
+    esos 3px se salían de la pista por abajo. `--shadow-0` es 1px y cabe.
+  */
+  box-shadow: var(--shadow-0);
 
+  transform-origin: left center;
   transition:
     translate var(--dur-base) var(--ease-out),
-    width var(--dur-fast) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
+    scale var(--dur-fast) var(--ease-out);
 }
 
 .fila:has(.entrada:checked) .pulgar {
   translate: 18px 0;
+  /* Encendido está pegado al filo derecho: si se estirase hacia la derecha,
+     se saldría de la pista. Crece hacia dentro. */
+  transform-origin: right center;
 }
 
-/* El pulgar se estira al presionar, como en iOS: acusa recibo del gesto
-   antes incluso de que el interruptor cambie de estado. */
+/*
+  El pulgar se estira al presionar, como en iOS: acusa recibo del gesto antes
+  incluso de que el interruptor cambie de estado.
+
+  Se estira con `scale`, NO con `width`. Animar `width` recalcula la
+  maquetación en cada fotograma y es prohibición dura del proyecto; aquí
+  además el pulgar está posicionado en absoluto y ensancharlo desplazaba su
+  propia caja mientras `translate` la movía, así que las dos animaciones se
+  peleaban por el mismo píxel.
+
+  24/20 = 1.2 en horizontal y 1 en vertical: se estira, no engorda. El origen
+  cambia de lado según dónde esté, para que crezca SIEMPRE hacia el centro de
+  la pista y nunca se salga por el filo.
+*/
 .fila:active .pulgar {
-  width: 24px;
+  scale: 1.2 1;
 }
 
-.fila:has(.entrada:checked):active .pulgar {
-  translate: 14px 0;
+@media (prefers-reduced-motion: reduce) {
+  .fila:active .pulgar {
+    scale: 1;
+  }
 }
 
 /* --- Checkbox y Radio ----------------------------------------------------- */
@@ -114,7 +136,14 @@
 
   width: 20px;
   height: 20px;
-  border: 1.5px solid var(--border-strong);
+  /*
+    1px, no 1.5. §2.2 admite exactamente DOS grosores —1px por defecto, 2px en
+    la superficie principal y en el foco— y un tercero convierte el trazo en
+    ruido. El medio píxel además se redondeaba distinto según la densidad de
+    pantalla, así que la casilla se veía más gruesa en unos equipos que en
+    otros. Con tinta plena, 1px se lee perfectamente a 20px de lado.
+  */
+  border: 1px solid var(--border-strong);
   background: var(--surface);
 
   transition:

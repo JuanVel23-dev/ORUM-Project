@@ -14,6 +14,15 @@ type CardProps = HTMLAttributes<HTMLDivElement> & {
   variant?: CardVariant
   /** Aplica estados de hover/press. El elemento pulsable lo pone el consumidor. */
   interactive?: boolean
+  /**
+   * El trazo de 2px: marca esta tarjeta como la superficie PRINCIPAL de la
+   * pantalla (el carnet, la tarjeta de veredicto).
+   *
+   * UNA por pantalla. Es el modo de fallo propio de esta dirección de arte:
+   * si varias lo llevan, el grosor deja de significar «esto es lo importante»
+   * y solo queda una cuadrícula de cajas. Si dudas, no lo pongas.
+   */
+  principal?: boolean
   children: ReactNode
 }
 
@@ -21,6 +30,7 @@ export function Card({
   padding = 'md',
   variant = 'default',
   interactive = false,
+  principal = false,
   className,
   children,
   ...props
@@ -32,6 +42,7 @@ export function Card({
         styles[`pad-${padding}`],
         variant !== 'default' && styles[variant],
         interactive && styles.interactive,
+        principal && styles.principal,
         className,
       ]
         .filter(Boolean)

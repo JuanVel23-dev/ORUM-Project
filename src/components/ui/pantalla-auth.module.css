@@ -97,7 +97,17 @@
   position: relative;
 
   padding: var(--space-8) var(--space-7);
-  border: 1px solid var(--border);
+  /*
+    EL trazo de 2px de esta pantalla (§2.2 / §6). Una pantalla de acceso tiene
+    exactamente un elemento principal —esta tarjeta—, así que aquí el grosor
+    reservado no compite con nada: no hay ninguna otra superficie en pantalla
+    que pueda reclamarlo.
+
+    Con tinta plena, además, deja de depender del relleno: el `color-mix` de
+    abajo la pinta blanca al 82 % sobre un fondo que ya es blanco, así que sin
+    trazo la tarjeta no tendría contorno en absoluto.
+  */
+  border: 2px solid var(--border-strong);
   border-radius: var(--radius-xl);
   background: color-mix(in srgb, var(--surface) 82%, transparent);
   backdrop-filter: blur(var(--blur-xl)) saturate(180%);
