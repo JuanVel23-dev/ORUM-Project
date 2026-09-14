@@ -1,0 +1,69 @@
+/* ==========================================================================
+   CROMO PÚBLICO  ·  cabecera pegajosa, contenido y pie
+   ========================================================================== */
+
+.fachada {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+
+  /*
+    Alto real de la cabecera, publicado UNA vez para sus dos consumidores: la
+    propia cabecera (`min-height`) y el `scroll-margin` de las secciones a las
+    que apuntan las anclas de navegación. Sin este número, un ancla dejaría su
+    encabezado debajo de la cabecera translúcida y parecería que el enlace no
+    funcionó.
+
+    28px es el alto del hijo más alto del cromo en móvil (el wordmark mide
+    26,4 = 17px x 1,55); a partir de 768px manda el botón de la navegación.
+    Mismo patrón y mismos números que `portal.module.css`.
+  */
+  --cabecera-contenido: 28px;
+  --cabecera-alto: calc(
+    max(var(--space-3), env(safe-area-inset-top, 0px)) + var(--cabecera-contenido) +
+      var(--space-3)
+  );
+}
+
+@media (min-width: 768px) {
+  .fachada {
+    --cabecera-contenido: 38px;
+  }
+}
+
+/* ==========================================================================
+   CONTENIDO
+   ========================================================================== */
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+
+  /* Relleno lateral de ESTE layout, publicado para que una pista de carrusel
+     pueda sangrar hasta el borde sin duplicar el número. Lo consume
+     `carril.module.css`, igual que en el portal de miembros. */
+  --pad-contenido: var(--space-4);
+  --pad-contenido-top: var(--space-6);
+
+  padding-top: var(--pad-contenido-top);
+  padding-bottom: var(--space-10);
+  padding-left: max(var(--pad-contenido), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
+
+  /* El contrato de adaptación de todo el portal. Sin él, cada
+     `@container contenido (...)` de las secciones de abajo NO CASARÍA NUNCA y
+     la landing se quedaría en su versión móvil a cualquier ancho. */
+  container-type: inline-size;
+  container-name: contenido;
+}
+
+@media (min-width: 768px) {
+  .main {
+    --pad-contenido: var(--space-6);
+    --pad-contenido-top: var(--space-8);
+
+    padding-bottom: var(--space-11);
+  }
+}

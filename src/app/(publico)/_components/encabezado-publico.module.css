@@ -1,0 +1,147 @@
+/* ==========================================================================
+   CABECERA PÚBLICA
+   --------------------------------------------------------------------------
+   Pegajosa como la del portal de miembros, por consistencia de producto. La
+   reserva de `env(safe-area-inset-top)` se hace igual por higiene, aunque aquí
+   no sea urgente: esta pantalla no se instala como PWA —`start_url` sigue en
+   `/miembros`— así que nunca se ve bajo `black-translucent`.
+   ========================================================================== */
+
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+
+  min-height: var(--cabecera-alto);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+
+  padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
+  padding-bottom: var(--space-3);
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
+
+  /* Material translúcido, no franja opaca: el contenido pasa por debajo y se
+     ve que sigue habiendo página. `backdrop-filter` está permitido aquí —es
+     cromo fijo—, nunca en las filas de una lista. */
+  background: var(--material);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+@media (min-width: 768px) {
+  .cabecera {
+    padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
+    gap: var(--space-6);
+  }
+}
+
+/* Si el usuario pide menos transparencia, se vuelve sólida. */
+@media (prefers-reduced-transparency: reduce) {
+  .cabecera {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+
+/* --- Wordmark -------------------------------------------------------------
+   Mismo tratamiento que el del portal: barrido metálico con `background-clip`
+   y color plano de respaldo. Es texto de marca, no un botón. */
+
+.marca {
+  flex-shrink: 0;
+  text-decoration: none;
+
+  font-size: var(--t-title-3-size);
+  font-weight: 680;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  color: var(--brand);
+  background: var(--gold-sheen);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .marca {
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.marca:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+  border-radius: var(--radius-xs);
+}
+
+/* --- Anclas de sección ---------------------------------------------------- */
+
+.nav {
+  display: none;
+  flex: 1;
+  gap: var(--space-1);
+}
+
+@media (min-width: 768px) {
+  .nav {
+    display: flex;
+  }
+}
+
+.enlace {
+  position: relative;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-callout-size);
+  font-weight: 510;
+  color: var(--text-2);
+  text-decoration: none;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.enlace:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.enlace:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --- Acciones ------------------------------------------------------------- */
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+/*
+  El acceso de texto y el menú de hamburguesa son la MISMA puerta con dos
+  formas, así que nunca se ven a la vez: en móvil «Iniciar sesión» vive dentro
+  de la hoja del menú, junto a las anclas y al CTA de alianza.
+
+  El umbral es el mismo 768px que usa el resto del cromo del producto. Es
+  `@media` y no `@container` a propósito: la cabecera está FUERA del contenedor
+  `contenido` —lo declara el `<main>` que va debajo— y un `@container` sin
+  contenedor ancestro no casaría nunca.
+*/
+.soloEscritorio {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .soloEscritorio {
+    display: inline-flex;
+  }
+}

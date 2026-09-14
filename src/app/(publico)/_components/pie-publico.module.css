@@ -1,0 +1,166 @@
+/* ==========================================================================
+   PIE PÚBLICO
+   ========================================================================== */
+
+.pie {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-sunk);
+
+  padding-top: var(--space-8);
+  padding-bottom: max(var(--space-8), env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
+}
+
+@media (min-width: 768px) {
+  .pie {
+    padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
+  }
+}
+
+.contenido {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/*
+  El pie está FUERA del `<main>`, así que no hay contenedor `contenido` que
+  consultar: se adapta con `@media`, y aquí eso es lo correcto y no el atajo
+  que la norma prohíbe. El ancho útil de este bloque ES el del viewport.
+*/
+@media (min-width: 768px) {
+  .contenido {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+}
+
+/* El wordmark pequeño. Oro de marca, como el de la cabecera. */
+.marca {
+  font-size: var(--t-callout-size);
+  font-weight: 680;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+/* --- Las tres puertas ----------------------------------------------------- */
+
+.puertas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+@media (min-width: 768px) {
+  .puertas {
+    flex-direction: row;
+    gap: var(--space-7);
+  }
+}
+
+/*
+  Dos líneas por puerta: la acción del visitante arriba («Soy socio») y el
+  nombre del destino debajo. El nombre no es decoración — es lo que hace que
+  el enlace coincida con el titular que se lee al llegar a la pantalla de
+  acceso, y lo que evita que tres enlaces parecidos se confundan entre sí.
+
+  El área de toque se consigue con `min-height`: una fila de navegación debe
+  verse grande, así que aquí lo que se ve y lo que se toca coinciden.
+*/
+.puerta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--tap-min);
+
+  padding: var(--space-1) var(--space-2);
+  margin-left: calc(var(--space-2) * -1);
+  border-radius: var(--radius-sm);
+
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.puerta:hover {
+  background: var(--surface-hover);
+}
+
+.puerta:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.puertaTexto {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  font-weight: 510;
+  color: var(--text);
+}
+
+.puertaDestino {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  color: var(--text-3);
+}
+
+/* --- Soporte -------------------------------------------------------------- */
+
+.soporte {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  align-self: flex-start;
+
+  padding: var(--space-1) var(--space-2);
+  margin-left: calc(var(--space-2) * -1);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  color: var(--text-2);
+  text-decoration: none;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.soporte:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.soporte:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --- Derechos ------------------------------------------------------------- */
+
+.derechos {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  color: var(--text-3);
+}

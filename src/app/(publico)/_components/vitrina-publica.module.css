@@ -1,0 +1,257 @@
+/* ==========================================================================
+   VITRINA PÚBLICA
+   --------------------------------------------------------------------------
+   Todo el movimiento va en `transform`/`translate`/`opacity`. Animar `width`,
+   `height`, `top`, `left` o `margin` recalcula layout cada fotograma y es
+   prohibición dura.
+   ========================================================================== */
+
+.envoltura {
+  padding-block: var(--space-8);
+  border-top: 1px solid var(--border-subtle);
+
+  /* Igual que en «Cómo funciona»: la cabecera pegajosa taparía el h2 al llegar
+     desde el ancla. */
+  scroll-margin-block-start: calc(var(--cabecera-alto) + var(--space-4));
+}
+
+/* ==========================================================================
+   1. LA PISTA  ·  se HEREDA de `CarrilPista`, no se duplica
+   --------------------------------------------------------------------------
+   `carril.module.css` ya resuelve el sangrado asimétrico —un sangrado
+   simétrico mete contenido deslizable en la banda del gesto «atrás» y el
+   visitante sale de la página—, `overscroll-behavior-inline: contain`, la
+   reserva del anillo de foco y la ausencia deliberada de `touch-action`, que es
+   lo que deja al navegador repartir el gesto entre la fila y el scroll vertical.
+
+   Aquí solo se sobrescribe lo que esta instancia necesita. Los TRES anchos son
+   literalmente los de `carrusel-destacados.module.css`: es la misma pieza
+   visual, y un cuarto juego de escalas para lo mismo sería la divergencia que
+   la norma prohíbe.
+   ========================================================================== */
+
+.pista {
+  --carril-tarjeta-w: min(76cqi, 300px);
+}
+
+/* Tableta: dos cubiertas completas y una insinuada. */
+@container contenido (min-width: 481px) {
+  .pista {
+    --carril-tarjeta-w: min(46cqi, 340px);
+  }
+}
+
+/* Escritorio: ancho fijo. Con el contenido topado en `--content-max` caben tres
+   completas y parte de la cuarta, y ese asomo es la señal de «hay más». */
+@container contenido (min-width: 901px) {
+  .pista {
+    --carril-tarjeta-w: 320px;
+  }
+}
+
+/*
+  El caso que no cabe: teléfono en horizontal. Se capa por ALTURA, y esta
+  `@media` no viola la norma —esa regla es sobre adaptación al ANCHO, y
+  `container-type: inline-size` solo mide ancho—. Va después de las consultas de
+  contenedor a propósito: con la misma especificidad, gana la última.
+*/
+@media (orientation: landscape) and (max-height: 420px) {
+  .pista {
+    --carril-tarjeta-w: min(52cqi, 220px);
+  }
+}
+
+/*
+  `x mandatory`, divergencia deliberada respecto al `Carril`, que se queda en
+  `proximity`. Con la tarjeta al 76 % del ancho y una visible a la vez, un flick
+  corto que no alcanza el umbral heurístico del motor dejaría media tarjeta de
+  cada una a la vista.
+
+  Clase duplicada a propósito: `carril.module.css` declara `scroll-snap-type`
+  sobre `.pista` con la misma especificidad, así que el ganador lo decidiría el
+  orden en que Next inyecte las hojas —que cambia entre desarrollo y
+  producción—. Repetida, la especificidad es mayor y no depende del orden.
+*/
+.pista.pista {
+  scroll-snap-type: x mandatory;
+}
+
+/*
+  Barra nativa fina SOLO con puntero fino: sin ella, un ratón de rueda vertical
+  —mayoría en escritorio Windows— no puede mover la fila, y una fila que el
+  ratón no puede mover se percibe como un control roto. En táctil no se pinta
+  nada: el dedo ya sabe. Misma razón que arriba para la clase duplicada.
+*/
+@media (pointer: fine) {
+  .pista.pista {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  .pista.pista::-webkit-scrollbar {
+    display: block;
+    height: var(--space-2);
+  }
+
+  .pista.pista::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--radius-full);
+  }
+
+  .pista.pista::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* ==========================================================================
+   2. LA TARJETA
+   ========================================================================== */
+
+.celda {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-md);
+
+  /* `backwards` para que el estado inicial valga durante el retardo; sin él las
+     tarjetas se ven un fotograma antes de empezar. `--ease-out` y no rebote: el
+     rebote se gana tras un gesto con momento, y aquí no hay gesto. */
+  animation: entrarVitrina var(--dur-base) var(--ease-out) backwards;
+  animation-delay: var(--retardo, 0ms);
+}
+
+@keyframes entrarVitrina {
+  from {
+    opacity: 0;
+    translate: 0 var(--space-3);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* `overflow: hidden` recorta la cubierta al radio de la tarjeta. */
+.superficie {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* ==========================================================================
+   3. LA CUBIERTA
+   --------------------------------------------------------------------------
+   Hoy es siempre el retrato de marca: el logotipo del aliado a tamaño completo
+   sobre el material. Ni una palabra dentro de la cubierta sobre la fotografía
+   que falta — eso convertiría el estado en una disculpa.
+
+   4:3 y no 16:9: a 300px de ancho, 16:9 da 169px de alto y se lee como banda,
+   no como portada. `container-type: inline-size` es lo que le da a la placa de
+   la variante `portada` un contenedor contra el que medir sus `cqi`.
+   ========================================================================== */
+
+.cubierta {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+
+  aspect-ratio: 4 / 3;
+  background: var(--surface-sunk);
+  background-image: var(--gold-halo);
+  background-repeat: no-repeat;
+  background-position: center;
+
+  /* Filo de luz superior: en tema oscuro es lo que hace que el material se lea
+     como superficie iluminada y no como un agujero. */
+  box-shadow: var(--edge-light);
+
+  container-type: inline-size;
+}
+
+/* ==========================================================================
+   4. EL PIE
+   ========================================================================== */
+
+.pie {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+
+  padding: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface);
+}
+
+/* Dos líneas reservadas siempre y recorte a partir de la segunda: la cubierta
+   nunca se encoge para que quepa el texto, y el texto nunca desborda. */
+.nombre {
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: var(--t-title-3-weight);
+  color: var(--text);
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  min-height: calc(var(--t-title-3-size) * var(--t-title-3-leading) * 2);
+}
+
+.meta {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  letter-spacing: var(--t-caption-tracking);
+  color: var(--text-3);
+
+  min-height: calc(var(--t-caption-size) * var(--t-caption-leading));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Altura reservada aunque esté vacía: si no, las tres líneas del pie caerían a
+   cotas distintas según el comercio tenga beneficio, descripción o nada. */
+.ranura {
+  display: flex;
+  align-items: center;
+
+  margin-top: var(--space-1);
+  min-height: calc(var(--t-footnote-size) * var(--t-footnote-leading) + var(--space-1));
+}
+
+.frase {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   5. MOVIMIENTO REDUCIDO  ·  equivalente no vestibular, no ausencia de feedback
+   --------------------------------------------------------------------------
+   La entrada pasa a ser solo opacidad, sin desplazamiento vertical. La regla
+   global de `globals.css` ya comprime la duración, así que el fundido se
+   resuelve de inmediato; se declara igual para que quede escrito que la
+   alternativa es un fundido y no un desplazamiento.
+
+   Va al final: misma especificidad que lo que corrige, así que gana por orden.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .celda {
+    animation-name: aparecerVitrina;
+  }
+}
+
+@keyframes aparecerVitrina {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

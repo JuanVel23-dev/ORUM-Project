@@ -1,0 +1,138 @@
+/*
+  EL PUENTE DEL SOCIO CON SESIÓN.
+
+  Una franja discreta, no un banner: informa sin secuestrar la primera pantalla
+  de quien todavía no es socio, que es a quien va dirigida la página.
+*/
+.puente {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  /* El área táctil se amplía con relleno, no con `::after`: es una fila ancha
+     y aquí agrandar el propio control no estorba a nada. */
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-5);
+  border-radius: var(--radius-full);
+
+  background: var(--surface-sunk);
+  border: 1px solid var(--border-subtle);
+  color: var(--text);
+  text-decoration: none;
+
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.puente:hover {
+  background: var(--surface-hover);
+}
+
+/* --- Cifras --------------------------------------------------------------- */
+
+.cifras {
+  margin-top: var(--space-10);
+}
+
+.tituloSeccion {
+  margin: 0 0 var(--space-5);
+
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+}
+
+.rejillaCifras {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@container contenido (min-width: 560px) {
+  .rejillaCifras {
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  }
+}
+
+/* --- Cierre --------------------------------------------------------------- */
+
+.cierre {
+  margin-top: var(--space-11);
+  padding: var(--space-9) var(--space-5);
+  border-radius: var(--radius-xl);
+  text-align: center;
+
+  background: var(--surface-sunk);
+  border: 1px solid var(--border-subtle);
+}
+
+.tituloCierre {
+  margin: 0 0 var(--space-3);
+
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+}
+
+.textoCierre {
+  margin: 0 auto;
+  max-width: 46ch;
+
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+}
+
+.accionesCierre {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+/* --- Puerta del comercio -------------------------------------------------- */
+
+/*
+  Subordinada al cierre: sin superficie elevada ni filo dorado, solo una regla
+  superior que la separa. Si tuviera el mismo peso visual que «Hazte socio»,
+  las dos acciones competirían y ninguna ganaría.
+*/
+.aliados {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+
+  margin-top: var(--space-10);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--border-subtle);
+}
+
+@container contenido (min-width: 640px) {
+  .aliados {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+}
+
+.tituloAliados {
+  margin: 0 0 var(--space-2);
+
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  font-weight: var(--t-title-3-weight);
+}
+
+.textoAliados {
+  margin: 0;
+  max-width: 48ch;
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  color: var(--text-2);
+}

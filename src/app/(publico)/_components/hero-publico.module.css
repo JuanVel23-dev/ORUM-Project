@@ -1,0 +1,167 @@
+/* ==========================================================================
+   HÉROE
+   --------------------------------------------------------------------------
+   Toda la adaptación pregunta por `contenido`, el contenedor que declara el
+   `<main>` del layout público. Nunca `@media`: el ancho útil del contenido no
+   es el del viewport, y aunque hoy coincidan en esta pantalla —no hay barra
+   lateral—, escribir un `@media` «porque total coinciden» es el atajo que la
+   norma prohíbe.
+   ========================================================================== */
+
+.hero {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+
+  padding-block: var(--space-6) var(--space-9);
+}
+
+/* Dos columnas solo cuando cada una tiene sitio de verdad. Por debajo de 900px
+   la columna del titular bajaría de ~340px y un titular de tres líneas se
+   partiría mal, así que se apilan: texto arriba, collage abajo. */
+@container contenido (min-width: 901px) {
+  .hero {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--space-9);
+    padding-block: var(--space-9) var(--space-11);
+  }
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.titular {
+  font-size: var(--t-display-1-size);
+  line-height: var(--t-display-1-leading);
+  letter-spacing: var(--t-display-1-tracking);
+  font-weight: var(--t-display-1-weight);
+  color: var(--text);
+
+  /* Evita la línea huérfana de una sola palabra en el salto. */
+  text-wrap: balance;
+  max-width: 18ch;
+}
+
+.lede {
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: 400;
+  color: var(--text-2);
+
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+
+  margin-top: var(--space-2);
+}
+
+/* En cuanto hay ancho, los dos CTA caben en línea y el primario deja de ocupar
+   todo el renglón: un botón de 900px de ancho no se lee como jerarquía. */
+@container contenido (min-width: 561px) {
+  .acciones {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-4);
+  }
+}
+
+/* --- Ancla secundaria -----------------------------------------------------
+   Enlace de texto con icono, no un `Button secondary`: compite menos con el
+   primario y sigue siendo un objetivo táctil completo. */
+
+.ancla {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  font-weight: 510;
+  color: var(--text-2);
+  text-decoration: none;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.ancla:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.ancla:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   EL COLLAGE
+   --------------------------------------------------------------------------
+   Rejilla de tres celdas: la primera ocupa la fila entera y las otras dos se
+   reparten la siguiente. Da una composición con jerarquía —hay un aliado
+   principal— sin necesitar tres tamaños de tarjeta distintos.
+   ========================================================================== */
+
+.collage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.collage > :first-child {
+  grid-column: 1 / -1;
+}
+
+/* Cuando solo hay un aliado, la celda única no necesita estirarse a lo ancho
+   de dos columnas vacías. */
+.collage:has(> :only-child) {
+  grid-template-columns: 1fr;
+}
+
+/*
+  Cada celda es una cubierta, con la misma proporción y el mismo material que
+  las del carrusel del portal: 4:3, superficie hundida y filo de luz superior,
+  que en tema oscuro es lo que hace que se lea como una superficie iluminada y
+  no como un agujero.
+
+  `container-type: inline-size` NO es opcional: la variante `portada` de
+  `ComercioLogo` mide su placa en `cqi`, y sin contenedor ancestro `cqi` mediría
+  el viewport pequeño y la placa se descuadraría.
+*/
+.celda {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunk);
+  background-image: var(--gold-halo);
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: var(--edge-light);
+
+  container-type: inline-size;
+}
+
+/* La celda grande es más ancha que alta: 4:3 la haría demasiado alta y
+   empujaría el CTA fuera de pantalla en móvil. */
+.collage > :first-child.celda {
+  aspect-ratio: 16 / 9;
+}

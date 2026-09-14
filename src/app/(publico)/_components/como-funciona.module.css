@@ -1,0 +1,106 @@
+/* ==========================================================================
+   CÓMO FUNCIONA
+   ========================================================================== */
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+
+  padding-block: var(--space-8);
+  border-top: 1px solid var(--border-subtle);
+
+  /*
+    La cabecera es pegajosa: sin este margen, saltar aquí desde el ancla
+    «Cómo funciona» dejaría el h2 justo debajo del material translúcido y
+    parecería que el enlace no funcionó. `--cabecera-alto` lo publica el
+    layout público, así que el número vive en un solo sitio.
+  */
+  scroll-margin-block-start: calc(var(--cabecera-alto) + var(--space-4));
+}
+
+.titulo {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+  color: var(--text);
+  text-wrap: balance;
+}
+
+@container contenido (min-width: 901px) {
+  .titulo {
+    text-align: center;
+  }
+}
+
+/* --- Los tres pasos -------------------------------------------------------
+   Móvil: una columna apilada. Tableta: dos, y la tercera baja de línea — se
+   prefiere a tres columnas estrechas porque el paso ③ quedaría con menos aire
+   que ① y ②, rompiendo la sensación de secuencia igualada. Escritorio: tres,
+   que es donde la secuencia se lee como un cómic de tres viñetas. */
+
+.pasos {
+  display: grid;
+  gap: var(--space-6);
+  list-style: none;
+}
+
+@container contenido (min-width: 561px) {
+  .pasos {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@container contenido (min-width: 901px) {
+  .pasos {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-7);
+  }
+}
+
+.paso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/*
+  El numeral: cifra grande en tinta atenuada sobre un disco hundido. Nada de
+  oro y nada de color de estado — no codifica ni marca ni importancia.
+*/
+.numero {
+  display: grid;
+  place-items: center;
+  width: var(--space-9);
+  height: var(--space-9);
+
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--surface-sunk);
+
+  font-size: var(--t-title-3-size);
+  font-weight: var(--t-title-3-weight);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.texto {
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+/* El nombre del paso encabeza su frase sin ser un encabezado: bloque propio,
+   peso alto y color de tinta plena. */
+.pasoTitulo {
+  display: block;
+  margin-bottom: var(--space-1);
+
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: var(--t-title-3-weight);
+  color: var(--text);
+}
