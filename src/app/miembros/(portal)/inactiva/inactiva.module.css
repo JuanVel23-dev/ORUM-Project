@@ -1,6 +1,18 @@
+/* ==========================================================================
+   MEMBRESÍA EN PAUSA  ·  spec §7
+   --------------------------------------------------------------------------
+   Tarjeta centrada y nada al lado. Se justifica igual que el acceso: es el
+   mensaje de una decisión, no una superficie de trabajo. Y aquí, además,
+   enseñarle un adelanto del catálogo sería enseñarle beneficios que no puede
+   usar, que es la definición de una mala pantalla de bloqueo.
+   ========================================================================== */
+
 .centro {
-  max-width: 460px;
+  max-width: 480px;
   margin: var(--space-9) auto;
+}
+
+.tarjeta {
   text-align: center;
 }
 
@@ -9,7 +21,7 @@
   place-items: center;
   width: 56px;
   height: 56px;
-  margin: 0 auto var(--space-5);
+  margin: 0 auto;
   border-radius: var(--radius-full);
 
   /* Ámbar atenuado, no rojo: la membresía está en pausa, no hay nada roto ni
@@ -19,25 +31,26 @@
 }
 
 .titulo {
-  margin-bottom: var(--space-3);
-
   font-size: var(--t-title-1-size);
   line-height: var(--t-title-1-leading);
   letter-spacing: var(--t-title-1-tracking);
   font-weight: var(--t-title-1-weight);
+  text-wrap: balance;
 }
 
 .texto {
-  margin-bottom: var(--space-6);
-
   font-size: var(--t-body-size);
   line-height: var(--t-body-leading);
   color: var(--text-2);
+  text-wrap: pretty;
 }
 
+/*
+  Las dos acciones se apilan y ocupan el ancho de la tarjeta: la primaria
+  arriba, «Cerrar sesión» debajo en `ghost`. `stretch` es el valor por defecto
+  de un `Stack`, pero se declara porque aquí NO es decorativo: es lo que hace
+  que el CTA sea una diana de ancho completo en el teléfono.
+*/
 .acciones {
-  display: flex;
-  gap: var(--space-3);
-  justify-content: center;
-  flex-wrap: wrap;
+  align-items: stretch;
 }

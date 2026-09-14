@@ -53,11 +53,20 @@
   height: var(--tap-min);
 }
 
-/* El relleno del hover no se ve sobre papel (1,02:1): el trazo lo acompaña. */
-.boton:hover {
-  color: var(--text);
-  background: var(--surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border-subtle);
+/*
+  El relleno del hover es tenue sobre papel, así que lo acompaña el trazo.
+
+  Y va dentro de `@media (hover: hover)`: en táctil el `:hover` no se va al
+  levantar el dedo, y el botón de copiar se quedaba con trazo permanente —
+  indistinguible de estar enfocado— justo después de usarlo, que es cuando el
+  socio mira la pantalla para comprobar que copió.
+*/
+@media (hover: hover) {
+  .boton:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
 }
 
 .boton:active {

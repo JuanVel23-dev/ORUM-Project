@@ -336,7 +336,23 @@ export default async function FichaComercioPage({
         </h2>
 
         {beneficios.length > 0 ? (
-          <Card padding="none">
+          /*
+            EL ÚNICO TRAZO DE 2px DE ESTA PANTALLA (§6 de la dirección v2).
+
+            La ficha existe para responder «qué me descuentan aquí». Todo lo
+            demás —el hero, la descripción, las sedes, la vuelta— es contexto de
+            esa respuesta, así que el grosor va donde está la respuesta y en
+            ningún otro sitio. Las tarjetas de sede se quedan en 1px a propósito:
+            son una lista de iguales, y si varias llevaran el trazo grueso el
+            grosor dejaría de significar «esto es lo importante».
+
+            NO se pone en la rama vacía. Esa rama es `Card variant="sunk"`, o
+            sea la ausencia de la respuesta: marcarla como principal ascendería
+            un estado vacío a protagonista de la pantalla. Con los datos de hoy
+            —cero promociones vigentes— eso significa que la ficha no tiene
+            ningún 2px, y es lo correcto: el trazo se gana, no se reparte.
+          */
+          <Card principal padding="none">
             <ul className={estilos.listaBeneficios}>
               {beneficios.map((b) => (
                 <li key={b.id} className={estilos.beneficio}>

@@ -1,55 +1,112 @@
 /* ==========================================================================
-   CARNET
+   CARNET  ·  spec §6
    --------------------------------------------------------------------------
    Es lo que el miembro enseña en la caja. Se diseña como una tarjeta física:
-   una sola pieza, el nombre grande, el código legible a un brazo de distancia
-   y el QR sin nada que compita con él.
+   una sola pieza, ancho propio, el QR arriba y el número legible a un brazo
+   de distancia.
+
+   Aquí vivía una consulta de contenedor a 620px que reorganizaba el carnet en
+   dos columnas. Se eliminó entera: el carnet es UNA columna a todos los
+   anchos. Si cambia de forma según el ancho deja de ser un objeto y vuelve a
+   ser una caja de datos — y el socio tiene que reconocerlo igual en su
+   teléfono que en la captura que alguien enseñe en un escritorio.
    ========================================================================== */
 
-.carnet {
-  position: relative;
-  overflow: hidden;
-}
-
-/*
-  Filo dorado superior. Es el único oro estructural del portal y mide 2px:
-  suficiente para que la tarjeta se lea como "la buena" sin gastar el
-  presupuesto de oro de toda la pantalla.
-*/
-.carnet::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--gold-sheen);
-}
-
-.cuerpo {
+.pantalla {
   display: grid;
-  grid-template-columns: 1fr auto;
+  gap: var(--space-6);
+
+  /*
+    El carnet no crece. NUNCA. Lo que crece es la columna de al lado, que
+    lleva contenido real. Publicado aquí porque lo consumen las dos reglas de
+    `.columnas` y tienen que decir el mismo número siempre.
+  */
+  --carnet-ancho: 460px;
+}
+
+.encabezado {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.titulo {
+  font-size: var(--t-display-2-size);
+  line-height: var(--t-display-2-leading);
+  letter-spacing: var(--t-display-2-tracking);
+  font-weight: var(--t-display-2-weight);
+}
+
+.lede {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+/* --- Reparto de la pantalla ----------------------------------------------- */
+
+.columnas {
+  display: grid;
   gap: var(--space-7);
+  grid-template-columns: minmax(0, var(--carnet-ancho));
+  /* Móvil y tableta: el carnet centrado. A 460px no hay nada que reorganizar
+     en 700px que mejore el objeto (§6.4). */
+  justify-content: center;
   align-items: start;
 }
 
-/* El QR baja debajo de los datos, centrado, cuando no caben en paralelo. */
-@container contenido (max-width: 620px) {
-  .cuerpo {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-  }
+/*
+  Escritorio. 460 + 32 + 380 = 872: cabe a 900 justos, y por debajo se apila.
+  El conjunto se alinea a la IZQUIERDA: centrarlo dejaría el mismo hueco
+  muerto de siempre, solo que repartido a los dos lados.
 
-  .datos {
-    justify-items: center;
+  `@container`, no `@media`: el ancho útil aquí depende del cromo del portal,
+  no del viewport. El contenedor `contenido` lo declara `.main` del portal
+  (`portal.module.css`), así que la consulta tiene ancestro.
+*/
+@container contenido (min-width: 900px) {
+  .columnas {
+    grid-template-columns: var(--carnet-ancho) minmax(0, 380px);
+    justify-content: start;
   }
 }
 
-.datos {
-  display: grid;
-  gap: var(--space-5);
+/* Envoltorio de la aparición: solo existe para llevar el `transform`. */
+.carnetCaja {
   min-width: 0;
+}
+
+/*
+  Doble clase a propósito (0,2,0): estos tres valores CORRIGEN a `card.module.css`
+  y el orden entre dos módulos CSS en el bundle no está garantizado. Con la
+  misma especificidad, cuál gana dependería del orden de importación.
+
+  - `--radius-xl`: la segunda y última superficie héroe del producto (§6.2).
+  - `--border-strong`: el trazo de 2px de `principal` es de TINTA. `variant="brand"`
+    tiñe el borde de oro al 45 %, que a 2px de grosor gastaría el presupuesto de
+    oro de la pantalla entera y dejaría la superficie peor definida. Del `brand`
+    se conserva lo que se quiere: el filo dorado de 1px de su `::before`.
+  - `overflow: hidden`: recorta ese filo a la curva de 28px (la primitiva lo
+    dibuja con el radio de 14px de una tarjeta normal).
+*/
+.carnet.carnet {
+  border-radius: var(--radius-xl);
+  border-color: var(--border-strong);
+  overflow: hidden;
+}
+
+/* --- Contenido del carnet ------------------------------------------------- */
+
+/*
+  El wordmark del emisor. Es uno de los sitios donde el oro vive por derecho
+  propio, y a este tamaño no mueve el presupuesto del ≤5 %.
+*/
+.wordmark {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  font-weight: 680;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand);
 }
 
 .nombre {
@@ -57,9 +114,40 @@
   line-height: var(--t-title-1-leading);
   letter-spacing: var(--t-title-1-tracking);
   font-weight: var(--t-title-1-weight);
+  text-wrap: balance;
 }
 
-.dato {
+/*
+  El nombre del plan puede ocupar dos líneas y NO se trunca: es el producto
+  que el socio compró. La aritmética de §6.3 ya cuenta con el peor caso.
+*/
+.plan {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  font-weight: var(--t-callout-weight);
+  color: var(--text-2);
+  text-wrap: balance;
+}
+
+.qr {
+  display: grid;
+  justify-items: center;
+}
+
+/*
+  ZONA DE SILENCIO. La norma del código QR pide 4 módulos por lado. Con
+  `size={160}` y 8 dígitos —versión 1, 21 módulos— cada módulo mide 7,6px, así
+  que 32px son 4,2 módulos. El relleno por defecto de la primitiva (16px) daba
+  1,7: no rompe siempre, rompe en la caja delante del cliente.
+
+  Especificidad 0,2,0 por la misma razón que `.carnet.carnet`: corrige a
+  `qr-code.module.css` y el orden del bundle no decide.
+*/
+.qr .qrMarco {
+  padding: var(--space-7);
+}
+
+.bloque {
   display: grid;
   gap: var(--space-1);
   min-width: 0;
@@ -73,24 +161,10 @@
   color: var(--text-3);
 }
 
-.valor {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-
-  font-size: var(--t-body-size);
-}
-
-@container contenido (max-width: 620px) {
-  .valor {
-    justify-content: center;
-  }
-}
-
 /*
-  El número es un dato que se dicta y se teclea: monoespaciado, tabular y con
-  tracking abierto, para que 0/O y 1/l no se confundan al leerlo en voz alta.
+  El número es el respaldo cuando el lector falla: se dicta y se teclea.
+  Monoespaciado, tabular y con tracking abierto, para que 0/O y 1/l no se
+  confundan al leerlo en voz alta.
 */
 .numero {
   display: flex;
@@ -103,23 +177,88 @@
   letter-spacing: 0.06em;
 }
 
-.qr {
+/* Estado y vigencia son UN bloque: la fecha es la línea secundaria del badge,
+   no otra etiqueta en versalitas. Ahorra 33px de alto y una redundancia. */
+.estadoFila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.vigencia {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+/* --- Cómo usarlo ---------------------------------------------------------- */
+
+.como {
   display: grid;
-  justify-items: center;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.comoTitulo {
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: var(--t-title-3-weight);
+}
+
+.pasos {
+  display: grid;
   gap: var(--space-3);
+  padding-inline-start: var(--space-5);
+  list-style: decimal;
+
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
 }
 
-.qrNota {
-  max-width: 22ch;
-  font-size: var(--t-caption-size);
-  line-height: var(--t-caption-leading);
+.pasos::marker,
+.pasos li::marker {
   color: var(--text-3);
-  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Al imprimir sobra todo lo que no sea el carnet. */
+.soporte {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+
+.soporteTexto {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-3);
+}
+
+/* ==========================================================================
+   IMPRESIÓN  ·  §6.6
+   --------------------------------------------------------------------------
+   Sobre papel la sombra no existe y el trazo sí. Se imprime SOLO el carnet.
+   ========================================================================== */
+
 @media print {
-  .carnet {
+  .encabezado,
+  .como {
+    display: none;
+  }
+
+  /* Sin rejilla ni centrado: en el folio solo queda una cosa. */
+  .columnas {
+    display: block;
+  }
+
+  .carnet.carnet {
+    /*
+      `none` como valor COMPLETO de la declaración es legal; lo prohibido es
+      un `none` DENTRO de una lista separada por comas, que invalida la
+      declaración entera en silencio.
+    */
     box-shadow: none;
     /*
       `--n-1000` y no `--border`: sobre papel no hay tema. Un alias de tema se
@@ -127,8 +266,25 @@
       gris claro que desaparece contra el blanco del folio. `--n-1000` es
       pigmento de la paleta cruda —no lo remapea ningún tema—, que es justo lo
       que pide la tinta, el mismo motivo por el que el QR se imprime en negro
-      sobre blanco pase lo que pase.
+      sobre blanco pase lo que pase. Y es un token: el `#000` literal solo
+      está permitido dentro de `QrCode`.
     */
     border: 1px solid var(--n-1000);
+  }
+
+  /* Mismo motivo: en tema oscuro `--brand` es un dorado claro que sobre folio
+     blanco no se lee. El filo dorado de la tarjeta sí puede irse en gris —o no
+     imprimirse— porque ningún significado depende de él. */
+  .wordmark {
+    color: var(--n-1000);
+  }
+
+  /*
+    Devuelve el relleno del marco del QR a lo que dice la primitiva para
+    impresión. La zona de silencio sigue cubierta: el carnet impreso conserva
+    sus 32px de relleno alrededor.
+  */
+  .qr .qrMarco {
+    padding: 0;
   }
 }

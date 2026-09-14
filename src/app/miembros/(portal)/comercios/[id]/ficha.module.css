@@ -56,7 +56,14 @@
   padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
 
   background: var(--surface);
-  border-bottom: 1px solid var(--border-subtle);
+
+  /*
+    DIRECCIÓN v2 · `--border`, no `--border-subtle`: `--surface` y `--bg` son el
+    mismo papel, así que esta barra ya no se distingue por su relleno y el filo
+    carga solo con decir dónde acaba el cromo. Mismo cambio y mismo motivo que
+    la cabecera y la barra inferior del portal.
+  */
+  border-bottom: 1px solid var(--border);
 }
 
 /*
@@ -86,17 +93,35 @@
   color: var(--text-2);
 
   text-decoration: none;
-  transition: color var(--dur-fast) var(--ease-out);
+
+  /* Vuelta elástica del encogido; la ida se acorta en `:active`. Es el mismo
+     reparto que `globals.css` §4b aplica a todo lo pulsable. */
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.volver:hover {
-  color: var(--text);
+/* En táctil el `:hover` no se va al levantar el dedo y la vuelta se quedaba en
+   tinta plena, indistinguible de enfocada. */
+@media (hover: hover) {
+  .volver:hover {
+    color: var(--text);
+  }
 }
 
-/* Feedback en `pointerdown`, no en `click`: `:active` es lo que da esa
-   inmediatez sin una línea de JavaScript. Solo `transform`. */
+/*
+  Feedback en `pointerdown`, no en `click`: `:active` es lo que da esa
+  inmediatez sin una línea de JavaScript.
+
+  `scale`, NO `transform: scale(...)`. Eran DOS encogidos superpuestos: la regla
+  global de `globals.css` §4b ya aplica `scale: var(--escala-press)` a todo
+  `a[href]`, y `transform` es una propiedad independiente que se compone con
+  ella — 0,92 x 0,97 = 0,89, casi el doble del gesto que se pretendía. Usando la
+  misma propiedad, esta declaración SUSTITUYE a la global en vez de sumarse.
+*/
 .volver:active {
-  transform: scale(var(--escala-press-sm));
+  scale: var(--escala-press-sm);
+  transition-duration: var(--dur-press);
 }
 
 .volver:focus-visible {
@@ -115,13 +140,19 @@
   }
 }
 
+/*
+  Movimiento reducido: el feedback sigue ocurriendo, sin desplazamiento. Se
+  repone `scale` —no `transform`, que no lo toca— y el toque se acusa con tinta
+  plena, que es el equivalente no vestibular.
+*/
 @media (prefers-reduced-motion: reduce) {
   .volver {
     transition-duration: var(--dur-instant);
   }
 
   .volver:active {
-    transform: none;
+    scale: 1;
+    color: var(--text);
   }
 }
 
@@ -377,11 +408,31 @@
   color: var(--text);
 
   text-decoration: none;
-  transition: color var(--dur-fast) var(--ease-out);
+
+  /* La lista local pisa la de `globals.css` §4b, así que `scale` tiene que
+     volver a nombrarse aquí o el encogido de press se aplicaría de golpe, sin
+     vuelta elástica. */
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.sedeTelefono:hover {
-  color: var(--text-2);
+/* Sin la guarda, el número se quedaba atenuado tras el toque en el teléfono —o
+   sea justo en el dispositivo donde ese enlace hace algo—. */
+@media (hover: hover) {
+  .sedeTelefono:hover {
+    color: var(--text-2);
+  }
+}
+
+/*
+  El toque lo acusa el encogido global de `globals.css` §4b, que a un enlace de
+  texto de este tamaño le va bien. Solo se le acorta la ida: `.sedeTelefono`
+  declara su propia lista de transiciones y, sin esto, hereda los 440ms de la
+  vuelta elástica también para la ida.
+*/
+.sedeTelefono:active {
+  transition-duration: var(--dur-press);
 }
 
 .sedeTelefono:focus-visible {
@@ -398,6 +449,12 @@
 @media (prefers-reduced-motion: reduce) {
   .sedeTelefono {
     transition-duration: var(--dur-instant);
+  }
+
+  /* Sin encogido; el toque se acusa por color, que no es vestibular. */
+  .sedeTelefono:active {
+    scale: 1;
+    color: var(--text-2);
   }
 }
 

@@ -1,7 +1,6 @@
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/feedback'
 import { Stack } from '@/components/ui/layout'
-import { SkeletonPageHeader } from '@/components/ui/skeletons'
 import styles from './perfil.module.css'
 
 /*
@@ -15,49 +14,69 @@ import styles from './perfil.module.css'
   salto peor que no tener ninguno.
 
   Reutiliza `perfil.module.css` —las mismas clases que la página real— para
-  que la silueta no pueda desviarse: filo dorado, datos a la izquierda y QR a
-  la derecha, que bajo 620px del contenedor pasa a columna centrada.
-*/
+  que la silueta no pueda desviarse: una sola columna, ancho fijo de carnet,
+  QR arriba y «Cómo usarlo» al lado en escritorio.
 
-/** Etiqueta en versalitas + su valor, la unidad que se repite en el carnet. */
-function Dato({ ancho }: { ancho: string }) {
-  return (
-    <div className={styles.dato}>
-      <Skeleton width="128px" height="12px" />
-      <Skeleton width={ancho} height="22px" />
-    </div>
-  )
-}
+  Antes de M3 este archivo dibujaba la forma ANTERIOR (datos a la izquierda,
+  QR a la derecha, dos columnas bajo 620px). Se corrigió aquí, no en la
+  página: la forma que manda es la de §6.3.
+
+  No lleva el envoltorio de aparición: el carnet aparece cuando llega el
+  carnet, no cuando llega su hueco. `Skeleton` ya se exime de la regla global
+  de movimiento reducido (`data-motion-esencial`), porque un esqueleto
+  congelado parece contenido roto y no contenido cargando.
+*/
 
 export default function Loading() {
   return (
-    <>
-      <SkeletonPageHeader conAccion={false} />
+    <div className={styles.pantalla}>
+      <div className={styles.encabezado}>
+        <Skeleton width="min(220px, 60%)" height="28px" radius="var(--radius-sm)" />
+        <Skeleton width="min(260px, 80%)" height="14px" />
+      </div>
 
-      <Card padding="lg" className={styles.carnet}>
-        <div className={styles.cuerpo}>
-          <div className={styles.datos}>
-            <Stack gap={1}>
-              <Skeleton width="min(240px, 70%)" height="28px" />
-              <Skeleton width="112px" height="13px" />
+      <div className={styles.columnas}>
+        <Card padding="lg" variant="brand" principal className={styles.carnet}>
+          <Stack gap={5}>
+            <Stack gap={5}>
+              <Skeleton width="62px" height="12px" />
+              <Stack gap={1}>
+                <Skeleton width="min(240px, 70%)" height="28px" />
+                <Skeleton width="112px" height="18px" />
+              </Stack>
             </Stack>
 
-            <Dato ancho="180px" />
-            <Dato ancho="164px" />
-            <Dato ancho="200px" />
-          </div>
-
-          <div className={styles.qr}>
             {/*
-              232px = los 200px del SVG más el `--space-4` de relleno del marco
-              a cada lado. Reservar el cuadro exacto es lo que evita que el
-              resto del carnet salte cuando el QR aparece.
+              224px = los 160px del SVG más los 32px de zona de silencio a cada
+              lado. Reservar el cuadro EXACTO es lo que evita que el resto del
+              carnet salte cuando el QR aparece: es el bloque más grande de la
+              pantalla y todo lo demás cuelga debajo.
             */}
-            <Skeleton width="232px" height="232px" radius="var(--radius-md)" />
-            <Skeleton width="176px" height="14px" />
-          </div>
+            <div className={styles.qr}>
+              <Skeleton width="224px" height="224px" radius="var(--radius-md)" />
+            </div>
+
+            <div className={styles.bloque}>
+              <Skeleton width="148px" height="12px" />
+              <Skeleton width="180px" height="24px" />
+            </div>
+
+            <div className={styles.bloque}>
+              <Skeleton width="96px" height="24px" radius="var(--radius-full)" />
+              <Skeleton width="200px" height="16px" />
+            </div>
+          </Stack>
+        </Card>
+
+        <div className={styles.como}>
+          <Skeleton width="128px" height="20px" />
+          <Stack gap={3}>
+            <Skeleton width="100%" height="15px" />
+            <Skeleton width="92%" height="15px" />
+            <Skeleton width="84%" height="15px" />
+          </Stack>
         </div>
-      </Card>
-    </>
+      </div>
+    </div>
   )
 }

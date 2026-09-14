@@ -56,11 +56,17 @@ import estilos from './carrusel-destacados.module.css'
  * (`--retardo`), que es el único uso de `style` que la norma admite. Así el
  * CSS no lleva ni un literal de duración.
  *
- * 60ms es el desfase que hace que la fila se lea como una secuencia sin que la
- * última tarjeta llegue tarde: con el tope de seis, la entrada completa termina
- * en 300ms + la duración de una tarjeta.
+ * 35ms, y ANTES ERAN 60. La dirección de arte v2 fija la horquilla en 30-40ms
+ * con tope de 8 elementos, y es el mismo número que resuelve `Stack`/`Grid` con
+ * su prop `escalonado`. El paso tiene que ser el mismo en toda la pantalla: la
+ * portada, los dos carriles y la rejilla entran una detrás de otra en el primer
+ * pantallazo, y tres cadencias distintas se leen como tres componentes que no
+ * se conocen.
+ *
+ * Con el tope de seis destacados la entrada completa termina en 175ms más la
+ * duración de una tarjeta, frente a los 300ms de antes.
  */
-const PASO_ESCALONADO_MS = 60
+const PASO_ESCALONADO_MS = 35
 
 /** Cuántas siluetas dibuja el esqueleto: una completa y el arranque de las siguientes. */
 const TARJETAS_ESQUELETO = 3

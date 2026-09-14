@@ -171,13 +171,26 @@
   `backwards` para que el estado inicial se aplique durante el retardo; sin él
   las seis tarjetas se verían un fotograma antes de empezar.
 
-  `bounce: 0`, o sea `--ease-out` y no `--ease-spring`: el rebote se gana tras
-  un gesto con momento, y aquí no hay gesto. Rebote gratuito se lee como
-  juguete.
+  `--ease-spring` (overshoot leve, el equivalente CSS de `bounce: 0.2`) Y NO
+  `--ease-out`, que es lo que había. La dirección v2 retira la regla de que «el
+  rebote se gana tras un gesto con momento» y lo permite expresamente en la
+  APARICIÓN DE TARJETAS, que es exactamente este caso. Sigue prohibido en
+  navegación y en cambios de estado de datos, y por eso NO lo lleva la rejilla:
+  doce tarjetas rebotando a la vez se leen como juguete, una portada de seis con
+  cubierta se lee como una revista que se abre.
+
+  Es también lo que distingue a la portada de lo que hay debajo sin gastar ni
+  trazo ni oro: el mismo paso de 35ms en las dos, curva distinta.
 */
 .enlace {
-  animation: entrarDestacado var(--dur-base) var(--ease-out) backwards;
+  animation: entrarDestacado var(--dur-base) var(--ease-spring) backwards;
   animation-delay: var(--retardo, 0ms);
+
+  /* La VUELTA del atenuado al soltar. La ida la acorta `.enlace:active` a
+     `--dur-press`. Durante la entrada escalonada esta transición no compite:
+     una animación tiene precedencia sobre la transición de la misma propiedad,
+     y `backwards` —no `forwards`— libera el valor al terminar. */
+  transition: opacity var(--dur-base) var(--ease-out);
 }
 
 @keyframes entrarDestacado {
@@ -239,15 +252,55 @@
   declaración entera en silencio.
 
   Especificidad (0,3,0), por encima del (0,2,0) de `Card.interactive:hover`, así
-  que gana sin depender del orden de las hojas. Y el `:active` de `Card` sigue
-  intacto porque acusa la presión con `scale`, una propiedad que esto no toca:
-  el feedback llega en `pointerdown`, no al soltar.
+  que gana sin depender del orden de las hojas.
+
+  EL `:hover` SE SEPARA DEL `:focus-visible` y se encierra en
+  `@media (hover: hover)`. Antes compartían regla, así que el realce entero
+  —sombra apilada, filo dorado y elevación— se ejecutaba también en táctil, donde
+  el hover NO SE VA al levantar el dedo: la tarjeta se quedaba flotando y con
+  filo dorado hasta que el socio tocaba otra cosa. Es prohibición dura desde la
+  dirección v2, y además es el mismo dispositivo que paga la factura de recomponer
+  dos sombras.
+
+  El foco, en cambio, se conserva a todos los anchos: un teclado existe en
+  cualquier dispositivo y el realce es lo que hace visible por dónde va.
 */
-.enlace:hover .superficie,
+@media (hover: hover) {
+  .enlace:hover .superficie {
+    border-color: color-mix(in srgb, var(--brand-edge) 45%, transparent);
+    box-shadow: var(--shadow-raised), var(--shadow-3), var(--edge);
+    translate: 0 calc(var(--space-1) * -0.5);
+  }
+}
+
 .enlace:focus-visible .superficie {
   border-color: color-mix(in srgb, var(--brand-edge) 45%, transparent);
   box-shadow: var(--shadow-raised), var(--shadow-3), var(--edge);
   translate: 0 calc(var(--space-1) * -0.5);
+}
+
+/*
+  PULSAR ES OPACIDAD, igual que en la rejilla y por el mismo motivo: una portada
+  de 300-340px con su cubierta es lo más caro de recomponer de toda la pantalla,
+  y quien la desplaza es un móvil de gama media.
+
+  Se anulan las dos capas heredadas: el `translate: 0 2px` + cambio de sombra de
+  `Card.interactive:active`, y el `scale` global de `globals.css` §4b, que
+  alcanza al `<a>` —donde la `scale: 1` de `Card` no llega— y hacía que la
+  tarjeta se encogiera y bajara a la vez.
+
+  La opacidad va en el ENLACE y no en `.superficie`: así se atenúa la tarjeta
+  entera, cubierta incluida, en una sola capa compuesta.
+*/
+.enlace:active {
+  scale: 1;
+  opacity: 0.72;
+  transition-duration: var(--dur-press);
+}
+
+.superficie.superficie:active {
+  translate: 0 0;
+  box-shadow: var(--shadow-card), var(--edge);
 }
 
 /* ==========================================================================
@@ -285,6 +338,26 @@
   overflow: hidden;
 
   aspect-ratio: 4 / 3;
+
+  /*
+    DIRECCIÓN v2 · esta línea ya NO tiñe nada en tema claro.
+
+    `--surface-sunk` vale `--w-0` desde la fundación: el mismo papel que la
+    tarjeta y que el fondo de la página. O sea que la cubierta dejó de
+    distinguirse por su relleno y, si no se hace nada, desaparece —que es la
+    consecuencia buscada de la dirección, no un defecto del token—.
+
+    Se CONSERVA el token en vez de cambiarlo por `--surface`, porque en tema
+    oscuro sigue valiendo `--n-950` y ahí sí hunde de verdad. Lo que se añade
+    es el TRAZO que la declara: la línea superior de `.pie`, que sube de
+    `--border-subtle` a `--border` porque ahora carga sola con la separación
+    entre cubierta y pie. Un hundido se dibuja, no se tiñe (§2.1).
+
+    Lo que da vida a la cubierta en claro es el halo de `.capa` —oro DIFUSO,
+    Regla B— más la placa del logotipo, que trae su propio filo. No se le pone
+    borde propio: sería una caja dentro de una caja, que es exactamente el modo
+    de fallo de §6.
+  */
   background: var(--surface-sunk);
 
   /* Filo de luz superior: en tema oscuro es lo que hace que el material se lea
@@ -313,6 +386,10 @@
   inset: 0;
   display: block;
 
+  /* Mismo caso que `.cubierta`: en claro esto es papel, no un gris. La capa
+     cubre la cubierta entera, así que el color que se ve de verdad es este.
+     El relleno opaco sigue siendo necesario —tapa la cubierta mientras el
+     paralaje la desplaza— y en oscuro sigue hundiendo. */
   background-color: var(--surface-sunk);
   background-image: var(--gold-halo);
   background-repeat: no-repeat;
@@ -357,8 +434,17 @@
 /* El micro-zoom de A3 se aplica a la capa y no a la tarjeta: en I1 es el zoom
    clásico de una portada; en I2 acerca la luz del material. Multiplica la
    sobremedida en vez de sustituirla, o el recorrido del paralaje se quedaría
-   sin holgura. */
-.enlace:hover .capa,
+   sin holgura.
+
+   Mismo desdoble que el realce de la superficie: el `:hover` bajo
+   `@media (hover: hover)`, porque en táctil se quedaba pegado y dejaba la
+   cubierta acercada indefinidamente; el `:focus-visible`, a todos los anchos. */
+@media (hover: hover) {
+  .enlace:hover .capa {
+    scale: calc(var(--sobremedida) * var(--realce));
+  }
+}
+
 .enlace:focus-visible .capa {
   scale: calc(var(--sobremedida) * var(--realce));
 }
@@ -406,7 +492,14 @@
   gap: var(--space-1);
 
   padding: var(--space-4);
-  border-top: 1px solid var(--border-subtle);
+
+  /*
+    `--border` y no `--border-subtle`: esta línea es lo ÚNICO que separa la
+    cubierta del pie desde que las dos son el mismo papel. Al 22 % no se veía;
+    al 55 % declara los dos planos. Es la misma corrección que `card.module.css`
+    aplicó a `.footer` por el mismo motivo.
+  */
+  border-top: 1px solid var(--border);
 
   /* Sobre superficie sólida, no sobre la imagen. */
   background: var(--surface);
@@ -522,13 +615,27 @@
     animation: none;
   }
 
-  .enlace:hover .capa,
   .enlace:focus-visible .capa {
     scale: var(--sobremedida);
   }
 
-  .enlace:hover .superficie,
   .enlace:focus-visible .superficie {
+    translate: 0 0;
+  }
+}
+
+/*
+  Las dos reglas de `:hover` viven dentro de `@media (hover: hover)`, así que su
+  corrección tiene que anidarse igual: una regla de fuera no gana a una de dentro
+  por especificidad —son idénticas— sino por orden, y solo si el navegador
+  evalúa las dos. Anidando se lee además dónde aplica cada cosa.
+*/
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
+  .enlace:hover .capa {
+    scale: var(--sobremedida);
+  }
+
+  .enlace:hover .superficie {
     translate: 0 0;
   }
 }

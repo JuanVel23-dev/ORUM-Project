@@ -102,7 +102,19 @@
   */
   background: var(--material);
   backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  border-bottom: 1px solid var(--border-subtle);
+
+  /*
+    DIRECCIÓN v2 · `--border`, no `--border-subtle`.
+
+    El cromo se distinguía del contenido por su material translúcido sobre un
+    fondo GRIS. Desde la fundación el fondo es papel blanco y el material es
+    blanco al 68 %: la diferencia de relleno cayó a casi nada y el filo pasó a
+    ser lo único que dice dónde acaba la cabecera y empieza la página. Al 22 %
+    de tinta no llegaba; al 55 % es la regla de una página impresa.
+
+    Con `prefers-contrast: more` globals.css ya lo sube a tinta plena.
+  */
+  border-bottom: 1px solid var(--border);
 }
 
 @media (min-width: 768px) {
@@ -182,10 +194,24 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.enlace:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+/* `@media (hover: hover)`, que faltaba. Esta navegación solo se muestra a
+   partir de 768px, pero eso incluye tabletas táctiles: sin la guarda, el
+   destino que el socio acaba de tocar se queda con relleno de hover y compite
+   con el indicador de ruta activa, que es la única señal que debe leerse. */
+@media (hover: hover) {
+  .enlace:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
 }
+
+/*
+  El relleno de hover es tinta al 6 %: perceptible, pero no es un portador
+  suficiente por sí solo. No hace falta un segundo canal aquí porque el hover no
+  codifica nada — la ruta activa la dicen el peso, la barra de
+  `.enlaceActivo::after` y `aria-current`, tres portadores que no dependen de
+  dónde esté el ratón.
+*/
 
 .enlace:focus-visible {
   outline: 2px solid var(--focus);
@@ -311,7 +337,11 @@
 
   background: var(--material);
   backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  border-top: 1px solid var(--border-subtle);
+
+  /* Mismo motivo que la cabecera: es el filo del cromo contra el papel, no una
+     división interna. Y aquí importa más, porque debajo pasa la última fila
+     del catálogo. */
+  border-top: 1px solid var(--border);
 }
 
 @media (min-width: 768px) {
@@ -352,8 +382,23 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/*
+  FEEDBACK INMEDIATO, y aquí faltaban las dos mitades.
+
+  1. El VALOR era un literal, `0.94`. `globals.css` §4b se escribió justamente
+     para retirar los trece valores distintos que había sueltos por los módulos
+     (0.9, 0.94, 0.96, 0.97…); este era uno de los supervivientes. Pasa a
+     `--escala-press-sm`, que es el escalón que el sistema reserva a los
+     controles pequeños — y una pestaña de barra inferior lo es.
+
+  2. El TIEMPO. `.tab` declara su propia lista de transiciones y esa lista pisa
+     la global, donde `scale` va a `--dur-rebote` (440ms elásticos). Sin acortar
+     la ida, la pestaña tardaba casi medio segundo en acusar el toque: es el
+     control que más se pulsa del portal y el que peor se sentía.
+*/
 .tab:active {
-  scale: 0.94;
+  scale: var(--escala-press-sm);
+  transition-duration: var(--dur-press);
 }
 
 .tabActivo {
@@ -395,5 +440,36 @@
   .tab:active {
     scale: 1;
     color: var(--text);
+  }
+}
+
+/* ==========================================================================
+   IMPRESIÓN  ·  el cromo no se imprime
+   --------------------------------------------------------------------------
+   Lo único del portal que alguien imprime es el carnet, y en esa hoja la
+   cabecera y la barra inferior no son navegación: son dos franjas de tinta
+   que se comen el papel y confunden sobre qué es el documento.
+
+   Vive aquí y no en `perfil.module.css` porque estas dos clases son de este
+   módulo: desde la hoja de la página no hay forma de alcanzarlas sin escribir
+   un selector global, que es peor.
+
+   `display: none` y no `visibility: hidden`: se quiere el hueco fuera, no
+   vacío. Para el lector de pantalla no cambia nada — `@media print` no aplica
+   a la pantalla.
+   ========================================================================== */
+@media print {
+  .cabecera,
+  .tabbar {
+    display: none;
+  }
+
+  /*
+    Sin la cabecera fija arriba ni la barra abajo, el contenido no tiene que
+    reservarles sitio. Sin esto la hoja sale con una franja en blanco arriba y
+    otra abajo del tamaño exacto del cromo que se acaba de ocultar.
+  */
+  .main {
+    padding: 0;
   }
 }

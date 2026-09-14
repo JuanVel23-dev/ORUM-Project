@@ -1,3 +1,87 @@
+/* ==========================================================================
+   EL ENLACE Y LA SUPERFICIE
+   --------------------------------------------------------------------------
+   DEFECTO QUE ESTABA VIVO: `comercio-card.tsx` pedía `styles.enlace` y
+   `styles.superficie` desde el primer commit y NINGUNA de las dos existía en
+   esta hoja. CSS Modules devuelve `undefined` para una clase que no declara,
+   React no pinta el atributo y no falla nada: ni tsc, ni eslint, ni el build.
+
+   Consecuencia real: el `<a>` es el elemento de la rejilla y se estira a la
+   altura de la fila, pero la `Card` de dentro se quedaba en su altura de
+   contenido. Es decir que `margin-top: auto` de `.promociones` y de
+   `.sinBeneficio` —la divisoria que existe PARA que las tarjetas se puedan
+   comparar de un vistazo— no tenía contra qué empujar y la línea caía a una
+   cota distinta en cada tarjeta.
+
+   Se declaran aquí las dos, que es donde el TSX ya las buscaba.
+   ========================================================================== */
+
+.enlace {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-md);
+
+  /* La ida es instantánea y la vuelta se toma su tiempo (ver `.enlace:active`
+     más abajo): el retardo al pulsar es justo lo que mata la sensación de
+     respuesta. Mismo reparto que la regla global de press. */
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+/*
+  El anillo lo pone el ENLACE, no la `Card`: el foco vive aquí, así que el
+  `:focus-visible` propio de `Card` nunca llegaría a dispararse. Solo se corrige
+  el radio —el global de `globals.css` usa `--radius-xs`, que es el de un chip—.
+*/
+.enlace:focus-visible {
+  border-radius: var(--radius-md);
+}
+
+.superficie {
+  height: 100%;
+}
+
+/*
+  PULSAR UNA TARJETA DE LISTA ES OPACIDAD, NUNCA SOMBRA NI DESPLAZAMIENTO.
+
+  Es prohibición dura y tiene una factura concreta: el catálogo pinta hasta 100
+  tarjetas y quien las desplaza es un móvil de gama media. Recomponer sombra y
+  posición de una tarjeta ancha en cada toque se paga ahí, no en el escritorio
+  donde se diseñó.
+
+  Hay que anular DOS cosas, y las dos venían de sitios distintos:
+
+    1. `Card.interactive:active` baja 2px y cambia de sombra. Se repone con la
+       clase duplicada —(0,3,0) contra (0,2,0)—, para que el ganador no dependa
+       del orden en que Next inyecte las dos hojas.
+    2. La regla global de `globals.css` §4b encoge TODO `a[href]` un 3 % al
+       pulsar, y la `scale: 1` de `Card` solo alcanza al `div` de dentro, no al
+       enlace. O sea que hasta ahora la tarjeta se encogía Y bajaba a la vez:
+       dos gestos superpuestos que nadie pidió.
+
+  El levantar al apuntar SE CONSERVA: vive dentro del `@media (hover: hover)`
+  de `Card`, así que en el teléfono no se ejecuta nunca y no entra en esta
+  factura.
+*/
+.enlace:active {
+  scale: 1;
+  /* Mismo valor en las tres superficies pulsables del portal —rejilla, carril
+     y portada— para que el toque se sienta igual venga de donde venga. */
+  opacity: 0.72;
+  transition-duration: var(--dur-press);
+}
+
+.superficie.superficie:active {
+  translate: 0 0;
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+/*
+  Movimiento reducido: el feedback SIGUE OCURRIENDO. La opacidad no es
+  vestibular —no desplaza ni escala nada— así que es ya el equivalente correcto
+  y no hay nada que anular aquí. Se deja escrito para que nadie añada un
+  `opacity: 1` creyendo que falta.
+*/
+
 .tarjeta {
   display: flex;
   flex-direction: column;

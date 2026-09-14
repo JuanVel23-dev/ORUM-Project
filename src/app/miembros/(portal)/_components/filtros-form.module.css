@@ -66,6 +66,13 @@
   cursor: pointer;
   list-style: none;
   user-select: none;
+
+  /* Ver `.resumen:active` más abajo: el toque se acusa por opacidad, no por
+     escala. `scale` no entra en esta lista a propósito — se repone con el valor
+     de reposo, no se anima. */
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
 }
 
 /* Safari pinta su propio triángulo si no se retira el marcador nativo. */
@@ -73,8 +80,28 @@
   display: none;
 }
 
-.resumen:hover {
-  color: var(--text);
+/* En táctil el `:hover` se queda pegado tras el toque: el disparador se
+   quedaba en tinta plena como si estuviera enfocado. */
+@media (hover: hover) {
+  .resumen:hover {
+    color: var(--text);
+  }
+}
+
+/*
+  FEEDBACK INMEDIATO AL PULSAR, por OPACIDAD y no por escala.
+
+  `globals.css` §4b encoge todo `summary` un 3 % al pulsar. Aquí se repone: esto
+  es una FILA de ancho de contenido dentro de un formulario, y escalar una fila
+  de texto deforma el texto mientras dura el gesto. La regla de la dirección es
+  explícita para filas: el feedback es opacidad.
+
+  Ida instantánea, vuelta normal — el mismo reparto de la regla global.
+*/
+.resumen:active {
+  scale: 1;
+  opacity: 0.6;
+  transition-duration: var(--dur-press);
 }
 
 .resumen:focus-visible {

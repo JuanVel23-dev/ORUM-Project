@@ -36,13 +36,35 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.chip:hover {
-  border-color: var(--border-strong);
-  color: var(--text);
+/*
+  `@media (hover: hover)`, que antes no estaba. En un teléfono el `:hover` NO se
+  va al levantar el dedo: el chip que el socio acababa de tocar se quedaba con
+  filo de tinta plena y texto oscuro —el mismo aspecto que un chip seleccionado,
+  pero sin el check ni el relleno— hasta que tocaba otra cosa. Con una fila de
+  filtros, eso es exactamente la señal que no puede mentir.
+*/
+@media (hover: hover) {
+  .chip:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
 }
 
+/*
+  FEEDBACK INMEDIATO AL PULSAR, que es lo que faltaba.
+
+  El valor ya estaba; el tiempo, no. `.chip` declara su propia lista de
+  transiciones, y esa lista pisa la de `globals.css` §4b —donde `scale` se anima
+  en `--dur-rebote`, 440ms, con curva elástica—. Sin acortar la IDA, el chip
+  tardaba casi medio segundo en acusar el toque y el socio lo pulsaba dos veces.
+
+  El reparto correcto es el de la regla global: ida instantánea (`--dur-press`),
+  vuelta elástica (`--dur-rebote`), que es lo que hace que el gesto se sienta
+  físico y no programado.
+*/
 .chip:active {
   scale: var(--escala-press);
+  transition-duration: var(--dur-press);
 }
 
 .chip:focus-visible {
@@ -67,14 +89,30 @@
   font-weight: 590;
 }
 
-.activo:hover {
-  background: var(--action-hover);
-  border-color: var(--action-hover);
-  color: var(--action-fg);
+@media (hover: hover) {
+  .activo:hover {
+    background: var(--action-hover);
+    border-color: var(--action-hover);
+    color: var(--action-fg);
+  }
 }
 
+/*
+  Movimiento reducido: NO es ausencia de feedback. Se retira el encogido —que es
+  lo vestibular— y el toque se acusa con relleno, que es el equivalente no
+  vestibular que la dirección pide. `--surface-hover` es tinta al 6 %, el mismo
+  canal que usa el resto del sistema para «este control está respondiendo».
+
+  Hay que reponer `scale`, no `transform`: son propiedades independientes y
+  `transform: none` no toca a `scale`.
+*/
 @media (prefers-reduced-motion: reduce) {
   .chip:active {
     scale: 1;
+    background: var(--surface-hover);
+  }
+
+  .activo:active {
+    background: var(--action-hover);
   }
 }
