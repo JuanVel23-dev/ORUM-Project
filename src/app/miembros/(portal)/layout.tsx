@@ -8,6 +8,7 @@ import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
 import { cerrarSesionMiembro } from '../login/actions'
 import { MenuTema } from './_components/menu-tema'
 import { PortalNav, PortalTabBar } from './_components/portal-nav'
+import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import styles from './portal.module.css'
 
 export const metadata = { title: 'Portal de Miembros · ORUM' }
@@ -93,6 +94,13 @@ export default async function MiembrosLayout({ children }: { children: ReactNode
           </form>
         </div>
       </header>
+
+      {/*
+        Uno por portal, con un único escuchador delegado. Es quien llama a
+        `document.startViewTransition`: escribir el `view-transition-name` no
+        anima nada por sí solo, y en Next 16.2.11 nadie más lo dispara.
+      */}
+      <TransicionesDeRuta />
 
       <main className={styles.main}>{children}</main>
 

@@ -19,6 +19,12 @@ type ComercioLogoProps = {
    */
   variante?: ComercioLogoVariante
   className?: string
+  /**
+   * `view-transition-name` de la placa, para la transición de elemento
+   * compartido entre la rejilla del catálogo y la ficha. Lo genera
+   * `transicionComercio()`; ver ahí la regla de «un nombre, un elemento».
+   */
+  nombreTransicion?: string
 }
 
 /**
@@ -84,6 +90,7 @@ export function ComercioLogo({
   nombre,
   variante = 'tarjeta',
   className,
+  nombreTransicion,
 }: ComercioLogoProps) {
   const inicial = nombre.trim().charAt(0).toUpperCase()
   const clases = [styles.placa, variante !== 'tarjeta' && styles[variante], className]
@@ -91,7 +98,21 @@ export function ComercioLogo({
     .join(' ')
 
   return (
-    <span className={clases} aria-hidden="true">
+    /*
+      `viewTransitionName` va en `style` y no en una clase porque su valor sale
+      del dato —el `id` del comercio— y porque es un espacio de nombres GLOBAL
+      del documento: un módulo CSS le cambiaría el hash. Es el caso que la
+      norma admite para `style`, inyectar un token dinámico, no maquetar.
+
+      Y va sobre ESTA placa, sin envoltorio: `.cabecera` es flex y `.hero` es
+      una rejilla de dos columnas, así que un `<div>` intermedio dejaría a los
+      hijos fuera del contenedor que les da su sitio.
+    */
+    <span
+      className={clases}
+      aria-hidden="true"
+      style={nombreTransicion ? { viewTransitionName: nombreTransicion } : undefined}
+    >
       {logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
         <img

@@ -4,8 +4,9 @@
    ORUM · Estilos globales
    ----------------------------------------------------------------------------
    1. Mapeo semántico por tema   4. Utilidades tipográficas
-   2. Reset                      5. Preferencias de accesibilidad
-   3. Base
+   2. Reset                      4b. Respuesta al pulsar
+   3. Base                       4c. Transiciones de ruta
+                                 5. Preferencias de accesibilidad
    ========================================================================== */
 
 /* ============================================================================
@@ -627,6 +628,83 @@ textarea:active,
 }
 
 /* ============================================================================
+   4c. TRANSICIONES DE RUTA  ·  View Transitions  (M5)
+   ----------------------------------------------------------------------------
+   Quién dispara esto: React, cuando encuentra un `<ViewTransition>` en el árbol
+   que cambia. El nombre lo escriben `ComercioLogo` y el bloque de títulos
+   con `transicionComercio()`, y quien dispara la transición es
+   `TransicionesDeRuta`
+   (`src/components/ui/transicion-compartida.tsx`); aquí solo se le pone tiempo
+   y curva a lo que el navegador ya sabe hacer.
+
+   PAR APROBADO, Y ES EL ÚNICO: rejilla del catálogo ↔ ficha del comercio. El
+   dictamen completo —qué pares tienen continuidad de objeto y cuáles no— está
+   en `.claude/docs/log/m5-view-transitions.md`.
+
+   Estos selectores son OBLIGATORIAMENTE globales: `view-transition-name` y los
+   pseudoelementos `::view-transition-*` viven en un árbol aparte, colgado del
+   elemento raíz, al que ningún hash de módulo CSS llega. Es la excepción que
+   justifica que esto esté en `globals.css` y no en una hoja de ruta.
+
+   Y son inalcanzables desde la red de seguridad de movimiento reducido de la
+   sección 5: aquel `*` no casa con un pseudoelemento. Por eso el tratamiento
+   accesible está escrito a mano más abajo, y no heredado.
+   ========================================================================== */
+
+/*
+  El fundido que sustituye al morfo cuando el usuario pide menos movimiento.
+  Se declaran fuera de la media query porque `@keyframes` no se hereda hacia
+  dentro de una consulta: dentro solo se referencian.
+*/
+@keyframes vt-fundido-salida {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fundido-entrada {
+  from {
+    opacity: 0;
+  }
+}
+
+/*
+  LA PIEZA COMPARTIDA. `--dur-page` es el token que se acuñó para esto y hasta
+  hoy no tenía ni un consumidor ("transición de ruta", `tokens.css`).
+
+  Medio segundo suena largo leído; no lo es visto, porque `--ease-out` es una
+  deceleración fuerte: la placa cubre la mayor parte del recorrido en los
+  primeros ~200ms y el resto es el asentamiento. Ese reparto es el que hace que
+  se lea como peso, no como lentitud.
+*/
+::view-transition-group(*) {
+  animation-duration: var(--dur-page);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: var(--dur-page);
+  animation-timing-function: var(--ease-out);
+}
+
+/*
+  LA RAÍZ ES EL FONDO, NO LA PIEZA, y por eso va más rápida: el resto de la
+  pantalla se resuelve en `--dur-base` y deja de competir por la atención
+  mientras la placa todavía viaja. Si el fondo durase lo mismo, el ojo no
+  sabría a dónde mirar.
+
+  Va DESPUÉS del bloque `(*)` a propósito: `root` es un nombre y `*` el
+  universal, así que aunque la especificidad entre los dos empatase, gana este
+  por orden de aparición.
+*/
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-base);
+}
+
+/* ============================================================================
    5. PREFERENCIAS DE ACCESIBILIDAD
    ----------------------------------------------------------------------------
    Red de seguridad global. El tratamiento fino vive dentro de cada componente:
@@ -652,6 +730,55 @@ textarea:active,
     transition:
       background-color var(--dur-theme) var(--ease-out),
       color var(--dur-theme) var(--ease-out) !important;
+  }
+
+  /*
+    TRANSICIONES DE RUTA · el equivalente no vestibular, no la ausencia.
+
+    Una transición de elemento compartido es movimiento vestibular puro: una
+    caja que viaja y crece. Es exactamente lo que hay que retirar. Lo que NO
+    hay que retirar es la señal de que la pantalla cambió, o el socio se queda
+    sin saber si su toque hizo algo. Queda un fundido cruzado.
+
+    Tres cosas, y las tres hacen falta:
+
+      1. `animation-name: none` en el grupo mata el morfo de la caja. Sin
+         animación, el grupo se queda directamente en su geometría final, así
+         que no hay ni viaje ni escalado de la caja.
+      2. `inline-size`/`block-size` en `auto` es lo que impide que el fotograma
+         viejo se estire hasta el tamaño nuevo. Sin esto, la placa de 72px se
+         pintaría escalada a 144 dentro del grupo ya colocado —un zoom sin
+         desplazamiento—, que sigue siendo movimiento. Con `auto`, cada
+         instantánea se pinta a su tamaño real y solo cambia la opacidad.
+      3. `isolation: auto` y `mix-blend-mode: normal` desmontan el
+         `plus-lighter` que el navegador usa por defecto para que un fundido
+         entre dos copias idénticas no parpadee. Aquí las dos copias son
+         distintas, y con `plus-lighter` el cruce se aclara de más.
+
+    No lleva `!important` y no le hace falta: la red de seguridad de arriba usa
+    `*`, que no alcanza a un pseudoelemento de transición. Estas reglas no
+    compiten con nada.
+  */
+  ::view-transition-group(*) {
+    animation-name: none;
+  }
+
+  ::view-transition-image-pair(*) {
+    isolation: auto;
+  }
+
+  ::view-transition-old(*) {
+    animation: vt-fundido-salida var(--dur-fast) var(--ease-out) both;
+    mix-blend-mode: normal;
+    inline-size: auto;
+    block-size: auto;
+  }
+
+  ::view-transition-new(*) {
+    animation: vt-fundido-entrada var(--dur-fast) var(--ease-out) both;
+    mix-blend-mode: normal;
+    inline-size: auto;
+    block-size: auto;
   }
 }
 

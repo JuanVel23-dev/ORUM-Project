@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
+import { transicionComercio } from '@/lib/comercios/transiciones'
 import { hoyISO } from '@/lib/shared/fecha'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 import { Badge } from '@/components/ui/badge'
@@ -268,6 +269,18 @@ export default async function FichaComercioPage({
   */
   const hrefVolver = resolverVolverAlCatalogo(paramsCrudos.volver)
 
+  /*
+    EL OTRO EXTREMO DEL PAR (M5). Los mismos dos nombres que escribe la tarjeta
+    de la rejilla, derivados del mismo `id`, así que casan sin que ninguna de
+    las dos pantallas sepa nada de la otra.
+
+    Llegar aquí por enlace directo —desde WhatsApp, sin catálogo detrás— no
+    necesita ningún caso especial: si no hay elemento anterior con ese nombre,
+    no hay nada que emparejar y no hay transición. Un nombre huérfano es inerte,
+    no un error.
+  */
+  const transicion = transicionComercio(comercio.id)
+
   return (
     <div className={estilos.pagina}>
       {/*
@@ -294,17 +307,22 @@ export default async function FichaComercioPage({
       </div>
 
       <header className={estilos.hero}>
-        <ComercioLogo logoUrl={comercio.logoUrl} nombre={comercio.nombre} variante="hero" />
+        <ComercioLogo
+          logoUrl={comercio.logoUrl}
+          nombre={comercio.nombre}
+          variante="hero"
+          nombreTransicion={transicion.placa}
+        />
 
-        <div className={estilos.heroTextos}>
-          {/* Único `h1` de la pantalla. `--t-title-1` (24px FIJO) y no
-              `--t-display-2`: junto a una placa de 144px, a 375px le quedan
-              187px, y un tamaño que creciera a 32px partiría el nombre en
-              cuatro líneas. */}
-          <h1 className={estilos.nombre}>{comercio.nombre}</h1>
+        <div className={estilos.heroTextos} style={{ viewTransitionName: transicion.titulos }}>
+            {/* Único `h1` de la pantalla. `--t-title-1` (24px FIJO) y no
+                `--t-display-2`: junto a una placa de 144px, a 375px le quedan
+                187px, y un tamaño que creciera a 32px partiría el nombre en
+                cuatro líneas. */}
+            <h1 className={estilos.nombre}>{comercio.nombre}</h1>
 
-          {/* Es lo que explica por qué se ve ESE logotipo cuando el comercio
-              no tiene uno propio y hereda el de su marca (V4). */}
+            {/* Es lo que explica por qué se ve ESE logotipo cuando el comercio
+                no tiene uno propio y hereda el de su marca (V4). */}
           {comercio.marcaNombre && <p className={estilos.marca}>{comercio.marcaNombre}</p>}
         </div>
 

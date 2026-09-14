@@ -15,7 +15,7 @@
 | M3 | Carnet (H1) y pantalla de pausa (H3) sobre la dirección v2 | frontend-implementer | **HECHA** | [m3-carnet-pausa.md](./log/m3-carnet-pausa.md) |
 | M4 | Catálogo, ficha y cromo del portal sobre la dirección v2 | frontend-implementer | **HECHA** | [m4-catalogo-ficha.md](./log/m4-catalogo-ficha.md) |
 | M6 | Rescatar las superficies que v2 dejó invisibles | frontend-implementer | **HECHA** · `5356b96` | [m6-superficies.md](./log/m6-superficies.md) |
-| M5 | View Transitions entre lista y ficha (H6) | frontend-implementer | PENDIENTE — lo único que queda del portal | [m5-view-transitions.md](./log/m5-view-transitions.md) |
+| M5 | View Transitions entre lista y ficha (H6) | frontend-implementer + orquestador | **HECHA** · dictamen del agente, mecanismo rehecho a mano porque el de React era inerte. Falta mirarla en un navegador de verdad | [m5-view-transitions.md](./log/m5-view-transitions.md) |
 
 ## Cerrado antes de abrir este registro
 

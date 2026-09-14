@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
+import { transicionComercio } from '@/lib/comercios/transiciones'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 import styles from './comercio-card.module.css'
 
@@ -96,28 +97,58 @@ export function ComercioCard({
   const restantes = comercio.promociones.length - visibles.length
   const conCiudades = mostrarCiudades && comercio.ciudades.length > 0
 
+  /*
+    LOS DOS NOMBRES DE TRANSICIÓN VIVEN AQUÍ Y EN NINGUNA OTRA TARJETA (M5).
+
+    Esta es la tarjeta de la REJILLA, la única lista del catálogo donde cada
+    comercio aparece exactamente una vez. El carrusel de portada y
+    `ComercioCardCompacta` enlazan al mismo destino y NO los llevan: un comercio
+    puede salir a la vez en la portada, en una estantería y aquí, y dos
+    elementos con el mismo `view-transition-name` vivos en el mismo documento
+    rompen la transición ENTERA sin avisar.
+
+    Si algún día la rejilla deja de ser la lista exhaustiva —paginación,
+    secciones que repitan comercios—, esto hay que revisarlo antes que nada.
+  */
+  const transicion = transicionComercio(comercio.id)
+
   return (
     <Link href={hrefFicha(comercio.id, volver)} className={styles.enlace}>
       <Card interactive className={styles.superficie}>
         <div className={styles.tarjeta}>
           <div className={styles.cabecera}>
-            <ComercioLogo logoUrl={comercio.logoUrl} nombre={comercio.nombre} />
+            {/* La placa es el mismo objeto que el hero de la ficha: misma
+                imagen, mismo comercio, misma posición relativa (a la izquierda
+                del nombre). Solo cambia de tamaño, que es justo lo que una
+                transición de elemento compartido sabe hacer bien. */}
+            <ComercioLogo
+              logoUrl={comercio.logoUrl}
+              nombre={comercio.nombre}
+              nombreTransicion={transicion.placa}
+            />
 
-            <div className={styles.titulos}>
-              {/*
-                `h3`, y antes era `h2`.
+            {/* Nombre + marca, el mismo par y en el mismo orden que el hero.
+                Se nombra el BLOQUE y no el `h3`: en la ficha el nodo es un
+                `h1`, y emparejar dos elementos de nivel distinto obliga a
+                repetir el nombre en dos sitios que no se parecen. El bloque sí
+                es el mismo objeto en las dos pantallas. */}
+            <div className={styles.titulos} style={{ viewTransitionName: transicion.titulos }}>
+                {/*
+                  `h3`, y antes era `h2`.
 
-                El comentario que había aquí decía: "el único consumidor de esta
-                tarjeta es el catálogo, cuyo `PageHeader` pone el `h1` y no
-                intercala ningún `h2`; con `h3` el documento saltaba de nivel".
-                Era CIERTO con el layout viejo y por eso no se borra: es lo que
-                evita que alguien lo revierta creyendo que arregla un salto.
+                  El comentario que había aquí decía: "el único consumidor de
+                  esta tarjeta es el catálogo, cuyo `PageHeader` pone el `h1` y
+                  no intercala ningún `h2`; con `h3` el documento saltaba de
+                  nivel". Era CIERTO con el layout viejo y por eso no se borra:
+                  es lo que evita que alguien lo revierta creyendo que arregla
+                  un salto.
 
-                La premisa dejó de serlo: ahora la rejilla lleva su propio `h2`
-                visible ("Todos los comercios") y cada estantería el suyo, así que
-                `h3` es el nivel correcto y no hay salto por ninguna rama.
-              */}
-              <h3 className={styles.nombre}>{comercio.nombre}</h3>
+                  La premisa dejó de serlo: ahora la rejilla lleva su propio
+                  `h2` visible ("Todos los comercios") y cada estantería el
+                  suyo, así que `h3` es el nivel correcto y no hay salto por
+                  ninguna rama.
+                */}
+                <h3 className={styles.nombre}>{comercio.nombre}</h3>
               {comercio.marcaNombre && <p className={styles.marca}>{comercio.marcaNombre}</p>}
             </div>
           </div>
@@ -190,6 +221,19 @@ export function ComercioCard({
  *
  * Sin descripción y sin ciudades — eso es justo lo que la comprime. Su ancho lo
  * fija `--carril-tarjeta-w` desde la pista, no ella.
+ *
+ * SIN `view-transition-name`, y es deliberado (M5). Las estanterías —«Nuevos en
+ * el club», «Beneficios del momento»— se surten de la MISMA lista que la
+ * rejilla, así que un comercio nuevo con beneficio vigente sale hasta tres
+ * veces en la misma pantalla contando la portada. Dos elementos con el mismo
+ * nombre vivos a la vez no degradan la transición: la anulan entera, en
+ * silencio, también para el resto de tarjetas. El nombre lo lleva solo
+ * `ComercioCard`, la de la rejilla. Es la misma restricción que ya estaba
+ * escrita en `carrusel-destacados.tsx`.
+ *
+ * Lo que el socio pierde al tocar aquí es el morfo de la placa, no el feedback:
+ * `.enlace:active` sigue dando su respuesta de opacidad, y la ficha sigue
+ * entrando con el fundido de página.
  */
 export function ComercioCardCompacta({
   comercio,

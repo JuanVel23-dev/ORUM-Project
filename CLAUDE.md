@@ -55,7 +55,7 @@ Romper cualquiera de estas es un bug, no una preferencia.
 | `className="orum-*"` | Esa capa se eliminó. No existe. |
 | Valores literales de color, espaciado, radio o duración | Todo sale de `src/styles/tokens.css` vía `var(--…)` |
 | `style={{ … }}` para maquetar | Los estilos van en `.module.css`. Solo se admite inyectar tokens dinámicos. |
-| Animar `width`, `height`, `top`, `left`, `margin` | Recalcula layout cada fotograma. Solo `transform` y `opacity`. |
+| Animar `width`, `height`, `top`, `left`, `margin` | Recalcula layout cada fotograma. Solo `transform` y `opacity`. **Única excepción: las View Transitions** — ver «Movimiento». |
 | `none` dentro de una lista de sombras | Invalida la declaración ENTERA en silencio. Usa `0 0 rgba(0,0,0,0)`. |
 | `outline: none` sin sustituto | Deja la interfaz sin foco visible. |
 | Color como único portador de significado | Siempre punto/icono **+ texto**. |
@@ -290,6 +290,90 @@ filas en `DataList` (`PASO_MS` / `MAX_ESCALONADAS`). Úsalo en la **primera
 pintura** de una rejilla, no en cada actualización: escalonar una lista que el
 usuario ya tenía delante le hace esperar otra vez por algo que ya había leído.
 
+### Transiciones de elemento compartido — la excepción a «no animes la caja»
+
+Aquí arriba está escrito que animar `width`, `height`, `top`, `left` o `margin`
+es un bug. Una View Transition interpola exactamente eso: el navegador lleva la
+caja del elemento de su geometría vieja a la nueva. **Es la única excepción, y
+está acotada.**
+
+Por qué no es la misma factura: lo que se interpola no es el elemento, es una
+**instantánea** suya. El navegador saca una foto del estado viejo y otra del
+nuevo, las coloca en una capa propia fuera del árbol de layout y las anima en el
+compositor, sin recalcular nada en el hilo principal en ningún fotograma. Animar
+`width` a mano, en cambio, obliga al motor a rehacer layout y pintado sesenta
+veces por segundo, arrastrando a los hermanos. **Sigue prohibido a mano.**
+
+**Dónde SÍ se usan, y hoy es un solo sitio:** rejilla del catálogo de miembros ↔
+ficha del comercio. La placa del logotipo y el bloque nombre+marca son el mismo
+objeto en las dos pantallas, con la misma disposición —placa a la izquierda,
+texto a la derecha—, y solo cambian de tamaño y de posición.
+
+**Dónde NO**, y no es una lista provisional:
+
+- **Catálogo → carnet** y **ficha → carnet**. No hay ningún objeto en común: el
+  carnet es el documento del socio, no el comercio. Ver volar la placa de un
+  aliado hacia el carnet inventaría un parentesco que no existe.
+- **Carrusel de portada → ficha** y **estanterías (`ComercioCardCompacta`) →
+  ficha**. Un comercio puede salir a la vez en la portada, en una estantería y
+  en la rejilla, y **dos elementos con el mismo `view-transition-name` vivos en
+  el mismo documento anulan la transición entera, en silencio**. El nombre lo
+  lleva solo la rejilla, que es la única lista exhaustiva.
+- **Filtrar o cambiar de categoría dentro del catálogo.** Es la misma pantalla
+  cambiando de contenido: morfar tarjetas que se reordenan produce vuelos
+  cruzados. Ahí el patrón es la entrada escalonada.
+- **Cualquier cruce de la frontera de sesión** (acceso → portal).
+
+La regla que decide: **continuidad de objeto real**. El mismo objeto persiste y
+se transforma. Un cambio de pantalla no basta. Una transición de elemento
+compartido donde no hay continuidad se lee como un error de la aplicación, y eso
+es peor que no tener ninguna.
+
+**El mecanismo es nuestro, no del framework.** `experimental.viewTransition`
+**no se consume en ninguna parte de Next 16.2.11**: existe en `config-schema.js`
+y en el default, y ningún módulo del router lo lee. `<ViewTransition>` de React
+—que el canary vendorizado sí exporta— se monta y no dispara nada: compila,
+tipa, pasa lint y build, y `document.startViewTransition` no se llama ni una vez.
+Es el mismo fallo mudo que `animate(callback, [desde, hasta])` en motion 12.
+
+Por eso el nombre lo escriben los propios elementos con `style`
+(`transicionComercio()` genera el valor desde el `id`, nunca desde el índice de
+la lista, que cambia al filtrar) y quien llama a `document.startViewTransition`
+es `TransicionesDeRuta`: **un solo componente de cliente por portal, con un
+escuchador delegado**. Envolver cada tarjeta habría hidratado cien raíces en el
+catálogo.
+
+Detalle que no es obvio: `router.push` no espera a que React pinte, así que el
+callback devuelve una promesa que solo se resuelve cuando `usePathname` cambia —
+y con un plazo máximo, porque sin él una navegación fallida dejaría la página
+congelada bajo la instantánea vieja.
+
+**No se puede verificar desde la automatización de esta máquina.** Su Chrome
+reporta `document.visibilityState === 'hidden'` incluso con foco, y la
+especificación aborta toda View Transition en ese estado
+(`Transition was aborted because of invalid state`). Es la misma causa de fondo
+que la nota de «Antes de dar algo por hecho» sobre medir transiciones aquí. Se
+comprueba en un navegador de verdad, mirando.
+
+**Cómo se escriben.** Nunca un `view-transition-name` suelto en un
+`.module.css`: en navegación de cliente, quien llama a
+`document.startViewTransition` es React, y solo si hay un `<ViewTransition>` en
+el árbol que cambia. Un nombre suelto compila, pasa el lint y no anima jamás
+—y además el hash del módulo CSS lo renombraría—. La puerta única es
+`<TransicionCompartida>` (`src/components/ui/transicion-compartida.tsx`), y el
+nombre se deriva del **`id` del dato**, nunca del índice de la lista: el índice
+cambia al filtrar y el par deja de casar justo cuando el usuario ha filtrado.
+
+**Movimiento reducido**: resuelto en `globals.css` §4c y §5, no en el
+componente. El morfo de la caja se anula y queda un fundido cruzado — equivalente
+no vestibular, nunca ausencia de feedback. No puede resolverse en el componente
+porque estas pantallas son Server Components y detectarlo exigiría hidratar cien
+tarjetas para escribir un atributo.
+
+**Ojo**: la red de seguridad de `prefers-reduced-motion` de `globals.css` §5 usa
+`*`, que **no casa con un pseudoelemento** `::view-transition-*`. Cualquier
+transición nueva necesita su tratamiento accesible escrito a mano; no lo hereda.
+
 ---
 
 ## Formularios: overlay, no página
@@ -512,8 +596,14 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
 
 ## Deuda conocida
 
-1. Las transiciones de elemento compartido entre lista y ficha están habilitadas
-   (`experimental.viewTransition`) pero **sin aplicar**.
+1. ~~Las transiciones de elemento compartido entre lista y ficha están
+   habilitadas pero sin aplicar.~~ **Cerrado (M5)**: el par rejilla ↔ ficha ya
+   las lleva. Queda **sin verificar en navegador**: esta máquina no pinta.
+   Y un dato incómodo de recordar: en Next 16.2.11 la bandera
+   `experimental.viewTransition` **no hace nada** —solo existe en el esquema de
+   configuración—. Lo que hace que funcione es que Next vendoriza un React
+   canary que ya exporta `ViewTransition`. No la quites sin comprobarlo, pero
+   tampoco cuentes con ella.
 2. Sin pruebas automatizadas de interfaz.
 3. Sin verificar en dispositivo real: vista móvil, gestos de la hoja, instalación
    de la PWA y Core Web Vitals. La automatización de navegador de esta máquina
