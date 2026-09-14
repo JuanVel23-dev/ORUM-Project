@@ -34,12 +34,19 @@
   gap: var(--space-3);
 
   padding: var(--space-4);
-  /* Flota sobre cualquier pantalla, y todas son papel blanco: el trazo pleno
-     es lo único que garantiza que se recorte del contenido de debajo. */
-  border: 1px solid var(--border-strong);
+  /*
+    Flota sobre cualquier pantalla, y todas son papel blanco: lo que lo recorta
+    del contenido de debajo es la sombra, en el escalón de lo que flota
+    (§2.2). Sin trazo (§2.1).
+
+    Token semántico y no `--shadow-3` crudo: en oscuro el escalón se remapea a
+    una sombra mucho más densa, y con el crudo el toast se fundía con la
+    pantalla.
+  */
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
   background: var(--surface);
-  box-shadow: var(--shadow-3), var(--edge);
+  box-shadow: var(--shadow-flotante), var(--edge);
 
   font-size: var(--t-callout-size);
   line-height: var(--t-callout-leading);

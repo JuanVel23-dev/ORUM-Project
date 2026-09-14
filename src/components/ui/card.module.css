@@ -1,12 +1,14 @@
 /*
-  Dirección de arte v2: el papel del fondo y el de la tarjeta son EL MISMO
-  blanco, así que una tarjeta sin borde no existe. El trazo dejó de ser
-  decoración y pasó a ser lo que la declara superficie.
+  Dirección de arte v3, §2.1: el papel del fondo y el de la tarjeta son EL
+  MISMO blanco, y lo que recorta uno del otro es LA SOMBRA. El trazo se va.
 
-  Por eso lleva `--border-strong` —tinta plena— y no el 22 % de antes: §2.2
-  asigna ese token exactamente a "tarjetas, campos y botones con contorno".
-  Lo que se reserva para una sola cosa por pantalla no es la tinta plena, es
-  el GROSOR de 2px (ver `.principal`).
+  `--border-superficie` vale `transparent`. El borde se declara igualmente
+  —en vez de `border: none`— para que la caja mida lo mismo con filo y sin él:
+  así `prefers-contrast: more` puede devolverlo desde globals.css sin desplazar
+  ni un píxel. Es el mecanismo de §2.5, no un resto del sistema anterior.
+
+  Si una tarjeta no se ve, la respuesta es SUBIR DE SOMBRA, nunca devolverle
+  el trazo.
 */
 .card {
   position: relative;
@@ -14,27 +16,27 @@
   flex-direction: column;
 
   background: var(--surface);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
 
-  /* En claro la elevación la da la sombra; en oscuro, el filo de luz superior
-     (`--edge`), porque una sombra negra sobre fondo negro no se ve. */
+  /* En claro la define la sombra; en oscuro, el anillo de luz de `--edge`,
+     porque una sombra negra sobre fondo negro no se ve. */
   box-shadow: var(--shadow-card), var(--edge);
 }
 
 /*
-  El trazo de 2px: UNA cosa por pantalla (§6 de la dirección).
+  LA superficie principal: UNA por pantalla.
 
-  Es el riesgo real de esta dirección de arte: si todo lleva borde grueso, el
-  borde deja de significar "esto es lo importante" y la pantalla se convierte
-  en una cuadrícula de cajas. Si al mirar una captura no sabes cuál es el
-  elemento principal, sobran bordes — y la respuesta es quitar, no añadir.
+  Ya no es un trazo de 2px —ese lenguaje se retiró con la v3—: es un escalón
+  más de sombra. La regla de §2.2 dice que la superficie grande se lee más
+  gruesa, y esta es la grande.
 
-  Va con tinta PLENA (`--border-strong`), no con el 55 %: el grosor y la
-  presencia van juntos, si no el trazo grueso se lee como un borde borroso.
+  El riesgo cambia de signo pero no desaparece (§5): si todo sube de escalón,
+  la pantalla es una sopa de objetos levitando y nadie sabe cuál es el
+  principal. Si al mirar una captura no lo distingues, sobran sombras — y la
+  respuesta es quitar, no añadir.
 */
 .principal {
-  border-width: 2px;
   box-shadow: var(--shadow-raised), var(--edge);
 }
 
@@ -58,20 +60,17 @@
 /*
   Hundida: para agrupar contenido secundario sin añadir otra capa elevada.
 
-  Ya NO se tiñe. `--surface-sunk` es el mismo papel que todo lo demás, así que
-  lo que la hunde es la AUSENCIA de sombra junto a tarjetas que sí la tienen,
-  más su propio trazo. Un hundido se dibuja, no se tiñe (§2.1).
+  No se tiñe y no se dibuja: se HUNDE. `--shadow-hundida` es la misma luz
+  entrando al revés —una sombra `inset`—, que es el vocabulario que la v3
+  abre y que el trazo no tenía. Un hundido no es un escalón negativo de la
+  escala: es otra dirección de la luz.
 
-  `box-shadow: none` aquí es legal porque es el valor COMPLETO de la
-  declaración. Lo prohibido es un `none` DENTRO de una lista separada por
-  comas: invalida la declaración entera en silencio.
+  Lo acompaña un hairline, que §2.1 conserva expresamente para esto.
 */
 .sunk {
   background: var(--surface-sunk);
-  /* Tinta al 55 %, no plena: lo hundido debe estar MENOS presente que la
-     tarjeta que lo contiene, y ese es el único eje que queda para decirlo. */
-  border-color: var(--border);
-  box-shadow: none;
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-hundida);
 }
 
 /* Realce de marca. El oro va SOLO en el filo, nunca rellenando la tarjeta. */
@@ -115,9 +114,13 @@
 */
 @media (hover: hover) {
   .interactive:hover {
-    border-color: var(--border-strong);
     translate: 0 -2px;
-    box-shadow: var(--shadow-raised), var(--edge);
+    /*
+      §2.3: al SEÑALAR aparece el filo dorado de 1px y la sombra sube un
+      escalón. Las dos señales juntas, y ninguna sola bastaría: la sombra no
+      llega a 3:1 en el límite del control y el filo solo no comunica altura.
+    */
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
   }
 }
 

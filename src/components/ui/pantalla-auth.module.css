@@ -98,20 +98,20 @@
 
   padding: var(--space-8) var(--space-7);
   /*
-    EL trazo de 2px de esta pantalla (§2.2 / §6). Una pantalla de acceso tiene
-    exactamente un elemento principal —esta tarjeta—, así que aquí el grosor
-    reservado no compite con nada: no hay ninguna otra superficie en pantalla
-    que pueda reclamarlo.
+    Sin trazo (§2.1). Era el único 2px de tinta de esta pantalla y con la v3 ese
+    lenguaje se retira entero: lo que recorta la tarjeta del halo es el escalón
+    de overlay —es la única superficie de la pantalla, así que le corresponde el
+    más alto— más el filo de luz dorado de `::before`.
 
-    Con tinta plena, además, deja de depender del relleno: el `color-mix` de
-    abajo la pinta blanca al 82 % sobre un fondo que ya es blanco, así que sin
-    trazo la tarjeta no tendría contorno en absoluto.
+    `--edge` importa aquí más que en ningún otro sitio: el `color-mix` pinta la
+    tarjeta blanca al 82 % sobre un fondo que ya es blanco, y en tema oscuro el
+    anillo de luz es lo único que le da contorno.
   */
-  border: 2px solid var(--border-strong);
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-xl);
   background: color-mix(in srgb, var(--surface) 82%, transparent);
   backdrop-filter: blur(var(--blur-xl)) saturate(180%);
-  box-shadow: var(--shadow-overlay);
+  box-shadow: var(--shadow-overlay), var(--edge);
 
   animation: entrar var(--dur-slow) var(--ease-out) backwards;
 }
@@ -126,17 +126,70 @@
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
+/*
+  MATERIALIZAR, NO FUNDIR (v3 §3.5).
+
+  Esta tarjeta es `--surface` al 82 % con `backdrop-filter`: un material, no una
+  superficie opaca. Entra animando DESENFOQUE Y ESCALA A LA VEZ —no una opacidad
+  que sube— para que se lea como una placa de vidrio que llega y se posa.
+
+  Que los dos ocurran juntos es el punto entero: si el desenfoque se resolviera
+  antes que la escala, el ojo vería primero un cristal y después una caja
+  creciendo, que son dos sucesos en vez de uno.
+
+  La excepción a «solo transform y opacity» se sostiene igual que en el velo del
+  modal: es UN elemento, ocurre UNA vez al montar la pantalla, y la tarjeta ya
+  está promocionada a su propia capa por el `backdrop-filter` que lleva en
+  reposo. No se copia a nada que se repita.
+*/
 @keyframes entrar {
   from {
     opacity: 0;
+    filter: blur(10px);
     transform: translateY(10px) scale(0.98);
   }
   to {
     opacity: 1;
+    filter: blur(0px);
     transform: translateY(0) scale(1);
   }
 }
 
+@media (prefers-reduced-transparency: reduce) {
+  .tarjeta {
+    background: var(--surface);
+    backdrop-filter: none;
+    /*
+      Sin translucidez no hay material que materializar: la tarjeta es opaca, y
+      desenfocarla al entrar se lee como una imagen mal cargada, no como vidrio.
+      Se conserva el viaje —que no es lo que esta preferencia pide retirar— y se
+      retira solo el desenfoque.
+    */
+    animation-name: entrarOpaca;
+  }
+
+  @keyframes entrarOpaca {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+}
+
+/*
+  EL ORDEN DE ESTOS DOS BLOQUES IMPORTA, y no es evidente.
+
+  Los dos escriben `animation-name` sobre `.tarjeta` con la misma
+  especificidad, así que decide el que va DESPUÉS. Movimiento reducido tiene
+  que ganar: quien pide las dos preferencias a la vez necesita que se retire el
+  viaje, no que se lo devuelva el bloque de translucidez. Si alguien reordena
+  este archivo, esto se rompe en silencio y solo lo nota quien tiene ambas
+  preferencias puestas.
+*/
 @media (prefers-reduced-motion: reduce) {
   .tarjeta {
     animation: fundir var(--dur-base) var(--ease-out) backwards;
@@ -149,13 +202,6 @@
     to {
       opacity: 1;
     }
-  }
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .tarjeta {
-    background: var(--surface);
-    backdrop-filter: none;
   }
 }
 

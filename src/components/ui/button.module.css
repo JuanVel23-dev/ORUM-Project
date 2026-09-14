@@ -36,12 +36,16 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-/* --- Levantar y hundir  ·  §4.3 de la dirección de arte v2 -----------------
+/* --- Levantar y hundir  ·  §3 de la dirección de arte v3 -------------------
 
-   La sombra desplazada da un vocabulario que la sombra difusa no tenía:
-   PRESIONAR HUNDE. Un botón que al pulsarse baja 2px y pierde la mitad de su
-   sombra comunica físicamente lo que un cambio de color solo comunica por
-   convención.
+   PRESIONAR HUNDE. Un botón que al pulsarse baja 2px y se queda solo con el
+   contacto de su sombra —pierde el halo— comunica físicamente lo que un cambio
+   de color solo comunica por convención.
+
+   Y ocurre en `:active`, que es el equivalente en CSS puro de responder en
+   `pointerdown` y no en `click`: el navegador entra en `:active` al apretar,
+   no al soltar. Esperar al `click` es lo que hace que una interfaz se sienta
+   muerta (§3.1).
 
    Sustituye al `scale: 0.97` anterior. No se acumulan: `scale` y `translate`
    son propiedades independientes y las dos a la vez se leen como un fallo de
@@ -194,11 +198,17 @@
 
 /* --- Variantes ------------------------------------------------------------ */
 
-/* Primario = TINTA, no oro. El oro es marca, no acción (spec §2.1). */
+/*
+  Primario = TINTA. Es el primario de ADMINISTRACIÓN y de la HERRAMIENTA DE
+  COMERCIOS, y ahí no cambia (§2.4): son herramientas de trabajo y el oro sería
+  ruido. En el Portal de Miembros y en las seis pantallas de acceso el primario
+  es `.brand`, el relleno dorado — esa diferencia la resuelve el `variant` del
+  componente, no hay que decidirla en cada pantalla.
+*/
 .primary {
   background: var(--action);
   color: var(--action-fg);
-  box-shadow: var(--shadow-1);
+  box-shadow: var(--shadow-card);
 }
 
 /*
@@ -209,29 +219,30 @@
   .primary:hover:not(:disabled) {
     background: var(--action-hover);
     translate: 0 -2px;
-    box-shadow: var(--shadow-2);
+    box-shadow: var(--shadow-raised);
   }
 }
 
 /*
-  Botón con contorno. §2.2 asigna `--border-strong` —tinta plena— a "tarjetas,
-  campos y botones con contorno": sobre papel blanco el filo gris de antes
-  (#dcdce2, 1,3:1) directamente no se veía.
+  Botón con contorno. Conserva filo en reposo —es un CONTROL, no una superficie
+  (§2.5)— pero baja de tinta plena a tinta al 55 %: 4,42:1 contra el papel, muy
+  por encima del 3:1 de WCAG 1.4.11, y deja de leerse como papelería.
 
-  No lleva sombra a propósito: es tinta sobre papel, no un objeto levantado.
-  Por eso tampoco se levanta al apuntarlo — lo que no está elevado no puede
-  elevarse sin que el gesto se lea como un salto.
+  No lleva sombra en reposo a propósito: es tinta sobre papel, no un objeto
+  levantado. Al señalarlo se enciende el oro y aparece el primer escalón —ahí
+  sí se levanta—, que es el par de §2.3.
 */
 .secondary {
   background: var(--surface);
   color: var(--text);
-  border-color: var(--border-strong);
+  border-color: var(--border);
 }
 
 @media (hover: hover) {
   .secondary:hover:not(:disabled) {
     background: var(--surface-hover);
-    box-shadow: var(--shadow-1);
+    border-color: var(--brand-edge);
+    box-shadow: var(--shadow-card);
   }
 }
 
@@ -265,14 +276,14 @@
 .danger {
   background: var(--danger);
   color: var(--text-on-accent);
-  box-shadow: var(--shadow-1);
+  box-shadow: var(--shadow-card);
 }
 
 @media (hover: hover) {
   .danger:hover:not(:disabled) {
     filter: brightness(0.92);
     translate: 0 -2px;
-    box-shadow: var(--shadow-2);
+    box-shadow: var(--shadow-raised);
   }
 }
 
@@ -298,7 +309,7 @@
 .brand {
   background: var(--action-gold);
   color: var(--action-gold-fg);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-raised);
 }
 
 /*
@@ -323,7 +334,7 @@
 @media (hover: hover) {
   .brand:hover:not(:disabled) {
     translate: 0 -2px;
-    box-shadow: var(--shadow-3);
+    box-shadow: var(--shadow-flotante);
   }
 
   .brand:hover:not(:disabled)::before {
@@ -347,7 +358,7 @@
   background-size: 200% 100%;
   background-position: 0% 0;
   color: var(--n-1000);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-raised);
 
   transition:
     background-position var(--dur-slow) var(--ease-out),
@@ -362,7 +373,7 @@
   .gold:hover:not(:disabled) {
     background-position: 28% 0;
     translate: 0 -2px;
-    box-shadow: var(--shadow-3);
+    box-shadow: var(--shadow-flotante);
   }
 }
 

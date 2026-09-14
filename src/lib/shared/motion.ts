@@ -6,7 +6,29 @@
  * no puede hacer: resortes interrumpibles, traspaso de velocidad y proyección
  * de momento.
  *
- * Referencia: spec §5 (Designing Fluid Interfaces, WWDC 2018).
+ * Referencia: dirección de arte v3 §3 (Designing Fluid Interfaces, WWDC 2018).
+ *
+ * LAS SIETE REGLAS, porque el preset correcto no sirve de nada aplicado mal:
+ *
+ *   1. RESPONDER EN `pointerdown`, NO EN `click`. En cuanto aparece latencia, la
+ *      sensación de manipulación directa se cae por un precipicio. En CSS puro
+ *      el equivalente es `:active`, que el navegador activa al APRETAR.
+ *   2. RESORTES, NO DURACIONES. Por defecto críticamente amortiguado
+ *      (`bounce: 0`, respuesta 0,3–0,4 s). El rebote se gana.
+ *   3. INTERRUMPIBLE SIEMPRE. Se anima desde el valor EN PANTALLA, nunca desde
+ *      el lógico, o al agarrar algo a medio camino se ve un salto. Para eso está
+ *      `leerTransformEnPantalla`.
+ *   4. ENTRADA Y SALIDA POR EL MISMO CAMINO, y ANCLADAS A SU ORIGEN: lo que nace
+ *      de una tarjeta crece desde esa tarjeta (`origenDesde`), no desde el
+ *      centro de la pantalla.
+ *   5. MATERIALIZAR, NO FUNDIR. Una superficie translúcida entra animando
+ *      desenfoque y escala A LA VEZ, para que se lea como un material que llega
+ *      y no como una opacidad que sube (`SPRING_MATERIAL`, `pasosMaterial`).
+ *   6. SOLO `transform` Y `opacity`. Única excepción: las View Transitions, que
+ *      el navegador ejecuta sobre instantáneas en el compositor.
+ *   7. `prefers-reduced-motion` NO ES «SIN FEEDBACK»: es el equivalente no
+ *      vestibular. Fundido corto en vez de viaje, sin rebote, sin paralaje.
+ *      Para eso está `transicionSegunPreferencia`.
  */
 
 /**
@@ -74,6 +96,99 @@ export const SPRING_FLICK: SpringPreset = {
   type: 'spring',
   bounce: 0.2,
   duration: 0.4,
+}
+
+/**
+ * MATERIALIZAR, NO FUNDIR (v3 §3.5).
+ *
+ * Para una superficie translúcida —la hoja, el modal, la tarjeta de acceso, el
+ * cromo con `backdrop-filter`— que entra animando DESENFOQUE Y ESCALA A LA VEZ.
+ *
+ * Por qué no vale un fundido: una opacidad que sube se lee como un fantasma
+ * apareciendo. Un material que llega tiene grosor, y el grosor se percibe en el
+ * desenfoque de lo que hay detrás. Animar los dos juntos es lo que convierte
+ * «apareció una caja» en «llegó una placa de vidrio».
+ *
+ * Sin rebote: un material pesado no rebota. Y algo más lento que `SPRING_UI`
+ * porque el desenfoque necesita recorrido para leerse; a 0,3 s no da tiempo a
+ * verlo ocurrir y vuelve a parecer un fundido.
+ *
+ * ⚠️ `filter: blur()` NO corre en el compositor y viola la regla 6 si se aplica
+ * a una superficie grande en cada fotograma. Aquí se anima el `backdrop-filter`
+ * del CROMO FIJO —una capa, ya promocionada— nunca filas de una lista.
+ */
+export const SPRING_MATERIAL: SpringPreset = {
+  type: 'spring',
+  bounce: 0,
+  duration: 0.42,
+}
+
+/**
+ * ACUSE DE PRESIÓN, en `pointerdown` (v3 §3.1).
+ *
+ * La ida y la vuelta NO son simétricas, y ahí está todo el efecto: al apretar,
+ * el elemento se encoge YA —esperar aquí es lo que hace que una interfaz se
+ * sienta muerta—; al soltar, vuelve con el resorte de su categoría.
+ *
+ * Es el gemelo en JS de `--dur-press` / `--escala-press` de `tokens.css`, que es
+ * por donde pasa el 95 % de los casos. Este preset solo hace falta cuando el
+ * acuse convive con otra animación del mismo elemento y CSS no puede componerlas.
+ */
+export const SPRING_PRESS: SpringPreset = {
+  type: 'spring',
+  bounce: 0,
+  duration: 0.12,
+}
+
+/**
+ * Transición tipo `motion` que NO es un resorte, para el equivalente no
+ * vestibular de `prefers-reduced-motion`.
+ *
+ * No es «sin animación»: quitar el feedback deja al usuario sin saber si su
+ * toque hizo algo. Es un fundido corto, sin viaje y sin sobreimpulso.
+ */
+export type TweenPreset = {
+  readonly duration: number
+  readonly ease: readonly [number, number, number, number]
+}
+
+/** `--ease-out` de `tokens.css`, en la forma que espera `motion`. */
+export const EASE_OUT = [0.16, 1, 0.3, 1] as const
+
+/** El fundido de movimiento reducido. 0,15 s: se percibe, no se sufre. */
+export const TWEEN_REDUCIDO: TweenPreset = {
+  duration: 0.15,
+  ease: EASE_OUT,
+}
+
+/**
+ * Elige entre el resorte y su equivalente no vestibular.
+ *
+ * Existe para que ningún componente vuelva a escribir
+ * `if (prefiereMovimientoReducido()) { … } else { … }` con dos llamadas a
+ * `animate` duplicadas: la rama de accesibilidad se olvida de actualizar cuando
+ * se toca la otra, y el fallo solo lo ve quien tiene la preferencia puesta.
+ *
+ * El segundo parámetro se inyecta para poder probar la función sin DOM; en
+ * producción se deja por defecto.
+ */
+export function transicionSegunPreferencia<T extends SpringPreset>(
+  preset: T,
+  reducido: boolean = prefiereMovimientoReducido(),
+): T | TweenPreset {
+  return reducido ? TWEEN_REDUCIDO : preset
+}
+
+/**
+ * Un resorte sin rebote a partir de otro.
+ *
+ * `prefers-reduced-motion` retira el sobreimpulso aunque conserve el viaje
+ * —el rebote es movimiento vestibular puro—, y hay gestos donde el viaje SÍ hay
+ * que conservarlo porque es lo que el dedo está haciendo: una hoja arrastrada no
+ * puede dejar de seguir al dedo por una preferencia.
+ */
+export function sinRebote<T extends SpringPreset>(preset: T): SpringPreset {
+  return { type: 'spring', bounce: 0, duration: preset.duration }
 }
 
 /**
@@ -158,4 +273,113 @@ export function velocidadRelativa(
 export function prefiereMovimientoReducido(): boolean {
   if (typeof window === 'undefined' || !window.matchMedia) return false
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+/** Caja en coordenadas de viewport. Compatible con `DOMRect`, sin depender de él. */
+export type Caja = {
+  readonly left: number
+  readonly top: number
+  readonly width: number
+  readonly height: number
+}
+
+/**
+ * ANCLAR AL ORIGEN (v3 §3.4).
+ *
+ * Calcula el `transform-origin` que hace que una superficie crezca DESDE el
+ * elemento que la abrió, y no desde su propio centro.
+ *
+ * Es la diferencia entre «apareció un panel» y «esta tarjeta se abrió»: sin
+ * anclaje, la relación espacial entre lo que el dedo tocó y lo que salió se
+ * pierde, y al cerrar no se sabe a dónde vuelve. Con anclaje, entrada y salida
+ * recorren el mismo camino (regla 4) sin necesidad de animar posición.
+ *
+ * Devuelve el valor listo para `style.transformOrigin`, en píxeles relativos a
+ * la esquina superior izquierda de `superficie`. Se permite que caiga FUERA de
+ * la superficie (valores negativos o mayores que su tamaño): es exactamente lo
+ * que debe ocurrir cuando el disparador está fuera del panel, y el navegador lo
+ * admite.
+ *
+ * Función pura: recibe cajas, no elementos. Se prueba sin DOM.
+ *
+ * @param origen      Caja del elemento que disparó la apertura.
+ * @param superficie  Caja de la superficie que se está animando.
+ */
+export function origenDesde(origen: Caja, superficie: Caja): string {
+  const x = origen.left + origen.width / 2 - superficie.left
+  const y = origen.top + origen.height / 2 - superficie.top
+  return `${redondear(x)}px ${redondear(y)}px`
+}
+
+/** Medio píxel de precisión: más decimales no se ven y ensucian el DOM. */
+function redondear(v: number): number {
+  return Math.round(v * 2) / 2
+}
+
+/** Lo que hay pintado ahora mismo en un elemento. */
+export type TransformEnPantalla = {
+  readonly x: number
+  readonly y: number
+  readonly escala: number
+}
+
+/** Identidad: sin desplazamiento y a tamaño natural. */
+export const TRANSFORM_IDENTIDAD: TransformEnPantalla = { x: 0, y: 0, escala: 1 }
+
+/**
+ * INTERRUMPIBLE SIEMPRE (v3 §3.3): lee la transformación que el elemento tiene
+ * EN PANTALLA en este instante, no la que el componente cree que tiene.
+ *
+ * Por qué importa y no es un refinamiento: una animación en curso se puede
+ * agarrar y revertir. Si al hacerlo se arranca desde el valor LÓGICO —el del
+ * estado de React, que ya es el destino— el elemento salta al destino y vuelve,
+ * y ese salto es visible aunque el resorte que lo sigue sea perfecto. Arrancar
+ * desde lo que hay pintado es lo que hace que un gesto se sienta continuo.
+ *
+ * Devuelve la identidad si no hay DOM, si el navegador no trae `DOMMatrix`, o
+ * si la matriz no se puede leer: nunca lanza. Un fallo aquí debe degradar a una
+ * animación normal, jamás romper la interacción.
+ */
+export function leerTransformEnPantalla(
+  elemento: Element | null | undefined,
+): TransformEnPantalla {
+  if (!elemento || typeof window === 'undefined') return TRANSFORM_IDENTIDAD
+  if (typeof window.DOMMatrixReadOnly !== 'function') return TRANSFORM_IDENTIDAD
+
+  const computado = window.getComputedStyle(elemento).transform
+  if (!computado || computado === 'none') return TRANSFORM_IDENTIDAD
+
+  try {
+    const m = new window.DOMMatrixReadOnly(computado)
+    // `a` es el factor de escala horizontal de la matriz 2D; `e`/`f`, la
+    // traslación. Basta para lo que este sistema anima: mover y escalar.
+    return { x: m.e, y: m.f, escala: m.a }
+  } catch {
+    return TRANSFORM_IDENTIDAD
+  }
+}
+
+/**
+ * MATERIALIZAR, NO FUNDIR (v3 §3.5): los fotogramas de entrada de una superficie
+ * translúcida, para pasárselos a `animate` tal cual.
+ *
+ * Desenfoque y escala ocurren A LA VEZ y por eso se declaran juntos: si el blur
+ * se resolviera antes que la escala, el ojo vería primero un cristal y luego una
+ * caja creciendo, que son dos sucesos y no uno.
+ *
+ * Con movimiento reducido devuelve solo la opacidad: el desenfoque no es
+ * vestibular, pero la escala sí, y sin escala el blur solo no dice nada.
+ *
+ * El segundo parámetro se inyecta para poder probar sin DOM.
+ */
+export function pasosMaterial(
+  desenfoque = 12,
+  reducido: boolean = prefiereMovimientoReducido(),
+): Record<string, (string | number)[]> {
+  if (reducido) return { opacity: [0, 1] }
+  return {
+    opacity: [0, 1],
+    filter: [`blur(${desenfoque}px)`, 'blur(0px)'],
+    transform: ['scale(0.96)', 'scale(1)'],
+  }
 }

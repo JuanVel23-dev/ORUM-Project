@@ -8,11 +8,16 @@
 */
 
 /*
-  La tabla es una superficie, y sobre papel blanco una superficie sin trazo no
-  existe: sube a `--border-strong`. Es el marco de la hoja.
+  La tabla es una superficie, y en la v3 una superficie la define la sombra
+  (§2.1). Se queda en `--shadow-card`: es una hoja apoyada, no algo que flote.
+
+  La regla anti-sopa de §5 empieza aquí y es la parte importante de este
+  archivo: LA SOMBRA LA LLEVA EL MARCO, NUNCA LA FILA. Una lista de cuarenta
+  filas con sombra cada una es exactamente la pantalla que esta dirección tiene
+  que evitar — y además es la que más cuesta en fotogramas.
 */
 .envoltorio {
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-card), var(--edge);
@@ -110,7 +115,9 @@
 */
 @media (min-width: 768px) and (hover: hover) {
   .fila:hover .td:first-child {
-    box-shadow: inset 2px 0 0 var(--border-strong);
+    /* Señalar enciende el oro (§2.3). Aquí sustituye a la tinta plena, y es
+       más legible sobre papel que el negro que había: 2px de filo de marca. */
+    box-shadow: inset 2px 0 0 var(--brand-edge);
   }
 }
 
@@ -273,9 +280,13 @@
     margin-bottom: var(--space-3);
     padding: var(--space-4);
 
-    /* En móvil cada fila ES una superficie independiente, así que aquí sí
-       lleva el trazo que la declara. */
-    border: 1px solid var(--border-strong);
+    /*
+      En móvil cada fila ES una superficie independiente —una tarjeta— y no una
+      fila de lista, así que aquí sí le corresponde su escalón. Es la excepción
+      que confirma la regla de arriba: lo que flota es lo que el dedo puede
+      levantar, y en móvil esto es la unidad que se toca.
+    */
+    border: 1px solid var(--border-superficie);
     border-radius: var(--radius-md);
     background: var(--surface);
     box-shadow: var(--shadow-card), var(--edge);
@@ -285,8 +296,11 @@
     contain-intrinsic-size: auto 190px;
   }
 
+  /* Repone el borde que la vista de escritorio quita a la última fila. Sigue
+     siendo transparente en reposo: lo que importa es que la caja mida igual
+     que la de sus hermanas para que alto contraste no descuadre la lista. */
   .tbody .fila:last-child {
-    border-bottom: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-superficie);
   }
 
   .td {

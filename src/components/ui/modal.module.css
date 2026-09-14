@@ -8,9 +8,12 @@
   margin: auto;
 
   padding: 0;
-  /* Superficie flotante sobre papel del mismo blanco: el trazo pleno es lo
-     que la recorta del fondo, aunque el velo ya la aísle. */
-  border: 1px solid var(--border-strong);
+  /*
+    Superficie flotante sobre papel del mismo blanco. Sin trazo (§2.1): lo que
+    la recorta del fondo es el escalón MÁS ALTO de la escala —un overlay va dos
+    por encima de todo (§2.2)— más el velo, que ya la aísla.
+  */
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg);
   background: var(--surface);
   color: var(--text);
@@ -50,12 +53,27 @@
   animation: salirFondo 180ms var(--ease-out) forwards;
 }
 
+/*
+  MATERIALIZAR, NO FUNDIR (v3 §3.5).
+
+  El velo es una superficie translúcida, así que no sube de opacidad: LLEGA. El
+  desenfoque y la opacidad se animan a la vez, y eso es lo que lo hace leerse
+  como una placa de vidrio que se interpone y no como una sombra que aparece.
+
+  Se anima `backdrop-filter`, que NO corre en el compositor y que este proyecto
+  prohíbe animar en general. La excepción se sostiene por tres razones y se
+  documenta para que nadie la copie a una lista: es UNA capa, ocurre UNA vez al
+  abrir, y el ::backdrop ya está promocionado por el navegador a la capa
+  superior. En filas de lista sigue prohibido, sin matices.
+*/
 @keyframes entrarFondo {
   from {
     opacity: 0;
+    backdrop-filter: blur(0px);
   }
   to {
     opacity: 1;
+    backdrop-filter: blur(var(--blur-sm));
   }
 }
 
@@ -73,11 +91,21 @@
 
 /*
   Con movimiento reducido el fondo sigue apareciendo y desapareciendo —una
-  transición de opacidad no es vestibular—, solo que más corta.
+  transición de opacidad no es vestibular—, solo que más corta y sin el viaje
+  del desenfoque: el velo llega ya cuajado.
 */
 @media (prefers-reduced-motion: reduce) {
   .dialog[open]::backdrop {
-    animation-duration: var(--dur-fast);
+    animation: entrarFondoPlano var(--dur-fast) var(--ease-out);
+  }
+
+  @keyframes entrarFondoPlano {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .cerrando::backdrop {

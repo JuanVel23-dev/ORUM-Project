@@ -6,11 +6,19 @@
 > porque ya pasó una vez: dos sesiones trabajaron en paralelo y construyeron dos
 > sistemas de diseño incompatibles sobre los mismos archivos.
 >
-> **Dirección de arte vigente: v2 — «papel blanco, trazo de tinta, sombra real
-> y un filo de oro»**, fijada el 13/09/2026 en
-> [`.claude/docs/DIRECCION-ARTE-claro.md`](.claude/docs/DIRECCION-ARTE-claro.md).
-> Sustituye a la anterior **solo en lo que ese documento dice**; lo que no
-> nombra sigue vigente. El detalle del porqué de cada decisión previa está en
+> **Dirección de arte vigente: v3 — «papel blanco, ninguna línea, luz y sombra
+> — y el oro aparece cuando tocas algo»**, fijada el 14/09/2026 en
+> [`.claude/docs/DIRECCION-ARTE-v3.md`](.claude/docs/DIRECCION-ARTE-v3.md).
+>
+> Es una **corrección de rumbo sobre la v2, no una vuelta atrás**: el papel
+> blanco se queda, el oro se queda, la disciplina se queda. Lo que cambia es
+> **qué separa una superficie de otra**: era el trazo de tinta, y ahora es la
+> sombra. Un trazo negro es papelería; una sombra bien hecha es una pantalla.
+>
+> La v3 sustituye a
+> [`.claude/docs/DIRECCION-ARTE-claro.md`](.claude/docs/DIRECCION-ARTE-claro.md)
+> **solo en lo que dice**; lo que no nombra sigue vigente. El detalle del porqué
+> de cada decisión previa está en
 > [`docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md`](docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md).
 >
 > Si algo de este archivo y algo de ese documento se contradicen, **gana este
@@ -61,102 +69,144 @@ Romper cualquiera de estas es un bug, no una preferencia.
 | Color como único portador de significado | Siempre punto/icono **+ texto**. |
 | `backdrop-filter` en filas de lista | Destroza el scroll en gama media. Solo en cromo fijo. |
 | Que un formulario ponga su propia tarjeta | La superficie la pone quien lo usa. |
-| Una superficie **sin trazo** | En claro el fondo y la tarjeta son el MISMO blanco: sin borde, la tarjeta no existe. |
+| Un **trazo en una superficie en reposo** | Lo que define una tarjeta, un modal, un menú, un toast o una tabla es **la sombra**. Si no se ve, sube de sombra — no le pongas borde. |
+| Poner **sombra a un chip, una píldora o una fila de lista** | Es el modo de fallo de esta dirección: todo flota y nada pesa. **Flota solo lo que el dedo puede levantar.** |
+| Quitar el borde a algo interactivo **sin dejarle foco visible** | Una sombra suave no cumple el 3:1 de WCAG 1.4.11 en el límite de un control. El foco es lo que sostiene ese criterio. |
+| Quitarle el borde en reposo a un **campo de formulario** | La regla «sin bordes» es para **superficies**, no para controles de entrada: un `<input>` vacío sobre papel blanco es invisible. |
 | Distinguir superficies con **un gris más claro** | Esa jerarquía se retiró. `--w-100..400` ya no tienen consumidor. |
-| Un **tercer grosor** de trazo | Solo hay dos: 1px por defecto, 2px en la superficie principal y en `:focus-visible`. |
-| **Más de un** elemento con trazo de 2px por pantalla | El borde deja de significar «esto es lo importante». |
+| Un **segundo grosor** de trazo | 1px, y punto. El único 2px del sistema es el de `:focus-visible`. |
 | Sombra o desplazamiento animados en **filas de lista** | Se paga en móvil de gama media, que es donde más filas hay. Ahí el feedback es **opacidad**. |
 | `:hover` **fuera de** `@media (hover: hover)` | En táctil el hover se queda pegado tras el toque. |
 
 ---
 
-## Papel, tinta y sombra
+## Papel, luz y sombra
 
-La frase entera: **papel blanco, trazo de tinta, sombra real y un filo de oro.**
-No es minimalismo suave, es una página impresa. El blanco no es un fondo, es el
-material.
+La frase entera: **papel blanco, ninguna línea, luz y sombra — y el oro aparece
+cuando tocas algo.** El blanco no es un fondo, es el material. Lo que lo separa
+en capas es la luz.
 
 ### El blanco no tiene escalones
 
 En tema claro **`--bg`, `--surface` y `--surface-sunk` son el mismo `--w-0`**.
-La separación entre superficies **no la da un gris más claro**: la dan el trazo
-y la sombra.
+La separación entre superficies **no la da un gris más claro ni un trazo**: la
+da la sombra.
 
-Consecuencia directa y buscada: **si una tarjeta no tiene borde, desaparece.**
-Cuando algo «se pierde» sobre el fondo no es un fallo del token, es que a esa
-superficie le falta declararse.
+Consecuencia directa y buscada: **si una superficie no tiene sombra,
+desaparece.** Cuando algo «se pierde» sobre el fondo no es un fallo del token:
+es que a esa superficie le falta su escalón. **La respuesta es subir de sombra,
+nunca devolverle un borde.**
 
-La única excepción que conserva tinte es `--surface-hover` (`--w-50`). **Es
-deliberadamente tenue: 1,02:1 sobre papel.** Por eso, donde el hover o la
-selección sean la ÚNICA señal —fila de menú, opción de la paleta de comandos,
-destino activo—, **hace falta un segundo canal**: el trazo que aparece
-(`box-shadow: inset`, que no mueve la caja), las acciones que se revelan, o
-`aria-current`. Nunca el color solo.
+La única excepción que conserva tinte es `--surface-hover`. **Es deliberadamente
+tenue: 1,02:1 sobre papel.** Por eso, donde el hover o la selección sean la ÚNICA
+señal —fila de menú, opción de la paleta de comandos, destino activo—, **hace
+falta un segundo canal**: el filo dorado que aparece (`box-shadow: inset`, que no
+mueve la caja), las acciones que se revelan, o `aria-current`. Nunca el color
+solo.
 
-Un hundido **se dibuja, no se tiñe**. Los dos únicos sitios donde el relleno
-sigue siendo información —y por eso existe `--surface-hueco`— son el esqueleto
-de carga y el carril de la barra de progreso: perfilar un esqueleto dibujaría
-el contorno exacto del contenido que aún no ha llegado, y un esqueleto no debe
-prometer una forma que puede no cumplirse.
+Un hundido **se hunde**: `--shadow-hundida`, que es una sombra `inset` — la misma
+luz entrando al revés. No es un escalón negativo de la escala, porque no existe
+tal cosa. Los dos únicos sitios donde el relleno sigue siendo información —y por
+eso existe `--surface-hueco`— son el esqueleto de carga y el carril de la barra
+de progreso: perfilar un esqueleto dibujaría el contorno exacto del contenido que
+aún no ha llegado, y un esqueleto no debe prometer una forma que puede no
+cumplirse.
 
-### El trazo es tinta, a tres presencias del MISMO color
+### Fuera el trazo, y cómo se retiró
+
+**Ninguna superficie lleva borde en reposo.** No se consiguió con
+`border: none`, y el matiz importa: cada superficie declara
+
+```css
+border: 1px solid var(--border-superficie); /* vale `transparent` */
+```
+
+Dos cosas se ganan con eso. La caja **mide lo mismo** con filo y sin él, así que
+devolverlo no desplaza un píxel. Y `@media (prefers-contrast: more)` los devuelve
+**cambiando un token en un solo sitio** (`globals.css`, al final), lo que alcanza
+también a los componentes que se escriban mañana. Una media query por módulo se
+rompe el día que alguien la olvida, y el fallo es invisible para quien no usa ese
+modo.
+
+Lo que queda de trazo, y para qué:
 
 | Token | Valor en claro | Ratio sobre papel | Para qué |
 |---|---|---|---|
-| `--border-strong` | `--n-1000` | 20,4:1 | **Define una superficie**: tarjetas, campos, botones con contorno, modales, hojas, menús, toasts |
-| `--border` | tinta al 55 % | 4,42:1 | Separa **dentro** de una superficie ya definida: cabeceras, pies, `Divider`, cromo fijo del shell |
-| `--border-subtle` | tinta al 22 % | 1,67:1 | Filas de lista y hairlines de hover. **No sirve para definir una superficie** |
+| `--border-superficie` | `transparent` | — | El filo de una superficie. **Transparente en reposo**; lo repone `prefers-contrast: more` |
+| `--border` | tinta al 55 % | 4,42:1 | Divisiones **dentro** de una superficie (cabeceras, pies, `Divider`), cromo fijo del shell, y el **borde en reposo de un control de entrada** |
+| `--border-subtle` | tinta al 22 % | 1,67:1 | Hairlines de fila. No define nada |
+| `--border-strong` | `--n-1000` | 20,4:1 | **Ya no se usa.** Es el valor al que alto contraste devuelve `--border-superficie` |
 
-Un borde gris y otro negro en la misma pantalla se leen como dos sistemas de
-diseño. Por eso los tres salen de `--n-1000` con `color-mix`, no de la rampa
-`--w-*`.
+**Grosor: 1px.** El 2px de «superficie principal» de la v2 desapareció con el
+trazo. El único 2px que queda en el sistema es el de `:focus-visible`.
 
-**Grosor: 1px por defecto. 2px SOLO** en la superficie principal de la pantalla
-y en `:focus-visible`.
+### Las dos excepciones, que no son negociables
 
-### La disciplina del trazo: el riesgo real
+1. **Un campo de formulario conserva borde en reposo.** `Input`, `Select`,
+   `Textarea`, `Checkbox`, `Radio` y `Button secondary`. Sin él no hay forma de
+   saber dónde se escribe. Va a `--border` (4,42:1), muy por encima del 3:1 de
+   WCAG 1.4.11 — lo que se le quitó es el aire de papelería, no la visibilidad.
+2. **Todo control que recibe foco lleva su filo en `:focus-visible`.** Una sombra
+   suave **no cumple** el 3:1 que 1.4.11 exige en el límite de un control
+   interactivo. El foco no es decorativo: es lo que sostiene el criterio ahora
+   que el borde en reposo se fue. Si quitas un borde y no dejas foco visible, has
+   roto accesibilidad.
 
-El trazo negro sobre blanco tiene un modo de fallo propio: **la pantalla se
-convierte en una cuadrícula de cajas**. Si todo lleva borde, el borde deja de
-significar «esto es una superficie».
+### La sombra hace todo el trabajo, así que tiene que poder
 
-**Una cosa a la vez lleva el trazo de 2px.** Lo pone `<Card principal>`, y hay
-exactamente una por pantalla. Si al mirar una captura no sabes cuál es el
-elemento principal, **sobran bordes — y la respuesta es quitar, no añadir oro.**
+**Dos capas por escalón**: un contacto corto y oscuro que ancla el objeto al
+fondo, y un halo amplio y muy suave que le da volumen. No es negra pura — lleva
+el mismo susurro frío que los neutrales, rgb 20/20/28; con negro neutro el
+conjunto envejece.
 
-Sabido y pendiente: una pantalla de `/admin` con tabla lleva hoy marco de
-`DataList` + botones secundarios + campos, los tres con tinta plena. Son tres
-pesos iguales compitiendo. Lo resuelve quien rediseñe la pantalla eligiendo su
-`principal` y bajando el resto; la capa de primitivas no puede decidirlo por
-ella.
+**Regla de grosor: la superficie grande se lee más gruesa.**
 
-### La sombra se ve
+| Peldaño semántico | Escalón | Quién |
+|---|---|---|
+| — | ninguno | chip, píldora, badge, fila de lista, segmento |
+| `--shadow-card` | 1 | tarjeta, tabla, fila-tarjeta en móvil |
+| `--shadow-raised` | 2 | tarjeta principal, tarjeta apuntada |
+| `--shadow-flotante` | 3 | menú, toast, popover |
+| `--shadow-overlay` | 4 | modal, hoja, paleta de comandos |
 
-La escala **desplaza, desenfoca poco y no es negra pura** (lleva el mismo
-susurro frío, rgb 20/20/28; con negro neutro el conjunto envejece). El primer
-plano de cada escalón es un `0 Npx 0` sin desenfoque: el canto duro de una hoja
-sobre otra.
+Más `--shadow-press` (el contacto sin el halo: lo que queda bajo el dedo) y
+`--shadow-hundida` (la `inset`).
 
-`--shadow-1` → `--shadow-4`, más `--shadow-0` (la mitad del escalón base, que
-es lo que queda bajo el dedo al pulsar). En semántico: `--shadow-card`,
-`--shadow-raised`, `--shadow-overlay` y `--shadow-press`.
+**Pide siempre el token semántico, nunca `--shadow-3` crudo.** Los crudos no se
+remapean por tema: `Menu` y `Toast` pedían el crudo y en tema oscuro no tenían
+sombra alguna.
 
-**La prohibición de `none` en listas de sombras importa ahora más**, porque los
-escalones 2, 3 y 4 tienen **dos entradas**. Un `none` dentro invalida la
+**La prohibición de `none` en listas de sombras importa ahora el doble**, porque
+**todos** los escalones tienen dos entradas. Un `none` dentro invalida la
 declaración ENTERA en silencio y la pantalla se queda sin una sola sombra.
 `--edge` sigue valiendo `0 0 rgba(0,0,0,0)`. Un `box-shadow: none` que sea el
 valor **completo** de la declaración sí es legal.
 
+### La disciplina de la sombra: el riesgo real
+
+La v2 fallaba por cuadrícula de cajas. **Esta falla por lo contrario: que todo
+flote y nada pese.** Si cada tarjeta, cada chip y cada píldora lleva sombra, la
+pantalla es una sopa de objetos levitando y se pierde la jerarquía igual que se
+perdía con los bordes.
+
+**La sombra es jerarquía, no decoración. Un chip no lleva sombra. Una fila de
+lista no lleva sombra. Flota lo que el dedo puede levantar.**
+
+Si al mirar una captura todo parece despegado del fondo, **sobran sombras — y la
+respuesta es quitar, no añadir oro.**
+
 ### El tema oscuro NO se retira
 
-Priorizar el claro no es eliminar el oscuro: el menú de tema existe, hay
-usuarios con la preferencia puesta y `prefers-color-scheme` sigue mandando en
-quien no ha elegido.
+Priorizar el claro no es eliminar el oscuro: el menú de tema existe, hay usuarios
+con la preferencia puesta y `prefers-color-scheme` sigue mandando en quien no ha
+elegido.
 
-**El claro es donde se diseña y se juzga.** En oscuro el trazo de tinta no
-funciona —negro sobre negro—, así que allí el borde sigue siendo el filo claro
-de siempre y la elevación la sigue dando `--edge`. Los cambios de superficie,
-trazo y sombra son **del bloque claro**.
+**El claro es donde se diseña y se juzga.** En oscuro una sombra negra sobre
+fondo negro no se ve, así que allí el material lo declara **`--edge`**, que con
+la v3 pasó de ser un chaflán superior a un **anillo completo de luz**: es el
+sustituto del borde que se retiró, y sin él un menú `--surface` sobre una tarjeta
+`--surface` se quedaba sin ningún límite. Los cuatro peldaños semánticos existen
+también en oscuro, con la misma gramática de dos capas y mucha más opacidad.
 
 **Cada cambio se audita en SU tema.** Los criterios de contraste se comprueban
 por tema, nunca una vez para los dos.
@@ -184,15 +234,42 @@ contraste de esta sección. Donde no se cumplan, sigue siendo tinta.
   a tinta**. No hay apaño de borde que sustituya la medición, y no se aprueba
   con una estimación: solo con el ratio firmado por `accessibility-auditor`.
 - El oro vive en: wordmark, indicador de ruta activa, anillo de focus,
-  hairlines, y —donde el punto anterior lo habilite— la acción principal del
-  recorrido del cliente. (La versión anterior citaba "el CTA comercial del
-  Portal Público" como única excepción: ese portal y ese CTA nunca se
-  construyeron. Se retira la referencia).
+  hairlines, **la respuesta al toque** (abajo) y —donde el punto anterior lo
+  habilite— la acción principal del recorrido del cliente. (La versión anterior
+  citaba "el CTA comercial del Portal Público" como única excepción: ese portal
+  y ese CTA nunca se construyeron. Se retira la referencia).
 - Presupuesto: **≤5% del área visible** por pantalla.
-- La dirección v2 **no habilita más oro**. Lo que cambia es que sobre papel
-  blanco con trazo negro el oro **resalta más con menos cantidad**: donde antes
-  hacía falta un filo de 2px, ahora basta 1px. Y que el fondo sea ahora más
-  blanco **empeora** `--gold-500`, no lo mejora: sigue prohibido sobre blanco.
+- `--gold-500` sobre blanco **sigue prohibido** (2,49:1). `--gold-600` sigue
+  siendo el único tono que cumple los dos criterios en claro.
+
+### El oro es la respuesta al toque
+
+Con la v3 el oro gana un papel nuevo, y es un cambio importante: deja de ser solo
+marca y pasa a ser **la señal de que el sistema te está respondiendo**.
+
+| Estado | Qué pasa |
+|---|---|
+| **Reposo** | Sin filo. Solo sombra |
+| **Señalado / enfocado / arrastrado** | Aparece un filo de 1px en `--brand-edge` y la sombra sube un escalón |
+| **Activo / seleccionado** | Filo dorado + relleno de `--surface-hover` |
+| **Favorito marcado** | El corazón se llena de **rojo**. Aquí el color SÍ es dato, y por eso no va en oro: es el único sitio donde el color dice algo que el oro no puede decir |
+
+El token es **`--filo-activo`** (`0 0 0 1px var(--brand-edge)`), y va en
+`box-shadow`, no en `border`: así no toca la caja y puede aparecer y desaparecer
+sin mover el contenido. Se compone en lista con la sombra:
+
+```css
+box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+```
+
+**El presupuesto no sube, y conviene entender por qué.** Casi todo es un filo de
+1px, y salvo el segmento seleccionado y el indicador de ruta activa **ninguno
+existe en reposo**: en una captura estática de la pantalla quieta, el oro de
+interacción es cero. Que el filo aparezca solo al señalar significa que en reposo
+el oro ocupa **menos** que en la v2, no más.
+
+**Y sigue sin codificar datos.** Dice «el sistema te está respondiendo», nunca
+«este dato es así».
 
 Contrastes verificados — no los cambies sin recalcular:
 
@@ -245,23 +322,59 @@ animate(desde, hasta, { ...SPRING_SHEET, onUpdate: (v) => colocar(v) })
 excepción, simplemente no anima. La hoja inferior se abría y se quedaba en su
 posición cerrada —asomando solo el tirador— y nada en consola lo delataba.
 
-- Feedback en `pointerdown`, no en `click`. En CSS eso es `:active`.
-- Gestos: seguimiento 1:1, resistencia elástica en los bordes, y al soltar se
-  decide por **dónde iba** el gesto (`proyectarMomento`), no por dónde se soltó.
-- Entrada y salida por el **mismo camino**.
-- `prefers-reduced-motion` ≠ sin feedback: es un equivalente no vestibular.
-  Lo que debe seguir animando (spinner, esqueleto, progreso) lleva
-  `data-motion-esencial`.
+### Las siete reglas, y ninguna es opcional
+
+El encargo pide explícitamente movimiento de estilo Apple. Traducido a reglas
+ejecutables (todas salen de *Designing Fluid Interfaces*, WWDC 2018):
+
+1. **Responder en `pointerdown`, no en `click`.** En cuanto aparece latencia, la
+   sensación de manipulación directa se cae por un precipicio. En CSS puro el
+   equivalente exacto es **`:active`**, que el navegador enciende al APRETAR.
+2. **Resortes, no duraciones.** Por defecto **críticamente amortiguado**
+   (`bounce: 0`, respuesta 0,3–0,4 s). El rebote se gana — ver abajo.
+3. **Interrumpible siempre.** Una animación en curso se puede agarrar y
+   revertir, y se anima **desde el valor en pantalla**, nunca desde el lógico.
+   Arrancar del lógico hace saltar el elemento al destino antes de volver, y ese
+   salto se ve por bueno que sea el resorte. Para eso está
+   **`leerTransformEnPantalla`**.
+4. **Entrada y salida por el mismo camino, y ancladas al origen.** Lo que nace de
+   una tarjeta crece **desde esa tarjeta** (`transform-origin`), no desde el
+   centro de la pantalla. Para calcularlo, **`origenDesde`** (función pura: recibe
+   cajas, no elementos).
+5. **Materializar, no fundir.** Una superficie translúcida entra animando
+   **desenfoque y escala a la vez**, para que se lea como un material que llega y
+   no como una opacidad que sube. `SPRING_MATERIAL` y `pasosMaterial`. Aplicado
+   hoy en el velo del modal y en la tarjeta de acceso. **Es la única excepción
+   viva a «solo transform y opacity» fuera de las View Transitions**, y se
+   sostiene porque son UNA capa, UNA vez, y ya promocionadas por su
+   `backdrop-filter` en reposo. **No se copia a nada que se repita.**
+6. **Solo `transform` y `opacity`** en todo lo demás.
+7. **`prefers-reduced-motion` ≠ sin feedback**: es el equivalente no vestibular
+   (fundido corto en vez de viaje, sin rebote, sin paralaje). Lo que debe seguir
+   animando —spinner, esqueleto, progreso— lleva `data-motion-esencial`.
+   **`transicionSegunPreferencia(preset)`** elige por ti, y existe para que nadie
+   vuelva a escribir dos llamadas a `animate` duplicadas: la rama de
+   accesibilidad se queda sin actualizar cuando se toca la otra, y el fallo solo
+   lo ve quien tiene la preferencia puesta.
+
+- Gestos: seguimiento 1:1, resistencia elástica en los bordes
+  (`amortiguarBorde`), y al soltar se decide por **dónde iba** el gesto
+  (`proyectarMomento`), no por dónde se soltó.
+
+Presets disponibles: `SPRING_UI` (por defecto), `SPRING_MOVE`, `SPRING_SHEET`,
+`SPRING_POP`, `SPRING_FLICK`, `SPRING_MATERIAL`, `SPRING_PRESS`, y `sinRebote()`
+para derivar uno amortiguado de otro.
 
 ### Presionar hunde, apuntar levanta
 
-La sombra desplazada da un vocabulario que la sombra difusa no tenía. Un botón
-que al pulsarse baja 2px y pierde la mitad de su sombra comunica **físicamente**
-lo que un cambio de color solo comunica por convención.
+Un botón que al pulsarse baja 2px y se queda solo con el contacto de su sombra
+—pierde el halo— comunica **físicamente** lo que un cambio de color solo comunica
+por convención. Y ocurre en `:active`, que es la regla 1 en CSS puro.
 
 - **Pulsación**: `translate: 0 2px` + `--shadow-press`. En `:active`.
-- **Hover**: `translate: 0 -2px` + el escalón siguiente de sombra, **solo bajo
-  `@media (hover: hover)`**. En táctil el hover se queda pegado tras el toque.
+- **Hover**: `translate: 0 -2px` + **`--filo-activo`** + el escalón siguiente de
+  sombra, **solo bajo `@media (hover: hover)`**. En táctil el hover se queda
+  pegado tras el toque.
 - Se anima `translate`, que es propiedad independiente de `transform`: así no
   pisa las transformaciones que ya use el componente y ambas se componen solas.
   Y **no se acumula con `scale`**: quien use `translate` repone `scale: 1`, que
@@ -451,9 +564,13 @@ Todo vive en `src/components/ui/`, en **kebab-case**. Antes de crear uno, mira s
 **`DataList` sustituye a toda tabla.** Es una tabla semántica que CSS convierte en
 tarjetas bajo 768px. Nunca scroll horizontal en móvil.
 
-**`<Card principal>`** es el trazo de 2px. Una por pantalla, y solo la que de
-verdad es el elemento principal. No lo pongas «porque queda bien»: si dos
-tarjetas lo llevan, ninguna lo lleva.
+**`<Card principal>`** sube un escalón de sombra (de `--shadow-card` a
+`--shadow-raised`). Una por pantalla, y solo la que de verdad es el elemento
+principal. No lo pongas «porque queda bien»: si dos tarjetas lo llevan, ninguna
+lo lleva. Ya no es un trazo de 2px — ese lenguaje se retiró con la v3.
+
+**`<Card sunk>`** se hunde con `--shadow-hundida` (una sombra `inset`) más un
+hairline. No se tiñe: `--surface-sunk` es el mismo papel que todo lo demás.
 
 **`escalonado` en `Stack` y `Grid`** da la entrada escalonada de §4.2 sin
 plumbing: 35 ms de paso y tope de 8, resuelto con `nth-child`, así que funciona

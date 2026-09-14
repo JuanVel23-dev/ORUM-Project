@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { animate } from 'motion'
 import { X } from 'lucide-react'
-import { SPRING_UI, prefiereMovimientoReducido } from '@/lib/shared/motion'
+import {
+  SPRING_UI,
+  leerTransformEnPantalla,
+  prefiereMovimientoReducido,
+  transicionSegunPreferencia,
+} from '@/lib/shared/motion'
 import { Button } from './button'
 import styles from './modal.module.css'
 
@@ -78,15 +83,24 @@ export function Modal({
     if (open) {
       if (!dialogo.open) dialogo.showModal()
 
-      if (prefiereMovimientoReducido()) {
-        animate(dialogo, { opacity: [0, 1] }, { duration: 0.15 })
-      } else {
-        animate(
-          dialogo,
-          { opacity: [0, 1], transform: ['scale(0.96)', 'scale(1)'] },
-          SPRING_UI,
-        )
-      }
+      /*
+        INTERRUMPIBLE (v3 §3.3): se arranca desde lo que HAY PINTADO, no desde
+        un 0.96 fijo. Si el diálogo se reabre mientras todavía se estaba
+        encogiendo al cerrarse, partir del valor lógico lo haría saltar a 0.96
+        antes de crecer — y ese salto se ve, por bueno que sea el resorte que
+        viene después.
+      */
+      const { escala } = leerTransformEnPantalla(dialogo)
+      const desde = escala > 0 && escala < 1 ? escala : 0.96
+
+      const reducido = prefiereMovimientoReducido()
+      animate(
+        dialogo,
+        reducido
+          ? { opacity: [0, 1] }
+          : { opacity: [0, 1], transform: [`scale(${desde})`, 'scale(1)'] },
+        transicionSegunPreferencia(SPRING_UI, reducido),
+      )
     } else if (dialogo.open) {
       cerrarConAnimacion()
     }

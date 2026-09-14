@@ -204,7 +204,9 @@
     justo lo que exige "el color nunca como único portador".
   */
   background: var(--surface-hover);
-  border: 1px solid var(--border);
+  /* Destino ACTIVO: filo dorado + relleno de `--surface-hover` — el par exacto
+     de §2.3. El relleno solo da 1,02:1 y nunca puede ir solo. */
+  border: 1px solid var(--brand-edge);
 }
 
 /* Filo dorado a la izquierda del destino activo: la única marca de marca
@@ -696,7 +698,8 @@
 */
 .masItem[data-activo='true'] {
   background: var(--surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border);
+  /* Mismo par de §2.3 que el indicador de la barra lateral, en la hoja "Más". */
+  box-shadow: inset 0 0 0 1px var(--brand-edge);
 }
 
 .masItemIcono {

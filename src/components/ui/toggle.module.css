@@ -56,7 +56,9 @@
   width: 44px;
   height: 26px;
   border-radius: var(--radius-full);
-  background: var(--border-strong);
+  /* La pista apagada es un MANDO, no una superficie: tiene que verse. Tinta al
+     55 % (4,42:1); la plena la convertía en una barra negra de papelería. */
+  background: var(--border);
 
   transition: background-color var(--dur-base) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
@@ -137,13 +139,14 @@
   width: 20px;
   height: 20px;
   /*
-    1px, no 1.5. §2.2 admite exactamente DOS grosores —1px por defecto, 2px en
-    la superficie principal y en el foco— y un tercero convierte el trazo en
-    ruido. El medio píxel además se redondeaba distinto según la densidad de
-    pantalla, así que la casilla se veía más gruesa en unos equipos que en
-    otros. Con tinta plena, 1px se lee perfectamente a 20px de lado.
+    1px, no 1.5. El sistema admite exactamente 1px de trazo, y 2px SOLO en
+    `:focus-visible`; un tercer grosor convierte el trazo en ruido. El medio
+    píxel además se redondeaba distinto según la densidad de pantalla, así que
+    la casilla se veía más gruesa en unos equipos que en otros.
   */
-  border: 1px solid var(--border-strong);
+  /* Control de entrada: conserva su borde en reposo (§2.5), al 55 % como el
+     resto de campos. */
+  border: 1px solid var(--border);
   background: var(--surface);
 
   transition:
@@ -162,7 +165,8 @@
 }
 
 .fila:hover .caja {
-  border-color: var(--text-3);
+  /* Señalar enciende el oro (§2.3), igual que en Input. */
+  border-color: var(--brand-edge);
 }
 
 .fila:active .caja {

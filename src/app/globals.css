@@ -22,17 +22,16 @@
 
 :root {
   /* --------------------------------------------------------------------------
-     PAPEL  ·  dirección de arte v2, §2.1
+     PAPEL  ·  dirección de arte v3, §2.1
 
-     El blanco deja de tener escalones. Antes la jerarquía en claro la daban
-     tres grises (fondo gris muy claro, tarjeta blanca, hundido gris); ahora
-     fondo, tarjeta y hundido son EL MISMO papel, y lo que separa una
-     superficie de otra es el trazo de tinta (§2.2) y la sombra (§2.3).
+     El blanco no tiene escalones: fondo, tarjeta y hundido son EL MISMO papel.
+     Eso no cambia. Lo que cambia con la v3 es QUÉ separa una superficie de
+     otra: era el trazo de tinta, y ahora es LA SOMBRA, sola.
 
-     Consecuencia directa y buscada: una tarjeta sin borde DESAPARECE. Toda
-     superficie tiene que declararse. Si al añadir una pantalla algo se
-     "pierde" sobre el fondo, no es un bug del token: es que a esa superficie
-     le falta su trazo.
+     Consecuencia directa y buscada: una superficie sin sombra DESAPARECE. Si
+     al añadir una pantalla algo se "pierde" sobre el fondo, no es un bug del
+     token: es que a esa superficie le falta su escalón de sombra. Y la
+     respuesta correcta es subir de sombra, NUNCA devolverle un borde.
 
      `--surface-hover` es la ÚNICA excepción que conserva tinte: el hover
      necesita cambiar de relleno sin mover nada.
@@ -68,25 +67,69 @@
   --surface-hueco: color-mix(in srgb, var(--n-1000) 7%, transparent);
 
   /* --------------------------------------------------------------------------
-     TINTA  ·  §2.2
+     TINTA  ·  dirección de arte v3, §2.1
 
-     Los tres bordes son EL MISMO color a distinta presencia. Un borde gris y
-     otro negro en la misma pantalla se leen como dos sistemas de diseño.
+     LO QUE CAMBIA EN LA v3: una SUPERFICIE ya no lleva borde en reposo. Lo que
+     la definía —el trazo de tinta— pasa a ser la sombra. Un trazo negro es
+     papelería; una sombra bien hecha es una pantalla.
 
-       --border-strong   tinta plena ..... define una superficie (21,0:1)
-       --border          tinta al 55 % ... separa dentro de una superficie ya
-                                           definida (4,42:1 sobre papel)
-       --border-subtle   tinta al 22 % ... hairline de fila (1,67:1 — el
-                                           anterior, #e9e9ed, daba 1,17:1)
+     Los tres bordes siguen siendo EL MISMO color a distinta presencia, porque
+     un borde gris y otro negro en la misma pantalla se leen como dos sistemas
+     de diseño. Lo que cambia es DÓNDE se usa cada uno:
 
-     GROSOR: 1px por defecto. 2px SOLO en la superficie principal de la
-     pantalla y en :focus-visible. Tres grosores convierten el trazo en ruido,
-     y si todo lleva borde el borde deja de significar "esto es una
-     superficie" (§6).
+       --border-strong   tinta plena ..... YA NO SE USA EN SUPERFICIES. Queda
+                                           como valor de reserva del modo de
+                                           alto contraste (21,0:1)
+       --border          tinta al 55 % ... divisiones internas, cromo fijo y el
+                                           borde en reposo de un CONTROL DE
+                                           ENTRADA (4,42:1 sobre papel)
+       --border-subtle   tinta al 22 % ... hairline de fila (1,67:1)
+
+     GROSOR: 1px. Punto. El 2px que la v2 reservaba «para la superficie
+     principal» desaparece con el trazo de superficie; el único 2px que queda
+     es el de `:focus-visible`.
      -------------------------------------------------------------------------- */
   --border: color-mix(in srgb, var(--n-1000) 55%, transparent);
   --border-subtle: color-mix(in srgb, var(--n-1000) 22%, transparent);
   --border-strong: var(--n-1000);
+
+  /*
+    EL FILO DE UNA SUPERFICIE, y el mecanismo entero de §2.5.
+
+    Vale `transparent` en reposo: la tarjeta, el modal, el menú, el toast y la
+    tabla escriben `border: 1px solid var(--border-superficie)` y no pintan
+    nada. Se declara el borde de todas formas —en vez de `border: none`— por
+    dos razones que importan:
+
+      1. La caja mide lo mismo con filo y sin él, así que devolverlo no
+         desplaza ni un píxel de maquetación.
+      2. `prefers-contrast: more` lo repone cambiando UN token, al final de
+         este archivo, y alcanza también a lo que se escriba mañana. Sin esto
+         habría que recordar añadir una media query por módulo, y el día que
+         alguien la olvide el fallo es invisible para quien no usa el modo.
+
+    NO es para controles de entrada: un `<input>` conserva su borde real en
+    reposo (§2.5) porque sin él un campo vacío sobre papel blanco es invisible.
+  */
+  --border-superficie: transparent;
+
+  /*
+    EL ORO COMO RESPUESTA AL TOQUE  ·  §2.3
+
+    En reposo no hay filo. Al SEÑALAR, ENFOCAR o ARRASTRAR aparece este —1px,
+    `--brand-edge`— y la sombra sube un escalón. Va en `box-shadow` y no en
+    `border` por lo mismo de arriba: no toca la caja, así que puede aparecer y
+    desaparecer sin mover el contenido.
+
+    Se compone en lista con las sombras:
+        box-shadow: var(--filo-activo), var(--shadow-2), var(--edge);
+
+    El presupuesto del oro NO sube (≤5 % del área visible). Un filo de 1px que
+    además solo existe mientras el puntero está encima ocupa MENOS que el oro
+    en reposo de la v2, no más. Y sigue sin codificar datos: dice «el sistema
+    te está respondiendo», nunca «este dato es así».
+  */
+  --filo-activo: 0 0 0 1px var(--brand-edge);
 
   --text: #141418;
   --text-2: #5b5b66; /* 6.71:1 sobre blanco */
@@ -170,16 +213,29 @@
   --info-bg: rgba(29, 95, 209, 0.08);
   --gold-bg: rgba(125, 103, 51, 0.1);
 
+  /*
+    LOS CUATRO PELDAÑOS SEMÁNTICOS. La regla de §2.2 —superficie grande, sombra
+    más gruesa— se lee aquí de arriba abajo, y es el único sitio donde se
+    decide: un componente pide `--shadow-flotante`, no `--shadow-3`.
+
+      --shadow-card      tarjeta, tabla ................ escalón 1
+      --shadow-raised    tarjeta principal, apuntada ... escalón 2
+      --shadow-flotante  menú, toast, popover .......... escalón 3
+      --shadow-overlay   modal, hoja, paleta ........... escalón 4
+
+    Lo que NO está en esta lista no lleva sombra, y es deliberado: chip,
+    píldora, badge, fila de lista, segmento. Ver el aviso de tokens.css §6.
+  */
   --shadow-card: var(--shadow-1);
   --shadow-raised: var(--shadow-2);
+  --shadow-flotante: var(--shadow-3);
   --shadow-overlay: var(--shadow-4);
 
   /*
-    Lo que queda bajo el dedo al PULSAR: la mitad del escalón base (§4.3).
-    La sombra desplazada da un vocabulario que la difusa no tenía —presionar
-    hunde—: el elemento baja 2px y pierde la mitad de su sombra, que es lo que
-    físicamente ocurriría. En oscuro no hay sombra que perder, así que este
-    token vale transparente y el acuse allí lo da el `scale` global.
+    Lo que queda bajo el dedo al PULSAR: el contacto sin el halo. El objeto no
+    desaparece, baja hasta tocar el fondo — que es lo que físicamente
+    ocurriría. En oscuro no hay sombra que perder, así que allí este token vale
+    transparente y el acuse lo da el `scale` global.
   */
   --shadow-press: var(--shadow-0);
 
@@ -269,16 +325,26 @@
   --gold-bg: rgba(191, 160, 99, 0.12);
 
   /*
-    En oscuro una sombra negra sobre fondo negro no se ve: la elevación la da
-    el filo de luz superior. Sombra TRANSPARENTE, no `none`, por la misma
-    razón que arriba: `none` dentro de una lista la invalida entera y se
-    perdía también el filo.
+    En oscuro una sombra negra sobre fondo negro no se ve, así que el material
+    lo declara el ANILLO de `--edge` (ver `--edge-light` en tokens.css) y la
+    sombra solo aporta la separación de las capas que flotan de verdad.
+
+    Se conserva la gramática de DOS CAPAS de la v3 —contacto + halo— porque es
+    lo que da volumen; lo que cambia es la opacidad, que aquí tiene que ser
+    mucho mayor para leerse sobre negro.
+
+    `--shadow-card` vale TRANSPARENTE y no `none`: estos tokens se combinan en
+    listas separadas por comas, y un `none` dentro de una lista la invalida
+    entera en silencio. Se perdía también el filo.
   */
   --shadow-card: 0 0 rgba(0, 0, 0, 0);
-  --shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.45);
-  --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.4);
+  --shadow-flotante: 0 4px 10px rgba(0, 0, 0, 0.55), 0 16px 36px rgba(0, 0, 0, 0.45);
+  --shadow-overlay: 0 8px 20px rgba(0, 0, 0, 0.6), 0 32px 72px rgba(0, 0, 0, 0.5);
   /* No hay sombra que perder al pulsar: aquí el acuse lo da el `scale`. */
   --shadow-press: 0 0 rgba(0, 0, 0, 0);
+  /* Un hundido en oscuro se dibuja al revés: sombra hacia dentro, más densa. */
+  --shadow-hundida: inset 0 1px 3px rgba(0, 0, 0, 0.5);
   --edge: var(--edge-light);
 
   --scrim: rgba(0, 0, 0, 0.6);
@@ -338,9 +404,12 @@
     --gold-bg: rgba(191, 160, 99, 0.12);
 
     --shadow-card: 0 0 rgba(0, 0, 0, 0);
-    --shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.45);
-    --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.6);
+    --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.4);
+    --shadow-flotante: 0 4px 10px rgba(0, 0, 0, 0.55),
+      0 16px 36px rgba(0, 0, 0, 0.45);
+    --shadow-overlay: 0 8px 20px rgba(0, 0, 0, 0.6), 0 32px 72px rgba(0, 0, 0, 0.5);
     --shadow-press: 0 0 rgba(0, 0, 0, 0);
+    --shadow-hundida: inset 0 1px 3px rgba(0, 0, 0, 0.5);
     --edge: var(--edge-light);
 
     --scrim: rgba(0, 0, 0, 0.6);
@@ -788,9 +857,27 @@ textarea:active,
   }
 }
 
+/*
+  ALTO CONTRASTE  ·  §2.5 — quitar el trazo tiene un coste y aquí se paga.
+
+  Una sombra suave no es un límite para todo el mundo: con poca visión, con
+  brillo alto o en una pantalla de contraste bajo, una tarjeta definida solo
+  por luz puede no existir. `prefers-contrast: more` es el mecanismo que la
+  plataforma da exactamente para este caso, y la v3 lo usa en vez de ignorarlo.
+
+  Devolver el filo cuesta UN token porque cada superficie ya declara
+  `border: 1px solid var(--border-superficie)` con la caja hecha (ver el bloque
+  de TINTA, arriba): aquí solo se le pone color. Cero desplazamiento de
+  maquetación, y alcanza también a los componentes que se escriban mañana.
+
+  No toca las sombras: se quedan, y ahora conviven con el trazo. Es el usuario
+  quien ha pedido más señal, no menos.
+*/
 @media (prefers-contrast: more) {
   :root {
+    --border-superficie: var(--border-strong);
     --border: var(--border-strong);
+    --border-subtle: var(--border);
     --text-2: var(--text);
     --material: var(--surface);
   }

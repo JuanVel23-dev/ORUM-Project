@@ -50,11 +50,18 @@
   height: var(--alto-hoja, min(92dvh, 920px));
 
   background: var(--surface);
-  /* La hoja y la página son el mismo papel: sin trazo pleno, al llegar arriba
-     del todo no se vería dónde termina una y empieza la otra. */
-  border-top: 1px solid var(--border-strong);
+  /*
+    La hoja y la página son el mismo papel, y la hoja ya no lleva trazo (§2.1):
+    lo que dice dónde termina una y empieza la otra es el escalón de overlay,
+    que aquí se proyecta hacia ARRIBA sobre el contenido de detrás.
+
+    `--edge` no sobra: en tema oscuro no hay sombra que ver y el anillo de luz
+    es lo único que declara el material. Faltaba, y la hoja se fundía con el
+    fondo en oscuro incluso antes de esta tanda.
+  */
+  border-top: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  box-shadow: var(--shadow-overlay);
+  box-shadow: var(--shadow-overlay), var(--edge);
 
   padding-bottom: env(safe-area-inset-bottom, 0px);
   will-change: transform;
@@ -72,7 +79,7 @@
     height: auto;
     max-height: min(88dvh, 780px);
     bottom: var(--space-6);
-    border: 1px solid var(--border-strong);
+    border: 1px solid var(--border-superficie);
   }
 }
 
@@ -97,7 +104,9 @@
   height: 5px;
   margin: 0 auto;
   border-radius: var(--radius-full);
-  background: var(--border-strong);
+  /* El tirador NO es una superficie: es un mando, y tiene que verse. Tinta al
+     55 % (4,42:1) — la plena lo convertía en una barra negra de papelería. */
+  background: var(--border);
 
   /*
     Se ensancha al agarrarlo: acusa recibo del gesto antes de que la hoja se
@@ -118,9 +127,14 @@
     background-color var(--dur-fast) var(--ease-out);
 }
 
+/*
+  ARRASTRADO es uno de los tres estados que encienden el oro (§2.3). Aquí es
+  además el único canal disponible: la hoja entera se mueve con el dedo, así
+  que no hay sombra que subir sin que compita con el gesto.
+*/
 .agarre:active .tirador {
   scale: 1.333 1;
-  background: var(--text-3);
+  background: var(--brand-edge);
 }
 
 /*

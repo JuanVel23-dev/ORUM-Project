@@ -13,12 +13,19 @@
   min-width: 200px;
   max-width: min(320px, calc(100vw - var(--space-6)));
 
-  /* Superficie flotante sobre papel del mismo blanco: sin trazo pleno el
-     menú se fundiría con lo que hay debajo y solo lo delataría la sombra. */
-  border: 1px solid var(--border-strong);
+  /*
+    Superficie flotante, y lo que la delata es la sombra: exactamente lo que
+    la v3 pide (§2.1). `--shadow-flotante` es el escalón de menú/toast/popover,
+    por encima de una tarjeta y por debajo de un modal (§2.2).
+
+    Se pide el token SEMÁNTICO y no `--shadow-3` a pelo, porque en tema oscuro
+    el escalón se remapea a una sombra mucho más densa: con el crudo, el menú
+    se quedaba sin nada que lo separase de la tarjeta de debajo.
+  */
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
   background: var(--surface);
-  box-shadow: var(--shadow-3), var(--edge);
+  box-shadow: var(--shadow-flotante), var(--edge);
 
   overflow: visible;
 }
@@ -126,10 +133,18 @@
   canal —una sombra interior de 1px, que no altera la caja ni desplaza el
   texto— y el icono, que ya se movía un píxel en la dirección de la acción.
 */
+/*
+  Señalar enciende el oro (§2.3). El filo va `inset` —y no en `--filo-activo`,
+  que es exterior— porque las filas ocupan casi todo el ancho de un panel con
+  `--space-2` de relleno: un anillo por fuera se comería el hueco de la fila
+  vecina. Es el mismo motivo por el que el foco también se dibuja por dentro.
+
+  Y sigue habiendo DOS canales: el relleno solo da 1,02:1 sobre papel.
+*/
 .item:hover:not(:disabled),
 .item:focus-visible {
   background: var(--surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border-subtle);
+  box-shadow: inset 0 0 0 1px var(--brand-edge);
 }
 
 /* El icono se desplaza un pelo en la dirección de la acción al apuntar. */

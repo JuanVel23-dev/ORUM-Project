@@ -7,8 +7,9 @@
      deja sitio para que la lista crezca hacia abajo. */
   margin: min(12dvh, 96px) auto auto;
 
-  /* Superficie flotante sobre papel del mismo blanco: trazo pleno. */
-  border: 1px solid var(--border-strong);
+  /* Superficie flotante sobre papel del mismo blanco. La define el escalón de
+     overlay, no un trazo (§2.1 / §2.2). */
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow-overlay), var(--edge);
@@ -147,9 +148,18 @@
   — que es la única forma de usar esta paleta. El trazo lleva el peso; el
   relleno solo acompaña.
 */
+/*
+  SELECCIONADA es uno de los estados que encienden el oro (§2.3): filo dorado
+  más relleno de `--surface-hover`. Y siguen haciendo falta los dos canales,
+  porque el relleno solo da 1,02:1 sobre papel y quien navega con flechas se
+  quedaría sin saber dónde está — que es la única forma de usar esta paleta.
+
+  El filo va `inset`: un anillo exterior en una fila de ancho casi completo se
+  saldría del relleno del panel.
+*/
 .opcion[data-seleccionada='true'] {
   background: var(--surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border);
+  box-shadow: inset 0 0 0 1px var(--brand-edge);
 }
 
 .opcionIcono {

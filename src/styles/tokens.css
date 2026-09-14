@@ -40,11 +40,15 @@
      sobrevive, en el hover.
 
      Los cuatro grises restantes NO tienen consumidor: los escalones de
-     superficie desaparecieron (§2.1) y los bordes pasaron a ser tinta a tres
-     presencias (§2.2). Se conservan como rampa —son la paleta cruda, no el
-     mapeo— pero si escribes `var(--w-300)` en un componente estás volviendo a
-     la dirección anterior. El borde se pide con --border / --border-subtle /
-     --border-strong, siempre. */
+     superficie desaparecieron (§2.1). Se conservan como rampa —son la paleta
+     cruda, no el mapeo— pero si escribes `var(--w-300)` en un componente estás
+     volviendo a la dirección anterior.
+
+     Tras la v3 una SUPERFICIE ya no se pide con borde en absoluto: la define
+     la sombra. Lo que queda de trazo son divisiones internas (--border),
+     hairlines (--border-subtle) y el borde en reposo de un CONTROL DE ENTRADA
+     (§2.5). `--border-superficie` existe solo para que `prefers-contrast: more`
+     pueda devolver el filo; en reposo vale `transparent`. */
   --w-0: #ffffff; /* PAPEL: fondo, tarjeta y hundido en claro */
   --w-50: #fbfbfc; /* sin consumidor: --surface-hover pasó a tinta diluida */
   --w-100: #f4f4f6; /* sin consumidor desde la dirección v2 */
@@ -164,38 +168,67 @@
   --radius-full: 999px; /* píldoras, avatares */
 
   /* ==========================================================================
-     6. SOMBRAS  ·  desplazada, no difusa  (dirección de arte v2, §2.3)
+     6. SOMBRAS  ·  luz, no trazo  (dirección de arte v3, §2.2)
      --------------------------------------------------------------------------
-     La escala anterior era sombra de interfaz translúcida: mucho desenfoque,
-     poca opacidad y CERO desplazamiento. Sobre papel blanco con trazo de tinta
-     no se veía nada, así que la jerarquía la acababa cargando el gris del
-     fondo — que es justo lo que la dirección v2 retira.
+     La escala de la v2 DESPLAZABA y casi no desenfocaba (`0 Npx 0`): el canto
+     duro de una hoja sobre otra. Era coherente con el trazo de tinta, y es
+     exactamente el lenguaje de papel del que la v3 sale. Ahora la sombra es
+     LO ÚNICO que define una superficie, así que tiene que poder sola.
 
-     La escala nueva DESPLAZA (el primer plano de cada escalón es un `0 Npx 0`,
-     sin desenfoque: el canto duro de una hoja sobre otra) y desenfoca poco en
-     el segundo plano, que solo da el asiento.
+     DOS CAPAS POR ESCALÓN, y cada una hace un trabajo distinto:
+       1ª  contacto corto y oscuro .... ancla el objeto al fondo
+       2ª  halo amplio y muy suave .... le da volumen
 
-     No es negro puro: lleva el mismo susurro frío de los neutrales (matiz
-     ~240°, rgb 20/20/28). Con negro neutro el conjunto envejece.
+     Sigue en rgb 20/20/28 —el susurro frío de los neutrales (matiz ~240°)—
+     porque con negro puro el conjunto envejece.
 
-     ⚠️ Cada escalón a partir del 2 tiene DOS entradas. Un `none` dentro de una
-     lista de sombras invalida la declaración ENTERA en silencio: para "sin
-     sombra" se usa una sombra transparente (`--edge` vale 0 0 rgba(0,0,0,0)).
+     REGLA DE GROSOR (§2.2): la superficie grande se lee más gruesa.
+       chip / píldora / fila de lista .... SIN SOMBRA (ver el aviso de abajo)
+       tarjeta, tabla ................... --shadow-1 / --shadow-2
+       menú, toast, popover ............. --shadow-3
+       modal, hoja, paleta .............. --shadow-4
 
-     Valores para tema claro. En oscuro las sombras no funcionan (negro sobre
-     negro); globals.css las sustituye por superficie + filo de luz.
+     ⛔ EL RIESGO DE ESTA DIRECCIÓN (§5): que todo flote y nada pese. La sombra
+     es JERARQUÍA, NO DECORACIÓN. Flota solo lo que el dedo puede levantar. Un
+     chip no lleva sombra. Una fila de lista no lleva sombra. Si al mirar una
+     captura todo parece levitar, sobran sombras — y la respuesta es quitar.
+
+     ⚠️ `none` DENTRO de una lista de sombras invalida la declaración ENTERA en
+     silencio, y ahora CADA escalón tiene dos entradas, así que el riesgo es
+     doble: un `none` mal puesto deja la pantalla sin una sola sombra y nada
+     avisa. Para "sin sombra" se usa una sombra transparente: `--edge` vale
+     `0 0 rgba(0,0,0,0)`. `box-shadow: none` solo es legal cuando es el valor
+     COMPLETO de la declaración, sin comas.
+
+     Valores para tema claro. En oscuro una sombra negra sobre fondo negro no
+     se ve: globals.css las sustituye por sombras más densas + el filo de luz.
      ======================================================================== */
 
-  /* Lo que queda bajo el dedo al pulsar: la mitad del escalón base. §4.3. */
-  --shadow-0: 0 1px 0 rgba(20, 20, 28, 0.1);
+  /* Lo que queda bajo el dedo al PULSAR: solo el contacto, sin halo. El objeto
+     no ha desaparecido, ha bajado hasta tocar el fondo. §3. */
+  --shadow-0: 0 1px 2px rgba(20, 20, 28, 0.05);
 
-  --shadow-1: 0 2px 0 rgba(20, 20, 28, 0.1);
-  --shadow-2: 0 3px 0 rgba(20, 20, 28, 0.14), 0 6px 16px rgba(20, 20, 28, 0.08);
-  --shadow-3: 0 6px 0 rgba(20, 20, 28, 0.16), 0 12px 28px rgba(20, 20, 28, 0.1);
-  --shadow-4: 0 10px 0 rgba(20, 20, 28, 0.18), 0 24px 56px rgba(20, 20, 28, 0.14);
+  --shadow-1: 0 1px 2px rgba(20, 20, 28, 0.06), 0 2px 8px rgba(20, 20, 28, 0.05);
+  --shadow-2: 0 2px 4px rgba(20, 20, 28, 0.07), 0 8px 20px rgba(20, 20, 28, 0.07);
+  --shadow-3: 0 4px 8px rgba(20, 20, 28, 0.08), 0 16px 40px rgba(20, 20, 28, 0.1);
+  --shadow-4: 0 8px 16px rgba(20, 20, 28, 0.1), 0 32px 72px rgba(20, 20, 28, 0.14);
 
-  /* Filo de luz superior: cómo se comunica la elevación en tema oscuro. */
-  --edge-light: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  /* Un HUNDIDO no es un escalón negativo de la escala: es la misma luz entrando
+     al revés. Va `inset`, y por eso no puede salir de --shadow-1 invertido. */
+  --shadow-hundida: inset 0 1px 3px rgba(20, 20, 28, 0.07);
+
+  /*
+     Filo de luz: cómo se comunica el material en tema OSCURO, donde la sombra
+     no puede.
+
+     Deja de ser solo el chaflán superior y pasa a ser un ANILLO completo, y el
+     motivo es la v3: al quitar `--border-strong` de las superficies, en oscuro
+     un menú `--surface` sobre una tarjeta `--surface` se quedaba sin ningún
+     límite. El anillo es el sustituto —material, no tinta— y va `inset`, así
+     que no mueve ni un píxel la caja.
+  */
+  --edge-light: inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
   /* ==========================================================================
      7. TIPOGRAFÍA
@@ -296,11 +329,18 @@
   --t-overline-weight: 600;
 
   /* ==========================================================================
-     8. MOVIMIENTO
+     8. MOVIMIENTO  ·  dirección de arte v3, §3
      --------------------------------------------------------------------------
      Estas curvas son para lo NO gestual (hover, color, aparición simple).
-     Todo lo que el usuario pueda tocar usa resortes desde src/lib/motion.ts:
-     los resortes son interrumpibles y conocen la velocidad; las curvas no.
+     Todo lo que el usuario pueda tocar usa RESORTES desde
+     src/lib/shared/motion.ts: los resortes son interrumpibles y conocen la
+     velocidad; las curvas no. Por defecto críticamente amortiguado
+     (`bounce: 0`, respuesta 0,3–0,4 s) — el rebote se gana.
+
+     Y el feedback va en `pointerdown`, no en `click`. En CSS puro el
+     equivalente exacto es `:active`, que el navegador enciende al APRETAR y no
+     al soltar. En cuanto aparece latencia, la sensación de manipulación directa
+     se cae por un precipicio.
      ======================================================================== */
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* deceleración fuerte — el sello Apple */

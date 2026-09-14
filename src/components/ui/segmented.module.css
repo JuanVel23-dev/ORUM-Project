@@ -26,12 +26,16 @@
   border-radius: var(--radio-interno);
   background: var(--surface);
   /*
-    Carril y pastilla son el MISMO papel, así que lo que dice cuál está
-    seleccionada es el trazo pleno más la sombra desplazada: la pastilla es
-    una ficha apoyada sobre el carril, no una zona más clara.
+    Carril y pastilla son el MISMO papel. Lo que dice cuál está seleccionada es
+    el par de §2.3 para el estado ACTIVO —filo dorado de 1px + sombra—: la
+    pastilla es una ficha apoyada sobre el carril, no una zona más clara.
+
+    Se queda en el escalón 1 y no sube: una pastilla de control es pequeña, y
+    §2.2 dice que la superficie grande es la que se lee gruesa. Con más sombra
+    esto sería un botón levitando dentro de otro control.
   */
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow-1), var(--edge);
+  border: 1px solid var(--border-superficie);
+  box-shadow: var(--filo-activo), var(--shadow-card), var(--edge);
 
   transform: translateX(calc(var(--indice, 0) * 100%));
   transition:
