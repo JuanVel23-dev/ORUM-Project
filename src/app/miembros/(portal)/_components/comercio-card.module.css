@@ -16,6 +16,46 @@
    Se declaran aquí las dos, que es donde el TSX ya las buscaba.
    ========================================================================== */
 
+/* ==========================================================================
+   EL MARCO  ·  lo que permite que el corazón NO esté dentro del enlace
+   --------------------------------------------------------------------------
+   Un `<button>` dentro de un `<a>` es marcado inválido, y parchear el evento
+   con `preventDefault` falla mientras el JavaScript no ha hidratado: el toque
+   navega y el socio acaba en otra pantalla. Así que el corazón es HERMANO del
+   enlace y se coloca encima por posición absoluta. Pulsarlo no navega porque el
+   evento nunca llega al enlace.
+
+   El marco pasa a ser el hijo de la rejilla y del carril, así que HEREDA el
+   `height: 100%` que sostenía la alineación de la divisoria inferior entre
+   tarjetas. Sin esto, `margin-top: auto` de `.promociones` deja de tener contra
+   qué empujar y cada tarjeta corta a una altura distinta — el defecto que esta
+   hoja ya arregló una vez.
+   ========================================================================== */
+
+.marco {
+  position: relative;
+  height: 100%;
+}
+
+/*
+  EL CORAZÓN, EN LA ESQUINA.
+
+  `z-index` sobre el enlace: es lo que hace que el área táctil ampliada de 44px
+  —el `::after` del botón, que se solapa con la tarjeta— reciba el toque en vez
+  de la tarjeta. Si alguien lo quita, el corazón parecerá roto por los bordes y
+  nada fallará de forma visible.
+
+  La posición sale del relleno de `Card` (`--space-4` en `padding` normal) para
+  que quede ópticamente alineado con la placa del logotipo, no flotando sobre la
+  esquina redondeada.
+*/
+.corazon {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 1;
+}
+
 .enlace {
   display: block;
   height: 100%;
@@ -94,6 +134,15 @@
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
+
+  /*
+    HUECO PARA EL CORAZÓN, que vive en la esquina superior derecha del marco.
+
+    Sin esto, un nombre largo pasa por DEBAJO del corazón: trunca con elipsis y
+    no desborda, pero las últimas letras quedan tapadas y el socio lee
+    "Restaurante La Esq…" con un corazón encima de la elipsis.
+  */
+  padding-inline-end: var(--space-7);
 }
 
 .titulos {
@@ -219,6 +268,10 @@
   align-items: flex-start;
   gap: var(--space-2);
   height: 100%;
+
+  /* Mismo hueco para el corazón, un escalón menor: esta tarjeta mide 200px y
+     `--space-7` se comería una cuarta parte del ancho del nombre. */
+  padding-inline-end: var(--space-6);
 }
 
 .compacta .nombre {

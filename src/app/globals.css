@@ -225,6 +225,14 @@
 
     Lo que NO está en esta lista no lleva sombra, y es deliberado: chip,
     píldora, badge, fila de lista, segmento. Ver el aviso de tokens.css §6.
+
+    W1 · 14/09/2026: el MAPEO no cambió; cambió la ESCALA que hay debajo. Las
+    sombras de la primera v3 no despegaban la tarjeta del papel, que es la
+    premisa entera de esta dirección, y los cuatro escalones subieron —sobre
+    todo de extensión, y bastante menos de opacidad, para que siga siendo luz y
+    no gris sucio—. Valores y razonamiento en `tokens.css` §6. Si una pantalla
+    se ve ahora demasiado cargada, la respuesta sigue siendo la de §5: QUITAR
+    sombras a lo que no deba flotar, nunca bajar la escala.
   */
   --shadow-card: var(--shadow-1);
   --shadow-raised: var(--shadow-2);
@@ -656,7 +664,17 @@ summary,
 [role='tab'],
 [role='switch'],
 a[href] {
-  /* Vuelta elástica. La ida se acorta abajo, en :active. */
+  /*
+    Vuelta elástica. La ida se acorta abajo, en :active.
+
+    W1 · 14/09/2026: esta es la línea por la que pasa el acuse de TODA la
+    interfaz, así que es también donde más se notaba la sequedad. No cambia el
+    mecanismo, cambian los dos tokens que consume: `--dur-rebote` baja de 440 a
+    320 ms —dentro de la banda 0,3–0,4 s que la v3 §3.2 fija para un resorte
+    crítico— y `--ease-rebote` recorta su sobreimpulso de ~+12 % a ~+4 %. El
+    porqué completo está en `tokens.css` §8. Lo que sale de aquí ahora se posa;
+    antes rebotaba.
+  */
   transition: scale var(--dur-rebote) var(--ease-rebote);
 }
 

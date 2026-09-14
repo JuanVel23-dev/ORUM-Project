@@ -1,0 +1,58 @@
+/* ==========================================================================
+   LA INVITACIÓN A MARCAR EL PRIMER FAVORITO
+   --------------------------------------------------------------------------
+   Es una franja, no una tarjeta. NO lleva sombra: «la sombra es jerarquía, no
+   decoración» —dirección v3 §5— y lo que flota es lo que el dedo puede
+   levantar. Esto no se toca: se lee.
+
+   Tampoco lleva borde en reposo, que es la regla nueva de la v3. Lo que la
+   separa del papel es el relleno tenue y su radio.
+   ========================================================================== */
+
+.invitacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-hover);
+}
+
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  /* El mismo tamaño que el `h2` de `Carril`: cuando el socio marque su primer
+     favorito, esta franja se convierte en una estantería y el encabezado NO
+     cambia de tamaño. Un título que encoge al aparecer contenido se lee como
+     dos secciones distintas. */
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text);
+}
+
+/*
+  El corazón del encabezado va en `--text-3`, NO en rojo.
+
+  El rojo está reservado al corazón MARCADO de una tarjeta, donde es dato. Aquí
+  sería decoración, y un rojo decorativo al lado de un rojo que significa algo
+  destruye el significado del segundo.
+*/
+.corazon {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+
+.texto {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+
+  /* Una medida corta: son dos frases de instrucción, no un párrafo de lectura,
+     y a ancho completo en escritorio se leerían como pie de página legal. */
+  max-width: 52ch;
+}

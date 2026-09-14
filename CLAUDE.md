@@ -172,6 +172,15 @@ conjunto envejece.
 Más `--shadow-press` (el contacto sin el halo: lo que queda bajo el dedo) y
 `--shadow-hundida` (la `inset`).
 
+**La escala subió en W1 (14/09/2026)**: la primera v3 acertó la gramática y se
+quedó corta de amplitud — sobre papel blanco la tarjeta no se despegaba, que es
+la premisa entera de esta dirección. Se subió **extensión antes que opacidad**
+(el halo desenfoca 1,5–2,5x más; la opacidad sube bastante menos en
+proporción), porque una sombra concentrada y opaca se lee como cerco gris y la
+misma cantidad de negro repartida sobre el doble de radio se lee como volumen.
+Si el gris se ve **como gris**, alguien subió opacidad donde tocaba subir radio.
+Valores exactos y razonamiento: `tokens.css` §6.
+
 **Pide siempre el token semántico, nunca `--shadow-3` crudo.** Los crudos no se
 remapean por tema: `Menu` y `Toast` pedían el crudo y en tema oscuro no tenían
 sombra alguna.
@@ -392,6 +401,27 @@ Por defecto `bounce: 0`. **`bounce: 0.2` está permitido** en entradas de
 overlay, confirmaciones y aparición de tarjetas. **Sigue prohibido** en
 navegación y en cambios de estado de datos: ahí el rebote se lee como juguete.
 
+La vuelta del acuse de presión —`--dur-rebote` / `--ease-rebote`, la que pasa
+por `globals.css` §4b y alcanza a todo lo pulsable— vale **320 ms con ~+4 % de
+sobreimpulso**. Estuvo en 440 ms y +12 %: fuera de la banda 0,3–0,4 s que este
+mismo documento exige, y con un rebote que soltar un botón no había ganado.
+`--ease-spring` **sí** conserva el 1.56 — ese es el rebote de lo que se gana.
+
+### Suave siempre, seco una vez
+
+Las dos peticiones conviven así, y el orden importa:
+
+- **Todo lo continuo es suave.** Lo que responde mientras el dedo está ahí
+  —hundir, levantar, abrir, mover— usa entrada rápida y salida decelerada
+  (`--ease-out`) o un resorte sin rebote. Sin excepciones.
+- **El único gesto seco es el acento puntual de la selección** (`Agitar`). No
+  acompaña un gesto: celebra un resultado, ocurre una vez y se acaba.
+
+No es un compromiso entre dos estilos: **el acento funciona porque todo lo demás
+es suave.** Sobre un fondo igual de seco desaparecería en el ruido. Por eso se
+aplica al **icono**, nunca a la superficie que lo contiene, y al **encender**,
+nunca al apagar.
+
 ### Entrada escalonada de listas y rejillas
 
 30–40 ms entre elementos, **tope de 8**. El tope es la parte importante, no el
@@ -560,6 +590,22 @@ Todo vive en `src/components/ui/`, en **kebab-case**. Antes de crear uno, mira s
 `Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` · `Alert` `Toast` · `Modal` `Sheet`
 `Overlay` `DropdownMenu` `MenuItem` · `Skeleton` `ProgressBar` `EmptyState` `ErrorState` ·
 `DataList` `AccionEstado` `Copiar` · `PantallaAuth` `ComercioLogo` `QrCode` `WhatsAppButton`
+· `Agitar`
+
+**`Agitar`** envuelve un icono y lo agita **una vez** cuando su prop `activo`
+pasa de `false` a `true` — el acento de «seleccionado» en un filtro. Se le pasa
+el mismo booleano que ya pinta el estado; no hay que disparar nada. No se agita
+al montar ni al apagarse. Lee su cabecera antes de usarlo: una agitación
+significa «error» en casi todas las interfaces, y lo que la convierte aquí en
+«seleccionado» es que sea corta, pequeña y **sin repetición**. Y **nunca es el
+único portador**: `prefers-reduced-motion` la retira entera, así que el estado
+tiene que verse igual con color, texto y `aria-pressed`.
+
+**`ComercioLogo` pinta un CÍRCULO** en sus tres variantes (`tarjeta` 72px,
+`hero` 144px, `portada` responsiva). `object-fit` se queda en **`contain`**: un
+logotipo apaisado deja aire arriba y abajo, y eso es preferible a recortar la
+marca. Si alguien propone `cover` «para llenar el círculo», el porqué de que no
+está escrito en `comercio-logo.module.css`.
 
 **`DataList` sustituye a toda tabla.** Es una tabla semántica que CSS convierte en
 tarjetas bajo 768px. Nunca scroll horizontal en móvil.

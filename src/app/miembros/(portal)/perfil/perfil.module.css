@@ -76,22 +76,123 @@
 }
 
 /*
-  Doble clase a propósito (0,2,0): estos tres valores CORRIGEN a `card.module.css`
+  Doble clase a propósito (0,2,0): estos valores CORRIGEN a `card.module.css`
   y el orden entre dos módulos CSS en el bundle no está garantizado. Con la
   misma especificidad, cuál gana dependería del orden de importación.
 
   - `--radius-xl`: la segunda y última superficie héroe del producto (§6.2).
-  - `--border-strong`: el trazo de 2px de `principal` es de TINTA. `variant="brand"`
-    tiñe el borde de oro al 45 %, que a 2px de grosor gastaría el presupuesto de
-    oro de la pantalla entera y dejaría la superficie peor definida. Del `brand`
-    se conserva lo que se quiere: el filo dorado de 1px de su `::before`.
-  - `overflow: hidden`: recorta ese filo a la curva de 28px (la primitiva lo
-    dibuja con el radio de 14px de una tarjeta normal).
+
+  - LA SOMBRA, y ya no el trazo. Aquí vivía `border-color: var(--border-strong)`,
+    que era el trazo de tinta de 2px de la dirección v2. La v3 §2.1 lo retira de
+    las superficies: «si necesita que se la vea, sube de sombra, no de trazo».
+    Un borde negro es papelería, y el encargo es exactamente lo contrario.
+
+    Sube a `--shadow-overlay` —el cuarto y último escalón, el de modales y
+    hojas— y no se queda en el `--shadow-raised` que le da `principal`, porque
+    en esta pantalla NO HAY NADA MÁS que flote: «Cómo usarlo» es texto suelto,
+    sin tarjeta. El riesgo que avisa la v3 §5 —que todo levite y nada pese— no
+    aplica cuando el objeto que flota es uno solo. Sobre fondo claro, el
+    escalón 4 es lo que separa «una tarjeta» de «una tarjeta que puedes coger».
+
+    `, var(--edge)` no es decoración: en tema oscuro `--shadow-overlay` casi no
+    se ve contra el fondo negro y lo que recorta el carnet es el anillo de luz.
+    Y NUNCA un `none` dentro de la lista: invalidaría la declaración entera en
+    silencio y el carnet se quedaría sin sombra y sin filo a la vez.
+
+  - Del `brand` se conserva todo: el borde dorado de 1px (`--brand-edge` al
+    45 %) y el hairline superior de su `::before`. A 1px el oro no mueve el
+    presupuesto del ≤5 % y es uno de los sitios donde vive por derecho propio.
+
+  - `overflow: hidden`: recorta ese filo —y el halo de abajo— a la curva de
+    28px (la primitiva los dibuja con el radio de 14px de una tarjeta normal).
 */
 .carnet.carnet {
   border-radius: var(--radius-xl);
-  border-color: var(--border-strong);
+  box-shadow: var(--shadow-overlay), var(--edge);
   overflow: hidden;
+}
+
+/*
+  EL BRILLO. Un halo dorado casi imperceptible, el mismo token que usa la
+  tarjeta de acceso: a 9 % de opacidad no se lee como color, se siente como luz
+  cayendo sobre metal. Es parte de lo que separa «una tarjeta blanca» de «un
+  objeto», y no codifica ningún dato.
+
+  `pointer-events: none` y `z-index: 0`, con el contenido elevado justo debajo:
+  un pseudoelemento POSICIONADO pinta por encima de los hijos no posicionados,
+  así que sin esto el halo velaría el QR — que es lo único de esta pantalla que
+  no se puede tocar.
+*/
+.carnet.carnet::after {
+  content: '';
+  position: absolute;
+  inset: -30% -25% auto auto;
+  width: 320px;
+  aspect-ratio: 1 / 1;
+  background: var(--gold-halo);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.carnet.carnet > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Identidad: foto, wordmark, nombre y plan ------------------------------ */
+
+.identidad {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-4);
+}
+
+/*
+  La foto va CUADRADA con la esquina redondeada, no en círculo: un carnet es un
+  documento, y el círculo lo devolvería al lenguaje de «avatar de app». Recorte
+  con `cover` —una cara centrada— y no `contain`, que dejaría bandas vacías.
+
+  Sin sombra: está encajada en la superficie, no levantada sobre ella. Lo que
+  flota en esta pantalla es el carnet entero, y nada dentro de él.
+*/
+.foto {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+
+  width: 72px;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunk);
+  border: 1px solid var(--border-subtle);
+}
+
+.fotoImagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fotoIniciales {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text-3);
+}
+
+.identidadTextos {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: start;
+  min-width: 0;
+}
+
+/* El botón respira respecto del plan, pero menos que un bloque nuevo: es una
+   acción sobre la foto de al lado, no otra sección del carnet. */
+.cambiarFoto {
+  margin-top: var(--space-2);
 }
 
 /* --- Contenido del carnet ------------------------------------------------- */
@@ -109,11 +210,31 @@
   color: var(--brand);
 }
 
+/*
+  EL TRACKING ES ESPECÍFICO DEL TAMAÑO, y por eso cada bloque de este carnet
+  pide el suyo y ninguno comparte un `letter-spacing` global:
+
+    .nombre   → display-2, tracking NEGATIVO (−0,02em). A este cuerpo las
+                letras se separan ópticamente solas; cerrarlas es lo que hace
+                que un nombre largo se lea como una pieza y no como una fila
+                de caracteres sueltos.
+    .plan     → callout, tracking 0. Texto normal a tamaño normal.
+    .numero   → monoespaciado, tabular y tracking POSITIVO. Se dicta en voz
+                alta en una caja, así que separar es justo lo que hace falta.
+    .wordmark
+    .etiqueta → versalitas, el tracking más abierto de todos: las mayúsculas
+                pequeñas y juntas se convierten en una mancha.
+
+  Sube de `title-1` a `display-2` porque el nombre es el HÉROE del objeto: en
+  un carnet físico es lo primero que se lee a un brazo de distancia.
+  `text-wrap: balance` reparte las dos líneas del peor caso en vez de dejar
+  una palabra huérfana abajo.
+*/
 .nombre {
-  font-size: var(--t-title-1-size);
-  line-height: var(--t-title-1-leading);
-  letter-spacing: var(--t-title-1-tracking);
-  font-weight: var(--t-title-1-weight);
+  font-size: var(--t-display-2-size);
+  line-height: var(--t-display-2-leading);
+  letter-spacing: var(--t-display-2-tracking);
+  font-weight: var(--t-display-2-weight);
   text-wrap: balance;
 }
 
@@ -253,6 +374,12 @@
     display: block;
   }
 
+  /*
+    SOBRE PAPEL NO HAY SOMBRA, ASÍ QUE AQUÍ EL TRAZO SÍ HACE FALTA. Es la otra
+    mitad de haber quitado el borde de pantalla: lo que en pantalla define el
+    carnet es `--shadow-overlay`, y una impresora no imprime luz. Sin esta
+    regla el carnet impreso saldría sin límite ninguno, flotando en el folio.
+  */
   .carnet.carnet {
     /*
       `none` como valor COMPLETO de la declaración es legal; lo prohibido es
@@ -270,6 +397,16 @@
       está permitido dentro de `QrCode`.
     */
     border: 1px solid var(--n-1000);
+  }
+
+  /*
+    El halo dorado y el botón de cambiar foto no se imprimen: el halo porque
+    una impresora lo convierte en una mancha beige sucia, y el botón porque en
+    un folio no se puede pulsar nada.
+  */
+  .carnet.carnet::after,
+  .cambiarFoto {
+    display: none;
   }
 
   /* Mismo motivo: en tema oscuro `--brand` es un dorado claro que sobre folio

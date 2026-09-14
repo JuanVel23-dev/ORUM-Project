@@ -6,16 +6,17 @@ type ComercioLogoProps = {
   logoUrl: string | null
   nombre: string
   /**
+   * Las tres son círculos y solo cambian de diámetro y de relleno:
    * `tarjeta` (72px) es la del catálogo; `hero` (144px) la de la ficha;
    * `portada` es la del carrusel de destacados, que mide en `cqi` porque la
    * cubierta que la contiene es responsiva (exige `container-type: inline-size`
    * en esa cubierta; sin contenedor ancestro, `cqi` mide el viewport pequeño).
    *
    * Es una prop y NO un `className` que el consumidor traiga de su propio
-   * módulo: `.hero` sobrescribe `--placa-logo-w` y el radio de `.placa`, y las
-   * dos reglas tienen que resolverse por el orden de ESTA hoja. Con dos hojas
-   * distintas el ganador lo decidiría el orden en que Next las inyecte, que
-   * cambia entre desarrollo y producción.
+   * módulo: `.hero` y `.portada` sobrescriben `--placa-logo-w` y `--placa-pad`
+   * de `.placa`, y esas reglas tienen que resolverse por el orden de ESTA hoja.
+   * Con dos hojas distintas el ganador lo decidiría el orden en que Next las
+   * inyecte, que cambia entre desarrollo y producción.
    */
   variante?: ComercioLogoVariante
   className?: string
@@ -28,12 +29,18 @@ type ComercioLogoProps = {
 }
 
 /**
- * El logotipo de un comercio aliado, dentro de su placa.
+ * El logotipo de un comercio aliado, dentro de su placa CIRCULAR.
  *
  * LA PLACA ES LO QUE HACE COLECCIÓN. Con `object-fit: contain` un logotipo 1:1
  * y uno 4:1 acaban con tamaños ópticos distintos, y eso es geometría, no un
- * defecto que se pueda pintar. Lo que los une es el marco: mismo tamaño, mismo
- * relleno, mismo filo, mismo fondo y mismo radio para todos.
+ * defecto que se pueda pintar. Lo que los une es el marco: mismo diámetro,
+ * mismo relleno, mismo filo y mismo fondo para todos.
+ *
+ * Es un círculo perfecto desde W1 (14/09/2026), por encargo del propietario:
+ * `--placa-logo-ratio` vale 1/1 y el radio es `--radius-full` en las tres
+ * variantes. `contain` NO cambia a `cover` por ello —un logotipo recortado es
+ * una marca mutilada—, así que un logotipo apaisado deja aire arriba y abajo.
+ * Es el intercambio aceptado, y el porqué largo está en el módulo CSS.
  *
  * EL RESPALDO NO ES UN ICONO GENÉRICO: es la inicial del comercio, igual que
  * `Avatar` hace con las personas. Un catálogo donde la mitad de las tarjetas

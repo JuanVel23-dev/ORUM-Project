@@ -1,0 +1,367 @@
+/* ==========================================================================
+   TOP 10 DEL CLUB  ·  la cinta que se mueve sola
+   --------------------------------------------------------------------------
+   Toda la animación es `translate` sobre una pista duplicada. Ni `left`, ni
+   `margin`, ni `scroll-left`: eso recalcularía el layout en cada fotograma y
+   esta pieza vive en la misma pantalla que hasta cien tarjetas de catálogo,
+   desplazadas por un móvil de gama media.
+   ========================================================================== */
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  /*
+    ANCHO DE UNA TARJETA DE LA CINTA.
+
+    Tiene gemelo en `top-descuentos.tsx` (`ANCHO_ITEM_PX`), que lo necesita para
+    derivar la duración a velocidad constante. Si cambias uno, cambia el otro o
+    la cinta se moverá a otra velocidad de la pensada.
+  */
+  --top-item-w: 232px;
+}
+
+.cabecera {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.titulos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* Mismo tamaño que el `h2` de `Carril` y que el de la rejilla: esta sección
+   pesa lo mismo que una estantería, no más. */
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text);
+}
+
+/* La llama es refuerzo del título, nunca su sustituto: el texto dice "Top N del
+   club" con todas sus letras. */
+.llama {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+
+.apoyo {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-3);
+}
+
+/* ==========================================================================
+   EL BOTÓN DE PAUSA
+   --------------------------------------------------------------------------
+   Visible, con icono Y TEXTO. Un icono solo dejaría el mecanismo que cumple
+   WCAG 2.2.2 dependiendo de que el socio reconozca dos barras verticales.
+   ========================================================================== */
+
+.pausa {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+
+  /* Sin borde en reposo (dirección v3): el filo dorado llega al señalar. */
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  font-weight: var(--t-caption-weight);
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
+}
+
+@media (hover: hover) {
+  .pausa:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--brand-edge);
+  }
+}
+
+.pausa:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.pausaTexto {
+  white-space: nowrap;
+}
+
+/*
+  SIN MOVIMIENTO NO HAY NADA QUE PAUSAR.
+
+  Bajo `prefers-reduced-motion` la cinta está quieta, así que el botón se retira
+  del todo: un control que no hace nada es peor que ninguno. `display: none` y
+  no `visibility`, para que tampoco esté en el orden de tabulación.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .pausa {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   LA VENTANA Y LA CINTA
+   ========================================================================== */
+
+.ventana {
+  /*
+    El sangrado a un solo lado, igual que `CarrilPista`: hacia `inline-end`.
+    Un sangrado simétrico metería contenido dentro de la banda del gesto de
+    "atrás" del sistema operativo, que vive en el borde izquierdo.
+  */
+  margin-inline-end: calc(var(--pad-contenido, 0px) * -1);
+
+  overflow: hidden;
+
+  /* Reserva para que el anillo de foco de una tarjeta no quede recortado por el
+     `overflow`: 2px de trazo + 2px de desplazamiento. */
+  padding-block: var(--space-1);
+
+  /* NINGÚN `backdrop-filter`: esto es una fila de lista, y ahí el desenfoque
+     destroza el scroll en gama media. Prohibición dura. */
+}
+
+.cinta {
+  display: flex;
+  width: max-content;
+
+  /*
+    EL DESPLAZAMIENTO. `-50%` es exactamente el ancho de UNA copia, porque la
+    cinta contiene dos idénticas: al llegar ahí, la segunda copia ocupa el sitio
+    donde empezó la primera y el salto a cero es invisible.
+
+    `linear`, sin curva: una cinta con aceleración se lee como un objeto que
+    arranca y frena, y esto no arranca ni frena, fluye.
+
+    La duración llega como `--duracion`, calculada a velocidad constante en
+    `duracionMarquesinaSegundos`. Si falta, el respaldo es 60s: lenta, nunca
+    rota.
+  */
+  animation: desplazar var(--duracion, 60s) linear infinite;
+}
+
+@keyframes desplazar {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: -50% 0;
+  }
+}
+
+/*
+  LOS CUATRO MECANISMOS DE PAUSA.
+
+  Los tres primeros son CSS puro y no cuestan nada; el cuarto —el botón— es el
+  único que cumple el criterio por sí solo, porque los demás solo suspenden
+  mientras mantienes el ratón, el foco o el dedo.
+
+  `animation-play-state: paused` congela en el fotograma actual y reanuda desde
+  ahí. Es lo correcto: reiniciar al soltar haría saltar el contenido que el
+  socio estaba leyendo.
+*/
+@media (hover: hover) {
+  .ventana:hover .cinta {
+    animation-play-state: paused;
+  }
+}
+
+.ventana:focus-within .cinta,
+.ventana[data-pausada='true'] .cinta {
+  animation-play-state: paused;
+}
+
+/*
+  MOVIMIENTO REDUCIDO: la cinta NO se mueve. Y no se queda inservible — pasa a
+  ser un carril que se recorre con el dedo o con el tabulador, como el resto del
+  portal. El equivalente no vestibular de "se mueve solo" es "puedes recorrerlo
+  tú".
+
+  La copia fantasma se retira: sin bucle no tiene función, y duplicar el
+  recorrido obligaría a pasar dos veces por lo mismo.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .ventana {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+    padding-inline-end: var(--pad-contenido, 0px);
+    scrollbar-width: none;
+  }
+
+  .ventana::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cinta {
+    animation: none;
+    translate: 0 0;
+  }
+
+  .grupo[aria-hidden='true'] {
+    display: none;
+  }
+
+  .celda {
+    scroll-snap-align: start;
+  }
+}
+
+.grupo {
+  display: flex;
+  gap: var(--space-3);
+  padding-inline-end: var(--space-3);
+  list-style: none;
+}
+
+.celda {
+  width: var(--top-item-w);
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   LA TARJETA DE LA CINTA
+   --------------------------------------------------------------------------
+   Es una FILA DE LISTA, no un objeto que el dedo pueda levantar: por eso NO
+   lleva sombra. «La sombra es jerarquía, no decoración» — dirección v3 §5.
+   Lo que la separa del papel es el relleno tenue y su radio.
+   ========================================================================== */
+
+.tarjeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+
+  background: var(--surface-hover);
+  color: inherit;
+  text-decoration: none;
+
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  a.tarjeta:hover {
+    box-shadow: inset 0 0 0 1px var(--brand-edge);
+  }
+}
+
+a.tarjeta:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Pulsar una fila de lista es OPACIDAD, nunca sombra ni desplazamiento: mismo
+   valor que la tarjeta de la rejilla, para que el toque se sienta igual venga
+   de donde venga. */
+a.tarjeta:active {
+  opacity: 0.72;
+  transition-duration: var(--dur-press);
+}
+
+/*
+  EL PUESTO. Es lo que convierte una fila de beneficios en un RANKING: el
+  desplazamiento por sí solo no comunica orden, y el socio que entra a mitad de
+  la cinta no sabría si está viendo el primero o el octavo.
+
+  Cifra tabular, como todo número de negocio del sistema.
+*/
+.puesto {
+  flex-shrink: 0;
+  width: 1.5em;
+
+  font-size: var(--t-footnote-size);
+  font-weight: 590;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  color: var(--text-3);
+  text-align: center;
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.comercio {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  font-weight: 590;
+  color: var(--text);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.promocion {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  color: var(--text-3);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   ANCHOS: `@container contenido`, NUNCA `@media`
+   --------------------------------------------------------------------------
+   El ancho útil no es el del viewport. `<main>` del portal declara
+   `container-type: inline-size` con `container-name: contenido`.
+   ========================================================================== */
+
+/*
+  `--top-item-w` NO cambia por ancho, y es deliberado: su gemelo en TypeScript
+  (`ANCHO_ITEM_PX`) deriva la duración a velocidad constante, y un ancho
+  distinto por contenedor haría que la cinta se moviera más despacio en el
+  teléfono que en el escritorio sin que nadie lo hubiera decidido. Una tarjeta
+  de 232px cabe de sobra en el ancho útil más estrecho del portal.
+
+  Lo que sí se adapta es la cabecera: con poco ancho, el título y el botón de
+  pausa se alinean al centro en vez de por la base, que es donde el
+  desequilibrio se nota.
+*/
+@container contenido (max-width: 560px) {
+  .cabecera {
+    align-items: center;
+  }
+}

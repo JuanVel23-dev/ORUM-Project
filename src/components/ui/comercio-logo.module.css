@@ -1,23 +1,34 @@
 /* ==========================================================================
-   LA PLACA DEL LOGO
+   LA PLACA DEL LOGO  ·  circular (encargo del propietario, W1 · 14/09/2026)
    --------------------------------------------------------------------------
-   Aquí decía: "logos ajenos de proporción impredecible: se recortan al cuadro
-   en vez de deformarse. Un logo estirado es lo primero que delata un catálogo
-   barato."
+   Historia corta de esta caja, porque las dos correcciones anteriores se
+   revirtieron una vez cada una y conviene que no haya una tercera:
 
-   EL DIAGNÓSTICO ERA CORRECTO Y EL REMEDIO NO. Un logo estirado delata, sí,
-   pero `object-fit: cover` no evita ese defecto: lo cambia por otro peor. Un
-   logotipo apaisado 4:1 metido en un cuadro pierde los lados —es decir, pierde
-   el nombre de la marca—. Para una fotografía `cover` es la regla correcta;
-   para un logo la regla es `contain`: SE MUESTRA ENTERO O NO SE MUESTRA.
+   1. Decía «logos ajenos de proporción impredecible: se recortan al cuadro en
+      vez de deformarse». EL DIAGNÓSTICO ERA CORRECTO Y EL REMEDIO NO. Un logo
+      estirado delata un catálogo barato, sí, pero `object-fit: cover` no evita
+      ese defecto: lo cambia por otro peor. Un logotipo apaisado 4:1 metido en
+      un cuadro pierde los lados —es decir, pierde el nombre de la marca—. Para
+      una fotografía `cover` es la regla correcta; para un logo la regla es
+      `contain`: SE MUESTRA ENTERO O NO SE MUESTRA. La deformación no vuelve
+      por esto, porque `contain` tampoco deforma.
 
-   Se deja escrito para que nadie lo revierta creyendo que corrige la
-   deformación: la deformación no vuelve, porque `contain` tampoco deforma.
+   2. La caja era apaisada 3:2 por la misma geometría: con `contain`, un 4:1 se
+      pinta al 25 % de su alto en un cuadro 1:1 y al ~50 % en 3:2.
 
-   La caja es apaisada 3:2 y no cuadrada por lo mismo: con `contain`, un
-   logotipo 4:1 se pinta al 25 % de su alto en un cuadro 1:1 y al ~50 % en 3:2.
-   Y una inicial centrada en un rectángulo se lee como placa de marca, no como
-   avatar: un comercio no es una persona.
+   AHORA ES UN CÍRCULO, y eso reabre el punto 2 a sabiendas: el encargo acepta
+   el aire que queda arriba y abajo en un logotipo muy apaisado a cambio de la
+   forma. Lo que NO se reabre es el punto 1 — `contain` se queda. Si alguien
+   propone `cover` «para que el círculo quede lleno», la respuesta está arriba.
+
+   Consecuencia geométrica que sí hubo que atender: dentro de un círculo el
+   área utilizable no es el cuadro entero sino el CUADRADO INSCRITO, que mide
+   ~70,7 % del diámetro. Con el relleno anterior (4px sobre 72) el contenido
+   llegaba al 94 % del diámetro y el filo curvo le recortaba las esquinas. Los
+   tres rellenos suben hasta dejar el contenido en torno al 75-78 %: por encima
+   del cuadrado inscrito —porque un logotipo apaisado no usa sus esquinas y en
+   el eje horizontal tiene el diámetro completo disponible— pero ya lejos del
+   recorte.
 
    El fondo y el filo NO SIGUEN EL TEMA (ver `tokens.css` §11). Es el mismo
    caso de `QrCode`: el activo no es nuestro y asume fondo claro. Un PNG
@@ -26,11 +37,11 @@
 
 .placa {
   /* Relleno interior. Local, no token del sistema: es la geometría de esta
-     pieza. En 4pt, porque los 6px que se barajaron están fuera de la rejilla,
-     que es la única regla que la escala tiene. */
-  --placa-pad: var(--space-1);
+     pieza, igual que el diámetro. En 4pt, que es la única regla que la escala
+     tiene. 8px sobre 72 deja el contenido en 56px = 78 % del diámetro. */
+  --placa-pad: var(--space-2);
 
-  flex-shrink: 0; /* Una placa de 68px junto a otra de 72px destroza la
+  flex-shrink: 0; /* Un círculo de 68px junto a otro de 72px destroza la
                      rejilla antes que cualquier logo feo. */
 
   display: grid;
@@ -38,41 +49,51 @@
   overflow: hidden;
 
   width: var(--placa-logo-w);
-  aspect-ratio: var(--placa-logo-ratio);
+  aspect-ratio: var(--placa-logo-ratio); /* 1/1 — el círculo no puede ovalarse */
   padding: var(--placa-pad);
 
-  border-radius: var(--radius-xs);
+  /* CÍRCULO PERFECTO. El radio ya no es «una proporción del tamaño» que cada
+     variante ajuste: a `--radius-full` las tres escalas son la misma forma, y
+     por eso las variantes de abajo ya no tocan el radio. */
+  border-radius: var(--radius-full);
   background: var(--placa-logo-bg);
 
   /*
     El filo va como sombra interior y no como `border` a propósito: un borde
-    consume caja y dejaría el interior en 62x38 en vez de los 64x40 que la
-    dirección de arte fija. Con `inset` la aritmética sale exacta —72-2x4 y
-    48-2x4— y el filo se ve idéntico, recortado por el mismo radio.
+    consume caja y dejaría el interior 2px más pequeño de lo que la geometría
+    de arriba fija. Con `inset` la aritmética sale exacta y el filo se ve
+    idéntico, recortado por el mismo radio — que ahora es el círculo completo.
     En tema claro esto es lo ÚNICO que dibuja la placa: su cuerpo blanco da
     1,00:1 contra la tarjeta.
   */
   box-shadow: inset 0 0 0 1px var(--placa-logo-borde);
 
   /*
-    Centra verticalmente el texto alternativo cuando la imagen falla. Es el
-    alto interior: ancho x 2/3 (el inverso de --placa-logo-ratio, que CSS no
-    sabe invertir por sí solo) menos los dos rellenos. SI CAMBIA LA PROPORCIÓN
-    DEL TOKEN, CAMBIA TAMBIÉN ESTE 2/3.
+    `line-height: 1` y NO un `calc` derivado de la proporción.
+
+    Aquí vivía `calc(--placa-logo-w * 2/3 - --placa-pad * 2)`, el alto interior
+    escrito a mano porque CSS no sabe invertir `--placa-logo-ratio`, con un
+    aviso de «si cambia la proporción, cambia también este 2/3». La proporción
+    ha cambiado, y en vez de reescribir el 2/3 por un 1/1 se retira el
+    acoplamiento entero: quien centra la inicial es `place-items: center` del
+    grid, que no necesita saber cuánto mide la caja. Con `line-height: 1` la
+    caja de línea es exactamente el glifo y el centrado óptico es el correcto
+    en las tres variantes sin una sola aritmética que mantener.
   */
-  line-height: calc(var(--placa-logo-w) * 2 / 3 - var(--placa-pad) * 2);
+  line-height: 1;
 }
 
 .imagen {
   width: 100%;
   height: 100%;
 
-  /* Un logo se muestra entero o no se muestra. */
+  /* Un logo se muestra entero o no se muestra. Ver el punto 1 de la cabecera
+     antes de cambiar esto por `cover`. */
   object-fit: contain;
   object-position: center;
 
   /*
-    AQUÍ VIVÍA LA TIPOGRAFÍA DEL TEXTO ALTERNATIVO, y se retira con D9.
+    AQUÍ VIVÍA LA TIPOGRAFÍA DEL TEXTO ALTERNATIVO, y se retiró con D9.
 
     Mientras el `alt` era la inicial, estas reglas eran lo que hacía que un
     `logo_url` muerto pintase una inicial con el aspecto correcto. Con `alt=""`
@@ -86,11 +107,23 @@
   overflow: hidden;
 }
 
-/* Sin logo propio ni de marca: la inicial hace de marca. Mismo aspecto que el
-   texto alternativo de `.imagen`, para que los dos caminos sean el mismo. */
+/*
+  Sin logo propio ni de marca: la inicial hace de marca.
+
+  Se centra en el círculo por el `place-items: center` de `.placa` más el
+  `line-height: 1` de arriba, no por márgenes ni por `calc`.
+
+  El tamaño sube de 0,26 a 0,32 del diámetro con la forma: una letra pequeña
+  perdida en un rectángulo se leía como una placa a medio cargar; la misma
+  letra al 32 % de un círculo se lee como un MONOGRAMA, que es exactamente lo
+  que es. Sigue por debajo de la proporción de `Avatar` (~0,36) porque la placa
+  es mayor que un avatar y la letra no debe tocar el filo. El color no cambia
+  —`--placa-logo-inicial`, 5,26:1 sobre la placa blanca—, así que subir el
+  tamaño solo puede mejorar su legibilidad, nunca empeorarla.
+*/
 .inicial {
   font-weight: 620;
-  font-size: calc(var(--placa-logo-w) * 0.26);
+  font-size: calc(var(--placa-logo-w) * 0.32);
   letter-spacing: -0.01em;
   text-transform: uppercase;
   color: var(--placa-logo-inicial);
@@ -100,25 +133,23 @@
 /* ==========================================================================
    VARIANTE HERO  ·  la placa de la ficha del comercio
    --------------------------------------------------------------------------
-   144x96 con 12px de relleno: caja interior de 120x72, el doble exacto de la
-   de la tarjeta. La altura NO se declara aquí tampoco — la sigue derivando el
-   mismo `aspect-ratio`, así que la proporción no puede divergir entre las dos
-   escalas.
+   144px de diámetro con 16px de relleno: interior de 112px, el 78 % del
+   diámetro — la misma proporción que en la tarjeta, así que un logotipo se ve
+   ópticamente igual en los dos sitios y solo cambia de escala.
 
-   El radio sube un escalón (--radius-xs -> --radius-sm) porque el radio no es
-   una constante de la pieza sino una proporción de su tamaño: 6px sobre 144px
-   se lee como una esquina viva, no como la misma placa más grande.
+   Ya NO toca el radio. Antes subía de `--radius-xs` a `--radius-sm` porque el
+   radio de un rectángulo redondeado es una proporción de su tamaño y 6px sobre
+   144 se leían como esquina viva. Con `--radius-full` esa aritmética
+   desaparece: un círculo es un círculo a cualquier diámetro.
 
-   Va DESPUÉS de `.placa` en este archivo y sobre el mismo elemento: la
-   cascada la resuelve el orden del propio módulo, no el orden en que Next
-   inyecte dos hojas distintas.
+   Va DESPUÉS de `.placa` en este archivo y sobre el mismo elemento: la cascada
+   la resuelve el orden del propio módulo, no el orden en que Next inyecte dos
+   hojas distintas.
    ========================================================================== */
 
 .hero {
-  --placa-pad: var(--space-3);
+  --placa-pad: var(--space-4);
   --placa-logo-w: 144px;
-
-  border-radius: var(--radius-sm);
 }
 
 /* ==========================================================================
@@ -131,22 +162,26 @@
 
    Se mide en `cqi` y no en px porque la cubierta es responsiva —de 220px en
    horizontal a 320px en escritorio—: una placa de tamaño fijo pasaría de
-   ahogada a diminuta en el mismo componente. El 60 % deja la placa como
-   protagonista sin tocar los bordes de la cubierta, y el tope de 196px impide
-   que en escritorio el logotipo se agrande por encima de su resolución.
+   ahogada a diminuta en el mismo componente.
+
+   ⚠️ EL TOPE BAJÓ DE 60cqi/196px A 50cqi/176px, Y NO ES ESTÉTICA. Con la placa
+   apaisada, 60cqi de ancho eran 40cqi de alto y cabían en cualquier cubierta.
+   Siendo un círculo, 60cqi de ancho son 60cqi de ALTO, y la celda mayor del
+   collage del portal público es 16/9 —o sea 56,25cqi de alto—: el círculo se
+   habría salido y el `overflow: hidden` de la celda lo habría recortado por
+   arriba y por abajo, que es justo el defecto que este componente existe para
+   evitar. A 50cqi entra con holgura en 16/9 y sobra sitio en las cubiertas 4/3
+   del carrusel. SI ALGUIEN SUBE ESTE NÚMERO, que lo compruebe contra la celda
+   16/9, que es la estrecha.
 
    EXIGE `container-type: inline-size` en la cubierta que la envuelve. Sin
    contenedor ancestro, `cqi` mide el viewport pequeño y la placa se descuadra:
    es el mismo aviso que `CLAUDE.md` da para `@container`.
 
-   El radio sube dos escalones respecto a la tarjeta por la misma razón que en
-   el hero: el radio no es una constante de la pieza, es una proporción de su
-   tamaño.
+   Tampoco toca ya el radio, por lo mismo que el hero.
    ========================================================================== */
 
 .portada {
-  --placa-pad: var(--space-4);
-  --placa-logo-w: min(60cqi, 196px);
-
-  border-radius: var(--radius-md);
+  --placa-pad: var(--space-6);
+  --placa-logo-w: min(50cqi, 176px);
 }

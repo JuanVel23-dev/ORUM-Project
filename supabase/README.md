@@ -10,6 +10,7 @@
 |---|---|---|
 | 1 | `migrations/20260913120000_imagenes_y_avatares.sql` | Foto de portada del comercio, avatar de quien trabaja en el club, foto del socio, y los dos buckets de Storage |
 | 2 | `migrations/20260914090000_favoritos_y_mas_usados.sql` | Favoritos del socio, «los que más usas», y la galería de imágenes de la ficha |
+| 3 | `migrations/20260914140000_top_descuentos.sql` | El top de descuentos más usados del club (global). **Añadido después: si ya corriste los dos primeros, este es el único que te falta** |
 
 ## Cómo se corren
 

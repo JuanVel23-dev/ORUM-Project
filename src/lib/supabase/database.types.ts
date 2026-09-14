@@ -519,6 +519,27 @@ export type Database = {
        * `comercio_id`: contarlo desde el cliente serían dos consultas y un
        * agrupado en JavaScript sobre todo el historial.
        */
+      /**
+       * Descuentos más usados del CLUB (global), no los del socio.
+       *
+       * Es función y no consulta porque contar esto exige leer `ventas` de
+       * todos los socios, y un socio no puede leer el historial de los demás.
+       * La función devuelve solo el agregado: cuántas veces se usó cada
+       * promoción, nunca quién la usó.
+       */
+      top_descuentos: {
+        Args: { p_limite?: number }
+        Returns: {
+          promocion_id: number
+          titulo: string
+          valor: number | null
+          tipo_beneficio_id: number
+          comercio_id: number
+          comercio_nombre: string
+          logo_url: string | null
+          usos: number
+        }[]
+      }
       comercios_mas_usados: {
         Args: { p_miembro_id: number; p_limite?: number }
         Returns: {

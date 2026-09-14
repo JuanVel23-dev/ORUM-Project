@@ -1,7 +1,10 @@
+import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { Check } from 'lucide-react'
+import { LayoutGrid } from 'lucide-react'
 import { CarrilPista } from '@/components/ui/carril'
+import { IconoCategoria } from './icono-categoria'
 import styles from './chips-categoria.module.css'
+import agitacion from './agitacion.module.css'
 
 export type Categoria = { id: number; nombre: string }
 
@@ -59,9 +62,22 @@ export function ChipsCategoria({
     : alfabeticas
 
   return (
+    /*
+      El nombre del `<nav>` dice "Categorías" y no "Filtros": arriba hay OTRA
+      fila de filtros —el selector de vista— y dos regiones llamadas igual
+      dejarían al lector de pantalla sin forma de distinguirlas.
+    */
     <nav aria-label="Categorías">
       <CarrilPista columnas="auto">
-        <Chip href={hrefCon(paramsBase)} activo={activaId === null}>
+        <Chip
+          href={hrefCon(paramsBase)}
+          activo={activaId === null}
+          /* "Todas" no es una categoría, así que no le toca glifo de categoría:
+             lleva el mismo icono de rejilla que la vista "Todo el club", que es
+             lo que significa. Pero icono lleva, como todos: un hueco en el
+             primer chip desalinearía la fila entera. */
+          icono={<LayoutGrid size={14} aria-hidden="true" />}
+        >
           Todas
         </Chip>
 
@@ -74,6 +90,13 @@ export function ChipsCategoria({
                  mismo dedo, en el mismo sitio. */
               href={esActiva ? hrefCon(paramsBase) : hrefCon(paramsBase, c.id)}
               activo={esActiva}
+              /*
+                EL ICONO SIGNIFICA ALGO (encargo nº 10): sale del nombre de la
+                categoría, y cuando ninguna palabra clave casa hay un respaldo
+                genérico. Nunca un hueco — la regla está escrita en
+                `iconos-categoria.ts`.
+              */
+              icono={<IconoCategoria nombre={c.nombre} />}
             >
               {c.nombre}
             </Chip>
@@ -87,10 +110,12 @@ export function ChipsCategoria({
 function Chip({
   href,
   activo,
+  icono,
   children,
 }: {
   href: string
   activo: boolean
+  icono: ReactNode
   children: string
 }) {
   return (
@@ -99,10 +124,29 @@ function Chip({
       className={[styles.chip, activo && styles.activo].filter(Boolean).join(' ')}
       aria-current={activo ? 'true' : undefined}
     >
-      {/* El check es el portador que sobrevive a la ceguera al color; el
-          relleno es refuerzo, no la señal. */}
-      {activo && <Check size={13} aria-hidden />}
-      {children}
+      {/*
+        EL ICONO ESTÁ SIEMPRE, activo o no.
+
+        Antes solo aparecía un `Check` en el chip activo, y era el portador que
+        sobrevivía a la ceguera al color. Ese papel pasa ahora al SUBRAYADO de la
+        etiqueta (encargo nº 11), que hace lo mismo sin gastar el hueco del
+        icono; y el hueco se gasta en algo que informa en los DOS estados: de
+        qué tipo de comercio habla el chip.
+
+        La agitación se aplica solo al activo, así que la animación arranca justo
+        cuando el filtro pasa a estarlo — por el simple hecho de que la propiedad
+        `animation` acaba de aplicarse al elemento. Sin JavaScript. Bajo
+        `prefers-reduced-motion` no se mueve nada y el estado lo siguen diciendo
+        el subrayado, el relleno y `aria-current`.
+      */}
+      <span
+        className={[styles.icono, activo && agitacion.agitar].filter(Boolean).join(' ')}
+      >
+        {icono}
+      </span>
+
+      {/* ICONO + TEXTO, nunca icono solo. */}
+      <span className={styles.etiqueta}>{children}</span>
     </Link>
   )
 }

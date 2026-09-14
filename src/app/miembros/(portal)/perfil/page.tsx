@@ -1,8 +1,11 @@
+import { Camera } from 'lucide-react'
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { derivarEstadoMembresia } from '@/lib/miembros/membresias'
 import { hoyISO } from '@/lib/shared/fecha'
+import { iniciales } from '@/components/ui/avatar'
 import { StatusBadge, VenceEn } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Copiar } from '@/components/ui/copiar'
 import { Stack } from '@/components/ui/layout'
@@ -22,10 +25,14 @@ export const metadata = { title: 'Mi carnet · ORUM' }
     estiraba hasta `--content-max` con `1fr auto`, lo que abría un hueco muerto
     de varios cientos de píxeles entre los datos y el QR en escritorio. Un
     carnet de 1100px no es un carnet.
-  - Es la superficie PRINCIPAL de su pantalla, así que es la única que lleva el
-    trazo de 2px (`Card principal`). Nada más en esta vista puede llevarlo: por
-    eso «Cómo usarlo» NO es otra tarjeta.
+  - Es el objeto MÁS PRECIOSO del portal, así que le corresponde la sombra más
+    gruesa de su pantalla. Ya no lleva trazo: la dirección v3 retiró el borde
+    de las superficies y lo que define al carnet es la luz. «Cómo usarlo» no
+    es otra tarjeta, así que no hay con qué confundirlo.
   - El QR sube justo debajo del nombre: es lo que se enseña.
+  - La foto del socio, si la hay, encabeza el carnet. Si no la hay, sus
+    iniciales — nunca un hueco ni un icono genérico de persona, que es lo que
+    hace que una credencial parezca rota.
 
   Server Component entero salvo el envoltorio de aparición y el botón de
   copiar, que son hojas de cliente.
@@ -72,13 +79,28 @@ export default async function PerfilMiembroPage() {
     `<Suspense>` (§6.7): un carnet que dice «Daniel Bulla» y medio segundo
     después añade «Plan Premium» se lee como un fallo, no como progreso.
   */
-  const [{ data: plan }, { data: config }] = await Promise.all([
+  const [{ data: plan }, { data: config }, { data: ficha }] = await Promise.all([
     supabase
       .from('planes_membresia')
       .select('nombre')
       .eq('id', miembro.membresiaVigente.planId)
       .maybeSingle(),
     supabase.from('configuracion').select('valor').eq('clave', 'whatsapp_soporte').maybeSingle(),
+    /*
+      La foto va con las otras dos y no en un `<Suspense>` aparte, por el
+      mismo motivo que el nombre del plan: un carnet que se dibuja y medio
+      segundo después le aparece la cara se lee como un fallo.
+
+      Se pide aquí y no en `requireMiembroVigente` porque esa función la
+      comparten el layout y `/miembros/inactiva`, y ninguna de las dos
+      necesita la foto: añadírsela cargaría una columna en cada navegación
+      del portal para usarla en una sola pantalla.
+    */
+    supabase
+      .from('miembros')
+      .select('foto_url')
+      .eq('id', miembro.id)
+      .maybeSingle(),
   ])
 
   /*
@@ -95,6 +117,7 @@ export default async function PerfilMiembroPage() {
 
   const nombreCompleto = `${miembro.nombres} ${miembro.apellidos}`.trim()
   const soporte = config?.valor ?? null
+  const fotoUrl = ficha?.foto_url ?? null
 
   return (
     <div className={styles.pantalla}>
@@ -106,27 +129,74 @@ export default async function PerfilMiembroPage() {
       <div className={styles.columnas}>
         <CarnetAparece className={styles.carnetCaja}>
           {/*
-            `principal` = el trazo de 2px, y es el único de la pantalla.
-            `brand` = el filo dorado de 1px del borde superior, que lo pone la
-            primitiva. La spec pedía 2px de oro; la dirección v2 §2.4 dice que
-            sobre papel basta 1px, y que el grosor de 2px es de TINTA.
+            `principal` ya no es un trazo: desde la v3 es un escalón MÁS de
+            sombra, y aquí el módulo lo sube otro más todavía (§2.2 — la
+            superficie grande se lee más gruesa, y esta es la más grande y la
+            más importante del portal).
+
+            `brand` aporta lo único dorado de la superficie: el filo de 1px
+            del borde y el hairline superior que dibuja su `::before`. El oro
+            es color de MARCA y el carnet es la marca en la mano del socio; no
+            codifica ningún dato.
           */}
           <Card padding="lg" variant="brand" principal className={styles.carnet}>
             {/* Entrada escalonada de los cuatro bloques: 35 ms, tope de 8. */}
             <Stack gap={5} escalonado>
-              <Stack gap={5}>
-                {/* Una credencial sin el nombre de quien la emite no parece
-                    una credencial. Pequeño, arriba a la izquierda. */}
-                <p className={styles.wordmark}>ORUM</p>
+              <div className={styles.identidad}>
+                {/*
+                  LA FOTO. `aria-hidden` porque el nombre está justo al lado:
+                  sin esto el lector anuncia «Daniel Bulla» dos veces, que es
+                  el mismo motivo por el que `Avatar` tiene `decorativo`.
 
-                <Stack gap={1}>
+                  `<img>` y no `next/image`: `next.config.ts` no declara
+                  `images` y la URL es externa —Storage o el servidor de
+                  quien la subiera—. `alt` vacío a propósito: una URL muerta
+                  con `alt` con texto puede arrastrar el glifo de imagen rota
+                  de Chrome, y eso no se enseña en una caja.
+                */}
+                <span className={styles.foto} aria-hidden="true">
+                  {fotoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+                    <img
+                      src={fotoUrl}
+                      alt=""
+                      className={styles.fotoImagen}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <span className={styles.fotoIniciales}>{iniciales(nombreCompleto)}</span>
+                  )}
+                </span>
+
+                <div className={styles.identidadTextos}>
+                  {/* Una credencial sin el nombre de quien la emite no parece
+                      una credencial. Pequeño, arriba a la izquierda. */}
+                  <p className={styles.wordmark}>ORUM</p>
                   <p className={styles.nombre}>{nombreCompleto}</p>
                   {/* `planes_membresia` sostiene varios planes: mostrar el
                       nombre es correcto. Sin plan, un respaldo genérico — un
                       hueco ahí parecería un carnet roto. */}
                   <p className={styles.plan}>{plan?.nombre ?? 'Membresía ORUM'}</p>
-                </Stack>
-              </Stack>
+
+                  {/*
+                    Un formulario no navega: `/miembros/perfil/foto` está
+                    interceptada por la ranura `@modal` del portal y se abre
+                    encima del carnet. Ghost y `sm`, que ya amplía su área
+                    táctil a 44px con un `::after`: es una acción de
+                    mantenimiento, no la razón de esta pantalla.
+                  */}
+                  <Button
+                    href="/miembros/perfil/foto"
+                    variant="ghost"
+                    size="sm"
+                    icon={<Camera size={15} />}
+                    className={styles.cambiarFoto}
+                  >
+                    {fotoUrl ? 'Cambiar foto' : 'Añadir mi foto'}
+                  </Button>
+                </div>
+              </div>
 
               {/*
                 `data-motion-esencial`: pase lo que pase con las preferencias

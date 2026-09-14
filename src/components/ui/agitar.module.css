@@ -1,0 +1,129 @@
+/* ==========================================================================
+   AGITAR  ·  el acento de la selección
+   --------------------------------------------------------------------------
+   El porqué, la tensión que resuelve y cómo se consume están en `agitar.tsx`.
+   Aquí solo la geometría y el tiempo.
+
+   TRES REGLAS QUE SOSTIENEN QUE ESTO SIGNIFIQUE «SELECCIONADO» Y NO «ERROR»:
+
+     1. UNA SOLA VUELTA. `animation-iteration-count` se queda en su valor por
+        defecto (1) y no se escribe `infinite` en ningún sitio. Una agitación
+        que repite es una vibración, y una vibración es el gesto universal de
+        «contraseña incorrecta».
+     2. AMPLITUD PEQUEÑA Y DECRECIENTE. 6° de giro (o 2px de desvío) en el
+        primer golpe, y cada golpe siguiente vale menos que el anterior. Es un
+        acento, no un forcejeo.
+     3. CORTA. `--dur-agitar` = 240 ms para los cuatro golpes juntos.
+
+   SOLO `rotate` Y `translate`, que son propiedades INDEPENDIENTES de
+   `transform`. No es un detalle: el acuse de presión global de `globals.css`
+   §4b anima `scale`, y una tarjeta o un botón que contenga esto puede estar
+   animando `translate` en su hover. Usando la propiedad independiente que
+   corresponde, las tres se componen solas y ninguna pisa a las otras — que es
+   lo que ocurriría si esto escribiese `transform: rotate(...)`.
+   ========================================================================== */
+
+.agitar {
+  /*
+    Amplitudes. Locales y no tokens del sistema, por el mismo criterio que
+    `--placa-pad` en `comercio-logo.module.css`: son la geometría de ESTA
+    pieza, y el sistema no tiene —ni necesita— una escala de ángulos. La
+    duración sí es un token (`--dur-agitar`), porque de duraciones el sistema
+    sí tiene escala y la regla es que no haya ninguna suelta.
+  */
+  --agitar-giro: 6deg;
+  --agitar-desvio: 2px;
+
+  /* Envoltorio del icono: no aporta caja propia ni rompe el `gap` del chip
+     que lo contenga. */
+  display: inline-flex;
+}
+
+/*
+  El disparo.
+
+  Que la regla exista SOLO mientras `data-agitado="si"` es lo que hace que la
+  animación se reproduzca sola en cada encendido: el navegador arranca una
+  animación cuando una declaración `animation` empieza a aplicarse a un
+  elemento. Al apagarse deja de aplicarse, y al volver a encenderse arranca
+  otra vez desde el principio.
+*/
+.agitar[data-agitado='si'] {
+  animation: agitar-giro var(--dur-agitar) var(--ease-in-out);
+}
+
+.agitar[data-agitado='si'][data-eje='lateral'] {
+  animation-name: agitar-lateral;
+}
+
+/*
+  Cuatro golpes con amortiguación: −1, +0,7, −0,3, 0. Termina EN CERO y sin
+  `animation-fill-mode`, así que el icono queda exactamente donde estaba: la
+  agitación no deja rastro geométrico, solo el recuerdo del acento.
+*/
+@keyframes agitar-giro {
+  0% {
+    rotate: 0deg;
+  }
+  22% {
+    rotate: calc(var(--agitar-giro) * -1);
+  }
+  55% {
+    rotate: calc(var(--agitar-giro) * 0.7);
+  }
+  80% {
+    rotate: calc(var(--agitar-giro) * -0.3);
+  }
+  100% {
+    rotate: 0deg;
+  }
+}
+
+@keyframes agitar-lateral {
+  0% {
+    translate: 0;
+  }
+  22% {
+    translate: calc(var(--agitar-desvio) * -1);
+  }
+  55% {
+    translate: calc(var(--agitar-desvio) * 0.7);
+  }
+  80% {
+    translate: calc(var(--agitar-desvio) * -0.3);
+  }
+  100% {
+    translate: 0;
+  }
+}
+
+/*
+  MOVIMIENTO REDUCIDO: AQUÍ SÍ ES «NADA».
+
+  El proyecto repite que `prefers-reduced-motion` no significa «sin feedback»
+  sino un equivalente no vestibular, y es cierto en general. Esta es la
+  excepción exacta: una agitación es movimiento vestibular PURO —oscilación de
+  alta frecuencia y baja amplitud, justo el estímulo que provoca el malestar—,
+  así que no hay versión reducida que conservar. Se retira entera.
+
+  Lo que ocupa su lugar NO se escribe aquí: es el propio estado seleccionado
+  del filtro (color, relleno, subrayado y texto), que existe siempre y para
+  todo el mundo. Por eso `Agitar` nunca puede ser el único portador de la
+  selección — ver la nota de accesibilidad en `agitar.tsx`.
+
+  Va con la MISMA especificidad que la regla de arriba y DESPUÉS en el archivo,
+  que es lo que le da la victoria. Y `animation: none` es legal porque es el
+  valor COMPLETO de la declaración: la prohibición del proyecto es sobre `none`
+  DENTRO de una lista separada por comas, que es otra cosa.
+
+  No lleva `data-motion-esencial`: la red de seguridad global de `globals.css`
+  §5 debe alcanzarlo, y lo alcanza. Esto es decorativo por definición.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .agitar[data-agitado='si'],
+  .agitar[data-agitado='si'][data-eje='lateral'] {
+    animation: none;
+    rotate: none;
+    translate: none;
+  }
+}

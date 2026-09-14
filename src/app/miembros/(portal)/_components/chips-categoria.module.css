@@ -89,6 +89,44 @@
   font-weight: 590;
 }
 
+/* ==========================================================================
+   EL ICONO Y EL SUBRAYADO  ·  encargos nº 10 y nº 11
+   ========================================================================== */
+
+/*
+  El hueco del icono. `display: flex` para que el `<svg>` —que globals.css pone
+  en `display: block`— quede centrado con la línea base del texto sin arrastrar
+  el descendente de la fuente.
+*/
+.icono {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/*
+  EL SUBRAYADO DEL CHIP ACTIVO.
+
+  Es el portador de FORMA que antes aportaba el check: sobrevive a la ceguera al
+  color y al tema oscuro. Se dibuja con `text-decoration` y no con un
+  pseudo-elemento porque aquí sí debe ceñirse al texto —el icono va aparte y ya
+  tiene su propia señal, la agitación— y porque un chip con relleno no deja
+  sitio para una barra sin tocar el borde de la píldora.
+
+  `--action-fg` es el color del texto sobre el relleno de tinta, así que el
+  subrayado hereda un par ya auditado.
+
+  `text-decoration-skip-ink` en `none`: con `auto`, las letras con descendente
+  (la "g" de "Gastronomía") abren huecos en la línea y el subrayado se lee
+  entrecortado a 14px.
+*/
+.activo .etiqueta {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  text-decoration-skip-ink: none;
+}
+
 @media (hover: hover) {
   .activo:hover {
     background: var(--action-hover);

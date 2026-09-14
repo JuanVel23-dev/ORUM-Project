@@ -202,20 +202,67 @@
 
      Valores para tema claro. En oscuro una sombra negra sobre fondo negro no
      se ve: globals.css las sustituye por sombras más densas + el filo de luz.
+
+     ── REVISIÓN W1 · 14/09/2026 · «las sombras casi no se ven» ──────────────
+     La primera escala de la v3 arreglaba la GRAMÁTICA —dos capas, tinte frío—
+     pero se quedó corta en AMPLITUD: con el halo de `--shadow-1` a 8px y al
+     5 % de opacidad, una tarjeta de papel blanco sobre fondo de papel blanco
+     no se despegaba, y esa separación es TODA la premisa de la v3. Si la
+     sombra es lo único que recorta una superficie de otra, una sombra que no
+     se ve equivale a no tener superficie.
+
+     Cómo se subió, que importa tanto como cuánto:
+
+       1. SE SUBIÓ EXTENSIÓN ANTES QUE OPACIDAD. El halo de cada escalón pasa
+          a desenfocar entre 1,5x y 2,5x más que antes; la opacidad sube
+          bastante menos en proporción. Es la diferencia entre luz y suciedad:
+          una sombra concentrada y opaca se lee como un cerco gris pegado al
+          borde; la misma cantidad de negro repartida sobre el doble de radio
+          se lee como volumen. Si al mirar una captura el gris se ve COMO
+          GRIS, es que se subió opacidad donde tocaba subir radio.
+
+       2. SE CONSERVAN LAS DOS CAPAS Y EL TINTE. Contacto corto + halo amplio,
+          rgb 20/20/28 en las dos. Nada de eso es negociable: el contacto es
+          lo que ancla el objeto al suelo, y sin él el halo solo hace que
+          flote sin tocar nada.
+
+       3. LA PROGRESIÓN SE HIZO MÁS ANCHA, no solo más fuerte. Entre escalón y
+          escalón el desenfoque del halo ~2,2x y el desplazamiento ~2x. Es lo
+          que hace legible la jerarquía de §2.2 —chip < tarjeta < menú <
+          overlay— de un vistazo y sin comparar dos objetos lado a lado.
+
+     El tema OSCURO no se toca aquí y no puede: allí estos valores no se
+     consumen (globals.css remapea los cuatro peldaños semánticos a sombras
+     negras densas) y lo que dibuja el límite es el ANILLO de `--edge-light`.
+     Subir la sombra clara no alcanza al oscuro; bajarle el anillo sí lo
+     rompería, y por eso `--edge-light` se queda exactamente como está.
      ======================================================================== */
 
   /* Lo que queda bajo el dedo al PULSAR: solo el contacto, sin halo. El objeto
-     no ha desaparecido, ha bajado hasta tocar el fondo. §3. */
-  --shadow-0: 0 1px 2px rgba(20, 20, 28, 0.05);
+     no ha desaparecido, ha bajado hasta tocar el fondo. §3.
 
-  --shadow-1: 0 1px 2px rgba(20, 20, 28, 0.06), 0 2px 8px rgba(20, 20, 28, 0.05);
-  --shadow-2: 0 2px 4px rgba(20, 20, 28, 0.07), 0 8px 20px rgba(20, 20, 28, 0.07);
-  --shadow-3: 0 4px 8px rgba(20, 20, 28, 0.08), 0 16px 40px rgba(20, 20, 28, 0.1);
-  --shadow-4: 0 8px 16px rgba(20, 20, 28, 0.1), 0 32px 72px rgba(20, 20, 28, 0.14);
+     Sube con el resto de la escala porque tiene que seguir siendo VISIBLE que
+     queda algo: si al pulsar la sombra desaparece del todo, el elemento no se
+     hunde, se apaga. Es el contacto de --shadow-1 sin su halo, literalmente. */
+  --shadow-0: 0 1px 2px rgba(20, 20, 28, 0.1);
+
+  /* chip elevado, interruptor, tarjeta en reposo */
+  --shadow-1: 0 1px 2px rgba(20, 20, 28, 0.1), 0 4px 12px rgba(20, 20, 28, 0.08);
+  /* tarjeta principal, tarjeta apuntada, tabla */
+  --shadow-2: 0 2px 5px rgba(20, 20, 28, 0.12), 0 10px 28px rgba(20, 20, 28, 0.1);
+  /* menú, toast, popover */
+  --shadow-3: 0 4px 10px rgba(20, 20, 28, 0.14), 0 20px 52px rgba(20, 20, 28, 0.14);
+  /* modal, hoja, paleta — cae sobre un scrim, así que aguanta más densidad */
+  --shadow-4: 0 8px 20px rgba(20, 20, 28, 0.18), 0 40px 88px rgba(20, 20, 28, 0.2);
 
   /* Un HUNDIDO no es un escalón negativo de la escala: es la misma luz entrando
-     al revés. Va `inset`, y por eso no puede salir de --shadow-1 invertido. */
-  --shadow-hundida: inset 0 1px 3px rgba(20, 20, 28, 0.07);
+     al revés. Va `inset`, y por eso no puede salir de --shadow-1 invertido.
+
+     Sube MENOS que la escala exterior, y a propósito: un inset sobre papel
+     blanco es el caso donde «gris sucio» ocurre antes, porque el desenfoque no
+     tiene a dónde escapar — queda encerrado dentro de la caja. Una sola capa,
+     corta, al 9 %. */
+  --shadow-hundida: inset 0 1px 3px rgba(20, 20, 28, 0.09);
 
   /*
      Filo de luz: cómo se comunica el material en tema OSCURO, donde la sombra
@@ -351,6 +398,22 @@
   --dur-instant: 100ms; /* feedback de presión */
   --dur-fast: 180ms; /* hover, color, opacidad */
 
+  /*
+    LA AGITACIÓN  ·  el único acento seco de un sistema por lo demás suave.
+
+    Vive aquí y no dentro del componente porque una duración es un token, sin
+    excepciones — pero la tensión que resuelve conviene leerla entera en
+    `src/components/ui/agitar.tsx`.
+
+    En resumen: todo lo que responde a un dedo es SUAVE (entrada rápida, salida
+    decelerada, resorte sin rebote). La agitación es lo contrario, y por eso
+    tiene que estar acotada por tiempo: 240 ms es lo que dura un acento y no
+    una vibración. Una agitación que se alarga o se repite deja de significar
+    «seleccionado» y pasa a significar «error», que es lo que este gesto
+    comunica en el 90 % de las interfaces (el campo de contraseña incorrecta).
+  */
+  --dur-agitar: 240ms;
+
   /* ------------------------------------------------------------------------
      RESPUESTA AL PULSAR
 
@@ -362,10 +425,30 @@
        (`--ease-rebote`). Ese sobreimpulso es el "rebote" que se percibe en
        iOS: vive en la VUELTA, no en la ida. Si se pusiera también al pulsar,
        el elemento titubearía bajo el dedo y se leería como juguete.
+
+     ── REVISIÓN W1 · 14/09/2026 · «suavidad, no sequedad» ──────────────────
+     La vuelta duraba 440 ms con un sobreimpulso de +12 %, y las dos cosas
+     estaban fuera de la norma que este mismo proyecto escribe:
+
+       · 440 ms queda por encima de la banda de respuesta que la v3 §3.2 fija
+         para un resorte crítico (0,3–0,4 s) y de `SPRING_UI` (0,35 s), que es
+         el vocabulario al que esta curva debería sonar igual. Tres cuartos de
+         segundo de ida y vuelta sobre un botón se percibe como pereza, no
+         como lujo. Baja a 320 ms, dentro de la banda.
+
+       · `cubic-bezier(0.34, 1.56, 0.64, 1)` se pasa ~+12 % del destino. «El
+         rebote se gana»: soltar un botón no es un gesto con momento ni algo
+         que aparece encima, así que ese rebote era gratuito y se leía como
+         goma. Se conserva el sobreimpulso —es lo que distingue una vuelta
+         viva de una muerta— pero recortado a ~+4 %: se siente, no se mira.
+
+     `--ease-spring` NO se toca: sigue en 1.56 y sigue siendo la curva del
+     rebote que SÍ se ganó (gesto con momento, aparición por encima). Lo que
+     cambia es que la vuelta del acuse de presión deja de usar esa amplitud.
      ---------------------------------------------------------------------- */
   --dur-press: 90ms; /* ida: instantánea */
-  --dur-rebote: 440ms; /* vuelta: elástica */
-  --ease-rebote: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-rebote: 320ms; /* vuelta: elástica, dentro de la banda del resorte */
+  --ease-rebote: cubic-bezier(0.22, 1.2, 0.36, 1); /* sobreimpulso ~+4 % */
 
   /* Cuanto más pequeño el control, más porcentaje necesita para notarse:
      un 4% en un botón grande se ve; en un icono de 30px, no. */
@@ -447,12 +530,33 @@
      Con --text-3 el mismo píxel daría 5,26:1 en claro y 3,33:1 en oscuro. */
   --placa-logo-inicial: var(--n-500);
 
-  /* Apaisada, no cuadrada: con `contain` un logotipo 4:1 se pinta al 25 % de
-     su alto en un cuadro 1:1, y al ~50 % en 3:2. */
-  --placa-logo-ratio: 3 / 2;
+  /*
+    CIRCULAR  ·  encargo del propietario, W1 · 14/09/2026.
 
-  /* Ancho en tarjeta. La ALTURA NO SE DECLARA: la deriva el aspect-ratio.
-     El hero de la ficha sobrescribe este token localmente a 144px. */
+    Aquí decía «apaisada, no cuadrada: con `contain` un logotipo 4:1 se pinta
+    al 25 % de su alto en un cuadro 1:1 y al ~50 % en 3:2». La geometría de esa
+    frase sigue siendo cierta y el encargo la asume: los logos de los comercios
+    son CÍRCULOS.
+
+    Qué se paga y qué NO se paga por ello:
+
+      · SE PAGA tamaño óptico en los logotipos muy apaisados. Un 4:1 ocupa poca
+        altura dentro del círculo y queda aire arriba y abajo. Correcto.
+      · NO SE PAGA la marca. `object-fit` sigue en `contain`, nunca `cover`: un
+        logotipo es una marca, y recortarlo la mutila —un 4:1 metido a `cover`
+        en un círculo pierde justo los lados, o sea el nombre—. Se muestra
+        entero o no se muestra. Esto no se revierte «para que llene mejor».
+
+    El relleno de la placa sube en las tres variantes precisamente por esto:
+    dentro de un círculo el área utilizable no es el cuadro, es el cuadrado
+    inscrito (~70 % del diámetro), y con el relleno anterior el filo curvo
+    recortaba las esquinas del logotipo. Ver `comercio-logo.module.css`.
+  */
+  --placa-logo-ratio: 1 / 1;
+
+  /* Diámetro en tarjeta. La ALTURA NO SE DECLARA: la deriva el aspect-ratio,
+     que ahora es 1/1 — así el círculo no puede volverse óvalo por descuido.
+     El hero de la ficha y la portada del carrusel lo sobrescriben localmente. */
   --placa-logo-w: 72px;
 }
 

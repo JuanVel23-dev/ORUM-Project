@@ -43,13 +43,15 @@ function TarjetaComercio() {
     <Card>
       <div className={tarjeta.tarjeta}>
         <div className={tarjeta.cabecera}>
-          {/* La placa REAL: 72x48 y su radio. Si el esqueleto dibujara un
-              cuadrado de 44 y llegara un rectángulo de 72x48, el relevo
-              saltaría justo donde el ojo está mirando. */}
+          {/* La placa REAL, y desde el 14/09/2026 es un CÍRCULO: mismo
+              diámetro y mismo radio que `ComercioLogo`. Antes decía
+              `* 2 / 3` —la proporción rectangular de entonces— y al volverse
+              circular el esqueleto prometía una forma que ya no llegaba: el
+              relevo saltaba justo donde el ojo está mirando. */}
           <Skeleton
             width="var(--placa-logo-w)"
-            height="calc(var(--placa-logo-w) * 2 / 3)"
-            radius="var(--radius-xs)"
+            height="var(--placa-logo-w)"
+            radius="var(--radius-full)"
           />
           <Stack gap={1}>
             <Skeleton width="140px" height="20px" />

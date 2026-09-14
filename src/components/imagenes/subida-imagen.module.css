@@ -1,0 +1,173 @@
+/* ==========================================================================
+   SUBIDA DE IMAGEN
+   --------------------------------------------------------------------------
+   La vista previa es una PLACA, con el mismo razonamiento que `ComercioLogo`:
+   lo que une imágenes de proporciones distintas no es recortarlas, es el
+   marco. Mismo tamaño, mismo relleno, mismo filo y mismo radio.
+
+   Sin sombra: esto no flota, está encajado dentro del formulario. La v3 avisa
+   de que el modo de fallo de esta dirección es que todo levite.
+   ========================================================================== */
+
+.subida {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.fila {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+/*
+  Se apila solo, sin consulta.
+
+  Aquí NO cabe un `@container contenido`: este control vive casi siempre
+  dentro de un `<Overlay>`, que se monta en un `<dialog>` fuera de `.main`, y
+  una consulta de contenedor sin contenedor ancestro no casa NUNCA — falla en
+  silencio, que es peor que no ponerla. `flex-wrap` resuelve lo mismo sin
+  depender de dónde esté montado.
+*/
+
+.campo {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+/* El botón NO se estira a todo el ancho del campo: una acción secundaria de
+   ancho completo compite con el primario del formulario que la rodea. */
+.campo > button {
+  justify-self: start;
+}
+
+/* --- La placa de vista previa --------------------------------------------- */
+
+.previa {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  /* Mismos tokens que la placa del catálogo: la imagen no es nuestra y se
+     calibró contra fondo claro, así que la placa no sigue el tema. */
+  background: var(--placa-logo-bg);
+  border: 1px solid var(--placa-logo-borde);
+  padding: var(--space-2);
+
+  width: 96px;
+}
+
+.cuadrada {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-lg);
+}
+
+.circulo {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-full);
+}
+
+/* Apaisada para portadas: un 16/9 dentro de un cuadro 1:1 se pintaría al 56 %
+   de su alto y no se vería lo que de verdad se está subiendo. */
+.apaisada {
+  aspect-ratio: 16 / 9;
+  width: 168px;
+  border-radius: var(--radius-md);
+}
+
+.imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* En un círculo `contain` deja dos lunas vacías arriba y abajo: una foto de
+   persona se recorta, que es lo que hace cualquier avatar. */
+.circulo .imagen {
+  object-fit: cover;
+  border-radius: var(--radius-full);
+}
+
+.inicial {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+  color: var(--placa-logo-inicial);
+}
+
+/* --- El selector de archivo ----------------------------------------------- */
+
+/*
+  Un control de ENTRADA conserva su borde en reposo (v3 §2.5): sin él, sobre
+  papel blanco no hay forma de saber dónde se pulsa. La regla de «sin trazo»
+  es para superficies.
+*/
+.archivo {
+  width: 100%;
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-2);
+
+  font-family: inherit;
+  font-size: var(--t-control-size);
+  line-height: var(--t-body-leading);
+
+  cursor: pointer;
+}
+
+.archivo:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  El botón interno del navegador. Se estiliza en vez de ocultarlo: es el que
+  abre el diálogo del sistema y el que anuncia el lector de pantalla.
+*/
+.archivo::file-selector-button {
+  margin-right: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  min-height: 32px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--surface-sunk);
+  color: var(--text);
+
+  font-family: inherit;
+  font-size: var(--t-caption-size);
+  font-weight: var(--t-callout-weight);
+
+  cursor: pointer;
+
+  /* Solo color: no hay transform posible sobre un pseudoelemento del navegador
+     sin arrastrar el campo entero. */
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .archivo:hover::file-selector-button {
+    background: var(--surface-hover);
+    /* §2.3: al señalar aparece el filo dorado. Aquí es borde, no sombra,
+       porque un pseudoelemento de control no admite elevación fiable. */
+    border-color: var(--brand-edge);
+  }
+}
+
+/* El acuse de pulsación va en `pointerdown`, que en CSS es `:active`. */
+.archivo:active::file-selector-button {
+  background: var(--surface-hover);
+}

@@ -21,6 +21,10 @@ import styles from './perfil.module.css'
   QR a la derecha, dos columnas bajo 620px). Se corrigió aquí, no en la
   página: la forma que manda es la de §6.3.
 
+  Y con W3 el carnet ganó la foto del socio, así que el esqueleto la reserva
+  también. Un esqueleto que se queda corto es peor que ninguno: el contenido
+  real llega, empuja todo hacia abajo y el QR —el bloque más grande— salta.
+
   No lleva el envoltorio de aparición: el carnet aparece cuando llega el
   carnet, no cuando llega su hueco. `Skeleton` ya se exime de la regla global
   de movimiento reducido (`data-motion-esencial`), porque un esqueleto
@@ -38,13 +42,27 @@ export default function Loading() {
       <div className={styles.columnas}>
         <Card padding="lg" variant="brand" principal className={styles.carnet}>
           <Stack gap={5}>
-            <Stack gap={5}>
-              <Skeleton width="62px" height="12px" />
-              <Stack gap={1}>
-                <Skeleton width="min(240px, 70%)" height="28px" />
+            {/*
+              La silueta de la identidad: foto a la izquierda, wordmark,
+              nombre, plan y el botón de la foto a la derecha. Reserva el hueco
+              de la FOTO aunque el socio no tenga ninguna: el respaldo de
+              iniciales ocupa exactamente el mismo cuadro de 72px, así que la
+              reserva vale para los dos casos y el carnet no salta al llegar.
+            */}
+            <div className={styles.identidad}>
+              <Skeleton width="72px" height="72px" radius="var(--radius-md)" />
+              <div className={styles.identidadTextos}>
+                <Skeleton width="62px" height="12px" />
+                <Skeleton width="min(240px, 85%)" height="32px" />
                 <Skeleton width="112px" height="18px" />
-              </Stack>
-            </Stack>
+                <Skeleton
+                  width="136px"
+                  height="36px"
+                  radius="var(--radius-sm)"
+                  className={styles.cambiarFoto}
+                />
+              </div>
+            </div>
 
             {/*
               224px = los 160px del SVG más los 32px de zona de silencio a cada

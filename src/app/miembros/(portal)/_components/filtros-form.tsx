@@ -30,6 +30,7 @@ export function FiltrosForm({
   marcaId,
   ciudadId,
   categoriaId,
+  ver,
   marcas,
   ciudades,
 }: {
@@ -38,6 +39,14 @@ export function FiltrosForm({
   ciudadId: string
   /** No tiene control aquí: lo eligen los chips. Viaja escondido. */
   categoriaId: string
+  /**
+   * La vista activa (`?ver=`). Tampoco tiene control aquí: la elige el selector
+   * de vista, que está fuera de este formulario. Viaja escondida por la misma
+   * razón que la categoría — ver la nota de `ocultos`.
+   *
+   * Cadena vacía cuando es la vista por defecto, que no se escribe en la URL.
+   */
+  ver: string
   marcas: Opcion[]
   ciudades: Opcion[]
 }) {
@@ -80,11 +89,12 @@ export function FiltrosForm({
   */
   const ocultos = [
     { name: 'categoria_id', valor: categoriaId },
+    { name: 'ver', valor: ver },
     { name: 'marca_id', valor: marcaId },
     { name: 'ciudad_id', valor: ciudadId },
   ].filter((c) => c.valor !== '' && !nombresRenderizados.has(c.name))
 
-  const hayFiltros = Boolean(q || marcaId || ciudadId || categoriaId)
+  const hayFiltros = Boolean(q || marcaId || ciudadId || categoriaId || ver)
 
   /* Abierto si alguno de SUS controles está activo: nunca puede haber un
      filtro aplicado y escondido detrás de un triángulo cerrado. */
