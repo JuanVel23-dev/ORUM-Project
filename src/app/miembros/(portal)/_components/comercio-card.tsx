@@ -283,8 +283,13 @@ export function ComercioCardCompacta({
 
   return (
     /* Mismo marco y por la misma razón que en la tarjeta de la rejilla: el
-       corazón no puede vivir dentro del enlace. Ver la nota de `ComercioCard`. */
-    <div className={styles.marco}>
+       corazón no puede vivir dentro del enlace. Ver la nota de `ComercioCard`.
+
+       `marcoCompacta` añade el contenedor de consulta: cuando la estantería
+       tiene pocas tarjetas y cada una se ensancha, ESTA tarjeta se entera y
+       cambia de forma. La clase es solo de la compacta —la de la rejilla no la
+       lleva— para no meter contención donde vive el `view-transition-name`. */
+    <div className={`${styles.marco} ${styles.marcoCompacta}`}>
       <Link href={hrefFicha(comercio.id, volver)} className={styles.enlace}>
         {/* `sm`: 24px de relleno sobre una tarjeta de 200px dejarían 152 de
             contenido, y el nombre empezaría a truncarse antes de tiempo. */}

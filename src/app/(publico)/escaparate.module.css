@@ -187,6 +187,23 @@
   box-shadow: inset 0 -1px 0 var(--brand-edge);
 }
 
+/*
+  LAS DOS FILOS, para la franja que va EMPAREDADA entre dos de papel.
+
+  El héroe solo necesita el de abajo: por arriba lo cierra la cabecera. El
+  cierre de la landing, en cambio, tiene papel encima y papel debajo.
+
+  Y en tema OSCURO esto deja de ser decoración y pasa a ser lo único que
+  delimita la franja: el cacao #2b1a15 contra el fondo raíz #14100e da
+  **1,15:1** medido. En claro el salto papel→cacao es evidente por sí solo y
+  el filo es el device caro de las referencias; en oscuro es el borde.
+*/
+.filoBanda {
+  box-shadow:
+    inset 0 1px 0 var(--brand-edge),
+    inset 0 -1px 0 var(--brand-edge);
+}
+
 /* ==========================================================================
    2. TIPOGRAFÍA CEREMONIAL COMPARTIDA
    --------------------------------------------------------------------------

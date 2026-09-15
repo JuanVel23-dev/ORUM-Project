@@ -215,12 +215,26 @@
   max-height: 280px;
 
   overflow: hidden;
-  border-radius: var(--radius-lg);
+  /* `--radius-xl`, el escalón de superficie héroe, y el mismo que la placa de
+     la galería: la cubierta y las fotos son el mismo material. */
+  border-radius: var(--radius-xl);
 
   /* Mientras la imagen carga, el hueco se ve como hueco y no como una tarjeta
      vacía: es para lo que existe `--surface-hueco`. */
   background: var(--surface-hueco);
-  box-shadow: var(--shadow-card), var(--edge);
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+/*
+  En escritorio la cubierta se ensancha y se aplana: a 1050px un 3:2 con tope
+  de 280px se recorta por arriba y por abajo y deja de encuadrar nada. El 21:9
+  es la proporción de una cabecera, no la de una foto suelta.
+*/
+@container contenido (min-width: 900px) {
+  .portada {
+    aspect-ratio: 21 / 9;
+    max-height: 340px;
+  }
 }
 
 .portadaImagen {
@@ -393,25 +407,61 @@
 /*
   EL CAMPO DE COLOR  ·  v4 §4 — «sin sombra, jerarquía por campos de color»
 
-  La ficha era una plancha blanca de arriba abajo. Un campo de crema alrededor
-  de «Tus beneficios» separa la RESPUESTA del contexto sin dibujar una sola
-  línea, que es lo que hace Agence Cartier con cero sombras en toda su página.
+  La ficha era una plancha blanca de arriba abajo. Ahora el ritmo es
+  papel (hero) → crema (beneficios) → cacao (carnet) → papel (fotos, sedes):
+  cuatro bloques separados por TINTE, sin dibujar una sola línea, que es lo que
+  hace Agence Cartier con cero sombras en toda su página.
 
-  1,04:1 contra el papel: no es un escalón de elevación y no sustituye a la
-  sombra. Lo que separa una tarjeta de su fondo sigue siendo la sombra; esto
-  separa una SECCIÓN de otra.
+  EL TINTE NO LO PINTA ESTE ARCHIVO. Lo pone `<Section tono="crema">` y
+  `<Section tono="cacao">` (`src/components/ui/layout.tsx`), que es la
+  herramienta que la v4 dejó para esto. Aquí antes había un `.seccionCrema`
+  propio con su `background` y su `padding`: funcionaba, pero se quedaba fuera
+  de la escala del sistema —el componente baja el relleno y el radio por debajo
+  de 600px de CONTENEDOR, que es justo el ancho de la hoja del overlay— y
+  duplicaba una decisión que ya estaba tomada en un solo sitio.
 
-  Contrastes sobre crema (#faf7f0), todos medidos: `--text` 16,25:1 ·
-  `--text-2` 7,04:1 · `--text-3` 4,52:1 · `--gold-700` 4,55:1. Los cuatro pasan
-  AA, así que dentro del campo no hay que retocar ningún tono.
+  Crema es 1,04:1 contra el papel: NO es un escalón de elevación y no sustituye
+  a la sombra. Lo que separa una tarjeta de su fondo sigue siendo la sombra;
+  esto separa una SECCIÓN de otra.
 
-  El relleno se toma del ancho: pegado al filo, un campo de color se lee como
-  un error de fondo y no como una sección.
+  Contrastes sobre crema (#faf7f0), medidos: `--text` 16,25:1 · `--text-2`
+  7,04:1 · `--text-3` 4,52:1 · `--gold-700` 4,55:1. Los cuatro pasan AA, así
+  que dentro del campo no hay que retocar ningún tono.
+
+  ⚠️ Lo que se PIERDE al cambiar al componente: `Section` no reenvía
+  `aria-labelledby`, así que el bloque de beneficios deja de exponerse como
+  `region` con nombre y pasa a ser un `<section>` genérico. El `h2` sigue ahí y
+  la navegación por encabezados —que es la que de verdad usa un lector de
+  pantalla en una ficha— no cambia. Las dos secciones que conservan su nombre
+  (fotos y sedes) siguen siendo `<section>` nativas. Reenviar los atributos ARIA
+  desde `Section` es cambio de `src/components/**`: queda anotado, no hecho.
 */
-.seccionCrema {
-  background: var(--surface-alt);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
+
+/*
+  El encabezado de una sección cuando lleva algo a la derecha (hoy, el conteo
+  de fotos). Sin él el número se iría a su propia línea.
+*/
+.cabeceraSeccion {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/*
+  EL CONTEO DE FOTOS. Un carril horizontal esconde por definición cuánto hay a
+  la derecha; el número lo dice antes de que el socio empiece a arrastrar.
+
+  Cifras tabulares y `--text-2` (7,34:1 sobre papel): es un dato de apoyo, no
+  un titular, y no lleva oro — el oro de esta pantalla está entero en la franja
+  de cacao.
+*/
+.conteo {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  color: var(--text-2);
 }
 
 .tituloSeccion {
@@ -616,19 +666,143 @@
 }
 
 /* ==========================================================================
-   ACCIÓN PRINCIPAL
+   LA FRANJA DE CACAO  ·  la acción principal  ·  W1
+   --------------------------------------------------------------------------
+   Va entre los beneficios y las sedes (`SPEC §5.3`): el socio lee lo que le
+   descuentan y en ese momento exacto tiene delante el botón que lo hace
+   efectivo. Arriba llegaría antes de que sepa si le interesa; al final de la
+   página quedaría escondida tras la lista de sucursales.
+
+   Lo nuevo es el MATERIAL. Era un botón suelto sobre papel; ahora es una
+   franja de chocolate, que es el cambio de registro que dice «aquí se pasa de
+   leer a actuar» sin una palabra de más — y el único fondo del sistema donde
+   el oro de acción se lee metal y no mostaza.
+
+   EL TINTE Y EL RELLENO LOS PONE `<Section tono="cacao">`, que además remapea
+   `--surface`, `--text`, `--text-2`, `--text-3`, `--brand`, `--brand-edge` y
+   `--focus` hacia dentro. Este bloque solo añade lo que el componente NO
+   remapea y sin lo cual algo de dentro saldría ilegible.
+
+   RATIOS MEDIDOS (sRGB, fórmula WCAG 2.x) sobre `--cacao-bg` #2b1a15:
+
+     --cacao-fg    papel #fdfcfa ..... 16,24:1   el titular
+     --cacao-fg-2  --n-300 #c4b8ac ....  8,56:1   la línea de apoyo
+     --gold-400    #d5ac5b ............  7,83:1   la versalita y el foco
+     --gold-600    #a8812b ............  4,63:1   el filo del botón (1.4.11: ≥3)
+     --tinta-1 sobre --gold-600 .......  4,84:1   el texto del botón (1.4.3: ≥4,5)
+
+   ⚠️ `--text-3` se COLAPSA en `--text-2`. `Section` lo baja a `--cacao-fg-3`
+   (`--n-400`), que da 5,78:1 contra el fondo de la franja pero 4,98:1 sobre
+   `--cacao-surface` y 4,02:1 sobre `--cacao-hover`: en cuanto algo se eleva
+   dentro, el tercer nivel se queda sin margen. Se pierde un escalón de
+   jerarquía y se gana que el texto se lea. Es la misma decisión que toma el
+   carnet en `perfil.module.css`, y por el mismo motivo.
    ========================================================================== */
 
 /*
-  Va entre los beneficios y las sedes (`SPEC §5.3`): el socio lee lo que le
-  descuentan y en ese momento exacto tiene delante el botón que lo hace
-  efectivo.
-
-  Es un contenedor sin estilo visual propio a propósito. Existe para que el
-  botón sea un hijo directo identificable de `.pagina` y pueda recolocarse en
-  el carril de escritorio sin que el marcado cambie de orden.
+  Doble clase (0,2,0) a propósito: estos valores CORRIGEN a `layout.module.css`
+  y el orden entre dos módulos CSS en el bundle no está garantizado. Con la
+  misma especificidad, cuál gana dependería del orden de importación.
 */
-.accion {
+.zonaCarnet.zonaCarnet {
+  /* Barras de scroll y controles nativos de dentro, en su variante oscura. */
+  color-scheme: dark;
+
+  /*
+    LA ACCIÓN SE INVIERTE. En claro `--action` es `--tinta-1`: sobre cacao
+    daría 1,04:1, o sea un botón negro sobre chocolate. Un `variant="primary"`
+    que entrara aquí mañana sería invisible, y el fallo no lo vería nadie hasta
+    tenerlo delante. Papel sobre cacao: 16,24:1.
+  */
+  --action: var(--w-0);
+  --action-hover: var(--n-100);
+  --action-fg: var(--cacao-bg);
+
+  /* Los tres bordes del tema claro son TINTA y aquí desaparecen. Sobre cacao
+     el filo es LUZ, igual que en el tema oscuro. */
+  --border: color-mix(in srgb, var(--w-0) 26%, transparent);
+  --border-subtle: color-mix(in srgb, var(--w-0) 14%, transparent);
+  --border-superficie: transparent;
+
+  /* Ver el aviso de la cabecera. */
+  --text-3: var(--cacao-fg-2);
+
+  /*
+    `Section` deja el foco en `--cacao-edge` (`--gold-600`, 4,63:1). Se sube a
+    `--gold-400` (7,83:1) por dos motivos: se ve más, y el anillo del botón
+    dorado aterriza a 2px de un relleno que ES `--gold-600` — con el mismo tono
+    a los dos lados del hueco el anillo se confunde con el propio botón.
+  */
+  --focus: var(--cacao-brand);
+
+  /* En claro `--edge` es transparente porque lo que recorta es la sombra. Aquí
+     el fondo es oscuro en los dos temas y hace falta el anillo de luz. */
+  --edge: var(--edge-light);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  align-items: stretch;
+}
+
+.carnetTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Versalitas en oro de display: 7,83:1. Es etiqueta ceremonial, no dato — el
+   oro de esta pantalla no codifica nada. */
+.carnetOverline {
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+/*
+  EL TITULAR VA EN SANS, no en Fraunces, y es una decisión.
+
+  El acento serif de esta pantalla lo lleva el `h1` con el nombre del comercio
+  (`--t-hero-2`, 32→48px). Un segundo serif a la vista y el acento deja de
+  serlo — «un acento por pantalla» es de las pocas reglas tipográficas que la
+  licencia v4 NO levanta, porque lo que la sostiene es aritmética, no gusto.
+
+  Y no es `h2`: no encabeza una sección de contenido, es la línea de una
+  llamada a la acción. Meterlo en el índice de encabezados pondría «Enséñalo en
+  la caja» entre «Tus beneficios» y «Fotos», que no es una sección.
+
+  16,24:1.
+*/
+.carnetTitular {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+  color: var(--text);
+  text-wrap: balance;
+}
+
+/* 8,56:1. */
+.carnetApoyo {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+/*
+  El botón va `fullWidth` con un TOPE. En el teléfono ocupa la franja entera,
+  que es lo que se quiere de una acción principal; en escritorio, sin el tope,
+  sería una barra dorada de 700px — el propio presupuesto de oro de la v4 avisa
+  de que un CTA a ancho completo ronda ya el 6-8% del lienzo él solo.
+*/
+.carnetAccion {
   display: flex;
 }
 
@@ -647,6 +821,28 @@
      obligan a desplazarse para ver la tercera. */
   .listaSedes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /*
+    La franja de cacao se abre en dos: el texto a la izquierda, la acción a la
+    derecha y alineada al centro óptico del bloque. Apilada a 700px el botón
+    quedaba a media franja de distancia del texto que lo justifica.
+
+    Aplica también DENTRO del overlay: `.enOverlay` se declara contenedor con
+    el mismo nombre, y la hoja mide ~656px de contenido.
+  */
+  .zonaCarnet.zonaCarnet {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-7);
+  }
+
+  .carnetAccion {
+    /* Ni se estira ni se encoge: el botón mide lo que mide su etiqueta más su
+       relleno, con un suelo para que no quede raquítico al lado de la franja. */
+    flex: 0 0 auto;
+    min-width: 220px;
   }
 }
 
@@ -698,7 +894,8 @@
       'hero   sedes'
       'desc   sedes'
       'benef  sedes'
-      'resto  accion';
+      'carnet sedes'
+      'fotos  fotos';
     column-gap: var(--space-8);
     row-gap: 0;
     align-content: start;
@@ -726,12 +923,20 @@
   }
 
   /*
-    Las dos secciones comparten la clase `.seccion`, así que se distinguen por
-    el `aria-labelledby` que ya las identifica en el marcado. No se añade una
-    clase de layout: el atributo es la misma verdad y no puede desincronizarse
-    del `h2` al que apunta.
+    LAS ÁREAS SE ASIGNAN POR CLASE, no por `section[aria-labelledby=…]`.
+
+    El selector de atributo funcionaba, pero ataba el layout al nombre
+    accesible de la sección: el día que «Tus beneficios» dejó de ser un
+    `<section>` nativo para pasar a `<Section tono="crema">` —que no reenvía
+    `aria-labelledby`— la regla dejó de casar y el bloque se descolocó sin que
+    nada fallara. Una clase de layout dice lo que es y no depende de un atributo
+    que existe para otra cosa.
+
+    Y LA GALERÍA LLEVA LA SUYA. Antes no tenía área: caía en la única celda
+    libre por AUTOCOLOCACIÓN, o sea que su posición dependía de que ninguna otra
+    sección se moviera. Añadir un bloque la habría desplazado en silencio.
   */
-  .pagina > section[aria-labelledby='titulo-beneficios'] {
+  .zonaBeneficios {
     grid-area: benef;
     /* Este tramo lleva `row-gap: 0` y el ritmo por márgenes. Con el campo de
        crema el hueco ya no es opcional: sin él, el filo inferior del campo
@@ -739,17 +944,27 @@
     margin-bottom: var(--space-6);
   }
 
-  .pagina > section[aria-labelledby='titulo-sedes'] {
-    grid-area: sedes;
-    /* Se alinea arriba y conserva su alto de contenido: sin esto se estiraría
-       a lo alto de las tres filas que abarca el área. */
+  .zonaCarnet.zonaCarnet {
+    grid-area: carnet;
     align-self: start;
   }
 
-  .accion {
-    grid-area: accion;
+  /*
+    LA GALERÍA CIERRA LA PÁGINA A ANCHO COMPLETO. Es donde el carril de fotos
+    cobra sentido: 700px de columna dan dos fotos y media, los ~1050px del
+    ancho entero dan cuatro. Encajonarla en la columna principal era pedirle a
+    lo más apetecible de la ficha que se conformara con el hueco que sobraba.
+  */
+  .zonaFotos {
+    grid-area: fotos;
+    margin-top: var(--space-9);
+  }
+
+  .zonaSedes {
+    grid-area: sedes;
+    /* Se alinea arriba y conserva su alto de contenido: sin esto se estiraría
+       a lo alto de las cuatro filas que abarca el área. */
     align-self: start;
-    margin-top: var(--space-6);
   }
 
   /* Con el carril a 320px caben de sobra dos columnas de texto, pero no dos
@@ -774,13 +989,16 @@
 
 .galeria {
   display: flex;
-  gap: var(--space-3);
+  gap: var(--space-4);
   margin: 0;
   padding: 0;
   list-style: none;
 
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  /* Sin esto, `scroll-snap-align: start` ancla la foto al filo exacto del
+     carril y la sombra del escalón queda recortada contra el borde. */
+  scroll-padding-inline-start: var(--space-1);
   /* Sin scroll encadenado: al llegar al final del carril no arrastra la página
      de detrás, que en una hoja modal se siente como si el overlay se cerrara. */
   overscroll-behavior-x: contain;
@@ -793,26 +1011,64 @@
   display: none;
 }
 
+/*
+  PRESENCIA  ·  W1. La galería era un carril de miniaturas de 320px con el
+  radio de una tarjeta normal: informaba, pero no hacía desear nada — y la
+  ficha existe, entre otras cosas, para que el socio quiera ir.
+
+  Tres cambios y ninguno cuesta un byte de JavaScript:
+
+    · TAMAÑO. 82% del carril y hasta 460px, en 3:2 en vez de 4:3. Una foto de
+      un local apaisada se lee como fotografía; en 4:3 se lee como recorte de
+      catálogo. Y el 82% deja asomar el borde de la siguiente, que es lo que
+      dice «hay más» sin dibujar una flecha.
+    · RADIO. `--radius-xl`, el escalón de superficie héroe. Lo redondo se lee
+      amable y encaja con los logotipos circulares (v4 §4).
+    · SOMBRA. Sube a `--shadow-raised`. Aquí la sombra SÍ decora, que es una de
+      las restricciones que la licencia creativa levanta explícitamente: son
+      cuatro objetos como mucho, no una lista larga, y `CLAUDE.md` prohíbe la
+      sombra en filas de lista justamente porque allí se repite cien veces.
+
+  La foto flota porque es contenido que el dedo podría levantar. El resto de la
+  ficha se apoya en la superficie que ya la contiene.
+*/
 .foto {
   flex: 0 0 auto;
   scroll-snap-align: start;
 
-  width: 72%;
-  max-width: 320px;
-  aspect-ratio: 4 / 3;
+  width: 82%;
+  max-width: 460px;
+  aspect-ratio: 3 / 2;
 
   overflow: hidden;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
 
-  /* La foto flota: es contenido que el dedo puede levantar. El resto de la
-     ficha se apoya en la superficie que ya la contiene. */
   background: var(--surface-hueco);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-raised);
 }
 
 @container contenido (min-width: 560px) {
   .foto {
-    width: 46%;
+    width: 52%;
+  }
+}
+
+/*
+  A ancho completo la galería cierra la página (ver el tramo de 900px), así que
+  caben tres y media: suficiente para que se lea como una galería y no como dos
+  fotos sueltas.
+*/
+@container contenido (min-width: 900px) {
+  .foto {
+    width: 29%;
+    max-width: none;
+  }
+
+  /* El estado vacío NO se estira con el carril. Una tarjeta de 1050px que dice
+     «todavía no hay fotos» es el bloque más grande de la ficha diciendo lo que
+     menos importa. */
+  .fotosVacias {
+    max-width: 640px;
   }
 }
 

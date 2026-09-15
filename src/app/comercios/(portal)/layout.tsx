@@ -41,7 +41,7 @@ export default async function ComerciosLayout({ children }: { children: ReactNod
           <form action={cerrarSesionComercio}>
             <DropdownMenu
               trigger={
-                <button type="button" aria-label="Mi cuenta">
+                <button type="button" className={styles.botonCuenta} aria-label="Mi cuenta">
                   <Avatar nombre={comercio?.nombre ?? correo} size="sm" decorativo />
                 </button>
               }

@@ -273,6 +273,34 @@
 }
 
 /*
+  EL VALOR DE LA COMPRA SE VE MÁS GRANDE QUE CUALQUIER OTRO CAMPO.
+
+  Es el único dato que el cajero TECLEA, y el segundo número más mirado de la
+  pantalla después del veredicto. A cuerpo de formulario, un cero de más pasa
+  desapercibido; a `--t-title-2` con cifras tabulares y alineado a la derecha
+  —como una caja registradora o un datáfono— se ve de un vistazo.
+
+  La clase va en un envoltorio y se aplica por descendencia (`.importe input`)
+  en lugar de pasarse como `className` al propio `Input`. No es capricho:
+  `Input` concatena la clase recibida DESPUÉS de `.control`, pero las dos
+  tienen la misma especificidad (0,1,0) y quién gana depende del orden en que
+  el empaquetador junte los dos módulos CSS. Con el descendiente son (0,1,1)
+  contra (0,1,0) y el resultado deja de depender del orden de compilación.
+
+  `min-height` se queda donde lo puso `Input` (`--tap-min`): el texto crece, el
+  objetivo táctil ya cumplía.
+*/
+.importe input {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/*
   Dato mostrado con forma de campo.
 
   El descuento calculado por la promoción NO es un campo: si fuera un `input`
@@ -320,8 +348,28 @@
 }
 
 /*
-  El valor final es la cifra que se le canta al cliente. Va aparte, en su
-  propia franja, para que no se confunda con los dos campos que la producen.
+  EL TOTAL ES EL PIE DEL RECIBO, NO UNA CAJA DENTRO DE OTRA CAJA.
+
+  Antes era una franja con `border: 1px solid var(--border-strong)` y relleno
+  `--surface-sunk`. Las dos mitades de eso dejaron de existir con la v4:
+
+    · `--border-strong` es tinta plena (16,96:1). `CLAUDE.md` lo declara
+      literalmente «ya no se usa»: es el valor al que `prefers-contrast: more`
+      devuelve `--border-superficie`, no un trazo que se pida a mano. Un marco
+      de tinta plena dentro de una tarjeta es justo la cuadrícula de cajas que
+      hundió la v2.
+    · `--surface-sunk` es EL MISMO PAPEL que la tarjeta (v4: el blanco no tiene
+      escalones). Como relleno no separaba nada; el recuadro entero lo sostenía
+      el borde.
+
+  Lo que queda es lo que hace un recibo de caja de verdad: una regla horizontal
+  y la cifra grande debajo. `--border` es legal aquí y no por casualidad —es el
+  token de «divisiones DENTRO de una superficie: cabeceras, pies, Divider»— y
+  esto es exactamente el pie del formulario. Medido: 4,16:1 sobre papel.
+
+  El tamaño hace el resto del trabajo que hacía el marco: la cifra sube a
+  `--t-title-1`, que es el mismo peso que el nombre del socio en el veredicto.
+  Es el número que se dice en voz alta.
 */
 .total {
   display: flex;
@@ -329,10 +377,8 @@
   justify-content: space-between;
   gap: var(--space-3);
 
-  padding: var(--space-4);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface-sunk);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
 }
 
 .totalEtiqueta {
@@ -340,11 +386,15 @@
   letter-spacing: var(--t-overline-tracking);
   font-weight: var(--t-overline-weight);
   text-transform: uppercase;
-  color: var(--text-3);
+  /* `--text-2` (7,34:1) y no `--text-3` (4,71:1): una versalita de 11px es
+     texto pequeño, y el mínimo de la escala no deja margen para leerla de pie
+     a un brazo de distancia. */
+  color: var(--text-2);
 }
 
 .totalValor {
   font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
   font-weight: var(--t-title-1-weight);
   letter-spacing: var(--t-title-1-tracking);
   font-variant-numeric: tabular-nums;
@@ -383,9 +433,39 @@
   letter-spacing: var(--t-title-2-tracking);
 }
 
+/* Los dos párrafos del acuse van juntos y separados del icono y del botón:
+   sin este agrupador, el `gap` de `.exito` repartía el mismo aire entre el ✓,
+   el título, la nota, el aviso y el CTA, y los cinco pesaban lo mismo. */
+.exitoTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
 .exitoNota {
-  font-size: var(--t-footnote-size);
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
   color: var(--text-2);
+}
+
+/*
+  LA LÍNEA HONESTA: «esto no se puede anular desde aquí».
+
+  Va en el tono más tenue de la tarjeta y con medida corta a propósito. Tiene
+  que estar —es lo único cierto que se le puede dar a un cajero que acaba de
+  equivocarse— pero no puede competir con el ✓ ni con «Verificar otro socio»,
+  que es lo que el 99 % de las veces se va a tocar a continuación.
+
+  `--text-3` sobre papel da 4,71:1, el mínimo de la escala y AA de cuerpo. No
+  baja más: el token ya está en su suelo (`tokens.css` §1) y aclararlo sería
+  reprobar.
+*/
+.exitoAviso {
+  max-width: 44ch;
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-3);
+  text-wrap: pretty;
 }
 
 /* Mientras el escáner se descarga. Sin esto, pulsar "Escanear QR" con mala

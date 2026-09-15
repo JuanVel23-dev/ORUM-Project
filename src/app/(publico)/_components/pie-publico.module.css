@@ -2,12 +2,34 @@
    PIE PÚBLICO
    ========================================================================== */
 
+/*
+  EL PIE CIERRA EN CREMA, y con eso el ritmo tonal de la página queda completo:
+  cacao → crema honda → crema → papel → cacao → papel → CREMA.
+
+  Ninguna sección larga repite el tono de su vecina, y lo que las separa es el
+  campo de color y no una línea — que es lo que hace Agence Cartier con cero
+  sombras en toda su página. Por eso este bloque perdió su `border-top`: con el
+  salto de tinte, el trazo decía dos veces lo mismo.
+
+  El pie está FUERA del `<main>`, así que el tinte se lo pone él mismo con
+  `--surface-alt` en vez de pasar por `.franja` de `escaparate.module.css`, que
+  es un mecanismo de sangrado para elementos que SÍ están dentro de la columna
+  centrada. Aquí el elemento ya ocupa el ancho completo.
+
+  Ratios medidos sobre crema (`--w-50` #faf7f0), método WCAG 2.1:
+    CLARO   --text 16,25:1 · --text-2 7,04:1 · --text-3 4,52:1 · --brand 4,55:1
+    OSCURO  (--surface-alt = --n-950) --text 15,96 · --text-2 9,31 ·
+            --text-3 6,28 · --brand 11,68
+  `--text-3` pasa AA por poco en claro (4,52 contra 4,5): es el token que
+  `CLAUDE.md` marca como «el MÍNIMO, no aclarar», y aquí se queda a un pelo.
+  Si alguien oscurece la crema, ESTE es el par que hay que recalcular antes.
+*/
 .pie {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
 
-  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-alt);
 
   padding-top: var(--space-8);
   padding-bottom: max(var(--space-8), env(safe-area-inset-bottom, 0px));
@@ -94,8 +116,12 @@
   transition: background-color var(--dur-fast) var(--ease-out);
 }
 
-.puerta:hover {
-  background: var(--surface-hover);
+/* `:hover` siempre dentro de `@media (hover: hover)`: en táctil el hover se
+   queda pegado tras el toque y la fila parece seleccionada sin estarlo. */
+@media (hover: hover) {
+  .puerta:hover {
+    background: var(--surface-hover);
+  }
 }
 
 .puerta:focus-visible {
@@ -139,9 +165,11 @@
     background-color var(--dur-fast) var(--ease-out);
 }
 
-.soporte:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .soporte:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
 }
 
 .soporte:focus-visible {

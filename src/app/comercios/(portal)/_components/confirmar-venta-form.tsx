@@ -194,7 +194,9 @@ export function ConfirmarVentaForm({
             tocar en absoluto. Antes abría la pantalla el selector de promoción,
             que en la mayoría de las ventas se deja como está.
           */}
-          <div className={styles.anchoCompleto}>
+          {/* `styles.importe` va en el ENVOLTORIO, no en el `Input`: ver el
+              porqué de la especificidad en `verificar.module.css`. */}
+          <div className={`${styles.anchoCompleto} ${styles.importe}`}>
             <Field label="Valor de la compra">
               <Input
                 /*
@@ -221,7 +223,6 @@ export function ConfirmarVentaForm({
                 autoComplete="off"
                 placeholder="0"
                 numeric
-                className={styles.importe}
                 value={enPesos(valorCompra)}
                 onChange={(e) => setValorCompra(soloDigitos(e.target.value).slice(0, MAX_DIGITOS))}
                 required

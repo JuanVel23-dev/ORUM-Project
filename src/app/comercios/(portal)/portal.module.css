@@ -11,6 +11,31 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+
+  /*
+    EL CAMPO DE COLOR  ·  v4, y es lo que mata el hueco de escritorio AQUÍ.
+
+    En un teléfono esta herramienta llena la pantalla y el fondo da igual. En
+    el monitor de una caja —que es lo habitual: un equipo de punto de venta con
+    el navegador abierto— el contenido es una columna estrecha y todo lo demás
+    era papel muerto, exactamente el «feo en PC» del encargo.
+
+    La respuesta de la v4 no es ensanchar la columna (no hay un segundo dato
+    que poner al lado: este portal tiene UN destino), es TEÑIR el campo. El
+    shell pasa a crema y las tarjetas se quedan en papel: 1,04:1 de diferencia,
+    que no se lee como «un gris» pero sí hace que la tarjeta se lea como un
+    objeto apoyado sobre algo, en vez de como un recorte invisible.
+
+    Contrastes medidos sobre crema (#faf7f0), que es donde caen el h1 y la
+    lede, fuera de toda tarjeta:
+      --text   16,25:1   ·   --text-2   7,04:1   ·   --text-3   4,52:1
+    Los tres pasan AA de cuerpo. En oscuro el par es --n-950 de fondo contra
+    --n-900 de tarjeta (1,06:1), que es la relación estándar del tema.
+
+    No lleva trazo ni sombra: una franja no es una tarjeta, está teñida, no
+    levantada.
+  */
+  background: var(--surface-alt);
 }
 
 .cabecera {
@@ -38,7 +63,11 @@
 
   background: var(--material);
   backdrop-filter: blur(var(--blur-xl)) saturate(180%);
-  border-bottom: 1px solid var(--border-subtle);
+  /* `--border`, no `--border-subtle`: el filo del cromo fijo del shell es una
+     división dentro de la interfaz, no un hairline de fila. Es además lo que
+     usa el Portal de Miembros, y dos cabeceras del mismo producto no pueden
+     separarse con distinta fuerza. 4,11:1 sobre crema. */
+  border-bottom: 1px solid var(--border);
 }
 
 @media (min-width: 768px) {
@@ -100,6 +129,31 @@
   margin-left: auto;
 }
 
+/*
+  EL AVATAR SE VE DE 28px Y SE TOCA DE 44px.
+
+  `DropdownMenu` monta su disparador con `display: contents`, así que el botón
+  que envuelve al `Avatar size="sm"` medía exactamente lo que el avatar: 28px.
+  Es el ÚNICO control de esta cabecera y es la única puerta a cerrar sesión, y
+  quien lo toca lo hace de pie, con una mano y con el cliente delante.
+
+  La clase va en el `<button>` del layout y NO en un selector de descendencia
+  (`.acciones form button` habría alcanzado también «Cerrar sesión» y las tres
+  opciones de tema, que viven dentro del mismo `<form>`).
+
+  Se agranda el área, no el dibujo: el avatar sigue midiendo 28px. Sin
+  `@media (pointer: coarse)` a propósito —al contrario que en el panel, donde
+  la densidad es una virtud—: este portal es táctil por definición de quién lo
+  usa, y en el monitor de la caja 44px tampoco estorban.
+*/
+.botonCuenta {
+  display: grid;
+  place-items: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border-radius: var(--radius-full);
+}
+
 .correoMenu {
   padding: var(--space-2) var(--space-3);
   font-size: var(--t-caption-size);
@@ -112,7 +166,24 @@
 .main {
   flex: 1;
   width: 100%;
-  max-width: 720px;
+
+  /*
+    LA COLUMNA ES ESTRECHA A PROPÓSITO, y bajó de 720px.
+
+    A 720px el veredicto —«MEMBRESÍA ACTIVA», que es todo el producto de esta
+    pantalla— dejaba media franja de color sin una letra dentro, y el botón
+    único de reposo se leía como una barra. 560px es el ancho con el que la
+    herramienta parece una herramienta: sigue por encima de los 420px que
+    necesita la rejilla de dos columnas del formulario de venta (sucursal y
+    promoción lado a lado, `verificar.module.css`), así que no se pierde
+    ninguna fila.
+
+    Literal con nombre y no un token porque no hay token de ancho de columna en
+    el sistema salvo `--content-max` (1100px, el del catálogo), y este no es
+    ese caso. Mismo patrón que `--carril-ficha-w` en la ficha del comercio.
+  */
+  --ancho-caja: 560px;
+  max-width: var(--ancho-caja);
   margin: 0 auto;
 
   padding-top: var(--space-6);

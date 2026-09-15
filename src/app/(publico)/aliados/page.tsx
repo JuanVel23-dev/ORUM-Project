@@ -4,6 +4,7 @@ import {
   obtenerInstanteServidor,
   obtenerWhatsappSoporte,
 } from '@/lib/publico/datos-publicos'
+import escaparate from '../escaparate.module.css'
 import { FormularioAliado } from './_components/formulario-aliado'
 import estilos from './aliados.module.css'
 
@@ -57,7 +58,23 @@ export default async function AliadosPage() {
   return (
     <div className={estilos.pagina}>
       <header className={estilos.encabezado}>
-        <h1 className={estilos.titulo}>Alía tu negocio con ORUM</h1>
+        {/*
+          EL MISMO PELDAÑO CEREMONIAL QUE LOS ENCABEZADOS DE LA LANDING.
+
+          `escaparate.tituloSeccion` es Fraunces a 32–48px con el tracking
+          interpolado por tamaño. Se reutiliza en vez de copiarse: esa
+          interpolación son cuatro números atados a dos anchos de ventana
+          concretos, y una tercera copia es una tercera oportunidad de que una
+          se quede atrás. Aquí viste un `h1` y allí un `h2`; la clase es una
+          ESCALA, no un nivel de encabezado.
+
+          El serif es legal aquí porque `/aliados` es fachada pública —el
+          recorrido del cliente—, no una pantalla de trabajo. En Administración
+          y en la Herramienta de Comercios seguiría prohibido.
+        */}
+        <h1 className={[escaparate.tituloSeccion, estilos.titulo].join(' ')}>
+          Alía tu negocio con ORUM
+        </h1>
         <p className={estilos.bajada}>
           Nuestros socios buscan dónde comer, cuidarse y consentirse. Si tu negocio
           puede ofrecerles un beneficio, cuéntanos y lo evaluamos contigo.

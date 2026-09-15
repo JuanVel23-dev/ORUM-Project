@@ -288,3 +288,83 @@
   font-size: var(--t-caption-size);
   color: var(--text-3);
 }
+
+/* ==========================================================================
+   LA SEGUNDA MITAD DEL HUECO DE ESCRITORIO  ·  W3
+   --------------------------------------------------------------------------
+   `carril.module.css` ya hace que una estantería con pocas tarjetas llegue
+   hasta el filo de la columna: el ancho de pista pasó de fijo a
+   `minmax(--carril-tarjeta-w, 1fr)`, así que el sobrante se reparte entre las
+   tarjetas en vez de quedarse como papel muerto a la derecha.
+
+   Eso resuelve el hueco y abre el problema siguiente, que es el que se cierra
+   aquí: una tarjeta DISEÑADA A 200px estirada a 542 —el caso real de
+   «Beneficios del momento» con sus dos comercios mínimos en una columna de
+   1100— es una columna de logotipo, nombre y chip con medio metro de aire a la
+   derecha. El hueco deja de estar entre las tarjetas y pasa a estar DENTRO de
+   cada una. No se gana nada.
+
+   Así que la tarjeta cambia de forma cuando se ensancha: de columna a fila,
+   con la placa a la izquierda y el texto a su derecha. Es la misma disposición
+   que ya usan la ficha del comercio y la fila de la rejilla en móvil, así que
+   no se inventa un tercer lenguaje.
+
+   El umbral son 300px porque es el ancho a partir del cual la columna deja de
+   tener sentido: por debajo (teléfono a 200px, o cuatro tarjetas o más en
+   escritorio, que salen a 270) se queda vertical, que es su forma canónica.
+
+   Se consulta un contenedor propio (`tarjeta`) y NO `contenido`: lo que decide
+   la forma es el ancho de ESTA tarjeta, que depende de cuántas haya en la
+   estantería, no del ancho de la página. Un `@container contenido` daría la
+   misma respuesta para una estantería de dos y otra de diez.
+
+   El contenedor vive en `.marcoCompacta` y no en `.marco`: la tarjeta de la
+   rejilla es la que lleva el `view-transition-name` del par rejilla ↔ ficha, y
+   no se le mete contención de layout encima sin poder mirarlo en un navegador.
+   ========================================================================== */
+
+.marcoCompacta {
+  container-type: inline-size;
+  container-name: tarjeta;
+}
+
+@container tarjeta (min-width: 300px) {
+  .compacta {
+    display: grid;
+    /* Placa a su ancho natural; el texto se lleva el resto. `minmax(0, 1fr)`
+       y no `1fr`: sin el mínimo en cero, un nombre largo ensancharía la pista
+       en vez de recortarse con la elipsis que `.nombre` ya declara. */
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    column-gap: var(--space-4);
+    row-gap: var(--space-1);
+  }
+
+  /* La placa ocupa las dos filas y se centra contra el bloque de texto. */
+  .compacta > :first-child {
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+
+  /* Nombre pegado a la línea de reparto por abajo, beneficio por arriba: así
+     los dos se leen como un bloque y no como dos datos sueltos. */
+  .compacta > :nth-child(2) {
+    align-self: end;
+  }
+
+  /*
+    `margin-top: auto` se anula: en la forma de columna es lo que ancla el
+    beneficio al fondo de la tarjeta y alinea todas las de la estantería entre
+    sí; en la forma de fila empujaría el chip contra el borde inferior.
+
+    `justify-self: start` porque un `Badge` es un `inline-flex` y como elemento
+    de rejilla se estiraría a todo el ancho de su columna — una píldora de
+    400px no es una píldora.
+  */
+  .compacta > :last-child {
+    margin-top: 0;
+    align-self: start;
+    justify-self: start;
+  }
+}

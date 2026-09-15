@@ -156,8 +156,17 @@ export default async function LandingPublica() {
           )}
           aria-labelledby="cifras-club"
         >
+          {/* `modo="contenedor"`: el envoltorio se queda en `display: contents`
+              y son el h2 y las tarjetas los que entran escalonados. Las reglas
+              están en `landing.module.css`, que es el único módulo que sabe qué
+              hijos hay — y por eso el h2 necesita una clase LOCAL además de la
+              del módulo compartido: desde aquí no se puede escribir un selector
+              contra la clase de otro módulo, porque su hash es distinto. */}
           <Revelar modo="contenedor">
-            <h2 id="cifras-club" className={escaparate.tituloSeccion}>
+            <h2
+              id="cifras-club"
+              className={[escaparate.tituloSeccion, estilos.tituloCifras].join(' ')}
+            >
               El club, en números
             </h2>
 
@@ -207,6 +216,7 @@ export default async function LandingPublica() {
         className={[
           escaparate.franja,
           escaparate.tonoCacao,
+          escaparate.filoBanda,
           estilos.cierre,
           estilos.franjaCierre,
         ].join(' ')}

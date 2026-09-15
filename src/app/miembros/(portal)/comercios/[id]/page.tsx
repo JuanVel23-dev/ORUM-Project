@@ -15,23 +15,23 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { EmptyState } from '@/components/ui/feedback'
+import { Section } from '@/components/ui/layout'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import estilos from './ficha.module.css'
 
 /*
-  FICHA DE COMERCIO — es una PÁGINA, no un overlay.
+  FICHA DE COMERCIO — el MISMO componente en dos superficies.
 
-  `CLAUDE.md` dice que un formulario no navega, se abre encima. Esto no es un
-  formulario: es contenido, y el contenido se empuja. Además un overlay
-  exigiría una ranura `@modal` nueva bajo `/miembros`, y la norma es explícita
-  en que la ranura vive en `app/admin/layout.tsx` y SOLO ahí. Es la ruptura que
-  más fácil se cuela por reflejo, así que queda escrita: aquí no hay
-  `OverlayRuta`, ni `useCerrarOverlay`, ni `@modal`.
+  Desde el catálogo se abre encima, en la ranura `@modal` del portal de
+  miembros (`enOverlay`). Por enlace directo se pinta a pantalla completa. El
+  porqué de que las dos convivan está en el bloque de `FichaComercioPage`, más
+  abajo, junto a la prop que las distingue.
 
   Server Component sin una sola línea de cliente. Los `searchParams` —de donde
   sale el destino de la vuelta— están disponibles en el servidor, así que la
   barra de vuelta no necesita `useSearchParams()` ni la frontera de `Suspense`
-  que eso arrastraría al cromo.
+  que eso arrastraría al cromo. El único cliente de esta pantalla es el
+  envoltorio del overlay, que vive en la ranura y no aquí.
 */
 
 const MENSAJE_SOPORTE_SEDES =
@@ -497,13 +497,8 @@ export default async function FichaComercioPage({
         ficha se pinta dentro de una hoja modal, y un `margin-inline: 50% - 50vw`
         ahí se saldría del overlay por los dos lados.
       */}
-      <section
-        className={`${estilos.seccion} ${estilos.seccionCrema}`}
-        aria-labelledby="titulo-beneficios"
-      >
-        <h2 id="titulo-beneficios" className={estilos.tituloSeccion}>
-          Tus beneficios
-        </h2>
+      <Section tono="crema" className={estilos.zonaBeneficios}>
+        <h2 className={estilos.tituloSeccion}>Tus beneficios</h2>
 
         {beneficios.length > 0 ? (
           /*
@@ -577,27 +572,69 @@ export default async function FichaComercioPage({
             />
           </Card>
         )}
-      </section>
+      </Section>
 
       {/*
-        LA ACCIÓN PRINCIPAL VA AQUÍ, entre los beneficios y las sedes.
+        LA FRANJA DE CACAO  ·  W1
 
-        El socio acaba de leer lo que le descuentan y en ese momento exacto
-        tiene delante el botón que lo hace efectivo. Al final de la página
-        quedaría escondida tras la lista de sucursales; arriba llegaría antes
-        de que sepa si le interesa.
+        La acción principal deja de ser un botón suelto sobre papel y pasa a
+        tener su propia franja. Tres motivos, en orden de peso:
 
-        `variant="brand"` es el relleno dorado PLANO (5,40:1 texto/relleno),
-        no `variant="gold"`, que es el barrido y reprueba 1.4.3 en tema claro.
-        `size` por defecto (md): T4 mide 6,03 % del lienzo a 375px, dentro de
-        la Regla A; `lg` subiría a 7,13 %. Es la ÚNICA acción dorada de la
-        pantalla — la vuelta es terciaria y las sedes no son accionables.
+        1. ES EL SITIO DEL RECORRIDO DONDE EL SOCIO PASA DE LEER A ACTUAR.
+           Acaba de ver lo que le descuentan; el paso siguiente es enseñar el
+           carnet. Un cambio de material —de papel a chocolate— dice eso sin
+           una sola palabra de más.
+        2. LA FICHA ERA UNA PLANCHA. Con la franja el ritmo queda papel (hero)
+           → crema (beneficios) → cacao (carnet) → papel (fotos y sedes), que
+           es la herramienta tonal de la v4: estructura sin dibujar una línea.
+        3. EL ORO DE ACCIÓN NECESITA UN FONDO QUE LO SOSTENGA. `--gold-600`
+           sobre papel da 3,51:1 de filo; sobre cacao, 4,63:1. El mismo botón
+           se lee mejor aquí, y encima es el único material del sistema donde
+           el oro se lee metal.
+
+        `<Section tono="cacao">` remapea `--text`, `--surface`, `--brand` y
+        `--focus` hacia dentro, así que el `Button` de aquí no sabe que está
+        sobre chocolate. Lo que el componente NO remapea —`--action`,
+        `--action-fg`, los bordes, el `color-scheme`— lo añade `.zonaCarnet`:
+        un primario en tinta sobre cacao sería tinta sobre tinta.
+
+        Ratios medidos (sRGB, WCAG 2.x) contra `--cacao-bg` #2b1a15:
+          overline  --gold-400 ....... 7,83:1
+          titular   --cacao-fg ...... 16,24:1
+          apoyo     --cacao-fg-2 ..... 8,56:1
+          botón     filo --gold-600 ... 4,63:1  (1.4.11 pide 3)
+                    texto --tinta-1 sobre --gold-600  4,84:1  (1.4.3 pide 4,5)
+          foco      --gold-400 ....... 7,83:1
+
+        EL TITULAR VA EN SANS, no en el serif de display, y es deliberado: el
+        acento serif de esta pantalla ya lo lleva el `h1` con el nombre del
+        comercio. Dos Fraunces a la vista y el acento deja de serlo — es la
+        misma razón por la que el `h1` del carnet se quedó en sans.
       */}
-      <div className={estilos.accion}>
-        <Button href="/miembros/perfil" variant="brand" fullWidth>
-          Mostrar mi carnet
-        </Button>
-      </div>
+      <Section tono="cacao" className={estilos.zonaCarnet}>
+        <div className={estilos.carnetTextos}>
+          <p className={estilos.carnetOverline}>Tu membresía ORUM</p>
+          <p className={estilos.carnetTitular}>Enséñalo en la caja, antes de pagar.</p>
+          <p className={estilos.carnetApoyo}>
+            El comercio escanea tu código y aplica el beneficio al momento.
+          </p>
+        </div>
+
+        {/*
+          `variant="brand"` es el relleno dorado PLANO, no `variant="gold"`,
+          que es el barrido metálico y no admite texto encima.
+
+          `fullWidth` con un tope: en el teléfono ocupa la franja entera —que
+          es lo que se quiere— y en escritorio se queda en su columna en vez de
+          convertirse en una barra dorada de 700px, que sí rompería el
+          presupuesto de oro por sí sola.
+        */}
+        <div className={estilos.carnetAccion}>
+          <Button href="/miembros/perfil" variant="brand" fullWidth>
+            Mostrar mi carnet
+          </Button>
+        </div>
+      </Section>
 
       {/* ==================================================================
           FOTOS  ·  encargo nº 7
@@ -618,10 +655,27 @@ export default async function FichaComercioPage({
         El estado vacío se conserva para el caso real, que es no tener ninguna.
       */}
       {(galeria.length > 0 || imagenes.length === 0) && (
-      <section className={estilos.seccion} aria-labelledby="titulo-fotos">
-        <h2 id="titulo-fotos" className={estilos.tituloSeccion}>
-          Fotos
-        </h2>
+      <section
+        className={`${estilos.seccion} ${estilos.zonaFotos}`}
+        aria-labelledby="titulo-fotos"
+      >
+        {/*
+          El conteo va en el encabezado y no debajo: el socio sabe cuántas
+          fotos hay ANTES de empezar a arrastrar el carril, que es lo que un
+          carril horizontal esconde por definición. `aria-hidden` porque la
+          lista que sigue ya tiene tantos elementos como dice el número, y el
+          lector de pantalla los cuenta solo.
+        */}
+        <div className={estilos.cabeceraSeccion}>
+          <h2 id="titulo-fotos" className={estilos.tituloSeccion}>
+            Fotos
+          </h2>
+          {galeria.length > 0 && (
+            <span className={estilos.conteo} aria-hidden>
+              {galeria.length}
+            </span>
+          )}
+        </div>
 
         {galeria.length > 0 ? (
           <ul className={estilos.galeria}>
@@ -647,7 +701,10 @@ export default async function FichaComercioPage({
             ))}
           </ul>
         ) : (
-          <Card>
+          /* En escritorio la galería cierra la página a ancho completo, y un
+             estado vacío de 1050px es un bloque muerto enorme: la tarjeta se
+             topa para que el «todavía no hay fotos» ocupe lo que pesa. */
+          <Card className={estilos.fotosVacias}>
             <EmptyState
               icon={<ImageOff size={22} />}
               title="Todavía no hay fotos"
@@ -658,7 +715,10 @@ export default async function FichaComercioPage({
       </section>
       )}
 
-      <section className={estilos.seccion} aria-labelledby="titulo-sedes">
+      <section
+        className={`${estilos.seccion} ${estilos.zonaSedes}`}
+        aria-labelledby="titulo-sedes"
+      >
         <h2 id="titulo-sedes" className={estilos.tituloSeccion}>
           Dónde usarlo
         </h2>
