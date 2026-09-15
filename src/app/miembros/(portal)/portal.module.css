@@ -4,6 +4,22 @@
   min-height: 100dvh;
 
   /*
+    LA COLUMNA DEL PORTAL, y por qué no es la del panel.
+
+    `--content-max` vale 1100px y sirve al panel de administración, que es una
+    pila de tablas: ahí una columna estrecha AYUDA a leer. El catálogo es una
+    rejilla de tarjetas, y con 1100px en una pantalla de 1920 quedaban ~410px
+    de papel muerto a cada lado — «dos pedazos vacíos», en palabras del
+    propietario. El vacío no sobraba: le faltaba columna.
+
+    Se publica aquí, en el contenedor, porque lo leen DOS: el `<main>` para
+    medirse y la cabecera para alinear su contenido con él. Un número, dos
+    consumidores — si cada uno llevara el suyo, la cabecera y la página se
+    desalinearían en el primer cambio.
+  */
+  --portal-max: var(--content-max);
+
+  /*
     `clip` y NO `hidden`, y la diferencia importa aquí.
 
     Las franjas sangran con `50vw`, que en escritorio incluye el ancho de la
@@ -70,6 +86,18 @@
   }
 }
 
+/*
+  Solo a partir de 1200px: por debajo, 1100 ya es prácticamente todo el ancho
+  disponible y ensanchar no cambiaría nada. El tope no sube más porque una
+  rejilla de tarjetas de 290px a más de 1400 empieza a repartir seis columnas
+  y la tarjeta deja de leerse como unidad.
+*/
+@media (min-width: 1200px) {
+  .portal {
+    --portal-max: 1400px;
+  }
+}
+
 /* ==========================================================================
    CABECERA  ·  capa de material
    ========================================================================== */
@@ -102,8 +130,33 @@
   */
   padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
   padding-bottom: var(--space-3);
-  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
-  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
+
+  /*
+    EL CONTENIDO DE LA CABECERA SE ALINEA CON LA COLUMNA.
+
+    El material translúcido sigue ocupando TODO el ancho —es la capa que separa
+    el cromo de la página, y una cabecera centrada con aire a los lados se lee
+    como una tarjeta flotante—, pero lo que hay dentro se mete hasta donde
+    empieza el contenido.
+
+    Antes el wordmark vivía pegado al filo izquierdo de la ventana y el catálogo
+    empezaba 410px más adentro: dos líneas verticales distintas en la misma
+    pantalla, que es lo que hacía que el contenido pareciera hundido en un
+    hueco. Con esto hay UNA sola.
+
+    El `max` protege el caso estrecho: mientras la ventana no supere la columna,
+    el reparto da menos que el relleno propio y manda el relleno.
+  */
+  padding-left: max(
+    var(--space-4),
+    env(safe-area-inset-left, 0px),
+    calc((100% - var(--portal-max)) / 2)
+  );
+  padding-right: max(
+    var(--space-4),
+    env(safe-area-inset-right, 0px),
+    calc((100% - var(--portal-max)) / 2)
+  );
 
   /*
     Material translúcido, no franja opaca: el contenido pasa por debajo y se
@@ -133,8 +186,16 @@
 
 @media (min-width: 768px) {
   .cabecera {
-    padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
+    padding-left: max(
+      var(--space-6),
+      env(safe-area-inset-left, 0px),
+      calc((100% - var(--portal-max)) / 2)
+    );
+    padding-right: max(
+      var(--space-6),
+      env(safe-area-inset-right, 0px),
+      calc((100% - var(--portal-max)) / 2)
+    );
     gap: var(--space-6);
   }
 }
@@ -336,7 +397,9 @@
 .main {
   flex: 1;
   width: 100%;
-  max-width: var(--content-max);
+  /* La columna la publica `.portal`, que es también quien se la pasa a la
+     cabecera para que las dos compartan línea vertical. */
+  max-width: var(--portal-max);
   margin: 0 auto;
 
   /*

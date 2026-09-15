@@ -80,7 +80,9 @@ export default async function MiembrosLayout({
                   className={styles.botonCuenta}
                   aria-label="Mi cuenta"
                 >
-                  <Avatar nombre={correo} size="sm" decorativo />
+                  {/* `md` (36px) y no `sm` (28px): es la única puerta a la cuenta en móvil,
+                      y a 28px se leía como un adorno en vez de como un control. */}
+                  <Avatar nombre={correo} size="md" decorativo />
                 </button>
               }
             >

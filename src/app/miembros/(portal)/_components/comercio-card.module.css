@@ -223,6 +223,23 @@
   white-space: nowrap;
 }
 
+/*
+  LA INSIGNIA NO ENCOGE, Y ESTE ES EL BUG QUE SE VEÍA.
+
+  `Badge` lleva `white-space: nowrap` y, como todo hijo de un flex, un
+  `flex-shrink: 1` implícito. Cuando el título era largo, el reparto encogía
+  la CAJA de la insignia por debajo de su propio texto — y como el texto no
+  parte, se salía de la píldora y de la tarjeta. El propietario lo describió
+  como «los descuentos se salen de la tarjeta».
+
+  La cifra del descuento es el dato que el socio vino a buscar: es lo último
+  que puede perder ancho. Quien cede es el título, que ya sabe recortarse con
+  puntos suspensivos.
+*/
+.promocion > :last-child {
+  flex-shrink: 0;
+}
+
 .masBeneficios {
   font-size: var(--t-caption-size);
   color: var(--text-3);

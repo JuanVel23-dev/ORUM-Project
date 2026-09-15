@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { ANCLAS } from './anclas'
 import { MenuMovilPublico } from './menu-movil-publico'
 import estilos from './encabezado-publico.module.css'
 
@@ -17,19 +18,6 @@ import estilos from './encabezado-publico.module.css'
   Server Component. Lo único que se hidrata es el menú de móvil, que necesita
   estado para abrir su hoja.
 */
-
-/**
- * Las anclas van con ruta absoluta (`/#…`) y no solo con `#…`.
- *
- * Esta cabecera la comparten la landing y `/aliados`. Con `#como-funciona` a
- * secas, pulsarla desde `/aliados` no haría nada: ahí esa sección no existe.
- * Con `/#como-funciona`, Next navega a la landing y luego desplaza; dentro de
- * la propia landing se comporta como un ancla normal, sin recargar.
- */
-export const ANCLAS = [
-  { href: '/#como-funciona', texto: 'Cómo funciona' },
-  { href: '/#comercios-aliados', texto: 'Comercios aliados' },
-] as const
 
 export function EncabezadoPublico() {
   return (

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
-import { ANCLAS } from './encabezado-publico'
+import { ANCLAS } from './anclas'
 import estilos from './menu-movil-publico.module.css'
 
 /*

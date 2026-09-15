@@ -560,6 +560,22 @@
 
   margin-top: var(--space-1);
   min-height: calc(var(--t-footnote-size) * var(--t-footnote-leading) + var(--space-1));
+
+  /* Sin esto, un hijo de flex no baja de su ancho de contenido y una insignia
+     con un beneficio largo empujaba el pie más allá del filo de la tarjeta.
+     `.superficie` lo recortaba con su `overflow: hidden`, así que el síntoma
+     era una píldora cortada a media palabra. */
+  min-width: 0;
+}
+
+/* La insignia o la frase se quedan dentro, pase lo que pase. `Badge` no parte
+   línea a propósito —una cifra partida en dos no es una cifra—, así que lo que
+   se hace es recortarla con puntos suspensivos. */
+.ranura > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Una línea y no dos: la frase es la razón para entrar, no la descripción

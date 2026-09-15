@@ -30,8 +30,36 @@
   overflow: visible;
 }
 
-.menu:popover-open {
-  animation: aparecer var(--dur-base) var(--ease-out);
+/*
+  ABRIR **Y CERRAR**, y por eso son transiciones y no un `@keyframes`.
+
+  Antes solo había animación de entrada: un popover se cierra quitándolo de la
+  capa superior, así que desaparecía de golpe — el encargo pedía animación «al
+  abrirlo y cerrarlo».
+
+  Para que un popover pueda animar su SALIDA hacen falta las dos entradas
+  `allow-discrete`: `display` y `overlay`. Sin ellas el navegador retira el
+  elemento en el primer fotograma y no queda nada que transicionar. Y
+  `@starting-style` es lo que da el valor de PARTIDA de la entrada, que en un
+  elemento que acaba de aparecer no existe.
+
+  Una transición además se reencamina a media animación: abrir y cerrar rápido
+  dos veces no reinicia el gesto desde cero, que es lo que haría un keyframe.
+
+  La salida va a `--dur-salida` (0,65x de la entrada): lento donde el usuario
+  decide, rápido donde el sistema responde — cerrar ya está decidido.
+*/
+.menu {
+  opacity: 0;
+  scale: 0.94;
+  translate: 0 var(--desplazamiento-entrada, -4px);
+
+  transition:
+    opacity var(--dur-salida) var(--ease-out),
+    scale var(--dur-salida) var(--ease-out),
+    translate var(--dur-salida) var(--ease-out),
+    display var(--dur-salida) allow-discrete,
+    overlay var(--dur-salida) allow-discrete;
 }
 
 /*
@@ -39,30 +67,40 @@
   fija JS según dónde acabe colocado el menú, para que la relación espacial
   entre disparador y contenido quede clara.
 */
-@keyframes aparecer {
-  from {
+.menu:popover-open {
+  opacity: 1;
+  scale: 1;
+  translate: 0 0;
+
+  transition-duration: var(--dur-base);
+}
+
+@starting-style {
+  .menu:popover-open {
     opacity: 0;
     scale: 0.94;
     translate: 0 var(--desplazamiento-entrada, -4px);
   }
-  to {
-    opacity: 1;
+}
+
+/*
+  Movimiento reducido: NO es ausencia de feedback. Se retira el viaje —la
+  escala y el desplazamiento, que es lo vestibular— y queda el fundido, que
+  sigue diciendo que algo apareció o se fue. `display` y `overlay` conservan
+  su `allow-discrete`: sin ellos el menú volvería a desaparecer de golpe, que
+  es peor para todo el mundo.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .menu,
+  .menu:popover-open {
     scale: 1;
     translate: 0 0;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .menu:popover-open {
-    animation: fundir var(--dur-fast) var(--ease-out);
-  }
-
-  @keyframes fundir {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
+  @starting-style {
+    .menu:popover-open {
+      scale: 1;
+      translate: 0 0;
     }
   }
 }
@@ -128,6 +166,22 @@
   white-space: nowrap;
 
   cursor: pointer;
+
+  /*
+    EL «FONDO AZUL» ERA LA SELECCIÓN DE TEXTO.
+
+    Sin `user-select: none`, pulsar una fila —y más aún pulsar dos veces, o
+    arrastrar un píxel al hacer clic— selecciona su etiqueta, y el navegador la
+    pinta con SU azul de selección, que no sale de ningún token nuestro. En un
+    menú el texto no es contenido que se copie: es una etiqueta de un control.
+    Es la misma razón por la que ningún botón del sistema se deja seleccionar.
+
+    `-webkit-tap-highlight-color` hace lo propio en táctil, donde el navegador
+    dibuja su propio destello al tocar.
+  */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
   transition: background-color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
     opacity var(--dur-press) var(--ease-out),
@@ -158,9 +212,21 @@
    el MISMO que el del foco, asi que el socio ve una fila o un campo activo
    que no lo esta. El `:focus-visible` se queda FUERA: un teclado existe en
    cualquier dispositivo. */
+/*
+  EL REALCE, con un lavado DORADO en vez del gris del sistema.
+
+  `--surface-hover` es tinta al 6 %: da 1,02:1 sobre papel y en una fila ancha
+  no se ve. El oro al 12 % se lee, es de la marca y hace juego con el filo que
+  ya aparecía — el encargo pedía «algo más atractivo» y esto es lo que el
+  sistema ya tenía a mano.
+
+  Sigue habiendo DOS canales, que es la regla: el lavado y el filo. Y el texto
+  no pierde contraste: un 12 % de oro sobre papel deja la tinta muy por encima
+  del 4,5:1.
+*/
 @media (hover: hover) {
   .item:hover:not(:disabled) {
-    background: var(--surface-hover);
+    background: color-mix(in srgb, var(--brand) 12%, transparent);
     box-shadow: inset 0 0 0 1px var(--brand-edge);
   }
 

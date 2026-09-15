@@ -68,11 +68,21 @@
   usarlo — indistinguible de estar enfocado, y en una rejilla de cien tarjetas
   eso es ruido en todas.
 */
+/*
+  SIN ARO DORADO, y es una excepción deliberada a «el oro es la respuesta al
+  toque». El corazón es REDONDO y pequeño: un filo de 1px alrededor de un
+  círculo de 30px no se lee como respuesta del sistema, se lee como un botón
+  con borde — justo lo que esta dirección retiró de todas partes. Encargo
+  literal del propietario: «no debería tener ningún borde».
+
+  Lo que responde al toque aquí es el relleno y el propio corazón, que pasa de
+  contorno a sólido y de tinta a rojo. Esa es la señal, y es más fuerte que
+  cualquier filo.
+*/
 @media (hover: hover) {
   .boton:hover {
     color: var(--text);
     background: var(--surface-hover);
-    box-shadow: inset 0 0 0 1px var(--brand-edge);
   }
 
   .boton[data-marcado='true']:hover {
