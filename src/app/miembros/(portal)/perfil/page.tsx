@@ -8,34 +8,36 @@ import { StatusBadge, VenceEn } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Copiar } from '@/components/ui/copiar'
-import { Stack } from '@/components/ui/layout'
 import { QrCode } from '@/components/ui/qr-code'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
-import { CarnetAparece } from './_components/carnet-aparece'
 import styles from './perfil.module.css'
 
 export const metadata = { title: 'Mi carnet · ORUM' }
 
 /*
-  EL CARNET  ·  spec §6
+  EL CARNET  ·  Z1
 
-  Es lo que el socio enseña en la caja, con una mano y con prisa. Por eso:
+  Es lo que el socio enseña con orgullo en la caja, con una mano y con prisa.
+  Con la licencia creativa v4 —sin presupuesto de oro y sin disciplina de
+  trazo— pasa a ser lo que tenía que ser: una tarjeta de CHOCOLATE con el
+  wordmark y los datos en oro. El porqué de cada decisión de color, y los
+  ratios medidos, están en `perfil.module.css`; aquí solo el marcado.
 
-  - Tiene ancho propio (460px) y UNA sola columna a todos los anchos. Antes se
-    estiraba hasta `--content-max` con `1fr auto`, lo que abría un hueco muerto
-    de varios cientos de píxeles entre los datos y el QR en escritorio. Un
-    carnet de 1100px no es un carnet.
-  - Es el objeto MÁS PRECIOSO del portal, así que le corresponde la sombra más
-    gruesa de su pantalla. Ya no lleva trazo: la dirección v3 retiró el borde
-    de las superficies y lo que define al carnet es la luz. «Cómo usarlo» no
-    es otra tarjeta, así que no hay con qué confundirlo.
-  - El QR sube justo debajo del nombre: es lo que se enseña.
-  - La foto del socio, si la hay, encabeza el carnet. Si no la hay, sus
-    iniciales — nunca un hueco ni un icono genérico de persona, que es lo que
-    hace que una credencial parezca rota.
+  Lo que manda la forma:
 
-  Server Component entero salvo el envoltorio de aparición y el botón de
-  copiar, que son hojas de cliente.
+  - Ancho propio (460px) y UNA sola columna a todos los anchos. Un carnet de
+    1100px no es un carnet.
+  - El nombre del socio va a ancho completo de la tarjeta, en Fraunces y en el
+    peldaño `hero`: en un carnet físico es lo primero que se lee a un brazo de
+    distancia. Por eso la foto sube a la cabecera, a la esquina del retrato de
+    un pasaporte, en vez de robarle 300px de línea al nombre.
+  - El QR va en su placa BLANCA, pase lo que pase con el tema y con el fondo.
+  - La foto del socio, si la hay. Si no la hay, sus iniciales — nunca un hueco
+    ni un icono genérico de persona, que es lo que hace que una credencial
+    parezca rota.
+
+  Server Component entero salvo el botón de copiar, que es una hoja de cliente.
+  La aparición ya no necesita JavaScript: la hace un `@keyframes` de 180ms.
 */
 
 /*
@@ -57,9 +59,9 @@ function fechaLegible(iso: string): string {
 }
 
 /*
-  Onboarding permanente (§6.3 ⑨). No cuesta un clic, no se descarta y es lo
-  que llena la columna lateral en escritorio en lugar del hueco muerto. Texto
-  plano, sin iconos: son instrucciones, no una fila de características.
+  Onboarding permanente. No cuesta un clic, no se descarta y es lo que llena la
+  columna lateral en escritorio en lugar del hueco muerto. Texto plano, sin
+  iconos: son instrucciones, no una fila de características.
 */
 const PASOS = [
   'Busca el comercio en el catálogo y mira qué beneficio tiene.',
@@ -75,9 +77,14 @@ export default async function PerfilMiembroPage() {
   const supabase = await createClient()
 
   /*
-    Las dos consultas van juntas y el nombre del plan NO se aísla en un
-    `<Suspense>` (§6.7): un carnet que dice «Daniel Bulla» y medio segundo
-    después añade «Plan Premium» se lee como un fallo, no como progreso.
+    Las tres consultas van juntas y ninguna se aísla en un `<Suspense>`: un
+    carnet que dice «Daniel Bulla» y medio segundo después añade «Plan
+    Premium» —o le aparece la cara— se lee como un fallo, no como progreso.
+
+    La foto se pide aquí y no en `requireMiembroVigente` porque esa función la
+    comparten el layout y `/miembros/inactiva`, y ninguna de las dos la
+    necesita: añadírsela cargaría una columna en cada navegación del portal
+    para usarla en una sola pantalla.
   */
   const [{ data: plan }, { data: config }, { data: ficha }] = await Promise.all([
     supabase
@@ -86,28 +93,17 @@ export default async function PerfilMiembroPage() {
       .eq('id', miembro.membresiaVigente.planId)
       .maybeSingle(),
     supabase.from('configuracion').select('valor').eq('clave', 'whatsapp_soporte').maybeSingle(),
-    /*
-      La foto va con las otras dos y no en un `<Suspense>` aparte, por el
-      mismo motivo que el nombre del plan: un carnet que se dibuja y medio
-      segundo después le aparece la cara se lee como un fallo.
-
-      Se pide aquí y no en `requireMiembroVigente` porque esa función la
-      comparten el layout y `/miembros/inactiva`, y ninguna de las dos
-      necesita la foto: añadírsela cargaría una columna en cada navegación
-      del portal para usarla en una sola pantalla.
-    */
-    supabase
-      .from('miembros')
-      .select('foto_url')
-      .eq('id', miembro.id)
-      .maybeSingle(),
+    supabase.from('miembros').select('foto_url').eq('id', miembro.id).maybeSingle(),
   ])
 
   /*
     Aunque `requireMiembroVigente` ya garantiza que está vigente, el estado se
     DERIVA igual: así el carnet puede decir cuántos días quedan, que es lo que
     de verdad le interesa al miembro, y nunca puede contradecir a la lista del
-    administrador —ambos usan la misma función.
+    administrador —ambos usan la misma función—.
+
+    `membresias.estado` en crudo, JAMÁS: tiene default `'activa'` y nada la
+    actualiza al vencer.
   */
   const estado = derivarEstadoMembresia(
     miembro.membresiaVigente.estado,
@@ -127,32 +123,38 @@ export default async function PerfilMiembroPage() {
       </header>
 
       <div className={styles.columnas}>
-        <CarnetAparece className={styles.carnetCaja}>
+        {/* El envoltorio existe para llevar el `transform` de la entrada: una
+            animación sobre el elemento que además recorta con `overflow` se
+            pelea con el recorte en algunos navegadores. */}
+        <div className={styles.carnetCaja}>
           {/*
-            `principal` ya no es un trazo: desde la v3 es un escalón MÁS de
-            sombra, y aquí el módulo lo sube otro más todavía (§2.2 — la
-            superficie grande se lee más gruesa, y esta es la más grande y la
-            más importante del portal).
+            `padding="none"`: el relleno lo pone `.carnetInterior`, que es
+            además quien se eleva por encima del halo dorado.
 
-            `brand` aporta lo único dorado de la superficie: el filo de 1px
-            del borde y el hairline superior que dibuja su `::before`. El oro
-            es color de MARCA y el carnet es la marca en la mano del socio; no
-            codifica ningún dato.
+            `variant="brand"` aporta el hairline superior de su `::before`; el
+            filo dorado del contorno lo sube el módulo, porque sobre chocolate
+            el `--brand-edge` al 45% de la primitiva no se ve.
           */}
-          <Card padding="lg" variant="brand" principal className={styles.carnet}>
-            {/* Entrada escalonada de los cuatro bloques: 35 ms, tope de 8. */}
-            <Stack gap={5} escalonado>
-              <div className={styles.identidad}>
+          <Card padding="none" variant="brand" principal className={styles.carnet}>
+            <div className={styles.carnetInterior}>
+              <header className={styles.cabecera}>
+                <div className={styles.emisor}>
+                  {/* Una credencial sin el nombre de quien la emite no parece
+                      una credencial. */}
+                  <p className={styles.wordmark}>ORUM</p>
+                  <p className={styles.tipo}>Carnet de socio</p>
+                </div>
+
                 {/*
-                  LA FOTO. `aria-hidden` porque el nombre está justo al lado:
+                  LA FOTO. `aria-hidden` porque el nombre está justo debajo:
                   sin esto el lector anuncia «Daniel Bulla» dos veces, que es
                   el mismo motivo por el que `Avatar` tiene `decorativo`.
 
                   `<img>` y no `next/image`: `next.config.ts` no declara
-                  `images` y la URL es externa —Storage o el servidor de
-                  quien la subiera—. `alt` vacío a propósito: una URL muerta
-                  con `alt` con texto puede arrastrar el glifo de imagen rota
-                  de Chrome, y eso no se enseña en una caja.
+                  `images` y la URL es externa —Storage o el servidor de quien
+                  la subiera—. `alt` vacío a propósito: una URL muerta con
+                  `alt` con texto puede arrastrar el glifo de imagen rota de
+                  Chrome, y eso no se enseña en una caja.
                 */}
                 <span className={styles.foto} aria-hidden="true">
                   {fotoUrl ? (
@@ -168,58 +170,45 @@ export default async function PerfilMiembroPage() {
                     <span className={styles.fotoIniciales}>{iniciales(nombreCompleto)}</span>
                   )}
                 </span>
+              </header>
 
-                <div className={styles.identidadTextos}>
-                  {/* Una credencial sin el nombre de quien la emite no parece
-                      una credencial. Pequeño, arriba a la izquierda. */}
-                  <p className={styles.wordmark}>ORUM</p>
-                  <p className={styles.nombre}>{nombreCompleto}</p>
-                  {/* `planes_membresia` sostiene varios planes: mostrar el
-                      nombre es correcto. Sin plan, un respaldo genérico — un
-                      hueco ahí parecería un carnet roto. */}
-                  <p className={styles.plan}>{plan?.nombre ?? 'Membresía ORUM'}</p>
+              <div className={styles.identidad}>
+                <p className={styles.nombre}>{nombreCompleto}</p>
+                {/* `planes_membresia` sostiene varios planes: mostrar el
+                    nombre es correcto. Sin plan, un respaldo genérico — un
+                    hueco ahí parecería un carnet roto. */}
+                <p className={styles.plan}>{plan?.nombre ?? 'Membresía ORUM'}</p>
+              </div>
 
-                  {/*
-                    Un formulario no navega: `/miembros/perfil/foto` está
-                    interceptada por la ranura `@modal` del portal y se abre
-                    encima del carnet. Ghost y `sm`, que ya amplía su área
-                    táctil a 44px con un `::after`: es una acción de
-                    mantenimiento, no la razón de esta pantalla.
-                  */}
-                  <Button
-                    href="/miembros/perfil/foto"
-                    variant="ghost"
-                    size="sm"
-                    icon={<Camera size={15} />}
-                    className={styles.cambiarFoto}
-                  >
-                    {fotoUrl ? 'Cambiar foto' : 'Añadir mi foto'}
-                  </Button>
+              <div className={styles.credencial}>
+                {/*
+                  `data-motion-esencial`: pase lo que pase con las preferencias
+                  de movimiento, el QR no puede quedarse a medio camino de una
+                  transformación. Es lo que se escanea delante del cajero.
+
+                  Va en el envoltorio del QR y NO en `.credencial`: la exención
+                  alcanza a todos los descendientes, y colgándola del bloque
+                  entero el botón de copiar se quedaría con su encogido de
+                  pulsación activo justo para quien pidió no tener movimiento.
+                */}
+                <div className={styles.qr} data-motion-esencial>
+                  <QrCode
+                    value={miembro.numeroMembresia}
+                    size={160}
+                    className={styles.qrMarco}
+                    label={`Código de la membresía ${miembro.numeroMembresia} de ${nombreCompleto}`}
+                  />
+                </div>
+
+                <div className={styles.bloque}>
+                  <span className={styles.etiqueta}>Número de membresía</span>
+                  <span className={styles.numero}>
+                    <Copiar valor={miembro.numeroMembresia} label="Copiar número de membresía" />
+                  </span>
                 </div>
               </div>
 
-              {/*
-                `data-motion-esencial`: pase lo que pase con las preferencias
-                de movimiento, el QR no puede quedarse a medio camino de una
-                transformación. Es lo que se escanea delante del cajero.
-              */}
-              <div className={styles.qr} data-motion-esencial>
-                <QrCode
-                  value={miembro.numeroMembresia}
-                  size={160}
-                  className={styles.qrMarco}
-                  label={`Código de la membresía ${miembro.numeroMembresia} de ${nombreCompleto}`}
-                />
-              </div>
-
-              <div className={styles.bloque}>
-                <span className={styles.etiqueta}>Número de membresía</span>
-                <span className={styles.numero}>
-                  <Copiar valor={miembro.numeroMembresia} label="Copiar número de membresía" />
-                </span>
-              </div>
-
-              <div className={styles.bloque}>
+              <div className={styles.pie}>
                 <span className={styles.estadoFila}>
                   <StatusBadge estado={estado} />
                   <VenceEn estado={estado} />
@@ -228,13 +217,33 @@ export default async function PerfilMiembroPage() {
                   Hasta el {fechaLegible(miembro.membresiaVigente.fechaFin)}
                 </span>
               </div>
-            </Stack>
+            </div>
           </Card>
-        </CarnetAparece>
+
+          {/*
+            «Cambiar foto» va FUERA de la tarjeta. Es mantenimiento —se hace
+            una vez— y dentro competía con el nombre y con el QR: lo que se
+            enseña en una caja no lleva botones de administración impresos
+            encima.
+
+            Un formulario no navega: `/miembros/perfil/foto` está interceptada
+            por la ranura `@modal` del portal y se abre encima del carnet.
+          */}
+          <div className={styles.acciones}>
+            <Button
+              href="/miembros/perfil/foto"
+              variant="ghost"
+              size="sm"
+              icon={<Camera size={15} />}
+            >
+              {fotoUrl ? 'Cambiar foto' : 'Añadir mi foto'}
+            </Button>
+          </div>
+        </div>
 
         {/*
           Sin `Card`: la pantalla ya tiene su superficie y duplicarla
-          convertiría el carnet en «una caja más» (dirección v2 §6).
+          convertiría el carnet en «una caja más».
         */}
         <section className={styles.como}>
           <h2 className={styles.comoTitulo}>Cómo usarlo</h2>

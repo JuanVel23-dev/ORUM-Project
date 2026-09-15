@@ -21,6 +21,57 @@
   }
 }
 
+/*
+  LA SEGUNDA VÍA, EN TEXTO Y NO EN BOTÓN.
+
+  En reposo hay una sola acción grande —escanear—, porque es la que resuelve la
+  inmensa mayoría de las ventas. Escribir el número existe siempre, pero con el
+  peso de un enlace: dos botones grandes lado a lado obligan a decidir cuál, y
+  decidir de pie con el cliente delante cuesta más que el toque que ahorraría.
+
+  Va subrayado y en tinta, no en oro: aquí el oro sigue siendo marca, y este
+  portal se mantiene sobrio a propósito.
+*/
+.salida {
+  text-align: center;
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+.enlaceTexto {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/*
+  Lo que se VE y lo que se TOCA son cosas distintas. El enlace debe leerse
+  pequeño —no compite con el botón de escanear—, así que el área crece por
+  debajo con un `::after` centrado de `--tap-min` en vez de engordar el texto.
+*/
+.enlaceTexto::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: max(100%, var(--tap-min));
+  height: var(--tap-min);
+}
+
+.enlaceTexto:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-xs);
+}
+
 /* --- Escáner --------------------------------------------------------------- */
 
 .escaner {
@@ -91,16 +142,88 @@
 /* --- Veredicto ------------------------------------------------------------- */
 
 /*
-  El momento de la verdad. Se lee de un vistazo o no sirve: nombre grande,
-  estado con punto Y texto (nunca solo color), y el número en monoespaciada
-  para poder cotejarlo con el carnet carácter a carácter.
+  EL MOMENTO DE LA VERDAD, Y LO ÚNICO DE ESTE PORTAL CON PRESENCIA.
+
+  Se lee a un metro, de pie, con el pulgar tapando media pantalla y a veces con
+  sol encima. Todo lo demás de la herramienta es sobrio; esto no puede serlo.
+
+  Antes el dictamen era un `Badge`: la pieza que decide si se cobra o no era la
+  MÁS PEQUEÑA de la tarjeta (`AUDIT-a11y` #9). Ahora es una franja de color
+  sólido a todo el ancho, con el veredicto dentro en mayúsculas.
+
+  Contraste medido, texto `--surface` sobre relleno de estado —los dos tokens
+  giran con el tema en sentidos opuestos, así que el par funciona en claro y en
+  oscuro sin una sola rama de tema:
+
+    activa   claro  #137a3b / #fdfcfa .... 5,29:1      inactiva claro  6,07:1
+    activa   oscuro #45d67c / #211a16 .... 9,12:1      inactiva oscuro 5,59:1
+
+  Los cuatro pasan AA de texto con holgura, y el filo de la franja contra la
+  tarjeta va muy por encima del 3:1 de 1.4.11 con esos mismos números.
 */
 .veredicto {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-5);
 }
 
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-sm);
+
+  color: var(--surface);
+
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  font-weight: 700;
+  text-transform: uppercase;
+  /* Tracking POSITIVO: la escala lo trae negativo para titulares en caja baja,
+     y unas versales apretadas se leen como un bloque a un metro de distancia. */
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+
+.bannerActiva {
+  background: var(--success);
+}
+
+.bannerInactiva {
+  background: var(--danger);
+}
+
+/*
+  Disco LLENO contra anillo HUECO. La diferencia es de forma, no de color: es
+  lo que sostiene el veredicto cuando el color no llega —daltonismo, sol sobre
+  la pantalla— y lo que ya hace `StatusBadge` en el resto del producto. El
+  tamaño va en `em` para que siga al titular si algún día cambia la escala.
+*/
+.punto {
+  flex-shrink: 0;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+
+.puntoHueco {
+  background: none;
+  box-shadow: inset 0 0 0 0.16em currentColor;
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/*
+  EL NOMBRE, LO SEGUNDO QUE LEE EL OJO. Confirma que el carnet es de quien lo
+  está entregando; el número baja a dato de cotejo, que es su verdadera función.
+*/
 .nombre {
   font-size: var(--t-title-1-size);
   line-height: var(--t-title-1-leading);
@@ -117,15 +240,17 @@
   color: var(--text-3);
 }
 
-.estadoFila {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-
 .plan {
   font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+/* Qué hacer, no solo qué pasa: un veredicto negativo sin instrucción deja al
+   cajero decidiendo a solas delante del cliente. */
+.instruccion {
+  margin-top: var(--space-2);
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
   color: var(--text-2);
 }
 

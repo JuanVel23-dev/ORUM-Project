@@ -8,12 +8,16 @@ import {
   obtenerInstanteServidor,
   obtenerVitrinaPublica,
   obtenerWhatsappSoporte,
+  type ComercioVitrina,
 } from '@/lib/publico/datos-publicos'
+import { obtenerPortadasPublicas } from './_datos/portadas-publicas'
 import { AliadosOverlayTrigger } from './_components/aliados-overlay-trigger'
 import { ComoFunciona } from './_components/como-funciona'
 import { CtaSocio } from './_components/cta-socio'
 import { HeroPublico } from './_components/hero-publico'
+import { Revelar } from './_components/revelar'
 import { VitrinaPublica } from './_components/vitrina-publica'
+import escaparate from './escaparate.module.css'
 import estilos from './landing.module.css'
 
 export const metadata: Metadata = {
@@ -47,22 +51,55 @@ export const metadata: Metadata = {
  * club por `/admin` o `/comercios`, y el `start_url` de la aplicación instalable
  * sigue siendo `/miembros` (`manifest.ts`). A quien ya tiene la PWA en su
  * teléfono esto no le mueve nada.
+ *
+ * ──────────────────────────────────────────────────────────────────────────
+ * EL RITMO TONAL DE LA PÁGINA (v4, franjas a ancho completo)
+ *
+ *   Héroe .............. CACAO        ← la única superficie donde el oro grande
+ *                                       es legible: 7,83:1 (sobre crema, 1,99:1)
+ *   Así funciona ....... CREMA HONDA  ← relleno sin texto tenue ni tarjetas
+ *   Vitrina ............ CREMA
+ *   El club en números . PAPEL
+ *   Hazte socio hoy .... CACAO        ← el cierre ceremonial, con el CTA en oro
+ *   ¿Tienes un negocio? PAPEL         ← subordinada, no compite
+ *   Pie ................ CREMA        (lo pone `pie-publico.module.css`)
+ *
+ * Ninguna sección queda en el mismo tono que su vecina. Lo que separa las
+ * secciones es el campo de color, no una línea: es lo que hace Agence Cartier
+ * sin una sola sombra en toda su página.
  */
+export const dynamic = 'force-dynamic'
+
 export default async function LandingPublica() {
   /*
-    Las tres lecturas van en paralelo: son independientes y encadenarlas con
-    tres `await` seguidos sumaría sus latencias en el camino más caliente del
-    sitio. `cache()` ya evita que el layout y esta página consulten dos veces el
-    número de soporte dentro de la misma petición.
+    Las lecturas van en paralelo: son independientes y encadenarlas con `await`
+    seguidos sumaría sus latencias en el camino más caliente del sitio.
+    `cache()` ya evita que el layout y esta página consulten dos veces el número
+    de soporte dentro de la misma petición.
   */
-  const [vitrina, soporte, perfil, abiertoEn] = await Promise.all([
+  const [vitrina, soporte, perfil, abiertoEn, portadas] = await Promise.all([
     obtenerVitrinaPublica(),
     obtenerWhatsappSoporte(),
     getPerfilActual(),
     obtenerInstanteServidor(),
+    obtenerPortadasPublicas(),
   ])
 
-  const hayVitrina = vitrina.comercios.length > 0
+  /*
+    LA FOTO DEL LOCAL SE INYECTA AQUÍ, en un solo sitio.
+
+    `obtenerVitrinaPublica` devuelve `portadaUrl: null` en duro —su comentario
+    dice que la columna no existe, y eso dejó de ser cierto—, pero ese archivo
+    está fuera del alcance de esta tanda. Se compone aquí para que el héroe y la
+    vitrina reciban el modelo YA COMPLETO y ninguno de los dos tenga que saber
+    de dónde salió la fotografía. Ver `_datos/portadas-publicas.ts`.
+  */
+  const comercios: ComercioVitrina[] = vitrina.comercios.map((comercio) => ({
+    ...comercio,
+    portadaUrl: portadas.get(comercio.id) ?? null,
+  }))
+
+  const hayVitrina = comercios.length > 0
 
   /*
     HAY CIFRAS O NO HAY SECCIÓN.
@@ -85,6 +122,11 @@ export default async function LandingPublica() {
         amigo—. Pero tampoco se le deja buscar la entrada, así que se le tiende
         un puente al principio de la página. Solo para el rol `miembro`: quien
         trabaja en el club entra por otra puerta y ya la tiene guardada.
+
+        Va ANTES de la primera franja a propósito: `escaparate.franja:first-child`
+        se come el relleno superior del `<main>` para que el cacao empiece pegado
+        a la cabecera, y cuando este puente existe esa banda de papel sí tiene
+        contenido y debe conservarse.
       */}
       {perfil?.rolCodigo === 'miembro' && (
         <Link href="/miembros" className={estilos.puente}>
@@ -93,11 +135,7 @@ export default async function LandingPublica() {
         </Link>
       )}
 
-      <HeroPublico
-        soporte={soporte}
-        comercios={vitrina.comercios}
-        hayVitrina={hayVitrina}
-      />
+      <HeroPublico soporte={soporte} comercios={comercios} hayVitrina={hayVitrina} />
 
       {/*
         «Cómo funciona» ANTES que la vitrina, y no al revés.
@@ -109,33 +147,48 @@ export default async function LandingPublica() {
       */}
       <ComoFunciona />
 
-      <VitrinaPublica comercios={vitrina.comercios} />
+      <VitrinaPublica comercios={comercios} />
 
       {hayCifras && (
-        <section className={estilos.cifras} aria-labelledby="cifras-club">
-          <h2 id="cifras-club" className={estilos.tituloSeccion}>
-            El club, en números
-          </h2>
+        <section
+          className={[escaparate.franja, escaparate.tonoPapel, estilos.cifras].join(
+            ' ',
+          )}
+          aria-labelledby="cifras-club"
+        >
+          <Revelar modo="contenedor">
+            <h2 id="cifras-club" className={escaparate.tituloSeccion}>
+              El club, en números
+            </h2>
 
-          <div className={estilos.rejillaCifras}>
-            <Card padding="lg">
-              <Cifra
-                etiqueta="Comercios aliados"
-                valor={vitrina.totalComercios.toLocaleString('es-CO')}
-                nota="Y creciendo cada mes"
-              />
-            </Card>
-
-            {vitrina.totalCiudades > 0 && (
-              <Card padding="lg">
+            <div className={estilos.rejillaCifras}>
+              <Card padding="lg" className={estilos.tarjetaCifra}>
+                {/*
+                  `size="display"` es el peldaño `--t-hero-cifra`: Fraunces a
+                  52px con `tabular-nums` obligatorio. Está prohibido en
+                  Administración y en la Herramienta de Comercios —son pantallas
+                  de trabajo— y habilitado justo aquí, que es el escaparate.
+                */}
                 <Cifra
-                  etiqueta={vitrina.totalCiudades === 1 ? 'Ciudad' : 'Ciudades'}
-                  valor={vitrina.totalCiudades.toLocaleString('es-CO')}
-                  nota="Con al menos una sede activa"
+                  size="display"
+                  etiqueta="Comercios aliados"
+                  valor={vitrina.totalComercios.toLocaleString('es-CO')}
+                  nota="Y creciendo cada mes"
                 />
               </Card>
-            )}
-          </div>
+
+              {vitrina.totalCiudades > 0 && (
+                <Card padding="lg" className={estilos.tarjetaCifra}>
+                  <Cifra
+                    size="display"
+                    etiqueta={vitrina.totalCiudades === 1 ? 'Ciudad' : 'Ciudades'}
+                    valor={vitrina.totalCiudades.toLocaleString('es-CO')}
+                    nota="Con al menos una sede activa"
+                  />
+                </Card>
+              )}
+            </div>
+          </Revelar>
         </section>
       )}
 
@@ -144,17 +197,33 @@ export default async function LandingPublica() {
         lleva varias pantallas de desplazamiento y el botón de arriba ya no
         existe para él. Pedirle que suba a buscarlo es perder la conversión que
         acabas de ganar.
-      */}
-      <section className={estilos.cierre}>
-        <h2 className={estilos.tituloCierre}>Hazte socio hoy</h2>
-        <p className={estilos.textoCierre}>
-          Escríbenos por WhatsApp y te contamos los planes, los precios y cómo
-          recibir tu carnet.
-        </p>
 
-        <div className={estilos.accionesCierre}>
-          <CtaSocio soporte={soporte} size="lg" />
-        </div>
+        Y vuelve al CACAO, que es lo que cierra la página con el mismo material
+        con el que la abrió — entrada y salida por el mismo camino. Ya no es una
+        tarjeta centrada con borde: una tarjeta gigante de ancho de columna se
+        lee como un aviso; una franja, como un final.
+      */}
+      <section
+        className={[
+          escaparate.franja,
+          escaparate.tonoCacao,
+          estilos.cierre,
+          estilos.franjaCierre,
+        ].join(' ')}
+      >
+        <Revelar className={estilos.bloqueCierre}>
+          <h2 className={[escaparate.tituloSeccion, estilos.tituloCierre].join(' ')}>
+            Hazte socio hoy
+          </h2>
+          <p className={estilos.textoCierre}>
+            Escríbenos por WhatsApp y te contamos los planes, los precios y cómo
+            recibir tu carnet.
+          </p>
+
+          <div className={estilos.accionesCierre}>
+            <CtaSocio soporte={soporte} size="lg" />
+          </div>
+        </Revelar>
       </section>
 
       {/*
@@ -163,22 +232,24 @@ export default async function LandingPublica() {
         Es una audiencia minoritaria —la landing la escribe para el socio— pero
         es la de mayor valor por cabeza, así que tiene su propio bloque en vez de
         un enlace perdido en el pie. Secundaria en peso visual, nunca compitiendo
-        con «Hazte socio».
+        con «Hazte socio»: de ahí que vuelva a papel justo después del cacao.
       */}
-      <section className={estilos.aliados}>
-        <div>
-          <h2 className={estilos.tituloAliados}>¿Tienes un negocio?</h2>
-          <p className={estilos.textoAliados}>
-            Los socios de ORUM buscan dónde comer, cuidarse y consentirse. Súmate
-            al club y llega a ellos.
-          </p>
-        </div>
+      <section className={[escaparate.franja, escaparate.tonoPapel].join(' ')}>
+        <Revelar className={estilos.aliados}>
+          <div>
+            <h2 className={estilos.tituloAliados}>¿Tienes un negocio?</h2>
+            <p className={estilos.textoAliados}>
+              Los socios de ORUM buscan dónde comer, cuidarse y consentirse. Súmate
+              al club y llega a ellos.
+            </p>
+          </div>
 
-        {/*
-          `Date.now()` del SERVIDOR: el reloj del visitante puede ir mal y la
-          comprobación anti-robot necesita un reloj del que fiarse.
-        */}
-        <AliadosOverlayTrigger abiertoEn={abiertoEn} soporte={soporte} />
+          {/*
+            `Date.now()` del SERVIDOR: el reloj del visitante puede ir mal y la
+            comprobación anti-robot necesita un reloj del que fiarse.
+          */}
+          <AliadosOverlayTrigger abiertoEn={abiertoEn} soporte={soporte} />
+        </Revelar>
       </section>
     </>
   )

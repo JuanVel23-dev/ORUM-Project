@@ -11,7 +11,6 @@ import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
 import { transicionComercio } from '@/lib/comercios/transiciones'
 import { hoyISO } from '@/lib/shared/fecha'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
@@ -275,6 +274,21 @@ export default async function FichaComercioPage({
     })),
   ]
 
+  /*
+    LA PRIMERA FOTO ABRE LA FICHA  ·  Z1
+
+    Es lo que hace desear el sitio, así que entra a lo ancho del hero en vez de
+    esperar turno en un carril a media pantalla. Si el comercio eligió portada
+    es esa; si no, su primera imagen — que es exactamente lo que un dueño de
+    local entiende por «la foto de mi negocio».
+
+    Y se RETIRA de la galería. La misma fotografía dos veces, una encima de la
+    otra y a diez píxeles de distancia, no se lee como «esta es la portada»: se
+    lee como un fallo de datos duplicados.
+  */
+  const cubierta = imagenes[0] ?? null
+  const galeria = imagenes.slice(1)
+
   const codigoTipo = new Map((tipos ?? []).map((t) => [t.id, t.codigo]))
   const nombreCiudad = new Map((ciudades ?? []).map((c) => [c.id, c.nombre]))
 
@@ -387,25 +401,64 @@ export default async function FichaComercioPage({
       )}
 
       <header className={estilos.hero}>
-        <ComercioLogo
-          logoUrl={comercio.logoUrl}
-          nombre={comercio.nombre}
-          variante="hero"
-          nombreTransicion={transicion.placa}
-        />
+        {/*
+          LA CUBIERTA. Si el comercio tiene foto, la ficha abre con ella a lo
+          ancho: es lo que hace desear el sitio, y ningún texto lo consigue.
+
+          Sin `next/image`: `next.config.ts` no declara `images` y estas URLs
+          son externas y arbitrarias. El hueco se reserva con `aspect-ratio`,
+          así que la foto no empuja el nombre al cargar (CLS) aunque no se
+          conozcan sus dimensiones.
+
+          `alt` con la descripción si la hay, y vacío si no: NUNCA el nombre
+          del comercio, que el `h1` de dos líneas más abajo ya dice.
+        */}
+        {cubierta && (
+          <div className={estilos.portada}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- URL externa, no un asset local */}
+            <img
+              src={cubierta.url}
+              alt={cubierta.descripcion ?? ''}
+              /* La cubierta es lo primero que se ve: cargarla con pereza sería
+                 pedirle al socio que espere a ver lo que ya está mirando. */
+              fetchPriority="high"
+              decoding="async"
+              className={estilos.portadaImagen}
+            />
+          </div>
+        )}
+
+        {/*
+          La placa monta sobre el borde inferior de la cubierta cuando la hay
+          —el margen negativo lo pone `.conPortada`— y el nombre baja a una
+          fila propia, a ancho completo.
+
+          Antes el nombre compartía fila con la placa de 144px y por eso estaba
+          atado a `--t-title-1` (24px fijo): a 375px le quedaban 187px y
+          cualquier tamaño mayor lo partía en cuatro líneas. Con la fila entera
+          para él puede llevar el serif y el peldaño `hero`, que es lo que hace
+          que la ficha se lea cara.
+        */}
+        <div
+          className={[estilos.placa, cubierta && estilos.conPortada].filter(Boolean).join(' ')}
+        >
+          <ComercioLogo
+            logoUrl={comercio.logoUrl}
+            nombre={comercio.nombre}
+            variante="hero"
+            nombreTransicion={transicion.placa}
+          />
+        </div>
 
         <div
           className={estilos.heroTextos}
           style={transicion.titulos ? { viewTransitionName: transicion.titulos } : undefined}
         >
-            {/* Único `h1` de la pantalla. `--t-title-1` (24px FIJO) y no
-                `--t-display-2`: junto a una placa de 144px, a 375px le quedan
-                187px, y un tamaño que creciera a 32px partiría el nombre en
-                cuatro líneas. */}
-            <h1 className={estilos.nombre}>{comercio.nombre}</h1>
+          {/* Único `h1` de la pantalla. */}
+          <h1 className={estilos.nombre}>{comercio.nombre}</h1>
 
-            {/* Es lo que explica por qué se ve ESE logotipo cuando el comercio
-                no tiene uno propio y hereda el de su marca (V4). */}
+          {/* Es lo que explica por qué se ve ESE logotipo cuando el comercio
+              no tiene uno propio y hereda el de su marca (V4). */}
           {comercio.marcaNombre && <p className={estilos.marca}>{comercio.marcaNombre}</p>}
         </div>
 
@@ -431,7 +484,23 @@ export default async function FichaComercioPage({
         <p className={estilos.descripcion}>{comercio.descripcion}</p>
       )}
 
-      <section className={estilos.seccion} aria-labelledby="titulo-beneficios">
+      {/*
+        EL CAMPO DE COLOR  ·  Z1
+
+        «Tus beneficios» es la respuesta a la pregunta por la que el socio abrió
+        esta ficha, así que deja de ser una sección más de la plancha blanca y
+        pasa a tener su propio campo en CREMA. Es la técnica de Agence Cartier:
+        separar sin dibujar una sola línea. Las tarjetas de dentro se quedan en
+        papel, así que son lo más claro de la pantalla y el ojo va ahí solo.
+
+        No sangra a ancho completo como las franjas del catálogo: esta misma
+        ficha se pinta dentro de una hoja modal, y un `margin-inline: 50% - 50vw`
+        ahí se saldría del overlay por los dos lados.
+      */}
+      <section
+        className={`${estilos.seccion} ${estilos.seccionCrema}`}
+        aria-labelledby="titulo-beneficios"
+      >
         <h2 id="titulo-beneficios" className={estilos.tituloSeccion}>
           Tus beneficios
         </h2>
@@ -457,14 +526,34 @@ export default async function FichaComercioPage({
             <ul className={estilos.listaBeneficios}>
               {beneficios.map((b) => (
                 <li key={b.id} className={estilos.beneficio}>
-                  <div className={estilos.beneficioCabecera}>
-                    <h3 className={estilos.beneficioTitulo}>{b.titulo}</h3>
-                    {/* La cifra va DENTRO de la píldora: el oro nunca es el
-                        único portador del significado. */}
-                    <Badge tone="gold" size="sm">
-                      {formatearBeneficio(b.tipoCodigo, b.valor)}
-                    </Badge>
-                  </div>
+                  {/*
+                    LA JERARQUÍA SE INVIERTE  ·  Z1
+
+                    Antes el título de la promoción era el titular y el
+                    descuento una píldora dorada de 11px a la derecha: el dato
+                    que el socio vino a buscar era lo más pequeño de la fila, y
+                    encima en el color de menor contraste de la paleta.
+
+                    Ahora el VALOR es el titular —tinta, 24px, cifras
+                    tabulares— y el título de la promoción, su línea de apoyo.
+                    Se lee de un vistazo, que era el encargo.
+
+                    Y va en TINTA, no en oro. `--gold-700` sobre crema cumple
+                    AA (4,55:1) pero la tinta da 16,25:1, y el criterio que
+                    sustituye a las reglas levantadas es explícito: si el oro
+                    hace que el dato tarde más en leerse, el oro sobra. Aquí el
+                    lujo lo ponen la cubierta y el serif del nombre; esta línea
+                    es información pura.
+
+                    El `h3` sigue siendo el título de la promoción: es el
+                    nombre del elemento, y un encabezado que dijera «20% de
+                    descuento» convertiría el índice de la pantalla en una
+                    lista de cifras sin sujeto.
+                  */}
+                  <p className={estilos.beneficioValor}>
+                    {formatearBeneficio(b.tipoCodigo, b.valor)}
+                  </p>
+                  <h3 className={estilos.beneficioTitulo}>{b.titulo}</h3>
                   {b.descripcion && (
                     <p className={estilos.beneficioDetalle}>{b.descripcion}</p>
                   )}
@@ -521,14 +610,22 @@ export default async function FichaComercioPage({
           fotos se dice con todas las letras. Un hueco mudo deja al socio
           creyendo que la pantalla se rompió.
           ================================================================== */}
+      {/*
+        La sección se omite ENTERA cuando la única foto del comercio es la que
+        ya abre la ficha: un encabezado «Fotos» sobre un carril vacío —o sobre
+        un «todavía no hay fotos» teniendo una arriba— se contradice solo.
+
+        El estado vacío se conserva para el caso real, que es no tener ninguna.
+      */}
+      {(galeria.length > 0 || imagenes.length === 0) && (
       <section className={estilos.seccion} aria-labelledby="titulo-fotos">
         <h2 id="titulo-fotos" className={estilos.tituloSeccion}>
           Fotos
         </h2>
 
-        {imagenes.length > 0 ? (
+        {galeria.length > 0 ? (
           <ul className={estilos.galeria}>
-            {imagenes.map((img) => (
+            {galeria.map((img) => (
               <li key={img.id} className={estilos.foto}>
                 {/*
                   Sin `next/image`: `next.config.ts` no declara `images` y estas
@@ -559,6 +656,7 @@ export default async function FichaComercioPage({
           </Card>
         )}
       </section>
+      )}
 
       <section className={estilos.seccion} aria-labelledby="titulo-sedes">
         <h2 id="titulo-sedes" className={estilos.tituloSeccion}>

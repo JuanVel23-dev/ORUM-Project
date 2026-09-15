@@ -1,29 +1,44 @@
 /* ==========================================================================
-   HÉROE
+   HÉROE  ·  la franja de cacao con el titular dorado
    --------------------------------------------------------------------------
-   Toda la adaptación pregunta por `contenido`, el contenedor que declara el
-   `<main>` del layout público. Nunca `@media`: el ancho útil del contenido no
-   es el del viewport, y aunque hoy coincidan en esta pantalla —no hay barra
-   lateral—, escribir un `@media` «porque total coinciden» es el atajo que la
-   norma prohíbe.
+   La adaptación pregunta por `contenido`, el contenedor que declara el
+   `<main>` del layout público. El `@container` dejó de ser obligatorio con la
+   licencia v4, pero aquí sigue siendo lo correcto y ya estaba escrito.
+
+   LA DECISIÓN DE FONDO: EL TITULAR DORADO VA SOBRE CACAO, NO SOBRE CREMA.
+   `--gold-400` sobre crema da 1,99:1 —medido, y ni siquiera llega al 3:1 de
+   texto grande—. Sobre `--cacao-bg` da 7,83:1, y además se lee METAL en vez de
+   mostaza. Así que el oro grande no vive sobre claro: vive aquí. La clase
+   `tonoCacao` de `franjas.module.css` es la que convierte esta sección en un
+   ámbito de tema para que todo lo que caiga dentro —`Button`, `ComercioLogo`—
+   resuelva sus propios tokens en oscuro.
    ========================================================================== */
 
 .hero {
-  display: grid;
-  gap: var(--space-7);
-  align-items: center;
+  /* La franja pone el relleno lateral y el sangrado; esto solo ajusta el aire
+     vertical, que en el héroe es mayor que en el resto de secciones. */
+  padding-block: var(--space-9) var(--space-10);
+}
 
-  padding-block: var(--space-6) var(--space-9);
+@container contenido (min-width: 901px) {
+  .hero {
+    padding-block: var(--space-10) var(--space-11);
+  }
+}
+
+.rejilla {
+  display: grid;
+  gap: var(--space-8);
+  align-items: center;
 }
 
 /* Dos columnas solo cuando cada una tiene sitio de verdad. Por debajo de 900px
    la columna del titular bajaría de ~340px y un titular de tres líneas se
    partiría mal, así que se apilan: texto arriba, collage abajo. */
 @container contenido (min-width: 901px) {
-  .hero {
+  .rejilla {
     grid-template-columns: 1.05fr 0.95fr;
     gap: var(--space-9);
-    padding-block: var(--space-9) var(--space-11);
   }
 }
 
@@ -33,28 +48,103 @@
   gap: var(--space-4);
 }
 
+/* --- Overline ---------------------------------------------------------------
+   Versalitas pequeñas con tracking ABIERTO. Es el otro extremo del mismo
+   principio que el titular: las mayúsculas a 11px comparten demasiada masa
+   vertical y sin aire se leen como una mancha. Por eso un `letter-spacing`
+   único está mal en algún tamaño siempre.
+
+   `--text-2` dentro del ámbito de cacao = `--cacao-fg-2`: 8,56:1 medido. */
+
+.overline {
+  margin: 0;
+
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+/* --- El titular -------------------------------------------------------------
+   `--t-hero-1`, el peldaño que X1 creó para esto y que ninguna pantalla de
+   trabajo hereda. Fraunces, hasta 72px.
+   -------------------------------------------------------------------------- */
+
 .titular {
-  font-size: var(--t-display-1-size);
-  line-height: var(--t-display-1-leading);
-  letter-spacing: var(--t-display-1-tracking);
-  font-weight: var(--t-display-1-weight);
+  margin: 0;
+  max-width: 16ch;
+
+  font-family: var(--font-display);
+  font-size: var(--t-hero-1-size);
+  line-height: var(--t-hero-1-leading);
+  font-weight: var(--t-hero-1-weight);
   color: var(--text);
+
+  /* Ligaduras y alternancias contextuales: es lo que distingue una serif bien
+     compuesta de la misma serif puesta sin más. A 72px se ve. */
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  /* Una serif de display con `antialiased` pierde las astas finas en Chrome
+     sobre macOS: aquí sí conviene el suavizado del sistema. */
+  -webkit-font-smoothing: auto;
 
   /* Evita la línea huérfana de una sola palabra en el salto. */
   text-wrap: balance;
-  max-width: 18ch;
+
+  /*
+    TRACKING ESPECÍFICO DEL TAMAÑO, interpolado con el tamaño real.
+
+    `--t-hero-1-tracking` es un valor único (−0,032em) para un tamaño que va de
+    44px a 72px, y un `letter-spacing` único está mal en algún tamaño siempre:
+    a 44px −0,032em aprieta las astas de la serif hasta que se tocan, y a 72px
+    −0,020em deja la palabra suelta.
+
+    Se interpola en PX y no en EM a propósito: un valor en em escala con la
+    fuente, o sea proporcionalmente, y el ajuste óptico correcto aprieta MÁS
+    que proporcionalmente al crecer. Los dos extremos son literales porque no
+    existe un token de tracking fluido; están anclados a los mismos anchos de
+    ventana donde `--t-hero-1-size` alcanza sus topes (7vw = 44px en 628px,
+    7vw = 72px en 1029px), así que los dos ramales van sincronizados.
+  */
+  --tracking-44: -0.88px; /* −0,020em a 44px */
+  --tracking-72: -2.45px; /* −0,034em a 72px */
+  letter-spacing: clamp(
+    var(--tracking-72),
+    calc(var(--tracking-44) - (100vw - 628px) * 0.003915),
+    var(--tracking-44)
+  );
 }
 
+/*
+  EL ORO DEL TITULAR. `--brand` dentro del ámbito de cacao es `--cacao-brand`
+  (`--gold-400`): 7,83:1 sobre la franja, medido. Fuera de esta franja el mismo
+  tono daría 1,99:1 y sería un fallo AA en la primera pantalla del producto.
+
+  El color NO es el único portador de nada: no codifica un dato, separa dos
+  mitades de una misma frase. El presupuesto del ≤5 % quedó levantado por la
+  licencia v4, así que un titular dorado ya es legítimo.
+*/
+.destacado {
+  color: var(--brand);
+}
+
+/* --- Lede ------------------------------------------------------------------ */
+
 .lede {
+  margin: 0;
+  max-width: 44ch;
+
   font-size: var(--t-title-3-size);
   line-height: var(--t-title-3-leading);
   letter-spacing: var(--t-title-3-tracking);
   font-weight: 400;
   color: var(--text-2);
 
-  max-width: 46ch;
   text-wrap: pretty;
 }
+
+/* --- Acciones -------------------------------------------------------------- */
 
 .acciones {
   display: flex;
@@ -62,7 +152,7 @@
   align-items: stretch;
   gap: var(--space-3);
 
-  margin-top: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 /* En cuanto hay ancho, los dos CTA caben en línea y el primario deja de ocupar
@@ -75,9 +165,8 @@
   }
 }
 
-/* --- Ancla secundaria -----------------------------------------------------
-   Enlace de texto con icono, no un `Button secondary`: compite menos con el
-   primario y sigue siendo un objetivo táctil completo. */
+/* Ancla secundaria: enlace de texto con icono, no un `Button secondary`.
+   Compite menos con el primario y sigue siendo un objetivo táctil completo. */
 
 .ancla {
   display: inline-flex;
@@ -86,7 +175,7 @@
   gap: var(--space-2);
   min-height: var(--tap-min);
 
-  padding-inline: var(--space-2);
+  padding-inline: var(--space-3);
   border-radius: var(--radius-sm);
 
   font-size: var(--t-callout-size);
@@ -110,12 +199,29 @@
   outline-offset: 2px;
 }
 
+/* El icono baja un pelo al señalar: es la señal de «esto te lleva ahí abajo».
+   `translate` y no `margin`, que recalcularía layout cada fotograma. */
+.anclaIcono {
+  transition: translate var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .ancla:hover .anclaIcono {
+    translate: 0 2px;
+  }
+}
+
 /* ==========================================================================
    EL COLLAGE
    --------------------------------------------------------------------------
    Rejilla de tres celdas: la primera ocupa la fila entera y las otras dos se
    reparten la siguiente. Da una composición con jerarquía —hay un aliado
    principal— sin necesitar tres tamaños de tarjeta distintos.
+
+   YA NO SON SOLO LOGOTIPOS. `comercios.portada_url` existe y se consulta, así
+   que cuando el aliado tiene foto del local, la foto manda: vende mucho más
+   que un logotipo. Sin foto se conserva el retrato de marca, que no es un
+   hueco sino el mejor activo visual que ese comercio tiene hoy.
    ========================================================================== */
 
 .collage {
@@ -135,24 +241,23 @@
 }
 
 /*
-  Cada celda es una cubierta, con la misma proporción y el mismo material que
-  las del carrusel del portal: 4:3, superficie hundida y filo de luz superior,
-  que en tema oscuro es lo que hace que se lea como una superficie iluminada y
-  no como un agujero.
+  Cada celda es una cubierta: 4:3, superficie de la franja y filo de luz
+  superior. Dentro del ámbito de cacao `--surface` es `--cacao-surface`, así
+  que la celda se recorta del fondo sin necesitar un trazo.
 
   `container-type: inline-size` NO es opcional: la variante `portada` de
-  `ComercioLogo` mide su placa en `cqi`, y sin contenedor ancestro `cqi` mediría
-  el viewport pequeño y la placa se descuadraría.
+  `ComercioLogo` mide su placa en `cqi`, y sin contenedor ancestro `cqi`
+  mediría el viewport pequeño y la placa se descuadraría.
 */
 .celda {
+  position: relative;
   display: grid;
   place-items: center;
   overflow: hidden;
 
   aspect-ratio: 4 / 3;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  background: var(--surface-sunk);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
   background-image: var(--gold-halo);
   background-repeat: no-repeat;
   background-position: center;
@@ -165,4 +270,115 @@
    empujaría el CTA fuera de pantalla en móvil. */
 .collage > :first-child.celda {
   aspect-ratio: 16 / 9;
+}
+
+/*
+  LA FOTO. Se apila SOBRE el material, nunca en su lugar: si la imagen falla no
+  pinta nada —su `alt` está vacío— y la placa del logotipo queda a la vista sin
+  un escuchador de `onError`, sin `'use client'` y sin salto de layout, porque
+  la proporción la fija el contenedor y no la imagen.
+*/
+.foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* El velo existe para que la placa no flote sobre un punto claro de la
+   fotografía. NO es portador de contraste de texto: ningún texto se apoya
+   sobre el collage, y esa decisión es la que convierte un riesgo abierto —el
+   contraste dependería de lo que suba cada comercio— en un número firmable. */
+.velo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--scrim) 0%, transparent 62%);
+}
+
+/* Con foto, la placa es una firma en la esquina de arranque. Su tamaño y su
+   radio los pone `ComercioLogo` con su variante; aquí solo se la coloca. */
+.placaSobreFoto {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  inset-block-end: var(--space-3);
+}
+
+/* ==========================================================================
+   ENTRADA  ·  al cargar, no al desplazar
+   --------------------------------------------------------------------------
+   El héroe está sobre el pliegue: no hay desplazamiento que esperar, así que
+   lo correcto es una entrada de carga y no un `IntersectionObserver` que
+   dispararía en el primer fotograma de todas formas.
+
+   `--ease-hero` —la curva medida en Agence Cartier— y no `--ease-out`: este es
+   el recorrido largo y deliberado de la página, el único que se permite
+   sentirse ceremonioso. Nunca `ease-in`.
+
+   `backwards` para que el estado inicial valga durante el retardo; sin él cada
+   pieza se ve un fotograma antes de empezar. Escalonado de `--escalonado`
+   (40ms), dentro de la banda 30–80.
+
+   Solo `transform` y `opacity`.
+   ========================================================================== */
+
+.textos > *,
+.celda {
+  animation: entrarHeroe var(--dur-page) var(--ease-hero) backwards;
+}
+
+.textos > :nth-child(1) {
+  animation-delay: 0ms;
+}
+.textos > :nth-child(2) {
+  animation-delay: var(--escalonado);
+}
+.textos > :nth-child(3) {
+  animation-delay: calc(var(--escalonado) * 2);
+}
+.textos > :nth-child(4) {
+  animation-delay: calc(var(--escalonado) * 3);
+}
+
+/* El collage entra detrás del texto: primero se entiende, después se desea. */
+.celda:nth-child(1) {
+  animation-delay: calc(var(--escalonado) * 4);
+}
+.celda:nth-child(2) {
+  animation-delay: calc(var(--escalonado) * 5);
+}
+.celda:nth-child(3) {
+  animation-delay: calc(var(--escalonado) * 6);
+}
+
+@keyframes entrarHeroe {
+  from {
+    opacity: 0;
+    /* Desde 0,97 y no desde 0: en el mundo real nada aparece de la nada, y un
+       bloque grande que crece desde 0,95 se lee como un zoom. */
+    transform: translate3d(0, var(--space-4), 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Movimiento reducido: se retira el viaje y queda el fundido. `globals.css` ya
+   comprime la duración, así que en la práctica aparece. Aparecer no marea. */
+@media (prefers-reduced-motion: reduce) {
+  .textos > *,
+  .celda {
+    animation-name: aparecerHeroe;
+  }
+}
+
+@keyframes aparecerHeroe {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

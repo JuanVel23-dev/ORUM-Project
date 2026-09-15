@@ -331,7 +331,7 @@ export function CarruselDestacadosEsqueleto() {
       <Skeleton width="200px" height="24px" />
       <Skeleton width="260px" height="14px" />
 
-      <CarrilPista className={estilos.pistaDestacados}>
+      <CarrilPista className={`${estilos.pistaDestacados} ${estilos.pistaEsqueleto}`}>
         {Array.from({ length: TARJETAS_ESQUELETO }, (_, i) => (
           <div key={i} className={estilos.celda}>
             <Card padding="none" className={estilos.superficie}>

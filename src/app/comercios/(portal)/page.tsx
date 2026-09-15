@@ -82,7 +82,10 @@ export default async function ComerciosHomePage() {
     <>
       <PageHeader
         title="Verificar membresía"
-        description="Escanea el código del carnet o escribe el número. Si la membresía está vigente, podrás registrar la venta."
+        /* La lede nombra las dos vías sin enseñar todavía ninguna: en reposo
+           solo se ve el botón de escanear, y saber que existe la alternativa
+           antes de necesitarla evita el «y si el carnet está rayado». */
+        description="Escanea el carnet del socio o escribe su número."
       />
       <VerificacionTool sucursales={sucursales} promociones={promociones} />
     </>

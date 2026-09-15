@@ -1,9 +1,11 @@
 import type { CSSProperties } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-import { Carril } from '@/components/ui/carril'
+import { CarrilPista } from '@/components/ui/carril'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import type { ComercioVitrina } from '@/lib/publico/datos-publicos'
+import escaparate from '../escaparate.module.css'
+import { Revelar } from './revelar'
 import estilos from './vitrina-publica.module.css'
 
 /*
@@ -28,16 +30,29 @@ import estilos from './vitrina-publica.module.css'
   SIN AUTOPLAY. Un carrusel que se mueve solo roba el control y es un fallo
   conocido de WCAG 2.2.2.
 
-  Server Component puro: toda la animación es CSS, así que hidratar estas
-  tarjetas sería un gasto a cambio de nada.
+  POR QUÉ `CarrilPista` Y NO `Carril`. Son el mismo CSS: `Carril` es la pista
+  más una cabecera de `h2` a `--t-title-2`. El escaparate sube TODOS sus
+  encabezados de sección al peldaño ceremonial `--t-hero-2` con Fraunces, y si
+  esta sección se quedara en la cabecera por defecto sería el único `h2` de la
+  página en otra escala. `CarrilPista` se expone suelta exactamente para esto,
+  y la geometría auditada de la pista —sangrado asimétrico, `overscroll`,
+  reserva del anillo de foco— se sigue heredando sin duplicar una línea.
+
+  Server Component: toda la animación es CSS. Lo único que se hidrata es el
+  `Revelar`, que no re-renderiza nada —escribe un atributo en el DOM—.
 
   Consume `ComercioVitrina`, no `ComercioListado`: importar el modelo de una
   ruta privada desde una ruta pública invertiría la dependencia.
 */
 
-/** Desfase de la entrada escalonada, en milisegundos. Mismo valor que la portada
-    del portal: 60ms lee como secuencia sin que la última tarjeta llegue tarde. */
+/** Desfase de la entrada escalonada, en milisegundos. 60ms lee como secuencia
+    sin que la última tarjeta llegue tarde; la banda de la v4 es 30–80. */
 const PASO_ESCALONADO_MS = 60
+
+/** Tope del escalonado. Importa más que el paso: con ocho tarjetas, un paso sin
+    techo deja la última entrando medio segundo después y eso se lee como
+    lentitud, no como ritmo. */
+const TOPE_ESCALONADO_MS = 300
 
 type Props = {
   comercios: ComercioVitrina[]
@@ -65,17 +80,26 @@ export function VitrinaPublica({ comercios }: Props) {
   if (comercios.length === 0) return null
 
   return (
-    <div className={estilos.envoltura} id="comercios-aliados">
-      <Carril
-        titulo="Conoce a tus futuros aliados"
-        apoyo={apoyo(comercios.length)}
-        pistaClassName={estilos.pista}
-      >
-        {comercios.map((comercio, indice) => (
-          <TarjetaVitrina key={comercio.id} comercio={comercio} indice={indice} />
-        ))}
-      </Carril>
-    </div>
+    <section
+      className={[escaparate.franja, escaparate.tonoCrema, estilos.envoltura].join(' ')}
+      id="comercios-aliados"
+      aria-labelledby="vitrina-titulo"
+    >
+      <Revelar modo="contenedor">
+        <div className={estilos.cabecera}>
+          <h2 id="vitrina-titulo" className={escaparate.tituloSeccion}>
+            Conoce a tus futuros aliados
+          </h2>
+          <p className={escaparate.apoyoSeccion}>{apoyo(comercios.length)}</p>
+        </div>
+
+        <CarrilPista className={estilos.pista}>
+          {comercios.map((comercio, indice) => (
+            <TarjetaVitrina key={comercio.id} comercio={comercio} indice={indice} />
+          ))}
+        </CarrilPista>
+      </Revelar>
+    </section>
   )
 }
 
@@ -88,9 +112,10 @@ export function VitrinaPublica({ comercios }: Props) {
       «-20 % en Casa Duarte», sí.
    4. CATEGORÍA Y CIUDAD — descartar. El menor peso visual de la tarjeta.
 
-  NINGÚN TEXTO SE APOYA SOBRE LA CUBIERTA. El día que exista `portada_url`, el
-  contraste dejaría de ser propiedad de un token y pasaría a depender de la
-  fotografía que suba cada comercio.
+  NINGÚN TEXTO SE APOYA SOBRE LA CUBIERTA, y ahora que hay fotografías reales
+  esa decisión pasa de precaución a requisito: con texto encima, el contraste
+  dejaría de ser propiedad de un token y pasaría a depender de la foto que suba
+  cada comercio — un número que nadie puede firmar.
 */
 function TarjetaVitrina({
   comercio,
@@ -100,29 +125,59 @@ function TarjetaVitrina({
   indice: number
 }) {
   const descripcion = (comercio.descripcion ?? '').trim()
+  const portadaUrl = (comercio.portadaUrl ?? '').trim()
   const meta = [comercio.categoriaNombre, comercio.ciudades.join(' · ')]
     .filter(Boolean)
     .join(' · ')
+
+  const retardo = Math.min(indice * PASO_ESCALONADO_MS, TOPE_ESCALONADO_MS)
 
   return (
     <div
       className={estilos.celda}
       /* Token dinámico: el único uso de `style` que la norma admite —inyectar
          un valor, nunca maquetar—. Es lo que escalona la entrada. */
-      style={{ '--retardo': `${indice * PASO_ESCALONADO_MS}ms` } as CSSProperties}
+      style={{ '--retardo': `${retardo}ms` } as CSSProperties}
     >
       <Card padding="none" className={estilos.superficie}>
         <div className={estilos.cubierta}>
+          {/*
+            LA FOTO DEL LOCAL, cuando la hay. `comercios.portada_url` ya existe
+            y ya se consulta: una foto del sitio vende mucho más que un
+            logotipo, y este es el escaparate.
+
+            El material con la placa es SIEMPRE la capa de fondo y la foto va
+            encima. Si falla no pinta nada —`alt` vacío— y queda el retrato de
+            marca, sin `onError`, sin `'use client'` y sin salto de layout
+            porque la proporción la fija el contenedor y no la imagen.
+          */}
+          {portadaUrl && (
+            // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+            <img
+              src={portadaUrl}
+              /* Decorativa: el nombre del comercio está en texto justo debajo.
+                 Con `alt=""` un fallo de carga no pinta ni texto alternativo ni
+                 glifo de rotura. */
+              alt=""
+              className={estilos.foto}
+              loading="lazy"
+              decoding="async"
+            />
+          )}
+
+          {portadaUrl && <span className={estilos.velo} aria-hidden="true" />}
+
           <ComercioLogo
             logoUrl={comercio.logoUrl}
             nombre={comercio.nombre}
-            variante="portada"
+            variante={portadaUrl ? 'tarjeta' : 'portada'}
+            className={portadaUrl ? estilos.placaSobreFoto : undefined}
           />
         </div>
 
         <div className={estilos.pie}>
-          {/* `h3` bajo el `h2` del carril: misma jerarquía que reconocerá en el
-              catálogo real el día que se haga socio. */}
+          {/* `h3` bajo el `h2` de la sección: misma jerarquía que reconocerá en
+              el catálogo real el día que se haga socio. */}
           <h3 className={estilos.nombre}>{comercio.nombre}</h3>
 
           {/* La línea se pinta siempre, aunque quede vacía: la anatomía

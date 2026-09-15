@@ -583,6 +583,25 @@
   gap: var(--space-1);
 }
 
+/*
+  EL ESQUELETO NO SE ESTIRA  ·  Z3
+
+  Z3 hizo que una pista con pocas tarjetas reparta el sobrante y llene el ancho
+  (`carril.module.css`, `.tarjeta`). Aquí eso sería contraproducente: el
+  esqueleto pinta SIEMPRE tres siluetas, pero la portada real suele traer
+  cuatro o más y entonces las columnas vuelven a su ancho rígido. La silueta
+  mediría 358px y el contenido 320px, así que el relevo movería la fila —y una
+  silueta existe precisamente para que no se mueva nada al llegar el contenido.
+
+  Con el techo pegado al suelo, la silueta mide lo que va a medir la tarjeta en
+  el caso dominante. Cuando la portada trae exactamente tres destacados sí hay
+  un ajuste de ancho al resolverse; es el caso raro, y es preferible a moverlo
+  siempre.
+*/
+.pistaEsqueleto {
+  --carril-tarjeta-max: var(--carril-tarjeta-w);
+}
+
 .esqueleto > :last-child {
   margin-top: var(--space-3);
 }

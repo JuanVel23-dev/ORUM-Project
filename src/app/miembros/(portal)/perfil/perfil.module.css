@@ -1,15 +1,20 @@
 /* ==========================================================================
-   CARNET  ·  spec §6
+   EL CARNET  ·  Z1 — sobre CACAO
    --------------------------------------------------------------------------
-   Es lo que el miembro enseña en la caja. Se diseña como una tarjeta física:
-   una sola pieza, ancho propio, el QR arriba y el número legible a un brazo
-   de distancia.
+   Es el objeto más precioso del producto: lo que el socio enseña con orgullo
+   en la caja. Con la licencia creativa v4 el presupuesto del oro y la
+   disciplina de trazo dejan de frenarlo, así que el carnet pasa a ser lo que
+   siempre tuvo que ser: una tarjeta de CHOCOLATE con el wordmark y los datos
+   en oro.
 
-   Aquí vivía una consulta de contenedor a 620px que reorganizaba el carnet en
-   dos columnas. Se eliminó entera: el carnet es UNA columna a todos los
-   anchos. Si cambia de forma según el ancho deja de ser un objeto y vuelve a
-   ser una caja de datos — y el socio tiene que reconocerlo igual en su
-   teléfono que en la captura que alguien enseñe en un escritorio.
+   POR QUÉ CACAO Y NO CLARO. `--gold-400` —el oro de display, el que se lee
+   metal y no mostaza— da 7,83:1 sobre `--cacao-bg` y 1,99:1 sobre crema. Un
+   carnet dorado sobre claro no es una opción de diseño: es un fallo AA. El
+   cacao es la única superficie del sistema donde ese oro es legible, y resulta
+   ser además la más impactante.
+
+   Sigue siendo UNA columna a todos los anchos y con ancho propio: si cambia de
+   forma según el ancho deja de ser un objeto y vuelve a ser una caja de datos.
    ========================================================================== */
 
 .pantalla {
@@ -17,8 +22,8 @@
   gap: var(--space-6);
 
   /*
-    El carnet no crece. NUNCA. Lo que crece es la columna de al lado, que
-    lleva contenido real. Publicado aquí porque lo consumen las dos reglas de
+    El carnet no crece. NUNCA. Lo que crece es la columna de al lado, que lleva
+    contenido real. Publicado aquí porque lo consumen las dos reglas de
     `.columnas` y tienen que decir el mismo número siempre.
   */
   --carnet-ancho: 460px;
@@ -29,6 +34,12 @@
   gap: var(--space-1);
 }
 
+/*
+  El `h1` de la pantalla se queda en SANS. El serif de display es un acento y
+  en esta pantalla ya lo lleva el nombre del socio dentro del carnet: dos
+  Fraunces a la vista y el acento deja de serlo. El héroe aquí es el objeto,
+  no su encabezado.
+*/
 .titulo {
   font-size: var(--t-display-2-size);
   line-height: var(--t-display-2-leading);
@@ -49,19 +60,18 @@
   gap: var(--space-7);
   grid-template-columns: minmax(0, var(--carnet-ancho));
   /* Móvil y tableta: el carnet centrado. A 460px no hay nada que reorganizar
-     en 700px que mejore el objeto (§6.4). */
+     en 700px que mejore el objeto. */
   justify-content: center;
   align-items: start;
 }
 
 /*
   Escritorio. 460 + 32 + 380 = 872: cabe a 900 justos, y por debajo se apila.
-  El conjunto se alinea a la IZQUIERDA: centrarlo dejaría el mismo hueco
-  muerto de siempre, solo que repartido a los dos lados.
+  El conjunto se alinea a la IZQUIERDA: centrarlo dejaría un hueco muerto
+  repartido a los dos lados.
 
   `@container`, no `@media`: el ancho útil aquí depende del cromo del portal,
-  no del viewport. El contenedor `contenido` lo declara `.main` del portal
-  (`portal.module.css`), así que la consulta tiene ancestro.
+  no del viewport. El contenedor `contenido` lo declara `.main` del portal.
 */
 @container contenido (min-width: 900px) {
   .columnas {
@@ -70,55 +80,239 @@
   }
 }
 
-/* Envoltorio de la aparición: solo existe para llevar el `transform`. */
+/* ==========================================================================
+   LA ENTRADA  ·  rápida, porque se ve muchas veces al día
+   --------------------------------------------------------------------------
+   Criterio de Emil Kowalski, que la v4 adopta: la FRECUENCIA decide. El carnet
+   se abre en cada caja, varias veces al día. Lo que se ve cientos de veces no
+   se celebra: aquí había un muelle con rebote (`SPRING_POP`, ~500ms) y un
+   escalonado de cuatro bloques a 35ms, o sea una ceremonia de tres cuartos de
+   segundo delante de un cajero esperando. Ahora son 180ms de subida corta.
+
+   Y deja de necesitar JavaScript. El envoltorio de cliente que lo animaba se
+   eliminó: un `@keyframes` es el instrumento correcto para una ENTRADA —no hay
+   estado anterior desde el que transicionar, que es la excepción que la propia
+   v4 §5.6 admite— y además se pinta aunque la hidratación no llegue nunca.
+   Con `motion` el peor caso era un carnet en `opacity: 0`; con esto, el peor
+   caso es que aparezca sin animar.
+
+   Solo `transform` y `opacity`.
+   ========================================================================== */
+
 .carnetCaja {
   min-width: 0;
+
+  /* La tarjeta y su acción de mantenimiento entran como una sola pieza: el
+     botón de la foto pertenece al carnet aunque no esté impreso dentro. */
+  display: grid;
+  gap: var(--space-3);
+
+  animation: entraCarnet 180ms var(--ease-out) both;
+}
+
+@keyframes entraCarnet {
+  from {
+    opacity: 0;
+    /* Nada entra desde `scale(0)` (v4 §5.1). Y a esta velocidad el
+       desplazamiento tiene que ser corto o se lee como un tirón. */
+    transform: scale(0.985) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /*
-  Doble clase a propósito (0,2,0): estos valores CORRIGEN a `card.module.css`
-  y el orden entre dos módulos CSS en el bundle no está garantizado. Con la
-  misma especificidad, cuál gana dependería del orden de importación.
+  Movimiento reducido: el equivalente no vestibular de una ENTRADA es estar
+  ahí. No hay gesto que acusar —la pantalla acaba de cargar—, así que el
+  carnet simplemente está, sin desplazamiento ni escala.
 
-  - `--radius-xl`: la segunda y última superficie héroe del producto (§6.2).
+  Se declara aquí aunque la regla global de `globals.css` ya reduciría la
+  duración a 0,01ms: escrito, no depende de un `!important` ajeno y se lee de
+  un vistazo qué pasa en este modo.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .carnetCaja {
+    animation: none;
+  }
+}
 
-  - LA SOMBRA, y ya no el trazo. Aquí vivía `border-color: var(--border-strong)`,
-    que era el trazo de tinta de 2px de la dirección v2. La v3 §2.1 lo retira de
-    las superficies: «si necesita que se la vea, sube de sombra, no de trazo».
-    Un borde negro es papelería, y el encargo es exactamente lo contrario.
+/* ==========================================================================
+   LA TARJETA  ·  ÁMBITO DE TEMA CACAO
+   --------------------------------------------------------------------------
+   NO BASTA CON PONER `color` NI `background`. Dentro del carnet caen
+   componentes que resuelven sus PROPIOS tokens —`StatusBadge` su relleno,
+   `Copiar` su icono y su foco, `QrCode` el filo de su placa— y todos apuntan a
+   los semánticos del tema CLARO. Con solo heredar el color saldrían ilegibles
+   sobre chocolate. Ya pasó una vez, en la franja del catálogo, y se arregló
+   igual: la superficie se comporta como un ÁMBITO DE TEMA y reasigna los
+   semánticos. Cualquier componente que entre se adapta sin saber dónde está, y
+   el que se escriba mañana también.
 
-    Sube a `--shadow-overlay` —el cuarto y último escalón, el de modales y
-    hojas— y no se queda en el `--shadow-raised` que le da `principal`, porque
-    en esta pantalla NO HAY NADA MÁS que flote: «Cómo usarlo» es texto suelto,
-    sin tarjeta. El riesgo que avisa la v3 §5 —que todo levite y nada pese— no
-    aplica cuando el objeto que flota es uno solo. Sobre fondo claro, el
-    escalón 4 es lo que separa «una tarjeta» de «una tarjeta que puedes coger».
+   RATIOS MEDIDOS (sRGB, fórmula WCAG 2.x) sobre `--cacao-bg` #2b1a15:
 
-    `, var(--edge)` no es decoración: en tema oscuro `--shadow-overlay` casi no
-    se ve contra el fondo negro y lo que recorta el carnet es el anillo de luz.
-    Y NUNCA un `none` dentro de la lista: invalidaría la declaración entera en
-    silencio y el carnet se quedaría sin sombra y sin filo a la vez.
+     --cacao-fg    papel #fdfcfa .......... 16,24:1   nombre, valores
+     --gold-200    #f2e3be ................ 13,09:1
+     --gold-300    #e6cd97 ................ 10,74:1   el número de membresía
+     --cacao-fg-2  --n-300 #c4b8ac .........  8,56:1   texto secundario
+     --gold-400    #d5ac5b ................  7,83:1   etiquetas, wordmark
+     --gold-500    #c69a43 ................  6,43:1   parada oscura del barrido
+     --success-dark #45d67c ...............  8,85:1
+     --warning-dark #f0912e ...............  6,97:1
+     --danger-dark  #ff5a52 ...............  5,42:1
+     --gold-600    #a8812b ................  4,63:1   filo (1.4.11: ≥3)
 
-  - Del `brand` se conserva todo: el borde dorado de 1px (`--brand-edge` al
-    45 %) y el hairline superior de su `::before`. A 1px el oro no mueve el
-    presupuesto del ≤5 % y es uno de los sitios donde vive por derecho propio.
+   Y sobre `--cacao-surface` #3a251e, que es donde de verdad vive el texto
+   tenue si algo se eleva dentro:
+     papel 14,00 · --n-300 7,38 · --n-400 4,98 · --gold-400 6,75 ·
+     --danger-dark 4,67 · --success-dark 7,63
 
-  - `overflow: hidden`: recorta ese filo —y el halo de abajo— a la curva de
-    28px (la primitiva los dibuja con el radio de 14px de una tarjeta normal).
+   ⚠️ `--text-3` NO BAJA A `--cacao-fg-3`. Ese tono está calculado contra el
+   fondo de la franja, no contra las superficies elevadas de dentro, y ahí se
+   queda sin margen. Se colapsa el tercer nivel en el segundo: se pierde un
+   escalón de jerarquía y se gana que el texto se lea, que es el cambio bueno.
+   Es la tercera trampa del log Y1 y aquí se evita desde el principio.
+   ========================================================================== */
+
+/*
+  Doble clase a propósito (0,2,0): estos valores CORRIGEN a `card.module.css` y
+  el orden entre dos módulos CSS en el bundle no está garantizado. Con la misma
+  especificidad, cuál gana dependería del orden de importación.
 */
 .carnet.carnet {
+  /* Los controles nativos y las barras de scroll de dentro, en su variante
+     oscura. Sin esto un `<select>` o un scroll saldría claro sobre chocolate. */
+  color-scheme: dark;
+
+  --bg: var(--cacao-bg);
+  --surface: var(--cacao-surface);
+  --surface-alt: var(--cacao-surface);
+  --surface-hover: var(--cacao-hover);
+  --surface-sunk: var(--cacao-bg);
+  --surface-hueco: var(--cacao-hover);
+
+  --text: var(--cacao-fg);
+  --text-2: var(--cacao-fg-2);
+  --text-3: var(--cacao-fg-2); /* ⚠️ colapsado a propósito — ver cabecera */
+  --text-on-accent: var(--cacao-bg);
+
+  /*
+    Los tres bordes del tema claro son TINTA (n-700 da 1,42:1 aquí: invisible).
+    Sobre cacao el filo es LUZ, igual que en el tema oscuro.
+  */
+  --border: color-mix(in srgb, var(--w-0) 26%, transparent);
+  --border-subtle: color-mix(in srgb, var(--w-0) 14%, transparent);
+  --border-strong: var(--n-300);
+
+  --brand: var(--cacao-brand);
+  --brand-edge: var(--cacao-edge);
+  --focus: var(--cacao-brand); /* 7,83:1 — muy por encima del 3:1 de 1.4.11 */
+
+  /* Acción en claro = tinta, y aquí la tinta desaparecería. Se invierte. */
+  --action: var(--w-0);
+  --action-hover: var(--n-100);
+  --action-fg: var(--cacao-bg);
+  --action-gold: var(--gold-500);
+  --action-gold-fg: var(--tinta-1); /* 7,30:1 sobre gold-500 */
+
+  --link: var(--info-dark);
+  --success: var(--success-dark);
+  --warning: var(--warning-dark);
+  --danger: var(--danger-dark);
+  --info: var(--info-dark);
+
+  /* Los del tema claro son literales `rgba()` del color claro; aquí se derivan
+     del semántico ya remapeado, así que siguen al valor y no a una copia. */
+  --success-bg: color-mix(in srgb, var(--success) 12%, transparent);
+  --warning-bg: color-mix(in srgb, var(--warning) 12%, transparent);
+  --danger-bg: color-mix(in srgb, var(--danger) 12%, transparent);
+  --info-bg: color-mix(in srgb, var(--info) 12%, transparent);
+  --gold-bg: color-mix(in srgb, var(--gold-400) 14%, transparent);
+
+  /*
+    EL BARRIDO DEL WORDMARK. En tema claro `--gold-sheen` se remapea a la mitad
+    OSCURA de la rampa (gold-600/700/800) y sobre chocolate su parada del 62%
+    daría 2,17:1: el wordmark se apagaría justo en el centro. Aquí se reescribe
+    con la mitad clara, y la parada más oscura es `--gold-500` a 6,43:1 — con
+    holgura sobre el 4,5 que pide un texto de este cuerpo.
+  */
+  --gold-sheen: linear-gradient(
+    135deg,
+    var(--gold-200) 0%,
+    /* luz */ var(--gold-400) 38%,
+    /* cuerpo */ var(--gold-500) 62%,
+    /* sombra */ var(--gold-300) 100% /* reflejo de retorno */
+  );
+
+  /* En claro `--edge` es transparente porque lo que recorta es la sombra. El
+     carnet es oscuro en los dos temas, así que necesita el anillo de luz. */
+  --edge: var(--edge-light);
+
   border-radius: var(--radius-xl);
+  /* Filo dorado de 1px. `--gold-500` al 55% sobre cacao: se lee como el canto
+     pulido de una tarjeta, no como un borde dibujado. */
+  border: 1px solid color-mix(in srgb, var(--gold-500) 55%, transparent);
+
+  /*
+    LA PROFUNDIDAD. `--shadow-overlay` es el cuarto y último escalón —el de
+    modales y hojas— y aquí está justificado porque en esta pantalla NO HAY
+    NADA MÁS que flote: «Cómo usarlo» es texto suelto, sin tarjeta.
+
+    `var(--edge)` no es decoración: es el anillo interior de luz que separa el
+    chocolate del fondo cuando el tema es oscuro y la sombra negra no se ve.
+
+    Y NUNCA un `none` dentro de la lista: invalidaría la declaración entera en
+    silencio y el carnet se quedaría sin sombra y sin filo a la vez.
+  */
   box-shadow: var(--shadow-overlay), var(--edge);
+
+  /*
+    QUÉ DIBUJA EL LÍMITE DE LA TARJETA, POR TEMA. En claro, el chocolate contra
+    el papel da 16,24:1 y no hace falta nada más. En OSCURO el fondo del portal
+    es `--n-1000` (#14100e) y el cacao contra él da 1,14:1: el cuerpo de la
+    tarjeta prácticamente no se distingue del fondo, y la sombra negra sobre
+    negro tampoco. Lo que la recorta ahí es el filo dorado —3,27:1 contra el
+    fondo oscuro, por encima del 3:1 de 1.4.11— más el anillo interior de
+    `--edge`. Por eso el filo no es decorativo en oscuro: es el borde.
+  */
+
+  /*
+    LA TEXTURA, en tres capas y ninguna anima:
+
+      1. El guilloché. Hairlines diagonales de oro al 4%, cada 8px: es lo que
+         hace que una superficie plana se lea como cartulina impresa y no como
+         un rectángulo de color. A esa opacidad no se ve, se siente.
+      2. La luz que entra por arriba a la derecha, con el tono de hover del
+         cacao — la misma familia, un punto más claro.
+      3. El chocolate.
+  */
+  background:
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 7px,
+      color-mix(in srgb, var(--gold-400) 4%, transparent) 7px 8px
+    ),
+    radial-gradient(
+      120% 92% at 88% -12%,
+      color-mix(in srgb, var(--cacao-hover) 85%, transparent) 0%,
+      transparent 62%
+    ),
+    var(--cacao-bg);
+
+  color: var(--text);
+
+  /* Recorta el halo, la textura y el filo a la curva de 32px: la primitiva los
+     dibuja con el radio de una tarjeta normal. */
   overflow: hidden;
 }
 
 /*
   EL BRILLO. Un halo dorado casi imperceptible, el mismo token que usa la
-  tarjeta de acceso: a 9 % de opacidad no se lee como color, se siente como luz
-  cayendo sobre metal. Es parte de lo que separa «una tarjeta blanca» de «un
-  objeto», y no codifica ningún dato.
+  tarjeta de acceso: no se lee como color, se siente como luz cayendo sobre
+  metal.
 
-  `pointer-events: none` y `z-index: 0`, con el contenido elevado justo debajo:
+  `pointer-events: none` y `z-index: 0`, con el contenido elevado justo encima:
   un pseudoelemento POSICIONADO pinta por encima de los hijos no posicionados,
   así que sin esto el halo velaría el QR — que es lo único de esta pantalla que
   no se puede tocar.
@@ -126,46 +320,106 @@
 .carnet.carnet::after {
   content: '';
   position: absolute;
-  inset: -30% -25% auto auto;
-  width: 320px;
+  inset: -34% -28% auto auto;
+  width: 360px;
   aspect-ratio: 1 / 1;
   background: var(--gold-halo);
   pointer-events: none;
   z-index: 0;
 }
 
-.carnet.carnet > * {
+/*
+  El interior. Existe para llevar el relleno y el ritmo vertical sin que el
+  `padding` de la primitiva compita con el recorte del filo, y para elevarse
+  por encima del halo.
+*/
+.carnetInterior {
   position: relative;
   z-index: 1;
+
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-7);
 }
 
-/* --- Identidad: foto, wordmark, nombre y plan ------------------------------ */
+/* --- Cabecera: wordmark y tipo de documento ------------------------------- */
 
-.identidad {
+.cabecera {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: var(--space-4);
 }
 
-/*
-  La foto va CUADRADA con la esquina redondeada, no en círculo: un carnet es un
-  documento, y el círculo lo devolvería al lenguaje de «avatar de app». Recorte
-  con `cover` —una cara centrada— y no `contain`, que dejaría bandas vacías.
+.emisor {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
 
-  Sin sombra: está encajada en la superficie, no levantada sobre ella. Lo que
-  flota en esta pantalla es el carnet entero, y nada dentro de él.
+/*
+  EL WORDMARK, con el barrido metálico. Es la única pieza del sistema que
+  quiere oro como MATERIAL y no como color plano, y el carnet es la marca en la
+  mano del socio: si hay un sitio donde el barrido se gana el gasto, es este.
+
+  Color plano de respaldo antes del `@supports`: si `background-clip: text` no
+  existe, el texto se pinta en `--brand` y se lee igual. Sin esa precaución un
+  navegador sin soporte mostraría el wordmark transparente, o sea nada.
+*/
+.wordmark {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  font-weight: 680;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+
+  color: var(--brand);
+  background: var(--gold-sheen);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .wordmark {
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/*
+  «Carnet de socio». Una credencial que no dice qué es no parece una
+  credencial. Versalitas y el tracking más abierto del objeto: las mayúsculas
+  pequeñas y juntas se convierten en una mancha.
+*/
+.tipo {
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+/* --- La foto -------------------------------------------------------------- */
+
+/*
+  Arriba a la derecha, como en un pasaporte: es la esquina donde el ojo busca
+  el retrato en un documento de identidad. CUADRADA con la esquina redondeada y
+  no en círculo — el círculo la devolvería al lenguaje de «avatar de app», y
+  esto es un documento.
+
+  Recorte con `cover` (una cara centrada) y no `contain`, que dejaría bandas.
 */
 .foto {
   display: grid;
   place-items: center;
   overflow: hidden;
 
-  width: 72px;
+  width: 88px;
   aspect-ratio: 1 / 1;
   border-radius: var(--radius-md);
-  background: var(--surface-sunk);
-  border: 1px solid var(--border-subtle);
+
+  background: var(--cacao-surface);
+  border: 1px solid color-mix(in srgb, var(--gold-500) 45%, transparent);
 }
 
 .fotoImagen {
@@ -174,73 +428,64 @@
   object-fit: cover;
 }
 
+/* Sobre `--cacao-surface`: `--gold-400` da 6,75:1. */
 .fotoIniciales {
-  font-size: var(--t-title-2-size);
-  line-height: var(--t-title-2-leading);
-  letter-spacing: var(--t-title-2-tracking);
-  font-weight: var(--t-title-2-weight);
-  color: var(--text-3);
-}
-
-.identidadTextos {
-  display: grid;
-  gap: var(--space-1);
-  justify-items: start;
-  min-width: 0;
-}
-
-/* El botón respira respecto del plan, pero menos que un bloque nuevo: es una
-   acción sobre la foto de al lado, no otra sección del carnet. */
-.cambiarFoto {
-  margin-top: var(--space-2);
-}
-
-/* --- Contenido del carnet ------------------------------------------------- */
-
-/*
-  El wordmark del emisor. Es uno de los sitios donde el oro vive por derecho
-  propio, y a este tamaño no mueve el presupuesto del ≤5 %.
-*/
-.wordmark {
-  font-size: var(--t-caption-size);
-  line-height: var(--t-caption-leading);
-  font-weight: 680;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-size: var(--t-title-1-size);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-weight: 600;
   color: var(--brand);
 }
 
-/*
-  EL TRACKING ES ESPECÍFICO DEL TAMAÑO, y por eso cada bloque de este carnet
-  pide el suyo y ninguno comparte un `letter-spacing` global:
+/* --- Identidad: el nombre manda ------------------------------------------- */
 
-    .nombre   → display-2, tracking NEGATIVO (−0,02em). A este cuerpo las
-                letras se separan ópticamente solas; cerrarlas es lo que hace
-                que un nombre largo se lea como una pieza y no como una fila
-                de caracteres sueltos.
-    .plan     → callout, tracking 0. Texto normal a tamaño normal.
-    .numero   → monoespaciado, tabular y tracking POSITIVO. Se dicta en voz
-                alta en una caja, así que separar es justo lo que hace falta.
-    .wordmark
-    .etiqueta → versalitas, el tracking más abierto de todos: las mayúsculas
-                pequeñas y juntas se convierten en una mancha.
-
-  Sube de `title-1` a `display-2` porque el nombre es el HÉROE del objeto: en
-  un carnet físico es lo primero que se lee a un brazo de distancia.
-  `text-wrap: balance` reparte las dos líneas del peor caso en vez de dejar
-  una palabra huérfana abajo.
-*/
-.nombre {
-  font-size: var(--t-display-2-size);
-  line-height: var(--t-display-2-leading);
-  letter-spacing: var(--t-display-2-tracking);
-  font-weight: var(--t-display-2-weight);
-  text-wrap: balance;
+.identidad {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
 /*
-  El nombre del plan puede ocupar dos líneas y NO se trunca: es el producto
-  que el socio compró. La aritmética de §6.3 ya cuenta con el peor caso.
+  EL NOMBRE DEL SOCIO ES EL HÉROE DEL OBJETO. En un carnet físico es lo primero
+  que se lee a un brazo de distancia, así que se lleva el peldaño `hero` y
+  Fraunces — el cambio que más hace por el «se ve caro» de toda la dirección.
+
+  Va a ANCHO COMPLETO de la tarjeta y no junto a la foto: con la foto al lado
+  le quedaban ~300px y un nombre de cuatro palabras se partía en cinco líneas a
+  48px. La foto sube a la cabecera justo por esto.
+
+  Tracking NEGATIVO, que es lo que pide el serif de display al crecer: lo trae
+  `--t-hero-2-tracking` (−0,024em), calibrado para este rango porque el eje
+  óptico de la familia no se carga.
+
+  `text-wrap: balance` reparte las líneas del peor caso en vez de dejar una
+  palabra huérfana abajo; `overflow-wrap` protege el nombre sin espacios.
+
+  16,24:1 sobre el cacao.
+*/
+.nombre {
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  letter-spacing: var(--t-hero-2-tracking);
+  font-weight: var(--t-hero-2-weight);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  /* Una serif de contraste alto con `antialiased` pierde las astas finas en
+     Chrome sobre macOS: aquí conviene el suavizado del sistema. */
+  -webkit-font-smoothing: auto;
+
+  color: var(--text);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/*
+  `planes_membresia` sostiene varios planes con precio y duración propios, así
+  que mostrar el nombre del plan es correcto y no un defecto. Puede ocupar dos
+  líneas y NO se trunca: es el producto que el socio compró.
+
+  8,56:1.
 */
 .plan {
   font-size: var(--t-callout-size);
@@ -250,42 +495,86 @@
   text-wrap: balance;
 }
 
+/* --- El QR y el número ---------------------------------------------------- */
+
+/*
+  Separado por un hairline dorado: es el cambio de registro entre «quién eres»
+  y «qué se escanea». Un filo de luz, no una línea dibujada.
+*/
+.credencial {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+
+  padding-top: var(--space-5);
+  border-top: 1px solid color-mix(in srgb, var(--gold-500) 32%, transparent);
+}
+
 .qr {
   display: grid;
   justify-items: center;
 }
 
 /*
-  ZONA DE SILENCIO. La norma del código QR pide 4 módulos por lado. Con
-  `size={160}` y 8 dígitos —versión 1, 21 módulos— cada módulo mide 7,6px, así
-  que 32px son 4,2 módulos. El relleno por defecto de la primitiva (16px) daba
-  1,7: no rompe siempre, rompe en la caja delante del cliente.
+  EL QR VA NEGRO SOBRE BLANCO EN LOS DOS TEMAS, Y SOBRE CACAO TAMBIÉN.
+  Invertirlo rompe el escaneo en algunos lectores y el fallo ocurre en la caja
+  del comercio, delante del cliente. Sobre chocolate eso significa que el QR
+  lleva SU PROPIA PLACA BLANCA — que además es lo que mejor queda: se lee como
+  una etiqueta cosida a la tarjeta.
 
-  Especificidad 0,2,0 por la misma razón que `.carnet.carnet`: corrige a
-  `qr-code.module.css` y el orden del bundle no decide.
+  La placa la pinta ya `qr-code.module.css` (`background: #ffffff`, el único
+  literal de color permitido del sistema). Aquí solo se le cambian dos cosas:
+
+  - ZONA DE SILENCIO. La norma del QR pide 4 módulos por lado. Con `size={160}`
+    y 8 dígitos —versión 1, 21 módulos— cada módulo mide 7,6px, así que 32px
+    son 4,2 módulos. El relleno por defecto de la primitiva (16px) daba 1,7: no
+    rompe siempre, rompe en la caja delante del cliente.
+
+  - EL FILO Y LA SOMBRA. El borde de la primitiva es `--border`, que en este
+    ámbito es luz al 26% y sobre una placa BLANCA no se ve. Se sustituye por
+    oro (`--gold-600` sobre blanco: 3,60:1, costura visible) y la placa recibe
+    sombra propia para separarse del chocolate.
+
+  Especificidad 0,2,0 por la misma razón que `.carnet.carnet`.
 */
 .qr .qrMarco {
   padding: var(--space-7);
+  border-color: var(--gold-600);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-flotante);
 }
 
 .bloque {
   display: grid;
   gap: var(--space-1);
+  justify-items: center;
   min-width: 0;
 }
 
+/* Versalitas en oro: 7,83:1. Es etiqueta, no dato. */
 .etiqueta {
   font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
   letter-spacing: var(--t-overline-tracking);
   font-weight: var(--t-overline-weight);
   text-transform: uppercase;
-  color: var(--text-3);
+  color: var(--brand);
 }
 
 /*
-  El número es el respaldo cuando el lector falla: se dicta y se teclea.
-  Monoespaciado, tabular y con tracking abierto, para que 0/O y 1/l no se
-  confundan al leerlo en voz alta.
+  EL NÚMERO ES UN CÓDIGO: se lee dígito a dígito, se dicta en voz alta y se
+  teclea cuando el lector falla. Por eso:
+
+    · cifras TABULARES — todas del mismo ancho, así que el ojo puede contarlas
+      por posición y no se descoloca al comparar dos números;
+    · tracking POSITIVO — separar es justo lo que hace falta aquí, al revés que
+      en el nombre, donde cerrar es lo que lo convierte en una pieza;
+    · monoespaciada del sistema — está diseñada para distinguir 0/O y 1/l, que
+      es exactamente el error que ocurre al leerlo en voz alta en una caja.
+
+  En `--gold-300`: 10,74:1, más contraste que el texto secundario y con el
+  carácter de metal grabado que pide el objeto. El oro aquí no codifica nada —
+  es ceremonial, y el dato se lee igual de rápido que en blanco.
 */
 .numero {
   display: flex;
@@ -294,12 +583,36 @@
 
   font-family: var(--font-mono);
   font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: 0.1em;
+  color: var(--gold-300);
 }
 
-/* Estado y vigencia son UN bloque: la fecha es la línea secundaria del badge,
-   no otra etiqueta en versalitas. Ahorra 33px de alto y una redundancia. */
+/* --- Pie: estado y vigencia ----------------------------------------------- */
+
+/*
+  Estado y vigencia son UN bloque: la fecha es la línea secundaria del badge,
+  no otra etiqueta en versalitas.
+
+  El estado lo pinta `StatusBadge` a partir de `derivarEstadoMembresia`, NUNCA
+  de `membresias.estado` en crudo: esa columna tiene default `'activa'` y nada
+  la actualiza al vencer, así que en crudo diría «Activa» en verde a quien
+  lleva meses sin pagar. Y la diferencia entre activa e inactiva es de FORMA
+  —disco lleno frente a anillo hueco— además de color.
+*/
+.pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
 .estadoFila {
   display: flex;
   align-items: center;
@@ -313,8 +626,28 @@
   color: var(--text-2);
 }
 
+/* --- Acciones bajo el carnet ---------------------------------------------- */
+
+/*
+  «Cambiar foto» SALE DE LA TARJETA. Es una acción de mantenimiento que se hace
+  una vez, y dentro del carnet competía con el nombre y con el QR — lo que se
+  enseña en una caja no lleva botones de administración impresos encima.
+
+  Debajo y en ghost: sigue a un toque de distancia y no ensucia el objeto.
+  `size="sm"` ya amplía su área táctil a 44px con un `::after` centrado, así
+  que se ve pequeño y se toca grande.
+*/
+.acciones {
+  display: flex;
+  justify-content: center;
+}
+
 /* --- Cómo usarlo ---------------------------------------------------------- */
 
+/*
+  Sin `Card`: la pantalla ya tiene su superficie —el carnet— y duplicarla
+  convertiría el objeto en «una caja más». Es texto suelto a propósito.
+*/
 .como {
   display: grid;
   gap: var(--space-4);
@@ -358,14 +691,25 @@
 }
 
 /* ==========================================================================
-   IMPRESIÓN  ·  §6.6
+   IMPRESIÓN
    --------------------------------------------------------------------------
-   Sobre papel la sombra no existe y el trazo sí. Se imprime SOLO el carnet.
+   SOBRE PAPEL NO HAY CHOCOLATE. Imprimir un carnet de cacao a sangre gasta
+   media cartucho, y los navegadores no imprimen fondos salvo que el usuario
+   active «gráficos de fondo» — así que el peor caso sin esta regla no es un
+   carnet oscuro: es texto CLARO sobre folio BLANCO, o sea nada.
+
+   La versión impresa vuelve a claro y con trazo: lo que en pantalla define el
+   carnet es la sombra, y una impresora no imprime luz.
+
+   El ámbito de tema se DESHACE entero aquí. Reasignar solo `color` dejaría los
+   componentes de dentro resolviendo los tokens de cacao — el mismo error, del
+   revés.
    ========================================================================== */
 
 @media print {
   .encabezado,
-  .como {
+  .como,
+  .acciones {
     display: none;
   }
 
@@ -374,54 +718,85 @@
     display: block;
   }
 
-  /*
-    SOBRE PAPEL NO HAY SOMBRA, ASÍ QUE AQUÍ EL TRAZO SÍ HACE FALTA. Es la otra
-    mitad de haber quitado el borde de pantalla: lo que en pantalla define el
-    carnet es `--shadow-overlay`, y una impresora no imprime luz. Sin esta
-    regla el carnet impreso saldría sin límite ninguno, flotando en el folio.
-  */
+  /* Una entrada animada en un folio no significa nada. */
+  .carnetCaja {
+    animation: none;
+  }
+
   .carnet.carnet {
+    color-scheme: light;
+
+    /* Los pigmentos crudos de la paleta, NO los alias de tema: un alias se
+       resolvería con el tema ACTIVO al imprimir, y en oscuro `--border` es un
+       gris claro que desaparece contra el blanco del folio. Es el mismo motivo
+       por el que el QR se imprime en negro sobre blanco pase lo que pase. */
+    --text: var(--n-1000);
+    --text-2: var(--n-800);
+    --text-3: var(--n-800);
+    --brand: var(--n-1000);
+    --brand-edge: var(--n-600);
+    --border: var(--n-600);
+    --border-subtle: var(--n-400);
+    --surface: var(--w-0);
+    --bg: var(--w-0);
+
     /*
-      `none` como valor COMPLETO de la declaración es legal; lo prohibido es
-      un `none` DENTRO de una lista separada por comas, que invalida la
-      declaración entera en silencio.
+      Y LOS SEMÁNTICOS TAMBIÉN VUELVEN. El ámbito de cacao los dejó en su
+      variante OSCURA —`--success-dark` es un verde claro que sobre folio
+      blanco da 1,9:1—, así que sin esto el badge de estado saldría impreso
+      ilegible. Es exactamente el error que el ámbito de tema vino a evitar,
+      del revés: reasignar la mitad es peor que no reasignar nada.
+
+      Los fondos atenuados se derivan de estos con `color-mix` más arriba, así
+      que siguen al valor y no hay que repetirlos.
     */
+    --success: var(--success-light);
+    --warning: var(--warning-light);
+    --danger: var(--danger-light);
+    --info: var(--info-light);
+    --link: var(--info-light);
+
+    background: var(--w-0);
+    /* Sin sombra sobre papel, así que aquí el trazo SÍ hace falta: es la otra
+       mitad de haber quitado el borde de pantalla. `none` como valor COMPLETO
+       es legal; lo prohibido es un `none` DENTRO de una lista de sombras. */
     box-shadow: none;
-    /*
-      `--n-1000` y no `--border`: sobre papel no hay tema. Un alias de tema se
-      resolvería con el tema ACTIVO al imprimir, y en oscuro `--border` es un
-      gris claro que desaparece contra el blanco del folio. `--n-1000` es
-      pigmento de la paleta cruda —no lo remapea ningún tema—, que es justo lo
-      que pide la tinta, el mismo motivo por el que el QR se imprime en negro
-      sobre blanco pase lo que pase. Y es un token: el `#000` literal solo
-      está permitido dentro de `QrCode`.
-    */
     border: 1px solid var(--n-1000);
   }
 
-  /*
-    El halo dorado y el botón de cambiar foto no se imprimen: el halo porque
-    una impresora lo convierte en una mancha beige sucia, y el botón porque en
-    un folio no se puede pulsar nada.
-  */
-  .carnet.carnet::after,
-  .cambiarFoto {
+  /* El halo dorado se convierte en una mancha beige sucia al imprimirse. */
+  .carnet.carnet::after {
     display: none;
   }
 
-  /* Mismo motivo: en tema oscuro `--brand` es un dorado claro que sobre folio
-     blanco no se lee. El filo dorado de la tarjeta sí puede irse en gris —o no
-     imprimirse— porque ningún significado depende de él. */
+  /* El barrido metálico no sobrevive a una impresora: el wordmark vuelve a
+     tinta plana. Sin esto quedaría transparente —el `-webkit-text-fill-color`
+     del `@supports` sigue activo— y el emisor del carnet desaparecería. */
   .wordmark {
+    background: none;
+    color: var(--n-1000);
+    -webkit-text-fill-color: var(--n-1000);
+  }
+
+  .numero {
     color: var(--n-1000);
   }
 
-  /*
-    Devuelve el relleno del marco del QR a lo que dice la primitiva para
-    impresión. La zona de silencio sigue cubierta: el carnet impreso conserva
-    sus 32px de relleno alrededor.
-  */
+  .foto {
+    background: var(--w-0);
+    border-color: var(--n-600);
+  }
+
+  .credencial {
+    border-top-color: var(--n-400);
+  }
+
+  /* La primitiva ya retira su marco en impresión: el papel es el fondo blanco.
+     Se le devuelven sus valores para no dejar 32px de aire impreso de más ni
+     una sombra que la impresora convertiría en una banda gris. */
   .qr .qrMarco {
     padding: 0;
+    border-color: transparent;
+    box-shadow: none;
   }
 }

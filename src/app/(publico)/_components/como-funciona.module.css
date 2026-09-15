@@ -1,14 +1,15 @@
 /* ==========================================================================
    CÓMO FUNCIONA
+   --------------------------------------------------------------------------
+   La franja (`escaparate.module.css`) pone el sangrado a ancho completo, el
+   relleno lateral, el relleno vertical y el tono de crema honda. Aquí solo va
+   lo propio de la sección.
    ========================================================================== */
 
 .seccion {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
-
-  padding-block: var(--space-8);
-  border-top: 1px solid var(--border-subtle);
+  gap: var(--space-7);
 
   /*
     La cabecera es pegajosa: sin este margen, saltar aquí desde el ancla
@@ -19,15 +20,8 @@
   scroll-margin-block-start: calc(var(--cabecera-alto) + var(--space-4));
 }
 
-.titulo {
-  font-size: var(--t-title-1-size);
-  line-height: var(--t-title-1-leading);
-  letter-spacing: var(--t-title-1-tracking);
-  font-weight: var(--t-title-1-weight);
-  color: var(--text);
-  text-wrap: balance;
-}
-
+/* La escala y la familia las pone `.tituloSeccion` del módulo compartido.
+   Aquí solo la alineación, que es propia de esta sección. */
 @container contenido (min-width: 901px) {
   .titulo {
     text-align: center;
@@ -66,8 +60,16 @@
 }
 
 /*
-  El numeral: cifra grande en tinta atenuada sobre un disco hundido. Nada de
-  oro y nada de color de estado — no codifica ni marca ni importancia.
+  El numeral: cifra grande en tinta atenuada sobre un disco hundido, con un
+  filo dorado de 1px. Nada de relleno de oro y nada de color de estado — no
+  codifica ni marca ni importancia; el filo es el device más barato de las
+  referencias y aparece igual en los tres, así que no distingue a ninguno.
+
+  El serif de display entra aquí porque la licencia v4 levantó «serif solo en
+  h1»: una cifra ceremonial en Fraunces se lee como numeral de índice.
+
+  `--text-2` sobre crema honda da 6,51:1 medido (`--text-3` daría 4,18:1 y
+  reprobaría; el ámbito `tonoHonda` ya lo colapsa por si acaso).
 */
 .numero {
   display: grid;
@@ -75,12 +77,16 @@
   width: var(--space-9);
   height: var(--space-9);
 
-  border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  background: var(--surface-sunk);
+  background: var(--surface);
+  /* `box-shadow` y no `border`: así el disco no cambia de tamaño al ganar el
+     filo, y ninguna capa de la lista lleva `none` dentro. */
+  box-shadow: 0 0 0 1px var(--brand-edge);
 
-  font-size: var(--t-title-3-size);
-  font-weight: var(--t-title-3-weight);
+  font-family: var(--font-display);
+  font-size: var(--t-title-2-size);
+  line-height: 1;
+  font-weight: var(--t-title-2-weight);
   font-variant-numeric: tabular-nums;
   color: var(--text-2);
 }
@@ -103,4 +109,58 @@
   letter-spacing: var(--t-title-3-tracking);
   font-weight: var(--t-title-3-weight);
   color: var(--text);
+}
+
+/* ==========================================================================
+   ENTRADA AL DESPLAZAR
+   --------------------------------------------------------------------------
+   El `Revelar` que envuelve esta sección solo escribe `data-visible` sobre su
+   nodo; las reglas son de aquí porque solo este módulo sabe qué hijos hay.
+
+   El estado oculto va dentro de `@media (scripting: enabled)`: sin JavaScript
+   —o en un navegador que no conozca la consulta— el contenido se pinta visible
+   y sin animación, que es la degradación correcta. Nunca invisible.
+
+   Solo `transform` y `opacity`.
+   ========================================================================== */
+
+.titulo,
+.paso {
+  transition:
+    opacity var(--dur-page) var(--ease-out),
+    transform var(--dur-page) var(--ease-out);
+}
+
+/* Escalonado de 60ms: dentro de la banda 30–80 de la v4, y por encima del paso
+   de 40ms del cromo porque aquí las piezas son grandes y lentas de leer. */
+.pasos {
+  --paso-revelar: calc(var(--escalonado) * 1.5);
+}
+
+.paso:nth-child(1) {
+  transition-delay: var(--paso-revelar);
+}
+.paso:nth-child(2) {
+  transition-delay: calc(var(--paso-revelar) * 2);
+}
+.paso:nth-child(3) {
+  transition-delay: calc(var(--paso-revelar) * 3);
+}
+
+@media (scripting: enabled) {
+  [data-visible='false'] .titulo,
+  [data-visible='false'] .paso {
+    opacity: 0;
+    /* Nada entra desde `scale(0)`. */
+    transform: translate3d(0, var(--space-4), 0) scale(0.98);
+  }
+}
+
+/* Movimiento reducido: se retira el viaje y queda el fundido, que `globals.css`
+   comprime a 0,01ms. Va al final: misma especificidad, gana por orden. */
+@media (prefers-reduced-motion: reduce) {
+  [data-visible='false'] .titulo,
+  [data-visible='false'] .paso {
+    transform: none;
+  }
 }

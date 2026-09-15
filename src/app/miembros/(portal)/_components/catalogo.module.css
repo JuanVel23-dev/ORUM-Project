@@ -110,6 +110,71 @@
   gap: var(--space-4);
 }
 
+/* ==========================================================================
+   LA REJILLA NO TERMINA EN UN HUECO  ·  Z3
+   --------------------------------------------------------------------------
+   Encargo del propietario: «la rejilla de Todos los comercios deja huecos al
+   final; que se adapte al ancho real en vez de a columnas fijas».
+
+   El diagnóstico exacto, porque no es lo que parecía: `Grid` ya se adaptaba
+   —`repeat(auto-fit, minmax(290px, 1fr))` reparte columnas sin puntos de
+   ruptura—. Lo que deja el hueco es la ÚLTIMA FILA: con 3 columnas y 7
+   tarjetas, la séptima ocupa un tercio y deja dos tercios de papel muerto
+   debajo de una rejilla por lo demás llena. Una rejilla no puede rellenar su
+   última fila: sus pistas son las mismas para todas.
+
+   Un contenedor flexible sí puede. Con `flex-wrap` y `flex-grow`, cada fila
+   reparte SU sobrante entre las tarjetas que le tocaron:
+     · fila completa → tres tarjetas del mismo ancho que hoy (el reparto de un
+       sobrante pequeño entre tres da lo mismo que `1fr`),
+     · última fila con dos → dos tarjetas anchas que llegan al filo,
+     · última fila con una → una tarjeta a media columna (ver el techo).
+
+   POR QUÉ SE ATACA DESDE AQUÍ Y NO DESDE `Grid`: `page.tsx` monta `<Grid
+   min="290px">` sin clase propia y pertenece a otro agente en esta tanda;
+   `Grid` lo comparte el panel de administración entero, donde esta forma no se
+   ha pedido ni medido. El selector de hijo directo mantiene el cambio dentro
+   del catálogo, y hereda los dos tokens que `Grid` ya publica en el elemento
+   (`--min`, `--gap`), así que el ancho mínimo sigue decidiéndose en un solo
+   sitio.
+   ========================================================================== */
+
+.rejilla > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch; /* las tarjetas de una fila siguen midiendo lo mismo */
+}
+
+.rejilla > div > * {
+  /* `--min` lo publica `Grid` en el propio elemento; el respaldo es su mismo
+     valor por defecto. `min-width: 0` es la guarda que evita el desbordamiento
+     cuando el contenedor mide menos que la base —el equivalente al
+     `min(…, 100%)` de la rejilla original—. */
+  flex: 1 1 var(--min, 290px);
+  min-width: 0;
+}
+
+/*
+  EL TECHO, PARA QUE UNA TARJETA SUELTA NO SE VUELVA UN CARTEL.
+
+  Sin él, una última fila de una sola tarjeta se estiraría a los 1100px de la
+  columna: el hueco desaparece, pero a cambio una tarjeta de catálogo se lee
+  como un banner y rompe la comparación entre iguales, que es para lo que sirve
+  una rejilla. Con el techo a media columna, esa tarjeta suelta ocupa la mitad
+  —la mitad del hueco de antes— y una última fila de DOS llena la línea exacta.
+
+  596px = 290 (`--min`) × 2 + 16 (`--space-4`): el ancho a partir del cual caben
+  dos columnas. Por debajo no hay techo, porque ahí la tarjeta suelta ya ocupa
+  la única columna que hay. La condición de un `@container` no admite `var()`,
+  de ahí los literales; el contenedor `contenido` lo declara el `<main>` del
+  portal.
+*/
+@container contenido (min-width: 596px) {
+  .rejilla > div > * {
+    max-width: calc(50% - var(--gap, var(--space-4)) / 2);
+  }
+}
+
 /*
   El `h2` de la rejilla es visible y no está solo por accesibilidad.
 

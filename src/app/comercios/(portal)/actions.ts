@@ -61,7 +61,30 @@ export async function buscarMiembro(
   }
 }
 
-export type RegistrarVentaState = { error?: string; ok?: boolean }
+export type RegistrarVentaState = {
+  error?: string
+  ok?: boolean
+  /**
+   * Hora del acuse, ya formateada en `America/Bogota`.
+   *
+   * La calcula el SERVIDOR, no el navegador, y por dos razones. La de negocio:
+   * es la hora del recibo, y el reloj del teléfono del cajero puede estar
+   * desajustado —el que vale es el del sistema que guardó la venta—. La técnica:
+   * leerla en el cliente obligaba a `setState` dentro de un efecto, que dispara
+   * un render en cascada y que la norma del proyecto prohíbe; moverla a una
+   * `ref` tampoco vale, porque una `ref` no se puede leer durante el render.
+   * Devolviéndola aquí, el dato llega con el acuse y no hay nada que sincronizar.
+   */
+  hora?: string
+}
+
+/* Zona del negocio, no la del servidor: en UTC un acuse de las 7pm en Colombia
+   saldría con la fecha del día siguiente. */
+const HORA_BOGOTA = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  hour: 'numeric',
+  minute: '2-digit',
+})
 
 /**
  * Registra la venta (RF-21/RF-22): valida que la sucursal y la promoción sean
@@ -171,5 +194,5 @@ export async function registrarVenta(
   })
   if (errVenta) return { error: `No se pudo registrar la venta: ${errVenta.message}` }
 
-  return { ok: true }
+  return { ok: true, hora: HORA_BOGOTA.format(new Date()) }
 }

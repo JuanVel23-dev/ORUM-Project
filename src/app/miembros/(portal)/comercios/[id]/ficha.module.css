@@ -22,6 +22,20 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+
+  /*
+    LA RANURA `@modal` CUELGA FUERA DE `.main`, así que dentro del overlay NO
+    HAY ancestro con `container-name: contenido` y TODAS las consultas de
+    contenedor de este archivo —las dos columnas de sedes, el ancho de la foto
+    de la galería— no casaban nunca. No fallaban: simplemente no se aplicaban,
+    que es el modo de fallo que `CLAUDE.md` avisa al hablar de `@container`.
+
+    La hoja se declara contenedor a sí misma y con el MISMO nombre, así que las
+    reglas de más abajo valen en las dos superficies sin duplicarse: en página
+    completa el contenedor es `.main` del portal; aquí, la propia ficha.
+  */
+  container-type: inline-size;
+  container-name: contenido;
 }
 
 /* ==========================================================================
@@ -173,39 +187,120 @@
    ========================================================================== */
 
 /*
-  Rejilla de dos columnas: la placa manda su ancho (144px, `variante="hero"`) y
-  los textos ocupan lo que queda. La meta —categoría y ciudades— cae en una
-  tercera fila a lo ancho de las dos columnas, porque a 375px no cabe junto a
-  la placa sin partirse en cuatro líneas.
+  UNA COLUMNA, CUATRO FILAS: cubierta, placa, nombre, meta.
+
+  Antes eran dos columnas —placa a la izquierda, textos a la derecha— y esa
+  decisión le costaba al nombre 144px de placa más 16 de hueco: a 375px le
+  quedaban 187px, y por eso estaba clavado a 24px. Bajando la placa a una fila
+  propia el nombre se lleva el ancho entero y puede ser lo que un hero pide.
 */
 .hero {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  column-gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
   row-gap: var(--space-3);
+}
+
+/*
+  LA CUBIERTA. Es lo que hace desear el sitio.
+
+  `aspect-ratio` reserva el hueco ANTES de que la foto llegue, así que no hay
+  salto de maquetación al cargar aunque no se conozcan sus dimensiones —son
+  URLs externas arbitrarias y no pasan por `next/image`—. El `max-height`
+  impide que en una hoja de 720px la cubierta se coma la pantalla entera: la
+  ficha existe para decir un beneficio, no para ser un álbum.
+*/
+.portada {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  max-height: 280px;
+
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+
+  /* Mientras la imagen carga, el hueco se ve como hueco y no como una tarjeta
+     vacía: es para lo que existe `--surface-hueco`. */
+  background: var(--surface-hueco);
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+.portadaImagen {
+  width: 100%;
+  height: 100%;
+  /* `cover` y no `contain`: es la fotografía de un local, no un logotipo. */
+  object-fit: cover;
+  display: block;
+}
+
+/*
+  El velo inferior. Una placa clara sobre una foto clara desaparece, y sobre
+  una oscura se pega. El degradado de cacao —el mismo pigmento de la franja,
+  no un negro plano— oscurece solo la banda donde la placa monta y deja intacto
+  el resto de la foto.
+*/
+.portada::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 45%;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--cacao-900) 58%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.placa {
+  justify-self: start;
+}
+
+/*
+  Con cubierta, la placa MONTA sobre su borde inferior. Es el gesto que ata las
+  dos piezas: sin él son una foto y, debajo, un logotipo sin relación.
+
+  Margen negativo, no `position: absolute`: así la placa sigue ocupando su sitio
+  en la rejilla y el nombre baja con ella cuando la placa crece o encoge.
+*/
+.conPortada {
+  margin-top: calc(-1 * var(--space-9));
+  margin-inline-start: var(--space-4);
 }
 
 .heroTextos {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  /* `minmax(0, 1fr)` en la columna permite encoger; esto permite que el texto
-     largo se parta en vez de desbordar la rejilla. */
+  /* Permite que el texto largo se parta en vez de desbordar la rejilla. */
   min-width: 0;
 }
 
 /*
-  `--t-title-1` (24px FIJO) y no `--t-display-2`: junto a una placa de 144px, a
-  375px al nombre le quedan 187px, y un tamaño que creciera a 32px lo partiría
-  en cuatro líneas. Es el único `h1` de la pantalla.
+  EL NOMBRE DEL COMERCIO, EN SERIF  ·  Z1
+
+  Peldaño `hero-2` (32 → 48px) con Fraunces. Es el cambio de mayor rendimiento
+  por esfuerzo de toda la dirección v4: un serif de display hace más por el «se
+  ve caro» que cualquier animación. Y aquí cabe porque la placa ya no le roba
+  la línea.
+
+  Tracking NEGATIVO al crecer (`--t-hero-2-tracking`, −0,024em): es el
+  sustituto del eje óptico de la familia, que no se carga para no pagar 30 KB
+  en un teléfono de gama media.
+
+  Es el único `h1` de la pantalla.
 */
 .nombre {
-  font-size: var(--t-title-1-size);
-  line-height: var(--t-title-1-leading);
-  letter-spacing: var(--t-title-1-tracking);
-  font-weight: var(--t-title-1-weight);
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  letter-spacing: var(--t-hero-2-tracking);
+  font-weight: var(--t-hero-2-weight);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  /* Una serif de contraste alto con `antialiased` pierde las astas finas en
+     Chrome sobre macOS: aquí conviene el suavizado del sistema. */
+  -webkit-font-smoothing: auto;
+
   color: var(--text);
+  text-wrap: balance;
 
   /* Nombres largos parten por palabras; uno sin espacios parte por donde sea
      antes que desbordar. */
@@ -295,6 +390,30 @@
   gap: var(--space-3);
 }
 
+/*
+  EL CAMPO DE COLOR  ·  v4 §4 — «sin sombra, jerarquía por campos de color»
+
+  La ficha era una plancha blanca de arriba abajo. Un campo de crema alrededor
+  de «Tus beneficios» separa la RESPUESTA del contexto sin dibujar una sola
+  línea, que es lo que hace Agence Cartier con cero sombras en toda su página.
+
+  1,04:1 contra el papel: no es un escalón de elevación y no sustituye a la
+  sombra. Lo que separa una tarjeta de su fondo sigue siendo la sombra; esto
+  separa una SECCIÓN de otra.
+
+  Contrastes sobre crema (#faf7f0), todos medidos: `--text` 16,25:1 ·
+  `--text-2` 7,04:1 · `--text-3` 4,52:1 · `--gold-700` 4,55:1. Los cuatro pasan
+  AA, así que dentro del campo no hay que retocar ningún tono.
+
+  El relleno se toma del ancho: pegado al filo, un campo de color se lee como
+  un error de fondo y no como una sección.
+*/
+.seccionCrema {
+  background: var(--surface-alt);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
 .tituloSeccion {
   font-size: var(--t-title-2-size);
   line-height: var(--t-title-2-leading);
@@ -322,7 +441,7 @@
 .beneficio {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
   padding: var(--space-4);
 }
 
@@ -331,23 +450,49 @@
 }
 
 /*
-  El título y la cifra en la misma línea, con la cifra alineada arriba: cuando
-  el título ocupa dos líneas la píldora se queda junto a la primera, que es
-  donde el ojo la busca.
+  EL DATO QUE EL SOCIO VINO A BUSCAR  ·  Z1
+
+  Antes era una píldora dorada de 11px a la derecha del título. O sea: lo más
+  pequeño de la fila, en el color de menor contraste de la paleta, para la
+  única información por la que se abre esta pantalla.
+
+  Ahora es el titular de la fila. 24px, tinta y cifras TABULARES —un «20%» y un
+  «$15.000» en filas consecutivas se comparan por posición cuando los dígitos
+  miden lo mismo—.
+
+  Las filas viven en una tarjeta de PAPEL dentro del campo de crema, así que el
+  par medido es tinta sobre papel: 16,96:1.
+
+  EN TINTA Y NO EN ORO, a propósito. `--gold-700` sobre papel cumple AA por
+  0,25 (4,75:1), pero el criterio de la licencia v4 es explícito: si el oro
+  hace que el dato tarde más en leerse, el oro sobra. El lujo de esta pantalla
+  lo ponen la cubierta y el serif del nombre.
 */
-.beneficioCabecera {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
+.beneficioValor {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  color: var(--text);
+  text-wrap: balance;
 }
 
+/*
+  El título de la promoción pasa a línea de apoyo. Sigue siendo el `h3` —es el
+  nombre del elemento, y un encabezado que dijera «20% de descuento» dejaría el
+  índice de la pantalla como una lista de cifras sin sujeto— pero visualmente
+  cede el turno al valor.
+
+  7,34:1 sobre el papel de la tarjeta.
+*/
 .beneficioTitulo {
   font-size: var(--t-callout-size);
   line-height: var(--t-callout-leading);
   letter-spacing: var(--t-callout-tracking);
   font-weight: var(--t-callout-weight);
-  color: var(--text);
+  color: var(--text-2);
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -588,6 +733,10 @@
   */
   .pagina > section[aria-labelledby='titulo-beneficios'] {
     grid-area: benef;
+    /* Este tramo lleva `row-gap: 0` y el ritmo por márgenes. Con el campo de
+       crema el hueco ya no es opcional: sin él, el filo inferior del campo
+       quedaría pegado al bloque siguiente y los dos se leerían como uno. */
+    margin-bottom: var(--space-6);
   }
 
   .pagina > section[aria-labelledby='titulo-sedes'] {

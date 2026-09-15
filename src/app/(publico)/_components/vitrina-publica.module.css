@@ -1,18 +1,23 @@
 /* ==========================================================================
    VITRINA PÚBLICA
    --------------------------------------------------------------------------
-   Todo el movimiento va en `transform`/`translate`/`opacity`. Animar `width`,
-   `height`, `top`, `left` o `margin` recalcula layout cada fotograma y es
-   prohibición dura.
+   Todo el movimiento va en `transform` y `opacity`. Animar `width`, `height`,
+   `top`, `left` o `margin` recalcula layout cada fotograma y es prohibición
+   dura.
+
+   La franja (`escaparate.module.css`) pone el sangrado a ancho completo, el
+   relleno y el tono de crema. Ya no hace falta el `border-top` que separaba
+   esta sección de la anterior: lo que las separa ahora es el campo de color,
+   que es lo que hace Agence Cartier sin dibujar una sola línea.
    ========================================================================== */
 
 .envoltura {
-  padding-block: var(--space-8);
-  border-top: 1px solid var(--border-subtle);
-
-  /* Igual que en «Cómo funciona»: la cabecera pegajosa taparía el h2 al llegar
-     desde el ancla. */
+  /* La cabecera pegajosa taparía el h2 al llegar desde el ancla. */
   scroll-margin-block-start: calc(var(--cabecera-alto) + var(--space-4));
+}
+
+.cabecera {
+  margin-bottom: var(--space-6);
 }
 
 /* ==========================================================================
@@ -51,9 +56,9 @@
 
 /*
   El caso que no cabe: teléfono en horizontal. Se capa por ALTURA, y esta
-  `@media` no viola la norma —esa regla es sobre adaptación al ANCHO, y
-  `container-type: inline-size` solo mide ancho—. Va después de las consultas de
-  contenedor a propósito: con la misma especificidad, gana la última.
+  `@media` no sustituye a una consulta de contenedor —`container-type:
+  inline-size` solo mide ancho—. Va después de las consultas de contenedor a
+  propósito: con la misma especificidad, gana la última.
 */
 @media (orientation: landscape) and (max-height: 420px) {
   .pista {
@@ -62,10 +67,10 @@
 }
 
 /*
-  `x mandatory`, divergencia deliberada respecto al `Carril`, que se queda en
-  `proximity`. Con la tarjeta al 76 % del ancho y una visible a la vez, un flick
-  corto que no alcanza el umbral heurístico del motor dejaría media tarjeta de
-  cada una a la vista.
+  `x mandatory`, divergencia deliberada respecto al `CarrilPista`, que se queda
+  en `proximity`. Con la tarjeta al 76 % del ancho y una visible a la vez, un
+  flick corto que no alcanza el umbral heurístico del motor dejaría media
+  tarjeta de cada una a la vista.
 
   Clase duplicada a propósito: `carril.module.css` declara `scroll-snap-type`
   sobre `.pista` con la misma especificidad, así que el ganador lo decidiría el
@@ -111,37 +116,37 @@
   display: block;
   height: 100%;
   border-radius: var(--radius-md);
-
-  /* `backwards` para que el estado inicial valga durante el retardo; sin él las
-     tarjetas se ven un fotograma antes de empezar. `--ease-out` y no rebote: el
-     rebote se gana tras un gesto con momento, y aquí no hay gesto. */
-  animation: entrarVitrina var(--dur-base) var(--ease-out) backwards;
-  animation-delay: var(--retardo, 0ms);
-}
-
-@keyframes entrarVitrina {
-  from {
-    opacity: 0;
-    translate: 0 var(--space-3);
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
 }
 
 /* `overflow: hidden` recorta la cubierta al radio de la tarjeta. */
 .superficie {
+  position: relative;
   overflow: hidden;
   height: 100%;
 }
 
+/*
+  SIN REALCE AL SEÑALAR, Y ES DELIBERADO.
+
+  La tentación evidente aquí era el levantamiento de 3px y el filo dorado al
+  pasar el ratón: cuesta nada y se lee caro. Pero estas tarjetas NO enlazan a
+  ningún sitio —la ficha vive detrás de `requireRolMiembro()` y llevar a un
+  visitante anónimo a un formulario de acceso es un clic muerto—, y un objeto
+  que se levanta al señalarlo promete que se puede pulsar. El hover sería una
+  mentira de interfaz, que es más cara que la falta de un detalle.
+
+  El oro entra igualmente, pero ESTÁTICO y en un sitio que no promete nada: el
+  filo de 1px que separa la cubierta del pie. Ver `.pie`.
+*/
+
 /* ==========================================================================
    3. LA CUBIERTA
    --------------------------------------------------------------------------
-   Hoy es siempre el retrato de marca: el logotipo del aliado a tamaño completo
-   sobre el material. Ni una palabra dentro de la cubierta sobre la fotografía
-   que falta — eso convertiría el estado en una disculpa.
+   Dos estados, y el primero ya no es una promesa pendiente: si el comercio
+   tiene `portada_url`, la cubierta es la FOTO DEL LOCAL; si no, es el retrato
+   de marca —el logotipo a tamaño completo sobre el material—. Ni una palabra
+   dentro de la cubierta sobre la fotografía que falta: eso convertiría el
+   estado en una disculpa.
 
    4:3 y no 16:9: a 300px de ancho, 16:9 da 169px de alto y se lee como banda,
    no como portada. `container-type: inline-size` es lo que le da a la placa de
@@ -167,6 +172,36 @@
   container-type: inline-size;
 }
 
+.foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* El velo existe para que la placa no flote sobre un punto claro de la
+   fotografía. NO es un portador de contraste de texto: ningún texto se apoya
+   sobre la cubierta, y esa decisión —texto fuera de la imagen— es la que
+   convierte un riesgo abierto (el contraste dependería de lo que suba cada
+   comercio) en un número que se puede firmar sin ver las fotos. */
+.velo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--scrim) 0%, transparent 62%);
+}
+
+/* Con foto, la placa es una firma en la esquina de arranque. Su tamaño y su
+   radio los pone `ComercioLogo` con su variante; aquí solo se la coloca, que es
+   una propiedad que ese módulo no declara y por tanto no puede entrar en
+   conflicto con él. */
+.placaSobreFoto {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  inset-block-end: var(--space-3);
+}
+
 /* ==========================================================================
    4. EL PIE
    ========================================================================== */
@@ -177,8 +212,14 @@
   gap: var(--space-1);
 
   padding: var(--space-4);
-  border-top: 1px solid var(--border-subtle);
   background: var(--surface);
+
+  /* EL FILO DORADO, el device más rentable de las cinco referencias: cuesta
+     nada, se lee caro y aquí además hace un trabajo real —separar la
+     fotografía del pie—, que es lo que impedía usar `--border-subtle` desde
+     que la cubierta puede ser una foto a sangre. 3,51:1 contra el papel del
+     pie; es decoración, no portadora de información. */
+  border-top: 1px solid var(--brand-edge);
 }
 
 /* Dos líneas reservadas siempre y recorte a partir de la segunda: la cubierta
@@ -198,6 +239,9 @@
   min-height: calc(var(--t-title-3-size) * var(--t-title-3-leading) * 2);
 }
 
+/* `--text-3` sobre la tarjeta (`--surface`, papel) da 4,71:1 medido. La franja
+   de crema que hay detrás no entra en el cálculo: el texto se apoya sobre la
+   tarjeta, no sobre la franja. */
 .meta {
   font-size: var(--t-caption-size);
   line-height: var(--t-caption-leading);
@@ -231,27 +275,46 @@
 }
 
 /* ==========================================================================
-   5. MOVIMIENTO REDUCIDO  ·  equivalente no vestibular, no ausencia de feedback
+   5. ENTRADA AL DESPLAZAR
    --------------------------------------------------------------------------
-   La entrada pasa a ser solo opacidad, sin desplazamiento vertical. La regla
+   Antes era una animación de CARGA con `animation-delay`: las tarjetas se
+   animaban aunque el visitante todavía estuviera leyendo el héroe y llegara
+   aquí veinte segundos después, con la entrada ya consumida. Ahora la dispara
+   el `IntersectionObserver` de `Revelar`, que escribe `data-visible` sobre el
+   envoltorio; el escalonado sigue siendo el mismo `--retardo` por tarjeta.
+
+   Transición y no `@keyframes`: una transición se reencamina a media
+   animación, un keyframe reinicia desde cero.
+   ========================================================================== */
+
+.celda {
+  transition:
+    opacity var(--dur-page) var(--ease-out),
+    transform var(--dur-page) var(--ease-out);
+  transition-delay: var(--retardo, 0ms);
+}
+
+@media (scripting: enabled) {
+  [data-visible='false'] .celda {
+    opacity: 0;
+    /* Nada entra desde `scale(0)`: desde 0,96 y con desplazamiento. */
+    transform: translate3d(0, var(--space-4), 0) scale(0.96);
+  }
+}
+
+/* ==========================================================================
+   6. MOVIMIENTO REDUCIDO  ·  equivalente no vestibular, no ausencia de feedback
+   --------------------------------------------------------------------------
+   La entrada pasa a ser solo opacidad, sin desplazamiento ni escalado. La regla
    global de `globals.css` ya comprime la duración, así que el fundido se
    resuelve de inmediato; se declara igual para que quede escrito que la
-   alternativa es un fundido y no un desplazamiento.
+   alternativa es un fundido y no un desplazamiento más corto.
 
    Va al final: misma especificidad que lo que corrige, así que gana por orden.
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .celda {
-    animation-name: aparecerVitrina;
-  }
-}
-
-@keyframes aparecerVitrina {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+  [data-visible='false'] .celda {
+    transform: none;
   }
 }

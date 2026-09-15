@@ -102,8 +102,34 @@
   destroza el scroll en gama media. Prohibición dura de CLAUDE.md.
 */
 
+/*
+  EL CARRIL CON POCAS TARJETAS NO DEJA PAPEL MUERTO  ·  Z3
+
+  Encargo del propietario: «con tres tarjetas, un carril de 1366px deja media
+  pantalla vacía y parece roto». Medido en el portal: tres tarjetas de 200px en
+  una columna de 1100px ocupaban 624px y dejaban 476px de nada a la derecha.
+
+  La corrección es UNA declaración, y es la que menos supuestos hace: el ancho
+  de columna deja de ser fijo y pasa a ser un SUELO con techo flexible.
+
+    - Si las tarjetas NO caben (el caso normal: diez comercios, o cualquier
+      ancho de teléfono), el espacio libre es negativo, `1fr` se resuelve al
+      mínimo y cada columna mide exactamente `--carril-tarjeta-w`: el carril se
+      comporta igual que antes, con su deslizamiento y su tarjeta cortada al
+      borde diciendo «hay más».
+    - Si SÍ caben —tres tarjetas en escritorio—, el sobrante se reparte entre
+      ellas y la fila llega hasta el filo de la columna de texto. Ya no hay
+      hueco, y no hace falta contar hijos ni consultar el ancho: lo resuelve el
+      algoritmo de rejilla con el ancho real, que es justo lo que se pedía.
+
+  Ningún consumidor pierde su contrato: `--carril-tarjeta-w` sigue siendo el
+  ancho que fija cada pista (`--pad-contenido` y el sangrado no se tocan).
+  `--carril-tarjeta-max` existe para el que necesite volver al ancho rígido
+  —una portada con asomo calibrado, un esqueleto que debe medir lo mismo que el
+  contenido que sustituye— sin duplicar la geometría de la pista.
+*/
 .tarjeta {
-  grid-auto-columns: var(--carril-tarjeta-w);
+  grid-auto-columns: minmax(var(--carril-tarjeta-w), var(--carril-tarjeta-max, 1fr));
 }
 
 /* Cada hijo mide lo suyo: el ancho de un chip es el de su etiqueta. */
