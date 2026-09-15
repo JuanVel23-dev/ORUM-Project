@@ -76,7 +76,7 @@ export function ChipsCategoria({
              lleva el mismo icono de rejilla que la vista "Todo el club", que es
              lo que significa. Pero icono lleva, como todos: un hueco en el
              primer chip desalinearía la fila entera. */
-          icono={<LayoutGrid size={14} aria-hidden="true" />}
+          icono={<LayoutGrid size={18} aria-hidden="true" />}
         >
           Todas
         </Chip>
@@ -96,7 +96,7 @@ export function ChipsCategoria({
                 genérico. Nunca un hueco — la regla está escrita en
                 `iconos-categoria.ts`.
               */
-              icono={<IconoCategoria nombre={c.nombre} />}
+              icono={<IconoCategoria nombre={c.nombre} size={18} />}
             >
               {c.nombre}
             </Chip>
@@ -123,6 +123,15 @@ function Chip({
       href={href}
       className={[styles.chip, activo && styles.activo].filter(Boolean).join(' ')}
       aria-current={activo ? 'true' : undefined}
+      /*
+        EL NOMBRE, SIEMPRE, aunque no se pinte.
+
+        La fila es de iconos: `title` da el globo del navegador al apuntar con
+        el ratón, y el texto de dentro —oculto a la vista pero no al lector de
+        pantalla— es lo que hace que esto siga siendo un enlace con nombre y no
+        un glifo mudo. Sin él, un lector anuncia «enlace» y se calla.
+      */
+      title={children}
     >
       {/*
         EL ICONO ESTÁ SIEMPRE, activo o no.
@@ -151,8 +160,20 @@ function Chip({
         {icono}
       </Agitar>
 
-      {/* ICONO + TEXTO, nunca icono solo. */}
-      <span className={styles.etiqueta}>{children}</span>
+      {/*
+        EL TEXTO SOLO EN EL CHIP ACTIVO.
+
+        Encargo del propietario: «en los filtros pon únicamente los iconos sin
+        el texto». Tal cual, una fila de quince glifos deja al socio adivinando
+        cuál es cuál — y esta fila existe para que NO adivine.
+
+        La salida es que el chip seleccionado conserve su nombre y los demás se
+        recojan a un círculo. La fila queda limpia, y la pantalla sigue diciendo
+        por qué está filtrada sin que haya que apuntar a nada. El texto no se
+        borra nunca del DOM: en los inactivos se oculta a la vista y sigue
+        estando para el lector de pantalla.
+      */}
+      <span className={activo ? styles.etiqueta : 'sr-only'}>{children}</span>
     </Link>
   )
 }

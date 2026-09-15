@@ -568,15 +568,40 @@
   min-width: 0;
 }
 
-/* La insignia o la frase se quedan dentro, pase lo que pase. `Badge` no parte
-   línea a propósito —una cifra partida en dos no es una cifra—, así que lo que
-   se hace es recortarla con puntos suspensivos. */
-.ranura > * {
+/* La frase sí se recorta: es prosa y su final no es información. La insignia
+   NO —ver `.beneficio` al final de este archivo—, porque ahí el final del
+   texto es parte del dato. */
+.frase {
   min-width: 0;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
+/*
+  LA INSIGNIA DE BENEFICIO PUEDE PARTIR EN DOS LÍNEAS.
+
+  `Badge` lleva `white-space: nowrap` con razón —una cifra partida no es una
+  cifra— pero el texto que genera `formatearBeneficio` no es solo la cifra:
+  «$50.000 de descuento» ronda los 150px, y en una tarjeta de estantería de
+  200px con relleno quedan 176. Con `nowrap` eso NO encoge (el `min-width`
+  automático de un hijo de flex es su ancho de contenido) y se sale de la
+  tarjeta. Es lo que el propietario veía.
+
+  Partir es mejor que recortar: con puntos suspensivos se perdería justo el
+  final —«de descuento»— y con dos líneas no se pierde nada. `max-width: 100%`
+  es el cinturón: pase lo que pase, no sobresale.
+
+  La clase va DUPLICADA para ganar a `.badge` por especificidad (0,2,0 contra
+  0,1,0). Con la misma, el ganador lo decidiría el orden en que Next inyecta
+  las dos hojas, que cambia entre desarrollo y producción.
+*/
+.beneficio.beneficio {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  /* Una palabra sola más larga que la píldora —una cifra enorme— parte en vez
+     de desbordar. */
+  overflow-wrap: anywhere;
+}
+
 
 /* Una línea y no dos: la frase es la razón para entrar, no la descripción
    completa —esa está en la ficha—. */

@@ -214,7 +214,7 @@ export function ComercioCard({
                       cifra va DENTRO de la píldora, así que el color nunca es el
                       único portador del significado.
                     */}
-                    <Badge tone="gold" size="sm">
+                    <Badge tone="gold" size="sm" className={styles.beneficio}>
                       {formatearBeneficio(p.tipoCodigo, p.valor)}
                     </Badge>
                   </li>
@@ -300,7 +300,7 @@ export function ComercioCardCompacta({
             <h3 className={styles.nombre}>{comercio.nombre}</h3>
 
             {destacado ? (
-              <Badge tone="gold" size="sm">
+              <Badge tone="gold" size="sm" className={styles.beneficio}>
                 {formatearBeneficio(destacado.tipoCodigo, destacado.valor)}
               </Badge>
             ) : (

@@ -18,10 +18,16 @@
    propio del layout y el texto se pegaría al filo.
    ========================================================================== */
 
+/*
+  La franja respira más que antes: `--space-8` dejaba el contenido pegado al
+  filo del campo de color y la banda se leía como una tira, no como una
+  sección. Con el tinte a ancho completo, el aire interior es lo que convierte
+  el color en superficie.
+*/
 .franja {
   margin-inline: calc(50% - 50vw);
   padding-inline: max(calc(50vw - 50%), var(--pad-contenido, var(--space-4)));
-  padding-block: var(--space-8);
+  padding-block: var(--space-9);
 }
 
 /* Dos franjas del mismo tono seguidas serían una sola más alta: el aire entre
@@ -44,6 +50,23 @@
   en su variante oscura. Sin esto, un carril con scroll visible saca una barra
   clara sobre chocolate.
 */
+/*
+  CREMA HONDA. Superficie de RELLENO, no de párrafo tenue: `--tinta-3` da
+  4,18:1 contra ella y reprueba AA. Aquí vive la estantería de novedades, cuyo
+  apoyo usa `--text-2`. El colapso de `--text-3` en `--text-2` es la red de
+  seguridad por si mañana entra un texto tenue: se pierde un escalón de
+  jerarquía y se gana que se lea (4,18:1 -> 6,51:1 en claro).
+
+  NO se remapea `--brand`: en claro habría que bajarlo a `--gold-800`, pero en
+  oscuro el `--gold-300` de ahí ya cumple de sobra, y un remapeo que solo vale
+  para un tema no se escribe. Lo que se hace es no poner texto dorado aquí.
+*/
+.franjaHonda {
+  background: var(--surface-alt-2);
+
+  --text-3: var(--text-2);
+}
+
 .franjaCacao {
   background: var(--cacao-bg);
   color-scheme: dark;
@@ -98,10 +121,28 @@
 /* Ritmo vertical de la pantalla, en un solo sitio. Cada bloque —encabezado,
    búsqueda, chips, estanterías, rejilla— es un hijo directo y ninguno declara
    márgenes propios: así el orden se puede cambiar sin recolocar espaciados. */
+/*
+  EL AIRE ENTRE SECCIONES.
+
+  Estaba en `--space-5` (20px) para todos los anchos, y en escritorio eso deja
+  la portada, las estanterías y la rejilla casi tocándose: el propietario lo
+  describió como «uno encima de otro, se ve feo». Una sección necesita
+  separarse de la siguiente MÁS de lo que sus propias piezas se separan entre
+  sí, o el ojo no sabe dónde acaba una.
+
+  Las franjas tonales traen su propio `padding-block`, así que allí el campo de
+  color ya hace de separador; esto gobierna lo que queda sobre papel.
+*/
 .pagina {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-7);
+}
+
+@container contenido (min-width: 900px) {
+  .pagina {
+    gap: var(--space-8);
+  }
 }
 
 .rejilla {

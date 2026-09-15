@@ -10,38 +10,27 @@
   y el lede conviven en dos columnas, así que el encabezado gana presencia
   horizontal en vez de altura.
 */
+/*
+  EJE CENTRAL, y esto sustituye a la rejilla de dos columnas que había.
+
+  La versión anterior repartía titular y lede en 3fr/2fr para «llenar el
+  escritorio». Llenaba, pero dejaba la portada del catálogo alineada a la
+  izquierda mientras el resto de la página —las estanterías centradas dentro de
+  sus franjas, la rejilla— tiraba al centro. Encargo del propietario: «me gusta
+  que todo esté centrado».
+
+  Un encabezado de sección centrado es además lo que hace que la página se lea
+  como un escaparate y no como un panel: es el gesto de las cinco referencias.
+  El vacío de los lados no vuelve, porque lo que llena el escritorio ahora es
+  la columna más ancha del portal y el campo de color de las franjas.
+*/
 .encabezado {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: var(--space-2);
-  align-items: end;
-  padding-block: var(--space-6) var(--space-5);
-}
-
-@container contenido (min-width: 720px) {
-  .encabezado {
-    /* El titular manda y el lede acompaña: 3fr/2fr, no mitades — dos columnas
-       iguales leen como dos temas, no como uno con su apoyo. */
-    grid-template-columns: 3fr 2fr;
-    column-gap: var(--space-8);
-    row-gap: var(--space-2);
-  }
-
-  .overline {
-    grid-column: 1;
-  }
-
-  .titulo {
-    grid-column: 1;
-  }
-
-  /* Alineado con la base del titular, no con su tope: dos textos de tamaños
-     muy distintos alineados arriba se ven descolgados. */
-  .lede {
-    grid-column: 2;
-    grid-row: 2;
-    align-self: end;
-    padding-bottom: 0.4em;
-  }
+  padding-block: var(--space-7) var(--space-6);
 }
 
 /*
@@ -82,7 +71,10 @@
   line-height: var(--t-callout-leading);
   color: var(--text-2);
 
-  /* Un lede a todo el ancho de un escritorio se lee como pie de página. */
-  max-width: 46ch;
-  margin: 0;
+  /* Un lede a todo el ancho de un escritorio se lee como pie de página. Con el
+     eje central, `margin-inline: auto` es lo que lo mantiene bajo el titular en
+     vez de pegado a un lado. */
+  max-width: 52ch;
+  margin: 0 auto;
+  text-wrap: pretty;
 }

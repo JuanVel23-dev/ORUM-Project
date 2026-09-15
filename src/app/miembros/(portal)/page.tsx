@@ -663,20 +663,38 @@ export default async function MiembrosHomePage({
           </div>
         )}
 
+        {/*
+          CADA SECCIÓN EN SU PROPIO CAMPO DE COLOR.
+
+          Encargo del propietario: «que se pueda diferenciar cada sección sin
+          tener que leer el título». Un encabezado en negrita no sirve para eso
+          —hay que leerlo—; el campo de color sí, porque se ve antes de enfocar
+          la vista. Es lo que hace Agence Cartier sin dibujar una sola línea.
+
+          El orden de la página queda: papel (portada) → crema (lo mío) →
+          cacao (el top del club) → crema honda (novedades) → cacao (beneficios
+          del momento) → papel (la rejilla). Ninguna repite el tono de su
+          vecina, y las dos franjas de cacao son las dos ceremoniales: lo que
+          presume el club y lo que caduca pronto.
+        */}
         {novedades.length > 0 && (
-          <Carril titulo="Nuevos en el club" apoyo="Los últimos aliados que se sumaron">
-            {novedades.map((c) => (
-              <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
-            ))}
-          </Carril>
+          <div className={`${estilos.franja} ${estilos.franjaHonda}`}>
+            <Carril titulo="Nuevos en el club" apoyo="Los últimos aliados que se sumaron">
+              {novedades.map((c) => (
+                <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
+              ))}
+            </Carril>
+          </div>
         )}
 
         {beneficiosDelMomento.length > 0 && (
-          <Carril titulo="Beneficios del momento" apoyo="Lo que puedes usar esta semana">
-            {beneficiosDelMomento.map((c) => (
-              <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
-            ))}
-          </Carril>
+          <div className={`${estilos.franja} ${estilos.franjaCacao}`}>
+            <Carril titulo="Beneficios del momento" apoyo="Lo que puedes usar esta semana">
+              {beneficiosDelMomento.map((c) => (
+                <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
+              ))}
+            </Carril>
+          </div>
         )}
 
         {comerciosVisibles.length === 0 ? (

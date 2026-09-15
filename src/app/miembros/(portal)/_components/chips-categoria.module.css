@@ -14,8 +14,20 @@
   justify-content: center;
   gap: var(--space-2);
 
+  /*
+    EN REPOSO ES UN CÍRCULO DE 44px CON SU BORDE, no una píldora con texto.
+
+    Encargo del propietario: los filtros en icono, y «iconos por categorías que
+    tengan un borde». El borde no es decoración aquí: sin texto, es lo único
+    que dice dónde acaba el objetivo táctil, y sin él quince glifos sueltos se
+    leen como una fila de adornos y no como controles.
+
+    `min-width` y no `width`: el chip ACTIVO recupera su nombre y tiene que
+    poder crecer (ver `.activo` más abajo).
+  */
   min-height: var(--tap-min);
-  padding: 0 var(--space-4);
+  min-width: var(--tap-min);
+  padding: 0;
   border-radius: var(--radius-full);
   border: 1px solid var(--border);
 
@@ -82,7 +94,16 @@
   Y no se confía al color: relleno lleno + peso 590 + el check antes de la
   etiqueta + `aria-current="true"`. Cuatro portadores, uno de ellos de forma.
 */
+/*
+  EL ACTIVO SE ABRE Y ENSEÑA SU NOMBRE.
+
+  Es lo que evita que una fila de iconos deje al socio adivinando: el resto se
+  recoge, y el que está filtrando se declara. Además le da a la fila un punto
+  de anclaje —una sola forma distinta entre círculos— que se ve de un vistazo
+  sin leer nada, que es justo lo que el encargo pide.
+*/
 .activo {
+  padding: 0 var(--space-4);
   background: var(--action);
   border-color: var(--action);
   color: var(--action-fg);
@@ -120,11 +141,14 @@
   (la "g" de "Gastronomía") abren huecos en la línea y el subrayado se lee
   entrecortado a 14px.
 */
+/*
+  El subrayado se retira: cuando el ÚNICO chip con texto es el activo, subrayarlo
+  es decir dos veces lo mismo. El portador de forma que el subrayado sostenía
+  —el que sobrevive a la ceguera al color— pasa a ser la propia silueta: píldora
+  contra círculo.
+*/
 .activo .etiqueta {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
-  text-decoration-skip-ink: none;
+  white-space: nowrap;
 }
 
 @media (hover: hover) {

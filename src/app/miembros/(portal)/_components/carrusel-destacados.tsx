@@ -233,7 +233,7 @@ function TarjetaDestacada({
           */}
           <div className={estilos.ranura}>
             {beneficio ? (
-              <Badge tone="gold" size="sm">
+              <Badge tone="gold" size="sm" className={estilos.beneficio}>
                 {formatearBeneficio(beneficio.tipoCodigo, beneficio.valor)}
               </Badge>
             ) : descripcion ? (

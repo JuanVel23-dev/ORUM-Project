@@ -61,7 +61,23 @@
     declara su relleno. Si un consumidor no lo define, el sangrado es cero: se
     ve peor, nunca roto.
   */
-  margin-inline-start: 0;
+  /*
+    AIRE A LA IZQUIERDA, SIN MOVER LAS TARJETAS.
+
+    `overflow-x: auto` recorta también en horizontal, y la primera tarjeta caía
+    pegada al filo del contenedor: al señalarla, su filo dorado y el canto de
+    su sombra quedaban cortados por la mitad — «se corta el borde cuando se
+    señala». Es el mismo problema que el `padding-block` de abajo resuelve en
+    vertical para el anillo de foco.
+
+    El relleno y el margen negativo se cancelan, así que la tarjeta sigue
+    empezando EXACTAMENTE donde empieza el texto de la página, que es lo que la
+    nota de arriba defiende. Lo único que cambia es que el contenedor tiene
+    dónde dibujar el realce.
+  */
+  margin-inline-start: calc(var(--space-1) * -1);
+  padding-inline-start: var(--space-1);
+
   margin-inline-end: calc(var(--pad-contenido, 0px) * -1);
   padding-inline-end: var(--pad-contenido, 0px);
 
@@ -72,7 +88,10 @@
     simétrico, este valor tiene que pasar a `var(--pad-contenido)` a la vez, o
     la tarjeta anclada queda pegada al borde físico de la pantalla.
   */
-  scroll-padding-inline-start: 0;
+  /* Sigue al `padding-inline-start` de arriba: el anclaje del snap se mide
+     contra el relleno, así que si no acompaña, la tarjeta anclada se desplaza
+     esos 4px y deja de caer donde empieza el texto. */
+  scroll-padding-inline-start: var(--space-1);
 
   /* 4px arriba y abajo para que el `overflow` no recorte el anillo de foco
      (2px de trazo + 2px de desplazamiento). Es la diferencia entre un carril
