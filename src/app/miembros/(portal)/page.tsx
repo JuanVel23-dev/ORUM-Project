@@ -623,20 +623,45 @@ export default async function MiembrosHomePage({
           pinta vacía: es la que enseña un mecanismo que, si no, nadie
           descubriría.
         */}
-        {sinFiltrar && <SeccionFavoritos favoritos={favoritosEstanteria} volver={volver} />}
+        {/*
+          LAS DOS LISTAS PERSONALES COMPARTEN UNA FRANJA DE CREMA.
 
-        {sinFiltrar && masUsadosEstanteria.length > 0 && (
-          <Carril titulo="Los que más usas" apoyo="Donde más has usado tu membresía">
-            {masUsadosEstanteria.map((c) => (
-              <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
-            ))}
-          </Carril>
+          Favoritos y «los que más usas» responden a la misma pregunta —«lo
+          mío»— y separarlas en dos campos de color las convertiría en dos
+          temas distintos. El tono las agrupa sin necesidad de un encabezado
+          que las englobe.
+        */}
+        {sinFiltrar && (
+          <div className={`${estilos.franja} ${estilos.franjaCrema}`}>
+            <SeccionFavoritos favoritos={favoritosEstanteria} volver={volver} />
+
+            {masUsadosEstanteria.length > 0 && (
+              <Carril titulo="Los que más usas" apoyo="Donde más has usado tu membresía">
+                {masUsadosEstanteria.map((c) => (
+                  <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
+                ))}
+              </Carril>
+            )}
+          </div>
         )}
 
-        {/* Se pinta sola si hay al menos tres descuentos con uso. Si la función
-            `top_descuentos` no está aplicada en la base, `topDelClub` llega
-            vacío y aquí no aparece nada. */}
-        {sinFiltrar && <TopDescuentos items={topDelClub} volver={volver} />}
+        {/*
+          EL TOP DEL CLUB, SOBRE CACAO.
+
+          Es la única sección ceremonial del catálogo —lo que presume el club,
+          no lo que el socio vino a buscar— y por eso es la que se lleva la
+          franja oscura. Además es la única condición bajo la que el oro claro
+          (`--gold-400`) es legible: da 7,83:1 sobre cacao y 1,99:1 sobre crema.
+
+          Se pinta sola si hay al menos tres descuentos con uso. Si la función
+          `top_descuentos` no está aplicada en la base, `topDelClub` llega vacío
+          y la franja entera no aparece — no queda una banda oscura hueca.
+        */}
+        {sinFiltrar && topDelClub.length > 0 && (
+          <div className={`${estilos.franja} ${estilos.franjaCacao}`}>
+            <TopDescuentos items={topDelClub} volver={volver} />
+          </div>
+        )}
 
         {novedades.length > 0 && (
           <Carril titulo="Nuevos en el club" apoyo="Los últimos aliados que se sumaron">

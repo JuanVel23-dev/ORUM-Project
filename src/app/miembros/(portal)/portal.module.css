@@ -4,6 +4,20 @@
   min-height: 100dvh;
 
   /*
+    `clip` y NO `hidden`, y la diferencia importa aquí.
+
+    Las franjas sangran con `50vw`, que en escritorio incluye el ancho de la
+    barra de desplazamiento: sin recorte, eso son ~15px de desbordamiento
+    horizontal y una barra inferior en toda la página.
+
+    `overflow: hidden` lo arreglaría, pero crea un contenedor de scroll y eso
+    ROMPE `position: sticky` de la cabecera, que dejaría de pegarse al borde
+    de la ventana. `overflow: clip` recorta sin crear contenedor de scroll:
+    la cabecera sigue pegajosa y el desbordamiento desaparece.
+  */
+  overflow-x: clip;
+
+  /*
     Alto real que ocupa la barra inferior, EN UN SOLO SITIO.
 
     Lo consumen dos reglas que tienen que decir lo mismo siempre: la propia

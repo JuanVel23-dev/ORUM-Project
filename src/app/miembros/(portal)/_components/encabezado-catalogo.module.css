@@ -1,7 +1,47 @@
+/*
+  EL ENCABEZADO DEL CATÁLOGO
+
+  Antes eran tres líneas apiladas que, en escritorio, ocupaban un tercio del
+  alto y dejaban los otros dos tercios del ancho vacíos. Era el caso más claro
+  de lo que el propietario llamó «se ve feo en PC»: espacio sin trabajo que
+  hacer.
+
+  Ahora el ancho se reparte. A partir de 720px de contenedor el bloque de texto
+  y el lede conviven en dos columnas, así que el encabezado gana presencia
+  horizontal en vez de altura.
+*/
 .encabezado {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  display: grid;
+  gap: var(--space-2);
+  align-items: end;
+  padding-block: var(--space-6) var(--space-5);
+}
+
+@container contenido (min-width: 720px) {
+  .encabezado {
+    /* El titular manda y el lede acompaña: 3fr/2fr, no mitades — dos columnas
+       iguales leen como dos temas, no como uno con su apoyo. */
+    grid-template-columns: 3fr 2fr;
+    column-gap: var(--space-8);
+    row-gap: var(--space-2);
+  }
+
+  .overline {
+    grid-column: 1;
+  }
+
+  .titulo {
+    grid-column: 1;
+  }
+
+  /* Alineado con la base del titular, no con su tope: dos textos de tamaños
+     muy distintos alineados arriba se ven descolgados. */
+  .lede {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: end;
+    padding-bottom: 0.4em;
+  }
 }
 
 /*
@@ -15,23 +55,34 @@
   letter-spacing: var(--t-overline-tracking);
   font-weight: var(--t-overline-weight);
   text-transform: uppercase;
-  color: var(--text-3);
+  color: var(--gold-700);
 }
 
+/*
+  EL SERIF, Y AQUÍ ES DONDE MÁS RINDE.
+
+  `--t-hero-2` en vez de `--t-display-2`: el peldaño `hero` es el que lleva la
+  familia serif y el tracking negativo que un display necesita al crecer. Es el
+  cambio que más hace por el «se ve caro» de toda la pantalla — más que
+  cualquier animación.
+*/
 .titulo {
-  font-size: var(--t-display-2-size);
-  line-height: var(--t-display-2-leading);
-  letter-spacing: var(--t-display-2-tracking);
-  font-weight: var(--t-display-2-weight);
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  letter-spacing: var(--t-hero-2-tracking);
+  font-weight: var(--t-hero-2-weight);
   color: var(--text);
   text-wrap: balance;
+  margin: 0;
 }
 
 .lede {
-  font-size: var(--t-footnote-size);
-  line-height: var(--t-footnote-leading);
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
   color: var(--text-2);
 
   /* Un lede a todo el ancho de un escritorio se lee como pie de página. */
   max-width: 46ch;
+  margin: 0;
 }
