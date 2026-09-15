@@ -54,9 +54,16 @@
   ocurre es que CAMBIA DE COLOR —no aparece de la nada— y el relleno acompaña.
   Sin ensanchar el trazo: el único 2px que queda en el sistema es el del foco.
 */
-.control:hover:not(:disabled):not(:focus-visible) {
-  border-color: var(--brand-edge);
-  background: var(--surface-hover);
+/* En tactil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa, y aqui el dibujo del hover es
+   el MISMO que el del foco, asi que el socio ve una fila o un campo activo
+   que no lo esta. El `:focus-visible` se queda FUERA: un teclado existe en
+   cualquier dispositivo. */
+@media (hover: hover) {
+  .control:hover:not(:disabled):not(:focus-visible) {
+    border-color: var(--brand-edge);
+    background: var(--surface-hover);
+  }
 }
 
 .control:focus-visible {
@@ -155,8 +162,10 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.selectWrap:hover .flecha {
-  color: var(--text-2);
+@media (hover: hover) {
+  .selectWrap:hover .flecha {
+    color: var(--text-2);
+  }
 }
 
 /* --- Prefijo / sufijo ----------------------------------------------------- */
@@ -237,9 +246,11 @@
   height: var(--tap-min);
 }
 
-.botonAdorno:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .botonAdorno:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
 }
 
 /* Retroalimentación en el toque, no al soltar. */

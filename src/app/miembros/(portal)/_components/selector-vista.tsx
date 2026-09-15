@@ -3,7 +3,7 @@ import { Clock3, Heart, LayoutGrid, Repeat2, type LucideIcon } from 'lucide-reac
 import { CarrilPista } from '@/components/ui/carril'
 import { VISTAS, VISTA_POR_DEFECTO, type Vista } from '@/lib/miembros/vistas-catalogo'
 import estilos from './selector-vista.module.css'
-import agitacion from './agitacion.module.css'
+import { Agitar } from '@/components/ui/agitar'
 
 /*
   EJE 1 · LA VISTA  ·  encargos nº 10 y nº 11
@@ -112,19 +112,20 @@ export function SelectorVista({
               title={opcion.descripcion}
             >
               {/*
-                El icono se agita al quedar seleccionado. La clase de agitación
-                solo se aplica al activo, así que la animación arranca justo
-                cuando el filtro pasa a estarlo — sin JavaScript. Bajo
-                `prefers-reduced-motion` no se mueve nada y el estado sigue
+                El icono se agita al quedar seleccionado, vía `<Agitar>`.
+
+                La copia local anterior encendía `animation` con solo estar la
+                clase puesta, y estas pestañas navegan con `<Link>`: al recargar
+                con una vista ya elegida el icono llegaba con la clase y se
+                agitaba al montar, en cada carga. `Agitar` siembra su estado con
+                `activo` y solo reacciona a la transición hacia encendido.
+
+                Bajo `prefers-reduced-motion` se retira entera y el estado sigue
                 dicho por el subrayado, el peso y `aria-current`.
               */}
-              <Icono
-                size={15}
-                aria-hidden="true"
-                className={[estilos.icono, esActiva && agitacion.agitar]
-                  .filter(Boolean)
-                  .join(' ')}
-              />
+              <Agitar activo={esActiva} className={estilos.icono}>
+                <Icono size={15} aria-hidden="true" />
+              </Agitar>
               {/* ICONO + TEXTO, siempre. Nunca icono solo. */}
               <span className={estilos.etiqueta}>{opcion.etiqueta}</span>
             </Link>

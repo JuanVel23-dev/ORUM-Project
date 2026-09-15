@@ -11,6 +11,7 @@ import {
   TOPE_DESTACADOS,
   apoyoDestacados,
 } from '@/lib/comercios/estanterias'
+import { retardoEscalonado } from '@/lib/shared/motion'
 import { hrefFicha, type ComercioListado } from './comercio-card'
 import estilos from './carrusel-destacados.module.css'
 
@@ -56,17 +57,18 @@ import estilos from './carrusel-destacados.module.css'
  * (`--retardo`), que es el único uso de `style` que la norma admite. Así el
  * CSS no lleva ni un literal de duración.
  *
- * 35ms, y ANTES ERAN 60. La dirección de arte v2 fija la horquilla en 30-40ms
- * con tope de 8 elementos, y es el mismo número que resuelve `Stack`/`Grid` con
- * su prop `escalonado`. El paso tiene que ser el mismo en toda la pantalla: la
- * portada, los dos carriles y la rejilla entran una detrás de otra en el primer
- * pantallazo, y tres cadencias distintas se leen como tres componentes que no
- * se conocen.
+ * EL PASO SALE DEL SISTEMA, no de aquí. Este archivo tenía un `35` escrito a
+ * mano con un comentario que afirmaba que era «el mismo número que resuelve
+ * `Stack`/`Grid`». No lo era: `--escalonado` y `ESCALONADO_MS` valen **40**, y
+ * la portada, los dos carriles y la rejilla entran en el mismo pantallazo — dos
+ * cadencias distintas se leen como dos componentes que no se conocen.
  *
- * Con el tope de seis destacados la entrada completa termina en 175ms más la
- * duración de una tarjeta, frente a los 300ms de antes.
+ * Es además la reincidencia exacta del bug que `CLAUDE.md` documenta: el paso
+ * estuvo escrito a mano siete veces en `layout.module.css` y una octava,
+ * distinto, en el menú. Por eso ahora se llama a `retardoEscalonado`, que trae
+ * el paso Y el tope — y el tope es la parte importante, porque sin él el último
+ * hermano llega tarde y eso se percibe como lentitud, no como elegancia.
  */
-const PASO_ESCALONADO_MS = 35
 
 /** Cuántas siluetas dibuja el esqueleto: una completa y el arranque de las siguientes. */
 const TARJETAS_ESQUELETO = 3
@@ -198,7 +200,7 @@ function TarjetaDestacada({
       className={estilos.enlace}
       /* Token dinámico, el único uso de `style` que la norma admite: inyectar
          un valor, nunca maquetar. Es lo que escalona la entrada (A1). */
-      style={{ '--retardo': `${indice * PASO_ESCALONADO_MS}ms` } as CSSProperties}
+      style={{ '--retardo': `${retardoEscalonado(indice)}ms` } as CSSProperties}
     >
       <Card padding="none" interactive className={estilos.superficie}>
         <Cubierta comercio={comercio} />

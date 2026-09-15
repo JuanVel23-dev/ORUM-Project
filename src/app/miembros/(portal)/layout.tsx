@@ -75,7 +75,11 @@ export default async function MiembrosLayout({
           <form action={cerrarSesionMiembro}>
             <DropdownMenu
               trigger={
-                <button type="button" aria-label="Mi cuenta">
+                <button
+                  type="button"
+                  className={styles.botonCuenta}
+                  aria-label="Mi cuenta"
+                >
                   <Avatar nombre={correo} size="sm" decorativo />
                 </button>
               }

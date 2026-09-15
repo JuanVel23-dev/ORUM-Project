@@ -35,7 +35,7 @@
 
 /* --- Entrada escalonada  ·  §4.2 de la dirección de arte v2 ----------------
 
-   Los hijos directos entran uno detrás de otro, 35 ms de diferencia, con tope
+   Los hijos directos entran uno detrás de otro, 40 ms de diferencia, con tope
    de 8. Es lo que convierte «apareció una rejilla» en «se desplegó una
    rejilla»: el ojo sigue la secuencia y entiende que son piezas de un mismo
    grupo.
@@ -57,7 +57,7 @@
 }
 
 /* v4 §5: el paso sale de `--escalonado` (40 ms, dentro de la banda 30–80) en
-   vez de los 35 ms escritos a mano siete veces. El tope sigue en el séptimo
+   vez de los 40 ms escritos a mano siete veces. El tope sigue en el séptimo
    múltiplo, así que la última pieza no espera más de siete pasos. */
 .escalonado > *:nth-child(1) {
   animation-delay: 0ms;
@@ -205,14 +205,67 @@
 .tonoCacao {
   background: var(--cacao-bg);
 
+  /*
+    `color-scheme: dark` no es decorativo: dentro de la franja el navegador
+    pinta barras de desplazamiento y controles nativos en su variante oscura.
+    Sin esto, un carril con scroll visible saca una barra clara sobre chocolate.
+  */
+  color-scheme: dark;
+
   --surface: var(--cacao-surface);
+  --surface-alt: var(--cacao-surface);
+  --surface-alt-2: var(--cacao-surface);
   --surface-hover: var(--cacao-hover);
+  --surface-sunk: var(--cacao-bg);
+
   --text: var(--cacao-fg);
   --text-2: var(--cacao-fg-2);
-  --text-3: var(--cacao-fg-3);
+  /*
+    ⚠️ `--text-3` SE COLAPSA en `--text-2`, y esto se decide AQUÍ y no en cada
+    pantalla.
+
+    `--cacao-fg-3` da 5,78:1 contra el FONDO de la franja, que es donde estaba
+    medido — pero el texto tenue no vive sobre el fondo, vive dentro de las
+    superficies elevadas, que son más claras: 4,98:1 sobre `--cacao-surface` y
+    **4,02:1 sobre `--cacao-hover`**. Eso reprueba AA.
+
+    Estaba parcheado a mano e idéntico en `catalogo.module.css`,
+    `perfil.module.css` y `ficha.module.css`, cada uno con su comentario
+    explicando el mismo hallazgo. Mientras el colapso no viviera aquí, el
+    sistema le garantizaba el fallo a quien escribiera la cuarta franja.
+
+    Sobre una superficie oscura no hay sitio para tres grises: se pierde un
+    escalón de jerarquía y se gana que el texto se lea.
+  */
+  --text-3: var(--cacao-fg-2);
+
   --brand: var(--cacao-brand);
   --brand-edge: var(--cacao-edge);
-  --focus: var(--cacao-edge);
+  /*
+    El foco sube de `--cacao-edge` (`--gold-600`, 4,63:1) a `--cacao-brand`
+    (`--gold-400`, 7,83:1). El foco es lo que sostiene 1.4.11 ahora que las
+    superficies no llevan borde en reposo, y sobre chocolate conviene el oro
+    claro, que aquí sí es legal.
+  */
+  --focus: var(--cacao-brand);
+
+  /*
+    LA ACCIÓN SE INVIERTE. En claro `--action` es tinta; sobre cacao una acción
+    de tinta desaparece. Papel sobre cacao: 16,24:1.
+  */
+  --action: var(--cacao-fg);
+  --action-fg: var(--cacao-bg);
+
+  /*
+    Los bordes del tema claro son TINTA y aquí se perderían. `--edge` es el
+    anillo de luz que sustituye al trazo en superficies oscuras: sin él, una
+    `Card` dentro de la franja resuelve `--shadow-card` —cálido, calibrado
+    contra papel, invisible sobre chocolate— y se queda SIN ningún límite,
+    porque `--cacao-surface` contra `--cacao-bg` es 1,16:1.
+  */
+  --edge: var(--edge-light);
+  --border: color-mix(in srgb, var(--cacao-fg) 22%, transparent);
+  --border-subtle: color-mix(in srgb, var(--cacao-fg) 12%, transparent);
 
   color: var(--text);
 }

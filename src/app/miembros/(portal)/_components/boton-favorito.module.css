@@ -174,7 +174,12 @@
   font-weight: var(--t-caption-weight);
   white-space: nowrap;
 
-  box-shadow: var(--shadow-2);
+  /* Semántico, no crudo: los `--shadow-N` se definen UNA vez con el tinte
+     cálido del tema claro y el oscuro solo remapea los semánticos, así que un
+     crudo aquí dejaba el aviso sin sombra sobre fondo oscuro. Es el mismo fallo
+     que se comió las sombras de `Menu` y `Toast`. Y el peldaño es `flotante`
+     porque esto es un mensaje que flota sobre la tarjeta, no una tarjeta. */
+  box-shadow: var(--shadow-flotante), var(--edge);
   animation: aparecerFallo var(--dur-fast) var(--ease-out);
 }
 

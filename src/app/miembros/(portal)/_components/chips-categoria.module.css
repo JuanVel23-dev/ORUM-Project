@@ -55,7 +55,7 @@
 
   El valor ya estaba; el tiempo, no. `.chip` declara su propia lista de
   transiciones, y esa lista pisa la de `globals.css` §4b —donde `scale` se anima
-  en `--dur-rebote`, 440ms, con curva elástica—. Sin acortar la IDA, el chip
+  en `--dur-rebote`, 200ms, con curva elástica—. Sin acortar la IDA, el chip
   tardaba casi medio segundo en acusar el toque y el socio lo pulsaba dos veces.
 
   El reparto correcto es el de la regla global: ida instantánea (`--dur-press`),

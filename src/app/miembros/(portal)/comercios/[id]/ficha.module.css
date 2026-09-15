@@ -635,7 +635,7 @@
 /*
   El toque lo acusa el encogido global de `globals.css` §4b, que a un enlace de
   texto de este tamaño le va bien. Solo se le acorta la ida: `.sedeTelefono`
-  declara su propia lista de transiciones y, sin esto, hereda los 440ms de la
+  declara su propia lista de transiciones y, sin esto, hereda los 200ms de la
   vuelta elástica también para la ida.
 */
 .sedeTelefono:active {
@@ -1044,7 +1044,10 @@
   border-radius: var(--radius-xl);
 
   background: var(--surface-hueco);
-  box-shadow: var(--shadow-raised);
+  /* Con `var(--edge)`, igual que `.portada`: son el mismo material y el
+     comentario de arriba lo dice. Sin el anillo, en oscuro la cubierta tenía
+     filo de luz y las fotos de la galería no. */
+  box-shadow: var(--shadow-raised), var(--edge);
 }
 
 @container contenido (min-width: 560px) {

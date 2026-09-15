@@ -268,14 +268,14 @@
 @media (hover: hover) {
   .enlace:hover .superficie {
     border-color: color-mix(in srgb, var(--brand-edge) 45%, transparent);
-    box-shadow: var(--shadow-raised), var(--shadow-3), var(--edge);
+    box-shadow: var(--shadow-flotante), var(--edge);
     translate: 0 calc(var(--space-1) * -0.5);
   }
 }
 
 .enlace:focus-visible .superficie {
   border-color: color-mix(in srgb, var(--brand-edge) 45%, transparent);
-  box-shadow: var(--shadow-raised), var(--shadow-3), var(--edge);
+  box-shadow: var(--shadow-flotante), var(--edge);
   translate: 0 calc(var(--space-1) * -0.5);
 }
 
@@ -360,9 +360,13 @@
   */
   background: var(--surface-sunk);
 
-  /* Filo de luz superior: en tema oscuro es lo que hace que el material se lea
-     como una superficie iluminada y no como un agujero. */
-  box-shadow: var(--edge-light);
+  /* Filo de luz: en tema oscuro es lo que hace que el material se lea como una
+     superficie iluminada y no como un agujero.
+
+     El token semántico, no el crudo `--edge-light`. `--edge` es transparente en
+     claro y anillo en oscuro; el crudo vale lo mismo en los dos, así que sobre
+     el papel cálido de la v4 dibujaba un anillo blanco que no pinta nada. */
+  box-shadow: var(--edge);
 
   container-type: inline-size;
 }

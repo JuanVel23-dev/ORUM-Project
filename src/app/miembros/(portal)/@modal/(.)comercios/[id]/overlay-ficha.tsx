@@ -38,10 +38,19 @@ export function OverlayFicha({ children }: { children: ReactNode }) {
       onClose={() => router.back()}
       /*
         Sin `title`: el `h1` con el nombre del comercio ya vive dentro de la
-        ficha, y repetirlo en el cromo del overlay lo diría dos veces al lector
-        de pantalla y lo pintaría dos veces en la hoja. El overlay queda
-        etiquetado por su contenido.
+        ficha, y repetirlo en el cromo del overlay lo pintaría dos veces.
+
+        Pero «queda etiquetado por su contenido» era falso, y costaba dos cosas.
+        El rol de diálogo lo tiene el `<dialog>`, y nada conectaba ese `h1` con
+        él: al abrir, el lector anunciaba «diálogo» sin decir cuál. Y en móvil
+        `Sheet` colgaba su cabecera ENTERA —la X incluida— de `title`, así que
+        esta ficha se quedaba sin botón de cerrar: solo el arrastre del tirador,
+        el velo, o un Escape que en un táctil puro no existe.
+
+        `ariaLabel` da el nombre sin pintar nada, y `Sheet` ya no condiciona la
+        X al título.
       */
+      ariaLabel="Ficha del comercio"
       width="720px"
       detent="large"
     >

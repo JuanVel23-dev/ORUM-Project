@@ -25,6 +25,8 @@ type Props = {
   open: boolean
   onClose: () => void
   title?: string
+  /** Nombre accesible del diálogo cuando NO hay `title` visible. */
+  ariaLabel?: string
   description?: string
   /** Botonera inferior. En móvil se apila invertida (la acción principal arriba). */
   footer?: ReactNode
@@ -42,6 +44,7 @@ export function Modal({
   description,
   footer,
   width = '480px',
+  ariaLabel,
   hideClose = false,
   children,
 }: Props) {
@@ -141,6 +144,7 @@ export function Modal({
       onCancel={alCancelar}
       onClick={alPulsar}
       aria-labelledby={title ? 'modal-titulo' : undefined}
+      aria-label={!title && ariaLabel ? ariaLabel : undefined}
     >
       <div className={styles.contenido}>
         {tieneCabecera && (

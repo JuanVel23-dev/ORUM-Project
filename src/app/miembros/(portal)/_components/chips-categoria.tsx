@@ -4,7 +4,7 @@ import { LayoutGrid } from 'lucide-react'
 import { CarrilPista } from '@/components/ui/carril'
 import { IconoCategoria } from './icono-categoria'
 import styles from './chips-categoria.module.css'
-import agitacion from './agitacion.module.css'
+import { Agitar } from '@/components/ui/agitar'
 
 export type Categoria = { id: number; nombre: string }
 
@@ -133,17 +133,23 @@ function Chip({
         icono; y el hueco se gasta en algo que informa en los DOS estados: de
         qué tipo de comercio habla el chip.
 
-        La agitación se aplica solo al activo, así que la animación arranca justo
-        cuando el filtro pasa a estarlo — por el simple hecho de que la propiedad
-        `animation` acaba de aplicarse al elemento. Sin JavaScript. Bajo
-        `prefers-reduced-motion` no se mueve nada y el estado lo siguen diciendo
-        el subrayado, el relleno y `aria-current`.
+        LA AGITACIÓN VA POR `<Agitar>`, no por una clase condicional.
+
+        La copia local que había aquí aplicaba `animation` por el mero hecho de
+        que la clase estuviera presente, y estos chips navegan con `<Link>`: en
+        una recarga con el filtro YA puesto el servidor pinta el icono con la
+        clase desde el primer fotograma y el navegador lo agita al montar. Es
+        decir, temblaba en cada carga de página — justo lo que la regla prohíbe
+        («no se agita al montar ni al apagarse»).
+
+        `Agitar` siembra su estado con `activo`, así que montar encendido no
+        agita nada y solo lo hace la transición apagado → encendido. Bajo
+        `prefers-reduced-motion` se retira entera, y el estado lo siguen
+        diciendo el subrayado, el relleno y `aria-current`.
       */}
-      <span
-        className={[styles.icono, activo && agitacion.agitar].filter(Boolean).join(' ')}
-      >
+      <Agitar activo={activo} className={styles.icono}>
         {icono}
-      </span>
+      </Agitar>
 
       {/* ICONO + TEXTO, nunca icono solo. */}
       <span className={styles.etiqueta}>{children}</span>

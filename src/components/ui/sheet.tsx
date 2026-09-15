@@ -44,7 +44,24 @@ type Props = {
   onClose: () => void
   title?: string
   description?: string
+  /**
+   * Nombre accesible del diálogo cuando NO hay `title` visible.
+   *
+   * Sin uno de los dos, el lector de pantalla anuncia «diálogo» y se calla: el
+   * `<dialog>` es quien tiene el rol, así que un `h1` dentro del contenido no
+   * lo nombra por mucho que se lea después.
+   */
+  ariaLabel?: string
   footer?: ReactNode
+  /**
+   * Oculta la X de cerrar. Por defecto NO se oculta, y el defecto importa:
+   * antes la cabecera entera colgaba de `title || description`, así que una
+   * hoja sin título —la ficha de comercio, que trae su propio encabezado— se
+   * quedaba en móvil SIN ningún botón de cerrar. Las únicas salidas eran
+   * arrastrar el tirador, acertar el velo o pulsar Escape, que en un táctil
+   * puro no existe. Es la misma condición que ya usaba `Modal`.
+   */
+  hideClose?: boolean
   /**
    * Altura inicial. `medium` habilita además el arrastre hacia `large`.
    * Por defecto `large`: la mayoría de hojas de este panel son formularios.
@@ -58,7 +75,9 @@ export function Sheet({
   onClose,
   title,
   description,
+  ariaLabel,
   footer,
+  hideClose = false,
   detent = 'large',
   children,
 }: Props) {
@@ -266,6 +285,7 @@ export function Sheet({
       className={styles.dialog}
       onCancel={alCancelar}
       aria-labelledby={title ? 'sheet-titulo' : undefined}
+      aria-label={!title && ariaLabel ? ariaLabel : undefined}
     >
       <div ref={veloRef} className={styles.velo} onClick={onClose} aria-hidden="true" />
 
@@ -280,7 +300,13 @@ export function Sheet({
           <div className={styles.tirador} aria-hidden="true" />
         </div>
 
-        {(title || description) && (
+        {/*
+          La cabecera existe también SIN título, porque es donde vive la X.
+          Misma condición que `Modal`: mientras haya botón de cerrar, hay
+          cabecera. Antes colgaba solo de `title || description` y dejaba la
+          ficha de comercio sin salida visible en móvil.
+        */}
+        {(title || description || !hideClose) && (
           <div className={styles.cabecera}>
             <div className={styles.textos}>
               {title && (
@@ -290,14 +316,16 @@ export function Sheet({
               )}
               {description && <p className={styles.descripcion}>{description}</p>}
             </div>
-            <button
-              type="button"
-              className={styles.cerrar}
-              onClick={onClose}
-              aria-label="Cerrar"
-            >
-              <X className={styles.cerrarIcono} aria-hidden="true" />
-            </button>
+            {!hideClose && (
+              <button
+                type="button"
+                className={styles.cerrar}
+                onClick={onClose}
+                aria-label="Cerrar"
+              >
+                <X className={styles.cerrarIcono} aria-hidden="true" />
+              </button>
+            )}
           </div>
         )}
 

@@ -227,7 +227,62 @@
   dónde esté el ratón.
 */
 
+/*
+  En puntero grueso el enlace sube a 44px. Se muestra a partir de 768px, y eso
+  incluye tabletas y portátiles 2-en-1: `padding: 8px 12px` sobre un cuerpo de
+  14px deja el destino en ~38px, por debajo del mínimo del sistema. En
+  escritorio la densidad es una virtud, así que no se toca allí — es el mismo
+  patrón que ya usa `.resumen` en `filtros-form.module.css`.
+*/
+@media (pointer: coarse) {
+  .enlace {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+  }
+}
+
 .enlace:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  EL DISPARADOR DE «MI CUENTA».
+
+  Se VE de 28px —es el avatar, y agrandarlo desequilibraría la cabecera— pero
+  se TOCA de 44. Es la distinción que el sistema hace en todas partes: lo que
+  se ve y lo que se toca son cosas distintas, y el área crece con un `::after`
+  centrado para no alterar la maquetación.
+
+  Aquí importa más que en ningún otro sitio del portal: en móvil este botón es
+  la ÚNICA puerta al conmutador de tema, al soporte por WhatsApp y a cerrar
+  sesión. No hay menú del avatar en el pie de una barra lateral, porque en el
+  portal no hay barra lateral.
+*/
+.botonCuenta {
+  position: relative;
+  display: grid;
+  place-items: center;
+  -webkit-tap-highlight-color: transparent;
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.botonCuenta::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+}
+
+.botonCuenta:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
@@ -406,7 +461,7 @@
      controles pequeños — y una pestaña de barra inferior lo es.
 
   2. El TIEMPO. `.tab` declara su propia lista de transiciones y esa lista pisa
-     la global, donde `scale` va a `--dur-rebote` (440ms elásticos). Sin acortar
+     la global, donde `scale` va a `--dur-rebote` (200ms elásticos). Sin acortar
      la ida, la pestaña tardaba casi medio segundo en acusar el toque: es el
      control que más se pulsa del portal y el que peor se sentía.
 */

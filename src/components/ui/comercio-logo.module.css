@@ -118,7 +118,7 @@
   letra al 32 % de un círculo se lee como un MONOGRAMA, que es exactamente lo
   que es. Sigue por debajo de la proporción de `Avatar` (~0,36) porque la placa
   es mayor que un avatar y la letra no debe tocar el filo. El color no cambia
-  —`--placa-logo-inicial`, 5,26:1 sobre la placa blanca—, así que subir el
+  —`--placa-logo-inicial`, 4,71:1 sobre la placa—, así que subir el
   tamaño solo puede mejorar su legibilidad, nunca empeorarla.
 */
 .inicial {

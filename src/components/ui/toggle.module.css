@@ -87,11 +87,17 @@
      del tema claro: un pulgar blanco frío sobre una pista cálida se ve azul. */
   background: var(--w-0);
   /*
-    Sombra mínima: la escala nueva DESPLAZA, y `--shadow-2` son 3px de canto
-    duro. En un pulgar de 20px dentro de una pista de 26 con 3px de holgura,
-    esos 3px se salían de la pista por abajo. `--shadow-0` es 1px y cabe.
+    Sombra mínima: la escala nueva DESPLAZA, y un peldaño de tarjeta son 3px de
+    canto duro. En un pulgar de 20px dentro de una pista de 26 con 3px de
+    holgura, esos 3px se salían de la pista por abajo.
+
+    `--shadow-press` es justo eso: el contacto SIN el halo, 1px, y cabe. Se pide
+    el semántico y no el crudo `--shadow-0` porque los crudos se definen una
+    sola vez con el tinte cálido del tema claro; en oscuro `--shadow-press` se
+    apaga a transparente, que es lo correcto — un pulgar de papel sobre una
+    pista oscura no necesita que nada lo despegue.
   */
-  box-shadow: var(--shadow-0);
+  box-shadow: var(--shadow-press);
 
   transform-origin: left center;
   transition:
@@ -154,7 +160,15 @@
   transition:
     background-color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
-    scale var(--dur-instant) var(--ease-out),
+    /*
+      UNA sola entrada de `scale`, y esto no es cosmético: en una lista separada
+      por comas la MISMA propiedad declarada dos veces se resuelve por la
+      ÚLTIMA, y la primera no se aplica jamás — sin aviso de nadie. Aquí
+      convivían `--dur-instant` y `--dur-rebote`, y la que corría siempre era la
+      segunda. Se borra la muerta en vez de la viva: el único `scale` de `.caja`
+      es el hundido de `:active`, y el acuse de presión del sistema son los
+      200 ms de `--dur-rebote` con su sobreimpulso (`globals.css` §4b).
+    */
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
