@@ -123,7 +123,7 @@
   display: grid;
   gap: var(--space-4);
 
-  animation: entraCarnet 180ms var(--ease-out) both;
+  animation: entraCarnet var(--dur-carnet) var(--ease-out) both;
 }
 
 @keyframes entraCarnet {

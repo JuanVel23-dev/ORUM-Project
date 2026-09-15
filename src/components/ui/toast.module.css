@@ -112,8 +112,14 @@
   border: none;
 }
 
-.accion:hover {
-  text-decoration: underline;
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .accion:hover {
+    text-decoration: underline;
+  }
 }
 
 .cerrar {
@@ -136,10 +142,16 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.cerrar:hover {
-  color: var(--text);
-  background: var(--surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border-subtle);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .cerrar:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
 }
 
 .cerrarIcono {

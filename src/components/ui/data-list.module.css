@@ -94,8 +94,14 @@
   border-bottom: none;
 }
 
-.fila:hover {
-  background: var(--surface-hover);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .fila:hover {
+    background: var(--surface-hover);
+  }
 }
 
 /*

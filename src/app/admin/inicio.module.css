@@ -77,9 +77,15 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.acceso:hover {
-  border-color: var(--border);
-  box-shadow: var(--shadow-raised), var(--edge);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .acceso:hover {
+    border-color: var(--border);
+    box-shadow: var(--shadow-raised), var(--edge);
+  }
 }
 
 .acceso:active {
@@ -133,6 +139,13 @@
 }
 
 /* Apunta en la dirección del gesto: telegrafía a dónde lleva. */
-.acceso:hover .flecha {
-  transform: translateX(3px);
+
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .acceso:hover .flecha {
+    transform: translateX(3px);
+  }
 }

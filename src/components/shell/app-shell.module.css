@@ -178,8 +178,14 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.item:hover {
-  color: var(--text);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .item:hover {
+    color: var(--text);
+  }
 }
 
 .item[data-activo='true'] {
@@ -275,9 +281,16 @@
 
 /* El relleno del hover no se ve sobre papel (1,02:1): el trazo lo acompaña.
    Va en `inset`, no en `border`, para no mover ni un píxel el avatar. */
-.perfilBoton:hover {
-  background: var(--surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border-subtle);
+
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .perfilBoton:hover {
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
 }
 
 .perfilBoton:focus-visible {
@@ -331,10 +344,16 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.colapsar:hover {
-  color: var(--text);
-  background: var(--surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border-subtle);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .colapsar:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
 }
 
 .colapsar:focus-visible {
@@ -701,9 +720,15 @@
   opacity: 0.62;
 }
 
-.masItem:hover {
-  background: var(--surface-hover);
-  box-shadow: inset 0 0 0 1px var(--border-subtle);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .masItem:hover {
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
 }
 
 /*

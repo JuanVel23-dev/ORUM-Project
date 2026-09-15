@@ -88,8 +88,14 @@
   transition: border-color var(--dur-fast) var(--ease-out);
 }
 
-.enlaceMiembro:hover {
-  border-color: var(--text);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .enlaceMiembro:hover {
+    border-color: var(--text);
+  }
 }
 
 .enlaceMiembro:focus-visible {

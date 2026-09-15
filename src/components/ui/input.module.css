@@ -253,10 +253,13 @@
   }
 }
 
-/* Retroalimentación en el toque, no al soltar. */
+/* Retroalimentación en el toque, no al soltar. `--escala-press-sm` es el mismo
+   0,92 que usan los demás controles pequeños del sistema: estaba escrito a mano
+   aquí, y era el último superviviente de los trece que `globals.css` §4b
+   centralizó. */
 .botonAdorno:active {
   color: var(--text);
-  scale: 0.92;
+  scale: var(--escala-press-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {

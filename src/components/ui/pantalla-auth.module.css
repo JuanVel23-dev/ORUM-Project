@@ -285,7 +285,7 @@
   ya roto, y sacudir al aterrizar regaña al usuario por algo que no hizo.
 */
 .formulario:has(.alerta) {
-  animation: sacudir 320ms var(--ease-out);
+  animation: sacudir var(--dur-slow) var(--ease-out);
 }
 
 .alerta {

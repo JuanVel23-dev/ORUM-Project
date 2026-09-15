@@ -180,9 +180,15 @@
   border-radius: var(--radius-full);
 }
 
-.fila:hover .caja {
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .fila:hover .caja {
   /* Señalar enciende el oro (§2.3), igual que en Input. */
-  border-color: var(--brand-edge);
+    border-color: var(--brand-edge);
+  }
 }
 
 .fila:active .caja {

@@ -727,6 +727,22 @@
      lo que miden las referencias, y en una interfaz que se usa a diario eso no
      se lee como calma, se lee como espera. */
   --dur-base: 220ms; /* entradas de UI — banda de desplegable (150–250) */
+
+  /*
+    LA ENTRADA DEL CARNET, y tiene token propio porque no encaja en ninguna banda.
+
+    Se abre CIENTOS de veces al día —el socio lo enseña en la caja de cada
+    comercio— así que manda la regla cero: lo muy frecuente no se anima, o se
+    anima al mínimo. Estuvo en un resorte con rebote de ~500ms, que es medio
+    segundo delante de un cajero esperando.
+
+    180ms cae entre `--dur-fast` (140) y `--dur-base` (220), y ninguno de los
+    dos vale: 140 no llega a leerse como movimiento y 220 ya se nota como
+    espera en algo tan repetido. Es un número medido para un caso, no un
+    escalón de la escala — pero vive aquí, y no suelto en la hoja, porque la
+    regla del sistema es que no haya duraciones sin nombre.
+  */
+  --dur-carnet: 180ms;
   --dur-slow: 320ms; /* hojas, modales — banda de overlay (200–500) */
   --dur-page: 420ms; /* transición de ruta */
   --dur-theme: 180ms; /* conmutación de tema */
