@@ -1,11 +1,12 @@
 import Link from 'next/link'
+import { TicketPercent } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Carril, CarrilPista } from '@/components/ui/carril'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { Skeleton } from '@/components/ui/feedback'
-import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
+import { formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import {
   MINIMO_DESTACADOS,
   TOPE_DESTACADOS,
@@ -233,8 +234,19 @@ function TarjetaDestacada({
           */}
           <div className={estilos.ranura}>
             {beneficio ? (
-              <Badge tone="gold" size="sm" className={estilos.beneficio}>
-                {formatearBeneficio(beneficio.tipoCodigo, beneficio.valor)}
+              <Badge
+                tone="gold"
+                size="sm"
+                className={estilos.beneficio}
+                /*
+                  El icono hace el trabajo que hacía la palabra «descuento»:
+                  dice de qué va la cifra sin gastar ancho. Con él, «20%» en una
+                  píldora dorada no es ambiguo — y con la frase entera la
+                  insignia se salía de la tarjeta.
+                */
+                icon={<TicketPercent size={12} aria-hidden="true" />}
+              >
+                {formatearBeneficioCorto(beneficio.tipoCodigo, beneficio.valor)}
               </Badge>
             ) : descripcion ? (
               <p className={estilos.frase}>{descripcion}</p>

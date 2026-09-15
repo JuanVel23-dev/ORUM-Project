@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatearBeneficio } from './beneficios-formato'
+import { formatearBeneficio, formatearBeneficioCorto } from './beneficios-formato'
 
 describe('formatearBeneficio', () => {
   it('porcentaje', () => {
@@ -24,5 +24,25 @@ describe('formatearBeneficio', () => {
 
   it('regalo', () => {
     expect(formatearBeneficio('regalo', null)).toBe('Regalo')
+  })
+})
+
+describe('formatearBeneficioCorto', () => {
+  it('deja la cifra sola: el contexto de la tarjeta dice el resto', () => {
+    expect(formatearBeneficioCorto('porcentaje', 20)).toBe('20%')
+  })
+
+  it('agrupa los miles en formato colombiano, sin la frase', () => {
+    expect(formatearBeneficioCorto('monto_fijo', 50000)).toBe('$50.000')
+  })
+
+  it('los beneficios que ya eran cortos no cambian', () => {
+    expect(formatearBeneficioCorto('dos_por_uno', null)).toBe('2x1')
+    expect(formatearBeneficioCorto('regalo', null)).toBe('Regalo')
+  })
+
+  it('un valor nulo no imprime «null»', () => {
+    expect(formatearBeneficioCorto('porcentaje', null)).toBe('0%')
+    expect(formatearBeneficioCorto('monto_fijo', null)).toBe('$0')
   })
 })

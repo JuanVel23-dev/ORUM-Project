@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { MapPin } from 'lucide-react'
+import { MapPin, TicketPercent } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
-import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
+import { formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import { transicionComercio } from '@/lib/comercios/transiciones'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 import { BotonFavorito } from './boton-favorito'
@@ -214,8 +214,13 @@ export function ComercioCard({
                       cifra va DENTRO de la píldora, así que el color nunca es el
                       único portador del significado.
                     */}
-                    <Badge tone="gold" size="sm" className={styles.beneficio}>
-                      {formatearBeneficio(p.tipoCodigo, p.valor)}
+                    <Badge
+                      tone="gold"
+                      size="sm"
+                      className={styles.beneficio}
+                      icon={<TicketPercent size={12} aria-hidden="true" />}
+                    >
+                      {formatearBeneficioCorto(p.tipoCodigo, p.valor)}
                     </Badge>
                   </li>
                 ))}
@@ -300,8 +305,13 @@ export function ComercioCardCompacta({
             <h3 className={styles.nombre}>{comercio.nombre}</h3>
 
             {destacado ? (
-              <Badge tone="gold" size="sm" className={styles.beneficio}>
-                {formatearBeneficio(destacado.tipoCodigo, destacado.valor)}
+              <Badge
+                      tone="gold"
+                      size="sm"
+                      className={styles.beneficio}
+                      icon={<TicketPercent size={12} aria-hidden="true" />}
+                    >
+                {formatearBeneficioCorto(destacado.tipoCodigo, destacado.valor)}
               </Badge>
             ) : (
               <span className={styles.sinBeneficioCompacta}>Sin beneficio vigente hoy</span>
