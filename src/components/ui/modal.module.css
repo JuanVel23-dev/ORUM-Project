@@ -48,9 +48,13 @@
 }
 
 /* Al cerrar, `motion` anima el panel y luego llama a `close()`. Sin esta clase
-   el fondo desaparecía de golpe un fotograma antes que el panel. */
+   el fondo desaparecía de golpe un fotograma antes que el panel.
+
+   v4 §5: la SALIDA ES MÁS RÁPIDA QUE LA ENTRADA, y por eso sale de
+   `--dur-salida` y no de `--dur-base`. Lento donde el usuario decide, rápido
+   donde el sistema responde: cerrar ya está decidido. */
 .cerrando::backdrop {
-  animation: salirFondo 180ms var(--ease-out) forwards;
+  animation: salirFondo var(--dur-salida) var(--ease-out) forwards;
 }
 
 /*
@@ -109,7 +113,7 @@
   }
 
   .cerrando::backdrop {
-    animation-duration: 120ms;
+    animation-duration: var(--dur-instant);
   }
 }
 

@@ -83,16 +83,27 @@
   color: var(--success);
 }
 
+/*
+  El icono se INTERCAMBIA (Copy ↔ Check), así que React desmonta uno y monta
+  otro. Es el caso donde un `@keyframes` sigue siendo la herramienta correcta
+  pese a la regla 6 de la v4 —«transiciones, no keyframes, en lo que se dispara
+  rápido»—: una transición necesita un valor de partida en el mismo elemento, y
+  aquí el elemento de partida ya no existe. Lo que sí se corrige es de DÓNDE
+  entra.
+*/
 .icono {
   width: 15px;
   height: 15px;
   animation: aparecer var(--dur-fast) var(--ease-out);
 }
 
+/* v4 §5, regla 1: nada entra desde la nada. Entraba desde 0,7 —un 30 % de
+   salto que en un icono de 15px se lee como un globo inflándose— y ahora desde
+   0,92: se percibe que algo cambió, no que algo estalló. */
 @keyframes aparecer {
   from {
     opacity: 0;
-    scale: 0.7;
+    scale: 0.92;
   }
   to {
     opacity: 1;

@@ -38,7 +38,7 @@
     transparent
   );
 
-  animation: barrer 1400ms ease-in-out infinite;
+  animation: barrer var(--dur-barrido) var(--ease-in-out) infinite;
 }
 
 @keyframes barrer {
@@ -94,7 +94,7 @@
   width: 40%;
   /* Aquí el `transform` lo escribe la animación: no hay porcentaje que escalar. */
   transform: none;
-  animation: recorrer 1200ms var(--ease-in-out) infinite;
+  animation: recorrer var(--dur-bucle) var(--ease-in-out) infinite;
 }
 
 @keyframes recorrer {

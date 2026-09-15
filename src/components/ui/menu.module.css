@@ -68,17 +68,24 @@
 }
 
 /*
-  Las opciones entran escalonadas, 22ms entre una y otra. Es lo que convierte
-  "apareció una caja" en "se desplegó una lista": el ojo sigue la secuencia y
-  entiende que son elementos de un mismo grupo.
+  Las opciones entran escalonadas. Es lo que convierte "apareció una caja" en
+  "se desplegó una lista": el ojo sigue la secuencia y entiende que son
+  elementos de un mismo grupo.
   `backwards` mantiene el estado inicial durante el retardo, para que ninguna
   parpadee antes de empezar.
+
+  v4 §5: el paso sale de `--escalonado` (40 ms) en vez de los 22 ms que había
+  escritos a mano, y la duración de `--dur-base`. El escalonado tiene banda
+  —30 a 80 ms— y 22 quedaba por debajo: con ocho opciones la secuencia entera
+  duraba 176 ms y no se leía como secuencia, se leía como un parpadeo. El
+  arranque se retrasa un escalón para que el menú ya tenga forma cuando la
+  primera opción empieza a entrar.
 */
 .menu:popover-open .item,
 .menu:popover-open .separador,
 .menu:popover-open .etiquetaGrupo {
-  animation: entrarItem 200ms var(--ease-out) backwards;
-  animation-delay: calc(var(--indice, 0) * 22ms + 40ms);
+  animation: entrarItem var(--dur-base) var(--ease-out) backwards;
+  animation-delay: calc(var(--indice, 0) * var(--escalonado) + var(--escalonado));
 }
 
 @keyframes entrarItem {

@@ -346,9 +346,10 @@
   Variante ceremonial de MATERIAL: el barrido metálico.
 
   ⚠️ NO admite texto encima. En tema claro `globals.css` remapea el barrido a
-  #9e8244 → #7d6733 → #5c4b25 → #9e8244, y la parada del 62% da 2,34:1 contra
-  `--n-1000`: reprueba WCAG 1.4.3 por más del doble, en el 62% del recorrido
-  del botón. Para un botón con etiqueta está `.brand`, que es plano.
+  la mitad oscura de la rampa de oro, y su parada del 62% (`--gold-800`) da
+  2,42:1 contra la tinta: reprueba WCAG 1.4.3 por casi el doble, y lo hace en
+  el 62% del recorrido del botón. Para un botón con etiqueta está `.brand`,
+  que es plano.
 
   Lo que sí sirve: superficies ceremoniales sin texto —el filo del carnet, el
   wordmark con `background-clip: text`, la barra de `ProgressBar`—.
@@ -357,7 +358,10 @@
   background-image: var(--gold-sheen);
   background-size: 200% 100%;
   background-position: 0% 0;
-  color: var(--n-1000);
+  /* Tinta cálida, no `--text`: esta superficie es dorada en los DOS temas, así
+     que su texto tampoco puede seguir al tema. 4,84:1 contra la parada más
+     clara del barrido; la más oscura no admite texto — ver el aviso de arriba. */
+  color: var(--tinta-1);
   box-shadow: var(--shadow-raised);
 
   transition:

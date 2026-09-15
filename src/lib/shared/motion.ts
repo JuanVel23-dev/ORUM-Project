@@ -6,7 +6,20 @@
  * no puede hacer: resortes interrumpibles, traspaso de velocidad y proyección
  * de momento.
  *
- * Referencia: dirección de arte v3 §3 (Designing Fluid Interfaces, WWDC 2018).
+ * Referencia: dirección de arte v4 §5 (marco de Emil Kowalski) sobre la v3 §3
+ * (Designing Fluid Interfaces, WWDC 2018).
+ *
+ * REGLA CERO, Y DECIDE ANTES QUE TODAS LAS DEMÁS: LA FRECUENCIA.
+ *
+ *   Cientos de veces al día ..... NO ANIMAR NUNCA
+ *   Decenas ..................... al mínimo
+ *   Ocasional ................... animación estándar
+ *   Rara / primera vez .......... se puede deleitar
+ *
+ * Elegir el preset es el segundo paso. El primero es contar cuántas veces al
+ * día alguien va a ver esto: una animación preciosa en algo que se hace 200
+ * veces al día son 200 esperas, y se percibe como que la aplicación va lenta
+ * mucho antes de que nadie la llame bonita.
  *
  * LAS SIETE REGLAS, porque el preset correcto no sirve de nada aplicado mal:
  *
@@ -29,6 +42,14 @@
  *   7. `prefers-reduced-motion` NO ES «SIN FEEDBACK»: es el equivalente no
  *      vestibular. Fundido corto en vez de viaje, sin rebote, sin paralaje.
  *      Para eso está `transicionSegunPreferencia`.
+ *
+ * Y TRES QUE AÑADE LA v4:
+ *
+ *   8. LA SALIDA MÁS RÁPIDA QUE LA ENTRADA. Lento donde el usuario decide,
+ *      rápido donde el sistema responde. `salidaDe()` lo calcula.
+ *   9. NADA ENTRA DESDE `scale(0)`. En el mundo real nada aparece de la nada.
+ *      Desde 0,95 y con la opacidad haciendo el trabajo de ocultar.
+ *  10. ESCALONADO DE 30–80 ms, y con TOPE. `ESCALONADO_MS` y `retardoEscalonado`.
  */
 
 /**
@@ -58,21 +79,21 @@ export type SpringPreset = {
 export const SPRING_UI: SpringPreset = {
   type: 'spring',
   bounce: 0,
-  duration: 0.35,
+  duration: 0.3,
 }
 
 /** Reposicionar un elemento (mover, reordenar). */
 export const SPRING_MOVE: SpringPreset = {
   type: 'spring',
   bounce: 0,
-  duration: 0.4,
+  duration: 0.34,
 }
 
 /** Hojas y drawers. */
 export const SPRING_SHEET: SpringPreset = {
   type: 'spring',
   bounce: 0.2,
-  duration: 0.35,
+  duration: 0.32,
 }
 
 /**
@@ -88,7 +109,7 @@ export const SPRING_SHEET: SpringPreset = {
 export const SPRING_POP: SpringPreset = {
   type: 'spring',
   bounce: 0.2,
-  duration: 0.3,
+  duration: 0.26,
 }
 
 /** Tras un gesto con momento (flick, lanzamiento). Aquí el rebote sí se ganó. */
@@ -120,7 +141,7 @@ export const SPRING_FLICK: SpringPreset = {
 export const SPRING_MATERIAL: SpringPreset = {
   type: 'spring',
   bounce: 0,
-  duration: 0.42,
+  duration: 0.38,
 }
 
 /**
@@ -152,13 +173,89 @@ export type TweenPreset = {
   readonly ease: readonly [number, number, number, number]
 }
 
-/** `--ease-out` de `tokens.css`, en la forma que espera `motion`. */
-export const EASE_OUT = [0.16, 1, 0.3, 1] as const
+/**
+ * Las tres curvas de `tokens.css` §8, en la forma que espera `motion`.
+ *
+ * v4 §5: SUBEN DE FUERZA. Las de CSS son flojas y las de la v3 se quedaban
+ * cerca; estas son las medidas en las referencias. Si cambias una, cambia la
+ * gemela de `tokens.css` en el mismo commit: que la misma animación se sienta
+ * distinta según la escriba CSS o JS es el peor tipo de incoherencia, porque
+ * no se ve en el código, solo en pantalla.
+ *
+ * ⛔ NO HAY `EASE_IN`, y no es un olvido. Una curva que empieza lenta arranca
+ * justo en el instante que el usuario más mira.
+ */
+export const EASE_OUT = [0.23, 1, 0.32, 1] as const
+
+/** Movimiento de A a B de algo que YA está en pantalla. */
+export const EASE_IN_OUT = [0.77, 0, 0.175, 1] as const
+
+/** Recorridos largos y deliberados. Medida en Agence Cartier. */
+export const EASE_HERO = [0.645, 0.045, 0.355, 1] as const
 
 /** El fundido de movimiento reducido. 0,15 s: se percibe, no se sufre. */
 export const TWEEN_REDUCIDO: TweenPreset = {
   duration: 0.15,
   ease: EASE_OUT,
+}
+
+/**
+ * LA SALIDA ES MÁS RÁPIDA QUE LA ENTRADA (v4 §5, regla 3).
+ *
+ * Proporción única para todo el sistema. No es un número estético: entrar es
+ * el sistema presentándose y admite recorrido; salir ya está decidido por el
+ * usuario, y hacerle esperar lo mismo se percibe como que la interfaz no le
+ * deja irse. 0,65 es donde la salida se siente ligera sin llegar a cortarse.
+ *
+ * Es el gemelo en JS de `--dur-salida` / `--dur-base` de `tokens.css`
+ * (150/220 ms ≈ 0,68).
+ */
+export const RAZON_SALIDA = 0.65
+
+/**
+ * La versión de salida de un preset de entrada: mismo carácter, más corta.
+ *
+ * Se descarta el rebote a propósito. Un sobreimpulso al salir deja el objeto
+ * pasándose de su destino JUSTO antes de desaparecer, y el ojo lo lee como un
+ * tirón. El rebote se gana al llegar, nunca al irse.
+ */
+export function salidaDe(preset: SpringPreset): SpringPreset {
+  return {
+    type: 'spring',
+    bounce: 0,
+    duration: redondearMs(preset.duration * RAZON_SALIDA),
+  }
+}
+
+/** Milisegundo entero, en segundos. Evita `0.19499999999999998` en el DOM. */
+function redondearMs(segundos: number): number {
+  return Math.round(segundos * 1000) / 1000
+}
+
+/**
+ * ESCALONADO entre hermanos que entran en serie (v4 §5, regla 4).
+ *
+ * 30–80 ms y no más. Gemelo de `--escalonado` en `tokens.css`.
+ */
+export const ESCALONADO_MS = 40
+
+/**
+ * Cuántos milisegundos espera el hermano número `indice` (base 0).
+ *
+ * EL TOPE ES LA PARTE IMPORTANTE, no el paso. Sin él, el elemento 25 de una
+ * lista llega casi un segundo tarde, y eso no se percibe como elegancia sino
+ * como que la aplicación va lenta. A partir de `maximo` todos comparten el
+ * mismo retardo: el efecto se lee igual y el último no se hace esperar.
+ *
+ * Función pura: se prueba sin DOM.
+ */
+export function retardoEscalonado(
+  indice: number,
+  paso: number = ESCALONADO_MS,
+  maximo = 7,
+): number {
+  if (indice <= 0) return 0
+  return Math.min(indice, maximo) * paso
 }
 
 /**

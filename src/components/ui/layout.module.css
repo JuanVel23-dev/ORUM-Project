@@ -56,30 +56,33 @@
   animation: entrarEscalonado var(--dur-base) var(--ease-out) backwards;
 }
 
+/* v4 §5: el paso sale de `--escalonado` (40 ms, dentro de la banda 30–80) en
+   vez de los 35 ms escritos a mano siete veces. El tope sigue en el séptimo
+   múltiplo, así que la última pieza no espera más de siete pasos. */
 .escalonado > *:nth-child(1) {
   animation-delay: 0ms;
 }
 .escalonado > *:nth-child(2) {
-  animation-delay: 35ms;
+  animation-delay: var(--escalonado);
 }
 .escalonado > *:nth-child(3) {
-  animation-delay: 70ms;
+  animation-delay: calc(var(--escalonado) * 2);
 }
 .escalonado > *:nth-child(4) {
-  animation-delay: 105ms;
+  animation-delay: calc(var(--escalonado) * 3);
 }
 .escalonado > *:nth-child(5) {
-  animation-delay: 140ms;
+  animation-delay: calc(var(--escalonado) * 4);
 }
 .escalonado > *:nth-child(6) {
-  animation-delay: 175ms;
+  animation-delay: calc(var(--escalonado) * 5);
 }
 .escalonado > *:nth-child(7) {
-  animation-delay: 210ms;
+  animation-delay: calc(var(--escalonado) * 6);
 }
 /* El octavo y TODOS los siguientes. El tope vive aquí. */
 .escalonado > *:nth-child(n + 8) {
-  animation-delay: 245ms;
+  animation-delay: calc(var(--escalonado) * 7);
 }
 
 @keyframes entrarEscalonado {
@@ -153,6 +156,81 @@
   gap: var(--space-4);
 }
 
+/* ----------------------------------------------------------------------------
+   FRANJAS TONALES  ·  dirección de arte v4, §1 y §4
+
+   Una franja NO es una tarjeta y no lleva sombra: no está levantada, está
+   TEÑIDA. Lo que la separa de la sección de al lado es un salto de 1,04:1 de
+   luminancia, que el ojo lee como «aquí empieza otra cosa» sin que haya una
+   sola línea dibujada. Es lo que hace Agence Cartier con cero sombras.
+
+   Por eso tampoco lleva borde: si llevara, sería una tarjeta grande y el
+   recurso perdería todo su sentido —volveríamos a la cuadrícula de cajas que
+   hizo fallar la v2.
+
+   El relleno lo pone la franja porque sin él el tinte queda pegado al texto y
+   se lee como un resaltador. `--radius-xl`, que es el escalón de superficie
+   héroe.
+   -------------------------------------------------------------------------- */
+.tonoCrema,
+.tonoHonda,
+.tonoCacao {
+  padding: var(--space-7) var(--space-6);
+  border-radius: var(--radius-xl);
+}
+
+.tonoCrema {
+  background: var(--surface-alt);
+}
+
+/* ⛔ Sin `--text-3` ni oro de texto dentro: 4,18:1 y 4,21:1 sobre esta
+   superficie, los dos reprueban AA. Ver `tokens.css` §1. */
+.tonoHonda {
+  background: var(--surface-alt-2);
+}
+
+/*
+  LA FRANJA DE CACAO. No sigue al tema —es cacao en claro y en oscuro, igual
+  que el QR es negro sobre blanco en los dos— y por eso REMAPEA sus propios
+  tokens de texto y de superficie hacia dentro: cualquier componente que viva
+  aquí (una Card, un Badge, un texto secundario) lee `--text` y obtiene el tono
+  que sí contrasta sobre cacao, sin que haya que vestirlo a mano.
+
+  Es el ÚNICO sitio del sistema donde el oro de display es legal: 7,83:1 aquí
+  contra 1,99:1 sobre crema.
+
+  Y el presupuesto no sube por esto: si el héroe lleva oro, la acción de esa
+  pantalla va en tinta.
+*/
+.tonoCacao {
+  background: var(--cacao-bg);
+
+  --surface: var(--cacao-surface);
+  --surface-hover: var(--cacao-hover);
+  --text: var(--cacao-fg);
+  --text-2: var(--cacao-fg-2);
+  --text-3: var(--cacao-fg-3);
+  --brand: var(--cacao-brand);
+  --brand-edge: var(--cacao-edge);
+  --focus: var(--cacao-edge);
+
+  color: var(--text);
+}
+
+/*
+  El ancho útil de una franja no es el del viewport: cambia según la barra
+  lateral esté abierta o en rail. Por eso se pregunta por el CONTENEDOR, que
+  `.main` del shell y el `<main>` del portal declaran, y nunca por `@media`.
+*/
+@container contenido (max-width: 600px) {
+  .tonoCrema,
+  .tonoHonda,
+  .tonoCacao {
+    padding: var(--space-6) var(--space-5);
+    border-radius: var(--radius-lg);
+  }
+}
+
 .sectionCabecera {
   display: flex;
   align-items: flex-end;
@@ -193,6 +271,25 @@
   font-weight: var(--t-display-2-weight);
   color: var(--text);
   text-wrap: balance;
+}
+
+/*
+  EL TITULAR EN SERIF (v4 §3). Opt-in vía `<PageHeader display>`.
+
+  ⛔ Administración y Herramienta de Comercios NO lo usan.
+
+  `text-wrap: balance` ya venía del titular en sans y aquí importa más: a 72px
+  una línea huérfana de dos palabras es un agujero en la composición.
+*/
+.pageTituloDisplay {
+  font-family: var(--font-display);
+  -webkit-font-smoothing: auto;
+
+  font-size: var(--t-hero-1-size);
+  line-height: var(--t-hero-1-leading);
+  letter-spacing: var(--t-hero-1-tracking);
+  font-weight: var(--t-hero-1-weight);
+  font-feature-settings: 'liga' 1, 'calt' 1;
 }
 
 .pageDescripcion {

@@ -12,85 +12,170 @@
 
 :root {
   /* ==========================================================================
-     1. NEUTRALES  ·  matiz ~240°, saturación 4–8%
+     1. NEUTRALES  ·  CÁLIDOS  (dirección de arte v4, §1)
      --------------------------------------------------------------------------
-     Neutros con un susurro de frío, NO cálidos. Sobre grises cálidos el oro
-     se lee beige/sepia (relación análoga); sobre neutros fríos se lee metal.
+     ⚠️ ESTO DEROGA LA REGLA DE LOS NEUTRALES FRÍOS. Hasta la v3 aquí ponía
+     «un susurro de frío, matiz ~240°, NO cálidos». La v4 la retira: cuatro de
+     las cinco referencias medidas hacen lo contrario y ninguna envejece. La
+     premisa fría era correcta para un oro METÁLICO CON BARRIDO; con un oro
+     PLANO sobre crema el conjunto no se lee beige, se lee apetecible — que es
+     lo que un club de beneficios necesita.
+
+     El barrido metálico (`--gold-sheen`) SÍ sigue queriendo frío, y por eso
+     queda restringido al wordmark, donde ya estaba.
+
+     Matiz de la rampa: ~20–30°, saturación 6–12%. Nada de gris puro: un gris
+     neutro junto a papel cálido se lee como una mancha azul.
+
+     RATIOS MEDIDOS (método WCAG 2.1, verificados al aplicar — §A del registro
+     `.claude/docs/log/x1-fundacion-v4.md`).
      ======================================================================== */
 
-  /* Oscuros */
-  --n-1000: #0a0a0c; /* fondo raíz (dark) */
-  --n-950: #101013; /* superficie nivel 1 */
-  --n-900: #16161a; /* tarjeta */
-  --n-850: #1d1d22; /* elevada / hover */
-  --n-800: #26262c; /* borde sutil */
-  --n-700: #33333a; /* borde */
-  --n-600: #4a4a53; /* borde fuerte, deshabilitado */
-  --n-500: #6b6b76; /* texto terciario */
-  --n-400: #8c8c97; /* texto secundario (dark) */
-  --n-300: #adadb8;
-  --n-200: #ceced6;
-  --n-100: #e6e6eb;
-  --n-50: #f4f4f7; /* texto primario (dark) — nunca blanco puro */
+  /* Oscuros — el tema oscuro también es CÁLIDO (v4 §1). Se audita aparte:
+     los criterios se comprueban POR TEMA, nunca una vez para los dos. */
+  --n-1000: #14100e; /* fondo raíz (dark) */
+  --n-950: #1a1512; /* superficie nivel 1 · banda alterna en oscuro */
+  --n-900: #211a16; /* tarjeta */
+  --n-850: #2a221d; /* elevada / hover */
+  --n-800: #332a24; /* borde sutil */
+  --n-700: #41362e; /* borde */
+  --n-600: #584a40; /* borde fuerte, deshabilitado */
+  --n-500: #7a7068; /* TINTA 3: 4,71:1 sobre papel — es el MÍNIMO, no aclarar */
+  --n-450: #8e8177; /* filo de la placa de logo: ≥3:1 contra las 4 superficies */
+  --n-400: #a3968a; /* texto terciario (dark): 6,56:1 sobre --n-1000 */
+  --n-300: #c4b8ac; /* texto secundario (dark): 9,73:1 sobre --n-1000 */
+  --n-200: #ddd3c8;
+  --n-100: #ebe3d9;
+  --n-50: #f5f0e8; /* texto primario (dark) — nunca blanco puro */
 
-  /* Claros
+  /* Claros  ·  PAPEL, CREMA, CREMA HONDA
      --------------------------------------------------------------------------
-     Tras la dirección de arte v2 el tema claro usa DOS de estos seis: --w-0 es
-     el papel (fondo, tarjeta y hundido a la vez) y --w-50 el único tinte que
-     sobrevive, en el hover.
+     La v3 decía «el blanco no tiene escalones». La v4 mantiene que la TARJETA
+     no se separa del fondo con un escalón de gris —eso lo sigue haciendo la
+     sombra— pero abre una herramienta nueva que antes no existía: SUPERFICIES
+     TONALES PARA ALTERNAR SECCIONES.
 
-     Los cuatro grises restantes NO tienen consumidor: los escalones de
-     superficie desaparecieron (§2.1). Se conservan como rampa —son la paleta
-     cruda, no el mapeo— pero si escribes `var(--w-300)` en un componente estás
-     volviendo a la dirección anterior.
+     Eso resuelve el encargo del propietario («fondos que no sean solo blanco o
+     negro», «los espacios vacíos de escritorio se ven feos»): una franja de
+     crema junto a una de papel divide una pantalla larga SIN DIBUJAR UNA SOLA
+     LÍNEA, que es exactamente lo que hace Agence Cartier con cero sombras.
 
-     Tras la v3 una SUPERFICIE ya no se pide con borde en absoluto: la define
-     la sombra. Lo que queda de trazo son divisiones internas (--border),
-     hairlines (--border-subtle) y el borde en reposo de un CONTROL DE ENTRADA
-     (§2.5). `--border-superficie` existe solo para que `prefers-contrast: more`
-     pueda devolver el filo; en reposo vale `transparent`. */
-  --w-0: #ffffff; /* PAPEL: fondo, tarjeta y hundido en claro */
-  --w-50: #fbfbfc; /* sin consumidor: --surface-hover pasó a tinta diluida */
-  --w-100: #f4f4f6; /* sin consumidor desde la dirección v2 */
-  --w-200: #e9e9ed; /* sin consumidor desde la dirección v2 */
-  --w-300: #dcdce2; /* sin consumidor desde la dirección v2 */
-  --w-400: #c4c4cc; /* sin consumidor desde la dirección v2 */
+     Contrastes medidos entre superficies:
+       papel vs crema .......... 1,04:1   separa sin trazo
+       papel vs crema honda .... 1,13:1
+       crema vs crema honda .... 1,08:1
+
+     ⚠️ QUÉ TEXTO ADMITE CADA UNA. Crema honda es la más oscura y NO llega a AA
+     con los dos tonos más tenues:
+       sobre PAPEL y CREMA ....... tinta 1/2/3 y --gold-700 ✓ (mín. 4,52:1)
+       sobre CREMA HONDA ......... tinta 1 (15,03) y tinta 2 (6,51) ✓
+                                   tinta 3 da 4,18:1 ✗ y --gold-700 4,21:1 ✗
+     Por eso crema honda es superficie de RELLENO (hueco, carril, esqueleto,
+     franja decorativa), no de párrafo secundario. Si necesitas texto tenue
+     ahí, sube a `--text-2`. */
+  --w-0: #fdfcfa; /* PAPEL: fondo y tarjeta en claro */
+  --w-50: #faf7f0; /* CREMA: superficie alterna, la que separa sin trazo */
+  --w-100: #f3eee3; /* CREMA HONDA: relleno, hueco, franja. Ver el aviso ↑ */
+  --w-200: #e8e0d2; /* filos y divisiones sobre crema */
+  --w-300: #d5c9b5;
+  --w-400: #b9aa93;
+
+  /* TINTA CÁLIDA  ·  los tres pesos de texto sobre papel (v4 §1)
+     --------------------------------------------------------------------------
+     Antes vivían como literales dentro de `globals.css` (`#141418`, `#5b5b66`,
+     `#6b6b76`). Ahora son tokens: un literal de color en la capa semántica es
+     igual de invisible al buscar que uno dentro de un componente.
+
+       --tinta-1 .... 16,96:1 sobre papel · 16,25:1 sobre crema
+       --tinta-2 .....  7,34:1 sobre papel ·  7,04:1 sobre crema
+       --tinta-3 .....  4,71:1 sobre papel ·  4,52:1 sobre crema  ← el mínimo */
+  --tinta-1: #1b1a18;
+  --tinta-2: #5c5349;
+  --tinta-3: var(--n-500);
+
+  /* CACAO  ·  la franja oscura sobre claro (v4 §2)
+     --------------------------------------------------------------------------
+     Es el único sitio del sistema donde vive el ORO DE DISPLAY. El titular
+     dorado de Ferrero sobre crema da 1,99:1 y no llega ni al 3:1 de texto
+     grande; el MISMO oro sobre cacao da 7,83:1 — y además se lee metal en vez
+     de mostaza. La salida accesible resultó ser también la más impactante.
+
+       papel sobre cacao ......... 16,24:1
+       --gold-400 sobre cacao .....  7,83:1   ← el titular
+       --gold-300 sobre cacao ..... 10,74:1
+       --n-400 sobre cacao ........  5,78:1   ← texto de apoyo dentro de la franja
+       --gold-600 filo vs cacao ...  4,63:1
+
+     Una franja de cacao NO sigue al tema: es cacao en claro y en oscuro, igual
+     que el QR es negro sobre blanco en los dos. Sus tokens semánticos están en
+     `globals.css` con el prefijo `--cacao-*`. */
+  --cacao-900: #2b1a15; /* la franja */
+  --cacao-800: #3a251e; /* tarjeta elevada dentro de la franja (1,16:1) */
+  --cacao-700: #4c332a; /* hover dentro de la franja (1,44:1) */
 
   /* ==========================================================================
-     2. ORO  ·  color de MARCA, nunca color de acción
+     2. ORO  ·  CUATRO OROS, CADA UNO CON SU TRABAJO  (v4 §2)
      --------------------------------------------------------------------------
-     Contrastes verificados (spec §2.3):
-       gold-300 sobre n-1000 ....... 13.0:1  ✓ AAA
-       gold-500 sobre n-1000 ........ 7.94:1 ✓ AAA
-       n-1000  sobre gold-500 ....... 7.94:1 ✓ AAA  (texto negro sobre oro)
-       gold-700 sobre w-0 ........... 5.44:1 ✓ AA
-       gold-600 sobre w-0 ........... 3.66:1 ✓ 3:1  (focus/filos, NO texto)
-       gold-500 sobre w-0 ........... 2.49:1 ✗ PROHIBIDO en modo claro
+     El error de esta paleta es usarlos al revés, así que aquí está escrito qué
+     hace cada uno y dónde está PROHIBIDO:
+
+       --gold-400  DISPLAY, solo sobre CACAO ..... 7,83:1 sobre --cacao-900
+                   ⛔ sobre papel da 2,07:1 y sobre crema 1,99:1. Ni el 3:1 de
+                      texto grande. Un titular dorado sobre crema es el fallo
+                      que la referencia comete y que aquí no se copia.
+       --gold-500  ORO DE MARCA / acción en oscuro  7,30:1 sobre --n-1000
+       --gold-600  RELLENO DE ACCIÓN + FILO ...... 4,84:1 con texto --tinta-1
+                                                   3,51:1 de filo sobre papel
+       --gold-700  TEXTO E ICONOS dorados ........ 4,75:1 papel · 4,55:1 crema
+
+     El oro de Lindt (#917236) se descartó por 0,11: da 4,39:1 sobre papel y
+     hacen falta 4,5. `--gold-700` es el mismo color un punto más oscuro.
+
+     El presupuesto NO sube: ≤5% del área visible por pantalla. Un titular
+     dorado es MUCHA área — si el héroe lleva oro, la acción va en tinta.
+
+     Tabla completa de ratios verificados al aplicar:
+       gold-400 sobre cacao-900 ..... 7,83:1 ✓   gold-400 sobre papel . 2,07 ⛔
+       gold-400 sobre n-1000 ........ 8,90:1 ✓   gold-400 sobre crema . 1,99 ⛔
+       gold-300 sobre n-1000 ........ 12,20:1 ✓  gold-300 sobre cacao . 10,74 ✓
+       gold-500 sobre n-1000 ......... 7,30:1 ✓  n-1000 sobre gold-500  7,30 ✓
+       gold-500 filo vs n-900 ........ 6,62:1 ✓
+       tinta-1 sobre gold-600 ........ 4,84:1 ✓  gold-600 filo/papel .. 3,51 ✓
+       gold-600 filo vs crema ........ 3,36:1 ✓  filo vs crema honda .. 3,11 ✓
+       gold-700 sobre papel .......... 4,75:1 ✓  gold-700 sobre crema . 4,55 ✓
+       gold-700 sobre crema honda .... 4,21:1 ⛔ (usar --gold-800: 6,22:1)
+       gold-800 sobre papel .......... 7,02:1 ✓
      ======================================================================== */
 
-  --gold-200: #efe0bc; /* halos, fondo de badge en dark */
-  --gold-300: #e3d0a4; /* texto dorado sobre negro */
-  --gold-400: #d4bc85; /* anillo de focus en dark */
-  --gold-500: #bfa063; /* ORO DE MARCA */
-  --gold-600: #9e8244; /* focus y filos en light */
-  --gold-700: #7d6733; /* texto dorado sobre blanco */
-  --gold-800: #5c4b25; /* dorado enfático en light */
+  --gold-200: #f2e3be; /* halos, fondo de badge en dark */
+  --gold-300: #e6cd97; /* texto dorado sobre oscuro */
+  --gold-400: #d5ac5b; /* DISPLAY sobre cacao/oscuro · focus en dark */
+  --gold-500: #c69a43; /* ORO DE MARCA · relleno de acción en dark */
+  --gold-600: #a8812b; /* RELLENO DE ACCIÓN en claro · FILO / hairline */
+  --gold-700: #8a6d2f; /* TEXTO e iconos dorados sobre claro */
+  --gold-800: #6b5424; /* dorado enfático · texto dorado sobre crema honda */
 
-  /* Oro como material: barrido que simula luz sobre metal. */
+  /* Oro como material: barrido que simula luz sobre metal.
+
+     ES LA ÚNICA PIEZA QUE SIGUE QUERIENDO FRÍO, y por eso la v4 la deja donde
+     estaba: el WORDMARK y nada más. Un barrido necesita que la parada de
+     sombra sea más azulada que la de luz, o no se lee como reflejo. En el
+     resto del sistema el oro es PLANO, que es lo que le permite ser cálido.
+     Las paradas salen de la rampa. */
   --gold-sheen: linear-gradient(
     135deg,
-    #e3d0a4 0%,
-    /* luz */ #bfa063 38%,
-    /* cuerpo */ #9e8244 62%,
-    /* sombra */ #d4bc85 100% /* reflejo de retorno */
+    var(--gold-300) 0%,
+    /* luz */ var(--gold-500) 38%,
+    /* cuerpo */ var(--gold-600) 62%,
+    /* sombra */ var(--gold-400) 100% /* reflejo de retorno */
   );
 
   /* Filo de luz de 1px, como el chaflán pulido de un iPhone. */
   --gold-hairline: linear-gradient(
     90deg,
     transparent,
-    rgba(227, 208, 164, 0.55) 20%,
-    rgba(227, 208, 164, 0.55) 80%,
+    color-mix(in srgb, var(--gold-300) 55%, transparent) 20%,
+    color-mix(in srgb, var(--gold-300) 55%, transparent) 80%,
     transparent
   );
 
@@ -122,17 +207,21 @@
      luminancia casi idéntica: 0.371 vs 0.390 — indistinguibles en grises).
      ======================================================================== */
 
-  /* Light — verificados sobre blanco */
-  --success-light: #137a3b; /* 5.42:1 */
-  --warning-light: #a85508; /* 5.29:1 — naranja quemado, más rojo que el oro */
-  --danger-light: #c1121f; /* 6.22:1 */
-  --info-light: #1d5fd1;
+  /* Light — RE-VERIFICADOS sobre PAPEL y CREMA con la paleta v4.
+     El papel cálido es un punto más oscuro que el blanco, así que todos
+     bajaron ~0,1–0,2 y ninguno se acercó al límite. No se cambia un valor. */
+  --success-light: #137a3b; /* 5,29:1 papel · 5,07:1 crema */
+  --warning-light: #a85508; /* 5,16:1 papel · 4,95:1 crema — naranja quemado */
+  --danger-light: #c1121f; /* 6,07:1 papel · 5,82:1 crema */
+  --info-light: #1d5fd1; /* 5,67:1 papel · 5,44:1 crema */
 
-  /* Dark — sobre --n-1000 */
-  --success-dark: #45d67c;
-  --warning-dark: #f0912e; /* 8.29:1 */
-  --danger-dark: #ff5a52;
-  --info-dark: #5b9dff;
+  /* Dark — RE-VERIFICADOS sobre el --n-1000 cálido (#14100e). Subieron todos:
+     el fondo oscuro cálido es un punto MÁS claro que el negro azulado de v3,
+     pero la diferencia de luminancia con los semánticos es mayor. */
+  --success-dark: #45d67c; /* 10,05:1 fondo · 9,12:1 tarjeta */
+  --warning-dark: #f0912e; /* 7,92:1 fondo */
+  --danger-dark: #ff5a52; /* 6,16:1 fondo · 5,59:1 tarjeta */
+  --info-dark: #5b9dff; /* 6,95:1 fondo */
 
   /* ==========================================================================
      4. ESPACIADO  ·  rejilla de 4pt
@@ -158,13 +247,21 @@
      5. RADIOS
      --------------------------------------------------------------------------
      Regla de anidamiento: radio_interno = radio_externo − padding.
-     ======================================================================== */
 
-  --radius-xs: 6px; /* chips, badges */
-  --radius-sm: 10px; /* inputs, botones */
-  --radius-md: 14px; /* tarjetas */
-  --radius-lg: 20px; /* modales, hojas */
-  --radius-xl: 28px; /* superficies héroe */
+     v4 §4: los radios de la v3 eran PEQUEÑOS. Lo redondo se lee amable, y
+     encaja con los logotipos circulares que el sistema ya tiene. Sube un
+     escalón cada uno, sin llegar a la caricatura de WildApricot (16/24/30/39):
+     un chip a 16px deja de leerse como chip.
+
+     La regla de anidamiento sigue mandando, y ahora muerde más: una tarjeta a
+     18px con 16px de relleno pide 2px dentro, no 14. Si algo se ve con la
+     esquina «pellizcada», es eso.                                           */
+
+  --radius-xs: 8px; /* chips, badges */
+  --radius-sm: 12px; /* inputs, botones */
+  --radius-md: 18px; /* tarjetas */
+  --radius-lg: 24px; /* modales, hojas */
+  --radius-xl: 32px; /* superficies héroe, franjas de cacao */
   --radius-full: 999px; /* píldoras, avatares */
 
   /* ==========================================================================
@@ -179,8 +276,12 @@
        1ª  contacto corto y oscuro .... ancla el objeto al fondo
        2ª  halo amplio y muy suave .... le da volumen
 
-     Sigue en rgb 20/20/28 —el susurro frío de los neutrales (matiz ~240°)—
-     porque con negro puro el conjunto envejece.
+     v4 §1: PASA A rgb 28/22/18 —CÁLIDO—. La sombra hereda la temperatura de
+     la paleta, no la contraria: una sombra azulada bajo una tarjeta de papel
+     cálido se lee como un cerco gris pegado, y es la mitad de por qué «las
+     sombras casi no se ven» volvía cada vez que se subían. Con negro puro el
+     conjunto envejece igual que antes, así que el tinte se conserva; lo único
+     que cambia es hacia dónde.
 
      REGLA DE GROSOR (§2.2): la superficie grande se lee más gruesa.
        chip / píldora / fila de lista .... SIN SOMBRA (ver el aviso de abajo)
@@ -222,7 +323,7 @@
           GRIS, es que se subió opacidad donde tocaba subir radio.
 
        2. SE CONSERVAN LAS DOS CAPAS Y EL TINTE. Contacto corto + halo amplio,
-          rgb 20/20/28 en las dos. Nada de eso es negociable: el contacto es
+          rgb 28/22/18 (cálido, v4) en las dos. Nada de eso es negociable: el contacto es
           lo que ancla el objeto al suelo, y sin él el halo solo hace que
           flote sin tocar nada.
 
@@ -244,16 +345,16 @@
      Sube con el resto de la escala porque tiene que seguir siendo VISIBLE que
      queda algo: si al pulsar la sombra desaparece del todo, el elemento no se
      hunde, se apaga. Es el contacto de --shadow-1 sin su halo, literalmente. */
-  --shadow-0: 0 1px 2px rgba(20, 20, 28, 0.1);
+  --shadow-0: 0 1px 2px rgba(28, 22, 18, 0.1);
 
   /* chip elevado, interruptor, tarjeta en reposo */
-  --shadow-1: 0 1px 2px rgba(20, 20, 28, 0.1), 0 4px 12px rgba(20, 20, 28, 0.08);
+  --shadow-1: 0 1px 2px rgba(28, 22, 18, 0.1), 0 4px 12px rgba(28, 22, 18, 0.08);
   /* tarjeta principal, tarjeta apuntada, tabla */
-  --shadow-2: 0 2px 5px rgba(20, 20, 28, 0.12), 0 10px 28px rgba(20, 20, 28, 0.1);
+  --shadow-2: 0 2px 5px rgba(28, 22, 18, 0.12), 0 10px 28px rgba(28, 22, 18, 0.1);
   /* menú, toast, popover */
-  --shadow-3: 0 4px 10px rgba(20, 20, 28, 0.14), 0 20px 52px rgba(20, 20, 28, 0.14);
+  --shadow-3: 0 4px 10px rgba(28, 22, 18, 0.14), 0 20px 52px rgba(28, 22, 18, 0.14);
   /* modal, hoja, paleta — cae sobre un scrim, así que aguanta más densidad */
-  --shadow-4: 0 8px 20px rgba(20, 20, 28, 0.18), 0 40px 88px rgba(20, 20, 28, 0.2);
+  --shadow-4: 0 8px 20px rgba(28, 22, 18, 0.18), 0 40px 88px rgba(28, 22, 18, 0.2);
 
   /* Un HUNDIDO no es un escalón negativo de la escala: es la misma luz entrando
      al revés. Va `inset`, y por eso no puede salir de --shadow-1 invertido.
@@ -262,7 +363,7 @@
      blanco es el caso donde «gris sucio» ocurre antes, porque el desenfoque no
      tiene a dónde escapar — queda encerrado dentro de la caja. Una sola capa,
      corta, al 9 %. */
-  --shadow-hundida: inset 0 1px 3px rgba(20, 20, 28, 0.09);
+  --shadow-hundida: inset 0 1px 3px rgba(28, 22, 18, 0.09);
 
   /*
      Filo de luz: cómo se comunica el material en tema OSCURO, donde la sombra
@@ -274,8 +375,8 @@
      límite. El anillo es el sustituto —material, no tinta— y va `inset`, así
      que no mueve ni un píxel la caja.
   */
-  --edge-light: inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --edge-light: inset 0 0 0 1px rgba(255, 249, 240, 0.09),
+    inset 0 1px 0 rgba(255, 249, 240, 0.07);
 
   /* ==========================================================================
      7. TIPOGRAFÍA
@@ -283,9 +384,66 @@
      Cada tamaño lleva SU PROPIO tracking y leading. Un letter-spacing único
      para toda la app está mal en algún sitio, siempre: los títulos grandes
      necesitan tracking negativo, el texto pequeño ligeramente positivo.
+
+     ── v4 §3 · DOS FAMILIAS Y UN PELDAÑO NUEVO ──────────────────────────────
+
+     Un serif de display hace más por el «se ve caro» que cualquier animación,
+     y es el cambio de mayor rendimiento por esfuerzo de toda la dirección.
+     Pero solo funciona si está ACOTADO:
+
+       --font-display   SERIF. Solo `h1` y CIFRAS GRANDES. El peldaño `hero`.
+       --font-sans      Inter. TODO lo demás: interfaz, cuerpo, botones,
+                        etiquetas, tablas. Un serif a 13px en un botón se lee
+                        amateur, y en la Herramienta de Comercios sería un
+                        estorbo.
+
+     ⛔ NUNCA en Administración ni en la Herramienta de Comercios. Son pantallas
+     de trabajo: el serif va en el recorrido del socio y en las puertas.
+
+     POR QUÉ HAY UN PELDAÑO `hero` NUEVO EN VEZ DE AGRANDAR `display`:
+     `--t-display-*` lo consumen hoy los encabezados de página del PANEL. Si el
+     serif y los 72px se hubieran colgado de ahí, Administración se habría
+     llevado los dos de golpe, que es exactamente lo prohibido. `hero` es
+     opt-in: `.t-hero-1` / `.t-hero-2` en `globals.css`.
+
+     EL RANGO SUBE, que era el encargo («falta impacto; el salto entre el
+     titular y el cuerpo es corto»). Antes el extremo superior era 40px contra
+     15px de cuerpo: 2,7x. Ahora `hero-1` llega a 72px: 4,8x. Un sistema
+     tipográfico sin rango no tiene jerarquía, tiene tamaños.
      ======================================================================== */
 
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /*
+    FRAUNCES  ·  el serif de display (v4 §3).
+
+    Por qué esta y no las otras dos del catálogo libre que se barajaban:
+
+      · Es VARIABLE en peso: un solo archivo de 35,8 KB cubre todo el rango, al
+        mismo precio que dos instancias estáticas y sin riesgo de un bold
+        sintético — que en una serif de contraste alto se ve.
+      · Sus formas son de estilo antiguo y ligeramente CÁLIDAS, que es la misma
+        decisión que toma la paleta. Sobre crema se lee como tinta sobre papel.
+      · CORMORANT GARAMOND por debajo de 40px se vuelve esmirriada: su
+        contraste alto adelgaza las astas hasta que dejan de cubrir el píxel, y
+        sobre crema —que es papel, no blanco— eso se paga en legibilidad.
+      · PLAYFAIR DISPLAY es robusta y habría servido, pero cuesta 37,5 KB (más)
+        y es la serif de display más vista de Google Fonts: arrastra lectura de
+        «invitación de boda». ORUM tiene que parecer ORUM.
+
+    ⚠️ SE CARGA SOLO EL EJE `wght`. La familia trae además `opsz`, `SOFT` y
+    `WONK`, y el óptico habría hecho la mitad del ajuste de tracking por su
+    cuenta — pero cuesta 30 KB MEDIDOS, casi el doble del archivo, para servir
+    a los titulares de unas pocas pantallas. El ajuste se hace a mano abajo, en
+    los tres peldaños `hero`: es trabajo que se paga una vez y no en cada carga
+    de un teléfono de gama media. El razonamiento largo, con las cinco medidas,
+    está en `src/app/layout.tsx`.
+
+    El fallback es Georgia y no un `serif` genérico: es la serif con métricas
+    más parecidas presente en Windows, macOS, Android e iOS, así que el salto
+    al intercambiar (`display: swap`) desplaza poco.
+  */
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
   /*
     Solo para datos que se dictan, se teclean o se comparan carácter a
@@ -297,28 +455,68 @@
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
 
-  /* display-1 — héroes, cifras del dashboard */
-  --t-display-1-size: clamp(2rem, 5vw, 2.5rem);
-  --t-display-1-leading: 1.05;
-  --t-display-1-tracking: -0.022em;
+  /* ------------------------------------------------------------------------
+     EL PELDAÑO `hero`  ·  SERIF, y solo aquí  (v4 §3)
+
+     Tres escalones, y los tres con TRACKING PROPIO, cada vez más negativo al
+     crecer: a 72px el espaciado por defecto de una serif de display abre
+     huecos entre letras que a 28px son exactamente los que hacen falta. Un
+     `letter-spacing` único está mal en algún tamaño siempre — aquí más, porque
+     el rango es de 28 a 72px.
+
+     ESTOS TRES VALORES SON EL SUSTITUTO DEL EJE ÓPTICO que no se cargó (ver la
+     nota de `--font-display`). No son un refinamiento opcional: sin ellos la
+     familia se pinta con el espaciado calibrado para su tamaño por defecto y
+     el titular grande se abre.
+
+     `hero-cifra` existe aparte de `hero-2` por una razón que no es estética:
+     una cifra de negocio necesita `font-variant-numeric: tabular-nums` (lo
+     pone `.t-hero-cifra`) y un leading de 1, mientras que un titular de dos
+     líneas necesita 1,08 o las líneas se tocan.
+     ---------------------------------------------------------------------- */
+
+  /* hero-1 — el titular de una pantalla de recibimiento. 44 → 72px */
+  --t-hero-1-size: clamp(2.75rem, 7vw, 4.5rem);
+  --t-hero-1-leading: 1;
+  --t-hero-1-tracking: -0.032em;
+  --t-hero-1-weight: 600;
+
+  /* hero-2 — titular de sección con peso. 32 → 48px */
+  --t-hero-2-size: clamp(2rem, 5vw, 3rem);
+  --t-hero-2-leading: 1.08;
+  --t-hero-2-tracking: -0.024em;
+  --t-hero-2-weight: 600;
+
+  /* hero-cifra — el número grande de un carnet o un panel. 36 → 52px */
+  --t-hero-cifra-size: clamp(2.25rem, 5.5vw, 3.25rem);
+  --t-hero-cifra-leading: 1;
+  --t-hero-cifra-tracking: -0.018em;
+  --t-hero-cifra-weight: 600;
+
+  /* display-1 — héroes en SANS, cifras del dashboard. 36 → 48px
+     Sube un escalón (era 32→40) para que el rango crezca también en las
+     pantallas de trabajo, donde el serif no entra. */
+  --t-display-1-size: clamp(2.25rem, 5vw, 3rem);
+  --t-display-1-leading: 1.04;
+  --t-display-1-tracking: -0.026em;
   --t-display-1-weight: 600;
 
-  /* display-2 — título de página */
-  --t-display-2-size: clamp(1.5rem, 3.5vw, 2rem);
+  /* display-2 — título de página. 28 → 36px */
+  --t-display-2-size: clamp(1.75rem, 3.5vw, 2.25rem);
   --t-display-2-leading: 1.1;
-  --t-display-2-tracking: -0.02em;
+  --t-display-2-tracking: -0.022em;
   --t-display-2-weight: 600;
 
-  /* title-1 — encabezado de sección */
-  --t-title-1-size: 1.5rem;
+  /* title-1 — encabezado de sección. 26px */
+  --t-title-1-size: 1.625rem;
   --t-title-1-leading: 1.2;
-  --t-title-1-tracking: -0.015em;
+  --t-title-1-tracking: -0.016em;
   --t-title-1-weight: 600;
 
-  /* title-2 — título de tarjeta */
-  --t-title-2-size: 1.25rem;
+  /* title-2 — título de tarjeta. 21px */
+  --t-title-2-size: 1.3125rem;
   --t-title-2-leading: 1.25;
-  --t-title-2-tracking: -0.01em;
+  --t-title-2-tracking: -0.011em;
   --t-title-2-weight: 600;
 
   /* title-3 — subtítulo, encabezado de lista */
@@ -366,17 +564,22 @@
   /* caption — metadatos */
   --t-caption-size: 0.75rem;
   --t-caption-leading: 1.35;
-  --t-caption-tracking: 0.01em;
+  --t-caption-tracking: 0.012em;
   --t-caption-weight: 500;
 
-  /* overline — encabezados de sección en mayúsculas */
+  /* overline — encabezados de sección en mayúsculas.
+     v4 §3: el tracking sube de 0,06 a 0,09em. Ferrero abre el suyo en las
+     versalitas pequeñas y tiene razón: las mayúsculas a 11px comparten
+     demasiada masa vertical y sin aire se leen como una mancha. Es el mismo
+     principio que el tracking negativo del `hero` aplicado al otro extremo de
+     la escala — por eso ninguno de los dos puede ser un valor único. */
   --t-overline-size: 0.6875rem;
   --t-overline-leading: 1.2;
-  --t-overline-tracking: 0.06em;
+  --t-overline-tracking: 0.09em;
   --t-overline-weight: 600;
 
   /* ==========================================================================
-     8. MOVIMIENTO  ·  dirección de arte v3, §3
+     8. MOVIMIENTO  ·  dirección de arte v4, §5  (marco de Emil Kowalski)
      --------------------------------------------------------------------------
      Estas curvas son para lo NO gestual (hover, color, aparición simple).
      Todo lo que el usuario pueda tocar usa RESORTES desde
@@ -388,15 +591,76 @@
      equivalente exacto es `:active`, que el navegador enciende al APRETAR y no
      al soltar. En cuanto aparece latencia, la sensación de manipulación directa
      se cae por un precipicio.
+
+     ── LO PRIMERO, PORQUE DECIDE SI ALGO ANIMA: LA FRECUENCIA ───────────────
+
+       Cientos de veces al día ..... NO ANIMAR NUNCA  (abrir el carnet)
+       Decenas ..................... al mínimo        (hover, chip de filtro)
+       Ocasional ................... estándar         (overlay, toast, hoja)
+       Rara / primera vez .......... se puede deleitar (alta de socio)
+
+     Una animación bonita en algo que se hace 200 veces al día es 200 esperas.
+     Antes de elegir duración, cuenta la frecuencia.
+
+     ── LAS CURVAS SUBEN DE FUERZA (v4 §5) ───────────────────────────────────
+
+     Las de CSS son flojas y las anteriores se quedaban cerca. Las tres nuevas
+     salen medidas de las referencias:
+
+       --ease-out     entradas, y el 90 % de los casos
+       --ease-in-out  algo que YA está en pantalla y se mueve de A a B
+       --ease-hero    recorridos largos y deliberados (medida en Cartier)
+
+     ⛔ `--ease-in` SE ELIMINA, no se deja «por si acaso». Una curva que empieza
+     lenta arranca justo en el instante que el usuario más mira, y hace que
+     300 ms se sientan como 500. No tenía ni un consumidor; si vuelve a
+     aparecer en el archivo es que alguien la reintrodujo sin leer esto.
+
+     ── LAS DURACIONES BAJAN ─────────────────────────────────────────────────
+
+       Pulsación ....... 100–160 ms   (Podia mide 120)
+       Desplegable ..... 150–250 ms   (Lindt, 200)
+       Overlay / hoja .. 200–500 ms   (Cartier, 450–550)
+
+     Y LA SALIDA ES MÁS RÁPIDA QUE LA ENTRADA, siempre: lento donde el usuario
+     decide, rápido donde el sistema responde. Para eso está `--dur-salida`, y
+     no es un adorno — una salida a la misma velocidad que la entrada se
+     percibe como que la interfaz no te deja irte.
      ======================================================================== */
 
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* deceleración fuerte — el sello Apple */
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* deceleración fuerte */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-hero: cubic-bezier(0.645, 0.045, 0.355, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* overshoot leve, solo tras gesto */
 
   --dur-instant: 100ms; /* feedback de presión */
-  --dur-fast: 180ms; /* hover, color, opacidad */
+  --dur-fast: 140ms; /* hover, color, opacidad — banda de pulsación */
+
+  /*
+    LA SALIDA. Un solo token, y se usa en TODO lo que se cierra: menú, modal,
+    hoja, toast, tooltip. ~0,65x de `--dur-base`, que es la proporción que hace
+    que cerrar se sienta como soltar y no como despedirse.
+  */
+  --dur-salida: 150ms;
+
+  /*
+    ESCALONADO entre hermanos que entran en serie (lista, menú, rejilla).
+
+    30–80 ms y NO MÁS. Con 120 ms y ocho filas la última llega casi un segundo
+    después de la primera, y eso ya no se lee como ritmo: se lee como que la
+    página va lenta. El delay de cada hermano es `calc(var(--escalonado) * n)`.
+  */
+  --escalonado: 40ms;
+
+  /*
+    Bucles de lo que informa de que algo ocurre (spinner, barrido de esqueleto,
+    barra indeterminada). Van marcados `data-motion-esencial` y por eso
+    sobreviven a `prefers-reduced-motion`: un esqueleto congelado deja de decir
+    «esto está cargando» y pasa a decir «esto está roto».
+  */
+  --dur-giro: 720ms; /* una vuelta del spinner */
+  --dur-bucle: 1200ms; /* recorrido de la barra indeterminada */
+  --dur-barrido: 1400ms; /* barrido de luz del esqueleto */
 
   /*
     LA AGITACIÓN  ·  el único acento seco de un sistema por lo demás suave.
@@ -447,17 +711,25 @@
      cambia es que la vuelta del acuse de presión deja de usar esa amplitud.
      ---------------------------------------------------------------------- */
   --dur-press: 90ms; /* ida: instantánea */
-  --dur-rebote: 320ms; /* vuelta: elástica, dentro de la banda del resorte */
+  /* v4 §5: 320 → 200 ms. La banda de PULSACIÓN es 100–160 ms y Podia mide 120;
+     320 era el resto de una escala calibrada para resortes de overlay, no para
+     el acuse de un botón. 200 ms deja sitio al sobreimpulso —que ocurre en el
+     último tercio— sin que la vuelta se mire. Es el gesto más frecuente de la
+     aplicación: la frecuencia manda, y aquí manda hacia abajo. */
+  --dur-rebote: 200ms; /* vuelta: elástica y corta */
   --ease-rebote: cubic-bezier(0.22, 1.2, 0.36, 1); /* sobreimpulso ~+4 % */
 
   /* Cuanto más pequeño el control, más porcentaje necesita para notarse:
      un 4% en un botón grande se ve; en un icono de 30px, no. */
   --escala-press: 0.97;
   --escala-press-sm: 0.92;
-  --dur-base: 260ms; /* entradas de UI */
-  --dur-slow: 400ms; /* hojas, modales */
-  --dur-page: 500ms; /* transición de ruta */
-  --dur-theme: 220ms; /* conmutación de tema */
+  /* v4 §5. Los cuatro bajan: la escala de la v3 estaba una banda por encima de
+     lo que miden las referencias, y en una interfaz que se usa a diario eso no
+     se lee como calma, se lee como espera. */
+  --dur-base: 220ms; /* entradas de UI — banda de desplegable (150–250) */
+  --dur-slow: 320ms; /* hojas, modales — banda de overlay (200–500) */
+  --dur-page: 420ms; /* transición de ruta */
+  --dur-theme: 180ms; /* conmutación de tema */
 
   /* ==========================================================================
      9. CAPAS Y MATERIALES
@@ -508,26 +780,33 @@
      Diferencia con QrCode: allí son literales por excepción sancionada; aquí
      son tokens, y se consumen con var(--…) como todo lo demás.
 
-     Contrastes (método de T5, WCAG 2.1):
-       filo --n-400 vs tarjeta clara #ffffff ........ 3,33:1  ok 1.4.11
-       filo --n-400 vs fondo claro   #fbfbfc ........ 3,22:1  ok 1.4.11
-       filo --n-400 vs tarjeta oscura #16161a ....... 5,42:1  ok 1.4.11
-       filo --n-400 vs fondo oscuro  #0a0a0c ........ 5,95:1  ok 1.4.11
-       inicial --n-500 sobre placa blanca ........... 5,26:1  ok (texto grande)
+     ⚠️ RECALCULADO EN LA v4, y aquí la paleta cálida SÍ rompió algo. El filo
+     era `--n-400` y con la rampa fría daba 3,33:1 contra el blanco; el --n-400
+     cálido (#a3968a) es más claro y cae a 2,81:1 contra el papel, que REPRUEBA
+     1.4.11. Es exactamente el fallo silencioso que la v4 advierte: al cambiar
+     la temperatura cambia la luminancia, y un valor firmado deja de valer.
+
+     Se añade `--n-450` (#8e8177), el escalón intermedio que vuelve a cumplir
+     contra las CUATRO superficies donde vive la placa, en los DOS temas:
+       filo --n-450 vs tarjeta clara #fdfcfa ........ 3,69:1  ok 1.4.11
+       filo --n-450 vs banda crema   #faf7f0 ........ 3,53:1  ok 1.4.11
+       filo --n-450 vs tarjeta oscura #211a16 ....... 4,54:1  ok 1.4.11
+       filo --n-450 vs fondo oscuro  #14100e ........ 5,01:1  ok 1.4.11
+       inicial --n-500 sobre placa de papel ......... 4,71:1  ok AA normal
      En tema claro la placa la dibuja el filo, y SOLO el filo: su cuerpo da
      1,00:1 contra la tarjeta.
      ======================================================================== */
 
-  /* Blanco puro, no --w-100: un logotipo en color se calibró contra blanco, y
-     medio escalón de gris no compra separación (1,10:1) pero sí lo ensucia. */
+  /* El papel, no la crema: un logotipo en color se calibró contra blanco, y
+     medio escalón de tinte no compra separación (1,04:1) pero sí lo ensucia. */
   --placa-logo-bg: var(--w-0);
 
-  /* El único valor de la rampa neutra con ≥3:1 contra las cuatro superficies
-     donde vive la placa, en los dos temas. --w-400 da 1,73:1 en claro. */
-  --placa-logo-borde: var(--n-400);
+  /* Ver el aviso de arriba: en la v4 este valor CAMBIÓ de --n-400 a --n-450
+     porque el --n-400 cálido reprueba 1.4.11 contra el papel (2,81:1). */
+  --placa-logo-borde: var(--n-450);
 
   /* La inicial vive sobre un fondo constante, así que su color también lo es.
-     Con --text-3 el mismo píxel daría 5,26:1 en claro y 3,33:1 en oscuro. */
+     Con --text-3 el mismo píxel daría 4,71:1 en claro y 2,81:1 en oscuro. */
   --placa-logo-inicial: var(--n-500);
 
   /*

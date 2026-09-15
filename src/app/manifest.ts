@@ -32,10 +32,18 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     orientation: 'portrait',
 
-    // Deben coincidir con el tema oscuro: es lo que se ve en la pantalla de
-    // arranque, antes de que el script de tema resuelva la preferencia real.
-    background_color: '#0A0A0C',
-    theme_color: '#0A0A0C',
+    /*
+      Deben coincidir con el tema oscuro: es lo que se ve en la pantalla de
+      arranque, antes de que el script de tema resuelva la preferencia real.
+
+      Literales a la fuerza —un `manifest.webmanifest` no lee `var(--…)`— así
+      que son la ÚNICA copia a mano de la paleta y hay que moverlos cuando ella
+      se mueve. Aquí valen `--n-1000` de la v4: eran `#0A0A0C`, el negro frío de
+      la paleta anterior, y la aplicación instalada arrancaba con una franja de
+      un sistema de diseño que ya no existe.
+    */
+    background_color: '#14100E',
+    theme_color: '#14100E',
 
     lang: 'es-CO',
     dir: 'ltr',

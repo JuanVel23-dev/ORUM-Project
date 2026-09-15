@@ -5,9 +5,12 @@ import { animate } from 'motion'
 import { X } from 'lucide-react'
 import {
   SPRING_SHEET,
+  SPRING_UI,
+  TWEEN_REDUCIDO,
   amortiguarBorde,
   prefiereMovimientoReducido,
   proyectarMomento,
+  salidaDe,
 } from '@/lib/shared/motion'
 import styles from './sheet.module.css'
 
@@ -115,17 +118,18 @@ export function Sheet({
       }
 
       if (prefiereMovimientoReducido()) {
-        animate(dialogo, { opacity: 0 }, { duration: 0.15 }).finished.then(fin, fin)
+        animate(dialogo, { opacity: 0 }, TWEEN_REDUCIDO).finished.then(fin, fin)
         return
       }
 
-      if (veloRef.current) animate(veloRef.current, { opacity: 0 }, { duration: 0.25 })
+      if (veloRef.current) animate(veloRef.current, { opacity: 0 }, salidaDe(SPRING_UI))
       animate(
         panel,
         { transform: `translateY(${panel.offsetHeight}px)` },
         // La velocidad del dedo continúa en la animación: sin costura entre
-        // arrastrar y animar.
-        { type: 'spring', bounce: 0, duration: 0.32, velocity: velocidad },
+        // arrastrar y animar. Y la salida va más corta que la entrada (v4 §5,
+        // regla 3): `salidaDe(SPRING_SHEET)` recorta 0,32 s a ~0,21.
+        { ...salidaDe(SPRING_SHEET), velocity: velocidad },
       ).finished.then(fin, fin)
     },
     [],
@@ -145,7 +149,7 @@ export function Sheet({
 
       if (prefiereMovimientoReducido()) {
         colocar(destino)
-        animate(dialogo, { opacity: [0, 1] }, { duration: 0.15 })
+        animate(dialogo, { opacity: [0, 1] }, TWEEN_REDUCIDO)
       } else {
         // Entra desde abajo del todo hasta su detent.
         colocar(panel.offsetHeight)

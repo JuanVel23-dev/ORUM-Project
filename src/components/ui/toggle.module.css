@@ -81,8 +81,10 @@
   width: 20px;
   height: 20px;
   border-radius: var(--radius-full);
-  /* El pulgar es blanco en los DOS temas —es el material del control, no una
-     superficie del tema—, así que sale de `--w-0` y no de `--surface`. */
+  /* El pulgar es PAPEL en los DOS temas —es el material del control, no una
+     superficie del tema—, así que sale de `--w-0` y no de `--surface`. Con la
+     paleta cálida de la v4 deja de ser blanco puro y pasa a ser el mismo papel
+     del tema claro: un pulgar blanco frío sobre una pista cálida se ve azul. */
   background: var(--w-0);
   /*
     Sombra mínima: la escala nueva DESPLAZA, y `--shadow-2` son 3px de canto
@@ -191,7 +193,8 @@
   /* La marca se dibuja: no aparece de golpe. */
   stroke-dasharray: 22;
   stroke-dashoffset: 22;
-  transition: stroke-dashoffset var(--dur-base) var(--ease-out),
+  transition:
+    stroke-dashoffset var(--dur-base) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
@@ -205,11 +208,26 @@
   border-radius: var(--radius-full);
   background: var(--action-fg);
 
-  scale: 0;
-  transition: scale var(--dur-base) var(--ease-out),
+  /*
+    v4 §5, regla 1: NADA ENTRA DESDE `scale(0)`. En el mundo real nada aparece
+    de la nada, y un punto que crece desde cero se lee como un globo que se
+    infla, no como una marca que se pone. Entra desde 0,8 con la opacidad a 0:
+    la opacidad es la que lo hace invisible en reposo, la escala solo da el
+    último tramo del movimiento.
+
+    Y la lista de transiciones declaraba `scale` DOS VECES —`--dur-base` y
+    luego `--dur-rebote`—, así que la primera nunca se aplicaba: en una lista
+    separada por comas, la última declaración de la misma propiedad gana. Se
+    deja una sola, la elástica, que es la que se quería.
+  */
+  opacity: 0;
+  scale: 0.8;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
 .fila:has(.entrada:checked) .punto {
+  opacity: 1;
   scale: 1;
 }

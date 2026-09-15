@@ -5,8 +5,10 @@ import { animate } from 'motion'
 import { X } from 'lucide-react'
 import {
   SPRING_UI,
+  TWEEN_REDUCIDO,
   leerTransformEnPantalla,
   prefiereMovimientoReducido,
+  salidaDe,
   transicionSegunPreferencia,
 } from '@/lib/shared/motion'
 import { Button } from './button'
@@ -63,16 +65,26 @@ export function Modal({
     }
 
     if (prefiereMovimientoReducido()) {
-      animate(dialogo, { opacity: 0 }, { duration: 0.15 }).finished.then(fin, fin)
+      animate(dialogo, { opacity: 0 }, TWEEN_REDUCIDO).finished.then(fin, fin)
       return
     }
 
-    // Sale por el MISMO camino por el que entró (spec §5.4): encogiendo hacia
-    // su centro. Entrar de una forma y salir de otra desorienta.
+    /*
+      Sale por el MISMO camino por el que entró (spec §5.4): encogiendo hacia
+      su centro. Entrar de una forma y salir de otra desorienta.
+
+      v4 §5: aquí había una curva ESCRITA A MANO, `[0.7, 0, 0.84, 0]`, que es
+      un `ease-in` — la única curva que esta dirección prohíbe en interfaz,
+      porque empieza lenta justo en el instante en que el usuario más mira. Y
+      además era un literal, así que no se veía en ninguna búsqueda de tokens.
+      Ahora es el mismo resorte de la entrada recortado por `salidaDe()`: mismo
+      carácter, ~0,20 s en vez de 0,30, sin rebote. La salida es más rápida que
+      la entrada, que es la regla 3.
+    */
     animate(
       dialogo,
       { opacity: 0, transform: 'scale(0.96)' },
-      { duration: 0.18, ease: [0.7, 0, 0.84, 0] },
+      salidaDe(SPRING_UI),
     ).finished.then(fin, fin)
   }, [])
 
