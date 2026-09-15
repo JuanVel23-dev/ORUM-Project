@@ -8,15 +8,20 @@
  *
  * No puede ser un componente de React con efectos: los efectos corren después
  * del pintado, que es justo lo que hay que evitar.
+ *
+ * ⚠️ ESTE ARCHIVO NO PUEDE EXPORTAR NADA MÁS QUE EL COMPONENTE.
+ *
+ * Tenía dentro `THEME_STORAGE_KEY` y los tipos, y `theme-provider` —que lleva
+ * `'use client'`— los importaba de aquí. Un import arrastra el módulo entero,
+ * así que este `<script>` viajaba al navegador dentro del bundle de cliente: se
+ * enviaban bytes que no se usan, y React avisaba en consola de que había
+ * encontrado una etiqueta `script` al renderizar en el cliente.
+ *
+ * Lo compartido vive ahora en `theme-constantes.ts`, que no tiene JSX y no
+ * pertenece a ninguno de los dos mundos. Si vuelves a añadir una constante
+ * aquí, vuelve el aviso.
  */
-
-export const THEME_STORAGE_KEY = 'orum-theme'
-
-/** Los tres modos son estados reales. `system` no es "ausencia de elección". */
-export type ThemeMode = 'system' | 'light' | 'dark'
-
-/** Tema efectivo ya resuelto: lo que de verdad se pinta. */
-export type ResolvedTheme = 'light' | 'dark'
+import { THEME_STORAGE_KEY } from './theme-constantes'
 
 // Minificado a mano y sin dependencias: corre antes que cualquier bundle.
 const script = `(function(){try{

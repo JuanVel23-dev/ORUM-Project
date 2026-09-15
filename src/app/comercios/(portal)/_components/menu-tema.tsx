@@ -4,7 +4,7 @@ import { useId, type ReactNode } from 'react'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { MenuItem, MenuLabel } from '@/components/ui/menu'
 import { useTheme } from '@/components/theme/theme-provider'
-import type { ThemeMode } from '@/components/theme/theme-script'
+import type { ThemeMode } from '@/components/theme/theme-constantes'
 
 /*
   EL TEMA, DENTRO DEL MENÚ DE LA CUENTA.

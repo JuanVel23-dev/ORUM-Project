@@ -204,7 +204,7 @@
 */
 .item:focus-visible {
   background: var(--surface-hover);
-  box-shadow: inset 0 0 0 1px var(--brand-edge);
+  box-shadow: var(--filo-activo-inset);
 }
 
 /* En tactil el `:hover` NO se retira al levantar el dedo: lo que se toca se
@@ -227,7 +227,7 @@
 @media (hover: hover) {
   .item:hover:not(:disabled) {
     background: color-mix(in srgb, var(--brand) 12%, transparent);
-    box-shadow: inset 0 0 0 1px var(--brand-edge);
+    box-shadow: var(--filo-activo-inset);
   }
 
   /* El icono se desplaza un pelo en la dirección de la acción al apuntar. */

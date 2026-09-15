@@ -75,13 +75,19 @@ export type ComercioVitrina = {
   /**
    * EL HUECO DE LA PORTADA, todavía sin columna.
    *
-   * `comercios.portada_url` está prevista en
-   * `supabase/migrations/20260913120000_imagenes_y_avatares.sql`, pero esa
-   * migración NO está aplicada y la columna no existe en `database.types.ts`:
-   * consultarla rompería el tipado y la consulta entera. El campo se declara
-   * para que el día que exista la fotografía entre por datos y no por una
-   * reescritura de la tarjeta; hoy llega `null` en el 100 % de los casos y
-   * cuesta cero en ejecución.
+   * La fotografía del local, que NO es el logotipo.
+   *
+   * El comentario anterior decía que `comercios.portada_url` no existía y que
+   * consultarla rompería la consulta entera. Dejó de ser cierto: la migración
+   * `20260913120000_imagenes_y_avatares.sql` está aplicada, la columna está en
+   * `database.types.ts` y ya la leen la ficha de comercio y el gestor de
+   * imágenes del panel. Mientras el comentario siguió ahí, el escaparate
+   * público devolvía `null` en duro y la landing se pintaba sin una sola foto.
+   *
+   * Ahora sale del mismo `select` que todo lo demás: una consulta, una forma de
+   * datos. Antes hacía falta una lectura suplementaria en
+   * `app/(publico)/_datos/portadas-publicas.ts`, que existía solo porque este
+   * archivo estaba fuera del alcance de aquella tanda. Ese archivo se borró.
    */
   portadaUrl?: string | null
 }
@@ -106,7 +112,7 @@ export const obtenerVitrinaPublica = cache(async (): Promise<DatosVitrina> => {
   const [{ data: comercios }, { data: marcas }, { data: categorias }] = await Promise.all([
     supabase
       .from('comercios')
-      .select('id, nombre, descripcion, logo_url, categoria_id, marca_id')
+      .select('id, nombre, descripcion, logo_url, portada_url, categoria_id, marca_id')
       .eq('activo', true)
       .is('deleted_at', null)
       .order('nombre')
@@ -177,7 +183,9 @@ export const obtenerVitrinaPublica = cache(async (): Promise<DatosVitrina> => {
       c.marca_id ? (logoDeMarca.get(c.marca_id) ?? null) : null,
     ),
     beneficioDestacado: beneficioPorComercio.get(c.id) ?? null,
-    portadaUrl: null,
+    /* Una cadena vacía no es una portada: sería un `<img src="">`, que el
+       navegador resuelve pidiendo otra vez la propia página. */
+    portadaUrl: (c.portada_url ?? '').trim() || null,
   }))
 
   /*

@@ -29,10 +29,11 @@ import estilos from '../perfil.module.css'
   más repetidas del producto —se hace en cada caja—, así que aquí no se añade
   NI UNA animación propia: ni escalonado, ni entrada de la tarjeta, ni
   resorte. Lo único que se mueve es lo que ya trae `Overlay` (~0,30 s de
-  entrada y ~0,20 de salida, sin rebote). La copia ampliada lleva `.ampliado`,
-  que entre otras cosas le quita la entrada de 180 ms de la versión de página:
-  animar dos veces lo mismo es lo que hace que una pantalla rápida se sienta
-  lenta.
+  entrada y ~0,20 de salida, sin rebote). La copia ampliada cuelga
+  DIRECTAMENTE del overlay y no de `.carnetCaja`, así que tampoco hereda la
+  entrada de 180 ms de la versión de página: dos animaciones encadenadas en la
+  acción más repetida del producto es justo lo que hace que una pantalla
+  rápida se sienta lenta.
 
   Los dos carnets llegan ya renderizados desde el servidor (`page.tsx` crea
   los elementos y los pasa como props): este componente solo guarda el

@@ -157,6 +157,24 @@
   --filo-activo: 0 0 0 1px var(--brand-edge);
 
   /*
+    EL GEMELO INTERIOR, y hacía falta porque el de arriba es EXTERIOR.
+
+    `--filo-activo` dibuja un anillo por fuera de la caja. Eso vale para lo que
+    tiene aire alrededor —una tarjeta en una rejilla, un botón— pero no para lo
+    que ocupa casi todo el ancho de su contenedor: una fila de menú, una opción
+    de la paleta de comandos, un destino de la barra lateral. Ahí el anillo
+    exterior se come el hueco de la fila vecina y las dos se tocan.
+
+    Estaba escrito a mano en siete sitios, cada uno con su comentario
+    explicando lo mismo. Ese es el patrón que este proyecto ya pagó con el paso
+    del escalonado, que vivió suelto ocho veces hasta que se centralizó.
+
+    Mismo grosor y mismo token de color que el exterior: si alguien cambia
+    `--brand-edge`, cambian los dos a la vez. Que era justo lo que no pasaba.
+  */
+  --filo-activo-inset: inset 0 0 0 1px var(--brand-edge);
+
+  /*
     LA TINTA, v4 §1. Los tres eran LITERALES aquí (#141418, #5b5b66, #6b6b76);
     ahora salen de `tokens.css`, que es donde se puede buscar un color.
 

@@ -3,7 +3,7 @@
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { SegmentedControl, type SegmentedOption } from '@/components/ui/segmented'
 import { useTheme } from './theme-provider'
-import type { ThemeMode } from './theme-script'
+import type { ThemeMode } from './theme-constantes'
 
 const ICONO = { width: 15, height: 15 } as const
 

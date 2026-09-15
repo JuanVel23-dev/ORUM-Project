@@ -102,7 +102,7 @@
   .pausa:hover {
     color: var(--text);
     background: var(--surface-hover);
-    box-shadow: inset 0 0 0 1px var(--brand-edge);
+    box-shadow: var(--filo-activo-inset);
   }
 }
 
@@ -277,7 +277,7 @@
 
 @media (hover: hover) {
   a.tarjeta:hover {
-    box-shadow: inset 0 0 0 1px var(--brand-edge);
+    box-shadow: var(--filo-activo-inset);
   }
 }
 

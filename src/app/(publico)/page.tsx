@@ -10,7 +10,6 @@ import {
   obtenerWhatsappSoporte,
   type ComercioVitrina,
 } from '@/lib/publico/datos-publicos'
-import { obtenerPortadasPublicas } from './_datos/portadas-publicas'
 import { AliadosOverlayTrigger } from './_components/aliados-overlay-trigger'
 import { ComoFunciona } from './_components/como-funciona'
 import { CtaSocio } from './_components/cta-socio'
@@ -77,27 +76,21 @@ export default async function LandingPublica() {
     `cache()` ya evita que el layout y esta página consulten dos veces el número
     de soporte dentro de la misma petición.
   */
-  const [vitrina, soporte, perfil, abiertoEn, portadas] = await Promise.all([
+  const [vitrina, soporte, perfil, abiertoEn] = await Promise.all([
     obtenerVitrinaPublica(),
     obtenerWhatsappSoporte(),
     getPerfilActual(),
     obtenerInstanteServidor(),
-    obtenerPortadasPublicas(),
   ])
 
   /*
-    LA FOTO DEL LOCAL SE INYECTA AQUÍ, en un solo sitio.
-
-    `obtenerVitrinaPublica` devuelve `portadaUrl: null` en duro —su comentario
-    dice que la columna no existe, y eso dejó de ser cierto—, pero ese archivo
-    está fuera del alcance de esta tanda. Se compone aquí para que el héroe y la
-    vitrina reciban el modelo YA COMPLETO y ninguno de los dos tenga que saber
-    de dónde salió la fotografía. Ver `_datos/portadas-publicas.ts`.
+    La fotografía del local ya viene dentro del modelo: `obtenerVitrinaPublica`
+    la selecciona en su propia consulta. Antes se componía aquí, con una lectura
+    suplementaria, porque aquel archivo estaba fuera del alcance de la tanda que
+    añadió las portadas — y mientras tanto la landing se pintaba sin una sola
+    foto, porque la fachada devolvía `null` en duro.
   */
-  const comercios: ComercioVitrina[] = vitrina.comercios.map((comercio) => ({
-    ...comercio,
-    portadaUrl: portadas.get(comercio.id) ?? null,
-  }))
+  const comercios: ComercioVitrina[] = vitrina.comercios
 
   const hayVitrina = comercios.length > 0
 

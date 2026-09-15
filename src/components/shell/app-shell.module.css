@@ -57,10 +57,24 @@
   */
   border-right: 1px solid var(--border);
 
-  /* `@property` permite interpolar la variable, así que barra y columna se
-     animan en el mismo fotograma. */
-  transition: width var(--dur-base) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
+  /*
+    EL PLEGADO ES INSTANTÁNEO, y dejó de animarse a propósito.
+
+    Animaba `width` aquí y `padding-left` en `.columna`, que es la prohibición
+    dura de recalcular la maquetación en cada fotograma: 220 ms moviendo el
+    ancho útil de TODO el panel —tablas incluidas— con reflujo y repintado en
+    cada uno. En un equipo de gama media eso va a tirones, y una animación a
+    tirones se ve peor que ninguna.
+
+    Y no compraba suavidad ni siquiera cuando iba fina: las etiquetas de la
+    barra desaparecen con `display: none` desde su consulta de contenedor (ver
+    §«rail»), que es un salto discreto. O sea que el usuario ya veía un corte a
+    mitad del recorrido.
+
+    `scale` se conserva: es el acuse de presión, va en el compositor y no toca
+    la maquetación.
+  */
+  transition: scale var(--dur-rebote) var(--ease-rebote);
 }
 
 @media (min-width: 768px) {
@@ -408,8 +422,9 @@
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  transition: padding-left var(--dur-base) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
+  /* Sin transición de `padding-left`: ver la nota del plegado en `.sidebar`.
+     Esta era la cara cara de las dos — mueve el ancho útil de todo el panel. */
+  transition: scale var(--dur-rebote) var(--ease-rebote);
 }
 
 /* La columna consume la MISMA variable que la barra: no pueden desincronizarse. */
@@ -699,7 +714,7 @@
 .masItem[data-activo='true'] {
   background: var(--surface-hover);
   /* Mismo par de §2.3 que el indicador de la barra lateral, en la hoja "Más". */
-  box-shadow: inset 0 0 0 1px var(--brand-edge);
+  box-shadow: var(--filo-activo-inset);
 }
 
 .masItemIcono {
