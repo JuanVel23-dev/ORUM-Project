@@ -123,7 +123,43 @@
 .menu:popover-open .separador,
 .menu:popover-open .etiquetaGrupo {
   animation: entrarItem var(--dur-base) var(--ease-out) backwards;
-  animation-delay: calc(var(--indice, 0) * var(--escalonado) + var(--escalonado));
+  /* Arranque: el menú ya tiene forma cuando la primera opción entra. */
+  animation-delay: var(--escalonado);
+}
+
+/*
+  EL ESCALONADO SALE DE `nth-child`, NO DE UN TOKEN INYECTADO DESDE REACT.
+
+  Antes `DropdownMenu` clonaba cada hijo para pasarle `style={{'--indice': i}}`.
+  Eso rompía el menú entero: sus hijos los monta un Server Component y un
+  elemento que cruza la frontera RSC no se puede clonar — ver la nota larga en
+  `menu.tsx`. Con `nth-child` el escalonado funciona sin tocar a los hijos, que
+  es además como ya lo hacen `Stack` y `Grid` en `layout.module.css`.
+
+  El tope es lo importante, no el paso: a partir del octavo todos comparten
+  retardo. Sin tope, una lista larga hace esperar al último casi un segundo y
+  eso se percibe como lentitud, no como elegancia.
+*/
+.menu:popover-open > *:nth-child(2) {
+  animation-delay: calc(var(--escalonado) * 2);
+}
+.menu:popover-open > *:nth-child(3) {
+  animation-delay: calc(var(--escalonado) * 3);
+}
+.menu:popover-open > *:nth-child(4) {
+  animation-delay: calc(var(--escalonado) * 4);
+}
+.menu:popover-open > *:nth-child(5) {
+  animation-delay: calc(var(--escalonado) * 5);
+}
+.menu:popover-open > *:nth-child(6) {
+  animation-delay: calc(var(--escalonado) * 6);
+}
+.menu:popover-open > *:nth-child(7) {
+  animation-delay: calc(var(--escalonado) * 7);
+}
+.menu:popover-open > *:nth-child(n + 8) {
+  animation-delay: calc(var(--escalonado) * 8);
 }
 
 @keyframes entrarItem {

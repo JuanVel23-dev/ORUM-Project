@@ -2,17 +2,7 @@
 
 import Link from 'next/link'
 import { Check } from 'lucide-react'
-import {
-  Children,
-  cloneElement,
-  isValidElement,
-  useCallback,
-  useId,
-  useRef,
-  type CSSProperties,
-  type ReactElement,
-  type ReactNode,
-} from 'react'
+import { useCallback, useId, useRef, type ReactElement, type ReactNode } from 'react'
 import styles from './menu.module.css'
 
 /*
@@ -112,10 +102,41 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
     }
   }
 
+  /*
+    ⚠️ NADA DE `cloneElement` AQUÍ, y esto es un bug pagado, no una preferencia.
+
+    `trigger` y los hijos de este menú los crea casi siempre un SERVER
+    COMPONENT —el layout del portal, el del panel, el de comercios— y viajan
+    hasta aquí por la frontera RSC. Un elemento que ha cruzado esa frontera
+    llega serializado: su `type` es una referencia perezosa al módulo de
+    cliente, no la función. `cloneElement` sobre eso devuelve un elemento cuyo
+    tipo React no sabe resolver, y el resultado es
+
+      «Element type is invalid: expected a string … but got: undefined»
+
+    …con un rastro que Next oculta entero (`at ignore-listed frames`), en la
+    petición del servidor, y por tanto un 500 en CUALQUIER pantalla que monte
+    este menú. Tipaba, compilaba, pasaba lint y pasaba `next build`, porque el
+    fallo solo existe al renderizar con datos reales.
+
+    El atributo se pone sobre el nodo ya montado, con una ref de callback. La
+    ref hace dos trabajos —guardar el nodo para `colocar()` y estampar el
+    atributo— porque son el mismo momento y separarlos daría dos refs sobre el
+    mismo elemento.
+  */
+  const anclarDisparador = useCallback(
+    (nodo: HTMLSpanElement | null) => {
+      disparadorRef.current = nodo
+      const boton = nodo?.firstElementChild
+      if (boton instanceof HTMLElement) boton.setAttribute('popovertarget', id)
+    },
+    [id],
+  )
+
   return (
     <>
-      <span ref={disparadorRef} className={styles.disparador}>
-        {cloneElement(trigger, { popoverTarget: id })}
+      <span ref={anclarDisparador} className={styles.disparador}>
+        {trigger}
       </span>
 
       <div
@@ -127,14 +148,17 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
         onToggle={alAlternar}
         onKeyDown={alPulsarTecla}
       >
-        {/* El índice alimenta el retardo escalonado de la animación de entrada. */}
-        {Children.map(children, (hijo, i) =>
-          isValidElement(hijo)
-            ? cloneElement(hijo as ReactElement<{ style?: CSSProperties }>, {
-                style: { '--indice': i } as CSSProperties,
-              })
-            : hijo,
-        )}
+        {/*
+          Los hijos se pintan TAL CUAL. El retardo escalonado lo resuelve
+          `menu.module.css` con `nth-child`, por la misma razón que el
+          disparador no se clona: estos hijos también cruzan la frontera RSC
+          —`MenuItem`, `MenuSeparator`, `MenuTema` los monta el layout del
+          servidor— y clonarlos rompía el menú entero.
+
+          Además es lo que ya hace `layout.module.css` para `Stack` y `Grid`:
+          escalonar con `nth-child` funciona con cualquier hijo sin tocarlo.
+        */}
+        {children}
       </div>
     </>
   )
