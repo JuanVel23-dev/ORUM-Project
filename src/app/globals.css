@@ -550,10 +550,29 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/*
+  `clip`, NO `hidden`, y esto es lo que hacía que la cabecera no se quedara fija.
+
+  `overflow-x: hidden` en `html`/`body` convierte al elemento en CONTENEDOR DE
+  DESPLAZAMIENTO. A partir de ahí, cualquier `position: sticky` de dentro deja
+  de anclarse al viewport y pasa a anclarse a ese contenedor — que se desplaza
+  con la página—, así que la barra de opciones del portal se iba hacia arriba
+  al bajar. El fallo es mudo: la regla `sticky` sigue ahí, sigue siendo válida
+  y simplemente no hace nada.
+
+  `overflow-x: clip` recorta el desbordamiento igual, pero NO crea contenedor de
+  desplazamiento, así que el `sticky` vuelve a medirse contra la ventana. Es
+  exactamente la misma corrección que `portal.module.css` ya llevaba en
+  `.portal`, con la misma nota escrita al lado; faltaba aquí, que es donde de
+  verdad manda.
+
+  Y se retira el `max-width: 100vw`: `100vw` INCLUYE el ancho de la barra de
+  desplazamiento en escritorio, así que forzaba un desbordamiento de ~15px justo
+  en el elemento que tenía que evitarlo. El recorte lo hace `clip`.
+*/
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 img,

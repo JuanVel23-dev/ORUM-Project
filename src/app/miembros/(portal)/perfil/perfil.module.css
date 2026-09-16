@@ -204,6 +204,22 @@
     El relleno responde al ancho para que en un teléfono de 320px el QR no se
     quede sin sitio: a 6vw el suelo (`--space-5`) entra sobre los 333px.
   */
+  /*
+    EL CARNET MIDE COMO UN CARNET, y esto faltaba.
+
+    No tenía tope de ancho, así que se estiraba a toda la columna del portal
+    —que en escritorio son 1400px— y quedaba una credencial de metro y medio
+    con la foto perdida arriba y el QR tan abajo que había que desplazarse para
+    verlo. El propietario lo dijo exacto: «es muy grande en cuestión horizontal
+    porque no se ve el QR y todo el carnet con solo abrirlo».
+
+    420px es el ancho al que un documento de bolsillo se lee como tal: cabe
+    entero de un vistazo, la foto manda y el QR entra sin desplazar. En un
+    teléfono el `min()` lo deja fluir a todo el ancho disponible.
+  */
+  max-width: min(100%, 420px);
+  margin-inline: auto;
+
   --carnet-pad: clamp(var(--space-5), 6vw, var(--space-7));
   --foto-lado: clamp(104px, 30vw, 128px);
   --qr-max: 224px;
@@ -346,10 +362,25 @@
   para que un lector lo coja desde el otro lado del mostrador sin que el
   conjunto deje de caber en la hoja de un teléfono.
 */
+/*
+  AMPLIADO: crece lo justo para leerse a un brazo de distancia, NO para llenar
+  la pantalla.
+
+  Antes subía el QR a 320px y la foto a 152, y con el ancho del overlay a 520
+  el conjunto pasaba de los 800px de alto: en la hoja de un teléfono —que deja
+  unos 700 útiles— el QR quedaba por debajo del pliegue, que es justo el trozo
+  por el que se amplía el carnet.
+
+  Ahora el objeto entero cabe: el QR sube solo a 260 y la foto a 140. Sigue
+  siendo bastante más grande que en la página, que es lo que se pedía, sin
+  dejar nada fuera de vista.
+*/
 .carnet.ampliado {
-  --carnet-pad: clamp(var(--space-5), 5vw, var(--space-8));
-  --foto-lado: clamp(120px, 34vw, 152px);
-  --qr-max: 320px;
+  max-width: min(100%, 420px);
+
+  --carnet-pad: clamp(var(--space-5), 5vw, var(--space-7));
+  --foto-lado: clamp(120px, 30vw, 140px);
+  --qr-max: 260px;
 }
 
 /*

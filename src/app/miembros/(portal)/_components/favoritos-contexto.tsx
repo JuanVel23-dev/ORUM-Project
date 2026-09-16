@@ -1,15 +1,32 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
   useTransition,
   type ReactNode,
 } from 'react'
+
+/*
+  CUÁNTO SE ESPERA ANTES DE REFRESCAR EL SERVIDOR TRAS UN FAVORITO.
+
+  El corazón es el control que más invita a tocarlo varias veces seguidas
+  —marcar cuatro comercios de una tirada es el gesto normal— y el catálogo es la
+  pantalla más cara del producto: entre diccionarios, comercios, promociones,
+  sucursales y dos funciones de agregación son del orden de diez consultas.
+  Refrescar en CADA toque las rehace todas, cuatro veces.
+
+  Así que se refresca una sola vez, cuando el socio deja de tocar. 700 ms es
+  más que la cadencia de dos toques seguidos y menos de lo que tarda en mirar
+  hacia la estantería de favoritos para ver si su comercio apareció.
+*/
+const ESPERA_REFRESCO_MS = 700
 import { alternarFavorito } from '../actions'
 
 /*
@@ -58,6 +75,7 @@ export function FavoritosProvider({
   inicial: number[]
   children: ReactNode
 }) {
+  const router = useRouter()
   const [ids, setIds] = useState<ReadonlySet<number>>(() => new Set(inicial))
   const [pendientes, setPendientes] = useState<ReadonlySet<number>>(() => new Set<number>())
   const [fallos, setFallos] = useState<Readonly<Record<number, string>>>({})
@@ -73,6 +91,38 @@ export function FavoritosProvider({
     de las veces en desarrollo y el corazón se queda al revés.
   */
   const idsRef = useRef<Set<number>>(new Set(inicial))
+
+  /*
+    EL REFRESCO DIFERIDO, que es lo que hace que la estantería «Tus favoritos»
+    y la vista «Tus favoritos» se pongan al día SOLAS.
+
+    Hasta ahora el cambio optimista solo movía el corazón: la sección seguía
+    mostrando lo que el servidor había pintado al cargar, y el socio tenía que
+    recargar para verse el comercio en su estantería. Con esto, el servidor
+    vuelve a pintar las partes que dependen de favoritos sin que la pantalla
+    parpadee: `router.refresh()` conserva el estado del cliente —incluido el
+    corazón que acaba de tocarse— y solo sustituye el árbol de servidor.
+
+    El temporizador se guarda en una ref y se reinicia en cada toque, así que
+    una ráfaga de cuatro favoritos cuesta UN refresco, no cuatro.
+  */
+  const refrescoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const pedirRefresco = useCallback(() => {
+    if (refrescoRef.current) clearTimeout(refrescoRef.current)
+    refrescoRef.current = setTimeout(() => {
+      refrescoRef.current = null
+      router.refresh()
+    }, ESPERA_REFRESCO_MS)
+  }, [router])
+
+  /* Si el socio navega antes de que salte el temporizador, no se deja un
+     refresco huérfano apuntando a una pantalla que ya no está. */
+  useEffect(() => {
+    return () => {
+      if (refrescoRef.current) clearTimeout(refrescoRef.current)
+    }
+  }, [])
 
   const aplicar = useCallback((siguiente: Set<number>) => {
     idsRef.current = siguiente
@@ -122,6 +172,9 @@ export function FavoritosProvider({
           if (resultado.favorito) confirmado.add(comercioId)
           else confirmado.delete(comercioId)
           aplicar(confirmado)
+          /* Solo cuando el servidor confirmó: refrescar tras un fallo pintaría
+             de nuevo el estado viejo y taparía el aviso de error. */
+          pedirRefresco()
           return
         }
 
@@ -133,7 +186,7 @@ export function FavoritosProvider({
         setFallos((previos) => ({ ...previos, [comercioId]: resultado.mensaje }))
       })
     },
-    [aplicar],
+    [aplicar, pedirRefresco],
   )
 
   const valor = useMemo<ContextoFavoritos>(

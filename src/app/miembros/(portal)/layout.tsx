@@ -34,13 +34,42 @@ export default async function MiembrosLayout({
   const perfil = await requireRolMiembro()
 
   const supabase = await createClient()
-  const { data: config } = await supabase
-    .from('configuracion')
-    .select('valor')
-    .eq('clave', 'whatsapp_soporte')
-    .maybeSingle()
+
+  /*
+    LA FOTO DEL SOCIO EN EL CROMO, que faltaba.
+
+    El socio subía su foto y solo la veía en el carnet: aquí el avatar se
+    montaba sin `src`, así que la cabecera seguía enseñando sus iniciales para
+    siempre. Es el sitio donde más veces la va a ver, porque está en todas las
+    pantallas del portal.
+
+    Va en SU PROPIA consulta y no dentro de la de configuración, por la lección
+    que ya costó un 404 en la ficha de comercio: meter una columna nueva en la
+    consulta que decide si algo EXISTE convierte «falta una columna» en «esto no
+    existe». Aquí lo peor que puede pasar es quedarse sin foto, que es el estado
+    que el avatar ya sabe pintar.
+
+    Las dos van en paralelo: son independientes y encadenarlas sumaría sus
+    latencias en el cromo, que se renderiza en cada pantalla del portal.
+  */
+  const [{ data: config }, { data: ficha }] = await Promise.all([
+    supabase
+      .from('configuracion')
+      .select('valor')
+      .eq('clave', 'whatsapp_soporte')
+      .maybeSingle(),
+    supabase
+      .from('miembros')
+      .select('foto_url')
+      .eq('perfil_id', perfil.userId)
+      .is('deleted_at', null)
+      .maybeSingle(),
+  ])
 
   const soporte = config?.valor ?? null
+  /* Una cadena vacía no es una foto: sería un `<img src="">`, que el navegador
+     resuelve pidiendo otra vez la propia página. */
+  const fotoUrl = (ficha?.foto_url ?? '').trim() || null
   /* Supabase puede devolver una cuenta sin correo (acceso solo por teléfono);
      el avatar necesita algo de lo que sacar una inicial en ese caso. */
   const correo = perfil.email ?? 'Mi cuenta'
@@ -82,7 +111,7 @@ export default async function MiembrosLayout({
                 >
                   {/* `md` (36px) y no `sm` (28px): es la única puerta a la cuenta en móvil,
                       y a 28px se leía como un adorno en vez de como un control. */}
-                  <Avatar nombre={correo} size="md" decorativo />
+                  <Avatar nombre={correo} src={fotoUrl} size="md" decorativo />
                 </button>
               }
             >

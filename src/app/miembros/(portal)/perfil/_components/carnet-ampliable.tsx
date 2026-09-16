@@ -101,7 +101,9 @@ export function CarnetAmpliable({ children, ampliado, acciones }: Props) {
           dejan 472px de carnet: unos 60px más de objeto que en la página, y
           sitio de sobra para que el QR llegue a su tope de 320px.
         */
-        width="520px"
+        /* 460 y no 520: el carnet tope a 420 + el relleno del diálogo. Un overlay
+           más ancho que su contenido deja dos franjas muertas a los lados. */
+        width="460px"
       >
         {ampliado}
       </Overlay>
