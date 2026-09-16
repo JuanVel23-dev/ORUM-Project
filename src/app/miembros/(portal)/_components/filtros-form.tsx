@@ -1,4 +1,4 @@
-import { ChevronDown, Search, X } from 'lucide-react'
+import { ChevronDown, MapPin, Search, Store, X, type LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input, Select } from '@/components/ui/input'
 import styles from './filtros-form.module.css'
@@ -10,6 +10,8 @@ type FiltroSelect = {
   id: string
   name: string
   etiqueta: string
+  /** Glifo que acompaña a la etiqueta. Nunca sustituye al texto. */
+  Icono: LucideIcon
   /** Texto de la opción "sin filtrar". Cambia de género según el filtro. */
   todas: string
   valor: string
@@ -64,6 +66,12 @@ export function FiltrosForm({
       id: 'f-marca',
       name: 'marca_id',
       etiqueta: 'Marca',
+      /* El glifo va en la ETIQUETA y no dentro del `<select>`: un `<select>`
+         nativo no admite contenido enriquecido, y sustituirlo por un control a
+         medida para poder meterle un icono cambiaría un control que el sistema
+         operativo ya sabe pintar —con su rueda en iOS y su lista en Android—
+         por uno que hay que reimplementar entero, teclado incluido. */
+      Icono: Store,
       todas: 'Todas',
       valor: marcaId,
       opciones: marcas,
@@ -72,6 +80,7 @@ export function FiltrosForm({
       id: 'f-ciudad',
       name: 'ciudad_id',
       etiqueta: 'Ciudad',
+      Icono: MapPin,
       todas: 'Todas',
       valor: ciudadId,
       opciones: ciudades,
@@ -153,6 +162,7 @@ export function FiltrosForm({
             {selects.map((f) => (
               <div key={f.id}>
                 <label className={styles.etiqueta} htmlFor={f.id}>
+                  <f.Icono size={14} aria-hidden="true" className={styles.etiquetaIcono} />
                   {f.etiqueta}
                 </label>
                 <Select id={f.id} name={f.name} defaultValue={f.valor}>
