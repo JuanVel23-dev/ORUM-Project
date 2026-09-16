@@ -37,7 +37,10 @@
 }
 
 .franjaCrema {
-  background: var(--surface-alt);
+  /* Las dos capas en UNA declaración. Puestas en dos, la forma corta
+     `background` de después habría reseteado el `background-image` de antes a
+     `none` y el degradado no se habría pintado nunca — sin aviso de nadie. */
+  background: var(--fondo-franja-clara), var(--surface-alt);
 }
 
 /*
@@ -62,13 +65,16 @@
   para un tema no se escribe. Lo que se hace es no poner texto dorado aquí.
 */
 .franjaHonda {
-  background: var(--surface-alt-2);
+  background: var(--fondo-franja-clara), var(--surface-alt-2);
 
   --text-3: var(--text-2);
 }
 
 .franjaCacao {
-  background: var(--cacao-bg);
+  /* El degradado va DELANTE del color plano en la lista: la primera capa es la
+     de arriba. Un color plano detrás garantiza que, si el navegador no
+     resolviera el `color-mix`, la franja siga siendo negra y no transparente. */
+  background: var(--fondo-franja-oscura), var(--cacao-bg);
   color-scheme: dark;
 
   /*

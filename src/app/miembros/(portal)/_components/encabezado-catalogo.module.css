@@ -24,13 +24,148 @@
   El vacío de los lados no vuelve, porque lo que llena el escritorio ahora es
   la columna más ancha del portal y el campo de color de las franjas.
 */
+/*
+  TÍTULO A LA IZQUIERDA, EMBLEMA A LA DERECHA.
+
+  Sustituye al eje central de la tanda anterior, por petición explícita del
+  propietario: «se podría alinear el título a la izquierda y a la derecha poner
+  algo, imagen o animación, que sea agradable».
+
+  En un teléfono se apila y el emblema va DEBAJO del texto, no encima: lo
+  primero de la pantalla tiene que ser lo que se lee, no el adorno.
+*/
 .encabezado {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--space-2);
+  align-items: flex-start;
+  gap: var(--space-5);
   padding-block: var(--space-7) var(--space-6);
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+@container contenido (min-width: 720px) {
+  .encabezado {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+}
+
+/* ==========================================================================
+   EL EMBLEMA  ·  lo que ocupa el hueco de la derecha
+   --------------------------------------------------------------------------
+   Decoración declarada (`aria-hidden` en el marcado). No dice ningún dato, así
+   que no puede mentir ni quedarse obsoleta.
+   ========================================================================== */
+
+.emblema {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  width: 108px;
+  height: 108px;
+}
+
+/* El halo. Es el mismo token que usa el carnet y la tarjeta de acceso: no se
+   lee como color, se siente como luz cayendo sobre metal. */
+.emblema::before {
+  content: '';
+  position: absolute;
+  inset: -34%;
+  background: var(--gold-halo);
+  pointer-events: none;
+}
+
+.anillos {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+}
+
+/*
+  Tres anillos, tres velocidades y dos sentidos. Un solo anillo girando se lee
+  como un indicador de carga —y esta pantalla ya terminó de cargar—; tres a
+  ritmos distintos se leen como un mecanismo.
+
+  `stroke-dasharray` deja huecos: un círculo continuo girando no se ve girar.
+*/
+.anilloExterior,
+.anilloMedio,
+.anilloInterior {
+  transform-origin: 60px 60px;
+  stroke: var(--brand-edge);
+  stroke-linecap: round;
+}
+
+.anilloExterior {
+  stroke-width: 1;
+  stroke-dasharray: 46 30;
+  opacity: 0.75;
+  animation: girarEmblema 34s linear infinite;
+}
+
+.anilloMedio {
+  stroke-width: 1.5;
+  stroke-dasharray: 22 58;
+  opacity: 0.95;
+  /* Al revés que los otros dos: es lo que convierte tres círculos en un
+     mecanismo en vez de en tres círculos. */
+  animation: girarEmblema 22s linear infinite reverse;
+}
+
+.anilloInterior {
+  stroke-width: 1;
+  stroke-dasharray: 8 20;
+  opacity: 0.6;
+  animation: girarEmblema 16s linear infinite;
+}
+
+@keyframes girarEmblema {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/*
+  El monograma. No es un `<h1>` ni texto de contenido: es la marca dibujada con
+  la tipografía que ya está cargada, que sale gratis frente a servir un
+  logotipo.
+*/
+.monograma {
+  position: relative;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--brand);
+}
+
+/*
+  Movimiento reducido: los anillos se PARAN, no desaparecen.
+
+  El adorno sigue entero —halo, metal, monograma— y lo único que se retira es
+  el giro continuo, que es movimiento vestibular puro en el borde del campo
+  visual: el caso que de verdad marea. Aquí no hay equivalente no vestibular
+  que buscar, porque no había información que transmitir.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .anilloExterior,
+  .anilloMedio,
+  .anilloInterior {
+    animation: none;
+  }
 }
 
 /*
@@ -74,7 +209,7 @@
   /* Un lede a todo el ancho de un escritorio se lee como pie de página. Con el
      eje central, `margin-inline: auto` es lo que lo mantiene bajo el titular en
      vez de pegado a un lado. */
-  max-width: 52ch;
-  margin: 0 auto;
+  max-width: 46ch;
+  margin: 0;
   text-wrap: pretty;
 }

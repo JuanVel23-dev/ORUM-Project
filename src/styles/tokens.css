@@ -259,6 +259,41 @@
     transparent 68%
   );
 
+
+  /* ==========================================================================
+     FONDOS DE FRANJA  ·  «tenues y lujosos», v5
+     --------------------------------------------------------------------------
+     Encargo del propietario: «pon fondos tenues y lujosos que vayan con el
+     objetivo de la marca».
+
+     Son DEGRADADOS, no imágenes: pesan cero, no cuestan una petición, se
+     adaptan al tema porque salen de los mismos tokens, y no hay que decidir de
+     quién es la fotografía. Y son degradados MUY tenues a propósito — el modo
+     de fallo de un fondo decorativo es competir con el texto que lleva encima,
+     y aquí encima hay tarjetas, cifras y un titular.
+
+     El de la franja oscura es luz de foco entrando por arriba a la izquierda,
+     que es de donde viene la luz en todo el sistema de sombras. El de las
+     claras es un velo apenas perceptible que evita que una banda grande de un
+     solo gris se lea como plancha.
+     ======================================================================== */
+  --fondo-franja-oscura: radial-gradient(
+      120% 90% at 18% 0%,
+      color-mix(in srgb, var(--gold-500) 11%, transparent) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      90% 70% at 88% 100%,
+      color-mix(in srgb, var(--gold-500) 6%, transparent) 0%,
+      transparent 62%
+    );
+
+  --fondo-franja-clara: radial-gradient(
+    140% 100% at 50% 0%,
+    color-mix(in srgb, var(--gold-500) 5%, transparent) 0%,
+    transparent 70%
+  );
+
   /* ==========================================================================
      3. SEMÁNTICOS  ·  brecha de croma frente al oro
      --------------------------------------------------------------------------

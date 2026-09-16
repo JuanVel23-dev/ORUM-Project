@@ -88,7 +88,9 @@
 /* CREMA. 1,04:1 contra el papel en claro; en oscuro la banda alterna es más
    clara que el fondo, con el mismo 1,04:1. El token ya resuelve los dos. */
 .tonoCrema {
-  background: var(--surface-alt);
+  /* Las dos capas en UNA declaración: la forma corta `background` resetea
+     cualquier `background-image` anterior, y el fallo sería mudo. */
+  background: var(--fondo-franja-clara), var(--surface-alt);
 }
 
 /*
@@ -108,7 +110,7 @@
   que hace esta pantalla.
 */
 .tonoHonda {
-  background: var(--surface-alt-2);
+  background: var(--fondo-franja-clara), var(--surface-alt-2);
 
   --text-3: var(--text-2);
 }
@@ -142,7 +144,11 @@
   6,75 · n-400 4,98.
 */
 .tonoCacao {
-  background: var(--cacao-bg);
+  /* Luz de foco entrando por arriba a la izquierda, que es de donde viene la
+     luz en todo el sistema de sombras. El color plano va DETRÁS como respaldo:
+     si un navegador no resolviera el `color-mix`, la franja sigue siendo negra
+     y no transparente. */
+  background: var(--fondo-franja-oscura), var(--cacao-bg);
   color-scheme: dark;
 
   --bg: var(--cacao-bg);
