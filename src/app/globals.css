@@ -22,11 +22,12 @@
 
 :root {
   /* --------------------------------------------------------------------------
-     PAPEL  ·  dirección de arte v3, §2.1
+     BLANCO  ·  dirección de arte v3 §2.1, con los valores de la v5
 
-     El blanco no tiene escalones: fondo, tarjeta y hundido son EL MISMO papel.
-     Eso no cambia. Lo que cambia con la v3 es QUÉ separa una superficie de
-     otra: era el trazo de tinta, y ahora es LA SOMBRA, sola.
+     El blanco no tiene escalones: fondo, tarjeta y hundido son EL MISMO
+     blanco. Eso no cambia — lo que cambia con la v5 es que ese blanco es ahora
+     `#FFFFFF` de verdad y no el papel cálido `#FDFCFA`. Lo que separa una
+     superficie de otra sigue siendo LA SOMBRA, sola.
 
      Consecuencia directa y buscada: una superficie sin sombra DESAPARECE. Si
      al añadir una pantalla algo se "pierde" sobre el fondo, no es un bug del
@@ -37,11 +38,11 @@
      necesita cambiar de relleno sin mover nada.
 
      Y es TINTA DILUIDA, no un gris de la rampa `--w-*`. La primera versión de
-     la dirección v2 lo fijó en `--w-50` (#fbfbfc), que sobre papel es un 1,5 %
-     de diferencia de luminosidad: literalmente imperceptible, y menos visible
-     que el `--w-100` al que sustituía. Tinta al 6 % da ~6 % de diferencia —
-     cuatro veces más— y además pertenece a la misma familia que los tres
-     trazos, que es la coherencia que persigue toda la dirección.
+     la dirección v2 lo fijó en `--w-50`, que sobre el fondo es un 1,5 % de
+     diferencia de luminosidad: literalmente imperceptible, y menos visible que
+     el `--w-100` al que sustituía. Tinta al 6 % da 1,13:1 sobre blanco —
+     medido— y además pertenece a la misma familia que los tres trazos, que es
+     la coherencia que persigue toda la dirección.
 
      Aun así sigue siendo tenue a propósito: donde el hover o la selección sean
      la ÚNICA señal —fila de menú, opción de la paleta, destino activo—, hace
@@ -54,36 +55,42 @@
   --surface-hover: color-mix(in srgb, var(--n-1000) 6%, var(--w-0));
 
   /* --------------------------------------------------------------------------
-     SUPERFICIES TONALES  ·  la herramienta nueva de la v4, §1 y §4
+     SUPERFICIES TONALES  ·  v4 §1 y §4, con los grises de la v5
 
      Encargo literal del propietario: «tonalidades, fondos que no sean solo
      blanco o negro», y —esto es lo que de verdad lo explica— lo que le parecía
      feo en escritorio eran los ESPACIOS VACÍOS. Una pantalla ancha con una
      columna de tarjetas blancas sobre fondo blanco no tiene vacío de más:
-     tiene vacío SIN ESTRUCTURA. Alternar papel y crema le da estructura sin
+     tiene vacío SIN ESTRUCTURA. Alternar blanco y gris le da estructura sin
      dibujar una sola línea, que es lo que hace Agence Cartier con cero
      sombras.
 
-     NO son escalones de elevación y no sustituyen a la sombra: dos franjas de
-     crema y papel a 1,04:1 no separan una tarjeta de su fondo. Separan una
-     SECCIÓN de otra. La tarjeta sigue definiéndose por su sombra.
+     v5: el tinte pasa de CREMA a GRIS NEUTRO, y de paso se separa un poco más
+     (1,08:1 en vez de 1,04:1). Hacía falta: un gris neutro sobre blanco se
+     percibe MENOS que una crema sobre papel cálido a la misma diferencia de
+     luminancia, porque la crema también cambiaba de tono y el gris solo cambia
+     de claridad. Un solo canal de diferencia necesita más recorrido.
+
+     NO son escalones de elevación y no sustituyen a la sombra: dos franjas a
+     1,08:1 no separan una tarjeta de su fondo. Separan una SECCIÓN de otra. La
+     tarjeta sigue definiéndose por su sombra.
 
      Cómo se usan: la franja pone `background: var(--surface-alt)` de borde a
      borde del contenedor, y la siguiente no pone nada. Si dos franjas alternas
      quedan contiguas, se ven como una sola: eso no es un bug del token.
 
      En OSCURO el tinte va al revés —la banda alterna es MÁS CLARA que el
-     fondo— porque en oscuro la luz es lo que avanza. Mismos 1,04:1.
+     fondo— porque en oscuro la luz es lo que avanza. 1,05:1.
      -------------------------------------------------------------------------- */
-  --surface-alt: var(--w-50); /* CREMA · 1,04:1 contra el papel */
-  --surface-alt-2: var(--w-100); /* CREMA HONDA · relleno, no párrafo. Ver tokens.css §1 */
+  --surface-alt: var(--w-50); /* GRIS CLARO · 1,08:1 contra el blanco */
+  --surface-alt-2: var(--w-100); /* GRIS HONDO · relleno, no párrafo. Ver tokens.css §1 */
 
   /*
     El relleno de un HUECO: lo que todavía no hay. Esqueleto de carga y carril
     de una barra de progreso.
 
     Existe porque son los dos únicos sitios donde `--surface-sunk` NO se podía
-    resolver con un trazo: un esqueleto blanco perfilado sobre papel blanco
+    resolver con un trazo: un esqueleto blanco perfilado sobre fondo blanco
     dibuja el contorno del contenido que aún no ha llegado —y eso es
     exactamente lo que un esqueleto no debe hacer, porque promete una forma
     que puede no cumplirse—; y un carril de 3px no tiene sitio para un borde.
@@ -104,11 +111,17 @@
 
        --border-strong   tinta plena ..... YA NO SE USA EN SUPERFICIES. Queda
                                            como valor de reserva del modo de
-                                           alto contraste (21,0:1)
+                                           alto contraste (18,7:1 en la v5)
        --border          tinta al 55 % ... divisiones internas, cromo fijo y el
                                            borde en reposo de un CONTROL DE
-                                           ENTRADA (4,42:1 sobre papel)
-       --border-subtle   tinta al 22 % ... hairline de fila (1,67:1)
+                                           ENTRADA (4,17:1 sobre blanco, y
+                                           4,00:1 sobre el gris hondo — los dos
+                                           muy por encima del 3:1 de 1.4.11)
+       --border-subtle   tinta al 22 % ... hairline de fila (1,62:1)
+
+     ⚠️ Y EN OSCURO NO SE CUMPLE, que es la deuda que esta tanda deja abierta:
+     allí `--border` es `--n-700` y da 1,92:1 contra la tarjeta. El detalle y
+     el porqué de no arreglarlo aquí están en `tokens.css` §1, al final.
 
      GROSOR: 1px. Punto. El 2px que la v2 reservaba «para la superficie
      principal» desaparece con el trazo de superficie; el único 2px que queda
@@ -134,7 +147,8 @@
          alguien la olvide el fallo es invisible para quien no usa el modo.
 
     NO es para controles de entrada: un `<input>` conserva su borde real en
-    reposo (§2.5) porque sin él un campo vacío sobre papel blanco es invisible.
+    reposo (§2.5) porque sin él un campo vacío sobre blanco es invisible — y
+    con la v5 el fondo es blanco PURO, así que lo es todavía más.
   */
   --border-superficie: transparent;
 
@@ -149,10 +163,12 @@
     Se compone en lista con las sombras:
         box-shadow: var(--filo-activo), var(--shadow-2), var(--edge);
 
-    El presupuesto del oro NO sube (≤5 % del área visible). Un filo de 1px que
-    además solo existe mientras el puntero está encima ocupa MENOS que el oro
-    en reposo de la v2, no más. Y sigue sin codificar datos: dice «el sistema
-    te está respondiendo», nunca «este dato es así».
+    El presupuesto del ≤5 % quedó levantado por el propietario
+    (`.claude/docs/LICENCIA-CREATIVA-v4.md`), así que ya no hay que contarlo —
+    pero lo que este mecanismo hacía bien sigue siendo cierto: un filo de 1px
+    que solo existe mientras el puntero está encima no sale en una captura de
+    la pantalla quieta. Y sigue sin codificar datos: dice «el sistema te está
+    respondiendo», nunca «este dato es así».
   */
   --filo-activo: 0 0 0 1px var(--brand-edge);
 
@@ -175,16 +191,19 @@
   --filo-activo-inset: inset 0 0 0 1px var(--brand-edge);
 
   /*
-    LA TINTA, v4 §1. Los tres eran LITERALES aquí (#141418, #5b5b66, #6b6b76);
-    ahora salen de `tokens.css`, que es donde se puede buscar un color.
+    LA TINTA. Los tres eran LITERALES aquí (#141418, #5b5b66, #6b6b76); desde
+    la v4 salen de `tokens.css`, que es donde se puede buscar un color.
 
-      --text ..... 16,96:1 sobre papel · 16,25:1 sobre crema · 15,03 sobre honda
-      --text-2 ....  7,34:1 sobre papel ·  7,04:1 sobre crema ·  6,51 sobre honda
-      --text-3 ....  4,71:1 sobre papel ·  4,52:1 sobre crema ·  4,18 sobre honda ✗
+    RATIOS v5, sobre las tres superficies claras:
+      --text ..... 18,69:1 blanco · 17,31:1 gris claro · 16,29:1 gris hondo
+      --text-2 ....  7,37:1 blanco ·  6,82:1 gris claro ·  6,42:1 gris hondo
+      --text-3 ....  5,27:1 blanco ·  4,88:1 gris claro ·  4,59:1 gris hondo
 
-    El último es el único caso del sistema que NO llega a AA en las tres, y por
-    eso crema honda no lleva texto terciario. No se resuelve aclarando
-    `--tinta-3`: 4,71:1 sobre papel ya es el mínimo.
+    ✅ `--text-3` sobre el gris hondo era el ÚNICO caso del sistema que no
+    llegaba a AA (4,18:1 con el papel cálido), y se cierra con la v5 sin tocar
+    el token: lo arregla el fondo, que subió de 0,858 a 0,866 de luminancia, y
+    sobre todo `--w-0`, que subió de 0,974 a 1,000. El margen que queda es
+    corto (4,59 contra 4,50), así que `--w-100` no puede oscurecerse.
   */
   --text: var(--tinta-1);
   --text-2: var(--tinta-2);
@@ -192,33 +211,58 @@
   --text-on-accent: var(--w-0);
 
   /* Acción = tinta. El oro es marca, no acción — salvo el par ceremonial de
-     más abajo, y solo fuera del panel. El hover se va hacia el CACAO en vez de
-     hacia un gris: subir de luminancia en un botón casi negro se lee como que
-     se apaga; irse a marrón se lee como que se calienta. 16,24:1 con el texto. */
+     más abajo.
+
+     ⚠️ EL HOVER CAMBIA DE DIRECCIÓN EN LA v5, y la razón anterior queda
+     derogada. Aquí ponía «el hover se va hacia el CACAO en vez de hacia un
+     gris: subir de luminancia en un botón casi negro se lee como que se apaga;
+     irse a marrón se lee como que se calienta». Eso dependía de que existiera
+     un marrón. En una paleta de negro y grises no hay ninguna dirección
+     «cálida» a la que ir, y el antiguo destino —la franja, ahora `#0A0A0C`— da
+     1,06:1 contra `--action`: imperceptible, o sea ningún hover.
+
+     Así que sube, a `--n-850`: 1,24:1 contra el reposo, que sí se ve, y 15,04:1
+     con el texto blanco encima. En un botón negro el hover que se lee es el que
+     ACLARA; lo que evita que parezca «apagarse» es que además aparece el filo
+     dorado de `--filo-activo`, que en la v4 no acompañaba a este gesto. */
   --action: var(--tinta-1);
-  --action-hover: var(--cacao-900);
+  --action-hover: var(--n-850);
   --action-fg: var(--w-0);
 
   /* --------------------------------------------------------------------------
-     LA FRANJA DE CACAO  ·  v4 §2 — no sigue al tema, como el QR
+     LA FRANJA NEGRA  ·  v5 §2 — no sigue al tema, como el QR
 
-     Es la superficie donde —y SOLO donde— vive el oro de display. El titular
-     dorado claro sobre crema da 1,99:1 y es inaccesible; el mismo oro sobre
-     cacao da 7,83:1 y además se lee metal en vez de mostaza.
+     ⚠️ EL PREFIJO `--cacao-*` ES HEREDADO. Estos ocho tokens se llamaron así
+     cuando la franja era marrón; con la v5 es NEGRA y el nombre se conserva a
+     propósito, porque seis módulos los consumen y un `var()` roto no falla:
+     hereda o se queda transparente, en silencio. Renombrarlos a medias sería
+     peor que el nombre feo. Anotado como deuda en `CLAUDE.md`.
 
-     Se declara una sola vez, fuera de los bloques de tema, porque una franja
-     de cacao es cacao en claro y en oscuro. Si siguiera al tema, en oscuro
-     sería una mancha negra sobre negro y el recurso desaparecería justo donde
-     más lo necesita.
+     Es la superficie donde —y SOLO donde— vive el oro de display. El oro
+     brillante sobre gris claro da 1,49:1 y es inaccesible hasta para texto
+     grande; el mismo oro sobre negro da 12,27:1.
 
-       --cacao-fg    papel sobre cacao ....... 16,24:1
-       --cacao-fg-2  --n-300 sobre cacao ......  8,56:1
-       --cacao-fg-3  --n-400 sobre cacao ......  5,78:1
-       --cacao-brand --gold-400 sobre cacao ....  7,83:1  ← EL TITULAR
-       --cacao-edge  --gold-600 sobre cacao ....  4,63:1
+     Y ese margen es lo que HACE POSIBLE el encargo de la v5: subir el oro de
+     display un 35 % de luminancia sin perder ni un criterio, porque debajo hay
+     negro y no marrón. Sobre el cacao de la v4 el mismo tono daba 7,83:1.
 
-     Presupuesto: un titular dorado es MUCHA área. Si el héroe lleva oro, la
-     acción de esa pantalla va en tinta. El ≤5% no sube por ser bonito.
+     Se declara una sola vez, fuera de los bloques de tema, porque la franja es
+     negra en claro y en oscuro. En oscuro se separa del fondo por 1,05:1 —el
+     mismo orden que el gris claro sobre blanco—, así que sigue leyéndose como
+     franja en vez de desaparecer, que era el riesgo real de volverla negra.
+
+       --cacao-fg    blanco sobre la franja ..... 19,78:1
+       --cacao-fg-2  --n-300 sobre la franja .... 11,30:1
+       --cacao-fg-3  --n-400 sobre la franja .....  7,10:1
+       --cacao-brand --gold-400 sobre la franja .. 12,27:1  ← EL TITULAR
+       --cacao-edge  --gold-600 sobre la franja ...  5,61:1
+
+     Y dentro de la tarjeta elevada de la franja (`--cacao-surface`):
+       blanco 17,70:1 · --n-300 10,11:1 · --n-400 6,35:1 · --gold-400 10,98:1
+
+     El presupuesto del ≤5 % de oro quedó LEVANTADO
+     (`.claude/docs/LICENCIA-CREATIVA-v4.md`): un titular dorado sobre negro
+     puede ocupar lo que la pantalla pida.
      -------------------------------------------------------------------------- */
   --cacao-bg: var(--cacao-900);
   --cacao-surface: var(--cacao-800);
@@ -238,33 +282,44 @@
 
      Relleno PLANO. Nunca --gold-sheen: en tema claro el barrido se remapea
      más abajo en este mismo archivo a la mitad oscura de la rampa, y su parada
-     del 62% (--gold-800) da 2,42:1 contra el texto tinta. Son ~172px de un
-     botón de 277px reprobando 1.4.3 por casi el doble. El barrido es MARCA
-     —el wordmark— y nunca relleno de acción.
+     del 62% (--gold-800) da 2,43:1 contra el texto tinta. Son ~172px de un
+     botón de 277px reprobando 1.4.3 por más del doble. Un degradado no puede
+     ser relleno de acción, porque 1.4.3 se mide contra su punto MÁS
+     desfavorable y no contra su promedio. El barrido es MARCA —el wordmark— y
+     nunca relleno de acción.
 
-     RATIOS RECALCULADOS PARA LA v4 (la paleta cálida invalida los firmados en
-     T5: cambiar la temperatura cambia la luminancia). Medidos al aplicar:
-       texto --action-gold-fg sobre --action-gold ....... 4,84:1  ok 1.4.3
-       filo contra --surface claro (papel) .............. 3,51:1  ok 1.4.11
-       filo contra --surface-alt (crema) ................ 3,36:1  ok 1.4.11
-       filo contra --surface-alt-2 (crema honda) ........ 3,11:1  ok 1.4.11
-       filo contra --cacao-bg ........................... 4,63:1  ok 1.4.11
+     RATIOS RECALCULADOS PARA LA v5. Los de la v4 dejaron de valer en cuanto se
+     movieron `--w-0` y `--gold-600`: cambiar la claridad de la superficie
+     cambia la luminancia de los dos lados del par.
+       texto --action-gold-fg sobre --action-gold ....... 5,30:1  ok 1.4.3
+       filo contra --surface (blanco) ................... 3,53:1  ok 1.4.11
+       filo contra --surface-alt (gris claro) ........... 3,27:1  ok 1.4.11
+       filo contra --surface-alt-2 (gris hondo) ......... 3,08:1  ok 1.4.11
+       filo contra --cacao-bg (la franja negra) ......... 5,61:1  ok 1.4.11
+       filo contra --surface-hover ...................... 3,12:1  ok 1.4.11
 
-     El margen de 1.4.3 se estrechó de 5,40 a 4,84 y el de 1.4.11 de 3,66 a
-     3,51. Siguen cumpliendo los dos, pero ya no hay holgura para «oscurecer un
-     poco el papel»: cualquier cambio en `--w-0` o en `--gold-600` obliga a
-     recalcular ESTE par antes de mirar nada más.
+     EL MARGEN DE 1.4.3 MEJORÓ (4,84 → 5,30) Y EL DE 1.4.11 CASI NO (3,51 →
+     3,53), y esa asimetría es la que hay que entender antes de tocar nada:
+     aclarar la superficie sube el numerador de los dos criterios, pero el oro
+     también subió, y lo que topa el oro es justamente 1.4.11 contra la
+     superficie MÁS OSCURA del tema claro. Quedan 0,08 puntos sobre el suelo en
+     `--surface-alt-2`. NO se puede subir más el oro sin aclarar `--w-100`
+     primero, y aclarar `--w-100` deshace la franja alterna.
 
-     `--gold-600` es el único tono que cumple los dos criterios en tema CLARO:
-     el oro de marca sobre papel da 2,53:1 de filo y reprueba 1.4.11. Esa es la
-     restricción que fija el valor aquí, y no se toca.
+     `--gold-600` sigue siendo el único tono que cumple los dos criterios en
+     tema CLARO: el oro de marca de la v5 sobre blanco da 2,03:1 de filo y
+     reprueba 1.4.11 por más del doble. Esa es la restricción que fija el valor
+     aquí, y no se toca.
 
-     En OSCURO esa restricción no existe, y el tono claro salía mostaza en vez
-     de metal. Ahí se usa el oro de marca, auditado POR TEMA:
-       texto --n-1000 sobre --gold-500 ................... 7,30:1  ok 1.4.3
-       filo --gold-500 contra --n-900 (tarjeta) .......... 6,62:1  ok 1.4.11
-       filo --gold-500 contra --n-1000 (fondo) ........... 7,30:1  ok 1.4.11
-     Ambos con MÁS holgura que el par de tema claro.
+     En OSCURO esa restricción no existe —el fondo es negro, así que el oro
+     brillante GANA contraste en vez de perderlo— y ahí se usa el oro de marca,
+     auditado POR TEMA:
+       texto --n-1000 sobre --gold-500 ................... 9,26:1  ok 1.4.3
+       filo --gold-500 contra --n-900 (tarjeta) .......... 8,25:1  ok 1.4.11
+       filo --gold-500 contra --n-1000 (fondo) ........... 9,26:1  ok 1.4.11
+       filo --gold-500 contra --n-950 (banda alterna) .... 8,79:1  ok 1.4.11
+     Los tres con MUCHA más holgura que el par de tema claro, y eso no es
+     casualidad: es la misma fórmula leída en la dirección favorable.
 
      Si cambias uno de los dos valores, audita ESE tema: los criterios se
      comprueban por tema, no una vez para los dos.
@@ -272,15 +327,20 @@
   --action-gold: var(--gold-600);
   --action-gold-fg: var(--tinta-1);
 
-  /* 3,51:1 sobre papel · 3,36:1 sobre crema · 3,11:1 sobre crema honda ·
-     4,63:1 sobre cacao. Cumple 1.4.11 en las cuatro superficies del tema. */
+  /* 3,53:1 sobre blanco · 3,27:1 sobre gris claro · 3,08:1 sobre gris hondo ·
+     5,61:1 sobre la franja negra. Cumple 1.4.11 en las cuatro superficies del
+     tema, que es lo que un anillo de foco tiene que hacer. */
   --focus: var(--gold-600);
-  --brand: var(--gold-700); /* 4,75:1 papel · 4,55:1 crema — texto dorado */
+  /* 5,26:1 blanco · 4,87:1 gris claro · 4,58:1 gris hondo. v5: por primera vez
+     el oro de texto cumple AA sobre LAS TRES; antes reprobaba sobre la más
+     honda (4,21:1) y había que sustituirlo por `--gold-800` a mano. */
+  --brand: var(--gold-700);
   --brand-edge: var(--gold-600); /* filos dorados en claro */
 
   /* El barrido metálico de tokens.css está calibrado para fondo oscuro; sobre
-     blanco se lava y el wordmark pierde presencia. Aquí baja a la mitad
-     oscura de la rampa para conservar el brillo metálico siendo legible. */
+     blanco se lava y el wordmark pierde presencia —y con la v5 el fondo es
+     blanco PURO, así que se lava más. Aquí baja a la mitad oscura de la rampa
+     para conservar el brillo metálico siendo legible. */
   --gold-sheen: linear-gradient(
     135deg,
     var(--gold-600) 0%,
@@ -347,10 +407,14 @@
   */
   --edge: 0 0 rgba(0, 0, 0, 0);
 
-  /* v4 §1: el velo y el material también se calientan. Un scrim azulado sobre
-     una pantalla de papel cálido tiñe de gris todo lo que hay debajo. */
-  --scrim: rgba(20, 14, 11, 0.42);
-  --material: rgba(253, 252, 250, 0.7);
+  /* v5 §1: el velo y el material se NEUTRALIZAN, por el mismo principio que en
+     la v4 —heredan la temperatura de la paleta, nunca la contraria— aplicado a
+     una paleta distinta. Un scrim marrón sobre una pantalla de grises la tiñe
+     de sepia, que es exactamente el mismo fallo que la v4 evitaba al revés.
+     El velo sube de 0,42 a 0,46: sobre un fondo blanco puro hace falta algo
+     más de densidad para que el contenido de debajo se lea como apagado. */
+  --scrim: rgba(6, 6, 8, 0.46);
+  --material: rgba(255, 255, 255, 0.72);
 
   color-scheme: light;
 }
@@ -375,21 +439,30 @@
   --surface-hover: var(--n-850);
   --surface-hueco: var(--n-850);
 
-  /* v4 §1. En oscuro la banda alterna es MÁS CLARA que el fondo: aquí lo que
-     avanza es la luz, no la sombra. Mismo 1,04:1 que papel/crema en claro.
-     Sobre --surface-alt: --text 15,96:1 · --text-3 6,28:1 · filo de oro 6,99:1. */
+  /* En oscuro la banda alterna es MÁS CLARA que el fondo: aquí lo que avanza
+     es la luz, no la sombra. 1,05:1, el mismo orden que blanco/gris en claro.
+     Sobre --surface-alt: --text 16,28:1 · --text-3 6,41:1 · filo de oro 8,79:1. */
   --surface-alt: var(--n-950);
   --surface-alt-2: var(--n-900);
   --border: var(--n-700);
   --border-subtle: var(--n-800);
-  --border-strong: var(--n-600);
+  /*
+    v5: `--border-strong` pasa de `--n-600` a `--n-500`, y NO es cosmético.
+    Este token existe casi solo para que `prefers-contrast: more` (al final de
+    este archivo) le devuelva el filo a las superficies. Con `--n-600` daba
+    2,62:1 contra la tarjeta: el modo de alto contraste no alcanzaba el 3:1 de
+    1.4.11, o sea que quien lo activaba seguía sin un límite conforme. Con
+    `--n-500` da 3,19:1 contra la tarjeta y 3,58:1 contra el fondo.
+  */
+  --border-strong: var(--n-500);
 
   --text: var(--n-50);
   /*
     Corregido en la auditoría de la Fase G. Antes eran n-400/n-500, y n-500
-    daba 3.77:1 sobre el fondo oscuro: reprobaba AA en los mismos sitios que
-    en claro (encabezados de sección, etiquetas, metadatos a 11-12px).
-    Ahora: n-300 = 8.89:1 y n-400 = 5.88:1, con el escalón intacto.
+    reprobaba AA en los mismos sitios que en claro (encabezados de sección,
+    etiquetas, metadatos a 11-12px).
+    v5, sobre el fondo neutro #111114: n-300 = 10,77:1 y n-400 = 6,76:1, con el
+    escalón intacto. Contra la tarjeta: 9,59:1 y 6,02:1.
   */
   --text-2: var(--n-300);
   --text-3: var(--n-400);
@@ -399,15 +472,17 @@
   --action-hover: var(--n-100);
   --action-fg: var(--n-1000);
 
-  /* Auditado en la v4 sobre el fondo oscuro CÁLIDO (#14100e), no sobre el
-     negro azulado de la v3: focus 8,90:1 · brand 12,20:1 · filo 7,30:1. */
+  /* Auditado en la v5 sobre el fondo oscuro NEUTRO (#111114), no sobre el
+     cálido de la v4: focus 11,69:1 · brand 13,95:1 · filo 9,26:1. Los tres
+     subieron respecto de la v4 porque el oro subió y el fondo sigue siendo
+     casi negro — es la dirección favorable de la fórmula. */
   --focus: var(--gold-400);
   --brand: var(--gold-300);
   --brand-edge: var(--gold-500);
 
   /* Oro de marca: en oscuro no rige la restricción del tema claro, y aquí
-     `--gold-600` se leía mostaza. Auditado: 7,30:1 de texto sobre el relleno,
-     6,62:1 de filo contra la tarjeta. Ver ACCIÓN CEREMONIAL arriba. */
+     `--gold-600` se leía apagado. Auditado: 9,26:1 de texto sobre el relleno,
+     8,25:1 de filo contra la tarjeta. Ver ACCIÓN CEREMONIAL arriba. */
   --action-gold: var(--gold-500);
 
   /* Sobre fondo oscuro vuelve el barrido brillante de tokens.css. */
@@ -455,8 +530,10 @@
   --shadow-hundida: inset 0 1px 3px rgba(0, 0, 0, 0.5);
   --edge: var(--edge-light);
 
-  --scrim: rgba(10, 6, 4, 0.62);
-  --material: rgba(33, 26, 22, 0.74);
+  /* v5: neutros. El scrim es negro puro porque debajo hay negro, y el material
+     sale de `--n-900`, la tarjeta. */
+  --scrim: rgba(0, 0, 0, 0.64);
+  --material: rgba(29, 29, 34, 0.74);
 
   color-scheme: dark;
 }
@@ -471,14 +548,13 @@
     --surface-hover: var(--n-850);
     --surface-hueco: var(--n-850);
 
-    /* v4 §1. En oscuro la banda alterna es MÁS CLARA que el fondo: aquí lo que
-       avanza es la luz, no la sombra. Mismo 1,04:1 que papel/crema en claro.
-       Sobre --surface-alt: --text 15,96:1 · --text-3 6,28:1 · filo de oro 6,99:1. */
+    /* Copia EXACTA del bloque `[data-theme='dark']` de arriba: si tocas uno,
+       toca el otro. El porqué de cada valor está allí, sin duplicar. */
     --surface-alt: var(--n-950);
     --surface-alt-2: var(--n-900);
     --border: var(--n-700);
     --border-subtle: var(--n-800);
-    --border-strong: var(--n-600);
+    --border-strong: var(--n-500);
 
     --text: var(--n-50);
     --text-2: var(--n-300);
@@ -526,8 +602,8 @@
     --shadow-hundida: inset 0 1px 3px rgba(0, 0, 0, 0.5);
     --edge: var(--edge-light);
 
-    --scrim: rgba(10, 6, 4, 0.62);
-    --material: rgba(33, 26, 22, 0.74);
+    --scrim: rgba(0, 0, 0, 0.64);
+    --material: rgba(29, 29, 34, 0.74);
 
     color-scheme: dark;
   }
@@ -690,10 +766,16 @@ a {
    ========================================================================== */
 
 /*
-  DOS FAMILIAS, Y LA FRONTERA ESTÁ AQUÍ (v4 §3).
+  UNA SOLA FAMILIA (v5 §4).
 
-  Todo lo que es INTERFAZ va en Inter. Sin excepción: botones, etiquetas,
-  tablas, cuerpo, metadatos. Un serif a 13px en un botón se lee amateur.
+  ⚠️ Aquí ponía «DOS FAMILIAS, Y LA FRONTERA ESTÁ AQUÍ». Esa frontera se
+  retira: encargo del propietario, «que toda sea de la misma familia, no
+  combinar». Plus Jakarta Sans viste el sistema entero.
+
+  Estas declaraciones de `font-family` se conservan aunque ahora sean
+  redundantes con la del `body`, y no por inercia: son la defensa contra que un
+  contenedor con `font-family` propio se cuele en un peldaño tipográfico. El
+  día que vuelva a haber dos familias, este es el sitio donde se dice cuál.
 */
 .t-display-1,
 .t-display-2,
@@ -709,31 +791,31 @@ a {
 }
 
 /* ----------------------------------------------------------------------------
-   EL PELDAÑO `hero`  ·  SERIF DE DISPLAY, y solo aquí
+   EL PELDAÑO `hero`  ·  la escala ceremonial
 
-   ⛔ PROHIBIDO en Administración y en la Herramienta de Comercios. Son
-   pantallas de trabajo: el serif va en el recorrido del socio y en las seis
-   puertas de acceso. No hay forma de impedirlo desde CSS, así que la regla
-   vive en `CLAUDE.md` y en la revisión — y es por esto que el serif NO está
-   colgado de `.t-display-*`, que el panel sí consume.
+   ⚠️ LO QUE ESTE BLOQUE YA NO DICE. Hasta la v4 aquí vivían tres prohibiciones
+   —«serif, y solo aquí», «prohibido en Administración», «nunca por debajo de
+   28px»— y las tres se caen con la familia única: no hay un segundo tipo que
+   racionar, así que un `h1` del panel a 72px ya no es una infracción, es
+   simplemente un tamaño que el panel no quiere.
 
-   ⛔ Y NUNCA por debajo de ~28px: la familia tiene contraste alto y sus astas
-   finas dejan de cubrir el píxel. Si un titular necesita ser pequeño, ese
-   titular es `.t-title-*` y va en sans.
+   Lo que SÍ queda, y sigue siendo criterio: `hero` es la escala del recorrido
+   del socio y de las puertas. Administración y la Herramienta de Comercios son
+   pantallas de trabajo y viven en `.t-display-*` hacia abajo — no porque esté
+   prohibido, sino porque 72px de titular en una pantalla de caja es espacio
+   robado a la tabla.
 
-   Uso: `h1` de una pantalla de recibimiento, y la CIFRA grande de un carnet o
-   un panel del socio. Nada más — es un acento, y un acento repetido deja de
-   serlo.
+   El suavizado: aquí había `-webkit-font-smoothing: auto` porque una serif de
+   contraste alto pierde sus astas finas con `antialiased` en Chrome sobre
+   macOS. Con una geométrica de asta constante ese problema no existe, y forzar
+   el suavizado del sistema solo en tres clases dejaba los titulares con un
+   peso distinto al del resto de la página. Se retira: se hereda el
+   `antialiased` del `body`, que es lo coherente.
    -------------------------------------------------------------------------- */
 .t-hero-1,
 .t-hero-2,
 .t-hero-cifra {
   font-family: var(--font-display);
-  /* Una serif de display con `antialiased` pierde las astas finas en Chrome
-     sobre macOS: aquí sí conviene el suavizado por subpíxel del sistema.
-     (El eje óptico de la familia NO se carga —30 KB—; el ajuste por tamaño lo
-     hacen los tres trackings de `tokens.css`.) */
-  -webkit-font-smoothing: auto;
 }
 
 .t-hero-1 {
@@ -741,8 +823,9 @@ a {
   line-height: var(--t-hero-1-leading);
   letter-spacing: var(--t-hero-1-tracking);
   font-weight: var(--t-hero-1-weight);
-  /* Ligaduras y alternancias contextuales: es lo que distingue una serif bien
-     compuesta de la misma serif puesta sin más. A 72px se ve. */
+  /* Ligaduras y alternancias contextuales. Siguen valiendo la pena con una
+     geométrica: `calt` es lo que corrige el espaciado de los pares difíciles
+     —Ty, Va, rn— y a 72px esos pares son lo primero que se ve mal. */
   font-feature-settings: 'liga' 1, 'calt' 1;
 }
 .t-hero-2 {

@@ -24,7 +24,7 @@ export default function AppleIcon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#14100E', // --n-1000 de la v4; era el negro frío anterior
+          background: '#111114', // --n-1000 de la v5 (negro neutro)
         }}
       >
         <div
@@ -32,7 +32,7 @@ export default function AppleIcon() {
             width: 96,
             height: 96,
             borderRadius: 96,
-            border: '10px solid #C69A43', // --gold-500 de la v4
+            border: '10px solid #DFAF35', // --gold-500 de la v5 (oro de marca)
           }}
         />
       </div>

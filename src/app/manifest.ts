@@ -42,8 +42,13 @@ export default function manifest(): MetadataRoute.Manifest {
       la paleta anterior, y la aplicación instalada arrancaba con una franja de
       un sistema de diseño que ya no existe.
     */
-    background_color: '#14100E',
-    theme_color: '#14100E',
+    /* Los dos siguen a `--n-1000` de `tokens.css`. No pueden salir de una
+       variable CSS: el manifiesto lo lee el sistema operativo antes de que
+       exista una hoja de estilos. Si la paleta cambia, cambian a mano — y si no,
+       la aplicación instalada arranca con el color de la dirección anterior,
+       que es lo que acababa de pasar. */
+    background_color: '#111114',
+    theme_color: '#111114',
 
     lang: 'es-CO',
     dir: 'ltr',

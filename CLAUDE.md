@@ -6,27 +6,40 @@
 > porque ya pasó una vez: dos sesiones trabajaron en paralelo y construyeron dos
 > sistemas de diseño incompatibles sobre los mismos archivos.
 >
-> **Dirección de arte vigente: v4 — «el oro sobre crema»**, fijada el
-> 14/09/2026 en
-> [`.claude/docs/DIRECCION-ARTE-v4.md`](.claude/docs/DIRECCION-ARTE-v4.md).
+> **Dirección de arte vigente: v5 — «negro, oro brillante y blanco»**, fijada
+> el 15/09/2026. Lo aplicado y lo medido está en
+> [`.claude/docs/log/v5-negro-oro.md`](.claude/docs/log/v5-negro-oro.md).
 >
-> Hereda de la v3 todo lo que la v4 no nombra —la sombra en vez del trazo, el
-> oro como respuesta al toque, la disciplina— y cambia tres cosas de raíz: los
-> neutrales pasan de fríos a **cálidos**, entra un **serif de display** acotado
-> a titulares, y el movimiento baja de duración y sube de fuerza de curva.
+> Hereda de la v3 y la v4 todo lo que no nombra —la sombra en vez del trazo, el
+> oro como respuesta al toque, las franjas tonales, las curvas y duraciones— y
+> cambia dos cosas de raíz:
 >
-> ⚠️ **La regla de los neutrales fríos queda DEROGADA.** Si la encuentras
-> escrita en algún sitio, ese sitio está sin actualizar.
+> 1. **Los neutrales pasan de cálidos a NEUTROS**, el papel crema pasa a blanco
+>    puro y la franja de cacao pasa a **negra**. El oro sube de brillo.
+> 2. **Una sola familia tipográfica** (Plus Jakarta Sans). El serif de display
+>    sale del sistema.
 >
-> Lo aplicado y lo medido está en
-> [`.claude/docs/log/x1-fundacion-v4.md`](.claude/docs/log/x1-fundacion-v4.md).
+> ⚠️ **Quedan DEROGADAS**: la regla de los neutrales cálidos de la v4, la de los
+> neutrales fríos de la v3 (que la v4 ya había derogado) y **toda la frontera
+> serif/sans**. Si las encuentras escritas en algún sitio, ese sitio está sin
+> actualizar.
+>
+> ⚠️ **Los tokens `--cacao-*` siguen llamándose así y ya NO son marrones.** Son
+> la franja negra. El nombre se conservó a propósito para no dejar `var()`
+> huérfanos; el renombrado está en «Deuda conocida».
 >
 > Cada dirección sustituye a la anterior
-> ([`.claude/docs/DIRECCION-ARTE-v3.md`](.claude/docs/DIRECCION-ARTE-v3.md),
+> ([`.claude/docs/DIRECCION-ARTE-v4.md`](.claude/docs/DIRECCION-ARTE-v4.md),
+> [`.claude/docs/DIRECCION-ARTE-v3.md`](.claude/docs/DIRECCION-ARTE-v3.md),
 > [`.claude/docs/DIRECCION-ARTE-claro.md`](.claude/docs/DIRECCION-ARTE-claro.md))
 > **solo en lo que dice**; lo que no nombra sigue vigente. El detalle del porqué
 > de cada decisión previa está en
 > [`docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md`](docs/superpowers/specs/2026-08-04-rediseno-visual-orum-design.md).
+>
+> Y las restricciones que el propietario levantó —presupuesto del oro, «serif
+> solo en h1», sombra solo como jerarquía— están en
+> [`.claude/docs/LICENCIA-CREATIVA-v4.md`](.claude/docs/LICENCIA-CREATIVA-v4.md),
+> que **sigue vigente**. Lo que ahí NO se levantó es el contraste AA.
 >
 > Si algo de este archivo y algo de ese documento se contradicen, **gana este
 > archivo**: aquí es donde la dirección se traduce a reglas, y aquí es donde se
@@ -74,7 +87,8 @@ Romper cualquiera de estas es un bug, no una preferencia.
 | `transition: all` | Anima propiedades que no sabes que existen, incluidas las caras. Enumera. |
 | `ease-in` en interfaz | Empieza lento justo en el instante que el usuario más mira. El token se eliminó. |
 | Que algo entre desde `scale(0)` | En el mundo real nada aparece de la nada. Desde `0.95` + `opacity: 0`. |
-| Serif de display en Administración o en Comercios | Son pantallas de trabajo. El serif es del recorrido del socio. |
+| Una segunda familia tipográfica | Encargo del propietario: **una sola**. Todo sale de `--font-sans`, y `--font-display` apunta a ella. |
+| `--gold-400` o `--gold-500` sobre una superficie clara | 1,61:1 y 2,03:1. Ni el 3:1 de texto grande. El oro brillante **solo vive sobre negro**. |
 | `none` dentro de una lista de sombras | Invalida la declaración ENTERA en silencio. Usa `0 0 rgba(0,0,0,0)`. |
 | `outline: none` sin sustituto | Deja la interfaz sin foco visible. |
 | Color como único portador de significado | Siempre punto/icono **+ texto**. |
@@ -83,30 +97,31 @@ Romper cualquiera de estas es un bug, no una preferencia.
 | Un **trazo en una superficie en reposo** | Lo que define una tarjeta, un modal, un menú, un toast o una tabla es **la sombra**. Si no se ve, sube de sombra — no le pongas borde. |
 | Poner **sombra a un chip, una píldora o una fila de lista** | Es el modo de fallo de esta dirección: todo flota y nada pesa. **Flota solo lo que el dedo puede levantar.** |
 | Quitar el borde a algo interactivo **sin dejarle foco visible** | Una sombra suave no cumple el 3:1 de WCAG 1.4.11 en el límite de un control. El foco es lo que sostiene ese criterio. |
-| Quitarle el borde en reposo a un **campo de formulario** | La regla «sin bordes» es para **superficies**, no para controles de entrada: un `<input>` vacío sobre papel blanco es invisible. |
-| Distinguir **una superficie de su fondo** con un tinte | Eso lo hace la sombra. El tinte de la v4 (`--surface-alt`) separa **secciones**, que es otra cosa: a 1,04:1 no despega una tarjeta de nada. |
+| Quitarle el borde en reposo a un **campo de formulario** | La regla «sin bordes» es para **superficies**, no para controles de entrada: un `<input>` vacío sobre blanco puro es invisible. |
+| Distinguir **una superficie de su fondo** con un tinte | Eso lo hace la sombra. La franja tonal (`--surface-alt`) separa **secciones**, que es otra cosa: a 1,08:1 no despega una tarjeta de nada. |
 | Un **segundo grosor** de trazo | 1px, y punto. El único 2px del sistema es el de `:focus-visible`. |
 | Sombra o desplazamiento animados en **filas de lista** | Se paga en móvil de gama media, que es donde más filas hay. Ahí el feedback es **opacidad**. |
 | `:hover` **fuera de** `@media (hover: hover)` | En táctil el hover se queda pegado tras el toque. |
 
 ---
 
-## Papel, luz y sombra
+## Blanco, luz y sombra
 
-La frase entera: **papel blanco, ninguna línea, luz y sombra — y el oro aparece
-cuando tocas algo.** El blanco no es un fondo, es el material. Lo que lo separa
-en capas es la luz.
+La frase entera: **blanco, ninguna línea, luz y sombra — y el oro aparece cuando
+tocas algo.** El blanco no es un fondo, es el material. Lo que lo separa en capas
+es la luz.
 
 ### El blanco no tiene escalones
 
 En tema claro **`--bg`, `--surface` y `--surface-sunk` son el mismo `--w-0`**
-—que desde la v4 es **papel cálido** `#FDFCFA`, no blanco puro—. La separación
-entre superficies **no la da un gris más claro ni un trazo**: la da la sombra.
+—que desde la v5 es **blanco puro `#FFFFFF`**; el papel cálido `#FDFCFA` de la v4
+queda retirado—. La separación entre superficies **no la da un gris más claro ni
+un trazo**: la da la sombra.
 
-⚠️ **Esto NO lo deroga la franja tonal de la v4**, y confundirlo es el error
-fácil: `--surface-alt` separa **secciones**, no superficies. Dos franjas a
-1,04:1 no despegan una tarjeta de su fondo — eso lo sigue haciendo la sombra, y
-solo la sombra.
+⚠️ **Esto NO lo derogan las franjas tonales**, y confundirlo es el error fácil:
+`--surface-alt` separa **secciones**, no superficies. Dos franjas a 1,08:1 no
+despegan una tarjeta de su fondo — eso lo sigue haciendo la sombra, y solo la
+sombra.
 
 Consecuencia directa y buscada: **si una superficie no tiene sombra,
 desaparece.** Cuando algo «se pierde» sobre el fondo no es un fallo del token:
@@ -114,7 +129,7 @@ es que a esa superficie le falta su escalón. **La respuesta es subir de sombra,
 nunca devolverle un borde.**
 
 La única excepción que conserva tinte es `--surface-hover`. **Es deliberadamente
-tenue: 1,02:1 sobre papel.** Por eso, donde el hover o la selección sean la ÚNICA
+tenue: 1,13:1 sobre blanco.** Por eso, donde el hover o la selección sean la ÚNICA
 señal —fila de menú, opción de la paleta de comandos, destino activo—, **hace
 falta un segundo canal**: el filo dorado que aparece (`box-shadow: inset`, que no
 mueve la caja), las acciones que se revelan, o `aria-current`. Nunca el color
@@ -146,12 +161,17 @@ modo.
 
 Lo que queda de trazo, y para qué:
 
-| Token | Valor en claro | Ratio sobre papel | Para qué |
+| Token | Valor en claro | Ratio sobre blanco | Para qué |
 |---|---|---|---|
 | `--border-superficie` | `transparent` | — | El filo de una superficie. **Transparente en reposo**; lo repone `prefers-contrast: more` |
-| `--border` | tinta al 55 % | 4,16:1 | Divisiones **dentro** de una superficie (cabeceras, pies, `Divider`), cromo fijo del shell, y el **borde en reposo de un control de entrada** |
-| `--border-subtle` | tinta al 22 % | 1,67:1 | Hairlines de fila. No define nada |
-| `--border-strong` | tinta plena | 16,96:1 | **Ya no se usa.** Es el valor al que alto contraste devuelve `--border-superficie` |
+| `--border` | tinta al 55 % | 4,17:1 | Divisiones **dentro** de una superficie (cabeceras, pies, `Divider`), cromo fijo del shell, y el **borde en reposo de un control de entrada** |
+| `--border-subtle` | tinta al 22 % | 1,62:1 | Hairlines de fila. No define nada |
+| `--border-strong` | tinta plena | 18,69:1 | **Ya no se usa.** Es el valor al que alto contraste devuelve `--border-superficie` |
+
+⚠️ **En tema OSCURO `--border` da 1,92:1 contra la tarjeta y NO cumple 1.4.11**
+para el borde en reposo de un `<input>`. Es deuda conocida, medida y abierta —
+ver «Deuda conocida». No la descubras otra vez ni la des por buena porque el
+claro cumple: **los criterios se comprueban por tema.**
 
 **Grosor: 1px.** El 2px de «superficie principal» de la v2 desapareció con el
 trazo. El único 2px que queda en el sistema es el de `:focus-visible`.
@@ -160,8 +180,9 @@ trazo. El único 2px que queda en el sistema es el de `:focus-visible`.
 
 1. **Un campo de formulario conserva borde en reposo.** `Input`, `Select`,
    `Textarea`, `Checkbox`, `Radio` y `Button secondary`. Sin él no hay forma de
-   saber dónde se escribe. Va a `--border` (4,42:1), muy por encima del 3:1 de
-   WCAG 1.4.11 — lo que se le quitó es el aire de papelería, no la visibilidad.
+   saber dónde se escribe — y sobre blanco puro, menos todavía. Va a `--border`
+   (4,17:1 en claro), por encima del 3:1 de WCAG 1.4.11. **En oscuro no llega**;
+   ver el aviso de arriba.
 2. **Todo control que recibe foco lleva su filo en `:focus-visible`.** Una sombra
    suave **no cumple** el 3:1 que 1.4.11 exige en el límite de un control
    interactivo. El foco no es decorativo: es lo que sostiene el criterio ahora
@@ -171,11 +192,13 @@ trazo. El único 2px que queda en el sistema es el de `:focus-visible`.
 ### La sombra hace todo el trabajo, así que tiene que poder
 
 **Dos capas por escalón**: un contacto corto y oscuro que ancla el objeto al
-fondo, y un halo amplio y muy suave que le da volumen. No es negra pura — lleva
-el mismo tinte que los neutrales, y con la v4 ese tinte es **cálido**:
-**rgb 28/22/18**. Con negro neutro el conjunto envejece, y con un tinte azulado
-bajo una tarjeta de papel cálido la sombra se lee como un cerco gris pegado al
-borde en vez de como volumen.
+fondo, y un halo amplio y muy suave que le da volumen. Lleva el mismo tinte que
+los neutrales, y con la v5 ese tinte es **neutro: rgb 10/10/14**. El principio
+no cambia —la sombra hereda la temperatura de la paleta, nunca la contraria—;
+cambia la paleta. Sobre blanco puro el tinte cálido de la v4 se leía sepia.
+
+**Las geometrías y las opacidades no se tocaron** en la v5: son las de W1. Sobre
+blanco puro se ven **más** que sobre el papel cálido, no menos.
 
 **Regla de grosor: la superficie grande se lee más gruesa.**
 
@@ -261,13 +284,15 @@ contraste de esta sección. Donde no se cumplan, sigue siendo tinta.
   a tinta**. No hay apaño de borde que sustituya la medición, y no se aprueba
   con una estimación: solo con el ratio firmado por `accessibility-auditor`.
 - El oro vive en: wordmark, indicador de ruta activa, anillo de focus,
-  hairlines, **la respuesta al toque** (abajo) y —donde el punto anterior lo
-  habilite— la acción principal del recorrido del cliente. (La versión anterior
-  citaba "el CTA comercial del Portal Público" como única excepción: ese portal
-  y ese CTA nunca se construyeron. Se retira la referencia).
-- Presupuesto: **≤5% del área visible** por pantalla.
-- El oro de marca sobre papel **sigue prohibido** (2,53:1). `--gold-600` sigue
-  siendo el único tono que cumple los dos criterios en claro.
+  hairlines, **la respuesta al toque** (abajo), el titular de la franja negra y
+  —donde el punto anterior lo habilite— la acción principal del recorrido del
+  cliente.
+- **Presupuesto: levantado.** El ≤5 % del área visible lo retiró el propietario
+  en `LICENCIA-CREATIVA-v4.md`. El oro puede ocupar lo que la pantalla pida. Lo
+  que **no** se levantó es el contraste.
+- El oro de marca sobre blanco **sigue prohibido** (2,03:1, y ahora es peor que
+  en la v4 porque el oro subió y el fondo también). `--gold-600` sigue siendo el
+  único tono que cumple los dos criterios en claro.
 
 ### El oro es la respuesta al toque
 
@@ -289,117 +314,146 @@ sin mover el contenido. Se compone en lista con la sombra:
 box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
 ```
 
-**El presupuesto no sube, y conviene entender por qué.** Casi todo es un filo de
-1px, y salvo el segmento seleccionado y el indicador de ruta activa **ninguno
-existe en reposo**: en una captura estática de la pantalla quieta, el oro de
-interacción es cero. Que el filo aparezca solo al señalar significa que en reposo
-el oro ocupa **menos** que en la v2, no más.
+**Casi todo es un filo de 1px**, y salvo el segmento seleccionado y el indicador
+de ruta activa **ninguno existe en reposo**: en una captura estática de la
+pantalla quieta, el oro de interacción es cero.
 
 **Y sigue sin codificar datos.** Dice «el sistema te está respondiendo», nunca
 «este dato es así».
 
 ### Cuatro oros, y el error es usarlos al revés
 
-La v4 reparte el oro en cuatro trabajos. **No son intercambiables**, y el fallo
-típico —poner el oro claro sobre una superficie clara— es el que arruina la
+El oro se reparte en cuatro trabajos. **No son intercambiables**, y el fallo
+típico —poner el oro brillante sobre una superficie clara— es el que arruina la
 accesibilidad de una pantalla entera de un plumazo.
+
+**La regla física, en una línea: sobre NEGRO el oro brillante gana contraste;
+sobre BLANCO lo pierde.** Es la misma fórmula leída en direcciones opuestas, así
+que ningún oro puede ser a la vez más brillante y más legible sobre blanco. Por
+eso la v5 sube mucho los tres que viven sobre negro y **no puede** subir los dos
+que viven sobre blanco.
 
 | Trabajo | Token | Ratio | Prohibición |
 |---|---|---|---|
-| **Display, solo sobre cacao** | `--gold-400` | **7,83:1** sobre `--cacao-bg` · 8,90:1 sobre el fondo oscuro | ⛔ Sobre papel da **2,07:1** y sobre crema **1,99:1**. Ni el 3:1 de texto grande |
-| **Marca · acción en oscuro** | `--gold-500` | 7,30:1 sobre el fondo oscuro · 6,62:1 de filo sobre la tarjeta | ⛔ Sobre papel da 2,53:1 |
-| **Relleno de acción · filo** | `--gold-600` | **4,84:1** con texto `--tinta-1` (1.4.3) · **3,51:1** de filo sobre papel, 3,36 sobre crema, 3,11 sobre crema honda, 4,63 sobre cacao (1.4.11) | — |
-| **Texto e iconos dorados** | `--gold-700` | 4,75:1 sobre papel · 4,55:1 sobre crema | ⛔ Sobre **crema honda** da 4,21:1. Ahí se usa `--gold-800` (6,22:1) |
-| Texto dorado sobre oscuro | `--gold-300` | 12,20:1 sobre el fondo · 10,74:1 sobre cacao | — |
+| **Display, solo sobre negro** | `--gold-400` | **12,27:1** sobre `--cacao-bg` · 11,69:1 sobre el fondo oscuro | ⛔ Sobre blanco da **1,61:1** y sobre gris claro **1,49:1**. Ni el 3:1 de texto grande |
+| **Marca · acción en oscuro** | `--gold-500` | 9,26:1 sobre el fondo oscuro · 8,25:1 de filo sobre la tarjeta | ⛔ Sobre blanco da 2,03:1 |
+| **Relleno de acción · filo** | `--gold-600` | **5,30:1** con texto `--tinta-1` (1.4.3) · **3,53:1** de filo sobre blanco, 3,27 sobre gris claro, 3,08 sobre gris hondo, 5,61 sobre la franja negra (1.4.11) | — |
+| **Texto e iconos dorados** | `--gold-700` | 5,26:1 blanco · 4,87:1 gris claro · **4,58:1 gris hondo** | Ya ninguna en claro: desde la v5 cumple sobre **las tres** |
+| Texto dorado sobre oscuro | `--gold-300` | 13,95:1 sobre el fondo · 14,64:1 sobre la franja negra | — |
 
-**El titular dorado grande vive sobre una franja de cacao, nunca sobre crema.**
-Ese es el hallazgo de la v4 y no es un capricho: el mismo oro que da 1,99:1
-sobre crema da 7,83:1 sobre cacao — y además ahí se lee **metal** en vez de
-mostaza. La salida accesible resultó ser también la más impactante.
+**El titular dorado grande vive sobre la franja negra, nunca sobre un gris.**
+El mismo oro que da 1,49:1 sobre gris claro da 12,27:1 sobre negro. La salida
+accesible es también la más impactante — y con negro en vez de cacao el margen
+pasó de 7,83 a 12,27, que es exactamente lo que permitió subir el brillo.
 
-**El margen se estrechó y hay que saberlo**: el par de acción pasó de 5,40 a
-4,84 (1.4.3) y de 3,66 a 3,51 (1.4.11). Siguen cumpliendo, pero ya no hay
-holgura para «oscurecer un poco el papel». Cualquier cambio en `--w-0` o en
-`--gold-600` obliga a recalcular **ese par** antes de tocar nada más.
+**Dónde está el techo, y no es negociable**: `--gold-600` está a **0,08 puntos**
+del suelo de 1.4.11 contra `--surface-alt-2`. No se puede subir más sin aclarar
+`--w-100`, y aclarar `--w-100` deshace la franja alterna. Cualquier cambio en
+`--w-0`, `--w-100` o `--gold-600` obliga a **recalcular ese par** antes de tocar
+nada más.
 
-**Ojo al presupuesto**: un CTA de ancho completo a 44-52px ronda el 6-8% del
-viewport móvil por sí solo, y un titular dorado es mucha más área que eso.
-**Si el héroe lleva oro, la acción de esa pantalla va en tinta.** Mídelo sobre
-captura real antes de dar el ≤5% por cumplido.
+**Y `--gold-700` BAJÓ de luminancia** (−9 %) aunque el encargo pidiera subir. A
+cambio pasa a cumplir AA sobre las tres superficies claras, cosa que antes no
+hacía. Un oro de texto legible sobre blanco es oscuro por obligación; el brillo
+se ve en la franja negra.
 
 ---
 
-## Tonalidades: papel, crema, cacao
+## Tonalidades: blanco, grises, negro
 
-**Los neutrales de ORUM son CÁLIDOS.** La v3 decía lo contrario —«un susurro de
-frío, matiz ~240°»— y **esa regla queda derogada**: cuatro de las cinco
-referencias medidas para la v4 hacen exactamente lo opuesto y ninguna envejece.
-La premisa fría era correcta para un oro *metálico con barrido*; con un oro
-**plano** sobre crema el conjunto no se lee beige, se lee apetecible. El barrido
-metálico (`--gold-sheen`) sí sigue queriendo frío, y por eso **sigue acotado al
-wordmark**.
+**Los neutrales de ORUM son NEUTROS.** Encargo literal del propietario:
+«cambiar tonos cafés a negros, además de utilizar dorados (no tan oscuros, más
+brillantes) y blanco. Además de tonos grises».
 
-Encargo que esto resuelve, en palabras del propietario: «tonalidades, fondos que
-no sean solo blanco o negro» — y, sobre escritorio, que **los espacios vacíos se
-veían feos**. El vacío no sobraba: **le faltaba estructura**.
+Eso deroga la regla cálida de la v4, que a su vez había derogado la fría de la
+v3. **No es volver a la v3**: aquello era un gris azulado visible (matiz ~240°);
+esto es gris, con un desvío frío de ≈2 % del canal que solo existe para que el
+gris no vire a caqui junto al oro.
 
-| Papel | Token | Para qué |
+Sigue vigente el encargo que las franjas resuelven: «fondos que no sean solo
+blanco o negro» y que **los espacios vacíos de escritorio se veían feos**. El
+vacío no sobraba: **le faltaba estructura**.
+
+| Superficie | Token | Para qué |
 |---|---|---|
-| **Papel** `#FDFCFA` | `--bg` · `--surface` | Fondo y tarjeta. Sigue sin haber escalones entre ellos |
-| **Crema** `#FAF7F0` | `--surface-alt` | Franja alterna. **1,04:1** contra el papel: separa **sin trazo** |
-| **Crema honda** `#F3EEE3` | `--surface-alt-2` | Relleno: hueco, carril, esqueleto. **No lleva texto tenue** |
-| **Cacao** `#2B1A15` | `--cacao-bg` | La franja oscura. El único sitio donde vive el oro de display |
+| **Blanco** `#FFFFFF` | `--bg` · `--surface` | Fondo y tarjeta. Sigue sin haber escalones entre ellos |
+| **Gris claro** `#F6F6F8` | `--surface-alt` | Franja alterna. **1,08:1** contra el blanco: separa **sin trazo** |
+| **Gris hondo** `#EFEFF3` | `--surface-alt-2` | Relleno: hueco, carril, esqueleto. Superficie de relleno, no de párrafo |
+| **Negro** `#0A0A0C` | `--cacao-bg` | La franja oscura. El único sitio donde vive el oro de display |
 
-Herramienta: **`<Section tono="crema" | "honda" | "cacao">`**. Una franja **no es
-una tarjeta**: no lleva sombra ni borde, porque no está levantada, está teñida.
-Si llevara filo volveríamos a la cuadrícula de cajas que hundió la v2.
+La separación de las franjas **subió** de 1,04 a 1,08:1, y hacía falta: un gris
+sobre blanco se percibe menos que una crema sobre papel cálido a la misma
+diferencia de luminancia, porque la crema cambiaba también de tono y el gris solo
+cambia de claridad. Un solo canal de diferencia necesita más recorrido.
 
-La franja de **cacao no sigue al tema** —es cacao en claro y en oscuro, igual que
-el `QrCode`— y **remapea sus tokens de texto hacia dentro**, así que lo que viva
-ahí no hay que vestirlo a mano.
+Herramienta: **`<Section tono="crema" | "honda" | "cacao">`**. ⚠️ **Los valores
+de la prop conservan los nombres de la v4** (el componente está fuera del alcance
+de esta tanda): `crema` es ahora gris claro, `honda` gris hondo y `cacao` negro.
+Una franja **no es una tarjeta**: no lleva sombra ni borde, porque no está
+levantada, está teñida.
 
-**El tema oscuro también es cálido**, y **se audita aparte**: los criterios se
+La franja **negra no sigue al tema** —es negra en claro y en oscuro, igual que el
+`QrCode`— y **remapea sus tokens de texto hacia dentro**, así que lo que viva ahí
+no hay que vestirlo a mano. En oscuro se separa del fondo por 1,05:1, así que
+sigue leyéndose como franja en vez de desaparecer.
+
+**El tema oscuro también es neutro**, y **se audita aparte**: los criterios se
 comprueban por tema, nunca una vez para los dos.
 
-⚠️ **Al cambiar la temperatura cambia la luminancia, y un ratio firmado deja de
-valer.** Pasó de verdad en esta tanda: el filo de la placa de logo era `--n-400`
-y con la rampa fría daba 3,33:1; el `--n-400` cálido cae a **2,81:1** y reprueba
-1.4.11. Hubo que añadir `--n-450`. Ningún valor entra sin recalcular.
+⚠️ **Al cambiar la temperatura o la claridad de la rampa cambia la luminancia, y
+un ratio firmado deja de valer.** Ya ha costado dos veces: en la v4 el filo de la
+placa de logo era `--n-400` y al pasar a cálido cayó a 2,81:1 (hubo que añadir
+`--n-450`); en la v5 esos mismos cuatro números volvieron a moverse y hubo que
+recalcularlos otra vez. **Ningún valor entra sin recalcular.**
 
-⛔ **Crema honda no admite `--text-3` ni `--gold-700`** (4,18:1 y 4,21:1). Es
-superficie de relleno, no de párrafo. Si necesitas texto tenue ahí, sube a
-`--text-2`. Y no se arregla aclarando `--tinta-3`: sus 4,71:1 sobre papel **ya
-son el mínimo**.
+✅ **Cerrado en la v5, y sin tocar un token de texto**: `--text-3` y
+`--gold-700` sobre la superficie más honda reprobaban AA en la v4 (4,18:1 y
+4,21:1). Sobre blanco puro dan **4,59:1 y 4,58:1** y pasan. El margen es corto,
+así que **`--w-100` no puede oscurecerse** sin recalcular ese par.
 
 ---
 
-## Tipografía: dos familias, y la frontera importa
+## Tipografía: UNA familia
 
-**Un serif de display hace más por el «se ve caro» que cualquier animación.** Es
-el cambio de mayor rendimiento por esfuerzo de toda la v4 — y solo funciona si
-está acotado.
+Encargo literal del propietario: «tipografía similar a la de Avianca. Y que toda
+sea de la misma familia, **no combinar**».
 
-| Familia | Token | Dónde |
+**Plus Jakarta Sans** viste el sistema entero. Es una geométrica humanista —caja
+alta grande, aperturas abiertas, terminales cortadas en ángulo, `a` de doble
+piso— que es lo que hace el lenguaje de Avianca. Se cargó con `next/font/google`,
+subconjunto latino, `display: swap`, variable en `wght` (200–800).
+
+| Token | Valor | Dónde |
 |---|---|---|
-| **Fraunces** (serif) | `--font-display` | **Solo** `h1` y cifras grandes, vía `.t-hero-1` `.t-hero-2` `.t-hero-cifra`, `<PageHeader display>` y `<Cifra size="display">` |
-| **Inter** | `--font-sans` | Todo lo demás: interfaz, cuerpo, botones, etiquetas, tablas |
+| `--font-sans` | Plus Jakarta Sans | **Todo** |
+| `--font-display` | `var(--font-sans)` | La misma familia. **Sigue existiendo** y no se puede borrar |
 
-- ⛔ **Nunca en Administración ni en la Herramienta de Comercios.** Son pantallas
-  de trabajo. Por eso el serif **no cuelga de `.t-display-*`**, que el panel sí
-  consume: si colgara, el panel se lo llevaría entero sin pedirlo.
-- ⛔ **Nunca por debajo de ~28px.** Un serif a 13px en un botón se lee amateur, y
-  sus astas finas dejan de cubrir el píxel.
-- **Un acento por pantalla.** Repetido deja de ser acento.
-- **El rango subió**, que era el encargo: el extremo era 40px contra 15 de
-  cuerpo (2,7x) y ahora `hero-1` llega a 72px (4,8x). Un sistema tipográfico sin
-  rango no tiene jerarquía, tiene tamaños.
-- **Tracking específico del tamaño**, y ahora es obligatorio, no un refinamiento:
-  se cargó **solo el eje `wght`** de Fraunces porque el eje óptico costaba 30 KB
-  medidos —casi el doble del archivo— así que el ajuste por tamaño lo hacen a
-  mano los tres trackings `hero` de `tokens.css`. Negativo al crecer
-  (−0,032em a 72px), y **positivo al encoger**: `--t-overline-tracking` subió a
-  0,09em porque las mayúsculas a 11px sin aire se leen como una mancha.
-- **Coste**: 35,8 KB, subconjunto latino, `display: swap`, fallback Georgia.
+⚠️ **`--font-display` no es un alias muerto**: lo consumen ocho módulos CSS. Un
+`var()` que apunta a un token inexistente **no falla** —la propiedad se queda en
+su valor inicial y el texto se pinta con la fuente por defecto del navegador—,
+así que borrarlo rompería ocho titulares en silencio. Se deriva de `--font-sans`
+para que no puedan divergir nunca.
+
+**Lo que queda DEROGADO de la v4**: «serif solo en `h1`», «nunca en
+Administración», «nunca por debajo de 28px», «un acento por pantalla». No hay un
+segundo tipo que racionar.
+
+- **Un sans de display necesita más peso y tracking más cerrado que un serif.**
+  Un serif crea presencia con la modulación de sus astas; una geométrica tiene el
+  asta constante y a 600 se lee delgada a 72px. Por eso `hero-1` sube a **800** y
+  `hero-2` / `hero-cifra` a **700**, y el tracking de `hero-1` cierra de −0,032 a
+  **−0,040em**. `display-1` (48px) sube igual, a 700 / −0,030em.
+- **De `display-2` (36px) hacia abajo el peso 600 no se toca**: subirlo engordaría
+  los encabezados de todas las páginas de Administración.
+- **`hero` sigue separado de `display`.** La frontera ya no es de familia, es de
+  escala: 72px contra 48px, con tracking y peso propios.
+- **El rango no cambia**: `hero-1` llega a 72px contra 15 de cuerpo, 4,8x.
+- **Tracking específico del tamaño**: negativo al crecer, **positivo al
+  encoger** (`--t-overline-tracking` sigue en 0,09em porque las mayúsculas a 11px
+  sin aire se leen como una mancha).
+- **Coste medido** (`.next/static/media` tras `build`): **57,6 KB** de woff2 en
+  total, de los que `next/font` precarga **26,6 KB**. La v4 cargaba dos familias;
+  el presupuesto de fuentes baja, no sube.
 
 ---
 
@@ -795,16 +849,18 @@ con cualquier hijo sin clonar elementos.
 
 **`Cifra`** para todo número de negocio (etiqueta + valor tabular + nota). No la
 reimplementes en la página: el panel de inicio ya lo hizo y hubo que extraerla.
-`size="display"` la pone en el serif a 36–52px — **solo en el recorrido del
-socio**, nunca en Administración ni en Comercios.
+`size="display"` la pone en el peldaño ceremonial a 36–52px (peso 700).
 
-**`<Section tono>`** es la herramienta tonal de la v4: `crema`, `honda` o
-`cacao`. Es lo que da estructura a una pantalla ancha sin dibujar una línea. La
-franja de `cacao` remapea sus tokens de texto hacia dentro y es el único sitio
-del sistema donde el oro de display es legal.
+**`<Section tono>`** es la herramienta tonal: `crema`, `honda` o `cacao`. ⚠️ Los
+**nombres de los valores son heredados de la v4** y ya no describen su color:
+`crema` = gris claro, `honda` = gris hondo, `cacao` = **negro**. Es lo que da
+estructura a una pantalla ancha sin dibujar una línea. La franja `cacao` remapea
+sus tokens de texto hacia dentro y es el único sitio del sistema donde el oro
+brillante (`--gold-400`, `--gold-300`) es legal.
 
-**`<PageHeader display>`** pone el `h1` en el serif a 44–72px. Mismo límite: la
-puerta del socio y su recorrido, no las pantallas de trabajo.
+**`<PageHeader display>`** pone el `h1` en el peldaño `hero` a 44–72px (peso
+800). Ya no es una cuestión de familia: es una cuestión de que 72px de titular en
+una pantalla de caja es espacio robado a la tabla.
 
 **`MenuItem submit`** cuando la acción del menú es una server action: renderiza un
 `<button type="submit">` dentro del `<form>` que envuelve al menú, así funciona sin
@@ -955,3 +1011,24 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    pide al usuario una captura o usa un dispositivo real.
 4. El Portal de Miembros solo se ha visto en su pantalla de acceso: el resto exige un
    miembro con membresía vigente y esas credenciales no están disponibles aquí.
+5. **La v5 no se ha visto renderizada.** Entró entera por tokens: `tsc`, `eslint`,
+   253 pruebas y `next build` pasan, y los 84 pares de contraste están calculados
+   con la fórmula WCAG 2.1 desde los hex — pero **nadie ha mirado una pantalla**.
+   Lo que hay que juzgar a ojo está listado en
+   [`.claude/docs/log/v5-negro-oro.md`](.claude/docs/log/v5-negro-oro.md).
+6. **Los tokens `--cacao-*` se llaman así y son NEGROS.** Once tokens (tres crudos
+   y ocho semánticos) conservan un nombre que ya no describe su valor. Se
+   mantuvieron a propósito: seis módulos los consumen y un `var()` huérfano no
+   falla, hereda en silencio. El renombrado a `--negro-*` / `--franja-*` es una
+   tanda propia, y tiene que tocar `<Section tono="cacao">` a la vez.
+7. **En tema oscuro `--border` da 1,92:1 contra la tarjeta y reprueba WCAG
+   1.4.11** para el borde en reposo de `Input`, `Select` y `Textarea`. Venía de
+   antes (la rampa cálida daba 1,46:1) y la v5 lo mejora sin cerrarlo. El arreglo
+   correcto es separar el borde de control del borde de división —`--border`
+   viste también los divisores del shell, y subirlo a 3:1 los engorda— y eso toca
+   módulos de componente.
+8. **Tres copias a mano de la paleta siguen en los colores de la v4** y hacen que
+   la PWA instalada arranque con la dirección de arte retirada:
+   `src/app/manifest.ts` (`#14100E`), `src/app/apple-icon.tsx` (`#14100E` y
+   `#C69A43`) y `src/app/icon.svg` (`#14100E` y las cuatro paradas del oro).
+   Quedaron fuera del alcance de la tanda de tokens.
