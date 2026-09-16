@@ -365,3 +365,23 @@ a.tarjeta:active {
     align-items: center;
   }
 }
+
+/*
+  LA INSIGNIA NO ENCOGE Y NO SE SALE.
+
+  `flex-shrink: 0` porque la cifra del descuento es el dato por el que existe
+  esta cinta: es lo último que puede perder ancho. Quien cede es el título de
+  la promoción, que ya sabe recortarse con puntos suspensivos.
+
+  `max-width` es el cinturón: si alguien alarga el texto, la píldora parte en
+  dos líneas dentro de la celda en vez de desbordarla. La clase va duplicada
+  para ganar a `.badge` por especificidad sin depender del orden en que Next
+  inyecte las hojas.
+*/
+.beneficio.beneficio {
+  flex-shrink: 0;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: anywhere;
+}

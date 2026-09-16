@@ -2,10 +2,10 @@
 
 import { useState, type CSSProperties } from 'react'
 import Link from 'next/link'
-import { Flame, Pause, Play } from 'lucide-react'
+import { Flame, Pause, Play, TicketPercent } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
-import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
+import { formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import {
   duracionMarquesinaSegundos,
   mereceMarquesina,
@@ -206,8 +206,23 @@ function Contenido({ item }: { item: TopDescuento }) {
         <span className={estilos.promocion}>{item.titulo}</span>
       </span>
 
-      <Badge tone="gold" size="sm">
-        {formatearBeneficio(item.tipoCodigo, item.valor)}
+      {/*
+        LA CIFRA SOLA, con el icono del descuento.
+
+        Aquí vivía la frase entera —«$1.250.000 de descuento»— dentro de una
+        celda de ancho FIJO (`--top-item-w`). `Badge` no parte línea y el
+        `min-width` automático de un hijo de flex es su ancho de contenido: no
+        encogía, empujaba, y la insignia se salía de la tarjeta. Es el mismo
+        fallo que ya se corrigió en la portada y en la rejilla — esta cinta se
+        quedó atrás porque se escribió antes.
+      */}
+      <Badge
+        tone="gold"
+        size="sm"
+        className={estilos.beneficio}
+        icon={<TicketPercent size={12} aria-hidden="true" />}
+      >
+        {formatearBeneficioCorto(item.tipoCodigo, item.valor)}
       </Badge>
     </>
   )
