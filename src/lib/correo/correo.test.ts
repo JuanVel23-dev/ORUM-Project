@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { construirCorreoInvitacion, leerConfigSmtp } from './correo'
+import { construirCorreoInvitacion, construirCorreoRecuperacion, leerConfigSmtp } from './correo'
 
 describe('construirCorreoInvitacion', () => {
   const base = {
@@ -34,6 +34,28 @@ describe('construirCorreoInvitacion', () => {
     expect(correo.html).not.toContain('<img')
     expect(correo.html).toContain('&lt;img')
     expect(correo.texto).toContain('Juan <img src=x onerror=alert(1)>')
+  })
+})
+
+describe('construirCorreoRecuperacion', () => {
+  const url = 'https://orum.example.com/auth/v1/verify?token=abc&type=recovery'
+
+  it('arma el asunto fijo', () => {
+    expect(construirCorreoRecuperacion({ urlRecuperacion: url }).asunto).toBe(
+      'Restablece tu contraseña en ORUM',
+    )
+  })
+
+  it('incluye el enlace en html y texto plano', () => {
+    const correo = construirCorreoRecuperacion({ urlRecuperacion: url })
+    expect(correo.html).toContain(url)
+    expect(correo.texto).toContain(url)
+  })
+
+  it('avisa que se ignore si no lo pidió el usuario', () => {
+    const correo = construirCorreoRecuperacion({ urlRecuperacion: url })
+    expect(correo.html).toMatch(/ignorarlo/i)
+    expect(correo.texto).toMatch(/ignorarlo/i)
   })
 })
 

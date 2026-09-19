@@ -41,6 +41,33 @@ export function construirCorreoInvitacion(input: InputCorreoInvitacion): CuerpoC
   return { asunto, html, texto }
 }
 
+export type InputCorreoRecuperacion = { urlRecuperacion: string }
+
+export function construirCorreoRecuperacion(input: InputCorreoRecuperacion): CuerpoCorreo {
+  const asunto = 'Restablece tu contraseña en ORUM'
+
+  const html = `
+    <p>Hola,</p>
+    <p>Recibimos una solicitud para restablecer tu contraseña en ORUM. Elige una
+    nueva con este enlace de un solo uso:</p>
+    <p><a href="${input.urlRecuperacion}">Restablecer mi contraseña</a></p>
+    <p>Si no fuiste tú, puedes ignorarlo: tu contraseña actual sigue funcionando.</p>
+  `.trim()
+
+  const texto = [
+    'Hola,',
+    '',
+    'Recibimos una solicitud para restablecer tu contraseña en ORUM. Elige una',
+    'nueva con este enlace de un solo uso:',
+    '',
+    input.urlRecuperacion,
+    '',
+    'Si no fuiste tú, puedes ignorarlo: tu contraseña actual sigue funcionando.',
+  ].join('\n')
+
+  return { asunto, html, texto }
+}
+
 export type ConfigSmtp = { usuario: string; password: string; remitente: string }
 
 /**
@@ -101,4 +128,14 @@ export async function enviarCorreo(input: InputCorreo): Promise<void> {
 export async function enviarCorreoInvitacion(input: InputCorreoInvitacion): Promise<void> {
   const { asunto, html, texto } = construirCorreoInvitacion(input)
   await enviarCorreo({ para: input.correo, nombre: input.nombre, asunto, html, texto })
+}
+
+export async function enviarCorreoRecuperacion(input: {
+  correo: string
+  urlRecuperacion: string
+}): Promise<void> {
+  const { asunto, html, texto } = construirCorreoRecuperacion({
+    urlRecuperacion: input.urlRecuperacion,
+  })
+  await enviarCorreo({ para: input.correo, nombre: input.correo, asunto, html, texto })
 }
