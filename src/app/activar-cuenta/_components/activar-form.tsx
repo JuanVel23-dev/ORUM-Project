@@ -9,6 +9,7 @@ import { Field } from '@/components/ui/field'
 import { Input, InputButton } from '@/components/ui/input'
 import { estilosAuth } from '@/components/ui/pantalla-auth'
 import { createClient } from '@/lib/supabase/client'
+import { textosActivacion } from '@/lib/auth/activacion'
 
 type Estado = 'verificando' | 'listo' | 'invalido' | 'guardando'
 
@@ -21,6 +22,7 @@ export function ActivarForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const destino = DESTINO_POR_ROL[searchParams.get('rol') ?? ''] ?? '/miembros'
+  const textos = textosActivacion(searchParams.get('modo') ?? undefined)
 
   const [estado, setEstado] = useState<Estado>('verificando')
   const [error, setError] = useState('')
@@ -82,7 +84,7 @@ export function ActivarForm() {
         </Alert>
       )}
 
-      <Field label="Elige tu contraseña" help="Mínimo 8 caracteres.">
+      <Field label={textos.etiquetaPassword} help="Mínimo 8 caracteres.">
         <Input
           name="password"
           type={verPassword ? 'text' : 'password'}
@@ -116,7 +118,7 @@ export function ActivarForm() {
         loading={estado === 'guardando'}
         icon={<ShieldCheck size={17} />}
       >
-        Activar cuenta
+        {textos.boton}
       </Button>
     </form>
   )

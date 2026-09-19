@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { enviarCorreoInvitacion } from '@/lib/correo/correo'
+import { construirUrlActivacion, urlBaseSitio } from '@/lib/auth/activacion'
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
 async function exigirSuperAdmin(): Promise<boolean> {
@@ -56,12 +57,11 @@ export async function crearComercio(
   const { data: rol } = await admin.from('roles').select('id').eq('codigo', 'comercio').single()
   if (!rol) return { error: 'No se encontró el rol "comercio" en la base de datos.' }
 
-  const urlBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
   const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
     type: 'invite',
     email,
-    options: { redirectTo: `${urlBase}/activar-cuenta?rol=comercio` },
+    options: { redirectTo: construirUrlActivacion(urlBaseSitio(), 'comercio') },
   })
   if (errAuth || !creado?.user) {
     const msg = /already been registered|already registered|exists/i.test(errAuth?.message ?? '')
