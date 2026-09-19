@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { construirCorreoInvitacion } from './correo'
+import { construirCorreoInvitacion, leerConfigSmtp } from './correo'
 
 describe('construirCorreoInvitacion', () => {
   const base = {
@@ -35,4 +35,32 @@ describe('construirCorreoInvitacion', () => {
     expect(correo.html).toContain('&lt;img')
     expect(correo.texto).toContain('Juan <img src=x onerror=alert(1)>')
   })
+})
+
+describe('leerConfigSmtp', () => {
+  const env = {
+    GMAIL_SMTP_USER: 'admin@orum.example.com',
+    GMAIL_SMTP_APP_PASSWORD: 'abcd efgh ijkl mnop',
+    GMAIL_FROM_EMAIL: 'no-reply@orum.example.com',
+  }
+
+  it('devuelve la configuración cuando están las tres variables', () => {
+    expect(leerConfigSmtp(env)).toEqual({
+      usuario: 'admin@orum.example.com',
+      password: 'abcdefghijklmnop',
+      remitente: 'no-reply@orum.example.com',
+    })
+  })
+
+  it('quita los espacios de la contraseña de aplicación (Google la muestra en bloques)', () => {
+    expect(leerConfigSmtp(env)?.password).toBe('abcdefghijklmnop')
+  })
+
+  it.each(['GMAIL_SMTP_USER', 'GMAIL_SMTP_APP_PASSWORD', 'GMAIL_FROM_EMAIL'])(
+    'devuelve null si falta %s',
+    (clave) => {
+      expect(leerConfigSmtp({ ...env, [clave]: undefined })).toBeNull()
+      expect(leerConfigSmtp({ ...env, [clave]: '   ' })).toBeNull()
+    },
+  )
 })

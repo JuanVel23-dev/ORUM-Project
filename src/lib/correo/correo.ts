@@ -1,4 +1,5 @@
-import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend'
+import nodemailer from 'nodemailer'
+import type { Transporter } from 'nodemailer'
 import { escaparHtml } from '../shared/html'
 
 export type InputCorreoInvitacion = {
@@ -40,24 +41,64 @@ export function construirCorreoInvitacion(input: InputCorreoInvitacion): CuerpoC
   return { asunto, html, texto }
 }
 
-const mailerSend = new MailerSend({ apiKey: process.env.MAILERSEND_API_KEY ?? '' })
+export type ConfigSmtp = { usuario: string; password: string; remitente: string }
+
+/**
+ * Lee la configuración SMTP del entorno. Devuelve `null` si falta cualquier
+ * variable: el envío es best-effort y una ausencia no debe romper el flujo.
+ * La contraseña de aplicación de Google se muestra en bloques separados por
+ * espacios ("abcd efgh …"); se quitan para que funcione pegada tal cual.
+ */
+export function leerConfigSmtp(env: Record<string, string | undefined>): ConfigSmtp | null {
+  const usuario = env.GMAIL_SMTP_USER?.trim()
+  const password = env.GMAIL_SMTP_APP_PASSWORD?.replace(/\s+/g, '')
+  const remitente = env.GMAIL_FROM_EMAIL?.trim()
+  if (!usuario || !password || !remitente) return null
+  return { usuario, password, remitente }
+}
+
+export type InputCorreo = {
+  para: string
+  nombre: string
+  asunto: string
+  html: string
+  texto: string
+}
+
+let transporte: Transporter | null = null
+
+function obtenerTransporte(config: ConfigSmtp): Transporter {
+  transporte ??= nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: { user: config.usuario, pass: config.password },
+  })
+  return transporte
+}
+
+/** Envía un correo transaccional por SMTP de Gmail. Nunca lanza: registra y sigue. */
+export async function enviarCorreo(input: InputCorreo): Promise<void> {
+  const config = leerConfigSmtp(process.env)
+  if (!config) {
+    console.error('Correo no enviado: faltan variables GMAIL_SMTP_USER / GMAIL_SMTP_APP_PASSWORD / GMAIL_FROM_EMAIL.')
+    return
+  }
+
+  try {
+    await obtenerTransporte(config).sendMail({
+      from: { name: 'ORUM', address: config.remitente },
+      to: { name: input.nombre, address: input.para },
+      subject: input.asunto,
+      html: input.html,
+      text: input.texto,
+    })
+  } catch (err) {
+    console.error('No se pudo enviar el correo:', err)
+  }
+}
 
 export async function enviarCorreoInvitacion(input: InputCorreoInvitacion): Promise<void> {
   const { asunto, html, texto } = construirCorreoInvitacion(input)
-
-  try {
-    const remitente = new Sender(process.env.MAILERSEND_FROM_EMAIL ?? '', 'ORUM')
-    const destinatarios = [new Recipient(input.correo, input.nombre)]
-
-    const emailParams = new EmailParams()
-      .setFrom(remitente)
-      .setTo(destinatarios)
-      .setSubject(asunto)
-      .setHtml(html)
-      .setText(texto)
-
-    await mailerSend.email.send(emailParams)
-  } catch (err) {
-    console.error('No se pudo enviar el correo de invitación:', err)
-  }
+  await enviarCorreo({ para: input.correo, nombre: input.nombre, asunto, html, texto })
 }
