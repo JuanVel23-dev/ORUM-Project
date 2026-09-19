@@ -57,7 +57,6 @@ export async function crearComercio(
   const { data: rol } = await admin.from('roles').select('id').eq('codigo', 'comercio').single()
   if (!rol) return { error: 'No se encontró el rol "comercio" en la base de datos.' }
 
-
   const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
     type: 'invite',
     email,

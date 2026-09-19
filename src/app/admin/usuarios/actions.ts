@@ -70,7 +70,6 @@ export async function crearUsuario(
     telefono: String(formData.get('telefono') ?? '').trim() || null,
   }
 
-
   const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
     type: 'invite',
     email,

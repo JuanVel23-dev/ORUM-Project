@@ -9,7 +9,7 @@ import { Field } from '@/components/ui/field'
 import { Input, InputButton } from '@/components/ui/input'
 import { estilosAuth } from '@/components/ui/pantalla-auth'
 import { createClient } from '@/lib/supabase/client'
-import { textosActivacion } from '@/lib/auth/activacion'
+import { interpretarEnlaceActivacion, MENSAJE_ENLACE_INVALIDO, textosActivacion } from '@/lib/auth/activacion'
 
 type Estado = 'verificando' | 'listo' | 'invalido' | 'guardando'
 
@@ -26,14 +26,28 @@ export function ActivarForm() {
 
   const [estado, setEstado] = useState<Estado>('verificando')
   const [error, setError] = useState('')
+  const [mensajeInvalido, setMensajeInvalido] = useState(MENSAJE_ENLACE_INVALIDO)
   const [verPassword, setVerPassword] = useState(false)
 
   // Chequeo único al montar (no una suscripción a store externo): confirma que
   // el enlace de invitación dejó una sesión válida antes de mostrar el formulario.
+  // La URL se lee ANTES de crear el cliente: supabase-js consume y limpia el hash
+  // al inicializar. Solo una URL con credenciales prueba algo; una sesión previa
+  // del navegador, por sí sola, no.
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      setEstado(data.session ? 'listo' : 'invalido')
+    const enlace = interpretarEnlaceActivacion(window.location.hash, window.location.search)
+    const resolver: Promise<{ estado: Estado; mensaje?: string }> =
+      enlace.tipo === 'con-credenciales'
+        ? createClient()
+            .auth.getSession()
+            .then(({ data }) => ({ estado: data.session ? 'listo' : 'invalido' }))
+        : Promise.resolve({
+            estado: 'invalido',
+            mensaje: enlace.tipo === 'error' ? enlace.mensaje : undefined,
+          })
+    resolver.then((r) => {
+      if (r.mensaje) setMensajeInvalido(r.mensaje)
+      setEstado(r.estado)
     })
   }, [])
 
@@ -71,7 +85,7 @@ export function ActivarForm() {
   if (estado === 'invalido') {
     return (
       <Alert tone="danger" className={estilosAuth.alerta}>
-        Este enlace no es válido o ya expiró. Pide que te envíen uno nuevo.
+        {mensajeInvalido}
       </Alert>
     )
   }

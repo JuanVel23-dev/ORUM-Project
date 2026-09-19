@@ -38,3 +38,32 @@ export function textosActivacion(modo: string | undefined) {
     boton: 'Activar cuenta',
   }
 }
+
+export const MENSAJE_ENLACE_INVALIDO =
+  'Este enlace no es válido o ya expiró. Pide que te envíen uno nuevo.'
+
+export type InterpretacionEnlace =
+  | { tipo: 'error'; mensaje: string }
+  | { tipo: 'con-credenciales' }
+  | { tipo: 'sin-credenciales' }
+
+/**
+ * Decide qué trae la URL a la que Supabase redirige tras el enlace del correo.
+ * Un enlace vencido o ya usado llega como `#error=access_denied&error_code=otp_expired`;
+ * uno bueno trae `#access_token=…` (implícito) o `?code=…` (PKCE). Sin ninguno de
+ * los dos, una sesión previa del navegador NO prueba nada sobre este enlace.
+ */
+export function interpretarEnlaceActivacion(hash: string, search: string): InterpretacionEnlace {
+  const h = new URLSearchParams(hash.replace(/^#/, ''))
+  const q = new URLSearchParams(search.replace(/^\?/, ''))
+
+  if (h.has('error') || h.has('error_description') || h.has('error_code')) {
+    const mensaje =
+      h.get('error_code') === 'otp_expired'
+        ? 'Este enlace ya expiró o ya se usó. Pide uno nuevo.'
+        : MENSAJE_ENLACE_INVALIDO
+    return { tipo: 'error', mensaje }
+  }
+  if (h.has('access_token') || h.has('type') || q.has('code')) return { tipo: 'con-credenciales' }
+  return { tipo: 'sin-credenciales' }
+}

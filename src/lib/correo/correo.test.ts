@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { escaparHtml } from '../shared/html'
 import { construirCorreoInvitacion, construirCorreoRecuperacion, leerConfigSmtp } from './correo'
 
 describe('construirCorreoInvitacion', () => {
@@ -15,7 +16,7 @@ describe('construirCorreoInvitacion', () => {
 
   it('incluye el enlace de invitación y ninguna contraseña', () => {
     const correo = construirCorreoInvitacion(base)
-    expect(correo.html).toContain(base.urlInvitacion)
+    expect(correo.html).toContain(escaparHtml(base.urlInvitacion))
     expect(correo.texto).toContain(base.urlInvitacion)
     expect(correo.html).not.toMatch(/contraseña:\s*\S/i)
   })
@@ -48,7 +49,7 @@ describe('construirCorreoRecuperacion', () => {
 
   it('incluye el enlace en html y texto plano', () => {
     const correo = construirCorreoRecuperacion({ urlRecuperacion: url })
-    expect(correo.html).toContain(url)
+    expect(correo.html).toContain(escaparHtml(url))
     expect(correo.texto).toContain(url)
   })
 
@@ -56,6 +57,23 @@ describe('construirCorreoRecuperacion', () => {
     const correo = construirCorreoRecuperacion({ urlRecuperacion: url })
     expect(correo.html).toMatch(/ignorarlo/i)
     expect(correo.texto).toMatch(/ignorarlo/i)
+  })
+})
+
+describe('escape de URLs en href', () => {
+  const url = 'https://orum.example.com/verify?token=a&type=recovery&x="y"'
+
+  it('escapa & y comillas en el href del html y deja el texto crudo (recuperación)', () => {
+    const correo = construirCorreoRecuperacion({ urlRecuperacion: url })
+    expect(correo.html).toContain(`href="${escaparHtml(url)}"`)
+    expect(correo.html).toContain('&amp;type=recovery')
+    expect(correo.texto).toContain(url)
+  })
+
+  it('escapa & y comillas en el href del html y deja el texto crudo (invitación)', () => {
+    const correo = construirCorreoInvitacion({ nombre: 'Ana', correo: 'a@b.co', urlInvitacion: url })
+    expect(correo.html).toContain(`href="${escaparHtml(url)}"`)
+    expect(correo.texto).toContain(url)
   })
 })
 

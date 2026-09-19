@@ -23,7 +23,7 @@ export function construirCorreoInvitacion(input: InputCorreoInvitacion): CuerpoC
     <p>Hola ${nombre},</p>
     <p>Se creó tu cuenta en ORUM (${correo}). Activa el acceso y elige tu propia
     contraseña con este enlace de un solo uso:</p>
-    <p><a href="${input.urlInvitacion}">Activar mi cuenta</a></p>
+    <p><a href="${escaparHtml(input.urlInvitacion)}">Activar mi cuenta</a></p>
     <p>Si no esperabas este correo, puedes ignorarlo.</p>
   `.trim()
 
@@ -50,7 +50,7 @@ export function construirCorreoRecuperacion(input: InputCorreoRecuperacion): Cue
     <p>Hola,</p>
     <p>Recibimos una solicitud para restablecer tu contraseña en ORUM. Elige una
     nueva con este enlace de un solo uso:</p>
-    <p><a href="${input.urlRecuperacion}">Restablecer mi contraseña</a></p>
+    <p><a href="${escaparHtml(input.urlRecuperacion)}">Restablecer mi contraseña</a></p>
     <p>Si no fuiste tú, puedes ignorarlo: tu contraseña actual sigue funcionando.</p>
   `.trim()
 
@@ -92,16 +92,23 @@ export type InputCorreo = {
   texto: string
 }
 
-let transporte: Transporter | null = null
+let cache: { clave: string; transporte: Transporter } | null = null
 
+/** El transporte se reutiliza mientras la configuración no cambie. */
 function obtenerTransporte(config: ConfigSmtp): Transporter {
-  transporte ??= nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: { user: config.usuario, pass: config.password },
-  })
-  return transporte
+  const clave = `${config.usuario}:${config.password}:${config.remitente}`
+  if (cache?.clave !== clave) {
+    cache = {
+      clave,
+      transporte: nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: { user: config.usuario, pass: config.password },
+      }),
+    }
+  }
+  return cache.transporte
 }
 
 /** Envía un correo transaccional por SMTP de Gmail. Nunca lanza: registra y sigue. */

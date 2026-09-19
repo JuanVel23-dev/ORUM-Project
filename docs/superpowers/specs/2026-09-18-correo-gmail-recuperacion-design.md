@@ -182,8 +182,12 @@ El destino tras guardar sigue resolviéndose por `rol` exactamente como hoy (`DE
   tiempo de respuesta aproximado (no cortar temprano si `resolverCorreoPorNumeroMembresia` no
   encuentra nada — seguir hasta el mismo punto del flujo antes de responder).
 - **Turnstile fail-closed**, igual que los logins (§7).
-- **Rate limit de Supabase Auth:** `generateLink` ya respeta los límites internos de Auth para
-  reenvíos repetidos sobre la misma cuenta; no se agrega limitación propia en este pase.
+- **Sin rate limit propio en este pase:** `generateLink` es una llamada de administración y NO
+  está sujeta al limitador de correos de GoTrue, así que no hay tope nativo. Riesgo aceptado:
+  quien resuelva Turnstile puede enviar recuperaciones repetidas a una dirección conocida o
+  consumir la cuota diaria de Workspace, lo que también detendría las invitaciones. Mitigación:
+  Turnstile ahora, más una regla de rate limiting de Cloudflare sobre
+  `/miembros/login/recuperar` y `/comercios/login/recuperar` en la Fase 2 de Cloudflare prevista.
 - El enlace de recuperación es de un solo uso y expira igual que el de invitación (comportamiento
   nativo de Supabase Auth, sin configuración adicional).
 

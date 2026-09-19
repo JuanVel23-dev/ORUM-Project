@@ -3,7 +3,7 @@
 import { after } from 'next/server'
 import { ERROR_TURNSTILE, verificarTurnstileDeFormulario } from '@/lib/auth/turnstile-request'
 import { enviarRecuperacion } from '@/lib/auth/recuperacion'
-import { resolverCorreoPorNumeroMembresia } from '@/lib/miembros/auth-miembro'
+import { resolverCuentaPorNumeroMembresia } from '@/lib/miembros/auth-miembro'
 
 export type RecuperarState = { enviado?: boolean; error?: string }
 
@@ -23,8 +23,12 @@ export async function solicitarRecuperacionMiembro(
   if (!captcha.valido) return { error: ERROR_TURNSTILE }
 
   after(async () => {
-    const correo = await resolverCorreoPorNumeroMembresia(numeroMembresia)
-    if (correo) await enviarRecuperacion(correo, 'miembro')
+    try {
+      const cuenta = await resolverCuentaPorNumeroMembresia(numeroMembresia)
+      if (cuenta) await enviarRecuperacion(cuenta.correo, 'miembro', cuenta.perfilId)
+    } catch (err) {
+      console.error('No se pudo procesar la recuperación de contraseña de miembro:', err)
+    }
   })
 
   return { enviado: true }

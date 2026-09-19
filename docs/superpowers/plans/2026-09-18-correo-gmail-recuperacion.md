@@ -861,7 +861,7 @@ Esta tarea es manual y bloquea el paso a producción (spec §6 y §11). Los dato
 - [ ] **Step 2: Variables de entorno**
 
 - `.env.local`: `GMAIL_SMTP_USER`, `GMAIL_SMTP_APP_PASSWORD`, `GMAIL_FROM_EMAIL`.
-- Vercel (Production **y** Preview): las tres anteriores y `NEXT_PUBLIC_SITE_URL` con el dominio real.
+- Vercel (Production **y** Preview): las tres anteriores y `NEXT_PUBLIC_SITE_URL` con el dominio real. `NEXT_PUBLIC_SITE_URL` se incrusta en el código en tiempo de BUILD en Vercel: tras añadirla o cambiarla hace falta un redeploy, no basta con guardar la variable.
 
 - [ ] **Step 3: Supabase Auth** (dashboard → Authentication → URL Configuration)
 
