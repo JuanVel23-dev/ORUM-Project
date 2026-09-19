@@ -12,6 +12,7 @@ import styles from './pantalla-auth.module.css'
 export const estilosAuth = {
   formulario: styles.formulario,
   alerta: styles.alerta,
+  enlace: styles.enlace,
 } as const
 
 type PantallaAuthProps = {
