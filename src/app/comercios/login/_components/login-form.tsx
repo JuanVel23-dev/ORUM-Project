@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react'
+import Link from 'next/link'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -58,6 +59,10 @@ export function LoginComercioForm({ mensajeInicial }: { mensajeInicial?: string 
           }
         />
       </Field>
+
+      <Link href="/comercios/login/recuperar" className={estilosAuth.enlace}>
+        ¿Olvidaste tu contraseña?
+      </Link>
 
       <Turnstile />
 
