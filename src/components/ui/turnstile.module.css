@@ -1,0 +1,6 @@
+.caja {
+  /* Reserva el alto del widget (300×65 en tamaño normal) para que al
+     renderizarse no empuje el botón de envío: un salto de maqueta en el
+     login se lee como un fallo. */
+  min-height: 65px;
+}

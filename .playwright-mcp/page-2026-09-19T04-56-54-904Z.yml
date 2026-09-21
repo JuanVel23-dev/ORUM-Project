@@ -1,0 +1,14 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e3]:
+    - banner [ref=f2e4]:
+      - generic [ref=f2e5]: ORUM
+      - generic [ref=f2e6]: Restablece tu contraseña
+    - generic [ref=f2e29]:
+      - status [ref=f2e30]:
+        - generic [ref=f2e34]:
+          - generic [ref=f2e35]: Revisa tu correo
+          - generic [ref=f2e36]: Si el número de membresía existe, te enviamos un enlace para restablecer tu contraseña. Puede tardar un par de minutos; mira también en spam.
+      - link "Volver a iniciar sesión" [ref=f2e37] [cursor=pointer]:
+        - /url: /miembros/login
+  - button "Open Next.js Dev Tools" [ref=f2e25] [cursor=pointer]
+  - alert [ref=f2e38]

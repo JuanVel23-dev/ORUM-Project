@@ -11,6 +11,7 @@ import {
   calcularFechaInicioRenovacion,
 } from '@/lib/miembros/membresias'
 import { esNumeroRegistroValido } from '@/lib/miembros/numeros-registro'
+import { construirUrlActivacion, urlBaseSitio } from '@/lib/auth/activacion'
 
 type Admin = ReturnType<typeof createAdminClient>
 
@@ -109,14 +110,13 @@ export async function registrarMiembro(
   if (!numeroLibre) {
     return { error: 'El número de registro seleccionado ya no está disponible. Elige otro.' }
   }
-  const urlBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
   // 5) Crear usuario en Auth vía invitación: no se genera ni se envía
   // contraseña, el miembro elige la suya al abrir el enlace de un solo uso.
   const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
     type: 'invite',
     email: correo,
-    options: { redirectTo: `${urlBase}/activar-cuenta?rol=miembro` },
+    options: { redirectTo: construirUrlActivacion(urlBaseSitio(), 'miembro') },
   })
   if (errAuth || !creado?.user) {
     const msg = /already been registered|already registered|exists/i.test(errAuth?.message ?? '')

@@ -7,9 +7,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * inventan correos internos: el miembro siempre tiene un correo real
  * asociado a su cuenta de Auth (provisionado desde Fase 2).
  */
-export async function resolverCorreoPorNumeroMembresia(
+export async function resolverCuentaPorNumeroMembresia(
   numeroMembresia: string,
-): Promise<string | null> {
+): Promise<{ correo: string; perfilId: string } | null> {
   const admin = createAdminClient()
 
   const { data: miembro } = await admin
@@ -22,5 +22,12 @@ export async function resolverCorreoPorNumeroMembresia(
   if (!miembro?.perfil_id) return null
 
   const { data } = await admin.auth.admin.getUserById(miembro.perfil_id)
-  return data.user?.email ?? null
+  const correo = data.user?.email
+  return correo ? { correo, perfilId: miembro.perfil_id } : null
+}
+
+export async function resolverCorreoPorNumeroMembresia(
+  numeroMembresia: string,
+): Promise<string | null> {
+  return (await resolverCuentaPorNumeroMembresia(numeroMembresia))?.correo ?? null
 }

@@ -1,0 +1,968 @@
+{
+  ".opencode/plugins/graphify.js": {
+    "mtime": 1786841024.0432148,
+    "seen": 1786841105.8479035,
+    "ast_hash": "b33d000860642c6f4907a877e0387a21",
+    "semantic_hash": ""
+  },
+  "eslint.config.mjs": {
+    "mtime": 1785098981.747084,
+    "seen": 1786841105.8479097,
+    "ast_hash": "6c4307ffa009658f5c97f5629094c0c2",
+    "semantic_hash": ""
+  },
+  "next.config.ts": {
+    "mtime": 1785098981.7480986,
+    "seen": 1786841105.8479116,
+    "ast_hash": "025f4fcb6024b3524d19492cf7ce54a2",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1786591858.19722,
+    "seen": 1786841105.8479128,
+    "ast_hash": "ac0750c86837e8a419e536bd7eaf4155",
+    "semantic_hash": ""
+  },
+  "src/app/admin/bitacora/page.tsx": {
+    "mtime": 1786147753.0915134,
+    "seen": 1786841105.8479135,
+    "ast_hash": "cb9bc90540073a57674676f25b8cc6d7",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/[id]/editar/_components/editar-comercio-form.tsx": {
+    "mtime": 1786146131.6044602,
+    "seen": 1786841105.847914,
+    "ast_hash": "f47a1a985b09b9cad79a48c53a8a0771",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/[id]/editar/page.tsx": {
+    "mtime": 1786146136.9300306,
+    "seen": 1786841105.8479147,
+    "ast_hash": "d8f401fea62c5d9459ee5ab184117772",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/[id]/page.tsx": {
+    "mtime": 1786407074.421286,
+    "seen": 1786841105.8479152,
+    "ast_hash": "b0437b6e93b407ab72f6fc4dc9bd9811",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/[id]/promociones/[promoId]/editar/page.tsx": {
+    "mtime": 1786146216.1200912,
+    "seen": 1786841105.847916,
+    "ast_hash": "1058fda68ef1394a6fb7cc73cd7c2cd9",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/[id]/promociones/_components/promocion-form.tsx": {
+    "mtime": 1786146207.4089432,
+    "seen": 1786841105.8479166,
+    "ast_hash": "88b915447c53fb4e90a75f3a87f0cfe8",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/[id]/promociones/nueva/page.tsx": {
+    "mtime": 1786146213.401238,
+    "seen": 1786841105.8479176,
+    "ast_hash": "3ee6537bb8b000f9820f4738584f0b46",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/[id]/sucursales/[sucursalId]/editar/page.tsx": {
+    "mtime": 1786146178.97939,
+    "seen": 1786841105.8479183,
+    "ast_hash": "5d470bee9c97a6b15c9701e2fd6b851f",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/[id]/sucursales/_components/sucursal-form.tsx": {
+    "mtime": 1786146168.9454265,
+    "seen": 1786841105.8479187,
+    "ast_hash": "9ea4576f3e78eac659ef819b0334ef92",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/[id]/sucursales/nueva/page.tsx": {
+    "mtime": 1786146175.4050043,
+    "seen": 1786841105.8479197,
+    "ast_hash": "c13b94e6b4105e7a69ccdcd2106da98e",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/_components/comercio-form.tsx": {
+    "mtime": 1786146015.5097415,
+    "seen": 1786841105.8479204,
+    "ast_hash": "9c9dfddfbda74519ef9244720394c177",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/actions.ts": {
+    "mtime": 1786145822.310544,
+    "seen": 1786841105.847921,
+    "ast_hash": "8a8f3a4185bb1b71f551b8cb0938434b",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/nuevo/page.tsx": {
+    "mtime": 1786146040.2308893,
+    "seen": 1786841105.8479214,
+    "ast_hash": "e3792736fcf8cae7bee87ad254649b59",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/page.tsx": {
+    "mtime": 1786407064.925517,
+    "seen": 1786841105.847922,
+    "ast_hash": "29cec408719e3b3db1f565d938bbb029",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/promociones-actions.ts": {
+    "mtime": 1786145821.8633049,
+    "seen": 1786841105.8479228,
+    "ast_hash": "bab1c2c608841e0e9364456085a0a94c",
+    "semantic_hash": ""
+  },
+  "src/app/admin/comercios/sucursales-actions.ts": {
+    "mtime": 1786145802.3293855,
+    "seen": 1786841105.8479233,
+    "ast_hash": "badd7bac45b8c5a589e5c48e4d0cbb2e",
+    "semantic_hash": ""
+  },
+  "src/app/admin/cuenta/actions.ts": {
+    "mtime": 1785098981.7553384,
+    "seen": 1786841105.847924,
+    "ast_hash": "a4323551f440b6fbabea38641f35ec09",
+    "semantic_hash": ""
+  },
+  "src/app/admin/cuenta/password/_components/password-form.tsx": {
+    "mtime": 1786147519.682905,
+    "seen": 1786841105.8479245,
+    "ast_hash": "b2dc394b44236743b646ca8bcc797e40",
+    "semantic_hash": ""
+  },
+  "src/app/admin/cuenta/password/page.tsx": {
+    "mtime": 1786147525.148909,
+    "seen": 1786841105.8479254,
+    "ast_hash": "ada23b28258e163d8696598452e63fa8",
+    "semantic_hash": ""
+  },
+  "src/app/admin/layout.tsx": {
+    "mtime": 1786147858.2881134,
+    "seen": 1786841105.847926,
+    "ast_hash": "bf1872b84c42674bdce9a76f0734c270",
+    "semantic_hash": ""
+  },
+  "src/app/admin/metricas/page.tsx": {
+    "mtime": 1786591581.3039377,
+    "seen": 1786841105.8479269,
+    "ast_hash": "ae758335a7eae52035bef8b328a5b269",
+    "semantic_hash": ""
+  },
+  "src/app/admin/miembros/[id]/_components/renovar-form.tsx": {
+    "mtime": 1786147105.3753757,
+    "seen": 1786841105.8479273,
+    "ast_hash": "b6ba0fb6b29b0c1409c3ba90fa4c30f2",
+    "semantic_hash": ""
+  },
+  "src/app/admin/miembros/[id]/editar/_components/editar-miembro-form.tsx": {
+    "mtime": 1786147072.3412745,
+    "seen": 1786841105.8479278,
+    "ast_hash": "d172726f08448d70ae55aaf47d850651",
+    "semantic_hash": ""
+  },
+  "src/app/admin/miembros/[id]/editar/page.tsx": {
+    "mtime": 1786147078.1829345,
+    "seen": 1786841105.8479285,
+    "ast_hash": "241d60c9ca30d950f8972eee282b2e2c",
+    "semantic_hash": ""
+  },
+  "src/app/admin/miembros/[id]/page.tsx": {
+    "mtime": 1786147122.3233569,
+    "seen": 1786841105.847929,
+    "ast_hash": "af8d559d5623f76a5e21f637928673b5",
+    "semantic_hash": ""
+  },
+  "src/app/admin/miembros/_components/miembro-form.tsx": {
+    "mtime": 1786146968.1124105,
+    "seen": 1786841105.8479297,
+    "ast_hash": "f5ec840150970694080245ae70c5d9f7",
+    "semantic_hash": ""
+  },
+  "src/app/admin/miembros/actions.ts": {
+    "mtime": 1786589728.1357374,
+    "seen": 1786841105.8479304,
+    "ast_hash": "ac44482776e2719ed3896478ac0ac612",
+    "semantic_hash": ""
+  },
+  "src/app/admin/miembros/nuevo/page.tsx": {
+    "mtime": 1786146986.967835,
+    "seen": 1786841105.8479311,
+    "ast_hash": "0652a179b7c11483567349bbbc437e55",
+    "semantic_hash": ""
+  },
+  "src/app/admin/miembros/page.tsx": {
+    "mtime": 1786146980.8975625,
+    "seen": 1786841105.8479316,
+    "ast_hash": "71fbf867cbc6c211f535818b9fca6bc3",
+    "semantic_hash": ""
+  },
+  "src/app/admin/page.tsx": {
+    "mtime": 1786145805.1330297,
+    "seen": 1786841105.8479323,
+    "ast_hash": "2235154a998ca51a39746ad88d94066a",
+    "semantic_hash": ""
+  },
+  "src/app/admin/planes/[id]/editar/page.tsx": {
+    "mtime": 1786147402.8320181,
+    "seen": 1786841105.8479328,
+    "ast_hash": "d5d3d5e84e9840604de829b5ce6afb4f",
+    "semantic_hash": ""
+  },
+  "src/app/admin/planes/_components/plan-form.tsx": {
+    "mtime": 1786147385.302558,
+    "seen": 1786841105.8479335,
+    "ast_hash": "b2a93b2deff9d56c5ee46bc0f85e58df",
+    "semantic_hash": ""
+  },
+  "src/app/admin/planes/actions.ts": {
+    "mtime": 1786145805.3594246,
+    "seen": 1786841105.8479342,
+    "ast_hash": "0d8fd7e4dffd456c3b76d23f840113ee",
+    "semantic_hash": ""
+  },
+  "src/app/admin/planes/nuevo/page.tsx": {
+    "mtime": 1786147397.803801,
+    "seen": 1786841105.847935,
+    "ast_hash": "32d0b055cbf4066bd1c6f726950c5c32",
+    "semantic_hash": ""
+  },
+  "src/app/admin/planes/page.tsx": {
+    "mtime": 1786147394.2042935,
+    "seen": 1786841105.8479354,
+    "ast_hash": "855f1d17e49ce4c00ce6829cdeb9dc09",
+    "semantic_hash": ""
+  },
+  "src/app/admin/usuarios/[id]/editar/_components/editar-usuario-form.tsx": {
+    "mtime": 1786147483.2259543,
+    "seen": 1786841105.847936,
+    "ast_hash": "4409d6238d8767248189120f04eb447f",
+    "semantic_hash": ""
+  },
+  "src/app/admin/usuarios/[id]/editar/page.tsx": {
+    "mtime": 1786147490.648243,
+    "seen": 1786841105.8479366,
+    "ast_hash": "c90b742a118e08e55fa90b31b0891ea4",
+    "semantic_hash": ""
+  },
+  "src/app/admin/usuarios/actions.ts": {
+    "mtime": 1786145822.6831548,
+    "seen": 1786841105.847937,
+    "ast_hash": "21bb6716829ca1b5176dc6ea91e5a132",
+    "semantic_hash": ""
+  },
+  "src/app/admin/usuarios/nuevo/_components/usuario-form.tsx": {
+    "mtime": 1786147435.3905232,
+    "seen": 1786841105.8479378,
+    "ast_hash": "605583fc23f801a0ac5a47630fa9b029",
+    "semantic_hash": ""
+  },
+  "src/app/admin/usuarios/nuevo/page.tsx": {
+    "mtime": 1786147451.8711147,
+    "seen": 1786841105.847939,
+    "ast_hash": "a2be5683edd78a8d499902a2e5e28a79",
+    "semantic_hash": ""
+  },
+  "src/app/admin/usuarios/page.tsx": {
+    "mtime": 1786147447.494244,
+    "seen": 1786841105.8479395,
+    "ast_hash": "ec4eb987f2129c6cfb0192d067571190",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/(portal)/_components/buscar-miembro-form.tsx": {
+    "mtime": 1786589728.1382606,
+    "seen": 1786841105.8479402,
+    "ast_hash": "1e07436e84ad33de681f01a5daa98a68",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/(portal)/_components/confirmar-venta-form.tsx": {
+    "mtime": 1786589728.1392677,
+    "seen": 1786841105.8479407,
+    "ast_hash": "41a021c3ade1ac0e2d519cfb8306725d",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/(portal)/_components/escaner-qr.tsx": {
+    "mtime": 1786589728.1402667,
+    "seen": 1786841105.8479412,
+    "ast_hash": "48eeedae2f7d9481eddf46b5dc08368c",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/(portal)/_components/resultado-miembro.tsx": {
+    "mtime": 1786589728.1402667,
+    "seen": 1786841105.8479419,
+    "ast_hash": "4e662235b5b77d4c633e71bb64a53cc6",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/(portal)/_components/verificacion-tool.tsx": {
+    "mtime": 1786589728.1417737,
+    "seen": 1786841105.8479424,
+    "ast_hash": "bbc3a58d9c45a2152b2ef4f40890ba00",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/(portal)/actions.ts": {
+    "mtime": 1786589728.1432955,
+    "seen": 1786841105.8479428,
+    "ast_hash": "cca76ec4f4bb196d0e1bb18b69472a93",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/(portal)/layout.tsx": {
+    "mtime": 1786589728.1432955,
+    "seen": 1786841105.8479433,
+    "ast_hash": "ead3f4c333c0b078b1a747b565a5ba5b",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/(portal)/page.tsx": {
+    "mtime": 1786589728.1432955,
+    "seen": 1786841105.847944,
+    "ast_hash": "85f6fdc8fd0a1c237ef1ceea8ae0c9d1",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/login/_components/login-form.tsx": {
+    "mtime": 1786589728.1443079,
+    "seen": 1786841105.8479445,
+    "ast_hash": "4787bc2f9ee3fd6f5f7222727ad6465c",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/login/actions.ts": {
+    "mtime": 1786589728.1443079,
+    "seen": 1786841105.847945,
+    "ast_hash": "3f46cf6230e018db165a85a6cb73dae7",
+    "semantic_hash": ""
+  },
+  "src/app/comercios/login/page.tsx": {
+    "mtime": 1786589728.1453013,
+    "seen": 1786841105.8479455,
+    "ast_hash": "d791f863513ad97e3a3b9080c355ee8f",
+    "semantic_hash": ""
+  },
+  "src/app/layout.tsx": {
+    "mtime": 1785098981.7740693,
+    "seen": 1786841105.847946,
+    "ast_hash": "19970d53a99a4f2f6d4a3142461d613e",
+    "semantic_hash": ""
+  },
+  "src/app/login/actions.ts": {
+    "mtime": 1786145807.0608528,
+    "seen": 1786841105.8479464,
+    "ast_hash": "f49e1a1d78bfbe3acb246648e0888281",
+    "semantic_hash": ""
+  },
+  "src/app/login/login-form.tsx": {
+    "mtime": 1785098981.7750788,
+    "seen": 1786841105.8479474,
+    "ast_hash": "008265f1ffd2439f0efbc163505ae142",
+    "semantic_hash": ""
+  },
+  "src/app/login/page.tsx": {
+    "mtime": 1786145807.3002906,
+    "seen": 1786841105.8479478,
+    "ast_hash": "1e6911c915f0ae2ab788e9655af7ae04",
+    "semantic_hash": ""
+  },
+  "src/app/miembros/(portal)/_components/comercio-card.tsx": {
+    "mtime": 1786407103.8457565,
+    "seen": 1786841105.8479483,
+    "ast_hash": "78678b5cb273cefb8e700769d9bea2ee",
+    "semantic_hash": ""
+  },
+  "src/app/miembros/(portal)/_components/filtros-form.tsx": {
+    "mtime": 1786315798.8277614,
+    "seen": 1786841105.8479488,
+    "ast_hash": "ce28efe707e9be6a8df3bfdea33db0f3",
+    "semantic_hash": ""
+  },
+  "src/app/miembros/(portal)/inactiva/page.tsx": {
+    "mtime": 1786315798.8292985,
+    "seen": 1786841105.8479493,
+    "ast_hash": "511496175cd332a34ef6e9f2cf844978",
+    "semantic_hash": ""
+  },
+  "src/app/miembros/(portal)/layout.tsx": {
+    "mtime": 1786315798.8303182,
+    "seen": 1786841105.8479497,
+    "ast_hash": "38b451146778ad6ac3e55db063d6db58",
+    "semantic_hash": ""
+  },
+  "src/app/miembros/(portal)/page.tsx": {
+    "mtime": 1786407094.5606863,
+    "seen": 1786841105.8479502,
+    "ast_hash": "53abe70231b3555fccd71ea1539152d9",
+    "semantic_hash": ""
+  },
+  "src/app/miembros/(portal)/perfil/page.tsx": {
+    "mtime": 1786315798.8332949,
+    "seen": 1786841105.8479512,
+    "ast_hash": "38ec160314aa4315f28659bbbea23ee9",
+    "semantic_hash": ""
+  },
+  "src/app/miembros/login/_components/login-form.tsx": {
+    "mtime": 1786315798.8348074,
+    "seen": 1786841105.8479517,
+    "ast_hash": "5463975d6adc49c5834d58717c095938",
+    "semantic_hash": ""
+  },
+  "src/app/miembros/login/actions.ts": {
+    "mtime": 1786315798.8363202,
+    "seen": 1786841105.8479521,
+    "ast_hash": "8ae5a913c78e8a6fbe0df52ef80cd055",
+    "semantic_hash": ""
+  },
+  "src/app/miembros/login/page.tsx": {
+    "mtime": 1786315798.8373342,
+    "seen": 1786841105.8479526,
+    "ast_hash": "7fa6c578d8cdc6abc377622c9b1dc0ea",
+    "semantic_hash": ""
+  },
+  "src/app/page.tsx": {
+    "mtime": 1785098981.777088,
+    "seen": 1786841105.8479533,
+    "ast_hash": "876dae40f1ae7585e0ab08e4b9a8d9fb",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Alert.tsx": {
+    "mtime": 1786145963.7591074,
+    "seen": 1786841105.847954,
+    "ast_hash": "176a20134b2fba66a77df7e7a8cf9428",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Badge.tsx": {
+    "mtime": 1786145951.8786428,
+    "seen": 1786841105.8479545,
+    "ast_hash": "2fcbdd4cb12f16d7e5a4116744654b9c",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Button.tsx": {
+    "mtime": 1786145946.7778716,
+    "seen": 1786841105.847955,
+    "ast_hash": "30d8ee59bdcc597a1726f8296e1f9096",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Card.tsx": {
+    "mtime": 1786315798.8388393,
+    "seen": 1786841105.8479555,
+    "ast_hash": "14b6a0a35c82f811a02f8925569f8de7",
+    "semantic_hash": ""
+  },
+  "src/components/ui/ComercioLogo.tsx": {
+    "mtime": 1786407046.3672745,
+    "seen": 1786841105.847956,
+    "ast_hash": "68a46c1983988bbf55cab811c4221fb0",
+    "semantic_hash": ""
+  },
+  "src/components/ui/DataTable.tsx": {
+    "mtime": 1786145957.7012773,
+    "seen": 1786841105.8479564,
+    "ast_hash": "e5974fedfadef942925c15326250bfa5",
+    "semantic_hash": ""
+  },
+  "src/components/ui/EmptyState.tsx": {
+    "mtime": 1786145949.4251642,
+    "seen": 1786841105.847957,
+    "ast_hash": "a2e6f92a5a6e31199019a2a1a809eec2",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Field.tsx": {
+    "mtime": 1786145942.6442122,
+    "seen": 1786841105.8479576,
+    "ast_hash": "dfce4419750689de96a81f49c32ab4c4",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Layout.tsx": {
+    "mtime": 1786145960.7339082,
+    "seen": 1786841105.8479586,
+    "ast_hash": "a007158c333a9841e2ffe25e0921929e",
+    "semantic_hash": ""
+  },
+  "src/components/ui/PageHeader.tsx": {
+    "mtime": 1786145937.8489108,
+    "seen": 1786841105.847959,
+    "ast_hash": "9f008bb46667fcffdfbc4a29fb61924d",
+    "semantic_hash": ""
+  },
+  "src/components/ui/QrCode.tsx": {
+    "mtime": 1786315798.8398564,
+    "seen": 1786841105.8479595,
+    "ast_hash": "cfc2bc75fb352c1fdda19a89be467b0c",
+    "semantic_hash": ""
+  },
+  "src/components/ui/SearchForm.tsx": {
+    "mtime": 1786146946.078528,
+    "seen": 1786841105.84796,
+    "ast_hash": "4fdf0a815f9b58cba25bc84befcb442d",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Select.tsx": {
+    "mtime": 1786315798.8418496,
+    "seen": 1786841105.8479605,
+    "ast_hash": "d1a7d1aec520ada2e18fb63e284141fd",
+    "semantic_hash": ""
+  },
+  "src/components/ui/WhatsAppButton.tsx": {
+    "mtime": 1786315798.8429546,
+    "seen": 1786841105.8479612,
+    "ast_hash": "f46c76f37e21b0b357a8a29e6e8b0a2c",
+    "semantic_hash": ""
+  },
+  "src/components/ui/index.ts": {
+    "mtime": 1786407049.3980832,
+    "seen": 1786841105.847962,
+    "ast_hash": "cb2c53fe56444224f3d9c5a782bfbbaf",
+    "semantic_hash": ""
+  },
+  "src/lib/auth/auth.ts": {
+    "mtime": 1785098981.7780876,
+    "seen": 1786841105.8479624,
+    "ast_hash": "7ce603e9545d2ef4caa8001063183f4d",
+    "semantic_hash": ""
+  },
+  "src/lib/bitacora/bitacora.test.ts": {
+    "mtime": 1785554364.2390082,
+    "seen": 1786841105.8479638,
+    "ast_hash": "062eeb2022759d99b481e9f855458652",
+    "semantic_hash": ""
+  },
+  "src/lib/bitacora/bitacora.ts": {
+    "mtime": 1785554364.2408948,
+    "seen": 1786841105.8479645,
+    "ast_hash": "a8b35ef2c83638ca2652c89a66f7ab08",
+    "semantic_hash": ""
+  },
+  "src/lib/comercios/beneficios-formato.test.ts": {
+    "mtime": 1786315798.8460603,
+    "seen": 1786841105.847965,
+    "ast_hash": "0915f0c8ac33bfc4ef3c9e781b0ced06",
+    "semantic_hash": ""
+  },
+  "src/lib/comercios/beneficios-formato.ts": {
+    "mtime": 1786315798.8475833,
+    "seen": 1786841105.8479655,
+    "ast_hash": "619a4c57fe905abb5f3688fb4ce97685",
+    "semantic_hash": ""
+  },
+  "src/lib/comercios/promocion-vigente.test.ts": {
+    "mtime": 1786589728.1453013,
+    "seen": 1786841105.8479662,
+    "ast_hash": "d459320927bb0947c98facc8ef22e669",
+    "semantic_hash": ""
+  },
+  "src/lib/comercios/promocion-vigente.ts": {
+    "mtime": 1786589728.1453013,
+    "seen": 1786841105.8479667,
+    "ast_hash": "3ee4c951d4b0045c6ad02c92d7b3b4ad",
+    "semantic_hash": ""
+  },
+  "src/lib/comercios/promociones.test.ts": {
+    "mtime": 1785195600.4616742,
+    "seen": 1786841105.847967,
+    "ast_hash": "317a267b31c26028bc6e5a08c37c66e0",
+    "semantic_hash": ""
+  },
+  "src/lib/comercios/promociones.ts": {
+    "mtime": 1786145848.3614066,
+    "seen": 1786841105.8479679,
+    "ast_hash": "22b93022588e85cb6f792e0b13fdc3fd",
+    "semantic_hash": ""
+  },
+  "src/lib/comercios/requerir-comercio.ts": {
+    "mtime": 1786589728.1453013,
+    "seen": 1786841105.8479686,
+    "ast_hash": "8d4684d79de7e1f792cbfd4ab67da834",
+    "semantic_hash": ""
+  },
+  "src/lib/comercios/ventas.test.ts": {
+    "mtime": 1786589728.146807,
+    "seen": 1786841105.847969,
+    "ast_hash": "e538cb7e9e2c08e6b21f1c273f709f2e",
+    "semantic_hash": ""
+  },
+  "src/lib/comercios/ventas.ts": {
+    "mtime": 1786589728.1473246,
+    "seen": 1786841105.8479695,
+    "ast_hash": "96722b95bfcd33ad7e499e9c745994d6",
+    "semantic_hash": ""
+  },
+  "src/lib/metricas/metricas.test.ts": {
+    "mtime": 1785554364.2418952,
+    "seen": 1786841105.84797,
+    "ast_hash": "4cfc1edbf15ffc1933086d425f924d89",
+    "semantic_hash": ""
+  },
+  "src/lib/metricas/metricas.ts": {
+    "mtime": 1786589728.1473246,
+    "seen": 1786841105.8479707,
+    "ast_hash": "ef9a9ea804f414caed02373a3afd8235",
+    "semantic_hash": ""
+  },
+  "src/lib/miembros/auth-miembro.ts": {
+    "mtime": 1786315798.8481061,
+    "seen": 1786841105.8479714,
+    "ast_hash": "d7b9ad6a626b627c9f2a0de59aef8735",
+    "semantic_hash": ""
+  },
+  "src/lib/miembros/membresia-vigente.test.ts": {
+    "mtime": 1786315798.858968,
+    "seen": 1786841105.847972,
+    "ast_hash": "c9541f9b12d823fe8321b073e7184879",
+    "semantic_hash": ""
+  },
+  "src/lib/miembros/membresia-vigente.ts": {
+    "mtime": 1786315798.859994,
+    "seen": 1786841105.8479726,
+    "ast_hash": "de8054a435a46c0e5c148406b591cba5",
+    "semantic_hash": ""
+  },
+  "src/lib/miembros/membresias.test.ts": {
+    "mtime": 1785098981.7780876,
+    "seen": 1786841105.847973,
+    "ast_hash": "a87b0a7845de84b09ee20a7e785bb6f7",
+    "semantic_hash": ""
+  },
+  "src/lib/miembros/membresias.ts": {
+    "mtime": 1785098981.7780876,
+    "seen": 1786841105.8479736,
+    "ast_hash": "16a5325f8b72994ca5f2f9c5fb265ae2",
+    "semantic_hash": ""
+  },
+  "src/lib/miembros/requerir-miembro.ts": {
+    "mtime": 1786315798.859994,
+    "seen": 1786841105.847974,
+    "ast_hash": "18f5bf6d0dcdddc2f5b8c92316206b5d",
+    "semantic_hash": ""
+  },
+  "src/lib/shared/fecha.test.ts": {
+    "mtime": 1786591546.4015996,
+    "seen": 1786841105.8479745,
+    "ast_hash": "6c36b9df7ddf8786b928c4a1c625e1db",
+    "semantic_hash": ""
+  },
+  "src/lib/shared/fecha.ts": {
+    "mtime": 1786591561.5994623,
+    "seen": 1786841105.8479753,
+    "ast_hash": "0e1a880cdf3e33af138da2c99ea69af4",
+    "semantic_hash": ""
+  },
+  "src/lib/shared/password.ts": {
+    "mtime": 1785098981.7794054,
+    "seen": 1786841105.8479757,
+    "ast_hash": "555897d0c7eb0dca8228f054024da7fc",
+    "semantic_hash": ""
+  },
+  "src/lib/supabase/admin.ts": {
+    "mtime": 1785098981.780481,
+    "seen": 1786841105.8479762,
+    "ast_hash": "1314dc8f49e6f35c6a1fc07fd4e9d6b9",
+    "semantic_hash": ""
+  },
+  "src/lib/supabase/client.ts": {
+    "mtime": 1785098981.780481,
+    "seen": 1786841105.847977,
+    "ast_hash": "1bd5f21c9d82143c138ca1493722c75e",
+    "semantic_hash": ""
+  },
+  "src/lib/supabase/database.types.ts": {
+    "mtime": 1786589728.1493442,
+    "seen": 1786841105.8479774,
+    "ast_hash": "18befc8136e8c8e7820f10fe0e8601a1",
+    "semantic_hash": ""
+  },
+  "src/lib/supabase/middleware.ts": {
+    "mtime": 1785098981.7814803,
+    "seen": 1786841105.8479779,
+    "ast_hash": "fd93cff82fbeedcb5355d3ca47547c29",
+    "semantic_hash": ""
+  },
+  "src/lib/supabase/server.ts": {
+    "mtime": 1785098981.7829087,
+    "seen": 1786841105.8479788,
+    "ast_hash": "57117d260a17ed88bc5f0ecf0256e154",
+    "semantic_hash": ""
+  },
+  "src/proxy.ts": {
+    "mtime": 1785098981.7829087,
+    "seen": 1786841105.8479793,
+    "ast_hash": "548b13f21244b9144acf681966fd8346",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1785098981.7839274,
+    "seen": 1786841105.8479798,
+    "ast_hash": "0a2f4ed9289b65cd3feb4fb4ab3a4fcd",
+    "semantic_hash": ""
+  },
+  "vitest.config.ts": {
+    "mtime": 1785098981.7849202,
+    "seen": 1786841105.8479803,
+    "ast_hash": "b32beef381bdb0dd01fe3a20b0007061",
+    "semantic_hash": ""
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1786832497.3819077,
+    "seen": 1786841105.847981,
+    "ast_hash": "c232166e6492ba1ed955030b16979b05",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/SKILL.md": {
+    "mtime": 1786832497.3779063,
+    "seen": 1786841105.8479815,
+    "ast_hash": "3953c31b4ef6d89d3b1cb43f0110817d",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/add-watch.md": {
+    "mtime": 1786832268.418131,
+    "seen": 1786841105.8479822,
+    "ast_hash": "d59d027fe449f06aa03905a01184e779",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/exports.md": {
+    "mtime": 1786832268.418131,
+    "seen": 1786841105.847983,
+    "ast_hash": "9da2a2152e60a22f07f05fed5158f287",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/extraction-spec.md": {
+    "mtime": 1786832268.41912,
+    "seen": 1786841105.8479836,
+    "ast_hash": "42fef56a01698118f7fd722acdadea34",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/github-and-merge.md": {
+    "mtime": 1786832268.420122,
+    "seen": 1786841105.847984,
+    "ast_hash": "cde13df085e4c492aeb7ba298a996d0d",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/hooks.md": {
+    "mtime": 1786832268.420122,
+    "seen": 1786841105.8479846,
+    "ast_hash": "3f545db6ce646650bb9de588f5512a27",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/query.md": {
+    "mtime": 1786832268.421121,
+    "seen": 1786841105.8479853,
+    "ast_hash": "3c46f8ad006874260614ed8657d02307",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/transcribe.md": {
+    "mtime": 1786832268.4292455,
+    "seen": 1786841105.8479857,
+    "ast_hash": "67b6a5fa6c0974e18f60db9f8932fbd8",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/update.md": {
+    "mtime": 1786832268.4302459,
+    "seen": 1786841105.8479862,
+    "ast_hash": "9378bd03d56baaf78bd738ab3848f142",
+    "semantic_hash": ""
+  },
+  ".opencode/skills/graphify/SKILL.md": {
+    "mtime": 1786841024.037223,
+    "seen": 1786841105.8479867,
+    "ast_hash": "2e9858a59406dd2af786cf4cb74bc610",
+    "semantic_hash": ""
+  },
+  ".opencode/skills/graphify/references/add-watch.md": {
+    "mtime": 1786832268.385247,
+    "seen": 1786841105.8479872,
+    "ast_hash": "d59d027fe449f06aa03905a01184e779",
+    "semantic_hash": ""
+  },
+  ".opencode/skills/graphify/references/exports.md": {
+    "mtime": 1786832268.386249,
+    "seen": 1786841105.8479877,
+    "ast_hash": "9da2a2152e60a22f07f05fed5158f287",
+    "semantic_hash": ""
+  },
+  ".opencode/skills/graphify/references/extraction-spec.md": {
+    "mtime": 1786832268.386249,
+    "seen": 1786841105.8479884,
+    "ast_hash": "42fef56a01698118f7fd722acdadea34",
+    "semantic_hash": ""
+  },
+  ".opencode/skills/graphify/references/github-and-merge.md": {
+    "mtime": 1786832268.3872485,
+    "seen": 1786841105.847989,
+    "ast_hash": "cde13df085e4c492aeb7ba298a996d0d",
+    "semantic_hash": ""
+  },
+  ".opencode/skills/graphify/references/hooks.md": {
+    "mtime": 1786832268.3872485,
+    "seen": 1786841105.8479898,
+    "ast_hash": "3f545db6ce646650bb9de588f5512a27",
+    "semantic_hash": ""
+  },
+  ".opencode/skills/graphify/references/query.md": {
+    "mtime": 1786832268.3882468,
+    "seen": 1786841105.8479903,
+    "ast_hash": "3c46f8ad006874260614ed8657d02307",
+    "semantic_hash": ""
+  },
+  ".opencode/skills/graphify/references/transcribe.md": {
+    "mtime": 1786832268.3882468,
+    "seen": 1786841105.8479908,
+    "ast_hash": "67b6a5fa6c0974e18f60db9f8932fbd8",
+    "semantic_hash": ""
+  },
+  ".opencode/skills/graphify/references/update.md": {
+    "mtime": 1786832268.3892882,
+    "seen": 1786841105.8479912,
+    "ast_hash": "9378bd03d56baaf78bd738ab3848f142",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1786841024.0412147,
+    "seen": 1786841105.8479917,
+    "ast_hash": "21ceb6533048be51308e69e7b74a35cf",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1786832497.3839362,
+    "seen": 1786841105.8479927,
+    "ast_hash": "8a6643a420fdad6bfb583523bc6cef16",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1785098981.7446704,
+    "seen": 1786841105.8479931,
+    "ast_hash": "9162add00befbcdb432430f405c4ad8d",
+    "semantic_hash": ""
+  },
+  "docs/ROADMAP.md": {
+    "mtime": 1786589817.4448287,
+    "seen": 1786841105.8479936,
+    "ast_hash": "00ba59224a88bd6d222d8c3298edd0e3",
+    "semantic_hash": ""
+  },
+  "docs/referencia/Contexto_ORUM.txt": {
+    "mtime": 1785098981.7405727,
+    "seen": 1786841105.847994,
+    "ast_hash": "e150ccd596f57e4d5f20f988ba3e76f7",
+    "semantic_hash": ""
+  },
+  "docs/referencia/Esquema_BD.txt": {
+    "mtime": 1785098981.7416172,
+    "seen": 1786841105.8479948,
+    "ast_hash": "7b73a56d2675f4e5f8f36327096f0c9f",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-07-22-fase2-miembros-membresias.md": {
+    "mtime": 1785098981.7465734,
+    "seen": 1786841105.8479953,
+    "ast_hash": "4f4b7f3e9745689200e4572c7947cecd",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-07-27-fase3-comercios-sucursales-promociones-plan.md": {
+    "mtime": 1785195600.43366,
+    "seen": 1786841105.847996,
+    "ast_hash": "e4423e6772016b429666df13df40bf6d",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-07-31-fase4-metricas-trazabilidad-plan.md": {
+    "mtime": 1785539383.5077124,
+    "seen": 1786841105.8479965,
+    "ast_hash": "008c989adcefb91dfb886c022e33d75b",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-07-reorg-01-limpieza-raiz.md": {
+    "mtime": 1786144927.6900353,
+    "seen": 1786841105.847997,
+    "ast_hash": "e0605e3dbef0cd647e513f1aed76a983",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-07-reorg-02-lib-por-dominio.md": {
+    "mtime": 1786144982.476213,
+    "seen": 1786841105.8479977,
+    "ast_hash": "b03400be1721e8a28bd437b632b175d9",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-07-reorg-03-kit-ui-comercios.md": {
+    "mtime": 1786145268.9708765,
+    "seen": 1786841105.8479981,
+    "ast_hash": "8c6eb7467413193b071f524044f8640f",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-07-reorg-04-kit-ui-miembros.md": {
+    "mtime": 1786146926.2462792,
+    "seen": 1786841105.8479986,
+    "ast_hash": "3461d4b24fb7dcfccc2b97b9a50b74b3",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-07-reorg-05-kit-ui-planes-usuarios-cuenta.md": {
+    "mtime": 1786147355.6412718,
+    "seen": 1786841105.8479993,
+    "ast_hash": "b7a3f623f4e58bca34ffa1cbbb81de79",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-07-reorg-06-kit-ui-bitacora-metricas.md": {
+    "mtime": 1786147703.2280352,
+    "seen": 1786841105.8479998,
+    "ast_hash": "d2f3f73a77d0ddf38cd3fe92643abf5c",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-07-reorg-07-kit-ui-admin-layout.md": {
+    "mtime": 1786147728.5046198,
+    "seen": 1786841105.8480003,
+    "ast_hash": "e58080b41f2818b24b4fc80d5d175ae2",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-09-portal-miembros-plan.md": {
+    "mtime": 1786315798.815042,
+    "seen": 1786841105.8480008,
+    "ast_hash": "109867da8655070ad13cac059ab92b8d",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-08-12-portal-comercios-plan.md": {
+    "mtime": 1786589728.1312306,
+    "seen": 1786841105.8480015,
+    "ast_hash": "7b3ca4b21a23be8fe5ff19e1469d8d07",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-22-fase2-miembros-membresias-design.md": {
+    "mtime": 1785098981.747084,
+    "seen": 1786841105.848002,
+    "ast_hash": "490fe942b11c0eb11b97e48ef19d6722",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-26-fase3-comercios-sucursales-promociones-design.md": {
+    "mtime": 1785119804.3462822,
+    "seen": 1786841105.8480027,
+    "ast_hash": "350d3ebfb0bb78f0ee6e5aa32119bbc8",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-31-fase4-metricas-trazabilidad-design.md": {
+    "mtime": 1785538701.487217,
+    "seen": 1786841105.8480031,
+    "ast_hash": "2afeb80f2eb5369b8006d4bf3427dabd",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-08-05-reorganizacion-proyecto-design.md": {
+    "mtime": 1785984611.7859464,
+    "seen": 1786841105.8480039,
+    "ast_hash": "15de7d23cc5513cb4bb6992d4f7d1a92",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-08-09-portal-miembros-design.md": {
+    "mtime": 1786306905.1181586,
+    "seen": 1786841105.8480046,
+    "ast_hash": "2e3ebf08f66c1f9ad274fccb3b92f54c",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-08-12-portal-comercios-design.md": {
+    "mtime": 1786576963.3794568,
+    "seen": 1786841105.848005,
+    "ast_hash": "0ee7a37000ceeafe7426a82360b71a9f",
+    "semantic_hash": ""
+  },
+  "pnpm-workspace.yaml": {
+    "mtime": 1785098981.7510934,
+    "seen": 1786841105.8480055,
+    "ast_hash": "aa3358047aa084b0250393604fb6d698",
+    "semantic_hash": ""
+  },
+  "docs/referencia/Esquema_ORUM.png": {
+    "mtime": 1785098981.7435784,
+    "seen": 1786841105.8480062,
+    "ast_hash": "b1e2c85a2e374f22a2f505f4a2c8f54b",
+    "semantic_hash": ""
+  }
+}
