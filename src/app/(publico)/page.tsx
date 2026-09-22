@@ -12,6 +12,7 @@ import {
 } from '@/lib/publico/datos-publicos'
 import { AliadosOverlayTrigger } from './_components/aliados-overlay-trigger'
 import { ComoFunciona } from './_components/como-funciona'
+import { QueEsOrum } from './_components/que-es-orum'
 import { CtaSocio } from './_components/cta-socio'
 import { HeroPublico } from './_components/hero-publico'
 import { Revelar } from './_components/revelar'
@@ -138,6 +139,10 @@ export default async function LandingPublica() {
         fila de logotipos y no entiende qué tiene que ver con él. Primero se
         entiende el club, después se desea lo que ofrece.
       */}
+      {/* Qué es ORUM, su misión y su visión: responde a «qué es» antes de «cómo
+          se usa». Texto del propietario. */}
+      <QueEsOrum />
+
       <ComoFunciona />
 
       <VitrinaPublica comercios={comercios} />

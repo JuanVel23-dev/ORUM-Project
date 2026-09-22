@@ -24,6 +24,7 @@
  * la propia landing se comporta como un ancla normal, sin recargar.
  */
 export const ANCLAS = [
+  { href: '/#que-es-orum', texto: 'Qué es ORUM' },
   { href: '/#como-funciona', texto: 'Cómo funciona' },
   { href: '/#comercios-aliados', texto: 'Comercios aliados' },
 ] as const
