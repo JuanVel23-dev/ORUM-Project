@@ -1,4 +1,5 @@
-import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend'
+import nodemailer from 'nodemailer'
+import type { Transporter } from 'nodemailer'
 import { escaparHtml } from '../shared/html'
 
 export type InputCorreoInvitacion = {
@@ -22,7 +23,7 @@ export function construirCorreoInvitacion(input: InputCorreoInvitacion): CuerpoC
     <p>Hola ${nombre},</p>
     <p>Se creó tu cuenta en ORUM (${correo}). Activa el acceso y elige tu propia
     contraseña con este enlace de un solo uso:</p>
-    <p><a href="${input.urlInvitacion}">Activar mi cuenta</a></p>
+    <p><a href="${escaparHtml(input.urlInvitacion)}">Activar mi cuenta</a></p>
     <p>Si no esperabas este correo, puedes ignorarlo.</p>
   `.trim()
 
@@ -40,26 +41,110 @@ export function construirCorreoInvitacion(input: InputCorreoInvitacion): CuerpoC
   return { asunto, html, texto }
 }
 
-const mailerSend = new MailerSend({ apiKey: process.env.MAILERSEND_API_KEY ?? '' })
+export type InputCorreoRecuperacion = { urlRecuperacion: string }
+
+export function construirCorreoRecuperacion(input: InputCorreoRecuperacion): CuerpoCorreo {
+  const asunto = 'Restablece tu contraseña en ORUM'
+
+  const html = `
+    <p>Hola,</p>
+    <p>Recibimos una solicitud para restablecer tu contraseña en ORUM. Elige una
+    nueva con este enlace de un solo uso:</p>
+    <p><a href="${escaparHtml(input.urlRecuperacion)}">Restablecer mi contraseña</a></p>
+    <p>Si no fuiste tú, puedes ignorarlo: tu contraseña actual sigue funcionando.</p>
+  `.trim()
+
+  const texto = [
+    'Hola,',
+    '',
+    'Recibimos una solicitud para restablecer tu contraseña en ORUM. Elige una',
+    'nueva con este enlace de un solo uso:',
+    '',
+    input.urlRecuperacion,
+    '',
+    'Si no fuiste tú, puedes ignorarlo: tu contraseña actual sigue funcionando.',
+  ].join('\n')
+
+  return { asunto, html, texto }
+}
+
+export type ConfigSmtp = { usuario: string; password: string; remitente: string }
+
+/**
+ * Lee la configuración SMTP del entorno. Devuelve `null` si falta cualquier
+ * variable: el envío es best-effort y una ausencia no debe romper el flujo.
+ * La contraseña de aplicación de Google se muestra en bloques separados por
+ * espacios ("abcd efgh …"); se quitan para que funcione pegada tal cual.
+ */
+export function leerConfigSmtp(env: Record<string, string | undefined>): ConfigSmtp | null {
+  const usuario = env.GMAIL_SMTP_USER?.trim()
+  const password = env.GMAIL_SMTP_APP_PASSWORD?.replace(/\s+/g, '')
+  const remitente = env.GMAIL_FROM_EMAIL?.trim()
+  if (!usuario || !password || !remitente) return null
+  return { usuario, password, remitente }
+}
+
+export type InputCorreo = {
+  para: string
+  nombre: string
+  asunto: string
+  html: string
+  texto: string
+}
+
+let cache: { clave: string; transporte: Transporter } | null = null
+
+/** El transporte se reutiliza mientras la configuración no cambie. */
+function obtenerTransporte(config: ConfigSmtp): Transporter {
+  const clave = `${config.usuario}:${config.password}:${config.remitente}`
+  if (cache?.clave !== clave) {
+    cache = {
+      clave,
+      transporte: nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: { user: config.usuario, pass: config.password },
+      }),
+    }
+  }
+  return cache.transporte
+}
+
+/** Envía un correo transaccional por SMTP de Gmail. Nunca lanza: registra y sigue. */
+export async function enviarCorreo(input: InputCorreo): Promise<void> {
+  const config = leerConfigSmtp(process.env)
+  if (!config) {
+    console.error('Correo no enviado: faltan variables GMAIL_SMTP_USER / GMAIL_SMTP_APP_PASSWORD / GMAIL_FROM_EMAIL.')
+    return
+  }
+
+  try {
+    await obtenerTransporte(config).sendMail({
+      from: { name: 'ORUM', address: config.remitente },
+      to: { name: input.nombre, address: input.para },
+      subject: input.asunto,
+      html: input.html,
+      text: input.texto,
+    })
+  } catch (err) {
+    console.error('No se pudo enviar el correo:', err)
+  }
+}
 
 export async function enviarCorreoInvitacion(input: InputCorreoInvitacion): Promise<void> {
   const { asunto, html, texto } = construirCorreoInvitacion(input)
+  await enviarCorreo({ para: input.correo, nombre: input.nombre, asunto, html, texto })
+}
 
-  try {
-    const remitente = new Sender(process.env.MAILERSEND_FROM_EMAIL ?? '', 'ORUM')
-    const destinatarios = [new Recipient(input.correo, input.nombre)]
-
-    const emailParams = new EmailParams()
-      .setFrom(remitente)
-      .setTo(destinatarios)
-      .setSubject(asunto)
-      .setHtml(html)
-      .setText(texto)
-
-    await mailerSend.email.send(emailParams)
-  } catch (err) {
-    console.error('No se pudo enviar el correo de invitación:', err)
-  }
+export async function enviarCorreoRecuperacion(input: {
+  correo: string
+  urlRecuperacion: string
+}): Promise<void> {
+  const { asunto, html, texto } = construirCorreoRecuperacion({
+    urlRecuperacion: input.urlRecuperacion,
+  })
+  await enviarCorreo({ para: input.correo, nombre: input.correo, asunto, html, texto })
 }
 
 /* ==========================================================================
@@ -157,46 +242,39 @@ export function construirCorreoSolicitudAliado(
 }
 
 /**
- * Envía la solicitud al buzón interno. **Lanza** si no puede.
+ * Envía la solicitud al buzón interno por SMTP. **Lanza** si no puede.
  *
- * El destinatario sale de `SOLICITUDES_EMAIL`, con respaldo a
- * `MAILERSEND_FROM_EMAIL` —el remitente verificado, que siempre existe si el
- * correo está configurado—, para que un despliegue que olvide la variable
- * nueva siga entregando en vez de perder solicitudes.
+ * A diferencia de `enviarCorreo`, que registra el fallo y sigue, esto lanza a
+ * propósito: si la solicitud no sale, el formulario tiene que decírselo al
+ * comercio para que reintente o escriba por WhatsApp. No hay tabla donde
+ * quede guardada, así que un fallo silencioso la perdería sin rastro.
+ *
+ * El destinatario sale de `SOLICITUDES_EMAIL`, con respaldo al remitente
+ * (`GMAIL_FROM_EMAIL`), que siempre existe si el correo está configurado.
+ *
+ * Migrado de MailerSend al transporte SMTP de Gmail al fusionar `main`, que
+ * retiró MailerSend del proyecto.
  */
 export async function enviarCorreoSolicitudAliado(
   input: InputCorreoSolicitudAliado,
 ): Promise<void> {
-  const remitenteEmail = process.env.MAILERSEND_FROM_EMAIL ?? ''
-  const destinatarioEmail = process.env.SOLICITUDES_EMAIL || remitenteEmail
-
-  if (!process.env.MAILERSEND_API_KEY || !remitenteEmail || !destinatarioEmail) {
+  const config = leerConfigSmtp(process.env)
+  if (!config) {
     throw new Error(
-      'Correo sin configurar: falta MAILERSEND_API_KEY, MAILERSEND_FROM_EMAIL o SOLICITUDES_EMAIL.',
+      'Correo sin configurar: falta GMAIL_SMTP_USER, GMAIL_SMTP_APP_PASSWORD o GMAIL_FROM_EMAIL.',
     )
   }
+  const destinatario = process.env.SOLICITUDES_EMAIL?.trim() || config.remitente
 
   const { asunto, html, texto } = construirCorreoSolicitudAliado(input)
 
-  const emailParams = new EmailParams()
-    .setFrom(new Sender(remitenteEmail, 'ORUM'))
-    .setTo([new Recipient(destinatarioEmail, 'Solicitudes ORUM')])
-    /* Responder en el cliente de correo escribe al comercio, no a ORUM. */
-    .setReplyTo(new Recipient(input.correo, input.nombreContacto))
-    .setSubject(asunto)
-    .setHtml(html)
-    .setText(texto)
-
-  const respuesta = await mailerSend.email.send(emailParams)
-
-  /*
-    El SDK lanza ante un 4xx/5xx, pero lanza un objeto plano, no un `Error`, y
-    hay rutas en las que resuelve con un estado que no es de éxito. Se
-    comprueba explícitamente: un `202 Accepted` es la respuesta normal de
-    MailerSend, y cualquier cosa fuera del rango 2xx se trata como fallo.
-  */
-  const estado = respuesta?.statusCode ?? 0
-  if (estado < 200 || estado >= 300) {
-    throw new Error(`MailerSend respondió ${estado} al enviar la solicitud de aliado.`)
-  }
+  await obtenerTransporte(config).sendMail({
+    from: { name: 'ORUM', address: config.remitente },
+    to: { name: 'Solicitudes ORUM', address: destinatario },
+    /* Responder desde el cliente de correo escribe al comercio, no a ORUM. */
+    replyTo: { name: input.nombreContacto, address: input.correo },
+    subject: asunto,
+    html,
+    text: texto,
+  })
 }

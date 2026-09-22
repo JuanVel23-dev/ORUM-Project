@@ -1,0 +1,14 @@
+- generic [active] [ref=f4e1]:
+  - generic [ref=f4e3]:
+    - banner [ref=f4e4]:
+      - generic [ref=f4e5]: ORUM
+      - generic [ref=f4e6]: Restablece tu contraseña
+    - generic [ref=f4e28]:
+      - status [ref=f4e29]:
+        - generic [ref=f4e33]:
+          - generic [ref=f4e34]: Revisa tu correo
+          - generic [ref=f4e35]: Si el correo está registrado, te enviamos un enlace para restablecer tu contraseña. Puede tardar un par de minutos; mira también en spam.
+      - link "Volver a iniciar sesión" [ref=f4e36] [cursor=pointer]:
+        - /url: /comercios/login
+  - button "Open Next.js Dev Tools" [ref=f4e24] [cursor=pointer]
+  - alert [ref=f4e37]

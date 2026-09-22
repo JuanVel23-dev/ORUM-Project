@@ -1,0 +1,20 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]: ORUM
+      - generic [ref=e6]: Portal de Comercios
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: Correo electrónico
+        - textbox "Correo electrónico" [ref=e11]:
+          - /placeholder: comercio@ejemplo.com
+          - text: e2e-test-comercio@orum-test.invalid
+      - generic [ref=e12]:
+        - generic [ref=e13]: Contraseña
+        - generic [ref=e15]:
+          - textbox "Contraseña" [active] [ref=e16]: TestE2E-Orum-2026!
+          - button "Mostrar contraseña" [ref=e18] [cursor=pointer]
+      - button "Iniciar sesión" [ref=e23] [cursor=pointer]
+    - paragraph [ref=e28]: ¿Problemas para entrar? Escribe al administrador del club.
+  - button "Open Next.js Dev Tools" [ref=e36] [cursor=pointer]
+  - alert [ref=e40]

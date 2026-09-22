@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Herramientas de agentes y skills, no código de la aplicación. Los
+    // scripts de la skill de security-audit son CommonJS a propósito y
+    // tumbaban `eslint .` desde que entraron en main.
+    ".agents/**",
+    ".claude/**",
   ]),
 ]);
 

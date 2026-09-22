@@ -371,3 +371,22 @@
   color: var(--text-3);
   text-wrap: balance;
 }
+
+/* Enlace secundario dentro del formulario ("¿Olvidaste tu contraseña?", "Volver").
+   El foco lo pone el anillo global `:focus-visible`. */
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  min-height: var(--tap-min);
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.enlace:hover {
+  color: var(--text);
+}

@@ -22,6 +22,7 @@ export const estilosAuth = {
   pila: styles.pila,
   cargando: styles.cargando,
   alerta: styles.alerta,
+  enlace: styles.enlace,
 } as const
 
 type PantallaAuthProps = {

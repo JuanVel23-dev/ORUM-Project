@@ -10,6 +10,7 @@ import { Input, InputButton } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { estilosAuth } from '@/components/ui/pantalla-auth'
 import { createClient } from '@/lib/supabase/client'
+import { interpretarEnlaceActivacion, MENSAJE_ENLACE_INVALIDO, textosActivacion } from '@/lib/auth/activacion'
 
 type Estado = 'verificando' | 'listo' | 'invalido' | 'guardando'
 
@@ -45,17 +46,34 @@ export function ActivarForm() {
   const rol = searchParams.get('rol') ?? ''
   const destino = DESTINO_POR_ROL[rol] ?? '/miembros'
   const login = LOGIN_POR_ROL[rol] ?? '/miembros/login'
+  // Activar una invitación o restablecer una contraseña: mismo formulario,
+  // otros textos (`?modo=recuperar`).
+  const textos = textosActivacion(searchParams.get('modo') ?? undefined)
 
   const [estado, setEstado] = useState<Estado>('verificando')
   const [errores, setErrores] = useState<Errores>({})
+  const [mensajeInvalido, setMensajeInvalido] = useState(MENSAJE_ENLACE_INVALIDO)
   const [verPassword, setVerPassword] = useState(false)
 
   // Chequeo único al montar (no una suscripción a store externo): confirma que
   // el enlace de invitación dejó una sesión válida antes de mostrar el formulario.
+  // La URL se lee ANTES de crear el cliente: supabase-js consume y limpia el hash
+  // al inicializar. Solo una URL con credenciales prueba algo; una sesión previa
+  // del navegador, por sí sola, no.
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      setEstado(data.session ? 'listo' : 'invalido')
+    const enlace = interpretarEnlaceActivacion(window.location.hash, window.location.search)
+    const resolver: Promise<{ estado: Estado; mensaje?: string }> =
+      enlace.tipo === 'con-credenciales'
+        ? createClient()
+            .auth.getSession()
+            .then(({ data }) => ({ estado: data.session ? 'listo' : 'invalido' }))
+        : Promise.resolve({
+            estado: 'invalido',
+            mensaje: enlace.tipo === 'error' ? enlace.mensaje : undefined,
+          })
+    resolver.then((r) => {
+      if (r.mensaje) setMensajeInvalido(r.mensaje)
+      setEstado(r.estado)
     })
   }, [])
 
@@ -136,8 +154,7 @@ export function ActivarForm() {
       // que no hizo.
       <div className={estilosAuth.pila}>
         <Alert tone="danger" className={estilosAuth.alerta}>
-          Este enlace no es válido o ya expiró. Pide uno nuevo a quien te invitó y
-          vuelve a intentarlo.
+          {mensajeInvalido}
         </Alert>
 
         <Button href={login} variant="secondary" size="lg" fullWidth>
@@ -160,7 +177,7 @@ export function ActivarForm() {
       )}
 
       <Field
-        label="Elige tu contraseña"
+        label={textos.etiquetaPassword}
         help="Mínimo 8 caracteres."
         error={errores.password ?? null}
       >
@@ -205,7 +222,7 @@ export function ActivarForm() {
         loading={estado === 'guardando'}
         icon={<ShieldCheck size={17} />}
       >
-        Activar cuenta
+        {textos.boton}
       </Button>
     </form>
   )

@@ -1,0 +1,20 @@
+- generic [ref=f6e1]:
+  - generic [ref=f6e3]:
+    - banner [ref=f6e4]:
+      - generic [ref=f6e5]: ORUM
+      - generic [ref=f6e6]: Portal de Comercios
+    - generic [ref=f6e7]:
+      - generic [ref=f6e8]:
+        - generic [ref=f6e9]: Correo electrónico
+        - textbox "Correo electrónico" [active] [ref=f6e11]:
+          - /placeholder: comercio@ejemplo.com
+      - generic [ref=f6e12]:
+        - generic [ref=f6e13]: Contraseña
+        - generic [ref=f6e15]:
+          - textbox "Contraseña" [ref=f6e16]
+          - button "Mostrar contraseña" [ref=f6e18] [cursor=pointer]
+      - link "¿Olvidaste tu contraseña?" [ref=f6e22] [cursor=pointer]:
+        - /url: /comercios/login/recuperar
+      - button "Iniciar sesión" [ref=f6e24] [cursor=pointer]
+    - paragraph [ref=f6e29]: ¿Problemas para entrar? Escribe al administrador del club.
+  - button "Open Next.js Dev Tools" [ref=f6e35] [cursor=pointer]

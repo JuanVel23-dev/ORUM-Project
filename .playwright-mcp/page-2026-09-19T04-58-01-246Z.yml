@@ -1,0 +1,8 @@
+- generic [active] [ref=f8e1]:
+  - generic [ref=f8e3]:
+    - banner [ref=f8e4]:
+      - generic [ref=f8e5]: ORUM
+      - generic [ref=f8e6]: Restablece tu contraseña
+    - paragraph [ref=f8e7]: Verificando el enlace…
+  - button "Open Next.js Dev Tools" [ref=f8e13] [cursor=pointer]
+  - alert [ref=f8e17]

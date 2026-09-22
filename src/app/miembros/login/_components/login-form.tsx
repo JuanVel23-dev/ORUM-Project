@@ -1,12 +1,14 @@
 'use client'
 
 import { useActionState, useState } from 'react'
+import Link from 'next/link'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, InputButton } from '@/components/ui/input'
 import { estilosAuth } from '@/components/ui/pantalla-auth'
+import { Turnstile } from '@/components/ui/turnstile'
 import { iniciarSesionMiembro, type LoginMiembroState } from '../actions'
 
 const estadoInicial: LoginMiembroState = {}
@@ -60,6 +62,12 @@ export function LoginMiembroForm({ mensajeInicial }: { mensajeInicial?: string }
           }
         />
       </Field>
+
+      <Link href="/miembros/login/recuperar" className={estilosAuth.enlace}>
+        ¿Olvidaste tu contraseña?
+      </Link>
+
+      <Turnstile />
 
       {/* Relleno dorado PLANO (`brand`), nunca el barrido (`gold`): ver la
           nota del acceso de administración. */}
