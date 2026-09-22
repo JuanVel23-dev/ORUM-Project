@@ -722,6 +722,9 @@ body {
   font-size: var(--t-body-size);
   line-height: var(--t-body-leading);
   font-weight: var(--t-body-weight);
+  /* Heredado por todo el texto sin clase propia. Los titulares declaran el
+     suyo (negativo) y lo pisan. */
+  letter-spacing: var(--t-body-tracking);
   font-optical-sizing: auto;
 
   -webkit-font-smoothing: antialiased;

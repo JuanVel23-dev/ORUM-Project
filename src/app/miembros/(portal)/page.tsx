@@ -278,7 +278,11 @@ export default async function MiembrosHomePage({
   /* `created_at` y `categoria_id` viajan en el mismo `select` que ya existía:
      alimentan la estantería de novedades y la línea inferior de la tarjeta
      cuando el comercio no tiene ningún beneficio vigente. */
-  const COLUMNAS_COMERCIO = 'id, nombre, descripcion, marca_id, categoria_id, logo_url, created_at'
+  /* `portada_url` faltaba aquí, y por eso las cinco tarjetas de «Conoce a tus
+     aliados» salían como cajas negras vacías: el carrusel sabe pintar la foto,
+     pero nunca le llegaba. Se vio en la primera captura real del portal. */
+  const COLUMNAS_COMERCIO =
+    'id, nombre, descripcion, marca_id, categoria_id, logo_url, portada_url, created_at'
 
   // Comercios cuyo nombre coincide con la búsqueda (y, si aplica, con los filtros de marca/ciudad).
   let queryPorNombre = supabase
@@ -320,6 +324,7 @@ export default async function MiembrosHomePage({
     marca_id: number | null
     categoria_id: number | null
     logo_url: string | null
+    portada_url: string | null
     created_at: string | null
   }
 
@@ -412,6 +417,7 @@ export default async function MiembrosHomePage({
     categoriaNombre: c.categoria_id ? (nombreCategoria.get(c.categoria_id) ?? null) : null,
     logoUrl: resolverLogoComercio(c.logo_url, c.marca_id ? (logoMarca.get(c.marca_id) ?? null) : null),
     createdAt: c.created_at,
+    portadaUrl: (c.portada_url ?? '').trim() || null,
     ciudades: Array.from(ciudadesPorComercio.get(c.id) ?? []),
     promociones: promocionesPorComercio.get(c.id) ?? [],
   }))
@@ -721,7 +727,9 @@ export default async function MiembrosHomePage({
           <section className={estilos.rejilla}>
             <h2 className={estilos.tituloRejilla}>{tituloRejilla}</h2>
 
-            <Grid min="290px">
+            {/* `escalonado`: las tarjetas entran una tras otra en la primera
+                pintura, 40ms de paso y tope de 8 — lo que ya traía `Grid`. */}
+            <Grid min="290px" escalonado>
               {comerciosVisibles.map((c) => (
                 <ComercioCard
                   key={c.id}

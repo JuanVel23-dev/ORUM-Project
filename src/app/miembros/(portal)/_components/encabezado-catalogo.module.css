@@ -67,7 +67,10 @@
 
 .emblema {
   position: relative;
-  display: grid;
+  /* En móvil no cabe: debajo del texto se comía ~150px del primer pantallazo
+     antes de la búsqueda, que es lo que el socio vino a usar. Aparece cuando
+     hay hueco a la derecha del título. */
+  display: none;
   place-items: center;
   flex-shrink: 0;
 
@@ -212,4 +215,14 @@
   max-width: 46ch;
   margin: 0;
   text-wrap: pretty;
+}
+
+/* Va AL FINAL a propósito: `.emblema { display: none }` está más arriba y con
+   la misma especificidad gana la regla escrita después. Dentro de la consulta
+   de contenedor del principio del archivo quedaba pisada y el emblema no salía
+   en escritorio. */
+@container contenido (min-width: 720px) {
+  .emblema {
+    display: grid;
+  }
 }

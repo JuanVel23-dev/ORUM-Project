@@ -186,40 +186,16 @@
    sitio.
    ========================================================================== */
 
-.rejilla > div {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch; /* las tarjetas de una fila siguen midiendo lo mismo */
-}
-
-.rejilla > div > * {
-  /* `--min` lo publica `Grid` en el propio elemento; el respaldo es su mismo
-     valor por defecto. `min-width: 0` es la guarda que evita el desbordamiento
-     cuando el contenedor mide menos que la base —el equivalente al
-     `min(…, 100%)` de la rejilla original—. */
-  flex: 1 1 var(--min, 290px);
-  min-width: 0;
-}
-
 /*
-  EL TECHO, PARA QUE UNA TARJETA SUELTA NO SE VUELVA UN CARTEL.
-
-  Sin él, una última fila de una sola tarjeta se estiraría a los 1100px de la
-  columna: el hueco desaparece, pero a cambio una tarjeta de catálogo se lee
-  como un banner y rompe la comparación entre iguales, que es para lo que sirve
-  una rejilla. Con el techo a media columna, esa tarjeta suelta ocupa la mitad
-  —la mitad del hueco de antes— y una última fila de DOS llena la línea exacta.
-
-  596px = 290 (`--min`) × 2 + 16 (`--space-4`): el ancho a partir del cual caben
-  dos columnas. Por debajo no hay techo, porque ahí la tarjeta suelta ya ocupa
-  la única columna que hay. La condición de un `@container` no admite `var()`,
-  de ahí los literales; el contenedor `contenido` lo declara el `<main>` del
-  portal.
+  REJILLA DE ANCHO FIJO POR TARJETA. Se probó el reparto flexible de la última
+  fila (Z3) y en pantalla quedó peor: la tarjeta suelta del final salía al doble
+  de ancho que sus vecinas, con el logo y el nombre perdidos a la izquierda. Una
+  última fila incompleta es normal en cualquier catálogo; una tarjeta distinta
+  a las demás, no.
 */
-@container contenido (min-width: 596px) {
-  .rejilla > div > * {
-    max-width: calc(50% - var(--gap, var(--space-4)) / 2);
-  }
+.rejilla > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--min, 290px), 100%), 1fr));
 }
 
 /*
@@ -235,4 +211,72 @@
   letter-spacing: var(--t-title-2-tracking);
   font-weight: var(--t-title-2-weight);
   color: var(--text);
+}
+
+/* ==========================================================================
+   ANIMACIONES DE ENTRADA  ·  solo CSS, sin JavaScript
+   --------------------------------------------------------------------------
+   Encargo del propietario: «añade animaciones de entrada».
+
+   Dos mecanismos, y cada uno para lo suyo:
+
+   1. AL CARGAR, lo del primer pantallazo entra escalonado: fundido y 12px de
+      subida, 420ms, 50ms entre bloque y bloque, tope en el quinto. Corto a
+      propósito — esta pantalla se abre decenas de veces al día (regla cero de
+      frecuencia: al mínimo, no nunca, porque lo pidió el propietario).
+
+   2. AL DESPLAZAR, cada sección de abajo se revela cuando entra en la vista,
+      con `animation-timeline: view()`. Es una animación ligada al scroll que
+      corre en el compositor: cero JavaScript, cero hidratación, y si el
+      navegador no la conoce el `@supports` la descarta y el contenido se ve
+      normal. Nunca se queda nada invisible.
+
+   Solo `opacity` y `translate`. Con movimiento reducido, `globals.css` §5
+   comprime la duración a 0,01ms: el contenido aparece sin viajar.
+   ========================================================================== */
+
+@keyframes entrarBloque {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+.pagina > * {
+  animation: entrarBloque var(--dur-page) var(--ease-out) backwards;
+}
+.pagina > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+.pagina > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+.pagina > *:nth-child(4) {
+  animation-delay: 150ms;
+}
+.pagina > *:nth-child(n + 5) {
+  animation-delay: 200ms;
+}
+
+@supports (animation-timeline: view()) {
+  /* Lo que queda por debajo del primer pantallazo se revela al llegar. */
+  .pagina > *:nth-child(n + 5) {
+    animation: entrarBloque linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+    animation-delay: 0ms;
+  }
+}
+
+/* Movimiento reducido: sin entrada y sin revelado ligado al scroll. El recorte
+   global de `globals.css` §5 no basta aquí: una animación atada al scroll no
+   usa la duración, así que seguiría deslizándose con el dedo. */
+@media (prefers-reduced-motion: reduce) {
+  /* Con `:nth-child` en el selector para igualar la especificidad (0,2,0) de
+     la regla de revelado: con `.pagina > *` a secas, esta perdía y el
+     revelado ligado al scroll seguía activo con movimiento reducido. */
+  .pagina > *,
+  .pagina > *:nth-child(n) {
+    animation: none;
+  }
 }

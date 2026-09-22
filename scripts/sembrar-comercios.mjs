@@ -184,7 +184,7 @@ for (const c of COMERCIOS) {
       comercio_id: id,
       ciudad_id: tulua.id,
       nombre: 'Sede principal',
-      direccion: `${c.direccion}, Tuluá`,
+      direccion: c.direccion, // la ciudad la pone la ficha; repetirla daba «Tuluá · Tuluá»
       activo: true,
     }),
     `sede ${c.nombre}`,

@@ -148,7 +148,14 @@
   contenido que sustituye— sin duplicar la geometría de la pista.
 */
 .tarjeta {
-  grid-auto-columns: minmax(var(--carril-tarjeta-w), var(--carril-tarjeta-max, 1fr));
+  /* Tope por defecto de 1,6× el ancho base. Con `1fr` a secas, un carril con
+     UNA sola tarjeta —«Tus favoritos» con un favorito— la estiraba a todo el
+     ancho de la columna: una tarjeta de 1300px con un logo de 72 a la
+     izquierda. Visto en la primera captura real del portal. */
+  grid-auto-columns: minmax(
+    var(--carril-tarjeta-w),
+    var(--carril-tarjeta-max, calc(var(--carril-tarjeta-w) * 1.6))
+  );
 }
 
 /* Cada hijo mide lo suyo: el ancho de un chip es el de su etiqueta. */

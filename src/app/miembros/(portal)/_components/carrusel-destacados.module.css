@@ -524,7 +524,15 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 
-  min-height: calc(var(--t-title-3-size) * var(--t-title-3-leading) * 2);
+  /* Una línea reservada, no dos: con nombres de comercio cortos, las dos líneas
+     dejaban un hueco blanco entre el nombre y el descuento en cada tarjeta.
+     Visto en captura. Un nombre largo sigue pudiendo partir en dos. */
+  min-height: calc(var(--t-title-3-size) * var(--t-title-3-leading));
+}
+
+/* Sin categoría ni ciudades que decir, la línea no ocupa sitio. */
+.meta:empty {
+  display: none;
 }
 
 /* El menor peso visual de la tarjeta: es un filtro mental, no un gancho. La

@@ -230,10 +230,18 @@
   de 280px se recorta por arriba y por abajo y deja de encuadrar nada. El 21:9
   es la proporción de una cabecera, no la de una foto suelta.
 */
+/*
+  En escritorio la cubierta ocupa TODO el ancho de su columna y fija su alto.
+  Antes era `21/9` con `max-height: 340px`, y esa combinación limita el ANCHO
+  (340 × 21/9 ≈ 793px): la foto quedaba más estrecha que las tarjetas de
+  debajo y la columna parecía desalineada. Visto en captura.
+*/
 @container contenido (min-width: 900px) {
   .portada {
-    aspect-ratio: 21 / 9;
-    max-height: 340px;
+    aspect-ratio: auto;
+    width: 100%;
+    height: clamp(260px, 26vw, 380px);
+    max-height: none;
   }
 }
 
@@ -276,8 +284,15 @@
   en la rejilla y el nombre baja con ella cuando la placa crece o encoge.
 */
 .conPortada {
+  /* `position` + `z-index`: la portada es `position: relative`, así que se
+     pintaba ENCIMA de la placa y la foto le cortaba la parte de arriba al
+     logo. Se vio en la captura de la ficha en móvil. */
+  position: relative;
+  z-index: 1;
   margin-top: calc(-1 * var(--space-9));
-  margin-inline-start: var(--space-4);
+  margin-inline-start: var(--space-5);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 0 4px var(--bg), var(--shadow-raised);
 }
 
 .heroTextos {
@@ -1082,4 +1097,72 @@
      recorte es preferible a la banda vacía. */
   object-fit: cover;
   display: block;
+}
+
+/* ==========================================================================
+   ANIMACIONES DE ENTRADA  ·  solo CSS, sin JavaScript
+   --------------------------------------------------------------------------
+   Encargo del propietario: «añade animaciones de entrada».
+
+   Dos mecanismos, y cada uno para lo suyo:
+
+   1. AL CARGAR, lo del primer pantallazo entra escalonado: fundido y 12px de
+      subida, 420ms, 50ms entre bloque y bloque, tope en el quinto. Corto a
+      propósito — esta pantalla se abre decenas de veces al día (regla cero de
+      frecuencia: al mínimo, no nunca, porque lo pidió el propietario).
+
+   2. AL DESPLAZAR, cada sección de abajo se revela cuando entra en la vista,
+      con `animation-timeline: view()`. Es una animación ligada al scroll que
+      corre en el compositor: cero JavaScript, cero hidratación, y si el
+      navegador no la conoce el `@supports` la descarta y el contenido se ve
+      normal. Nunca se queda nada invisible.
+
+   Solo `opacity` y `translate`. Con movimiento reducido, `globals.css` §5
+   comprime la duración a 0,01ms: el contenido aparece sin viajar.
+   ========================================================================== */
+
+@keyframes entrarBloque {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+.pagina > * {
+  animation: entrarBloque var(--dur-page) var(--ease-out) backwards;
+}
+.pagina > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+.pagina > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+.pagina > *:nth-child(4) {
+  animation-delay: 150ms;
+}
+.pagina > *:nth-child(n + 5) {
+  animation-delay: 200ms;
+}
+
+@supports (animation-timeline: view()) {
+  /* Lo que queda por debajo del primer pantallazo se revela al llegar. */
+  .pagina > *:nth-child(n + 5) {
+    animation: entrarBloque linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+    animation-delay: 0ms;
+  }
+}
+
+/* Movimiento reducido: sin entrada y sin revelado ligado al scroll. El recorte
+   global de `globals.css` §5 no basta aquí: una animación atada al scroll no
+   usa la duración, así que seguiría deslizándose con el dedo. */
+@media (prefers-reduced-motion: reduce) {
+  /* Con `:nth-child` en el selector para igualar la especificidad (0,2,0) de
+     la regla de revelado: con `.pagina > *` a secas, esta perdía y el
+     revelado ligado al scroll seguía activo con movimiento reducido. */
+  .pagina > *,
+  .pagina > *:nth-child(n) {
+    animation: none;
+  }
 }

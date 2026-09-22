@@ -672,7 +672,9 @@
   /* body — texto general */
   --t-body-size: 0.9375rem;
   --t-body-leading: 1.55;
-  --t-body-tracking: 0;
+  /* +0,01em: Plus Jakarta Sans viene apretada de serie a 13–15px y en pantalla
+     el cuerpo se leía comprimido. El 0 venía calibrado para Inter. */
+  --t-body-tracking: 0.01em;
   --t-body-weight: 400;
 
   /*
@@ -696,13 +698,13 @@
   /* callout — etiquetas, botones */
   --t-callout-size: 0.875rem;
   --t-callout-leading: 1.5;
-  --t-callout-tracking: 0;
+  --t-callout-tracking: 0.01em;
   --t-callout-weight: 500;
 
   /* footnote — texto de apoyo */
   --t-footnote-size: 0.8125rem;
   --t-footnote-leading: 1.45;
-  --t-footnote-tracking: 0.005em;
+  --t-footnote-tracking: 0.012em;
   --t-footnote-weight: 400;
 
   /* caption — metadatos */

@@ -59,14 +59,21 @@
   enfoca.
 
   Sigue topada, y eso no cambia: un `<input>` de 1052px para escribir «pizza»
-  es la señal más barata de que nadie diseñó esta pantalla. Lo que cambia es
-  que ahora se CENTRA, para caer sobre el mismo eje que el encabezado del
-  catálogo y los títulos de sección.
+  es la señal más barata de que nadie diseñó esta pantalla. Va ALINEADA A LA
+  IZQUIERDA, sobre la misma línea que el título, las pestañas y los encabezados
+  de sección: centrada fue la única pieza de la columna con otro eje, y en
+  captura se leía como suelta.
 */
 .campoBusqueda {
+  /* `stretch`, no `center`: centrado, el campo encogía hasta su contenido y
+     medía ~215px en escritorio, cortando su propio marcador («Busca un
+     comercio o»). Visto en captura. Lo que se centra es el BLOQUE, con su
+     `max-width` y `margin-inline: auto` de más abajo. */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+  width: 100%;
+  max-width: 560px;
 }
 
 /* La etiqueta se recoge: con un icono de lupa dentro del campo y un marcador
@@ -101,20 +108,19 @@
   box-shadow: var(--shadow-raised);
 }
 
-@container contenido (min-width: 900px) {
-  .campoBusqueda {
-    max-width: 520px;
-    margin-inline: auto;
-  }
-}
+
 
 /* ==========================================================================
    MÁS FILTROS
    ========================================================================== */
 
+/* Centrado bajo la búsqueda y sin línea encima: con el campo centrado, un
+   «Más filtros» pegado a la izquierda y tras un filete quedaba huérfano, como
+   si fuera de otra sección. */
 .masFiltros {
-  border-top: 1px solid var(--border-subtle);
-  padding-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .resumen {

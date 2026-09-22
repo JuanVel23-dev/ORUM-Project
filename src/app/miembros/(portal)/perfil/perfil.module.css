@@ -220,9 +220,12 @@
   max-width: min(100%, 420px);
   margin-inline: auto;
 
-  --carnet-pad: clamp(var(--space-5), 6vw, var(--space-7));
-  --foto-lado: clamp(104px, 30vw, 128px);
-  --qr-max: 224px;
+  /* Más compacto que antes: en un teléfono de 844px de alto el QR quedaba bajo
+     la barra inferior al abrir la pantalla, y el QR es lo único del carnet que
+     el cajero necesita ver. Visto en captura. */
+  --carnet-pad: clamp(var(--space-4), 5vw, var(--space-6));
+  --foto-lado: clamp(88px, 24vw, 112px);
+  --qr-max: 196px;
 
   /* Los controles nativos y las barras de scroll de dentro, en su variante
      oscura. Sin esto un `<select>` o un scroll saldría claro sobre chocolate. */

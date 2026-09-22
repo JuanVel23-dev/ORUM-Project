@@ -24,6 +24,8 @@ export type ComercioListado = {
   categoriaNombre: string | null
   logoUrl: string | null
   createdAt: string | null
+  /** Foto del local para la portada del carrusel. Opcional: la rejilla no la usa. */
+  portadaUrl?: string | null
   ciudades: string[]
   promociones: PromocionListada[]
 }
