@@ -149,7 +149,7 @@
      si un navegador no resolviera el `color-mix`, la franja sigue siendo negra
      y no transparente. */
   background: var(--fondo-franja-oscura), var(--cacao-bg);
-  color-scheme: dark;
+  color-scheme: var(--cacao-scheme, dark);
 
   --bg: var(--cacao-bg);
   --surface: var(--cacao-surface);

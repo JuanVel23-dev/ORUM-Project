@@ -1,5 +1,5 @@
 import { Heart } from 'lucide-react'
-import { Carril } from '@/components/ui/carril'
+import { CintaRotativa } from './cinta-rotativa'
 import { ComercioCardCompacta, type ComercioListado } from './comercio-card'
 import estilos from './seccion-favoritos.module.css'
 
@@ -59,10 +59,12 @@ export function SeccionFavoritos({
   }
 
   return (
-    <Carril titulo="Tus favoritos" apoyo="Los comercios que marcaste con el corazón">
-      {favoritos.map((c) => (
-        <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
-      ))}
-    </Carril>
+    <CintaRotativa
+              titulo="Tus favoritos"
+              apoyo="Los comercios que marcaste con el corazón"
+              items={favoritos.map((c) => (
+                <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
+              ))}
+            />
   )
 }

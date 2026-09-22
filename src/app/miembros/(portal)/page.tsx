@@ -29,7 +29,7 @@ import {
 } from '@/lib/miembros/vistas-catalogo'
 import { hoyISO } from '@/lib/shared/fecha'
 import { Button } from '@/components/ui/button'
-import { Carril } from '@/components/ui/carril'
+import { CintaRotativa } from './_components/cinta-rotativa'
 import { EmptyState } from '@/components/ui/feedback'
 import { Grid } from '@/components/ui/layout'
 import { EncabezadoCatalogo } from './_components/encabezado-catalogo'
@@ -642,11 +642,13 @@ export default async function MiembrosHomePage({
             <SeccionFavoritos favoritos={favoritosEstanteria} volver={volver} />
 
             {masUsadosEstanteria.length > 0 && (
-              <Carril titulo="Los que más usas" apoyo="Donde más has usado tu membresía">
-                {masUsadosEstanteria.map((c) => (
-                  <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
-                ))}
-              </Carril>
+              <CintaRotativa
+              titulo="Los que más usas"
+              apoyo="Donde más has usado tu membresía"
+              items={masUsadosEstanteria.map((c) => (
+                <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
+              ))}
+            />
             )}
           </div>
         )}
@@ -685,21 +687,25 @@ export default async function MiembrosHomePage({
         */}
         {novedades.length > 0 && (
           <div className={`${estilos.franja} ${estilos.franjaHonda}`}>
-            <Carril titulo="Nuevos en el club" apoyo="Los últimos aliados que se sumaron">
-              {novedades.map((c) => (
+            <CintaRotativa
+              titulo="Nuevos en el club"
+              apoyo="Los últimos aliados que se sumaron"
+              items={novedades.map((c) => (
                 <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
               ))}
-            </Carril>
+            />
           </div>
         )}
 
         {beneficiosDelMomento.length > 0 && (
           <div className={`${estilos.franja} ${estilos.franjaCacao}`}>
-            <Carril titulo="Beneficios del momento" apoyo="Lo que puedes usar esta semana">
-              {beneficiosDelMomento.map((c) => (
+            <CintaRotativa
+              titulo="Beneficios del momento"
+              apoyo="Lo que puedes usar esta semana"
+              items={beneficiosDelMomento.map((c) => (
                 <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
               ))}
-            </Carril>
+            />
           </div>
         )}
 

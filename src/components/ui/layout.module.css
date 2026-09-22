@@ -210,7 +210,7 @@
     pinta barras de desplazamiento y controles nativos en su variante oscura.
     Sin esto, un carril con scroll visible saca una barra clara sobre chocolate.
   */
-  color-scheme: dark;
+  color-scheme: var(--cacao-scheme, dark);
 
   --surface: var(--cacao-surface);
   --surface-alt: var(--cacao-surface);

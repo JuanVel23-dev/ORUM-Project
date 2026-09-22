@@ -229,7 +229,7 @@
 
   /* Los controles nativos y las barras de scroll de dentro, en su variante
      oscura. Sin esto un `<select>` o un scroll saldría claro sobre chocolate. */
-  color-scheme: dark;
+  color-scheme: var(--cacao-scheme, dark);
 
   --bg: var(--cacao-bg);
   --surface: var(--cacao-surface);

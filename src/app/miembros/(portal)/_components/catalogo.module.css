@@ -75,7 +75,7 @@
      de arriba. Un color plano detrás garantiza que, si el navegador no
      resolviera el `color-mix`, la franja siga siendo negra y no transparente. */
   background: var(--fondo-franja-oscura), var(--cacao-bg);
-  color-scheme: dark;
+  color-scheme: var(--cacao-scheme, dark);
 
   /*
     NO basta con poner `color`. Dentro de esta franja caen componentes que
@@ -258,15 +258,8 @@
   animation-delay: 200ms;
 }
 
-@supports (animation-timeline: view()) {
-  /* Lo que queda por debajo del primer pantallazo se revela al llegar. */
-  .pagina > *:nth-child(n + 5) {
-    animation: entrarBloque linear both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 35%;
-    animation-delay: 0ms;
-  }
-}
+/* El revelado al desplazar ya no es por sección: lo lleva cada pieza con la
+   utilidad global `.revelar-vista` (globals.css). */
 
 /* Movimiento reducido: sin entrada y sin revelado ligado al scroll. El recorte
    global de `globals.css` §5 no basta aquí: una animación atada al scroll no

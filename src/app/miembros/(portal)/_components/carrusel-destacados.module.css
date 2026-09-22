@@ -124,26 +124,8 @@
   Misma razón que arriba para la clase duplicada: `.pista` declara
   `scrollbar-width: none` y oculta `::-webkit-scrollbar`.
 */
-@media (pointer: fine) {
-  .pistaDestacados.pistaDestacados {
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-strong) transparent;
-  }
-
-  .pistaDestacados.pistaDestacados::-webkit-scrollbar {
-    display: block;
-    height: var(--space-2);
-  }
-
-  .pistaDestacados.pistaDestacados::-webkit-scrollbar-thumb {
-    background: var(--border-strong);
-    border-radius: var(--radius-full);
-  }
-
-  .pistaDestacados.pistaDestacados::-webkit-scrollbar-track {
-    background: transparent;
-  }
-}
+/* Barra de desplazamiento retirada: «se ve feo». La portada ya no es un carril
+   con scroll sino una rejilla (ver el final del archivo). */
 
 /* ==========================================================================
    2. LA TARJETA
@@ -183,8 +165,9 @@
   trazo ni oro: el mismo paso de 35ms en las dos, curva distinta.
 */
 .enlace {
-  animation: entrarDestacado var(--dur-base) var(--ease-spring) backwards;
-  animation-delay: var(--retardo, 0ms);
+  /* Sin animación de carga propia: la entrada la da `.revelar-vista`
+     (globals.css), ligada al scroll y en los dos sentidos. Declararlas las dos
+     en el mismo elemento dejaba el ganador al orden de las hojas. */
 
   /* La VUELTA del atenuado al soltar. La ida la acorta `.enlace:active` a
      `--dur-press`. Durante la entrada escalonada esta transición no compite:
@@ -679,10 +662,6 @@
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .enlace {
-    animation-name: aparecerDestacado;
-  }
-
   .capa {
     animation: none;
   }
@@ -719,4 +698,58 @@
   to {
     opacity: 1;
   }
+}
+
+/* ==========================================================================
+   DE CARRIL A REJILLA  ·  rediseño a partir de capturas reales
+   --------------------------------------------------------------------------
+   Encargo del propietario: quitar la barra de desplazamiento («se ve feo»),
+   resaltar las imágenes y que los comercios con foto se vean «uno debajo del
+   otro» en vez de escondidos a la derecha de un carril. Así que la portada
+   deja de desplazarse: todas las tarjetas a la vista, en rejilla.
+
+   Clase repetida (0,3,0) para ganar a `.pista` del carril, que declara el
+   desplazamiento horizontal, el sangrado y el snap.
+*/
+.pistaDestacados.pistaDestacados.pistaDestacados {
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-5);
+
+  overflow: visible;
+  scroll-snap-type: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+/* La foto manda: más alta que antes. */
+.cubierta.cubierta {
+  aspect-ratio: 16 / 11;
+}
+
+/* Logo más grande sobre la foto, con anillo blanco para despegarlo de
+   cualquier imagen. */
+.placaSobreFoto.placaSobreFoto {
+  --placa-logo-w: 72px;
+  box-shadow:
+    0 0 0 3px var(--surface),
+    var(--shadow-raised);
+}
+
+/* Nombre con más presencia. */
+.nombre.nombre {
+  font-size: var(--t-title-2-size);
+  font-weight: 700;
+}
+
+/* La promoción resaltada: píldora de oro brillante con la cifra en tinta
+   (9,3:1). Es lo más llamativo después de la foto. */
+.beneficio.beneficio.beneficio {
+  padding: var(--space-2) var(--space-4);
+  background: var(--gold-500);
+  border-color: transparent;
+  color: var(--tinta-1);
+  font-size: var(--t-callout-size);
+  font-weight: 700;
 }

@@ -280,14 +280,20 @@
      (`.claude/docs/LICENCIA-CREATIVA-v4.md`): un titular dorado sobre negro
      puede ocupar lo que la pantalla pida.
      -------------------------------------------------------------------------- */
-  --cacao-bg: var(--cacao-900);
-  --cacao-surface: var(--cacao-800);
-  --cacao-hover: var(--cacao-700);
-  --cacao-fg: var(--w-0);
-  --cacao-fg-2: var(--n-300);
-  --cacao-fg-3: var(--n-400);
-  --cacao-brand: var(--gold-400);
+  /*
+    LA FRANJA DEPENDE DEL TEMA. En claro es champán con tinta y oro de texto;
+    en oscuro sigue siendo negra con oro brillante (bloques de más abajo). El
+    nombre `--cacao-*` se conserva para no dejar `var()` huérfanos.
+  */
+  --cacao-bg: var(--champan-100);
+  --cacao-surface: var(--w-0);
+  --cacao-hover: var(--champan-200);
+  --cacao-fg: var(--tinta-1);
+  --cacao-fg-2: var(--tinta-2);
+  --cacao-fg-3: var(--tinta-2);
+  --cacao-brand: var(--gold-700);
   --cacao-edge: var(--gold-600);
+  --cacao-scheme: light;
 
   /* --------------------------------------------------------------------------
      ACCIÓN CEREMONIAL  ·  el par dorado de `Button variant=brand`
@@ -449,6 +455,14 @@
   claro, y cada uno se audita en SU tema.
 */
 [data-theme='dark'] {
+  --cacao-bg: var(--cacao-900);
+  --cacao-surface: var(--cacao-800);
+  --cacao-hover: var(--cacao-700);
+  --cacao-fg: var(--w-0);
+  --cacao-fg-2: var(--n-300);
+  --cacao-fg-3: var(--n-400);
+  --cacao-brand: var(--gold-400);
+  --cacao-scheme: dark;
   --bg: var(--n-1000);
   --surface: var(--n-900);
   --surface-sunk: var(--n-950);
@@ -559,6 +573,14 @@
    data-theme, se sigue la preferencia del sistema. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']):not([data-theme='dark']) {
+    --cacao-bg: var(--cacao-900);
+    --cacao-surface: var(--cacao-800);
+    --cacao-hover: var(--cacao-700);
+    --cacao-fg: var(--w-0);
+    --cacao-fg-2: var(--n-300);
+    --cacao-fg-3: var(--n-400);
+    --cacao-brand: var(--gold-400);
+    --cacao-scheme: dark;
     --bg: var(--n-1000);
     --surface: var(--n-900);
     --surface-sunk: var(--n-950);
@@ -1205,3 +1227,55 @@ textarea:active,
   Sus sustitutos son `Grid` y `ComercioLogo`. Se eliminan para que nadie las
   encuentre por búsqueda y las dé por vigentes.
 */
+
+/* ==========================================================================
+   REVELADO POR PIEZA AL DESPLAZAR  ·  `.revelar-vista`
+   --------------------------------------------------------------------------
+   Encargo del propietario: «añade animaciones de entrada para cada componente
+   o sección, al igual si se devuelve». Cada pieza marcada entra al aparecer
+   por abajo y, al volver hacia arriba, las que reaparecen por arriba también
+   entran: la animación está ligada a la posición en la vista
+   (`animation-timeline: view()`), así que funciona en los dos sentidos.
+
+   Solo CSS, en el compositor, sin JavaScript ni hidratación. Si el navegador
+   no conoce `view()`, el `@supports` la descarta y la pieza se ve normal:
+   nada puede quedarse invisible. Solo `opacity`, `translate` y `scale`.
+   ========================================================================== */
+@supports (animation-timeline: view()) {
+  .revelar-vista {
+    animation: revelar-vista linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+}
+
+@keyframes revelar-vista {
+  entry 0% {
+    opacity: 0;
+    translate: 0 28px;
+    scale: 0.97;
+  }
+  entry 70% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+    scale: 0.98;
+  }
+}
+
+/* Movimiento reducido: sin revelado. La animación ligada al scroll no usa la
+   duración, así que el recorte global de §5 no la alcanza. */
+@media (prefers-reduced-motion: reduce) {
+  .revelar-vista {
+    animation: none;
+  }
+}

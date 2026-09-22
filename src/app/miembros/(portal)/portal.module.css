@@ -3,6 +3,11 @@
   flex-direction: column;
   min-height: 100dvh;
 
+  /* La textura del club bajo todo el papel del portal. Las franjas tonales
+     pintan su propio fondo encima, así que solo asoma en las zonas blancas. */
+  background-image: var(--patron-club);
+  background-size: 240px 240px;
+
   /*
     LA COLUMNA DEL PORTAL, y por qué no es la del panel.
 

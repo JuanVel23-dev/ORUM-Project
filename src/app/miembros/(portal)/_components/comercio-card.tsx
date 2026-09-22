@@ -3,7 +3,7 @@ import { MapPin, TicketPercent } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
-import { formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
+import { formatearBeneficio, formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import { transicionComercio } from '@/lib/comercios/transiciones'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 import { BotonFavorito } from './boton-favorito'
@@ -123,9 +123,30 @@ export function ComercioCard({
       antes tenía el enlace; si no, la divisoria inferior de la tarjeta dejaría
       de alinearse entre tarjetas, que es para lo que existe.
     */
-    <div className={styles.marco}>
+    <div className={`${styles.marco} revelar-vista`}>
       <Link href={hrefFicha(comercio.id, volver)} className={styles.enlace}>
-        <Card interactive className={styles.superficie}>
+        <Card interactive padding="none" className={styles.superficie}>
+          {/*
+            LA FOTO ES LA PROTAGONISTA. Encargo: «resalta las imágenes, que no
+            se oculten, que sean el centro de atención». La portada del local
+            abre la tarjeta a todo el ancho; sin portada, un fondo champán con la
+            marca en grande, para que la tarjeta no se vea incompleta.
+          */}
+          <div className={styles.cubierta}>
+            {comercio.portadaUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria
+              <img
+                src={comercio.portadaUrl}
+                alt=""
+                className={styles.foto}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <span className={styles.cubiertaVacia} aria-hidden="true" />
+            )}
+          </div>
+
           <div className={styles.tarjeta}>
             <div className={styles.cabecera}>
               {/* La placa es el mismo objeto que el hero de la ficha: misma
@@ -136,6 +157,7 @@ export function ComercioCard({
                 logoUrl={comercio.logoUrl}
                 nombre={comercio.nombre}
                 nombreTransicion={transicion.placa}
+                className={styles.logoGrande}
               />
 
               {/* Nombre + marca, el mismo par y en el mismo orden que el hero.
@@ -201,21 +223,12 @@ export function ComercioCard({
               <ul className={styles.promociones}>
                 {visibles.map((p) => (
                   <li key={p.id} className={styles.promocion}>
+                    {/* La cifra primero y en grande: es lo que el socio vino a buscar. */}
+                    <span className={styles.promocionCifra}>
+                      <TicketPercent size={16} aria-hidden="true" />
+                      {formatearBeneficio(p.tipoCodigo, p.valor)}
+                    </span>
                     <span className={styles.promocionTitulo}>{p.titulo}</span>
-                    {/*
-                      El beneficio es la cifra que el miembro busca: va en oro.
-                      Es el único uso ceremonial del oro en esta pantalla, y la
-                      cifra va DENTRO de la píldora, así que el color nunca es el
-                      único portador del significado.
-                    */}
-                    <Badge
-                      tone="gold"
-                      size="sm"
-                      className={styles.beneficio}
-                      icon={<TicketPercent size={12} aria-hidden="true" />}
-                    >
-                      {formatearBeneficioCorto(p.tipoCodigo, p.valor)}
-                    </Badge>
                   </li>
                 ))}
 
@@ -294,7 +307,11 @@ export function ComercioCardCompacta({
             contenido, y el nombre empezaría a truncarse antes de tiempo. */}
         <Card padding="sm" interactive className={styles.superficie}>
           <div className={styles.compacta}>
-            <ComercioLogo logoUrl={comercio.logoUrl} nombre={comercio.nombre} />
+            <ComercioLogo
+              logoUrl={comercio.logoUrl}
+              nombre={comercio.nombre}
+              className={styles.logoCompacta}
+            />
 
             <h3 className={styles.nombre}>{comercio.nombre}</h3>
 

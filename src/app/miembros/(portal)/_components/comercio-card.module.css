@@ -53,7 +53,15 @@
   position: absolute;
   top: var(--space-3);
   right: var(--space-3);
-  z-index: 1;
+  z-index: 2;
+}
+
+/* En la rejilla el corazón va SOBRE LA FOTO: necesita su propio fondo para
+   leerse encima de cualquier imagen. La compacta no tiene foto y no lo lleva. */
+.marco:not(.marcoCompacta) .corazon {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-card);
 }
 
 .enlace {
@@ -78,6 +86,57 @@
 
 .superficie {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  /* Recorta la foto al radio de la tarjeta. */
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   LA CUBIERTA · la foto del local, protagonista
+   ========================================================================== */
+
+.cubierta {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--cacao-bg);
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Acercamiento lento al apuntar: la foto «respira». Solo `scale`, en el
+     compositor. */
+  transition: scale var(--dur-page) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .enlace:hover .foto {
+    scale: 1.05;
+  }
+}
+
+/* Sin portada: un campo champán con el halo dorado, para que la tarjeta no se
+   vea a medias. La marca la pone el logo grande que monta encima. */
+.cubiertaVacia {
+  position: absolute;
+  inset: 0;
+  background: var(--gold-halo), var(--cacao-bg);
+}
+
+/* El logo grande MONTA sobre el borde inferior de la foto. Clase duplicada para
+   ganar a `.placa` sin depender del orden de las hojas. */
+.logoGrande.logoGrande {
+  --placa-logo-w: 76px;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 4px var(--surface),
+    var(--shadow-raised);
 }
 
 /*
@@ -126,7 +185,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  height: 100%;
+  flex: 1;
+  padding: 0 var(--space-5) var(--space-5);
 }
 
 .cabecera {
@@ -135,14 +195,11 @@
   gap: var(--space-3);
   min-width: 0;
 
-  /*
-    HUECO PARA EL CORAZÓN, que vive en la esquina superior derecha del marco.
-
-    Sin esto, un nombre largo pasa por DEBAJO del corazón: trunca con elipsis y
-    no desborda, pero las últimas letras quedan tapadas y el socio lee
-    "Restaurante La Esq…" con un corazón encima de la elipsis.
-  */
-  padding-inline-end: var(--space-7);
+  /* El logo sube la mitad de su alto sobre la foto; el nombre queda a su
+     derecha, alineado con la base del círculo. El corazón vive sobre la foto,
+     así que ya no hace falta reservarle hueco aquí. */
+  align-items: flex-end;
+  margin-top: -38px;
 }
 
 .titulos {
@@ -150,10 +207,10 @@
 }
 
 .nombre {
-  font-size: var(--t-title-3-size);
-  line-height: var(--t-title-3-leading);
-  font-weight: var(--t-title-3-weight);
-  letter-spacing: var(--t-title-3-tracking);
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  font-weight: 700;
+  letter-spacing: var(--t-title-2-tracking);
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -200,45 +257,48 @@
 .promociones {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-
+  gap: var(--space-3);
   margin-top: auto;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--border-subtle);
 }
 
 .promocion {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
   font-size: var(--t-footnote-size);
 }
 
+/*
+  LA PROMOCIÓN, RESALTADA. Encargo: «resalta las promociones». Píldora de oro
+  brillante con la cifra completa en tinta: --gold-500 contra --tinta-1 da
+  9,3:1, sobrado. Es la pieza más llamativa de la tarjeta después de la foto,
+  que es el orden que se pidió.
+*/
+.promocionCifra {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+
+  background: var(--gold-500);
+  color: var(--tinta-1);
+  font-size: var(--t-callout-size);
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
 .promocionTitulo {
-  min-width: 0;
+  max-width: 100%;
+  color: var(--text-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/*
-  LA INSIGNIA NO ENCOGE, Y ESTE ES EL BUG QUE SE VEÍA.
-
-  `Badge` lleva `white-space: nowrap` y, como todo hijo de un flex, un
-  `flex-shrink: 1` implícito. Cuando el título era largo, el reparto encogía
-  la CAJA de la insignia por debajo de su propio texto — y como el texto no
-  parte, se salía de la píldora y de la tarjeta. El propietario lo describió
-  como «los descuentos se salen de la tarjeta».
-
-  La cifra del descuento es el dato que el socio vino a buscar: es lo último
-  que puede perder ancho. Quien cede es el título, que ya sabe recortarse con
-  puntos suspensivos.
-*/
-.promocion > :last-child {
-  flex-shrink: 0;
-}
 
 .masBeneficios {
   font-size: var(--t-caption-size);
@@ -345,7 +405,10 @@
   container-name: tarjeta;
 }
 
-@container tarjeta (min-width: 300px) {
+/* Umbral a 0: la compacta es SIEMPRE fila. En columna medía el doble de alto
+   para enseñar lo mismo —logo, nombre y beneficio— y el propietario pidió
+   quitar el espacio que no aporta («Beneficios del momento» se veía enorme). */
+@container tarjeta (min-width: 0px) {
   .compacta {
     display: grid;
     /* Placa a su ancho natural; el texto se lleva el resto. `minmax(0, 1fr)`
@@ -411,4 +474,9 @@
   /* Una palabra sola más larga que la píldora —una cifra enorme— parte en vez
      de desbordar. */
   overflow-wrap: anywhere;
+}
+
+/* Logo más grande en la compacta: con la tarjeta en fila hay sitio. */
+.logoCompacta.logoCompacta {
+  --placa-logo-w: 60px;
 }

@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Carril, CarrilPista } from '@/components/ui/carril'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { Skeleton } from '@/components/ui/feedback'
-import { formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
+import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
 import {
   MINIMO_DESTACADOS,
   TOPE_DESTACADOS,
@@ -198,7 +198,7 @@ function TarjetaDestacada({
   return (
     <Link
       href={hrefFicha(comercio.id, volver)}
-      className={estilos.enlace}
+      className={`${estilos.enlace} revelar-vista`}
       /* Token dinámico, el único uso de `style` que la norma admite: inyectar
          un valor, nunca maquetar. Es lo que escalona la entrada (A1). */
       style={{ '--retardo': `${retardoEscalonado(indice)}ms` } as CSSProperties}
@@ -244,9 +244,9 @@ function TarjetaDestacada({
                   píldora dorada no es ambiguo — y con la frase entera la
                   insignia se salía de la tarjeta.
                 */
-                icon={<TicketPercent size={12} aria-hidden="true" />}
+                icon={<TicketPercent size={16} aria-hidden="true" />}
               >
-                {formatearBeneficioCorto(beneficio.tipoCodigo, beneficio.valor)}
+                {formatearBeneficio(beneficio.tipoCodigo, beneficio.valor)}
               </Badge>
             ) : descripcion ? (
               <p className={estilos.frase}>{descripcion}</p>
