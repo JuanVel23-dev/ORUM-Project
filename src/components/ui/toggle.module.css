@@ -154,7 +154,7 @@
   */
   /* Control de entrada: conserva su borde en reposo (§2.5), al 55 % como el
      resto de campos. */
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-control);
   background: var(--surface);
 
   transition:

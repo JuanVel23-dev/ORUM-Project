@@ -668,6 +668,8 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
   letter-spacing: 0.1em;
+  /* Lo hereda el valor de `Copiar`, que si no fijaría su propio 0,03em. */
+  --copiar-tracking: 0.1em;
   color: var(--gold-300);
 }
 

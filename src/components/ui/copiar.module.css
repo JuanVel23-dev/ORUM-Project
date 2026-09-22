@@ -8,7 +8,10 @@
 .valor {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-  letter-spacing: 0.03em;
+  /* El tracking se puede fijar desde fuera con `--copiar-tracking`. Antes era
+     un 0,03em fijo que pisaba el tracking del contenedor: el número del carnet
+     pedía 0,1em —metal grabado— y se pintaba con el de la primitiva. */
+  letter-spacing: var(--copiar-tracking, 0.03em);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

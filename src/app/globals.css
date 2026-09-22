@@ -132,6 +132,22 @@
   --border-strong: var(--n-1000);
 
   /*
+    EL BORDE EN REPOSO DE UN CONTROL DE ENTRADA, separado de `--border`.
+
+    `--border` hace dos trabajos: los divisores del cromo y de dentro de las
+    superficies, y el filo de `Input`, `Select`, `Textarea`, `Checkbox`,
+    `Radio`, `SegmentedControl` y `Button secondary`. En claro los dos casos
+    caben en el mismo valor (4,17:1 sobre blanco). En OSCURO no: `--n-700` da
+    1,92:1 contra la tarjeta y reprueba el 3:1 de WCAG 1.4.11 en el límite de
+    un control — y subirlo para todos engordaría cada divisor del panel.
+
+    Así que el control tiene el suyo. En claro es el mismo `--border`; en
+    oscuro sube a `--n-500`: 3,19:1 sobre la tarjeta, 3,58 sobre el fondo y
+    3,39 sobre la banda alterna.
+  */
+  --border-control: var(--border);
+
+  /*
     EL FILO DE UNA SUPERFICIE, y el mecanismo entero de §2.5.
 
     Vale `transparent` en reposo: la tarjeta, el modal, el menú, el toast y la
@@ -446,6 +462,7 @@
   --surface-alt-2: var(--n-900);
   --border: var(--n-700);
   --border-subtle: var(--n-800);
+  --border-control: var(--n-500); /* 3,19:1 sobre la tarjeta — ver la nota del tema claro */
   /*
     v5: `--border-strong` pasa de `--n-600` a `--n-500`, y NO es cosmético.
     Este token existe casi solo para que `prefers-contrast: more` (al final de
@@ -554,6 +571,7 @@
     --surface-alt-2: var(--n-900);
     --border: var(--n-700);
     --border-subtle: var(--n-800);
+    --border-control: var(--n-500);
     --border-strong: var(--n-500);
 
     --text: var(--n-50);
@@ -1169,6 +1187,7 @@ textarea:active,
     --border-superficie: var(--border-strong);
     --border: var(--border-strong);
     --border-subtle: var(--border);
+    --border-control: var(--border-strong);
     --text-2: var(--text);
     --material: var(--surface);
   }

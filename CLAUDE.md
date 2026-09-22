@@ -168,10 +168,10 @@ Lo que queda de trazo, y para qué:
 | `--border-subtle` | tinta al 22 % | 1,62:1 | Hairlines de fila. No define nada |
 | `--border-strong` | tinta plena | 18,69:1 | **Ya no se usa.** Es el valor al que alto contraste devuelve `--border-superficie` |
 
-⚠️ **En tema OSCURO `--border` da 1,92:1 contra la tarjeta y NO cumple 1.4.11**
-para el borde en reposo de un `<input>`. Es deuda conocida, medida y abierta —
-ver «Deuda conocida». No la descubras otra vez ni la des por buena porque el
-claro cumple: **los criterios se comprueban por tema.**
+✅ **El borde en reposo de un control de entrada es `--border-control`, no
+`--border`.** En claro valen lo mismo; en OSCURO `--border` da 1,92:1 contra la
+tarjeta y reprobaba 1.4.11, así que el control sube a `--n-500` (3,19:1) sin
+engordar los divisores. **Los criterios se comprueban por tema.**
 
 **Grosor: 1px.** El 2px de «superficie principal» de la v2 desapareció con el
 trazo. El único 2px que queda en el sistema es el de `:focus-visible`.
@@ -1021,14 +1021,13 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    mantuvieron a propósito: seis módulos los consumen y un `var()` huérfano no
    falla, hereda en silencio. El renombrado a `--negro-*` / `--franja-*` es una
    tanda propia, y tiene que tocar `<Section tono="cacao">` a la vez.
-7. **En tema oscuro `--border` da 1,92:1 contra la tarjeta y reprueba WCAG
-   1.4.11** para el borde en reposo de `Input`, `Select` y `Textarea`. Venía de
-   antes (la rampa cálida daba 1,46:1) y la v5 lo mejora sin cerrarlo. El arreglo
-   correcto es separar el borde de control del borde de división —`--border`
-   viste también los divisores del shell, y subirlo a 3:1 los engorda— y eso toca
-   módulos de componente.
-8. **Tres copias a mano de la paleta siguen en los colores de la v4** y hacen que
-   la PWA instalada arranque con la dirección de arte retirada:
-   `src/app/manifest.ts` (`#14100E`), `src/app/apple-icon.tsx` (`#14100E` y
-   `#C69A43`) y `src/app/icon.svg` (`#14100E` y las cuatro paradas del oro).
-   Quedaron fuera del alcance de la tanda de tokens.
+7. ~~En tema oscuro `--border` reprobaba WCAG 1.4.11 en el borde de los
+   controles.~~ **Cerrado**: existe `--border-control`, separado de `--border`.
+   En claro vale lo mismo; en oscuro sube a `--n-500` (3,19:1 sobre la tarjeta,
+   3,58 sobre el fondo, 3,39 sobre la banda). Lo usan `Input`/`Select`/
+   `Textarea`, `Checkbox`/`Radio`, `SegmentedControl` y `Button secondary`. Un
+   control de entrada nuevo **pide `--border-control`, no `--border`**.
+8. ~~Tres copias a mano de la paleta seguían en los colores de la v4.~~
+   **Cerrado**: `manifest.ts`, `apple-icon.tsx` e `icon.svg` ya van en v5. Si la
+   paleta vuelve a cambiar, se mueven A MANO — ninguno puede leer una variable
+   CSS (ver la nota en `src/app/layout.tsx`).

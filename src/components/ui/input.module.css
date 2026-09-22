@@ -17,7 +17,7 @@
     por encima del 3:1 que WCAG 1.4.11 pide en el límite de un control, y deja
     de competir con el texto que el campo contiene.
   */
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text);
