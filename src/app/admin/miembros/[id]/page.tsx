@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { CreditCard, Pencil } from 'lucide-react'
+import { Camera, CreditCard, Pencil } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { derivarEstadoMembresia, type EstadoMembresia } from '@/lib/miembros/membresias'
@@ -202,6 +202,15 @@ export default async function FichaMiembroPage({
               icon={<Pencil size={16} />}
             >
               Editar datos
+            </Button>
+            {/* La pantalla de la foto existía —página, modal y acción— sin un
+                solo enlace que llevara a ella. */}
+            <Button
+              href={`/admin/miembros/${miembro.id}/foto`}
+              variant="secondary"
+              icon={<Camera size={16} />}
+            >
+              Cambiar foto
             </Button>
             {/*
               Renovar es la acción que mueve dinero: va primaria y arriba.

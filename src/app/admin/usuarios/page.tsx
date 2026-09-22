@@ -1,4 +1,4 @@
-import { MoreHorizontal, Pencil, UserPlus } from 'lucide-react'
+import { Camera, MoreHorizontal, Pencil, UserPlus } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AccionEstado } from '@/components/ui/accion-estado'
@@ -21,6 +21,8 @@ type Fila = {
   rolNombre: string
   rolCodigo: string
   activo: boolean
+  /** Foto de perfil. Sin ella el avatar pinta iniciales. */
+  avatarUrl: string | null
 }
 
 const COLUMNAS: ReadonlyArray<Column<Fila>> = [
@@ -30,7 +32,7 @@ const COLUMNAS: ReadonlyArray<Column<Fila>> = [
     primary: true,
     cell: (f) => (
       <span className={styles.celdaNombre}>
-        <Avatar nombre={f.nombre} size="sm" decorativo />
+        <Avatar nombre={f.nombre} src={f.avatarUrl} size="sm" decorativo />
         <span className={styles.nombre}>{f.nombre}</span>
       </span>
     ),
@@ -68,7 +70,7 @@ export default async function UsuariosPage() {
 
   const [{ data: perfiles }, { data: roles }, { data: empleados }, authList] =
     await Promise.all([
-      admin.from('perfiles').select('id, rol_id, activo'),
+      admin.from('perfiles').select('id, rol_id, activo, avatar_url'),
       admin.from('roles').select('id, codigo, nombre'),
       admin.from('empleados').select('perfil_id, nombres, apellidos').is('deleted_at', null),
       admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
@@ -91,6 +93,7 @@ export default async function UsuariosPage() {
         rolNombre: rol.nombre,
         rolCodigo: rol.codigo,
         activo: p.activo,
+        avatarUrl: (p.avatar_url ?? '').trim() || null,
       }
     })
     .filter((f): f is Fila => f !== null)
@@ -152,6 +155,15 @@ export default async function UsuariosPage() {
                 icon={<Pencil size={16} />}
               >
                 Editar datos
+              </MenuItem>
+              {/* La pantalla existía —página, modal y acción— pero nada
+                  enlazaba a ella: el avatar de un administrador no se podía
+                  cambiar navegando el panel. */}
+              <MenuItem
+                href={`/admin/usuarios/${f.perfilId}/avatar`}
+                icon={<Camera size={16} />}
+              >
+                Cambiar foto
               </MenuItem>
             </DropdownMenu>
           </>

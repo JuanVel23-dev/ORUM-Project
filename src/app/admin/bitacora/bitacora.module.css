@@ -73,6 +73,15 @@
   color: var(--text-2);
 }
 
+/* Avatar y nombre en una fila; `min-width: 0` deja que el nombre se recorte
+   en vez de empujar la columna. */
+.actorFila {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
 .actor {
   font-size: var(--t-footnote-size);
   color: var(--text-3);

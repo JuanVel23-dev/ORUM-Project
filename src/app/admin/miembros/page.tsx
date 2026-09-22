@@ -1,4 +1,4 @@
-import { CreditCard, Hash, MoreHorizontal, Pencil, Search, UserPlus } from 'lucide-react'
+import { Camera, CreditCard, Hash, MoreHorizontal, Pencil, Search, UserPlus } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { buscarMiembros, type MiembroEncontrado } from '@/lib/miembros/buscar-miembros'
 import { Avatar } from '@/components/ui/avatar'
@@ -21,7 +21,7 @@ const COLUMNAS: ReadonlyArray<Column<MiembroEncontrado>> = [
     cell: (m) => (
       <span className={styles.celdaNombre}>
         {/* Decorativo: el nombre va escrito justo al lado. */}
-        <Avatar nombre={m.nombre} size="sm" decorativo />
+        <Avatar nombre={m.nombre} src={m.fotoUrl} size="sm" decorativo />
         <span className={styles.nombre}>{m.nombre}</span>
       </span>
     ),
@@ -190,6 +190,9 @@ export default async function MiembrosPage({
               icon={<CreditCard size={16} />}
             >
               Renovar membresía
+            </MenuItem>
+            <MenuItem href={`/admin/miembros/${m.id}/foto`} icon={<Camera size={16} />}>
+              Cambiar foto
             </MenuItem>
           </DropdownMenu>
         )}

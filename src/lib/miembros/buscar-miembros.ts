@@ -17,6 +17,8 @@ export type MiembroEncontrado = {
   numeroMembresia: string
   nombre: string
   cedula: string
+  /** Foto del socio. Sin ella el avatar pinta iniciales. */
+  fotoUrl: string | null
   plan: string | null
   /** `null` si el miembro nunca ha tenido membresía. */
   estado: EstadoDerivado | null
@@ -51,7 +53,7 @@ export async function buscarMiembros(
 
   let consulta = admin
     .from('miembros')
-    .select('id, numero_membresia, nombres, apellidos, cedula')
+    .select('id, numero_membresia, nombres, apellidos, cedula, foto_url')
     .is('deleted_at', null)
 
   const limpio = limpiarTermino(termino)
@@ -104,6 +106,7 @@ export async function buscarMiembros(
       numeroMembresia: m.numero_membresia,
       nombre: `${m.nombres} ${m.apellidos}`.trim(),
       cedula: m.cedula,
+      fotoUrl: (m.foto_url ?? '').trim() || null,
       plan: encontrado?.plan ?? null,
       estado: encontrado?.estado ?? null,
     }

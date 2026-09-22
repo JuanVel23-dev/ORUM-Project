@@ -4,6 +4,7 @@ import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resumirEventoBitacora } from '@/lib/bitacora/bitacora'
 import { finDiaBogota, inicioDiaBogota } from '@/lib/shared/fecha'
+import { Avatar } from '@/components/ui/avatar'
 import { Badge, type BadgeTone } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataList, type Column } from '@/components/ui/data-list'
@@ -21,7 +22,9 @@ type Evento = {
   miembroNombre: string
   accion: string
   detalle: string
+  /** Nombre del empleado si lo hay; si no, su correo. */
   actor: string
+  actorFoto: string | null
 }
 
 /*
@@ -104,7 +107,21 @@ const COLUMNAS: ReadonlyArray<Column<Evento>> = [
     key: 'actor',
     header: 'Registrado por',
     width: '220px',
-    cell: (e) => <span className={styles.actor}>{e.actor}</span>,
+    /*
+      FOTO + NOMBRE, que es lo que pidió el propietario: «ver a los demás
+      administradores en los reportes con las fotos y nombres». Antes era el
+      correo en texto plano. El avatar va `decorativo` porque el nombre está
+      escrito al lado — si no, el lector de pantalla lo diría dos veces.
+    */
+    cell: (e) =>
+      e.actor === '—' ? (
+        <span className={styles.actor}>—</span>
+      ) : (
+        <span className={styles.actorFila}>
+          <Avatar nombre={e.actor} src={e.actorFoto} size="sm" decorativo />
+          <span className={styles.actor}>{e.actor}</span>
+        </span>
+      ),
   },
 ]
 
@@ -172,7 +189,7 @@ export default async function BitacoraPage({
 
   // Los nombres de miembro y los correos de los autores salen ambos de
   // `eventos`, ya resuelto, pero no dependen entre sí: se piden en paralelo.
-  const [{ data: miembrosInfo }, correoActorEntries] = await Promise.all([
+  const [{ data: miembrosInfo }, correoActorEntries, { data: perfilesActor }, { data: empleadosActor }] = await Promise.all([
     idsMiembros.length > 0
       ? admin.from('miembros').select('id, nombres, apellidos').in('id', idsMiembros)
       : Promise.resolve({ data: [] as { id: number; nombres: string; apellidos: string }[] }),
@@ -182,7 +199,19 @@ export default async function BitacoraPage({
         return [idActor, data.user?.email ?? '—'] as const
       }),
     ),
+    actorIds.length > 0
+      ? admin.from('perfiles').select('id, avatar_url').in('id', actorIds)
+      : Promise.resolve({ data: [] as { id: string; avatar_url: string | null }[] }),
+    actorIds.length > 0
+      ? admin.from('empleados').select('perfil_id, nombres, apellidos').in('perfil_id', actorIds)
+      : Promise.resolve({ data: [] as { perfil_id: string; nombres: string; apellidos: string }[] }),
   ])
+  const fotoActor = new Map(
+    (perfilesActor ?? []).map((p) => [p.id, (p.avatar_url ?? '').trim() || null]),
+  )
+  const nombreActor = new Map(
+    (empleadosActor ?? []).map((e) => [e.perfil_id, `${e.nombres} ${e.apellidos}`.trim()]),
+  )
   const nombreMiembro = new Map(
     (miembrosInfo ?? []).map((m) => [m.id, `${m.nombres} ${m.apellidos}`.trim()]),
   )
@@ -197,7 +226,10 @@ export default async function BitacoraPage({
       : '—',
     accion: e.accion,
     detalle: resumirEventoBitacora(e.accion, e.datos_anteriores, e.datos_nuevos),
-    actor: e.actor_id ? (correoActor.get(e.actor_id) ?? '—') : '—',
+    actor: e.actor_id
+      ? (nombreActor.get(e.actor_id) || correoActor.get(e.actor_id) || '—')
+      : '—',
+    actorFoto: e.actor_id ? (fotoActor.get(e.actor_id) ?? null) : null,
   }))
 
   return (
