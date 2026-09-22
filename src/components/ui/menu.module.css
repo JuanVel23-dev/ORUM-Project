@@ -122,44 +122,35 @@
 .menu:popover-open .item,
 .menu:popover-open .separador,
 .menu:popover-open .etiquetaGrupo {
-  animation: entrarItem var(--dur-base) var(--ease-out) backwards;
-  /* Arranque: el menú ya tiene forma cuando la primera opción entra. */
-  animation-delay: var(--escalonado);
+  animation: entrarItem var(--dur-fast) var(--ease-out) backwards;
 }
 
 /*
   EL ESCALONADO SALE DE `nth-child`, NO DE UN TOKEN INYECTADO DESDE REACT.
 
-  Antes `DropdownMenu` clonaba cada hijo para pasarle `style={{'--indice': i}}`.
-  Eso rompía el menú entero: sus hijos los monta un Server Component y un
-  elemento que cruza la frontera RSC no se puede clonar — ver la nota larga en
-  `menu.tsx`. Con `nth-child` el escalonado funciona sin tocar a los hijos, que
-  es además como ya lo hacen `Stack` y `Grid` en `layout.module.css`.
+  Antes `DropdownMenu` clonaba cada hijo para pasarle `style={{'--indice': i}}`,
+  y eso rompía el menú entero: sus hijos los monta un Server Component y un
+  elemento que cruza la frontera RSC no se puede clonar (ver `menu.tsx`).
 
-  El tope es lo importante, no el paso: a partir del octavo todos comparten
-  retardo. Sin tope, una lista larga hace esperar al último casi un segundo y
-  eso se percibe como lentitud, no como elegancia.
+  Y CON TOPE EN CUATRO, más corto que el de una rejilla. Es un desplegable que
+  se abre decenas de veces al día: con ocho pasos de 40 ms más 220 de entrada,
+  la última opción llegaba a los ~540 ms, y la banda de un desplegable es
+  150–250 ms (regla cero: la frecuencia manda). Ahora la entrada es
+  `--dur-fast` y el último escalón arranca a 160 ms: el menú entero está en
+  pantalla en ~300 ms y sigue leyéndose como una secuencia, no como un
+  parpadeo.
 */
 .menu:popover-open > *:nth-child(2) {
-  animation-delay: calc(var(--escalonado) * 2);
+  animation-delay: var(--escalonado);
 }
 .menu:popover-open > *:nth-child(3) {
-  animation-delay: calc(var(--escalonado) * 3);
+  animation-delay: calc(var(--escalonado) * 2);
 }
 .menu:popover-open > *:nth-child(4) {
+  animation-delay: calc(var(--escalonado) * 3);
+}
+.menu:popover-open > *:nth-child(n + 5) {
   animation-delay: calc(var(--escalonado) * 4);
-}
-.menu:popover-open > *:nth-child(5) {
-  animation-delay: calc(var(--escalonado) * 5);
-}
-.menu:popover-open > *:nth-child(6) {
-  animation-delay: calc(var(--escalonado) * 6);
-}
-.menu:popover-open > *:nth-child(7) {
-  animation-delay: calc(var(--escalonado) * 7);
-}
-.menu:popover-open > *:nth-child(n + 8) {
-  animation-delay: calc(var(--escalonado) * 8);
 }
 
 @keyframes entrarItem {
