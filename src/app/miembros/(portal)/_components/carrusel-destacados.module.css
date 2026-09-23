@@ -1,0 +1,755 @@
+/* ==========================================================================
+   CARRUSEL DE DESTACADOS  ·  la portada del Portal de Miembros
+   --------------------------------------------------------------------------
+   Cuatro movimientos, TODOS en `transform`/`translate`/`scale` u `opacity`:
+   animar `width`, `height`, `top`, `left` o `margin` recalcula layout cada
+   fotograma y es prohibición dura de `CLAUDE.md`.
+
+     A1  entrada escalonada ..... el retardo llega como token dinámico
+     A2  paralaje al deslizar ... animación guiada por scroll, cero JavaScript
+     A3  realce al apuntar ...... sombra + filo dorado + micro-zoom
+     A4  lo que NO se hace ...... autoplay, Ken Burns en bucle, backdrop-filter
+
+   Presupuesto de gama baja: UNA capa compuesta persistente por tarjeta —`.capa`,
+   promovida por A2—. Sin `filter`, sin desenfoque y sin sombras animadas en
+   continuo: el cambio de sombra de A3 es discreto y puntual, como ya hace
+   `Card.interactive:hover`.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. LA PISTA  ·  se HEREDA de `CarrilPista`, no se duplica
+   --------------------------------------------------------------------------
+   `carril.module.css` ya resuelve el sangrado asimétrico —la decisión más
+   importante de la pieza, porque un sangrado simétrico mete contenido
+   deslizable en la banda del gesto "atrás" y el socio sale de la aplicación—,
+   `overscroll-behavior-inline: contain`, la reserva del anillo de foco y la
+   AUSENCIA DELIBERADA de `touch-action`, que es lo que deja al navegador
+   repartir el gesto entre la fila y el scroll vertical de la página.
+
+   Aquí solo se sobrescribe lo que esta instancia necesita. Duplicar esa
+   geometría en este módulo garantizaría que las dos se desincronicen.
+   ========================================================================== */
+
+/*
+  `cqi`, NO `vw`. El ancho útil del contenido no es el del viewport: `.main`
+  publica `container-type: inline-size` con nombre `contenido` y lo topa en
+  `--content-max`. Hoy coinciden casi en todo el rango porque el portal no tiene
+  barra lateral — es una coincidencia de la topología actual, no una garantía.
+
+  Y se sobrescribe SOLO EN ESTA INSTANCIA, vía el token que la pista ya lee:
+  `--carril-tarjeta-w` vale 200px para los dos consumidores actuales del
+  `Carril` (las dos estanterías) y así se queda.
+*/
+.pistaDestacados {
+  --carril-tarjeta-w: min(76cqi, 300px);
+}
+
+/* Tableta: dos cubiertas completas y una insinuada. Es el punto más ajustado
+   de toda la geometría —unos 40px de asomo— y el primer sitio a mirar en
+   captura real. */
+@container contenido (min-width: 481px) {
+  .pistaDestacados {
+    --carril-tarjeta-w: min(46cqi, 340px);
+  }
+}
+
+/* Escritorio: ancho fijo. El contenido topa en `--content-max` = 1100px, así
+   que caben tres tarjetas completas y un 29 % de la cuarta: en escritorio
+   SIEMPRE hay algo que deslizar salvo con tres destacados o menos, y ese asomo
+   es justamente la señal de "hay más". La pista no se centra ni se estira:
+   queda alineada con el h1, el h2 y la rejilla. */
+@container contenido (min-width: 901px) {
+  .pistaDestacados {
+    --carril-tarjeta-w: 320px;
+  }
+}
+
+/*
+  EL CASO QUE NO CABE: teléfono en horizontal.
+
+  A 667×375 la tarjeta completa ronda los 324px de alto contra una altura útil
+  de 215–260px —la barra inferior sigue visible, porque el umbral que la oculta
+  es 768px—, así que la primera tarjeta no entraría sin desplazar, que es lo
+  contrario del encargo.
+
+  Se capa por ALTURA, y esta `@media` no viola la regla de `CLAUDE.md`: esa
+  regla es sobre adaptación al ANCHO, y `container-type: inline-size` solo mide
+  ancho — no hay forma de consultar la altura con `@container` en este árbol.
+
+  Va después de las dos consultas de contenedor a propósito: con la misma
+  especificidad, gana la última, y en horizontal el contenedor supera los 481px.
+*/
+@media (orientation: landscape) and (max-height: 420px) {
+  .pistaDestacados {
+    --carril-tarjeta-w: min(52cqi, 220px);
+  }
+}
+
+/*
+  `x mandatory`, y es una DIVERGENCIA DELIBERADA respecto al `Carril`, que se
+  queda en `proximity`.
+
+  `proximity` es correcto en una estantería: diez tarjetas de 200px, varias
+  visibles a la vez, que se hojean. Aquí no: tope de seis, tarjeta al 76–94 %
+  del ancho y UNA VISIBLE A LA VEZ. Con `proximity`, un flick corto que no
+  alcanza el umbral heurístico del motor —umbral que difiere entre Chrome y
+  Safari— deja media tarjeta de cada una a la vista, que es exactamente el
+  efecto "roto" que esta pieza existe para evitar.
+
+  La clase va DUPLICADA (`.x.x`) a propósito: `carril.module.css` declara
+  `scroll-snap-type` sobre `.pista`, con la misma especificidad que tendría
+  `.pistaDestacados`, así que el ganador lo decidiría el orden en que Next
+  inyecte las dos hojas —que cambia entre desarrollo y producción—. Con la
+  clase repetida la especificidad es mayor y el resultado no depende del orden.
+*/
+.pistaDestacados.pistaDestacados {
+  scroll-snap-type: x mandatory;
+}
+
+/*
+  ALCANCE CON RATÓN  ·  barra nativa fina, solo con puntero fino.
+
+  Hueco real que la spec dejó abierto: con `scrollbar-width: none`, sin rueda
+  horizontal y sin flechas, UN RATÓN DE RUEDA VERTICAL NO PUEDE MOVER LA FILA
+  —mayoría en escritorio Windows—. `Shift`+rueda funciona, pero nadie lo
+  descubre solo. No es un bloqueo de contenido, porque todo está en la rejilla,
+  pero una fila que el ratón no puede mover se percibe como un control roto.
+
+  DECISIÓN: barra de desplazamiento nativa fina bajo `(pointer: fine)`.
+  Cuesta cero bytes de JavaScript y es accionable con cualquier ratón. La
+  alternativa —flechas— exige saber si hay desbordamiento, o sea un Client
+  Component, y el plan descartó pagar hidratación en la primera pantalla del
+  socio. En táctil no se muestra nada: el dedo ya sabe.
+
+  Misma razón que arriba para la clase duplicada: `.pista` declara
+  `scrollbar-width: none` y oculta `::-webkit-scrollbar`.
+*/
+/* Barra de desplazamiento retirada: «se ve feo». La portada ya no es un carril
+   con scroll sino una rejilla (ver el final del archivo). */
+
+/* ==========================================================================
+   2. LA TARJETA
+   --------------------------------------------------------------------------
+   La pista es una rejilla de una sola fila, así que todas las tarjetas miden lo
+   mismo de alto sin pedirlo: el estirado lo da `align-items: stretch`. Por eso
+   el nombre reserva dos líneas y la ranura inferior su altura — para que las
+   tres líneas del pie caigan a la misma cota en todas las tarjetas, no para
+   igualar la altura de la fila.
+   ========================================================================== */
+
+/* `.celda` es la geometría; `.enlace` añade lo que solo tiene sentido en algo
+   pulsable. El esqueleto usa `.celda`: una silueta no se enfoca ni entra
+   escalonada. */
+.celda,
+.enlace {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-md);
+}
+
+/*
+  A1 · ENTRADA ESCALONADA
+
+  `backwards` para que el estado inicial se aplique durante el retardo; sin él
+  las seis tarjetas se verían un fotograma antes de empezar.
+
+  `--ease-spring` (overshoot leve, el equivalente CSS de `bounce: 0.2`) Y NO
+  `--ease-out`, que es lo que había. La dirección v2 retira la regla de que «el
+  rebote se gana tras un gesto con momento» y lo permite expresamente en la
+  APARICIÓN DE TARJETAS, que es exactamente este caso. Sigue prohibido en
+  navegación y en cambios de estado de datos, y por eso NO lo lleva la rejilla:
+  doce tarjetas rebotando a la vez se leen como juguete, una portada de seis con
+  cubierta se lee como una revista que se abre.
+
+  Es también lo que distingue a la portada de lo que hay debajo sin gastar ni
+  trazo ni oro: el mismo paso de 35ms en las dos, curva distinta.
+*/
+.enlace {
+  /* Sin animación de carga propia: la entrada la da `.revelar-vista`
+     (globals.css), ligada al scroll y en los dos sentidos. Declararlas las dos
+     en el mismo elemento dejaba el ganador al orden de las hojas. */
+
+  /* La VUELTA del atenuado al soltar. La ida la acorta `.enlace:active` a
+     `--dur-press`. Durante la entrada escalonada esta transición no compite:
+     una animación tiene precedencia sobre la transición de la misma propiedad,
+     y `backwards` —no `forwards`— libera el valor al terminar. */
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+@keyframes entrarDestacado {
+  from {
+    opacity: 0;
+    translate: 0 var(--space-3);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* El anillo lo pone el enlace, no la `Card`: el foco vive aquí, así que el
+   `:focus-visible` propio de `Card` nunca llegaría a dispararse. El trazo y el
+   desplazamiento son los globales; solo se corrige el radio, que por defecto es
+   el de un chip. La pista ya reserva los 4px de `padding-block` que hacen falta
+   para que el `overflow` no lo recorte, también en la primera y la última. */
+.enlace:focus-visible {
+  border-radius: var(--radius-md);
+}
+
+/*
+  `overflow: hidden` es lo que recorta la cubierta al radio de la tarjeta: así
+  la foto —y el material de I2— no asoman por las esquinas.
+*/
+.superficie {
+  overflow: hidden;
+  height: 100%;
+}
+
+/*
+  Se REPITE la lista de transiciones de `Card.interactive` y se le añade
+  `translate`. No es un descuido: `.superficie` y `.interactive` tienen la misma
+  especificidad, así que declarar aquí solo `translate` dejaría al azar del
+  orden de inyección de las hojas cuál de las dos listas gana, y perder la de
+  `Card` significaría perder la transición de sombra y de borde. La clase va
+  duplicada por el mismo motivo.
+*/
+.superficie.superficie {
+  transition:
+    box-shadow var(--dur-base) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
+}
+
+/*
+  A3 · REALCE AL APUNTAR O ENFOCAR  ·  refuerza, nunca revela nada nuevo.
+
+  Tres cosas a la vez y ninguna es solo color: un nivel más de sombra, el filo
+  dorado del borde y una elevación de 2px. Si el hover añadiera contenido, la
+  versión táctil perdería funcionalidad.
+
+  La sombra se APILA sobre `--shadow-raised` en vez de sustituirla: `--shadow-3`
+  está calibrada para tema claro, y en oscuro —donde `--shadow-raised` es una
+  sombra propia y más opaca— reemplazarla dejaría el hover con MENOS presencia
+  que el reposo. Ningún `none` en la lista: un `none` entre comas invalida la
+  declaración entera en silencio.
+
+  Especificidad (0,3,0), por encima del (0,2,0) de `Card.interactive:hover`, así
+  que gana sin depender del orden de las hojas.
+
+  EL `:hover` SE SEPARA DEL `:focus-visible` y se encierra en
+  `@media (hover: hover)`. Antes compartían regla, así que el realce entero
+  —sombra apilada, filo dorado y elevación— se ejecutaba también en táctil, donde
+  el hover NO SE VA al levantar el dedo: la tarjeta se quedaba flotando y con
+  filo dorado hasta que el socio tocaba otra cosa. Es prohibición dura desde la
+  dirección v2, y además es el mismo dispositivo que paga la factura de recomponer
+  dos sombras.
+
+  El foco, en cambio, se conserva a todos los anchos: un teclado existe en
+  cualquier dispositivo y el realce es lo que hace visible por dónde va.
+*/
+@media (hover: hover) {
+  .enlace:hover .superficie {
+    border-color: color-mix(in srgb, var(--brand-edge) 45%, transparent);
+    box-shadow: var(--shadow-flotante), var(--edge);
+    translate: 0 calc(var(--space-1) * -0.5);
+  }
+}
+
+.enlace:focus-visible .superficie {
+  border-color: color-mix(in srgb, var(--brand-edge) 45%, transparent);
+  box-shadow: var(--shadow-flotante), var(--edge);
+  translate: 0 calc(var(--space-1) * -0.5);
+}
+
+/*
+  PULSAR ES OPACIDAD, igual que en la rejilla y por el mismo motivo: una portada
+  de 300-340px con su cubierta es lo más caro de recomponer de toda la pantalla,
+  y quien la desplaza es un móvil de gama media.
+
+  Se anulan las dos capas heredadas: el `translate: 0 2px` + cambio de sombra de
+  `Card.interactive:active`, y el `scale` global de `globals.css` §4b, que
+  alcanza al `<a>` —donde la `scale: 1` de `Card` no llega— y hacía que la
+  tarjeta se encogiera y bajara a la vez.
+
+  La opacidad va en el ENLACE y no en `.superficie`: así se atenúa la tarjeta
+  entera, cubierta incluida, en una sola capa compuesta.
+*/
+.enlace:active {
+  scale: 1;
+  opacity: 0.72;
+  transition-duration: var(--dur-press);
+}
+
+.superficie.superficie:active {
+  translate: 0 0;
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+/* ==========================================================================
+   3. LA CUBIERTA  ·  I1 foto · I2 material + logotipo · I3 inicial
+   --------------------------------------------------------------------------
+   La proporción la fija el CSS del marco, NUNCA atributos `width`/`height` en
+   el `<img>`: competirían con `object-fit: cover` en fotos de proporción real
+   distinta. Es lo único que garantiza salto de layout cero cuando la foto
+   llegue tarde, y el marco es idéntico en I1, I2, I3 y en el esqueleto, así que
+   tampoco hay salto entre estados.
+
+   4:3 y no 16:9: a 285px de ancho, 16:9 da 160px de alto y la imagen se lee
+   como una banda, no como una portada.
+
+   `container-type: inline-size` es lo que le da a la placa de la variante
+   `portada` un contenedor contra el que medir sus `cqi`. Sin él, `cqi` mediría
+   el viewport pequeño y la placa se descuadraría.
+   ========================================================================== */
+
+.cubierta {
+  /*
+    Amplitud del paralaje y sobremedida de la capa. Locales, no tokens del
+    sistema: son la geometría del movimiento de ESTA pieza, igual que
+    `--placa-pad` es la de la placa. La sobremedida tiene que superar el
+    doble de la amplitud, o el borde de la capa asomaría en los extremos del
+    recorrido.
+  */
+  --paralaje: 3%;
+  --sobremedida: 1.08;
+  --realce: 1.04;
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+
+  aspect-ratio: 4 / 3;
+
+  /*
+    DIRECCIÓN v2 · esta línea ya NO tiñe nada en tema claro.
+
+    `--surface-sunk` vale `--w-0` desde la fundación: el mismo papel que la
+    tarjeta y que el fondo de la página. O sea que la cubierta dejó de
+    distinguirse por su relleno y, si no se hace nada, desaparece —que es la
+    consecuencia buscada de la dirección, no un defecto del token—.
+
+    Se CONSERVA el token en vez de cambiarlo por `--surface`, porque en tema
+    oscuro sigue valiendo `--n-950` y ahí sí hunde de verdad. Lo que se añade
+    es el TRAZO que la declara: la línea superior de `.pie`, que sube de
+    `--border-subtle` a `--border` porque ahora carga sola con la separación
+    entre cubierta y pie. Un hundido se dibuja, no se tiñe (§2.1).
+
+    Lo que da vida a la cubierta en claro es el halo de `.capa` —oro DIFUSO,
+    Regla B— más la placa del logotipo, que trae su propio filo. No se le pone
+    borde propio: sería una caja dentro de una caja, que es exactamente el modo
+    de fallo de §6.
+  */
+  background: var(--surface-sunk);
+
+  /* Filo de luz: en tema oscuro es lo que hace que el material se lea como una
+     superficie iluminada y no como un agujero.
+
+     El token semántico, no el crudo `--edge-light`. `--edge` es transparente en
+     claro y anillo en oscuro; el crudo vale lo mismo en los dos, así que sobre
+     el papel cálido de la v4 dibujaba un anillo blanco que no pinta nada. */
+  box-shadow: var(--edge);
+
+  container-type: inline-size;
+}
+
+/*
+  LA CAPA QUE SE MUEVE.
+
+  En I1 lleva la foto; en I2, el halo dorado del material. Es la misma capa y el
+  mismo movimiento en los dos estados: así una fila mezclada se comporta igual
+  en todas sus tarjetas.
+
+  El oro va aquí como LUZ, no como relleno: `--gold-halo` es un radial de α
+  0,09 → 0,03 → 0, o sea oro DIFUSO —Regla B de `T4 §3.2`, ≤2 % del lienzo
+  ponderado por α—, y no oro sólido, que la Regla A limita a una sola pieza por
+  pantalla y la Regla C prohíbe como fondo de una superficie de contenido.
+  `--gold-sheen` (α 1) queda por tanto descartado para rellenar la cubierta:
+  seis cubiertas de oro sólido incumplirían por conteo sin necesidad de medir.
+*/
+.capa {
+  position: absolute;
+  inset: 0;
+  display: block;
+
+  /* Mismo caso que `.cubierta`: en claro esto es papel, no un gris. La capa
+     cubre la cubierta entera, así que el color que se ve de verdad es este.
+     El relleno opaco sigue siendo necesario —tapa la cubierta mientras el
+     paralaje la desplaza— y en oscuro sigue hundiendo. */
+  background-color: var(--surface-sunk);
+  background-image: var(--gold-halo);
+  background-repeat: no-repeat;
+  background-position: center;
+
+  /* La sobremedida es estática: lo único que se anima es `translate`. */
+  scale: var(--sobremedida);
+
+  transition: scale var(--dur-base) var(--ease-out);
+}
+
+/*
+  A2 · PARALAJE AL DESLIZAR  ·  el movimiento que se siente "caro".
+
+  La capa se desplaza dentro de su marco a distinta velocidad que la tarjeta,
+  guiada por el scroll de la propia pista: corre en el compositor y no cuesta ni
+  un byte de JavaScript. Y lo importante es que el movimiento aparece COMO
+  RESPUESTA AL DEDO, no como una animación que se ejecuta sola.
+
+  El `@supports` no es decorativo: sin él, un navegador sin animaciones guiadas
+  por scroll interpretaría `animation: … both` sin duración como una animación
+  de 0s y aplicaría el fotograma final PARA SIEMPRE, dejando la capa desplazada
+  en frío. Con la guarda, donde no hay soporte simplemente no hay paralaje:
+  mejora progresiva, no dependencia.
+*/
+@supports (animation-timeline: scroll()) {
+  .capa {
+    animation: paralajeDestacado linear both;
+    animation-timeline: scroll(nearest inline);
+  }
+}
+
+@keyframes paralajeDestacado {
+  from {
+    translate: calc(var(--paralaje) * -1) 0;
+  }
+  to {
+    translate: var(--paralaje) 0;
+  }
+}
+
+/* El micro-zoom de A3 se aplica a la capa y no a la tarjeta: en I1 es el zoom
+   clásico de una portada; en I2 acerca la luz del material. Multiplica la
+   sobremedida en vez de sustituirla, o el recorrido del paralaje se quedaría
+   sin holgura.
+
+   Mismo desdoble que el realce de la superficie: el `:hover` bajo
+   `@media (hover: hover)`, porque en táctil se quedaba pegado y dejaba la
+   cubierta acercada indefinidamente; el `:focus-visible`, a todos los anchos. */
+@media (hover: hover) {
+  .enlace:hover .capa {
+    scale: calc(var(--sobremedida) * var(--realce));
+  }
+}
+
+.enlace:focus-visible .capa {
+  scale: calc(var(--sobremedida) * var(--realce));
+}
+
+/* La foto, cuando exista `comercios.portada_url`. `cover` y no `contain`: es
+   una fotografía, no un logotipo — para un logotipo la regla es la contraria y
+   la resuelve la placa. */
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/*
+  El velo existe para que la placa no flote sobre un punto claro de la
+  fotografía. NO es un portador de contraste de texto: ningún texto se apoya
+  sobre la cubierta, y esa decisión —texto fuera de la imagen— es la que
+  convierte un riesgo abierto (el contraste dependería de lo que suba cada
+  comercio) en un número que se puede firmar sin ver las fotos.
+*/
+.velo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--scrim) 0%, transparent 62%);
+}
+
+/* Con foto, la placa es una firma en la esquina de arranque. Su tamaño y su
+   radio los pone `ComercioLogo` con su variante; aquí solo se la coloca, que es
+   una propiedad que ese módulo no declara y por tanto no puede entrar en
+   conflicto con él. */
+.placaSobreFoto {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  inset-block-end: var(--space-3);
+}
+
+/* ==========================================================================
+   4. EL PIE  ·  nombre, meta y la ranura
+   ========================================================================== */
+
+.pie {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+
+  padding: var(--space-4);
+
+  /*
+    `--border` y no `--border-subtle`: esta línea es lo ÚNICO que separa la
+    cubierta del pie desde que las dos son el mismo papel. Al 22 % no se veía;
+    al 55 % declara los dos planos. Es la misma corrección que `card.module.css`
+    aplicó a `.footer` por el mismo motivo.
+  */
+  border-top: 1px solid var(--border);
+
+  /* Sobre superficie sólida, no sobre la imagen. */
+  background: var(--surface);
+}
+
+/* Dos líneas reservadas SIEMPRE, y recorte a partir de la segunda: la cubierta
+   nunca se encoge para que quepa el texto, y el texto nunca desborda la
+   tarjeta. */
+.nombre {
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: var(--t-title-3-weight);
+  color: var(--text);
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  /* Una línea reservada, no dos: con nombres de comercio cortos, las dos líneas
+     dejaban un hueco blanco entre el nombre y el descuento en cada tarjeta.
+     Visto en captura. Un nombre largo sigue pudiendo partir en dos. */
+  min-height: calc(var(--t-title-3-size) * var(--t-title-3-leading));
+}
+
+/* Sin categoría ni ciudades que decir, la línea no ocupa sitio. */
+.meta:empty {
+  display: none;
+}
+
+/* El menor peso visual de la tarjeta: es un filtro mental, no un gancho. La
+   línea se reserva aunque el comercio no tenga categoría ni ciudad, para que la
+   ranura caiga a la misma cota en toda la fila. */
+.meta {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  letter-spacing: var(--t-caption-tracking);
+  color: var(--text-3);
+
+  min-height: calc(var(--t-caption-size) * var(--t-caption-leading));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+  LA RANURA, con su altura reservada aunque esté vacía: si no, las tres líneas
+  del pie caerían a cotas distintas según el comercio tenga beneficio,
+  descripción o nada.
+
+  La insignia es la del `Badge tone="gold"` que ya usan la rejilla y las
+  estanterías: oro difuso —relleno al 10 % con la cifra en `--brand`—, no oro
+  sólido. Seis insignias de relleno dorado opaco incumplirían la Regla A por
+  conteo; en oro difuso entran de sobra en el 2 % de la Regla B, y además la
+  cifra va DENTRO de la píldora, así que el color nunca es el único portador del
+  significado.
+*/
+.ranura {
+  display: flex;
+  align-items: center;
+
+  margin-top: var(--space-1);
+  min-height: calc(var(--t-footnote-size) * var(--t-footnote-leading) + var(--space-1));
+
+  /* Sin esto, un hijo de flex no baja de su ancho de contenido y una insignia
+     con un beneficio largo empujaba el pie más allá del filo de la tarjeta.
+     `.superficie` lo recortaba con su `overflow: hidden`, así que el síntoma
+     era una píldora cortada a media palabra. */
+  min-width: 0;
+}
+
+/* La frase sí se recorta: es prosa y su final no es información. La insignia
+   NO —ver `.beneficio` al final de este archivo—, porque ahí el final del
+   texto es parte del dato. */
+.frase {
+  min-width: 0;
+  max-width: 100%;
+}
+/*
+  LA INSIGNIA DE BENEFICIO PUEDE PARTIR EN DOS LÍNEAS.
+
+  `Badge` lleva `white-space: nowrap` con razón —una cifra partida no es una
+  cifra— pero el texto que genera `formatearBeneficio` no es solo la cifra:
+  «$50.000 de descuento» ronda los 150px, y en una tarjeta de estantería de
+  200px con relleno quedan 176. Con `nowrap` eso NO encoge (el `min-width`
+  automático de un hijo de flex es su ancho de contenido) y se sale de la
+  tarjeta. Es lo que el propietario veía.
+
+  Partir es mejor que recortar: con puntos suspensivos se perdería justo el
+  final —«de descuento»— y con dos líneas no se pierde nada. `max-width: 100%`
+  es el cinturón: pase lo que pase, no sobresale.
+
+  La clase va DUPLICADA para ganar a `.badge` por especificidad (0,2,0 contra
+  0,1,0). Con la misma, el ganador lo decidiría el orden en que Next inyecta
+  las dos hojas, que cambia entre desarrollo y producción.
+*/
+.beneficio.beneficio {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  /* Una palabra sola más larga que la píldora —una cifra enorme— parte en vez
+     de desbordar. */
+  overflow-wrap: anywhere;
+}
+
+
+/* Una línea y no dos: la frase es la razón para entrar, no la descripción
+   completa —esa está en la ficha—. */
+.frase {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   5. EL ESQUELETO
+   --------------------------------------------------------------------------
+   Mismo ritmo vertical que la cabecera real del `Carril` (`--space-4` entre
+   cabecera y pista, `--space-1` entre título y apoyo), para que el relevo no
+   desplace la fila.
+   ========================================================================== */
+
+.esqueleto {
+  display: grid;
+  gap: var(--space-1);
+}
+
+/*
+  EL ESQUELETO NO SE ESTIRA  ·  Z3
+
+  Z3 hizo que una pista con pocas tarjetas reparta el sobrante y llene el ancho
+  (`carril.module.css`, `.tarjeta`). Aquí eso sería contraproducente: el
+  esqueleto pinta SIEMPRE tres siluetas, pero la portada real suele traer
+  cuatro o más y entonces las columnas vuelven a su ancho rígido. La silueta
+  mediría 358px y el contenido 320px, así que el relevo movería la fila —y una
+  silueta existe precisamente para que no se mueva nada al llegar el contenido.
+
+  Con el techo pegado al suelo, la silueta mide lo que va a medir la tarjeta en
+  el caso dominante. Cuando la portada trae exactamente tres destacados sí hay
+  un ajuste de ancho al resolverse; es el caso raro, y es preferible a moverlo
+  siempre.
+*/
+.pistaEsqueleto {
+  --carril-tarjeta-max: var(--carril-tarjeta-w);
+}
+
+.esqueleto > :last-child {
+  margin-top: var(--space-3);
+}
+
+/* ==========================================================================
+   6. MOVIMIENTO REDUCIDO  ·  equivalente no vestibular, no ausencia de feedback
+   --------------------------------------------------------------------------
+   A1 pasa a ser solo opacidad —sin desplazamiento vertical—, A2 desaparece por
+   completo y A3 se queda con la sombra y el filo dorado, que no implican
+   movimiento. Es el mismo reparto que ya hace `.tab:active` del portal:
+   reutilizar `--shadow-2` → `--shadow-3` y el filo de marca en vez de inventar
+   un tercer mecanismo.
+
+   Nota: la regla global de `globals.css` ya comprime toda animación a 0,01ms
+   bajo esta preferencia, así que el fundido de A1 se resuelve de inmediato. El
+   cambio de fotogramas se declara igual, para que quede escrito que la
+   alternativa es un fundido y no un desplazamiento — y para que siga siendo
+   correcta si algún día esa regla global se afina.
+
+   Va al final del archivo: estas reglas tienen la misma especificidad que las
+   que corrigen, así que ganan por orden.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .capa {
+    animation: none;
+  }
+
+  .enlace:focus-visible .capa {
+    scale: var(--sobremedida);
+  }
+
+  .enlace:focus-visible .superficie {
+    translate: 0 0;
+  }
+}
+
+/*
+  Las dos reglas de `:hover` viven dentro de `@media (hover: hover)`, así que su
+  corrección tiene que anidarse igual: una regla de fuera no gana a una de dentro
+  por especificidad —son idénticas— sino por orden, y solo si el navegador
+  evalúa las dos. Anidando se lee además dónde aplica cada cosa.
+*/
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
+  .enlace:hover .capa {
+    scale: var(--sobremedida);
+  }
+
+  .enlace:hover .superficie {
+    translate: 0 0;
+  }
+}
+
+@keyframes aparecerDestacado {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   DE CARRIL A REJILLA  ·  rediseño a partir de capturas reales
+   --------------------------------------------------------------------------
+   Encargo del propietario: quitar la barra de desplazamiento («se ve feo»),
+   resaltar las imágenes y que los comercios con foto se vean «uno debajo del
+   otro» en vez de escondidos a la derecha de un carril. Así que la portada
+   deja de desplazarse: todas las tarjetas a la vista, en rejilla.
+
+   Clase repetida (0,3,0) para ganar a `.pista` del carril, que declara el
+   desplazamiento horizontal, el sangrado y el snap.
+*/
+.pistaDestacados.pistaDestacados.pistaDestacados {
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-5);
+
+  overflow: visible;
+  scroll-snap-type: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+/* La foto manda: más alta que antes. */
+.cubierta.cubierta {
+  aspect-ratio: 16 / 11;
+}
+
+/* Logo más grande sobre la foto, con anillo blanco para despegarlo de
+   cualquier imagen. */
+.placaSobreFoto.placaSobreFoto {
+  --placa-logo-w: 72px;
+  box-shadow:
+    0 0 0 3px var(--surface),
+    var(--shadow-raised);
+}
+
+/* Nombre con más presencia. */
+.nombre.nombre {
+  font-size: var(--t-title-2-size);
+  font-weight: 700;
+}
+
+/* La promoción resaltada: píldora de oro brillante con la cifra en tinta
+   (9,3:1). Es lo más llamativo después de la foto. */
+.beneficio.beneficio.beneficio {
+  padding: var(--space-2) var(--space-4);
+  background: var(--gold-500);
+  border-color: transparent;
+  color: var(--tinta-1);
+  font-size: var(--t-callout-size);
+  font-weight: 700;
+}

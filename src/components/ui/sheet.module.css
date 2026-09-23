@@ -50,9 +50,18 @@
   height: var(--alto-hoja, min(92dvh, 920px));
 
   background: var(--surface);
-  border-top: 1px solid var(--border-subtle);
+  /*
+    La hoja y la página son el mismo papel, y la hoja ya no lleva trazo (§2.1):
+    lo que dice dónde termina una y empieza la otra es el escalón de overlay,
+    que aquí se proyecta hacia ARRIBA sobre el contenido de detrás.
+
+    `--edge` no sobra: en tema oscuro no hay sombra que ver y el anillo de luz
+    es lo único que declara el material. Faltaba, y la hoja se fundía con el
+    fondo en oscuro incluso antes de esta tanda.
+  */
+  border-top: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  box-shadow: var(--shadow-overlay);
+  box-shadow: var(--shadow-overlay), var(--edge);
 
   padding-bottom: env(safe-area-inset-bottom, 0px);
   will-change: transform;
@@ -70,7 +79,7 @@
     height: auto;
     max-height: min(88dvh, 780px);
     bottom: var(--space-6);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-superficie);
   }
 }
 
@@ -95,19 +104,47 @@
   height: 5px;
   margin: 0 auto;
   border-radius: var(--radius-full);
-  background: var(--border-strong);
+  /* El tirador NO es una superficie: es un mando, y tiene que verse. Tinta al
+     55 % (4,42:1) — la plena lo convertía en una barra negra de papelería. */
+  background: var(--border);
 
-  /* Se ensancha al agarrarlo: acusa recibo del gesto antes de que la hoja
-     se haya movido un solo píxel. */
+  /*
+    Se ensancha al agarrarlo: acusa recibo del gesto antes de que la hoja se
+    haya movido un solo píxel.
+
+    Se ensancha con `scale`, NO con `width`. Animar `width` recalcula la
+    maquetación en cada fotograma, y esto ocurre justo al empezar un arrastre
+    —el momento en que menos margen hay— en un elemento centrado con
+    `margin: 0 auto`, o sea que cada fotograma recalculaba también su margen.
+    Con `scale` el crecimiento sale del centro solo, en el compositor.
+
+    Es 48/36 = 1.333 en horizontal y 1 en vertical: el tirador se estira, no
+    engorda. Escalar los dos ejes lo convertiría en una pastilla gruesa.
+  */
+  transform-origin: center;
   transition:
-    width var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
+    scale var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
 }
 
+/*
+  ARRASTRADO es uno de los tres estados que encienden el oro (§2.3). Aquí es
+  además el único canal disponible: la hoja entera se mueve con el dedo, así
+  que no hay sombra que subir sin que compita con el gesto.
+*/
 .agarre:active .tirador {
-  width: 48px;
-  background: var(--text-3);
+  scale: 1.333 1;
+  background: var(--brand-edge);
+}
+
+/*
+  Movimiento reducido: el acuse se conserva por COLOR, que no es vestibular.
+  Lo que se retira es el estiramiento.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .agarre:active .tirador {
+    scale: 1;
+  }
 }
 
 .cabecera {
@@ -158,7 +195,8 @@
   flex-direction: column-reverse;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-6);
-  border-top: 1px solid var(--border-subtle);
+  /* El pie perdió su relleno distinto: la línea lo separa sola. */
+  border-top: 1px solid var(--border);
   background: var(--surface-sunk);
   flex-shrink: 0;
 }
@@ -189,9 +227,12 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.cerrar:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .cerrar:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
 }
 
 .cerrarIcono {

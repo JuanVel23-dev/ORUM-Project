@@ -1,0 +1,233 @@
+/* ==========================================================================
+   EL CORAZÓN DE FAVORITO
+   --------------------------------------------------------------------------
+   La posición (esquina superior derecha de la tarjeta) NO se decide aquí: la
+   pone quien lo usa, con `.corazon` en `comercio-card.module.css`. Este módulo
+   solo describe el control. Es la misma regla que "un formulario no pone su
+   propia tarjeta": la superficie la pone quien lo usa.
+   ========================================================================== */
+
+.marco {
+  position: relative;
+  display: inline-flex;
+}
+
+.boton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  /* SE VE de 30px: un corazón grande convertiría la acción secundaria en la
+     protagonista de la tarjeta, y la protagonista es el beneficio. */
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
+}
+
+/*
+  …PERO SE TOCA DE 44px. El área crece con un pseudo-elemento centrado, sin
+  alterar el dibujo ni empujar la cabecera de la tarjeta. Mismo patrón que
+  `Copiar`, y por el mismo motivo: lo que se ve y lo que se toca son cosas
+  distintas.
+
+  Ojo: este `::after` se solapa con el enlace de la tarjeta, que está DEBAJO en
+  el apilado. Gana el corazón porque `.corazon` lleva su `z-index`. Si alguien
+  quita ese `z-index`, el área ampliada deja de recibir el toque y el corazón
+  parecerá roto en los bordes.
+*/
+.boton::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+}
+
+/*
+  SIN BORDE EN REPOSO (dirección v3): el corazón flota sobre la tarjeta sin
+  caja. Al señalar o enfocar aparece el filo dorado, que es la respuesta del
+  sistema al toque.
+
+  Dentro de `@media (hover: hover)`: en táctil el `:hover` no se retira al
+  levantar el dedo y el corazón se quedaría con filo permanente justo después de
+  usarlo — indistinguible de estar enfocado, y en una rejilla de cien tarjetas
+  eso es ruido en todas.
+*/
+/*
+  SIN ARO DORADO, y es una excepción deliberada a «el oro es la respuesta al
+  toque». El corazón es REDONDO y pequeño: un filo de 1px alrededor de un
+  círculo de 30px no se lee como respuesta del sistema, se lee como un botón
+  con borde — justo lo que esta dirección retiró de todas partes. Encargo
+  literal del propietario: «no debería tener ningún borde».
+
+  Lo que responde al toque aquí es el relleno y el propio corazón, que pasa de
+  contorno a sólido y de tinta a rojo. Esa es la señal, y es más fuerte que
+  cualquier filo.
+*/
+@media (hover: hover) {
+  .boton:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
+
+  .boton[data-marcado='true']:hover {
+    color: var(--danger);
+  }
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  MARCADO: rojo y RELLENO. El relleno lo pinta el atributo `fill` del SVG desde
+  el TSX; aquí solo cambia el color, que es lo que `currentColor` propaga.
+
+  El rojo es `--danger`, el único token rojo del sistema, y aquí NO significa
+  error: significa "tuyo". Es el caso que la dirección de arte v3 §2.3 autoriza
+  expresamente —el único sitio donde el color dice algo que el oro no puede
+  decir—. Y aun así el color no viaja solo: el corazón pasa de contorno a
+  sólido, que es un cambio de FORMA y sobrevive a cualquier daltonismo.
+*/
+.boton[data-marcado='true'] {
+  color: var(--danger);
+}
+
+/*
+  EN CURSO: la opacidad baja un punto y nada más.
+
+  Nada de spinner y nada de `disabled`. La actualización es optimista: el estado
+  que el socio ve YA es el bueno, y un indicador de espera sobre algo que
+  visiblemente terminó se lee como "no se ha guardado". Deshabilitarlo sería
+  peor todavía: bloquearía el arrepentimiento inmediato, que es justo el gesto
+  que este control invita a hacer.
+*/
+.boton[data-en-curso='true'] {
+  opacity: 0.7;
+}
+
+.icono {
+  width: 20px;
+  height: 20px;
+
+  /* El relleno entra con la escala, no con un cambio de tamaño: solo
+     `transform` y `opacity`. */
+  transition: scale var(--dur-rebote) var(--ease-rebote);
+}
+
+/*
+  EL LATIDO AL MARCAR.
+
+  Una sola pulsación corta, sin repetición: es una confirmación, no una alarma.
+  Solo `scale`, que es propiedad de composición.
+
+  Se dispara porque la animación se AÑADE al elemento cuando cambia el atributo
+  `data-marcado`; al desmarcar, la regla deja de aplicar y no hay latido de
+  vuelta. Correcto: quitar algo no se celebra.
+*/
+.boton[data-marcado='true'] .icono {
+  animation: latido var(--dur-base) var(--ease-rebote);
+}
+
+@keyframes latido {
+  0% {
+    scale: 1;
+  }
+  45% {
+    scale: 1.25;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/*
+  EL FALLO.
+
+  `position: absolute` para que aparecer no mueva nada: en una rejilla de cien
+  tarjetas, un mensaje que empuja el contenido es un salto de layout en cadena.
+
+  Se ancla al borde derecho del marco y se despliega hacia la izquierda
+  (`right: 0`), que es donde hay sitio: el corazón vive en la esquina superior
+  DERECHA de la tarjeta.
+*/
+.fallo {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  z-index: var(--z-popover);
+
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+
+  background: var(--danger);
+  color: var(--w-0);
+
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  font-weight: var(--t-caption-weight);
+  white-space: nowrap;
+
+  /* Semántico, no crudo: los `--shadow-N` se definen UNA vez con el tinte
+     cálido del tema claro y el oscuro solo remapea los semánticos, así que un
+     crudo aquí dejaba el aviso sin sombra sobre fondo oscuro. Es el mismo fallo
+     que se comió las sombras de `Menu` y `Toast`. Y el peldaño es `flotante`
+     porque esto es un mensaje que flota sobre la tarjeta, no una tarjeta. */
+  box-shadow: var(--shadow-flotante), var(--edge);
+  animation: aparecerFallo var(--dur-fast) var(--ease-out);
+}
+
+@keyframes aparecerFallo {
+  from {
+    opacity: 0;
+    scale: 0.94;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/*
+  MOVIMIENTO REDUCIDO: se retira lo vestibular —el latido y la escala de
+  entrada— y el feedback SIGUE OCURRIENDO, que es la regla: el corazón cambia de
+  forma y de color igual, y el mensaje de fallo entra con un fundido.
+
+  Hay que reponer `scale`, no `transform`: son propiedades independientes y
+  `transform: none` no toca a `scale`.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .boton[data-marcado='true'] .icono {
+    animation: none;
+    scale: 1;
+  }
+
+  .fallo {
+    animation: fundir var(--dur-fast) var(--ease-out);
+  }
+
+  @keyframes fundir {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

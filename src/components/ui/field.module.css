@@ -65,7 +65,7 @@
   volver a sacudir aportaría poco.
 */
 .field:has(.error) .control {
-  animation: sacudir 280ms var(--ease-out);
+  animation: sacudir var(--dur-agitar) var(--ease-out);
 }
 
 @keyframes sacudir {

@@ -1,0 +1,98 @@
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.titulo {
+  margin: 0;
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.apoyo {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+/*
+  La ventana recorta la pista y funde los dos bordes, para que las tarjetas
+  entren y salgan en vez de cortarse en seco. `mask-image` no mueve nada: solo
+  la opacidad de los extremos.
+*/
+.ventana {
+  overflow: hidden;
+  /* Aire para que la sombra de las tarjetas no se recorte. */
+  padding-block: var(--space-2) var(--space-4);
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+
+.pista {
+  display: flex;
+  width: max-content;
+  animation: rotar var(--duracion, 30s) linear infinite;
+}
+
+/* Se detiene al apuntar o al enfocar una tarjeta: nadie puede pulsar algo que
+   se le escapa. */
+.ventana:hover .pista,
+.ventana:focus-within .pista {
+  animation-play-state: paused;
+}
+
+.grupo {
+  display: flex;
+  gap: var(--space-4);
+  padding: 0 var(--space-2) 0 0;
+  margin: 0;
+  list-style: none;
+}
+
+.celda {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+/* La mitad exacta: la pista son dos copias iguales, así que al llegar al 50 %
+   la segunda ocupa el sitio de la primera y el bucle no se nota. */
+@keyframes rotar {
+  to {
+    translate: -50% 0;
+  }
+}
+
+/* Pocas tarjetas: fila quieta, sin duplicar. */
+.fila {
+  padding-block: var(--space-2) var(--space-4);
+}
+
+.pistaQuieta .grupo {
+  flex-wrap: wrap;
+}
+
+/* Movimiento reducido: sin rotación; la fila se desplaza a mano. */
+@media (prefers-reduced-motion: reduce) {
+  .ventana {
+    overflow-x: auto;
+    mask-image: none;
+  }
+
+  .pista {
+    animation: none;
+  }
+
+  /* Sin rotación la copia sobra: se verían los comercios dos veces. */
+  .pista > .grupo + .grupo {
+    display: none;
+  }
+}

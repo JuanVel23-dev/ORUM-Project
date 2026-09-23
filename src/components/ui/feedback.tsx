@@ -74,6 +74,9 @@ type ProgressProps = {
 
 export function ProgressBar({ value, label = 'Progreso', className }: ProgressProps) {
   const indeterminada = value === undefined
+  // Un mismo número para lo que se pinta y para lo que se anuncia: si el
+  // consumidor manda 120, la barra se topa en 100 y el lector también.
+  const porcentaje = indeterminada ? 0 : Math.min(100, Math.max(0, value))
 
   return (
     <div
@@ -84,12 +87,21 @@ export function ProgressBar({ value, label = 'Progreso', className }: ProgressPr
       aria-label={label}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-valuenow={indeterminada ? undefined : Math.round(value)}
+      aria-valuenow={indeterminada ? undefined : Math.round(porcentaje)}
       data-motion-esencial
     >
+      {/*
+        El porcentaje viaja como token dinámico —el único uso admitido de
+        `style`—, no como `width`: la hoja lo consume con `scaleX`, que se
+        compone en el GPU y no relayoutea en cada fotograma.
+      */}
       <div
         className={styles.progresoBarra}
-        style={indeterminada ? undefined : { width: `${Math.min(100, Math.max(0, value))}%` }}
+        style={
+          indeterminada
+            ? undefined
+            : ({ '--progreso': porcentaje / 100 } as CSSProperties)
+        }
       />
     </div>
   )

@@ -5,7 +5,8 @@
   grid-auto-columns: 1fr;
 
   padding: 3px;
-  border: 1px solid var(--border-subtle);
+  /* El carril ya no se tiñe: lo dibuja su trazo. */
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-full);
   background: var(--surface-sunk);
 
@@ -24,7 +25,17 @@
 
   border-radius: var(--radio-interno);
   background: var(--surface);
-  box-shadow: var(--shadow-1), var(--edge);
+  /*
+    Carril y pastilla son el MISMO papel. Lo que dice cuál está seleccionada es
+    el par de §2.3 para el estado ACTIVO —filo dorado de 1px + sombra—: la
+    pastilla es una ficha apoyada sobre el carril, no una zona más clara.
+
+    Se queda en el escalón 1 y no sube: una pastilla de control es pequeña, y
+    §2.2 dice que la superficie grande es la que se lee gruesa. Con más sombra
+    esto sería un botón levitando dentro de otro control.
+  */
+  border: 1px solid var(--border-superficie);
+  box-shadow: var(--filo-activo), var(--shadow-card), var(--edge);
 
   transform: translateX(calc(var(--indice, 0) * 100%));
   transition:
@@ -58,8 +69,14 @@
   transition: color var(--dur-fast) var(--ease-out);
 }
 
-.option:hover {
-  color: var(--text-2);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .option:hover {
+    color: var(--text-2);
+  }
 }
 
 .option:has(.radio:checked) {

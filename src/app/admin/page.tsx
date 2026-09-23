@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { hoyISO } from '@/lib/shared/fecha'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Cifra } from '@/components/ui/cifra'
@@ -17,11 +18,6 @@ import { Grid, PageHeader, Section, Stack } from '@/components/ui/layout'
 import styles from './inicio.module.css'
 
 export const metadata = { title: 'Inicio · ORUM' }
-
-/** Fecha de hoy en 'YYYY-MM-DD', el formato de las columnas `date`. */
-function hoyISO(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 /**
  * Cifras del panel.

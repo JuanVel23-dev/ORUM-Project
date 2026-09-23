@@ -19,20 +19,111 @@
   `auto-fit` + `minmax` reparte columnas sin media queries: la rejilla se
   adapta al ancho disponible en lugar de a puntos de ruptura fijos, así que
   funciona igual dentro de una sidebar estrecha que a pantalla completa.
+
+  El `min(…, 100%)` es la guarda imprescindible: sin ella, `minmax(290px, 1fr)`
+  crea una pista de 290px aunque el contenedor mida menos —no encoge— y la
+  rejilla desborda. Medido: 42px de desbordamiento a 280px de viewport, 2px a
+  320px, 0 desde 344px. Con la guarda la pista nunca supera el ancho
+  disponible; por encima de `--min` no cambia nada.
 */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--min, 240px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--min, 240px), 100%), 1fr));
   gap: var(--gap, var(--space-4));
   min-width: 0;
 }
 
+/* --- Entrada escalonada  ·  §4.2 de la dirección de arte v2 ----------------
+
+   Los hijos directos entran uno detrás de otro, 40 ms de diferencia, con tope
+   de 8. Es lo que convierte «apareció una rejilla» en «se desplegó una
+   rejilla»: el ojo sigue la secuencia y entiende que son piezas de un mismo
+   grupo.
+
+   El TOPE es la parte importante, no el paso. Sin él, el elemento 25 de una
+   lista llega 875 ms tarde y eso NO se percibe como elegancia sino como que
+   la aplicación va lenta. A partir del noveno todos comparten el retardo del
+   octavo: el efecto se lee igual y el último no se hace esperar.
+
+   Se resuelve con `nth-child` y no pasando un índice desde el TSX porque así
+   funciona con cualquier hijo, incluidos los que no controlamos, y no obliga
+   a clonar elementos.
+
+   Solo `transform` y `opacity`. `backwards` mantiene el estado inicial
+   durante el retardo, para que ninguna pieza parpadee antes de empezar.     */
+
+.escalonado > * {
+  animation: entrarEscalonado var(--dur-base) var(--ease-out) backwards;
+}
+
+/* v4 §5: el paso sale de `--escalonado` (40 ms, dentro de la banda 30–80) en
+   vez de los 40 ms escritos a mano siete veces. El tope sigue en el séptimo
+   múltiplo, así que la última pieza no espera más de siete pasos. */
+.escalonado > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.escalonado > *:nth-child(2) {
+  animation-delay: var(--escalonado);
+}
+.escalonado > *:nth-child(3) {
+  animation-delay: calc(var(--escalonado) * 2);
+}
+.escalonado > *:nth-child(4) {
+  animation-delay: calc(var(--escalonado) * 3);
+}
+.escalonado > *:nth-child(5) {
+  animation-delay: calc(var(--escalonado) * 4);
+}
+.escalonado > *:nth-child(6) {
+  animation-delay: calc(var(--escalonado) * 5);
+}
+.escalonado > *:nth-child(7) {
+  animation-delay: calc(var(--escalonado) * 6);
+}
+/* El octavo y TODOS los siguientes. El tope vive aquí. */
+.escalonado > *:nth-child(n + 8) {
+  animation-delay: calc(var(--escalonado) * 7);
+}
+
+@keyframes entrarEscalonado {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+  Movimiento reducido: NO es «sin entrada». El escalonado se conserva —sigue
+  contando el mismo relato de secuencia— pero por opacidad sola, sin
+  desplazamiento, que es lo vestibular.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .escalonado > * {
+    animation-name: aparecerEscalonado;
+  }
+
+  @keyframes aparecerEscalonado {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
 /* --- Divider -------------------------------------------------------------- */
 
+/* Separador dentro de una superficie ya definida → `--border` (§2.2). Con el
+   22 % anterior, sobre papel blanco, un `Divider` era casi invisible. */
 .divider {
   border: 0;
   height: 1px;
-  background: var(--border-subtle);
+  background: var(--border);
   margin: 0;
 }
 
@@ -54,7 +145,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--border-subtle);
+  background: var(--border);
 }
 
 /* --- Section -------------------------------------------------------------- */
@@ -63,6 +154,134 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+/* ----------------------------------------------------------------------------
+   FRANJAS TONALES  ·  dirección de arte v4, §1 y §4
+
+   Una franja NO es una tarjeta y no lleva sombra: no está levantada, está
+   TEÑIDA. Lo que la separa de la sección de al lado es un salto de 1,04:1 de
+   luminancia, que el ojo lee como «aquí empieza otra cosa» sin que haya una
+   sola línea dibujada. Es lo que hace Agence Cartier con cero sombras.
+
+   Por eso tampoco lleva borde: si llevara, sería una tarjeta grande y el
+   recurso perdería todo su sentido —volveríamos a la cuadrícula de cajas que
+   hizo fallar la v2.
+
+   El relleno lo pone la franja porque sin él el tinte queda pegado al texto y
+   se lee como un resaltador. `--radius-xl`, que es el escalón de superficie
+   héroe.
+   -------------------------------------------------------------------------- */
+.tonoCrema,
+.tonoHonda,
+.tonoCacao {
+  padding: var(--space-7) var(--space-6);
+  border-radius: var(--radius-xl);
+}
+
+.tonoCrema {
+  background: var(--surface-alt);
+}
+
+/* ⛔ Sin `--text-3` ni oro de texto dentro: 4,18:1 y 4,21:1 sobre esta
+   superficie, los dos reprueban AA. Ver `tokens.css` §1. */
+.tonoHonda {
+  background: var(--surface-alt-2);
+}
+
+/*
+  LA FRANJA DE CACAO. No sigue al tema —es cacao en claro y en oscuro, igual
+  que el QR es negro sobre blanco en los dos— y por eso REMAPEA sus propios
+  tokens de texto y de superficie hacia dentro: cualquier componente que viva
+  aquí (una Card, un Badge, un texto secundario) lee `--text` y obtiene el tono
+  que sí contrasta sobre cacao, sin que haya que vestirlo a mano.
+
+  Es el ÚNICO sitio del sistema donde el oro de display es legal: 7,83:1 aquí
+  contra 1,99:1 sobre crema.
+
+  Y el presupuesto no sube por esto: si el héroe lleva oro, la acción de esa
+  pantalla va en tinta.
+*/
+.tonoCacao {
+  background: var(--cacao-bg);
+
+  /*
+    `color-scheme: dark` no es decorativo: dentro de la franja el navegador
+    pinta barras de desplazamiento y controles nativos en su variante oscura.
+    Sin esto, un carril con scroll visible saca una barra clara sobre chocolate.
+  */
+  color-scheme: var(--cacao-scheme, dark);
+
+  --surface: var(--cacao-surface);
+  --surface-alt: var(--cacao-surface);
+  --surface-alt-2: var(--cacao-surface);
+  --surface-hover: var(--cacao-hover);
+  --surface-sunk: var(--cacao-bg);
+
+  --text: var(--cacao-fg);
+  --text-2: var(--cacao-fg-2);
+  /*
+    ⚠️ `--text-3` SE COLAPSA en `--text-2`, y esto se decide AQUÍ y no en cada
+    pantalla.
+
+    `--cacao-fg-3` da 5,78:1 contra el FONDO de la franja, que es donde estaba
+    medido — pero el texto tenue no vive sobre el fondo, vive dentro de las
+    superficies elevadas, que son más claras: 4,98:1 sobre `--cacao-surface` y
+    **4,02:1 sobre `--cacao-hover`**. Eso reprueba AA.
+
+    Estaba parcheado a mano e idéntico en `catalogo.module.css`,
+    `perfil.module.css` y `ficha.module.css`, cada uno con su comentario
+    explicando el mismo hallazgo. Mientras el colapso no viviera aquí, el
+    sistema le garantizaba el fallo a quien escribiera la cuarta franja.
+
+    Sobre una superficie oscura no hay sitio para tres grises: se pierde un
+    escalón de jerarquía y se gana que el texto se lea.
+  */
+  --text-3: var(--cacao-fg-2);
+
+  --brand: var(--cacao-brand);
+  --brand-edge: var(--cacao-edge);
+  /*
+    El foco sube de `--cacao-edge` (`--gold-600`, 4,63:1) a `--cacao-brand`
+    (`--gold-400`, 7,83:1). El foco es lo que sostiene 1.4.11 ahora que las
+    superficies no llevan borde en reposo, y sobre chocolate conviene el oro
+    claro, que aquí sí es legal.
+  */
+  --focus: var(--cacao-brand);
+
+  /*
+    LA ACCIÓN SE INVIERTE. En claro `--action` es tinta; sobre cacao una acción
+    de tinta desaparece. Papel sobre cacao: 16,24:1.
+  */
+  --action: var(--cacao-fg);
+  --action-fg: var(--cacao-bg);
+
+  /*
+    Los bordes del tema claro son TINTA y aquí se perderían. `--edge` es el
+    anillo de luz que sustituye al trazo en superficies oscuras: sin él, una
+    `Card` dentro de la franja resuelve `--shadow-card` —cálido, calibrado
+    contra papel, invisible sobre chocolate— y se queda SIN ningún límite,
+    porque `--cacao-surface` contra `--cacao-bg` es 1,16:1.
+  */
+  --edge: var(--edge-light);
+  --border: color-mix(in srgb, var(--cacao-fg) 22%, transparent);
+  --border-subtle: color-mix(in srgb, var(--cacao-fg) 12%, transparent);
+
+  color: var(--text);
+}
+
+/*
+  El ancho útil de una franja no es el del viewport: cambia según la barra
+  lateral esté abierta o en rail. Por eso se pregunta por el CONTENEDOR, que
+  `.main` del shell y el `<main>` del portal declaran, y nunca por `@media`.
+*/
+@container contenido (max-width: 600px) {
+  .tonoCrema,
+  .tonoHonda,
+  .tonoCacao {
+    padding: var(--space-6) var(--space-5);
+    border-radius: var(--radius-lg);
+  }
 }
 
 .sectionCabecera {
@@ -105,6 +324,25 @@
   font-weight: var(--t-display-2-weight);
   color: var(--text);
   text-wrap: balance;
+}
+
+/*
+  EL TITULAR EN SERIF (v4 §3). Opt-in vía `<PageHeader display>`.
+
+  ⛔ Administración y Herramienta de Comercios NO lo usan.
+
+  `text-wrap: balance` ya venía del titular en sans y aquí importa más: a 72px
+  una línea huérfana de dos palabras es un agujero en la composición.
+*/
+.pageTituloDisplay {
+  font-family: var(--font-display);
+  -webkit-font-smoothing: auto;
+
+  font-size: var(--t-hero-1-size);
+  line-height: var(--t-hero-1-leading);
+  letter-spacing: var(--t-hero-1-tracking);
+  font-weight: var(--t-hero-1-weight);
+  font-feature-settings: 'liga' 1, 'calt' 1;
 }
 
 .pageDescripcion {

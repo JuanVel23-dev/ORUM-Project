@@ -8,7 +8,10 @@
 .valor {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
-  letter-spacing: 0.03em;
+  /* El tracking se puede fijar desde fuera con `--copiar-tracking`. Antes era
+     un 0,03em fijo que pisaba el tracking del contenedor: el número del carnet
+     pedía 0,1em —metal grabado— y se pintaba con el de la primitiva. */
+  letter-spacing: var(--copiar-tracking, 0.03em);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -53,9 +56,20 @@
   height: var(--tap-min);
 }
 
-.boton:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+/*
+  El relleno del hover es tenue sobre papel, así que lo acompaña el trazo.
+
+  Y va dentro de `@media (hover: hover)`: en táctil el `:hover` no se va al
+  levantar el dedo, y el botón de copiar se quedaba con trazo permanente —
+  indistinguible de estar enfocado— justo después de usarlo, que es cuando el
+  socio mira la pantalla para comprobar que copió.
+*/
+@media (hover: hover) {
+  .boton:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
 }
 
 .boton:active {
@@ -72,16 +86,27 @@
   color: var(--success);
 }
 
+/*
+  El icono se INTERCAMBIA (Copy ↔ Check), así que React desmonta uno y monta
+  otro. Es el caso donde un `@keyframes` sigue siendo la herramienta correcta
+  pese a la regla 6 de la v4 —«transiciones, no keyframes, en lo que se dispara
+  rápido»—: una transición necesita un valor de partida en el mismo elemento, y
+  aquí el elemento de partida ya no existe. Lo que sí se corrige es de DÓNDE
+  entra.
+*/
 .icono {
   width: 15px;
   height: 15px;
   animation: aparecer var(--dur-fast) var(--ease-out);
 }
 
+/* v4 §5, regla 1: nada entra desde la nada. Entraba desde 0,7 —un 30 % de
+   salto que en un icono de 15px se lee como un globo inflándose— y ahora desde
+   0,92: se percibe que algo cambió, no que algo estalló. */
 @keyframes aparecer {
   from {
     opacity: 0;
-    scale: 0.7;
+    scale: 0.92;
   }
   to {
     opacity: 1;

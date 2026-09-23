@@ -1,0 +1,62 @@
+/*
+  EL ENCABEZADO DEL CATÁLOGO
+
+  Antes eran tres líneas apiladas que, en escritorio, ocupaban un tercio del
+  alto y dejaban los otros dos tercios del ancho vacíos. Era el caso más claro
+  de lo que el propietario llamó «se ve feo en PC»: espacio sin trabajo que
+  hacer.
+
+  Ahora el ancho se reparte. A partir de 720px de contenedor el bloque de texto
+  y el lede conviven en dos columnas, así que el encabezado gana presencia
+  horizontal en vez de altura.
+*/
+/*
+  EJE CENTRAL, y esto sustituye a la rejilla de dos columnas que había.
+
+  La versión anterior repartía titular y lede en 3fr/2fr para «llenar el
+  escritorio». Llenaba, pero dejaba la portada del catálogo alineada a la
+  izquierda mientras el resto de la página —las estanterías centradas dentro de
+  sus franjas, la rejilla— tiraba al centro. Encargo del propietario: «me gusta
+  que todo esté centrado».
+
+  Un encabezado de sección centrado es además lo que hace que la página se lea
+  como un escaparate y no como un panel: es el gesto de las cinco referencias.
+  El vacío de los lados no vuelve, porque lo que llena el escritorio ahora es
+  la columna más ancha del portal y el campo de color de las franjas.
+*/
+/*
+  TÍTULO A LA IZQUIERDA, EMBLEMA A LA DERECHA.
+
+  Sustituye al eje central de la tanda anterior, por petición explícita del
+  propietario: «se podría alinear el título a la izquierda y a la derecha poner
+  algo, imagen o animación, que sea agradable».
+
+  En un teléfono se apila y el emblema va DEBAJO del texto, no encima: lo
+  primero de la pantalla tiene que ser lo que se lee, no el adorno.
+*/
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+  padding-block: var(--space-7) var(--space-6);
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+@container contenido (min-width: 720px) {
+  .encabezado {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+}
+
+/* El emblema de anillos giratorios se retiró por petición del propietario
+   («quita la animación del anillo, es fea»). */

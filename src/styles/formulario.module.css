@@ -63,9 +63,12 @@
   gap: var(--space-2);
 
   padding: var(--space-4);
+  /* Bloque HUNDIDO, no superficie flotante: mismo tratamiento que `Card.sunk`
+     —hairline + sombra hacia dentro—, nunca trazo de tinta plena (v3 §2.1). */
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: var(--surface-sunk);
+  box-shadow: var(--shadow-hundida);
 }
 
 .credencialEtiqueta {

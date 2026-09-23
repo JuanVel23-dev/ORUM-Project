@@ -4,8 +4,11 @@
   flex-shrink: 0;
 
   border-radius: var(--radius-full);
+  /* Papel, no gris: lo que dibuja el disco es su trazo. Sube a `--border`
+     (tinta al 55 %) porque un avatar sin foto es SOLO el círculo y la
+     inicial — con el 22 % anterior sobre papel blanco desaparecía. */
   background: var(--surface-sunk);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
   color: var(--text-2);
 
   font-weight: 600;

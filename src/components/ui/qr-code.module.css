@@ -14,7 +14,13 @@
   border-radius: var(--radius-md);
 
   background: #ffffff;
-  border: 1px solid var(--border-subtle);
+  /*
+    La placa es blanca en los DOS temas (el QR no se invierte: hay lectores
+    que dejan de escanearlo, y el fallo ocurre en la caja del comercio delante
+    del cliente). En claro esa placa blanca está ahora sobre papel blanco, así
+    que su filo tiene que verse: sube a `--border`.
+  */
+  border: 1px solid var(--border);
   box-shadow: var(--shadow-card), var(--edge);
 }
 

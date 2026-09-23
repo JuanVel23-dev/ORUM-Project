@@ -10,7 +10,7 @@
 
 .arco {
   transform-origin: center;
-  animation: girar 720ms linear infinite;
+  animation: girar var(--dur-giro) linear infinite;
 }
 
 @keyframes girar {

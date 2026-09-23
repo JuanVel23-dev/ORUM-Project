@@ -5,8 +5,8 @@ import { requireRolComercio } from '@/lib/comercios/requerir-comercio'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/avatar'
 import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
-import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { cerrarSesionComercio } from '../login/actions'
+import { MenuTema } from './_components/menu-tema'
 import styles from './portal.module.css'
 
 export const metadata = { title: 'Portal de Comercios · ORUM' }
@@ -33,8 +33,6 @@ export default async function ComerciosLayout({ children }: { children: ReactNod
         {comercio?.nombre && <span className={styles.comercio}>{comercio.nombre}</span>}
 
         <div className={styles.acciones}>
-          <ThemeToggle />
-
           {/*
             El formulario envuelve el menú: así "Cerrar sesión" es un submit
             real dentro de él y la server action se dispara aunque no haya
@@ -43,12 +41,17 @@ export default async function ComerciosLayout({ children }: { children: ReactNod
           <form action={cerrarSesionComercio}>
             <DropdownMenu
               trigger={
-                <button type="button" aria-label="Mi cuenta">
+                <button type="button" className={styles.botonCuenta} aria-label="Mi cuenta">
                   <Avatar nombre={comercio?.nombre ?? correo} size="sm" decorativo />
                 </button>
               }
             >
               <p className={styles.correoMenu}>{correo}</p>
+
+              <MenuSeparator />
+
+              {/* El tema baja aquí desde la cabecera: ver `menu-tema.tsx`. */}
+              <MenuTema />
 
               <MenuSeparator />
 

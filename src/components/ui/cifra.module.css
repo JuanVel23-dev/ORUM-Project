@@ -16,6 +16,26 @@
 }
 
 /*
+  Variante DISPLAY (v4 §3): el número en el serif de titulares.
+
+  Lleva su propio tracking —más cerrado que el de `display-1`, porque una
+  serif de contraste alto a 52px abre huecos que a 15px son necesarios— y
+  `tabular-nums` OBLIGATORIO: una cifra que cambia con dígitos proporcionales
+  baila de ancho, y a este tamaño el baile es de varios píxeles.
+
+  ⛔ Nunca en Administración ni en la Herramienta de Comercios.
+*/
+.display .valor {
+  font-family: var(--font-display);
+  -webkit-font-smoothing: auto;
+
+  font-size: var(--t-hero-cifra-size);
+  line-height: var(--t-hero-cifra-leading);
+  letter-spacing: var(--t-hero-cifra-tracking);
+  font-weight: var(--t-hero-cifra-weight);
+}
+
+/*
   Variante compacta para rejillas de 4+ cifras, donde el display-1 obligaría a
   la tarjeta a envolver el número.
 */

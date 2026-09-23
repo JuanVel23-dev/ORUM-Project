@@ -1,17 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import {
-  Children,
-  cloneElement,
-  isValidElement,
-  useCallback,
-  useId,
-  useRef,
-  type CSSProperties,
-  type ReactElement,
-  type ReactNode,
-} from 'react'
+import { Check } from 'lucide-react'
+import { useCallback, useId, useRef, type ReactElement, type ReactNode } from 'react'
 import styles from './menu.module.css'
 
 /*
@@ -25,6 +16,15 @@ import styles from './menu.module.css'
 
 const MARGEN = 6 // separación entre disparador y menú, en px
 const BORDE = 8 // margen mínimo respecto al borde de la ventana
+
+/*
+  Qué cuenta como opción navegable con flechas. Incluye `menuitemradio` porque
+  una opción de un grupo excluyente —el tema— sigue siendo una fila del menú:
+  si el selector solo mirase `menuitem`, las flechas la saltarían y el foco
+  inicial al abrir caería en otra parte.
+*/
+const SELECTOR_OPCIONES =
+  '[role="menuitem"]:not(:disabled), [role="menuitemradio"]:not(:disabled)'
 
 type DropdownMenuProps = {
   /** Elemento que abre el menú. Recibe los atributos de popover. */
@@ -77,15 +77,13 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
 
     colocar()
     // Enfocar el primer elemento deja el menú listo para el teclado.
-    menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]:not(:disabled)')?.focus()
+    menuRef.current?.querySelector<HTMLElement>(SELECTOR_OPCIONES)?.focus()
   }
 
   /** Navegación con flechas, Inicio y Fin dentro del menú. */
   const alPulsarTecla = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const opciones = Array.from(
-      menuRef.current?.querySelectorAll<HTMLElement>(
-        '[role="menuitem"]:not(:disabled)',
-      ) ?? [],
+      menuRef.current?.querySelectorAll<HTMLElement>(SELECTOR_OPCIONES) ?? [],
     )
     if (opciones.length === 0) return
 
@@ -104,10 +102,41 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
     }
   }
 
+  /*
+    ⚠️ NADA DE `cloneElement` AQUÍ, y esto es un bug pagado, no una preferencia.
+
+    `trigger` y los hijos de este menú los crea casi siempre un SERVER
+    COMPONENT —el layout del portal, el del panel, el de comercios— y viajan
+    hasta aquí por la frontera RSC. Un elemento que ha cruzado esa frontera
+    llega serializado: su `type` es una referencia perezosa al módulo de
+    cliente, no la función. `cloneElement` sobre eso devuelve un elemento cuyo
+    tipo React no sabe resolver, y el resultado es
+
+      «Element type is invalid: expected a string … but got: undefined»
+
+    …con un rastro que Next oculta entero (`at ignore-listed frames`), en la
+    petición del servidor, y por tanto un 500 en CUALQUIER pantalla que monte
+    este menú. Tipaba, compilaba, pasaba lint y pasaba `next build`, porque el
+    fallo solo existe al renderizar con datos reales.
+
+    El atributo se pone sobre el nodo ya montado, con una ref de callback. La
+    ref hace dos trabajos —guardar el nodo para `colocar()` y estampar el
+    atributo— porque son el mismo momento y separarlos daría dos refs sobre el
+    mismo elemento.
+  */
+  const anclarDisparador = useCallback(
+    (nodo: HTMLSpanElement | null) => {
+      disparadorRef.current = nodo
+      const boton = nodo?.firstElementChild
+      if (boton instanceof HTMLElement) boton.setAttribute('popovertarget', id)
+    },
+    [id],
+  )
+
   return (
     <>
-      <span ref={disparadorRef} className={styles.disparador}>
-        {cloneElement(trigger, { popoverTarget: id })}
+      <span ref={anclarDisparador} className={styles.disparador}>
+        {trigger}
       </span>
 
       <div
@@ -119,14 +148,17 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
         onToggle={alAlternar}
         onKeyDown={alPulsarTecla}
       >
-        {/* El índice alimenta el retardo escalonado de la animación de entrada. */}
-        {Children.map(children, (hijo, i) =>
-          isValidElement(hijo)
-            ? cloneElement(hijo as ReactElement<{ style?: CSSProperties }>, {
-                style: { '--indice': i } as CSSProperties,
-              })
-            : hijo,
-        )}
+        {/*
+          Los hijos se pintan TAL CUAL. El retardo escalonado lo resuelve
+          `menu.module.css` con `nth-child`, por la misma razón que el
+          disparador no se clona: estos hijos también cruzan la frontera RSC
+          —`MenuItem`, `MenuSeparator`, `MenuTema` los monta el layout del
+          servidor— y clonarlos rompía el menú entero.
+
+          Además es lo que ya hace `layout.module.css` para `Stack` y `Grid`:
+          escalonar con `nth-child` funciona con cualquier hijo sin tocarlo.
+        */}
+        {children}
       </div>
     </>
   )
@@ -148,6 +180,15 @@ type MenuItemProps = {
    */
   submit?: boolean
   icon?: ReactNode
+  /**
+   * Opción elegida dentro de un grupo excluyente (el tema, por ejemplo).
+   *
+   * Cuando se pasa —incluso `false`— el elemento deja de ser `menuitem` y pasa
+   * a `menuitemradio` con `aria-checked`: es lo que le dice al lector de
+   * pantalla que hay una elección y cuál está activa. El check visible es el
+   * segundo portador; sin él la única señal sería el estado ARIA, invisible.
+   */
+  selected?: boolean
   /** Rojo. Reserva `true` para acciones que borran o revocan. */
   destructive?: boolean
   disabled?: boolean
@@ -159,6 +200,7 @@ export function MenuItem({
   href,
   submit = false,
   icon,
+  selected,
   destructive = false,
   disabled = false,
   children,
@@ -172,10 +214,18 @@ export function MenuItem({
     elemento.closest<HTMLElement>('[popover]')?.hidePopover()
   }
 
+  const excluyente = selected !== undefined
+
   const contenido = (
     <>
       {icon && <span className={styles.itemIcono}>{icon}</span>}
       {children}
+      {/* Decorativo: quien lo necesita ya lo tiene en `aria-checked`. */}
+      {selected && (
+        <span className={styles.itemMarca} aria-hidden="true">
+          <Check size={15} />
+        </span>
+      )}
     </>
   )
 
@@ -195,7 +245,8 @@ export function MenuItem({
   return (
     <button
       type={submit ? 'submit' : 'button'}
-      role="menuitem"
+      role={excluyente ? 'menuitemradio' : 'menuitem'}
+      aria-checked={excluyente ? selected : undefined}
       className={clase}
       disabled={disabled}
       onClick={(e) => {
@@ -212,6 +263,18 @@ export function MenuSeparator() {
   return <hr className={styles.separador} />
 }
 
-export function MenuLabel({ children }: { children: ReactNode }) {
-  return <div className={styles.etiquetaGrupo}>{children}</div>
+/**
+ * Encabezado de un grupo de opciones.
+ *
+ * El `id` es opcional y existe para poder referenciarlo desde el
+ * `aria-labelledby` de un `role="group"`: así el lector anuncia "Tema, Claro,
+ * marcado" en vez de solo "Claro, marcado", sin repetir el texto en un
+ * `aria-label` que podría desincronizarse del visible.
+ */
+export function MenuLabel({ id, children }: { id?: string; children: ReactNode }) {
+  return (
+    <div id={id} className={styles.etiquetaGrupo}>
+      {children}
+    </div>
+  )
 }

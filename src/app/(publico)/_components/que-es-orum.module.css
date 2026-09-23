@@ -1,0 +1,73 @@
+/* Clase duplicada: convive con `.bloque` de `Revelar` en el mismo elemento, y
+   así no depende del orden en que Next inyecte las dos hojas. */
+.bloque.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 60ch;
+}
+
+.lede {
+  margin: 0;
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+.pilares {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@container contenido (min-width: 720px) {
+  .pilares {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Superficie levantada con sombra, sin trazo: la regla del sistema. */
+.pilar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+/* Glifo de marca en un círculo de oro tenue; --gold-700 sobre ese fondo pasa
+   AA de sobra (es texto/icono dorado sobre claro). */
+.icono {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--gold-500) 16%, var(--surface));
+  color: var(--gold-700);
+}
+
+.pilarTitulo {
+  margin: 0;
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pilarTexto {
+  margin: 0;
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+  text-wrap: pretty;
+}

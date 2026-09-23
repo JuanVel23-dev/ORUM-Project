@@ -12,7 +12,7 @@ import {
   THEME_STORAGE_KEY,
   type ResolvedTheme,
   type ThemeMode,
-} from './theme-script'
+} from './theme-constantes'
 import { useHidratado } from '../use-hidratado'
 
 /*

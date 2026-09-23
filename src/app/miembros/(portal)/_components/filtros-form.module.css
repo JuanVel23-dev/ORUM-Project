@@ -1,36 +1,223 @@
+/* ==========================================================================
+   FILTROS DEL CATÁLOGO
+   --------------------------------------------------------------------------
+   Aquí vivía una plantilla de rejilla con `--columnas` inyectado y treinta
+   líneas de aritmética del mínimo intrínseco, porque el formulario tenía
+   CUATRO desplegables en línea y había que demostrar en qué franja de anchos
+   desbordaban. Ese cálculo ya no aplica y por eso no se conserva: los
+   desplegables son como mucho dos, viven dentro de un `<details>` y nunca
+   comparten fila con la búsqueda.
+
+   Lo que queda es más simple a propósito. A 375px el formulario anterior
+   ponía CINCO campos apilados antes del primer comercio; ahora pone uno.
+   ========================================================================== */
+
 .filtros {
-  display: grid;
-  grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(140px, 1fr)) auto;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
-  align-items: end;
-  margin-bottom: var(--space-6);
 }
 
-@container contenido (max-width: 860px) {
-  .filtros {
-    grid-template-columns: 1fr 1fr;
-  }
+/*
+  LA ETIQUETA, CON SU GLIFO.
 
-  .campoBusqueda,
-  .acciones {
-    grid-column: 1 / -1;
-  }
-}
+  Encargo: «pon iconos en los filtros». El icono va junto al texto, nunca en su
+  lugar: dos desplegables de un catálogo no son una barra de herramientas donde
+  el usuario ya conoce los símbolos, y «Ciudad» a secas no se adivina de un
+  alfiler de mapa. Icono MÁS texto es además la norma del sistema.
 
-@container contenido (max-width: 460px) {
-  .filtros {
-    grid-template-columns: 1fr;
-  }
-}
-
+  `inline-flex` y no `block` para que el glifo comparta línea base con el texto
+  sin arrastrar el descendente de la fuente.
+*/
 .etiqueta {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   margin-bottom: var(--space-2);
 
   font-size: var(--t-caption-size);
   font-weight: 590;
   letter-spacing: var(--t-caption-tracking);
   color: var(--text-3);
+}
+
+/* El glifo es de MARCA, no de dato: dice de qué habla el filtro, nunca cuál
+   está puesto. Por eso no cambia con el valor seleccionado. */
+.etiquetaIcono {
+  flex-shrink: 0;
+  color: var(--brand);
+}
+
+/*
+  LA BÚSQUEDA ES EL CONTROL PRINCIPAL DE LA PANTALLA, y hasta ahora se veía
+  como un campo más de un formulario.
+
+  Encargo: «mejora la barra de búsqueda de ciudad y de búsqueda en general».
+  Lo que gana es PRESENCIA, no tamaño: radio completo —la forma universal de
+  «aquí se busca», que se reconoce antes de leer el marcador de posición—, una
+  sombra de tarjeta que la despega del papel, y el filo dorado cuando se
+  enfoca.
+
+  Sigue topada, y eso no cambia: un `<input>` de 1052px para escribir «pizza»
+  es la señal más barata de que nadie diseñó esta pantalla. Va ALINEADA A LA
+  IZQUIERDA, sobre la misma línea que el título, las pestañas y los encabezados
+  de sección: centrada fue la única pieza de la columna con otro eje, y en
+  captura se leía como suelta.
+*/
+.campoBusqueda {
+  /* `stretch`, no `center`: centrado, el campo encogía hasta su contenido y
+     medía ~215px en escritorio, cortando su propio marcador («Busca un
+     comercio o»). Visto en captura. Lo que se centra es el BLOQUE, con su
+     `max-width` y `margin-inline: auto` de más abajo. */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 560px;
+}
+
+/* La etiqueta se recoge: con un icono de lupa dentro del campo y un marcador
+   de posición que ya dice qué se busca, «Buscar» encima es decir tres veces lo
+   mismo. Sigue en el DOM para el lector de pantalla. */
+.campoBusqueda .etiqueta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+  El campo de dentro. Se estiliza por elemento y no por clase porque `Input` es
+  una primitiva compartida: darle una variante «búsqueda» obligaría a que todo
+  el sistema la conociera, y esto es de ESTA pantalla.
+*/
+.campoBusqueda input {
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.campoBusqueda input:focus-visible {
+  box-shadow: var(--shadow-raised);
+}
+
+
+
+/* ==========================================================================
+   MÁS FILTROS
+   ========================================================================== */
+
+/* Centrado bajo la búsqueda y sin línea encima: con el campo centrado, un
+   «Más filtros» pegado a la izquierda y tras un filete quedaba huérfano, como
+   si fuera de otra sección. */
+.masFiltros {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.resumen {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  /* El disparador es una fila entera de menú: en táctil no puede medir menos
+     que el mínimo. En escritorio la densidad es una virtud. */
+  min-height: var(--space-8);
+  padding: 0 var(--space-2);
+  margin-left: calc(var(--space-2) * -1);
+  border-radius: var(--radius-xs);
+
+  font-size: var(--t-callout-size);
+  font-weight: 510;
+  color: var(--text-2);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+
+  /* Ver `.resumen:active` más abajo: el toque se acusa por opacidad, no por
+     escala. `scale` no entra en esta lista a propósito — se repone con el valor
+     de reposo, no se anima. */
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+/* Safari pinta su propio triángulo si no se retira el marcador nativo. */
+.resumen::-webkit-details-marker {
+  display: none;
+}
+
+/* En táctil el `:hover` se queda pegado tras el toque: el disparador se
+   quedaba en tinta plena como si estuviera enfocado. */
+@media (hover: hover) {
+  .resumen:hover {
+    color: var(--text);
+  }
+}
+
+/*
+  FEEDBACK INMEDIATO AL PULSAR, por OPACIDAD y no por escala.
+
+  `globals.css` §4b encoge todo `summary` un 3 % al pulsar. Aquí se repone: esto
+  es una FILA de ancho de contenido dentro de un formulario, y escalar una fila
+  de texto deforma el texto mientras dura el gesto. La regla de la dirección es
+  explícita para filas: el feedback es opacidad.
+
+  Ida instantánea, vuelta normal — el mismo reparto de la regla global.
+*/
+.resumen:active {
+  scale: 1;
+  opacity: 0.6;
+  transition-duration: var(--dur-press);
+}
+
+.resumen:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .resumen {
+    min-height: var(--tap-min);
+  }
+}
+
+/* Gira el triángulo, NO anima el alto del bloque: animar `height` recalcula
+   layout en cada fotograma y está prohibido. */
+.triangulo {
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+
+.masFiltros[open] .triangulo {
+  rotate: 180deg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .triangulo {
+    transition: none;
+  }
+}
+
+.cuerpo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  align-items: end;
+  padding-top: var(--space-3);
+}
+
+@container contenido (min-width: 560px) {
+  .cuerpo {
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  }
 }
 
 .acciones {

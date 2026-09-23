@@ -14,9 +14,11 @@ import { animate } from 'motion'
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from 'lucide-react'
 import {
   SPRING_UI,
+  TWEEN_REDUCIDO,
   amortiguarBorde,
   prefiereMovimientoReducido,
   proyectarMomento,
+  salidaDe,
 } from '@/lib/shared/motion'
 import { useHidratado } from '../use-hidratado'
 import styles from './toast.module.css'
@@ -147,7 +149,7 @@ function Toast({ item, onCerrar }: { item: ToastItem; onCerrar: () => void }) {
       }
 
       if (prefiereMovimientoReducido()) {
-        animate(nodo, { opacity: [0, 1] }, { duration: 0.2 })
+        animate(nodo, { opacity: [0, 1] }, TWEEN_REDUCIDO)
       } else {
         animate(
           nodo,
@@ -219,8 +221,9 @@ function Toast({ item, onCerrar }: { item: ToastItem; onCerrar: () => void }) {
         nodo,
         { transform: `translateX(${ancho + 40}px)`, opacity: 0 },
         // La velocidad del dedo se traspasa a la animación: sin costura entre
-        // arrastrar y animar.
-        { type: 'spring', bounce: 0, duration: 0.3, velocity: velocidad },
+        // arrastrar y animar. Descartar es SALIR, así que va recortado (v4 §5,
+        // regla 3): ~0,20 s frente a los 0,30 de la entrada.
+        { ...salidaDe(SPRING_UI), velocity: velocidad },
       ).finished.then(onCerrar, onCerrar)
       return
     }
@@ -241,6 +244,11 @@ function Toast({ item, onCerrar }: { item: ToastItem; onCerrar: () => void }) {
       // debería ser una carrera contra el temporizador.
       onMouseEnter={cancelarCierre}
       onMouseLeave={programarCierre}
+      // Y con teclado igual (WCAG 2.2.1): quien llega al botón de acción del
+      // aviso tabulando no tiene ratón que dejar encima, y sin esto el aviso
+      // se le cierra debajo del foco mientras decide.
+      onFocus={cancelarCierre}
+      onBlur={programarCierre}
     >
       <Icono className={styles.icono} aria-hidden="true" />
 

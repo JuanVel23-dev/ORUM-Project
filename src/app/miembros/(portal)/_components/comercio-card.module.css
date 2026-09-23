@@ -1,8 +1,192 @@
+/* ==========================================================================
+   EL ENLACE Y LA SUPERFICIE
+   --------------------------------------------------------------------------
+   DEFECTO QUE ESTABA VIVO: `comercio-card.tsx` pedía `styles.enlace` y
+   `styles.superficie` desde el primer commit y NINGUNA de las dos existía en
+   esta hoja. CSS Modules devuelve `undefined` para una clase que no declara,
+   React no pinta el atributo y no falla nada: ni tsc, ni eslint, ni el build.
+
+   Consecuencia real: el `<a>` es el elemento de la rejilla y se estira a la
+   altura de la fila, pero la `Card` de dentro se quedaba en su altura de
+   contenido. Es decir que `margin-top: auto` de `.promociones` y de
+   `.sinBeneficio` —la divisoria que existe PARA que las tarjetas se puedan
+   comparar de un vistazo— no tenía contra qué empujar y la línea caía a una
+   cota distinta en cada tarjeta.
+
+   Se declaran aquí las dos, que es donde el TSX ya las buscaba.
+   ========================================================================== */
+
+/* ==========================================================================
+   EL MARCO  ·  lo que permite que el corazón NO esté dentro del enlace
+   --------------------------------------------------------------------------
+   Un `<button>` dentro de un `<a>` es marcado inválido, y parchear el evento
+   con `preventDefault` falla mientras el JavaScript no ha hidratado: el toque
+   navega y el socio acaba en otra pantalla. Así que el corazón es HERMANO del
+   enlace y se coloca encima por posición absoluta. Pulsarlo no navega porque el
+   evento nunca llega al enlace.
+
+   El marco pasa a ser el hijo de la rejilla y del carril, así que HEREDA el
+   `height: 100%` que sostenía la alineación de la divisoria inferior entre
+   tarjetas. Sin esto, `margin-top: auto` de `.promociones` deja de tener contra
+   qué empujar y cada tarjeta corta a una altura distinta — el defecto que esta
+   hoja ya arregló una vez.
+   ========================================================================== */
+
+.marco {
+  position: relative;
+  height: 100%;
+}
+
+/*
+  EL CORAZÓN, EN LA ESQUINA.
+
+  `z-index` sobre el enlace: es lo que hace que el área táctil ampliada de 44px
+  —el `::after` del botón, que se solapa con la tarjeta— reciba el toque en vez
+  de la tarjeta. Si alguien lo quita, el corazón parecerá roto por los bordes y
+  nada fallará de forma visible.
+
+  La posición sale del relleno de `Card` (`--space-4` en `padding` normal) para
+  que quede ópticamente alineado con la placa del logotipo, no flotando sobre la
+  esquina redondeada.
+*/
+.corazon {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 2;
+}
+
+/* En la rejilla el corazón va SOBRE LA FOTO: necesita su propio fondo para
+   leerse encima de cualquier imagen. La compacta no tiene foto y no lo lleva. */
+.marco:not(.marcoCompacta) .corazon {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-card);
+}
+
+.enlace {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-md);
+
+  /* La ida es instantánea y la vuelta se toma su tiempo (ver `.enlace:active`
+     más abajo): el retardo al pulsar es justo lo que mata la sensación de
+     respuesta. Mismo reparto que la regla global de press. */
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+/*
+  El anillo lo pone el ENLACE, no la `Card`: el foco vive aquí, así que el
+  `:focus-visible` propio de `Card` nunca llegaría a dispararse. Solo se corrige
+  el radio —el global de `globals.css` usa `--radius-xs`, que es el de un chip—.
+*/
+.enlace:focus-visible {
+  border-radius: var(--radius-md);
+}
+
+.superficie {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  /* Recorta la foto al radio de la tarjeta. */
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   LA CUBIERTA · la foto del local, protagonista
+   ========================================================================== */
+
+.cubierta {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--cacao-bg);
+}
+
+.foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Acercamiento lento al apuntar: la foto «respira». Solo `scale`, en el
+     compositor. */
+  transition: scale var(--dur-page) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .enlace:hover .foto {
+    scale: 1.05;
+  }
+}
+
+/* Sin portada: un campo champán con el halo dorado, para que la tarjeta no se
+   vea a medias. La marca la pone el logo grande que monta encima. */
+.cubiertaVacia {
+  position: absolute;
+  inset: 0;
+  background: var(--gold-halo), var(--cacao-bg);
+}
+
+/* El logo grande MONTA sobre el borde inferior de la foto. Clase duplicada para
+   ganar a `.placa` sin depender del orden de las hojas. */
+.logoGrande.logoGrande {
+  --placa-logo-w: 76px;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 0 4px var(--surface),
+    var(--shadow-raised);
+}
+
+/*
+  PULSAR UNA TARJETA DE LISTA ES OPACIDAD, NUNCA SOMBRA NI DESPLAZAMIENTO.
+
+  Es prohibición dura y tiene una factura concreta: el catálogo pinta hasta 100
+  tarjetas y quien las desplaza es un móvil de gama media. Recomponer sombra y
+  posición de una tarjeta ancha en cada toque se paga ahí, no en el escritorio
+  donde se diseñó.
+
+  Hay que anular DOS cosas, y las dos venían de sitios distintos:
+
+    1. `Card.interactive:active` baja 2px y cambia de sombra. Se repone con la
+       clase duplicada —(0,3,0) contra (0,2,0)—, para que el ganador no dependa
+       del orden en que Next inyecte las dos hojas.
+    2. La regla global de `globals.css` §4b encoge TODO `a[href]` un 3 % al
+       pulsar, y la `scale: 1` de `Card` solo alcanza al `div` de dentro, no al
+       enlace. O sea que hasta ahora la tarjeta se encogía Y bajaba a la vez:
+       dos gestos superpuestos que nadie pidió.
+
+  El levantar al apuntar SE CONSERVA: vive dentro del `@media (hover: hover)`
+  de `Card`, así que en el teléfono no se ejecuta nunca y no entra en esta
+  factura.
+*/
+.enlace:active {
+  scale: 1;
+  /* Mismo valor en las tres superficies pulsables del portal —rejilla, carril
+     y portada— para que el toque se sienta igual venga de donde venga. */
+  opacity: 0.72;
+  transition-duration: var(--dur-press);
+}
+
+.superficie.superficie:active {
+  translate: 0 0;
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+/*
+  Movimiento reducido: el feedback SIGUE OCURRIENDO. La opacidad no es
+  vestibular —no desplaza ni escala nada— así que es ya el equivalente correcto
+  y no hay nada que anular aquí. Se deja escrito para que nadie añada un
+  `opacity: 1` creyendo que falta.
+*/
+
 .tarjeta {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  height: 100%;
+  flex: 1;
+  padding: 0 var(--space-5) var(--space-5);
 }
 
 .cabecera {
@@ -10,6 +194,12 @@
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
+
+  /* El logo sube la mitad de su alto sobre la foto; el nombre queda a su
+     derecha, alineado con la base del círculo. El corazón vive sobre la foto,
+     así que ya no hace falta reservarle hueco aquí. */
+  align-items: flex-end;
+  margin-top: -38px;
 }
 
 .titulos {
@@ -17,10 +207,10 @@
 }
 
 .nombre {
-  font-size: var(--t-title-3-size);
-  line-height: var(--t-title-3-leading);
-  font-weight: var(--t-title-3-weight);
-  letter-spacing: var(--t-title-3-tracking);
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  font-weight: 700;
+  letter-spacing: var(--t-title-2-tracking);
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -67,34 +257,226 @@
 .promociones {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-
+  gap: var(--space-3);
   margin-top: auto;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--border-subtle);
 }
 
 .promocion {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
   font-size: var(--t-footnote-size);
 }
 
+/*
+  LA PROMOCIÓN, RESALTADA. Encargo: «resalta las promociones». Píldora de oro
+  brillante con la cifra completa en tinta: --gold-500 contra --tinta-1 da
+  9,3:1, sobrado. Es la pieza más llamativa de la tarjeta después de la foto,
+  que es el orden que se pidió.
+*/
+.promocionCifra {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+
+  background: var(--gold-500);
+  color: var(--tinta-1);
+  font-size: var(--t-callout-size);
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
 .promocionTitulo {
-  min-width: 0;
+  max-width: 100%;
+  color: var(--text-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.sinPromociones {
+
+.masBeneficios {
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+/*
+  El bloque de "sin beneficio" ocupa exactamente el hueco que ocuparían las
+  promociones: mismo `margin-top: auto` y misma divisoria. LA ALINEACIÓN NO SE
+  SACRIFICA — es lo que permite comparar tarjetas de un vistazo, y es el caso
+  más frecuente del catálogo, no una excepción que se disculpa.
+
+  Sin icono y sin color de aviso: un triángulo ámbar convertiría una situación
+  normal en una alarma.
+*/
+.sinBeneficio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+
   margin-top: auto;
   padding-top: var(--space-3);
   border-top: 1px solid var(--border-subtle);
 
   font-size: var(--t-caption-size);
   color: var(--text-3);
+}
+
+.categoria {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   TARJETA DE ESTANTERÍA
+   ========================================================================== */
+
+.compacta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  height: 100%;
+
+  /* Mismo hueco para el corazón, un escalón menor: esta tarjeta mide 200px y
+     `--space-7` se comería una cuarta parte del ancho del nombre. */
+  padding-inline-end: var(--space-6);
+}
+
+.compacta .nombre {
+  max-width: 100%;
+}
+
+/* El beneficio se ancla al fondo: es lo que alinea todas las tarjetas del
+   carril entre sí, igual que la divisoria hace en la rejilla. */
+.compacta > :last-child {
+  margin-top: auto;
+}
+
+.sinBeneficioCompacta {
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+/* ==========================================================================
+   LA SEGUNDA MITAD DEL HUECO DE ESCRITORIO  ·  W3
+   --------------------------------------------------------------------------
+   `carril.module.css` ya hace que una estantería con pocas tarjetas llegue
+   hasta el filo de la columna: el ancho de pista pasó de fijo a
+   `minmax(--carril-tarjeta-w, 1fr)`, así que el sobrante se reparte entre las
+   tarjetas en vez de quedarse como papel muerto a la derecha.
+
+   Eso resuelve el hueco y abre el problema siguiente, que es el que se cierra
+   aquí: una tarjeta DISEÑADA A 200px estirada a 542 —el caso real de
+   «Beneficios del momento» con sus dos comercios mínimos en una columna de
+   1100— es una columna de logotipo, nombre y chip con medio metro de aire a la
+   derecha. El hueco deja de estar entre las tarjetas y pasa a estar DENTRO de
+   cada una. No se gana nada.
+
+   Así que la tarjeta cambia de forma cuando se ensancha: de columna a fila,
+   con la placa a la izquierda y el texto a su derecha. Es la misma disposición
+   que ya usan la ficha del comercio y la fila de la rejilla en móvil, así que
+   no se inventa un tercer lenguaje.
+
+   El umbral son 300px porque es el ancho a partir del cual la columna deja de
+   tener sentido: por debajo (teléfono a 200px, o cuatro tarjetas o más en
+   escritorio, que salen a 270) se queda vertical, que es su forma canónica.
+
+   Se consulta un contenedor propio (`tarjeta`) y NO `contenido`: lo que decide
+   la forma es el ancho de ESTA tarjeta, que depende de cuántas haya en la
+   estantería, no del ancho de la página. Un `@container contenido` daría la
+   misma respuesta para una estantería de dos y otra de diez.
+
+   El contenedor vive en `.marcoCompacta` y no en `.marco`: la tarjeta de la
+   rejilla es la que lleva el `view-transition-name` del par rejilla ↔ ficha, y
+   no se le mete contención de layout encima sin poder mirarlo en un navegador.
+   ========================================================================== */
+
+.marcoCompacta {
+  container-type: inline-size;
+  container-name: tarjeta;
+}
+
+/* Umbral a 0: la compacta es SIEMPRE fila. En columna medía el doble de alto
+   para enseñar lo mismo —logo, nombre y beneficio— y el propietario pidió
+   quitar el espacio que no aporta («Beneficios del momento» se veía enorme). */
+@container tarjeta (min-width: 0px) {
+  .compacta {
+    display: grid;
+    /* Placa a su ancho natural; el texto se lleva el resto. `minmax(0, 1fr)`
+       y no `1fr`: sin el mínimo en cero, un nombre largo ensancharía la pista
+       en vez de recortarse con la elipsis que `.nombre` ya declara. */
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    column-gap: var(--space-4);
+    row-gap: var(--space-1);
+  }
+
+  /* La placa ocupa las dos filas y se centra contra el bloque de texto. */
+  .compacta > :first-child {
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+
+  /* Nombre pegado a la línea de reparto por abajo, beneficio por arriba: así
+     los dos se leen como un bloque y no como dos datos sueltos. */
+  .compacta > :nth-child(2) {
+    align-self: end;
+  }
+
+  /*
+    `margin-top: auto` se anula: en la forma de columna es lo que ancla el
+    beneficio al fondo de la tarjeta y alinea todas las de la estantería entre
+    sí; en la forma de fila empujaría el chip contra el borde inferior.
+
+    `justify-self: start` porque un `Badge` es un `inline-flex` y como elemento
+    de rejilla se estiraría a todo el ancho de su columna — una píldora de
+    400px no es una píldora.
+  */
+  .compacta > :last-child {
+    margin-top: 0;
+    align-self: start;
+    justify-self: start;
+  }
+}
+
+/*
+  LA INSIGNIA DE BENEFICIO PUEDE PARTIR EN DOS LÍNEAS.
+
+  `Badge` lleva `white-space: nowrap` con razón —una cifra partida no es una
+  cifra— pero el texto que genera `formatearBeneficio` no es solo la cifra:
+  «$50.000 de descuento» ronda los 150px, y en una tarjeta de estantería de
+  200px con relleno quedan 176. Con `nowrap` eso NO encoge (el `min-width`
+  automático de un hijo de flex es su ancho de contenido) y se sale de la
+  tarjeta. Es lo que el propietario veía.
+
+  Partir es mejor que recortar: con puntos suspensivos se perdería justo el
+  final —«de descuento»— y con dos líneas no se pierde nada. `max-width: 100%`
+  es el cinturón: pase lo que pase, no sobresale.
+
+  La clase va DUPLICADA para ganar a `.badge` por especificidad (0,2,0 contra
+  0,1,0). Con la misma, el ganador lo decidiría el orden en que Next inyecta
+  las dos hojas, que cambia entre desarrollo y producción.
+*/
+.beneficio.beneficio {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  /* Una palabra sola más larga que la píldora —una cifra enorme— parte en vez
+     de desbordar. */
+  overflow-wrap: anywhere;
+}
+
+/* Logo más grande en la compacta: con la tarjeta en fila hay sitio. */
+.logoCompacta.logoCompacta {
+  --placa-logo-w: 60px;
 }

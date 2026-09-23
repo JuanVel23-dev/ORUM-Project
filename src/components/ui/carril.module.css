@@ -1,0 +1,164 @@
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.titulo {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text);
+}
+
+.apoyo {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-3);
+}
+
+/* ==========================================================================
+   LA PISTA
+   ========================================================================== */
+
+.pista {
+  display: grid;
+  grid-auto-flow: column;
+  gap: var(--space-3);
+
+  overflow-x: auto;
+
+  /* El deslizamiento que llega al final de la pista NO se propaga a la
+     página ni dispara el "atrás" por gesto del navegador. */
+  overscroll-behavior-inline: contain;
+
+  /* `proximity`, no `mandatory`: mandatory pelea con el momento en listas
+     largas y frena el desplazamiento donde el dedo no lo pidió. */
+  scroll-snap-type: x proximity;
+
+  /*
+    SANGRADO SOLO HACIA `inline-end`, y esto no es una preferencia estética.
+
+    Un sangrado simétrico —el reflejo obvio— mete contenido deslizable dentro
+    de la banda del gesto de "atrás" del sistema, que en iOS vive en el borde
+    izquierdo y en Android en los dos. El socio arrastra donde el diseño le
+    invita y SALE DE LA PANTALLA.
+
+    Con el sangrado a un solo lado: el primer elemento queda alineado con el
+    h1, con el h2 y con la rejilla —que es lo que hace que la estantería se lea
+    como parte de la página y no como un widget pegado encima— y la tarjeta
+    cortada, la que dice "hay más", sigue apareciendo en el borde derecho, que
+    es hacia donde se va, no desde donde se arrastra.
+
+    `--pad-contenido` lo publica `.main` del portal, en la misma regla donde
+    declara su relleno. Si un consumidor no lo define, el sangrado es cero: se
+    ve peor, nunca roto.
+  */
+  /*
+    AIRE A LA IZQUIERDA, SIN MOVER LAS TARJETAS.
+
+    `overflow-x: auto` recorta también en horizontal, y la primera tarjeta caía
+    pegada al filo del contenedor: al señalarla, su filo dorado y el canto de
+    su sombra quedaban cortados por la mitad — «se corta el borde cuando se
+    señala». Es el mismo problema que el `padding-block` de abajo resuelve en
+    vertical para el anillo de foco.
+
+    El relleno y el margen negativo se cancelan, así que la tarjeta sigue
+    empezando EXACTAMENTE donde empieza el texto de la página, que es lo que la
+    nota de arriba defiende. Lo único que cambia es que el contenedor tiene
+    dónde dibujar el realce.
+  */
+  margin-inline-start: calc(var(--space-1) * -1);
+  padding-inline-start: var(--space-1);
+
+  margin-inline-end: calc(var(--pad-contenido, 0px) * -1);
+  padding-inline-end: var(--pad-contenido, 0px);
+
+  /*
+    El anclaje del snap se mide contra este relleno. Vale CERO porque el
+    sangrado de arranque también es cero: así la tarjeta anclada cae exactamente
+    donde empieza el texto de la página. Si algún día el sangrado volviera a ser
+    simétrico, este valor tiene que pasar a `var(--pad-contenido)` a la vez, o
+    la tarjeta anclada queda pegada al borde físico de la pantalla.
+  */
+  /* Sigue al `padding-inline-start` de arriba: el anclaje del snap se mide
+     contra el relleno, así que si no acompaña, la tarjeta anclada se desplaza
+     esos 4px y deja de caer donde empieza el texto. */
+  scroll-padding-inline-start: var(--space-1);
+
+  /* 4px arriba y abajo para que el `overflow` no recorte el anillo de foco
+     (2px de trazo + 2px de desplazamiento). Es la diferencia entre un carril
+     navegable con teclado y uno que parece que no lo es. */
+  padding-block: var(--space-1);
+
+  scrollbar-width: none;
+}
+
+.pista::-webkit-scrollbar {
+  display: none;
+}
+
+.pista > * {
+  scroll-snap-align: start;
+}
+
+/*
+  NINGÚN `touch-action` y NINGÚN `backdrop-filter`.
+
+  Lo primero, porque el fallo clásico —que la fila atrape el desplazamiento
+  vertical de la página— viene de gestos propios en JavaScript; con scroll
+  nativo el navegador reparte el gesto solo, y tocar `touch-action` es lo que
+  lo rompería.
+
+  Lo segundo, porque una estantería es una fila de lista, y ahí el desenfoque
+  destroza el scroll en gama media. Prohibición dura de CLAUDE.md.
+*/
+
+/*
+  EL CARRIL CON POCAS TARJETAS NO DEJA PAPEL MUERTO  ·  Z3
+
+  Encargo del propietario: «con tres tarjetas, un carril de 1366px deja media
+  pantalla vacía y parece roto». Medido en el portal: tres tarjetas de 200px en
+  una columna de 1100px ocupaban 624px y dejaban 476px de nada a la derecha.
+
+  La corrección es UNA declaración, y es la que menos supuestos hace: el ancho
+  de columna deja de ser fijo y pasa a ser un SUELO con techo flexible.
+
+    - Si las tarjetas NO caben (el caso normal: diez comercios, o cualquier
+      ancho de teléfono), el espacio libre es negativo, `1fr` se resuelve al
+      mínimo y cada columna mide exactamente `--carril-tarjeta-w`: el carril se
+      comporta igual que antes, con su deslizamiento y su tarjeta cortada al
+      borde diciendo «hay más».
+    - Si SÍ caben —tres tarjetas en escritorio—, el sobrante se reparte entre
+      ellas y la fila llega hasta el filo de la columna de texto. Ya no hay
+      hueco, y no hace falta contar hijos ni consultar el ancho: lo resuelve el
+      algoritmo de rejilla con el ancho real, que es justo lo que se pedía.
+
+  Ningún consumidor pierde su contrato: `--carril-tarjeta-w` sigue siendo el
+  ancho que fija cada pista (`--pad-contenido` y el sangrado no se tocan).
+  `--carril-tarjeta-max` existe para el que necesite volver al ancho rígido
+  —una portada con asomo calibrado, un esqueleto que debe medir lo mismo que el
+  contenido que sustituye— sin duplicar la geometría de la pista.
+*/
+.tarjeta {
+  /* Tope por defecto de 1,6× el ancho base. Con `1fr` a secas, un carril con
+     UNA sola tarjeta —«Tus favoritos» con un favorito— la estiraba a todo el
+     ancho de la columna: una tarjeta de 1300px con un logo de 72 a la
+     izquierda. Visto en la primera captura real del portal. */
+  grid-auto-columns: minmax(
+    var(--carril-tarjeta-w),
+    var(--carril-tarjeta-max, calc(var(--carril-tarjeta-w) * 1.6))
+  );
+}
+
+/* Cada hijo mide lo suyo: el ancho de un chip es el de su etiqueta. */
+.auto {
+  grid-auto-columns: max-content;
+}

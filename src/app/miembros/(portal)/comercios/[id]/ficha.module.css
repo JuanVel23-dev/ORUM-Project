@@ -1,0 +1,1188 @@
+/*
+  FICHA DE COMERCIO — hoja de la pantalla.
+
+  Orden de lectura que manda sobre el layout (`SPEC §5.1`): qué me descuentan,
+  dónde queda, cómo lo cobro. El ritmo vertical vive aquí y ningún bloque
+  declara márgenes propios, igual que en `catalogo.module.css`: así el orden se
+  puede cambiar sin recolocar espaciados.
+*/
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/*
+  La misma ficha dentro del overlay. La superficie, el relleno y la sombra los
+  pone el overlay, así que aquí solo queda el ritmo vertical — y algo menos,
+  porque una hoja tiene menos alto útil que una página y el aire de sobra se
+  convierte en desplazamiento.
+*/
+.enOverlay {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+
+  /*
+    LA RANURA `@modal` CUELGA FUERA DE `.main`, así que dentro del overlay NO
+    HAY ancestro con `container-name: contenido` y TODAS las consultas de
+    contenedor de este archivo —las dos columnas de sedes, el ancho de la foto
+    de la galería— no casaban nunca. No fallaban: simplemente no se aplicaban,
+    que es el modo de fallo que `CLAUDE.md` avisa al hablar de `@container`.
+
+    La hoja se declara contenedor a sí misma y con el MISMO nombre, así que las
+    reglas de más abajo valen en las dos superficies sin duplicarse: en página
+    completa el contenedor es `.main` del portal; aquí, la propia ficha.
+  */
+  container-type: inline-size;
+  container-name: contenido;
+}
+
+/* ==========================================================================
+   BARRA DE VUELTA  ·  pegajosa bajo la cabecera  (SPEC §5.4)
+   ========================================================================== */
+
+/*
+  Sangra hasta los dos bordes y anula el relleno superior de `.main`, para
+  quedar pegada a la cabecera sin un hueco entre las dos.
+
+  Los tres márgenes negativos repiten la aritmética de `.main` con los MISMOS
+  nombres —`--pad-contenido`, `--pad-contenido-top` y los `env()` de área
+  segura—, que es justo para lo que `portal.module.css` los publica. Si alguien
+  cambia la densidad del portal, esta barra le sigue sola.
+
+  `top: var(--cabecera-alto)` la ancla justo debajo del cromo. Ese número lo
+  publica `.portal`, un ancestro, así que la custom property se hereda: la
+  barra no repite la suma del relleno de la cabecera, que es exactamente el
+  fallo silencioso que `portal.module.css` documenta al declararlo.
+
+  Fondo SÓLIDO (`--surface`) y sin `backdrop-filter`: apilar una segunda capa
+  de material sobre la cabecera es caro en gama media, y con fondo opaco la
+  prohibición de `CLAUDE.md` ni siquiera entra en juego.
+
+  Un escalón por debajo de la cabecera en el eje Z: cuando las dos se cruzan
+  durante el desplazamiento, la que gana es el cromo del portal.
+*/
+.barraVuelta {
+  position: sticky;
+  top: var(--cabecera-alto);
+  z-index: calc(var(--z-sticky) - 1);
+
+  margin-top: calc(-1 * var(--pad-contenido-top));
+  margin-left: calc(-1 * max(var(--pad-contenido), env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(var(--pad-contenido), env(safe-area-inset-right, 0px)));
+
+  /* El hueco hasta el hero lo pone la barra y no el `gap` de `.pagina`: el
+     `gap` mediría desde el borde sangrado y quedaría descompensado. */
+  margin-bottom: calc(var(--space-2) - var(--space-6));
+
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+  padding-left: max(var(--pad-contenido), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
+
+  background: var(--surface);
+
+  /*
+    DIRECCIÓN v2 · `--border`, no `--border-subtle`: `--surface` y `--bg` son el
+    mismo papel, así que esta barra ya no se distingue por su relleno y el filo
+    carga solo con decir dónde acaba el cromo. Mismo cambio y mismo motivo que
+    la cabecera y la barra inferior del portal.
+  */
+  border-bottom: 1px solid var(--border);
+}
+
+/*
+  «Comercios», no «Volver»: es el destino, como en la vista empujada de iOS, y
+  no promete devolver a unos resultados que puede que no existan.
+
+  Es una acción TERCIARIA —la única acción dorada de la pantalla es «Mostrar mi
+  carnet»—, así que va en tinta secundaria y solo el icono la acompaña.
+*/
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  /* El relleno lateral se compensa con un margen negativo del mismo tamaño:
+     el área táctil crece hacia fuera y el texto queda alineado con el resto
+     del contenido de la página, no sangrado dos espacios. */
+  padding: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: var(--t-callout-weight);
+  color: var(--text-2);
+
+  text-decoration: none;
+
+  /* Vuelta elástica del encogido; la ida se acorta en `:active`. Es el mismo
+     reparto que `globals.css` §4b aplica a todo lo pulsable. */
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
+}
+
+/* En táctil el `:hover` no se va al levantar el dedo y la vuelta se quedaba en
+   tinta plena, indistinguible de enfocada. */
+@media (hover: hover) {
+  .volver:hover {
+    color: var(--text);
+  }
+}
+
+/*
+  Feedback en `pointerdown`, no en `click`: `:active` es lo que da esa
+  inmediatez sin una línea de JavaScript.
+
+  `scale`, NO `transform: scale(...)`. Eran DOS encogidos superpuestos: la regla
+  global de `globals.css` §4b ya aplica `scale: var(--escala-press)` a todo
+  `a[href]`, y `transform` es una propiedad independiente que se compone con
+  ella — 0,92 x 0,97 = 0,89, casi el doble del gesto que se pretendía. Usando la
+  misma propiedad, esta declaración SUSTITUYE a la global en vez de sumarse.
+*/
+.volver:active {
+  scale: var(--escala-press-sm);
+  transition-duration: var(--dur-press);
+}
+
+.volver:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  En escritorio la densidad es una virtud, así que el alto mínimo de 44px se
+  pide SOLO donde se toca con el dedo. Es la regla de `CLAUDE.md`: lo que se ve
+  y lo que se toca son cosas distintas.
+*/
+@media (pointer: coarse) {
+  .volver {
+    min-height: var(--tap-min);
+  }
+}
+
+/*
+  Movimiento reducido: el feedback sigue ocurriendo, sin desplazamiento. Se
+  repone `scale` —no `transform`, que no lo toca— y el toque se acusa con tinta
+  plena, que es el equivalente no vestibular.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .volver {
+    transition-duration: var(--dur-instant);
+  }
+
+  .volver:active {
+    scale: 1;
+    color: var(--text);
+  }
+}
+
+/* ==========================================================================
+   HERO  ·  placa + nombre + marca + meta
+   ========================================================================== */
+
+/*
+  UNA COLUMNA, CUATRO FILAS: cubierta, placa, nombre, meta.
+
+  Antes eran dos columnas —placa a la izquierda, textos a la derecha— y esa
+  decisión le costaba al nombre 144px de placa más 16 de hueco: a 375px le
+  quedaban 187px, y por eso estaba clavado a 24px. Bajando la placa a una fila
+  propia el nombre se lleva el ancho entero y puede ser lo que un hero pide.
+*/
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--space-3);
+}
+
+/*
+  LA CUBIERTA. Es lo que hace desear el sitio.
+
+  `aspect-ratio` reserva el hueco ANTES de que la foto llegue, así que no hay
+  salto de maquetación al cargar aunque no se conozcan sus dimensiones —son
+  URLs externas arbitrarias y no pasan por `next/image`—. El `max-height`
+  impide que en una hoja de 720px la cubierta se coma la pantalla entera: la
+  ficha existe para decir un beneficio, no para ser un álbum.
+*/
+.portada {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  max-height: 280px;
+
+  overflow: hidden;
+  /* `--radius-xl`, el escalón de superficie héroe, y el mismo que la placa de
+     la galería: la cubierta y las fotos son el mismo material. */
+  border-radius: var(--radius-xl);
+
+  /* Mientras la imagen carga, el hueco se ve como hueco y no como una tarjeta
+     vacía: es para lo que existe `--surface-hueco`. */
+  background: var(--surface-hueco);
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+/*
+  En escritorio la cubierta se ensancha y se aplana: a 1050px un 3:2 con tope
+  de 280px se recorta por arriba y por abajo y deja de encuadrar nada. El 21:9
+  es la proporción de una cabecera, no la de una foto suelta.
+*/
+/*
+  En escritorio la cubierta ocupa TODO el ancho de su columna y fija su alto.
+  Antes era `21/9` con `max-height: 340px`, y esa combinación limita el ANCHO
+  (340 × 21/9 ≈ 793px): la foto quedaba más estrecha que las tarjetas de
+  debajo y la columna parecía desalineada. Visto en captura.
+*/
+@container contenido (min-width: 900px) {
+  .portada {
+    aspect-ratio: auto;
+    width: 100%;
+    height: clamp(260px, 26vw, 380px);
+    max-height: none;
+  }
+}
+
+.portadaImagen {
+  width: 100%;
+  height: 100%;
+  /* `cover` y no `contain`: es la fotografía de un local, no un logotipo. */
+  object-fit: cover;
+  display: block;
+}
+
+/*
+  El velo inferior. Una placa clara sobre una foto clara desaparece, y sobre
+  una oscura se pega. El degradado de cacao —el mismo pigmento de la franja,
+  no un negro plano— oscurece solo la banda donde la placa monta y deja intacto
+  el resto de la foto.
+*/
+.portada::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 45%;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--cacao-900) 58%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.placa {
+  justify-self: start;
+}
+
+/*
+  Con cubierta, la placa MONTA sobre su borde inferior. Es el gesto que ata las
+  dos piezas: sin él son una foto y, debajo, un logotipo sin relación.
+
+  Margen negativo, no `position: absolute`: así la placa sigue ocupando su sitio
+  en la rejilla y el nombre baja con ella cuando la placa crece o encoge.
+*/
+.conPortada {
+  /* `position` + `z-index`: la portada es `position: relative`, así que se
+     pintaba ENCIMA de la placa y la foto le cortaba la parte de arriba al
+     logo. Se vio en la captura de la ficha en móvil. */
+  position: relative;
+  z-index: 1;
+  margin-top: calc(-1 * var(--space-9));
+  margin-inline-start: var(--space-5);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 0 4px var(--bg), var(--shadow-raised);
+}
+
+.heroTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  /* Permite que el texto largo se parta en vez de desbordar la rejilla. */
+  min-width: 0;
+}
+
+/*
+  EL NOMBRE DEL COMERCIO, EN SERIF  ·  Z1
+
+  Peldaño `hero-2` (32 → 48px) con Fraunces. Es el cambio de mayor rendimiento
+  por esfuerzo de toda la dirección v4: un serif de display hace más por el «se
+  ve caro» que cualquier animación. Y aquí cabe porque la placa ya no le roba
+  la línea.
+
+  Tracking NEGATIVO al crecer (`--t-hero-2-tracking`, −0,024em): es el
+  sustituto del eje óptico de la familia, que no se carga para no pagar 30 KB
+  en un teléfono de gama media.
+
+  Es el único `h1` de la pantalla.
+*/
+.nombre {
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  letter-spacing: var(--t-hero-2-tracking);
+  font-weight: var(--t-hero-2-weight);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  /* Una serif de contraste alto con `antialiased` pierde las astas finas en
+     Chrome sobre macOS: aquí conviene el suavizado del sistema. */
+  -webkit-font-smoothing: auto;
+
+  color: var(--text);
+  text-wrap: balance;
+
+  /* Nombres largos parten por palabras; uno sin espacios parte por donde sea
+     antes que desbordar. */
+  overflow-wrap: anywhere;
+}
+
+/*
+  V4 · Es lo que explica por qué se ve ESE logotipo cuando el comercio no tiene
+  uno propio y hereda el de su marca. Sin esta línea la herencia parecería un
+  error de datos.
+*/
+.marca {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text-3);
+}
+
+.meta {
+  grid-column: 1 / -1;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  letter-spacing: var(--t-caption-tracking);
+  font-weight: var(--t-caption-weight);
+  color: var(--text-2);
+}
+
+/*
+  La categoría va en píldora y las ciudades en texto con icono: son dos ejes
+  distintos —qué tipo de negocio es, y dónde está— y darles la misma forma los
+  haría leer como una sola lista de etiquetas.
+
+  Hairline dorado, que es uso de MARCA y no de dato: la categoría no cambia de
+  color según cuál sea.
+*/
+.categoria {
+  padding: var(--space-1) var(--space-2);
+  /* `--brand-edge`, no `--gold-hairline`: ese token es un `linear-gradient` y
+     `border` solo acepta un COLOR, así que la declaración entera se descartaba
+     y el filo no se pintaba nunca. El degradado solo vale como `background`. */
+  border: 1px solid var(--brand-edge);
+  border-radius: var(--radius-full);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.ciudades {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* ==========================================================================
+   DESCRIPCIÓN
+   ========================================================================== */
+
+/*
+  V3 · Si no hay descripción el bloque no se renderiza y no deja hueco, así que
+  aquí no hace falta ningún estado vacío: un «Sin descripción» de relleno sería
+  peor que el silencio.
+
+  Completa, sin recorte: el socio está decidiendo si entra al local.
+*/
+.descripcion {
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  letter-spacing: var(--t-body-tracking);
+  font-weight: var(--t-body-weight);
+  color: var(--text-2);
+}
+
+/* ==========================================================================
+   SECCIONES  ·  «Tus beneficios» y «Dónde usarlo»
+   ========================================================================== */
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/*
+  EL CAMPO DE COLOR  ·  v4 §4 — «sin sombra, jerarquía por campos de color»
+
+  La ficha era una plancha blanca de arriba abajo. Ahora el ritmo es
+  papel (hero) → crema (beneficios) → cacao (carnet) → papel (fotos, sedes):
+  cuatro bloques separados por TINTE, sin dibujar una sola línea, que es lo que
+  hace Agence Cartier con cero sombras en toda su página.
+
+  EL TINTE NO LO PINTA ESTE ARCHIVO. Lo pone `<Section tono="crema">` y
+  `<Section tono="cacao">` (`src/components/ui/layout.tsx`), que es la
+  herramienta que la v4 dejó para esto. Aquí antes había un `.seccionCrema`
+  propio con su `background` y su `padding`: funcionaba, pero se quedaba fuera
+  de la escala del sistema —el componente baja el relleno y el radio por debajo
+  de 600px de CONTENEDOR, que es justo el ancho de la hoja del overlay— y
+  duplicaba una decisión que ya estaba tomada en un solo sitio.
+
+  Crema es 1,04:1 contra el papel: NO es un escalón de elevación y no sustituye
+  a la sombra. Lo que separa una tarjeta de su fondo sigue siendo la sombra;
+  esto separa una SECCIÓN de otra.
+
+  Contrastes sobre crema (#faf7f0), medidos: `--text` 16,25:1 · `--text-2`
+  7,04:1 · `--text-3` 4,52:1 · `--gold-700` 4,55:1. Los cuatro pasan AA, así
+  que dentro del campo no hay que retocar ningún tono.
+
+  ⚠️ Lo que se PIERDE al cambiar al componente: `Section` no reenvía
+  `aria-labelledby`, así que el bloque de beneficios deja de exponerse como
+  `region` con nombre y pasa a ser un `<section>` genérico. El `h2` sigue ahí y
+  la navegación por encabezados —que es la que de verdad usa un lector de
+  pantalla en una ficha— no cambia. Las dos secciones que conservan su nombre
+  (fotos y sedes) siguen siendo `<section>` nativas. Reenviar los atributos ARIA
+  desde `Section` es cambio de `src/components/**`: queda anotado, no hecho.
+*/
+
+/*
+  El encabezado de una sección cuando lleva algo a la derecha (hoy, el conteo
+  de fotos). Sin él el número se iría a su propia línea.
+*/
+.cabeceraSeccion {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/*
+  EL CONTEO DE FOTOS. Un carril horizontal esconde por definición cuánto hay a
+  la derecha; el número lo dice antes de que el socio empiece a arrastrar.
+
+  Cifras tabulares y `--text-2` (7,34:1 sobre papel): es un dato de apoyo, no
+  un titular, y no lleva oro — el oro de esta pantalla está entero en la franja
+  de cacao.
+*/
+.conteo {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  color: var(--text-2);
+}
+
+.tituloSeccion {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text);
+}
+
+/* --- Beneficios ----------------------------------------------------------- */
+
+/*
+  Filas dentro de UNA tarjeta, separadas por hairline y sin hueco entre ellas:
+  son variantes del mismo beneficio en el mismo comercio, y una tarjeta por
+  promoción las haría leer como comercios distintos.
+
+  Sin `backdrop-filter` en las filas: `CLAUDE.md` lo prohíbe en listas porque
+  destroza el scroll en gama media.
+*/
+.listaBeneficios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.beneficio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+}
+
+.beneficio + .beneficio {
+  border-top: 1px solid var(--border-subtle);
+}
+
+/*
+  EL DATO QUE EL SOCIO VINO A BUSCAR  ·  Z1
+
+  Antes era una píldora dorada de 11px a la derecha del título. O sea: lo más
+  pequeño de la fila, en el color de menor contraste de la paleta, para la
+  única información por la que se abre esta pantalla.
+
+  Ahora es el titular de la fila. 24px, tinta y cifras TABULARES —un «20%» y un
+  «$15.000» en filas consecutivas se comparan por posición cuando los dígitos
+  miden lo mismo—.
+
+  Las filas viven en una tarjeta de PAPEL dentro del campo de crema, así que el
+  par medido es tinta sobre papel: 16,96:1.
+
+  EN TINTA Y NO EN ORO, a propósito. `--gold-700` sobre papel cumple AA por
+  0,25 (4,75:1), pero el criterio de la licencia v4 es explícito: si el oro
+  hace que el dato tarde más en leerse, el oro sobra. El lujo de esta pantalla
+  lo ponen la cubierta y el serif del nombre.
+*/
+.beneficioValor {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+/*
+  El título de la promoción pasa a línea de apoyo. Sigue siendo el `h3` —es el
+  nombre del elemento, y un encabezado que dijera «20% de descuento» dejaría el
+  índice de la pantalla como una lista de cifras sin sujeto— pero visualmente
+  cede el turno al valor.
+
+  7,34:1 sobre el papel de la tarjeta.
+*/
+.beneficioTitulo {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: var(--t-callout-weight);
+  color: var(--text-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.beneficioDetalle {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text-2);
+}
+
+/* --- Sedes ---------------------------------------------------------------- */
+
+.listaSedes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.sede {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  /* La tarjeta ocupa el alto de su celda: con dos columnas, dos sedes de texto
+     desigual quedan alineadas por arriba y por abajo. */
+  height: 100%;
+}
+
+.sedeNombre {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: var(--t-callout-weight);
+  color: var(--text);
+}
+
+.sedeDato {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text-2);
+}
+
+/*
+  El número se conserva LEGIBLE y es un enlace `tel:`: en el teléfono abre el
+  marcador, en escritorio no estorba. No se disfraza de botón —no es la acción
+  principal de la pantalla— pero sí tiene su propia área táctil.
+*/
+.sedeTelefono {
+  align-self: flex-start;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  padding: var(--space-1) var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text);
+
+  text-decoration: none;
+
+  /* La lista local pisa la de `globals.css` §4b, así que `scale` tiene que
+     volver a nombrarse aquí o el encogido de press se aplicaría de golpe, sin
+     vuelta elástica. */
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
+}
+
+/* Sin la guarda, el número se quedaba atenuado tras el toque en el teléfono —o
+   sea justo en el dispositivo donde ese enlace hace algo—. */
+@media (hover: hover) {
+  .sedeTelefono:hover {
+    color: var(--text-2);
+  }
+}
+
+/*
+  El toque lo acusa el encogido global de `globals.css` §4b, que a un enlace de
+  texto de este tamaño le va bien. Solo se le acorta la ida: `.sedeTelefono`
+  declara su propia lista de transiciones y, sin esto, hereda los 200ms de la
+  vuelta elástica también para la ida.
+*/
+.sedeTelefono:active {
+  transition-duration: var(--dur-press);
+}
+
+.sedeTelefono:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .sedeTelefono {
+    min-height: var(--tap-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sedeTelefono {
+    transition-duration: var(--dur-instant);
+  }
+
+  /* Sin encogido; el toque se acusa por color, que no es vestibular. */
+  .sedeTelefono:active {
+    scale: 1;
+    color: var(--text-2);
+  }
+}
+
+/* ==========================================================================
+   LA FRANJA DE CACAO  ·  la acción principal  ·  W1
+   --------------------------------------------------------------------------
+   Va entre los beneficios y las sedes (`SPEC §5.3`): el socio lee lo que le
+   descuentan y en ese momento exacto tiene delante el botón que lo hace
+   efectivo. Arriba llegaría antes de que sepa si le interesa; al final de la
+   página quedaría escondida tras la lista de sucursales.
+
+   Lo nuevo es el MATERIAL. Era un botón suelto sobre papel; ahora es una
+   franja de chocolate, que es el cambio de registro que dice «aquí se pasa de
+   leer a actuar» sin una palabra de más — y el único fondo del sistema donde
+   el oro de acción se lee metal y no mostaza.
+
+   EL TINTE Y EL RELLENO LOS PONE `<Section tono="cacao">`, que además remapea
+   `--surface`, `--text`, `--text-2`, `--text-3`, `--brand`, `--brand-edge` y
+   `--focus` hacia dentro. Este bloque solo añade lo que el componente NO
+   remapea y sin lo cual algo de dentro saldría ilegible.
+
+   RATIOS MEDIDOS (sRGB, fórmula WCAG 2.x) sobre `--cacao-bg` #2b1a15:
+
+     --cacao-fg    papel #fdfcfa ..... 16,24:1   el titular
+     --cacao-fg-2  --n-300 #c4b8ac ....  8,56:1   la línea de apoyo
+     --gold-400    #d5ac5b ............  7,83:1   la versalita y el foco
+     --gold-600    #a8812b ............  4,63:1   el filo del botón (1.4.11: ≥3)
+     --tinta-1 sobre --gold-600 .......  4,84:1   el texto del botón (1.4.3: ≥4,5)
+
+   ⚠️ `--text-3` se COLAPSA en `--text-2`. `Section` lo baja a `--cacao-fg-3`
+   (`--n-400`), que da 5,78:1 contra el fondo de la franja pero 4,98:1 sobre
+   `--cacao-surface` y 4,02:1 sobre `--cacao-hover`: en cuanto algo se eleva
+   dentro, el tercer nivel se queda sin margen. Se pierde un escalón de
+   jerarquía y se gana que el texto se lea. Es la misma decisión que toma el
+   carnet en `perfil.module.css`, y por el mismo motivo.
+   ========================================================================== */
+
+/*
+  Doble clase (0,2,0) a propósito: estos valores CORRIGEN a `layout.module.css`
+  y el orden entre dos módulos CSS en el bundle no está garantizado. Con la
+  misma especificidad, cuál gana dependería del orden de importación.
+*/
+.zonaCarnet.zonaCarnet {
+  /* Barras de scroll y controles nativos de dentro, en su variante oscura. */
+  color-scheme: var(--cacao-scheme, dark);
+
+  /*
+    LA ACCIÓN SE INVIERTE. En claro `--action` es `--tinta-1`: sobre cacao
+    daría 1,04:1, o sea un botón negro sobre chocolate. Un `variant="primary"`
+    que entrara aquí mañana sería invisible, y el fallo no lo vería nadie hasta
+    tenerlo delante. Papel sobre cacao: 16,24:1.
+  */
+  --action: var(--w-0);
+  --action-hover: var(--n-100);
+  --action-fg: var(--cacao-bg);
+
+  /* Los tres bordes del tema claro son TINTA y aquí desaparecen. Sobre cacao
+     el filo es LUZ, igual que en el tema oscuro. */
+  --border: color-mix(in srgb, var(--w-0) 26%, transparent);
+  --border-subtle: color-mix(in srgb, var(--w-0) 14%, transparent);
+  --border-superficie: transparent;
+
+  /* Ver el aviso de la cabecera. */
+  --text-3: var(--cacao-fg-2);
+
+  /*
+    `Section` deja el foco en `--cacao-edge` (`--gold-600`, 4,63:1). Se sube a
+    `--gold-400` (7,83:1) por dos motivos: se ve más, y el anillo del botón
+    dorado aterriza a 2px de un relleno que ES `--gold-600` — con el mismo tono
+    a los dos lados del hueco el anillo se confunde con el propio botón.
+  */
+  --focus: var(--cacao-brand);
+
+  /* En claro `--edge` es transparente porque lo que recorta es la sombra. Aquí
+     el fondo es oscuro en los dos temas y hace falta el anillo de luz. */
+  --edge: var(--edge-light);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  align-items: stretch;
+}
+
+.carnetTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Versalitas en oro de display: 7,83:1. Es etiqueta ceremonial, no dato — el
+   oro de esta pantalla no codifica nada. */
+.carnetOverline {
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: var(--t-overline-weight);
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+/*
+  EL TITULAR VA EN SANS, no en Fraunces, y es una decisión.
+
+  El acento serif de esta pantalla lo lleva el `h1` con el nombre del comercio
+  (`--t-hero-2`, 32→48px). Un segundo serif a la vista y el acento deja de
+  serlo — «un acento por pantalla» es de las pocas reglas tipográficas que la
+  licencia v4 NO levanta, porque lo que la sostiene es aritmética, no gusto.
+
+  Y no es `h2`: no encabeza una sección de contenido, es la línea de una
+  llamada a la acción. Meterlo en el índice de encabezados pondría «Enséñalo en
+  la caja» entre «Tus beneficios» y «Fotos», que no es una sección.
+
+  16,24:1.
+*/
+.carnetTitular {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: var(--t-title-1-weight);
+  color: var(--text);
+  text-wrap: balance;
+}
+
+/* 8,56:1. */
+.carnetApoyo {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  font-weight: var(--t-footnote-weight);
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+/*
+  El botón va `fullWidth` con un TOPE. En el teléfono ocupa la franja entera,
+  que es lo que se quiere de una acción principal; en escritorio, sin el tope,
+  sería una barra dorada de 700px — el propio presupuesto de oro de la v4 avisa
+  de que un CTA a ancho completo ronda ya el 6-8% del lienzo él solo.
+*/
+.carnetAccion {
+  display: flex;
+}
+
+/* ==========================================================================
+   TABLETA  ·  contenedor >= 600px
+   ========================================================================== */
+
+/*
+  `@container contenido`, NUNCA `@media`: el ancho útil no es el del viewport
+  —cambia con el cromo del portal— y un `@media` se equivoca justo donde
+  importa. El contenedor lo declara `.main` de `portal.module.css`
+  (`container-name: contenido`).
+*/
+@container contenido (min-width: 600px) {
+  /* Dos columnas de sedes en cuanto caben: tres sedes en una sola columna
+     obligan a desplazarse para ver la tercera. */
+  .listaSedes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /*
+    La franja de cacao se abre en dos: el texto a la izquierda, la acción a la
+    derecha y alineada al centro óptico del bloque. Apilada a 700px el botón
+    quedaba a media franja de distancia del texto que lo justifica.
+
+    Aplica también DENTRO del overlay: `.enOverlay` se declara contenedor con
+    el mismo nombre, y la hoja mide ~656px de contenido.
+  */
+  .zonaCarnet.zonaCarnet {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-7);
+  }
+
+  .carnetAccion {
+    /* Ni se estira ni se encoge: el botón mide lo que mide su etiqueta más su
+       relleno, con un suelo para que no quede raquítico al lado de la franja. */
+    flex: 0 0 auto;
+    min-width: 220px;
+  }
+}
+
+/*
+  Topada a 700px y alineada a la IZQUIERDA, no centrada (`SPEC §5.5`): pasados
+  los ~75 caracteres por línea el texto se lee peor, y la alineación izquierda
+  mantiene la relación con la barra de vuelta, que sí ocupa el ancho completo.
+
+  El tope se retira en el tramo de dos columnas, donde la rejilla manda.
+*/
+@container contenido (min-width: 600px) and (max-width: 899px) {
+  .pagina {
+    max-width: 700px;
+  }
+}
+
+/* ==========================================================================
+   ESCRITORIO  ·  contenedor >= 900px  ·  dos columnas reales  (SPEC §5.6)
+   ========================================================================== */
+
+/*
+  Columna principal `1fr` con hero, descripción y beneficios; carril derecho de
+  320px con las sedes y, al fondo, la acción principal.
+
+  EL ORDEN VISUAL CAMBIA, EL DEL DOM NO. El carril se coloca con áreas de
+  rejilla, así que lectura y tabulación siguen siendo beneficios → acción →
+  sedes: un lector de pantalla y un teclado recorren la ficha en el orden de
+  importancia, no en el de las columnas.
+
+  `row-gap: 0` y el ritmo vertical por márgenes, no por `gap`: la descripción
+  es opcional (V3) y su área queda vacía cuando no hay ninguna. Con `row-gap`
+  esa fila vacía dejaría un hueco doble; con márgenes en cada bloque, colapsa a
+  cero y no se nota.
+*/
+@container contenido (min-width: 900px) {
+  .pagina {
+    /*
+      320px es geometría de ESTA pieza, como `--cabecera-contenido` lo es del
+      cromo: no es un espaciado del sistema y no va en `tokens.css`. A 1052px
+      de contenedor deja 700px para la columna principal, que es el ancho de
+      lectura correcto.
+    */
+    --carril-ficha-w: 320px;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--carril-ficha-w);
+    grid-template-areas:
+      'vuelta vuelta'
+      'hero   sedes'
+      'desc   sedes'
+      'benef  sedes'
+      'carnet sedes'
+      'fotos  fotos';
+    column-gap: var(--space-8);
+    row-gap: 0;
+    align-content: start;
+
+    /* El tope del tramo de una columna no aplica aquí. */
+    max-width: none;
+  }
+
+  .barraVuelta {
+    grid-area: vuelta;
+    /* Ocupa el ancho completo, por encima de las dos columnas, así que el
+       margen inferior vuelve a ser un margen normal y no una resta del `gap`
+       que este tramo ya no tiene. */
+    margin-bottom: var(--space-6);
+  }
+
+  .hero {
+    grid-area: hero;
+    margin-bottom: var(--space-6);
+  }
+
+  .descripcion {
+    grid-area: desc;
+    margin-bottom: var(--space-6);
+  }
+
+  /*
+    LAS ÁREAS SE ASIGNAN POR CLASE, no por `section[aria-labelledby=…]`.
+
+    El selector de atributo funcionaba, pero ataba el layout al nombre
+    accesible de la sección: el día que «Tus beneficios» dejó de ser un
+    `<section>` nativo para pasar a `<Section tono="crema">` —que no reenvía
+    `aria-labelledby`— la regla dejó de casar y el bloque se descolocó sin que
+    nada fallara. Una clase de layout dice lo que es y no depende de un atributo
+    que existe para otra cosa.
+
+    Y LA GALERÍA LLEVA LA SUYA. Antes no tenía área: caía en la única celda
+    libre por AUTOCOLOCACIÓN, o sea que su posición dependía de que ninguna otra
+    sección se moviera. Añadir un bloque la habría desplazado en silencio.
+  */
+  .zonaBeneficios {
+    grid-area: benef;
+    /* Este tramo lleva `row-gap: 0` y el ritmo por márgenes. Con el campo de
+       crema el hueco ya no es opcional: sin él, el filo inferior del campo
+       quedaría pegado al bloque siguiente y los dos se leerían como uno. */
+    margin-bottom: var(--space-6);
+  }
+
+  .zonaCarnet.zonaCarnet {
+    grid-area: carnet;
+    align-self: start;
+  }
+
+  /*
+    LA GALERÍA CIERRA LA PÁGINA A ANCHO COMPLETO. Es donde el carril de fotos
+    cobra sentido: 700px de columna dan dos fotos y media, los ~1050px del
+    ancho entero dan cuatro. Encajonarla en la columna principal era pedirle a
+    lo más apetecible de la ficha que se conformara con el hueco que sobraba.
+  */
+  .zonaFotos {
+    grid-area: fotos;
+    margin-top: var(--space-9);
+  }
+
+  .zonaSedes {
+    grid-area: sedes;
+    /* Se alinea arriba y conserva su alto de contenido: sin esto se estiraría
+       a lo alto de las cuatro filas que abarca el área. */
+    align-self: start;
+  }
+
+  /* Con el carril a 320px caben de sobra dos columnas de texto, pero no dos
+     tarjetas de sede: vuelven a una. */
+  .listaSedes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ==========================================================================
+   GALERÍA DE FOTOS  ·  encargo nº 7
+   --------------------------------------------------------------------------
+   Carril horizontal con anclaje, no rejilla. Dos razones: en el teléfono una
+   rejilla de fotos obliga a desplazar la página entera para ver la tercera,
+   y el carril deja claro de un vistazo que hay MÁS a la derecha — una rejilla
+   cortada por el borde inferior no lo dice.
+
+   `@container contenido`, nunca `@media`: esta ficha se pinta en dos anchos
+   muy distintos —la hoja del overlay y la página completa— y el viewport no
+   distingue entre ellos.
+   ========================================================================== */
+
+.galeria {
+  display: flex;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Sin esto, `scroll-snap-align: start` ancla la foto al filo exacto del
+     carril y la sombra del escalón queda recortada contra el borde. */
+  scroll-padding-inline-start: var(--space-1);
+  /* Sin scroll encadenado: al llegar al final del carril no arrastra la página
+     de detrás, que en una hoja modal se siente como si el overlay se cerrara. */
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none;
+}
+
+.galeria::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+  PRESENCIA  ·  W1. La galería era un carril de miniaturas de 320px con el
+  radio de una tarjeta normal: informaba, pero no hacía desear nada — y la
+  ficha existe, entre otras cosas, para que el socio quiera ir.
+
+  Tres cambios y ninguno cuesta un byte de JavaScript:
+
+    · TAMAÑO. 82% del carril y hasta 460px, en 3:2 en vez de 4:3. Una foto de
+      un local apaisada se lee como fotografía; en 4:3 se lee como recorte de
+      catálogo. Y el 82% deja asomar el borde de la siguiente, que es lo que
+      dice «hay más» sin dibujar una flecha.
+    · RADIO. `--radius-xl`, el escalón de superficie héroe. Lo redondo se lee
+      amable y encaja con los logotipos circulares (v4 §4).
+    · SOMBRA. Sube a `--shadow-raised`. Aquí la sombra SÍ decora, que es una de
+      las restricciones que la licencia creativa levanta explícitamente: son
+      cuatro objetos como mucho, no una lista larga, y `CLAUDE.md` prohíbe la
+      sombra en filas de lista justamente porque allí se repite cien veces.
+
+  La foto flota porque es contenido que el dedo podría levantar. El resto de la
+  ficha se apoya en la superficie que ya la contiene.
+*/
+.foto {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+
+  width: 82%;
+  max-width: 460px;
+  aspect-ratio: 3 / 2;
+
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+
+  background: var(--surface-hueco);
+  /* Con `var(--edge)`, igual que `.portada`: son el mismo material y el
+     comentario de arriba lo dice. Sin el anillo, en oscuro la cubierta tenía
+     filo de luz y las fotos de la galería no. */
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+@container contenido (min-width: 560px) {
+  .foto {
+    width: 52%;
+  }
+}
+
+/*
+  A ancho completo la galería cierra la página (ver el tramo de 900px), así que
+  caben tres y media: suficiente para que se lea como una galería y no como dos
+  fotos sueltas.
+*/
+@container contenido (min-width: 900px) {
+  .foto {
+    width: 29%;
+    max-width: none;
+  }
+
+  /* El estado vacío NO se estira con el carril. Una tarjeta de 1050px que dice
+     «todavía no hay fotos» es el bloque más grande de la ficha diciendo lo que
+     menos importa. */
+  .fotosVacias {
+    max-width: 640px;
+  }
+}
+
+.fotoImagen {
+  width: 100%;
+  height: 100%;
+  /* `cover` y no `contain`: son fotografías de un local, no logotipos. Aquí el
+     recorte es preferible a la banda vacía. */
+  object-fit: cover;
+  display: block;
+}
+
+/* ==========================================================================
+   ANIMACIONES DE ENTRADA  ·  solo CSS, sin JavaScript
+   --------------------------------------------------------------------------
+   Encargo del propietario: «añade animaciones de entrada».
+
+   Dos mecanismos, y cada uno para lo suyo:
+
+   1. AL CARGAR, lo del primer pantallazo entra escalonado: fundido y 12px de
+      subida, 420ms, 50ms entre bloque y bloque, tope en el quinto. Corto a
+      propósito — esta pantalla se abre decenas de veces al día (regla cero de
+      frecuencia: al mínimo, no nunca, porque lo pidió el propietario).
+
+   2. AL DESPLAZAR, cada sección de abajo se revela cuando entra en la vista,
+      con `animation-timeline: view()`. Es una animación ligada al scroll que
+      corre en el compositor: cero JavaScript, cero hidratación, y si el
+      navegador no la conoce el `@supports` la descarta y el contenido se ve
+      normal. Nunca se queda nada invisible.
+
+   Solo `opacity` y `translate`. Con movimiento reducido, `globals.css` §5
+   comprime la duración a 0,01ms: el contenido aparece sin viajar.
+   ========================================================================== */
+
+@keyframes entrarBloque {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+.pagina > * {
+  animation: entrarBloque var(--dur-page) var(--ease-out) backwards;
+}
+.pagina > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+.pagina > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+.pagina > *:nth-child(4) {
+  animation-delay: 150ms;
+}
+.pagina > *:nth-child(n + 5) {
+  animation-delay: 200ms;
+}
+
+@supports (animation-timeline: view()) {
+  /* Lo que queda por debajo del primer pantallazo se revela al llegar, y en
+     los DOS sentidos: al volver hacia arriba también entra. */
+  .pagina > *:nth-child(n + 5) {
+    animation: revelarFicha linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+    animation-delay: 0ms;
+  }
+}
+
+@keyframes revelarFicha {
+  entry 0% {
+    opacity: 0;
+    translate: 0 28px;
+  }
+  entry 70% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+  }
+}
+
+/* Movimiento reducido: sin entrada y sin revelado ligado al scroll. El recorte
+   global de `globals.css` §5 no basta aquí: una animación atada al scroll no
+   usa la duración, así que seguiría deslizándose con el dedo. */
+@media (prefers-reduced-motion: reduce) {
+  /* Con `:nth-child` en el selector para igualar la especificidad (0,2,0) de
+     la regla de revelado: con `.pagina > *` a secas, esta perdía y el
+     revelado ligado al scroll seguía activo con movimiento reducido. */
+  .pagina > *,
+  .pagina > *:nth-child(n) {
+    animation: none;
+  }
+}

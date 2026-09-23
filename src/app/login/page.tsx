@@ -31,7 +31,8 @@ export default async function LoginPage({
 
   return (
     <PantallaAuth
-      subtitulo="Portal de Administración"
+      titular="Administración"
+      apoyo="Entra con tu correo y tu contraseña."
       pie="¿Problemas para entrar? Contacta al administrador del club."
     >
       <LoginForm mensajeInicial={mensajeInicial} />

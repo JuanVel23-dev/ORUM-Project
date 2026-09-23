@@ -1,0 +1,75 @@
+/* ==========================================================================
+   REVELAR  ·  la geometría de la entrada
+   --------------------------------------------------------------------------
+   Solo `transform` y `opacity`. Animar `width`, `height`, `top` o `margin`
+   recalcula layout cada fotograma y es prohibición dura.
+
+   NADA ENTRA DESDE `scale(0)`: en el mundo real nada aparece de la nada. Un
+   bloque de sección tampoco entra desde 0,95 —a 900px de ancho eso son 45px de
+   crecimiento y se lee como un zoom—, así que el escalado de un BLOQUE es más
+   contenido que el de una tarjeta y el desplazamiento hace el resto.
+
+   `--ease-out` para las entradas. Nunca `ease-in`: empieza lento justo en el
+   instante que el usuario más mira.
+   ========================================================================== */
+
+.bloque,
+.contenedor {
+  /* El contenedor no impone caja: hereda el flujo de quien lo usa. Sin esto,
+     un `Revelar` dentro de una rejilla rompería la rejilla. */
+  display: contents;
+}
+
+/*
+  `display: contents` no admite transformaciones —el nodo no genera caja—, así
+  que el modo `bloque` sí necesita ser una caja. Se declara como bloque normal:
+  ocupa el ancho de su hueco y no añade márgenes.
+*/
+.bloque {
+  display: block;
+
+  transition:
+    opacity var(--dur-page) var(--ease-out),
+    transform var(--dur-page) var(--ease-out);
+  transition-delay: var(--retardo, 0ms);
+}
+
+/*
+  EL ESTADO OCULTO VIVE AQUÍ DENTRO, Y ESO ES LA RED DE SEGURIDAD.
+
+  Sin JavaScript el atributo nunca pasa a `true`. Si el estado oculto fuera
+  incondicional, el escaparate se quedaría en blanco para quien no ejecute el
+  bundle — el fallo más caro posible en esta pantalla concreta.
+
+  `scripting: enabled` responde exactamente a esa pregunta. Y en un navegador
+  que no conozca la consulta, el bloque entero se descarta y el contenido se
+  pinta visible: la degradación es correcta en los dos sentidos.
+*/
+@media (scripting: enabled) {
+  .bloque[data-visible='false'] {
+    opacity: 0;
+    transform: translate3d(0, var(--space-5), 0) scale(0.985);
+  }
+}
+
+.bloque[data-visible='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   MOVIMIENTO REDUCIDO  ·  equivalente no vestibular, no ausencia de feedback
+
+   Se retira el viaje y se conserva la opacidad. `globals.css` ya comprime la
+   duración a 0,01ms, así que en la práctica el bloque aparece: aparecer no
+   marea, viajar sí. Se escribe igualmente para dejar constancia de que la
+   alternativa es un fundido y no un desplazamiento más corto.
+
+   Va al final: misma especificidad que lo que corrige, así que gana por orden.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .bloque[data-visible='false'] {
+    transform: none;
+  }
+}

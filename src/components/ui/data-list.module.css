@@ -7,8 +7,17 @@
   una tabla accesible.
 */
 
+/*
+  La tabla es una superficie, y en la v3 una superficie la define la sombra
+  (§2.1). Se queda en `--shadow-card`: es una hoja apoyada, no algo que flote.
+
+  La regla anti-sopa de §5 empieza aquí y es la parte importante de este
+  archivo: LA SOMBRA LA LLEVA EL MARCO, NUNCA LA FILA. Una lista de cuarenta
+  filas con sombra cada una es exactamente la pantalla que esta dirección tiene
+  que evitar — y además es la que más cuesta en fotogramas.
+*/
 .envoltorio {
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-card), var(--edge);
@@ -28,10 +37,16 @@
   background: var(--surface-sunk);
 }
 
+/*
+  El encabezado ya no se distingue por relleno —es el mismo papel que las
+  filas, y además es `sticky`, así que el contenido pasa por debajo—, de modo
+  que la regla inferior tiene que llevar el peso sola: `--border`, no el 22 %
+  de una división de fila.
+*/
 .th {
   text-align: left;
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border);
 
   font-size: var(--t-overline-size);
   line-height: var(--t-overline-leading);
@@ -46,6 +61,7 @@
   position: relative;
   border-bottom: 1px solid var(--border-subtle);
   transition: background-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-press) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 
   /* Listas largas: el navegador se salta el layout de lo que no se ve. */
@@ -78,8 +94,37 @@
   border-bottom: none;
 }
 
-.fila:hover {
-  background: var(--surface-hover);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .fila:hover {
+    background: var(--surface-hover);
+  }
+}
+
+/*
+  El segundo canal del hover de fila: una marca de tinta en el filo izquierdo.
+
+  `--surface-hover` sobre papel blanco da 1,02:1, así que como única señal no
+  existiría — y en una tabla saber QUÉ fila está bajo el cursor es la mitad de
+  poder usarla.
+
+  Va en la primera celda y no en la `<tr>` porque la tabla es
+  `border-collapse: collapse`, y con los bordes colapsados el navegador no
+  pinta `box-shadow` sobre una fila. Es pintura pura: ni cambia la caja ni
+  lleva transición, que es la prohibición de §4.3 para filas de lista.
+
+  Solo en escritorio: en móvil la fila es una tarjeta y ya tiene su propio
+  trazo completo.
+*/
+@media (min-width: 768px) and (hover: hover) {
+  .fila:hover .td:first-child {
+    /* Señalar enciende el oro (§2.3). Aquí sustituye a la tinta plena, y es
+       más legible sobre papel que el negro que había: 2px de filo de marca. */
+    box-shadow: inset 2px 0 0 var(--brand-edge);
+  }
 }
 
 /*
@@ -87,15 +132,34 @@
   llega la pantalla siguiente. El feedback va en la PRESIÓN, no al soltar:
   esperar al `click` se siente muerto.
 */
+/*
+  El acuse de una fila es OPACIDAD, nunca sombra ni desplazamiento.
+
+  Es la excepción explícita de §4.3: una lista larga en un móvil de gama media
+  paga cada sombra animada en fotogramas, y son justo las pantallas donde más
+  filas hay. La opacidad corre en el compositor y no recalcula nada.
+
+  Y tiene que ser opacidad y no solo el fondo: `--surface-hover` sobre papel
+  blanco da 1,02:1, o sea que como única señal no existiría.
+*/
 @media (hover: none) {
   .fila:active {
     background: var(--surface-hover);
+    opacity: 0.62;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fila:active {
+    /* La opacidad NO es movimiento vestibular: el acuse se conserva entero. */
+    transition: none;
   }
 }
 
 /* El enlace de fila hereda el mismo acuse en escritorio. */
 .fila:has(.enlace:active) {
   background: var(--surface-hover);
+  opacity: 0.62;
 }
 
 .td {
@@ -222,7 +286,13 @@
     margin-bottom: var(--space-3);
     padding: var(--space-4);
 
-    border: 1px solid var(--border-subtle);
+    /*
+      En móvil cada fila ES una superficie independiente —una tarjeta— y no una
+      fila de lista, así que aquí sí le corresponde su escalón. Es la excepción
+      que confirma la regla de arriba: lo que flota es lo que el dedo puede
+      levantar, y en móvil esto es la unidad que se toca.
+    */
+    border: 1px solid var(--border-superficie);
     border-radius: var(--radius-md);
     background: var(--surface);
     box-shadow: var(--shadow-card), var(--edge);
@@ -232,8 +302,11 @@
     contain-intrinsic-size: auto 190px;
   }
 
+  /* Repone el borde que la vista de escritorio quita a la última fila. Sigue
+     siendo transparente en reposo: lo que importa es que la caja mida igual
+     que la de sus hermanas para que alto contraste no descuadre la lista. */
   .tbody .fila:last-child {
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-superficie);
   }
 
   .td {

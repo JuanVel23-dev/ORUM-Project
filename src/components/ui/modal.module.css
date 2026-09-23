@@ -8,7 +8,12 @@
   margin: auto;
 
   padding: 0;
-  border: 1px solid var(--border-subtle);
+  /*
+    Superficie flotante sobre papel del mismo blanco. Sin trazo (§2.1): lo que
+    la recorta del fondo es el escalón MÁS ALTO de la escala —un overlay va dos
+    por encima de todo (§2.2)— más el velo, que ya la aísla.
+  */
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg);
   background: var(--surface);
   color: var(--text);
@@ -43,17 +48,36 @@
 }
 
 /* Al cerrar, `motion` anima el panel y luego llama a `close()`. Sin esta clase
-   el fondo desaparecía de golpe un fotograma antes que el panel. */
+   el fondo desaparecía de golpe un fotograma antes que el panel.
+
+   v4 §5: la SALIDA ES MÁS RÁPIDA QUE LA ENTRADA, y por eso sale de
+   `--dur-salida` y no de `--dur-base`. Lento donde el usuario decide, rápido
+   donde el sistema responde: cerrar ya está decidido. */
 .cerrando::backdrop {
-  animation: salirFondo 180ms var(--ease-out) forwards;
+  animation: salirFondo var(--dur-salida) var(--ease-out) forwards;
 }
 
+/*
+  MATERIALIZAR, NO FUNDIR (v3 §3.5).
+
+  El velo es una superficie translúcida, así que no sube de opacidad: LLEGA. El
+  desenfoque y la opacidad se animan a la vez, y eso es lo que lo hace leerse
+  como una placa de vidrio que se interpone y no como una sombra que aparece.
+
+  Se anima `backdrop-filter`, que NO corre en el compositor y que este proyecto
+  prohíbe animar en general. La excepción se sostiene por tres razones y se
+  documenta para que nadie la copie a una lista: es UNA capa, ocurre UNA vez al
+  abrir, y el ::backdrop ya está promocionado por el navegador a la capa
+  superior. En filas de lista sigue prohibido, sin matices.
+*/
 @keyframes entrarFondo {
   from {
     opacity: 0;
+    backdrop-filter: blur(0px);
   }
   to {
     opacity: 1;
+    backdrop-filter: blur(var(--blur-sm));
   }
 }
 
@@ -71,15 +95,25 @@
 
 /*
   Con movimiento reducido el fondo sigue apareciendo y desapareciendo —una
-  transición de opacidad no es vestibular—, solo que más corta.
+  transición de opacidad no es vestibular—, solo que más corta y sin el viaje
+  del desenfoque: el velo llega ya cuajado.
 */
 @media (prefers-reduced-motion: reduce) {
   .dialog[open]::backdrop {
-    animation-duration: var(--dur-fast);
+    animation: entrarFondoPlano var(--dur-fast) var(--ease-out);
+  }
+
+  @keyframes entrarFondoPlano {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .cerrando::backdrop {
-    animation-duration: 120ms;
+    animation-duration: var(--dur-instant);
   }
 }
 
@@ -135,7 +169,8 @@
   gap: var(--space-3);
 
   padding: var(--space-4) var(--space-6);
-  border-top: 1px solid var(--border-subtle);
+  /* El pie perdió su relleno distinto: la línea lo separa sola. */
+  border-top: 1px solid var(--border);
   background: var(--surface-sunk);
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
@@ -159,9 +194,12 @@
     background-color var(--dur-fast) var(--ease-out);
 }
 
-.cerrar:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .cerrar:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
 }
 
 .cerrarIcono {

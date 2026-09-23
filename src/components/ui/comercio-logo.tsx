@@ -1,44 +1,140 @@
 import styles from './comercio-logo.module.css'
 
+export type ComercioLogoVariante = 'tarjeta' | 'hero' | 'portada'
+
 type ComercioLogoProps = {
   logoUrl: string | null
   nombre: string
-  size?: number
+  /**
+   * Las tres son círculos y solo cambian de diámetro y de relleno:
+   * `tarjeta` (72px) es la del catálogo; `hero` (144px) la de la ficha;
+   * `portada` es la del carrusel de destacados, que mide en `cqi` porque la
+   * cubierta que la contiene es responsiva (exige `container-type: inline-size`
+   * en esa cubierta; sin contenedor ancestro, `cqi` mide el viewport pequeño).
+   *
+   * Es una prop y NO un `className` que el consumidor traiga de su propio
+   * módulo: `.hero` y `.portada` sobrescriben `--placa-logo-w` y `--placa-pad`
+   * de `.placa`, y esas reglas tienen que resolverse por el orden de ESTA hoja.
+   * Con dos hojas distintas el ganador lo decidiría el orden en que Next las
+   * inyecte, que cambia entre desarrollo y producción.
+   */
+  variante?: ComercioLogoVariante
   className?: string
+  /**
+   * `view-transition-name` de la placa, para la transición de elemento
+   * compartido entre la rejilla del catálogo y la ficha. Lo genera
+   * `transicionComercio()`; ver ahí la regla de «un nombre, un elemento».
+   */
+  nombreTransicion?: string
 }
 
 /**
- * Logo de un comercio aliado, con respaldo tipográfico cuando no hay imagen.
+ * El logotipo de un comercio aliado, dentro de su placa CIRCULAR.
  *
- * El respaldo NO es un icono genérico: es la inicial del comercio, igual que
+ * LA PLACA ES LO QUE HACE COLECCIÓN. Con `object-fit: contain` un logotipo 1:1
+ * y uno 4:1 acaban con tamaños ópticos distintos, y eso es geometría, no un
+ * defecto que se pueda pintar. Lo que los une es el marco: mismo diámetro,
+ * mismo relleno, mismo filo y mismo fondo para todos.
+ *
+ * Es un círculo perfecto desde W1 (14/09/2026), por encargo del propietario:
+ * `--placa-logo-ratio` vale 1/1 y el radio es `--radius-full` en las tres
+ * variantes. `contain` NO cambia a `cover` por ello —un logotipo recortado es
+ * una marca mutilada—, así que un logotipo apaisado deja aire arriba y abajo.
+ * Es el intercambio aceptado, y el porqué largo está en el módulo CSS.
+ *
+ * EL RESPALDO NO ES UN ICONO GENÉRICO: es la inicial del comercio, igual que
  * `Avatar` hace con las personas. Un catálogo donde la mitad de las tarjetas
  * muestran el mismo icono de tienda se lee como incompleto; con la inicial,
  * cada tarjeta sigue siendo distinguible de un vistazo.
+ *
+ * ── El respaldo ante un `logo_url` muerto · D9, CERRADO ───────────────────
+ *
+ * Un `logo_url` muerto pintaba el icono de imagen rota, que destruye
+ * exactamente la confianza que el catálogo busca. Los dos remedios evidentes
+ * se excluyen entre sí: si el `<img>` es transparente para dejar ver una
+ * inicial pintada detrás, un logo transparente legítimo la deja ver entre sus
+ * trazos; y si lleva fondo opaco para taparla, una imagen rota también la tapa
+ * y queda una placa vacía. El servidor no puede distinguir "cargó" de "falló",
+ * y no hay selector de CSS para eso.
+ *
+ * Durante T12 el `alt` de este `<img>` ERA la inicial, con su tipografía
+ * aplicada al propio elemento, para que el navegador pintase el alternativo ya
+ * estilado. Se apuntó un riesgo y quedó abierto: Chrome puede pintar un glifo
+ * de rotura JUNTO al texto alternativo cuando el `<img>` tiene dimensiones
+ * explícitas —y este las tiene, 100 % de una placa dimensionada—.
+ *
+ * **Se cierra tomando el camino 2 de `T4 §4.5`: `alt=""`.** Un `<img>` con
+ * `alt` vacío que falla no pinta texto alternativo NI glifo de rotura en
+ * ningún navegador: es lo que la especificación dice de una imagen decorativa
+ * que no está disponible. El peor caso pasa a ser **placa vacía**, que T4
+ * aceptó explícitamente —"feo, nunca icono de rotura"—.
+ *
+ * Por qué se cierra así y no verificando el camino 1: la verificación exige
+ * abrir Chrome, Firefox y Safari, y esta máquina no puede; mientras el riesgo
+ * estaba abierto, el carrusel de portada lo heredaba multiplicado por seis, con
+ * la placa a tamaño de cubierta, en la primera pantalla que ve el socio. Ante
+ * la duda se elige el mecanismo cuyo peor caso está acotado y es conocido,
+ * frente al que puede producir justo lo único que no se acepta.
+ *
+ * Lo que NO se pierde: la inicial sigue siendo el respaldo cuando no hay
+ * logotipo que resolver (`logoUrl === null`), que es el caso que la cadena
+ * comercio → marca deja abierto y el frecuente de los dos.
+ *
+ * Y el camino 3 —pasar a cliente con `onError`— sigue descartado: el catálogo
+ * pinta hasta 100 placas, o sea ~100 raíces de hidratación en la pantalla cuya
+ * regla nº2 es el rendimiento.
+ *
+ * La placa entera va `aria-hidden`, así que el lector no anuncia nada de aquí:
+ * el nombre del comercio está siempre visible al lado.
+ *
+ * El tamaño sale de `--placa-logo-w` y la altura la deriva `--placa-logo-ratio`:
+ * no hay `style={{ width, height }}`. Las otras dos escalas —el hero de la ficha
+ * de comercio, 144px, y la portada del carrusel, responsiva— se piden con
+ * `variante`, que sobrescribe ese token desde este mismo módulo CSS.
  */
-export function ComercioLogo({ logoUrl, nombre, size = 48, className }: ComercioLogoProps) {
-  const clases = [styles.logo, className].filter(Boolean).join(' ')
-
-  if (logoUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
-      <img
-        src={logoUrl}
-        alt={`Logo de ${nombre}`}
-        className={clases}
-        style={{ width: size, height: size }}
-        loading="lazy"
-        decoding="async"
-      />
-    )
-  }
+export function ComercioLogo({
+  logoUrl,
+  nombre,
+  variante = 'tarjeta',
+  className,
+  nombreTransicion,
+}: ComercioLogoProps) {
+  const inicial = nombre.trim().charAt(0).toUpperCase()
+  const clases = [styles.placa, variante !== 'tarjeta' && styles[variante], className]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <div
-      className={[clases, styles.placeholder].join(' ')}
-      style={{ width: size, height: size, fontSize: size * 0.4 }}
-      aria-hidden
+    /*
+      `viewTransitionName` va en `style` y no en una clase porque su valor sale
+      del dato —el `id` del comercio— y porque es un espacio de nombres GLOBAL
+      del documento: un módulo CSS le cambiaría el hash. Es el caso que la
+      norma admite para `style`, inyectar un token dinámico, no maquetar.
+
+      Y va sobre ESTA placa, sin envoltorio: `.cabecera` es flex y `.hero` es
+      una rejilla de dos columnas, así que un `<div>` intermedio dejaría a los
+      hijos fuera del contenedor que les da su sitio.
+    */
+    <span
+      className={clases}
+      aria-hidden="true"
+      style={nombreTransicion ? { viewTransitionName: nombreTransicion } : undefined}
     >
-      {nombre.charAt(0)}
-    </div>
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+        <img
+          src={logoUrl}
+          /* D9: vacío a propósito. Ver el bloque de arriba — un `alt` con texto
+             puede arrastrar el glifo de rotura de Chrome, y eso es lo único
+             que no se acepta. */
+          alt=""
+          className={styles.imagen}
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <span className={styles.inicial}>{inicial}</span>
+      )}
+    </span>
   )
 }

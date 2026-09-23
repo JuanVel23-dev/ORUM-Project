@@ -1,0 +1,180 @@
+/*
+  EL CHIP MIDE EL MÍNIMO TÁCTIL DE VERDAD: `var(--tap-min)`, 44px.
+
+  La alternativa era dejarlo en 36px y ampliar el área con un `::after`, la
+  técnica que el sistema usa para el ojo de la contraseña y el botón de copiar.
+  Ahí es la correcta, porque esos controles DEBEN verse pequeños. Un chip de
+  filtro no: es el control principal de la pantalla. Medir 44 de verdad elimina
+  un literal de alto, elimina la técnica de ampliación y elimina la posibilidad
+  de que quede vivo un objetivo de 36px. Cuesta 8px del primer pantallazo.
+*/
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  /*
+    EN REPOSO ES UN CÍRCULO DE 44px CON SU BORDE, no una píldora con texto.
+
+    Encargo del propietario: los filtros en icono, y «iconos por categorías que
+    tengan un borde». El borde no es decoración aquí: sin texto, es lo único
+    que dice dónde acaba el objetivo táctil, y sin él quince glifos sueltos se
+    leen como una fila de adornos y no como controles.
+
+    `min-width` y no `width`: el chip ACTIVO recupera su nombre y tiene que
+    poder crecer (ver `.activo` más abajo).
+  */
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  padding: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  font-weight: var(--t-callout-weight);
+  color: var(--text-2);
+  text-decoration: none;
+  white-space: nowrap;
+
+  background: var(--surface);
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
+}
+
+/*
+  `@media (hover: hover)`, que antes no estaba. En un teléfono el `:hover` NO se
+  va al levantar el dedo: el chip que el socio acababa de tocar se quedaba con
+  filo de tinta plena y texto oscuro —el mismo aspecto que un chip seleccionado,
+  pero sin el check ni el relleno— hasta que tocaba otra cosa. Con una fila de
+  filtros, eso es exactamente la señal que no puede mentir.
+*/
+@media (hover: hover) {
+  .chip:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+}
+
+/*
+  FEEDBACK INMEDIATO AL PULSAR, que es lo que faltaba.
+
+  El valor ya estaba; el tiempo, no. `.chip` declara su propia lista de
+  transiciones, y esa lista pisa la de `globals.css` §4b —donde `scale` se anima
+  en `--dur-rebote`, 200ms, con curva elástica—. Sin acortar la IDA, el chip
+  tardaba casi medio segundo en acusar el toque y el socio lo pulsaba dos veces.
+
+  El reparto correcto es el de la regla global: ida instantánea (`--dur-press`),
+  vuelta elástica (`--dur-rebote`), que es lo que hace que el gesto se sienta
+  físico y no programado.
+*/
+.chip:active {
+  scale: var(--escala-press);
+  transition-duration: var(--dur-press);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  EL CHIP ACTIVO ES TINTA, NO ORO.
+
+  Un chip activo codifica un estado de filtro, y el oro no codifica estado
+  —regla C del presupuesto de oro—. El precedente en el sistema es
+  `toggle.module.css:144`, que ya pinta lo marcado con `--action`.
+
+  Y no se confía al color: relleno lleno + peso 590 + el check antes de la
+  etiqueta + `aria-current="true"`. Cuatro portadores, uno de ellos de forma.
+*/
+/*
+  EL ACTIVO SE ABRE Y ENSEÑA SU NOMBRE.
+
+  Es lo que evita que una fila de iconos deje al socio adivinando: el resto se
+  recoge, y el que está filtrando se declara. Además le da a la fila un punto
+  de anclaje —una sola forma distinta entre círculos— que se ve de un vistazo
+  sin leer nada, que es justo lo que el encargo pide.
+*/
+.activo {
+  padding: 0 var(--space-4);
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--action-fg);
+  font-weight: 590;
+}
+
+/* ==========================================================================
+   EL ICONO Y EL SUBRAYADO  ·  encargos nº 10 y nº 11
+   ========================================================================== */
+
+/*
+  El hueco del icono. `display: flex` para que el `<svg>` —que globals.css pone
+  en `display: block`— quede centrado con la línea base del texto sin arrastrar
+  el descendente de la fuente.
+*/
+.icono {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/*
+  EL SUBRAYADO DEL CHIP ACTIVO.
+
+  Es el portador de FORMA que antes aportaba el check: sobrevive a la ceguera al
+  color y al tema oscuro. Se dibuja con `text-decoration` y no con un
+  pseudo-elemento porque aquí sí debe ceñirse al texto —el icono va aparte y ya
+  tiene su propia señal, la agitación— y porque un chip con relleno no deja
+  sitio para una barra sin tocar el borde de la píldora.
+
+  `--action-fg` es el color del texto sobre el relleno de tinta, así que el
+  subrayado hereda un par ya auditado.
+
+  `text-decoration-skip-ink` en `none`: con `auto`, las letras con descendente
+  (la "g" de "Gastronomía") abren huecos en la línea y el subrayado se lee
+  entrecortado a 14px.
+*/
+/*
+  El subrayado se retira: cuando el ÚNICO chip con texto es el activo, subrayarlo
+  es decir dos veces lo mismo. El portador de forma que el subrayado sostenía
+  —el que sobrevive a la ceguera al color— pasa a ser la propia silueta: píldora
+  contra círculo.
+*/
+.activo .etiqueta {
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .activo:hover {
+    background: var(--action-hover);
+    border-color: var(--action-hover);
+    color: var(--action-fg);
+  }
+}
+
+/*
+  Movimiento reducido: NO es ausencia de feedback. Se retira el encogido —que es
+  lo vestibular— y el toque se acusa con relleno, que es el equivalente no
+  vestibular que la dirección pide. `--surface-hover` es tinta al 6 %, el mismo
+  canal que usa el resto del sistema para «este control está respondiendo».
+
+  Hay que reponer `scale`, no `transform`: son propiedades independientes y
+  `transform: none` no toca a `scale`.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .chip:active {
+    scale: 1;
+    background: var(--surface-hover);
+  }
+
+  .activo:active {
+    background: var(--action-hover);
+  }
+}

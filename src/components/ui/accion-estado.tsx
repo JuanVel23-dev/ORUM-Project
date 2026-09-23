@@ -70,6 +70,10 @@ export function AccionEstado({
       <button
         type="submit"
         className={styles.boton}
+        // Es un interruptor, no una acción suelta: sin `aria-pressed` el lector
+        // solo canta la etiqueta y no dice en qué estado está lo que gobierna.
+        // Va con el valor OPTIMISTA, el mismo que se pinta.
+        aria-pressed={optimista}
         data-destructivo={optimista}
         data-pendiente={pendiente}
         // Acompaña al gesto, no a la confirmación del servidor.

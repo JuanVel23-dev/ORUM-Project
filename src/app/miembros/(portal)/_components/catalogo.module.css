@@ -1,0 +1,275 @@
+/* ==========================================================================
+   FRANJAS A ANCHO COMPLETO  ·  «fondos que no sean solo blanco»
+   --------------------------------------------------------------------------
+   El encargo del propietario: tonalidades, no una plancha blanca. La v4 dejó
+   cuatro superficies —papel, crema, crema honda y cacao— y esto es el
+   mecanismo que las deja SANGRAR hasta el borde de la ventana.
+
+   Por qué a ancho completo y no una tarjeta de color: una franja que respeta
+   el margen del contenido se lee como una tarjeta gigante, no como una
+   sección. Lo que separa secciones sin dibujar una sola línea —que es lo que
+   hace Agence Cartier, sin una sombra en toda la página— es el campo de color
+   de borde a borde.
+
+   La aritmética: `.main` es una columna centrada con `max-width`, así que el
+   margen negativo `50% - 50vw` lleva el borde de la franja hasta el borde de
+   la ventana, y el relleno simétrico devuelve el texto a su columna. El `max`
+   protege el caso estrecho, donde `50vw - 50%` se vuelve menor que el relleno
+   propio del layout y el texto se pegaría al filo.
+   ========================================================================== */
+
+/*
+  La franja respira más que antes: `--space-8` dejaba el contenido pegado al
+  filo del campo de color y la banda se leía como una tira, no como una
+  sección. Con el tinte a ancho completo, el aire interior es lo que convierte
+  el color en superficie.
+*/
+.franja {
+  margin-inline: calc(50% - 50vw);
+  padding-inline: max(calc(50vw - 50%), var(--pad-contenido, var(--space-4)));
+  padding-block: var(--space-9);
+}
+
+/* Dos franjas del mismo tono seguidas serían una sola más alta: el aire entre
+   ellas es lo que las separa, y solo hace falta cuando cambian de color. */
+.franja + .franja {
+  margin-top: 0;
+}
+
+.franjaCrema {
+  /* Las dos capas en UNA declaración. Puestas en dos, la forma corta
+     `background` de después habría reseteado el `background-image` de antes a
+     `none` y el degradado no se habría pintado nunca — sin aviso de nadie. */
+  background: var(--fondo-franja-clara), var(--surface-alt);
+}
+
+/*
+  LA FRANJA DE CACAO. Es donde vive el oro claro: `--gold-400` da 7,83:1 aquí
+  y 1,99:1 sobre crema, así que sobre claro está prohibido y sobre esto es
+  donde brilla.
+
+  `color-scheme: dark` no es decorativo: dentro de esta franja el navegador
+  pinta las barras de desplazamiento de los carriles y los controles nativos
+  en su variante oscura. Sin esto, un carril con scroll visible saca una barra
+  clara sobre chocolate.
+*/
+/*
+  CREMA HONDA. Superficie de RELLENO, no de párrafo tenue: `--tinta-3` da
+  4,18:1 contra ella y reprueba AA. Aquí vive la estantería de novedades, cuyo
+  apoyo usa `--text-2`. El colapso de `--text-3` en `--text-2` es la red de
+  seguridad por si mañana entra un texto tenue: se pierde un escalón de
+  jerarquía y se gana que se lea (4,18:1 -> 6,51:1 en claro).
+
+  NO se remapea `--brand`: en claro habría que bajarlo a `--gold-800`, pero en
+  oscuro el `--gold-300` de ahí ya cumple de sobra, y un remapeo que solo vale
+  para un tema no se escribe. Lo que se hace es no poner texto dorado aquí.
+*/
+.franjaHonda {
+  background: var(--fondo-franja-clara), var(--surface-alt-2);
+
+  --text-3: var(--text-2);
+}
+
+.franjaCacao {
+  /* El degradado va DELANTE del color plano en la lista: la primera capa es la
+     de arriba. Un color plano detrás garantiza que, si el navegador no
+     resolviera el `color-mix`, la franja siga siendo negra y no transparente. */
+  background: var(--fondo-franja-oscura), var(--cacao-bg);
+  color-scheme: var(--cacao-scheme, dark);
+
+  /*
+    NO basta con poner `color`. Dentro de esta franja caen componentes que
+    resuelven sus propios tokens —`Carril` su título, `Badge` su relleno,
+    `ComercioLogo` su placa—, y todos apuntan a los semánticos del tema CLARO.
+    Con solo heredar el color, el título «Top 3 del club» salía tinta sobre
+    chocolate: ilegible, y comprobado en pantalla antes de arreglarlo.
+
+    Así que la franja se comporta como un ÁMBITO DE TEMA: reasigna los
+    semánticos a sus equivalentes de cacao. Cualquier componente que entre aquí
+    se adapta sin saber que está dentro de una franja oscura, y el que se
+    escriba mañana también.
+
+    Los ratios sobre `--cacao-bg` (#2b1a15) están medidos en `globals.css` §1:
+    `--cacao-fg` 16,24:1 · `--cacao-fg-2` y `--cacao-fg-3` por encima de AA ·
+    `--cacao-brand` (el oro claro) 7,83:1 — el único sitio del producto donde
+    ese oro es legible.
+  */
+  --bg: var(--cacao-bg);
+  --surface: var(--cacao-surface);
+  --surface-alt: var(--cacao-surface);
+  --surface-hover: var(--cacao-hover);
+  --surface-sunk: var(--cacao-bg);
+
+  --text: var(--cacao-fg);
+  --text-2: var(--cacao-fg-2);
+  /*
+    `--text-3` NO baja a `--cacao-fg-3`, y esto se descubrió midiendo lo
+    renderizado.
+
+    Los ratios de `--cacao-fg-3` están calculados contra `--cacao-bg`, el fondo
+    de la franja. Pero el texto tenue no vive ahí: vive dentro de las TARJETAS,
+    que son `--cacao-surface` y por tanto más claras. Contra ellas cae a
+    4,02:1 y reprueba AA.
+
+    Sobre una tarjeta oscura no hay sitio para tres niveles de gris. Se colapsa
+    el tercero en el segundo: se pierde un escalón de jerarquía y se gana que
+    el texto se lea, que es el cambio bueno.
+  */
+  --text-3: var(--cacao-fg-2);
+
+  --brand: var(--cacao-brand);
+  --brand-edge: var(--cacao-edge);
+  --focus: var(--cacao-brand);
+
+  color: var(--text);
+}
+
+/* Ritmo vertical de la pantalla, en un solo sitio. Cada bloque —encabezado,
+   búsqueda, chips, estanterías, rejilla— es un hijo directo y ninguno declara
+   márgenes propios: así el orden se puede cambiar sin recolocar espaciados. */
+/*
+  EL AIRE ENTRE SECCIONES.
+
+  Estaba en `--space-5` (20px) para todos los anchos, y en escritorio eso deja
+  la portada, las estanterías y la rejilla casi tocándose: el propietario lo
+  describió como «uno encima de otro, se ve feo». Una sección necesita
+  separarse de la siguiente MÁS de lo que sus propias piezas se separan entre
+  sí, o el ojo no sabe dónde acaba una.
+
+  Las franjas tonales traen su propio `padding-block`, así que allí el campo de
+  color ya hace de separador; esto gobierna lo que queda sobre papel.
+*/
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+@container contenido (min-width: 900px) {
+  .pagina {
+    gap: var(--space-8);
+  }
+}
+
+.rejilla {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ==========================================================================
+   LA REJILLA NO TERMINA EN UN HUECO  ·  Z3
+   --------------------------------------------------------------------------
+   Encargo del propietario: «la rejilla de Todos los comercios deja huecos al
+   final; que se adapte al ancho real en vez de a columnas fijas».
+
+   El diagnóstico exacto, porque no es lo que parecía: `Grid` ya se adaptaba
+   —`repeat(auto-fit, minmax(290px, 1fr))` reparte columnas sin puntos de
+   ruptura—. Lo que deja el hueco es la ÚLTIMA FILA: con 3 columnas y 7
+   tarjetas, la séptima ocupa un tercio y deja dos tercios de papel muerto
+   debajo de una rejilla por lo demás llena. Una rejilla no puede rellenar su
+   última fila: sus pistas son las mismas para todas.
+
+   Un contenedor flexible sí puede. Con `flex-wrap` y `flex-grow`, cada fila
+   reparte SU sobrante entre las tarjetas que le tocaron:
+     · fila completa → tres tarjetas del mismo ancho que hoy (el reparto de un
+       sobrante pequeño entre tres da lo mismo que `1fr`),
+     · última fila con dos → dos tarjetas anchas que llegan al filo,
+     · última fila con una → una tarjeta a media columna (ver el techo).
+
+   POR QUÉ SE ATACA DESDE AQUÍ Y NO DESDE `Grid`: `page.tsx` monta `<Grid
+   min="290px">` sin clase propia y pertenece a otro agente en esta tanda;
+   `Grid` lo comparte el panel de administración entero, donde esta forma no se
+   ha pedido ni medido. El selector de hijo directo mantiene el cambio dentro
+   del catálogo, y hereda los dos tokens que `Grid` ya publica en el elemento
+   (`--min`, `--gap`), así que el ancho mínimo sigue decidiéndose en un solo
+   sitio.
+   ========================================================================== */
+
+/*
+  REJILLA DE ANCHO FIJO POR TARJETA. Se probó el reparto flexible de la última
+  fila (Z3) y en pantalla quedó peor: la tarjeta suelta del final salía al doble
+  de ancho que sus vecinas, con el logo y el nombre perdidos a la izquierda. Una
+  última fila incompleta es normal en cualquier catálogo; una tarjeta distinta
+  a las demás, no.
+*/
+.rejilla > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--min, 290px), 100%), 1fr));
+}
+
+/*
+  El `h2` de la rejilla es visible y no está solo por accesibilidad.
+
+  Con estanterías encima, una rejilla sin cabecera se lee como "lo que sobró":
+  le da nombre y CIERRA la lista. Y de paso le da al lector de pantalla un
+  destino de salto que hoy no tenía.
+*/
+.tituloRejilla {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  color: var(--text);
+}
+
+/* ==========================================================================
+   ANIMACIONES DE ENTRADA  ·  solo CSS, sin JavaScript
+   --------------------------------------------------------------------------
+   Encargo del propietario: «añade animaciones de entrada».
+
+   Dos mecanismos, y cada uno para lo suyo:
+
+   1. AL CARGAR, lo del primer pantallazo entra escalonado: fundido y 12px de
+      subida, 420ms, 50ms entre bloque y bloque, tope en el quinto. Corto a
+      propósito — esta pantalla se abre decenas de veces al día (regla cero de
+      frecuencia: al mínimo, no nunca, porque lo pidió el propietario).
+
+   2. AL DESPLAZAR, cada sección de abajo se revela cuando entra en la vista,
+      con `animation-timeline: view()`. Es una animación ligada al scroll que
+      corre en el compositor: cero JavaScript, cero hidratación, y si el
+      navegador no la conoce el `@supports` la descarta y el contenido se ve
+      normal. Nunca se queda nada invisible.
+
+   Solo `opacity` y `translate`. Con movimiento reducido, `globals.css` §5
+   comprime la duración a 0,01ms: el contenido aparece sin viajar.
+   ========================================================================== */
+
+@keyframes entrarBloque {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+.pagina > * {
+  animation: entrarBloque var(--dur-page) var(--ease-out) backwards;
+}
+.pagina > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+.pagina > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+.pagina > *:nth-child(4) {
+  animation-delay: 150ms;
+}
+.pagina > *:nth-child(n + 5) {
+  animation-delay: 200ms;
+}
+
+/* El revelado al desplazar ya no es por sección: lo lleva cada pieza con la
+   utilidad global `.revelar-vista` (globals.css). */
+
+/* Movimiento reducido: sin entrada y sin revelado ligado al scroll. El recorte
+   global de `globals.css` §5 no basta aquí: una animación atada al scroll no
+   usa la duración, así que seguiría deslizándose con el dedo. */
+@media (prefers-reduced-motion: reduce) {
+  /* Con `:nth-child` en el selector para igualar la especificidad (0,2,0) de
+     la regla de revelado: con `.pagina > *` a secas, esta perdía y el
+     revelado ligado al scroll seguía activo con movimiento reducido. */
+  .pagina > *,
+  .pagina > *:nth-child(n) {
+    animation: none;
+  }
+}

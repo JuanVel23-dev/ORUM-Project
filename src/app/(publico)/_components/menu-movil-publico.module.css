@@ -1,0 +1,61 @@
+/* El botón desaparece donde las mismas entradas ya son texto en la cabecera.
+   Mismo umbral que el resto del cromo del producto, y `@media` porque la
+   cabecera vive fuera del contenedor `contenido`. */
+.soloMovil {
+  display: inline-flex;
+}
+
+@media (min-width: 768px) {
+  .soloMovil {
+    display: none;
+  }
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+  Filas anchas, no chips. El objetivo táctil se consigue con `min-height` —lo
+  que se ve y lo que se toca coinciden aquí, porque una fila de menú DEBE ser
+  grande— y no con un `::after` ampliador, que se reserva para los controles
+  que deben verse pequeños.
+*/
+.fila {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-min);
+
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  font-weight: 510;
+  color: var(--text);
+  text-decoration: none;
+
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+/* Separador entre filas: una lista de cuatro destinos distintos necesita que
+   se vea dónde acaba cada área de toque. */
+.fila + .fila {
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .fila:hover {
+    background: var(--surface-hover);
+  }
+}
+
+.fila:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}

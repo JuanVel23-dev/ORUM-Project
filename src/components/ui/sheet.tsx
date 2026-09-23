@@ -5,9 +5,12 @@ import { animate } from 'motion'
 import { X } from 'lucide-react'
 import {
   SPRING_SHEET,
+  SPRING_UI,
+  TWEEN_REDUCIDO,
   amortiguarBorde,
   prefiereMovimientoReducido,
   proyectarMomento,
+  salidaDe,
 } from '@/lib/shared/motion'
 import styles from './sheet.module.css'
 
@@ -41,7 +44,24 @@ type Props = {
   onClose: () => void
   title?: string
   description?: string
+  /**
+   * Nombre accesible del diálogo cuando NO hay `title` visible.
+   *
+   * Sin uno de los dos, el lector de pantalla anuncia «diálogo» y se calla: el
+   * `<dialog>` es quien tiene el rol, así que un `h1` dentro del contenido no
+   * lo nombra por mucho que se lea después.
+   */
+  ariaLabel?: string
   footer?: ReactNode
+  /**
+   * Oculta la X de cerrar. Por defecto NO se oculta, y el defecto importa:
+   * antes la cabecera entera colgaba de `title || description`, así que una
+   * hoja sin título —la ficha de comercio, que trae su propio encabezado— se
+   * quedaba en móvil SIN ningún botón de cerrar. Las únicas salidas eran
+   * arrastrar el tirador, acertar el velo o pulsar Escape, que en un táctil
+   * puro no existe. Es la misma condición que ya usaba `Modal`.
+   */
+  hideClose?: boolean
   /**
    * Altura inicial. `medium` habilita además el arrastre hacia `large`.
    * Por defecto `large`: la mayoría de hojas de este panel son formularios.
@@ -55,7 +75,9 @@ export function Sheet({
   onClose,
   title,
   description,
+  ariaLabel,
   footer,
+  hideClose = false,
   detent = 'large',
   children,
 }: Props) {
@@ -115,17 +137,18 @@ export function Sheet({
       }
 
       if (prefiereMovimientoReducido()) {
-        animate(dialogo, { opacity: 0 }, { duration: 0.15 }).finished.then(fin, fin)
+        animate(dialogo, { opacity: 0 }, TWEEN_REDUCIDO).finished.then(fin, fin)
         return
       }
 
-      if (veloRef.current) animate(veloRef.current, { opacity: 0 }, { duration: 0.25 })
+      if (veloRef.current) animate(veloRef.current, { opacity: 0 }, salidaDe(SPRING_UI))
       animate(
         panel,
         { transform: `translateY(${panel.offsetHeight}px)` },
         // La velocidad del dedo continúa en la animación: sin costura entre
-        // arrastrar y animar.
-        { type: 'spring', bounce: 0, duration: 0.32, velocity: velocidad },
+        // arrastrar y animar. Y la salida va más corta que la entrada (v4 §5,
+        // regla 3): `salidaDe(SPRING_SHEET)` recorta 0,32 s a ~0,21.
+        { ...salidaDe(SPRING_SHEET), velocity: velocidad },
       ).finished.then(fin, fin)
     },
     [],
@@ -145,7 +168,7 @@ export function Sheet({
 
       if (prefiereMovimientoReducido()) {
         colocar(destino)
-        animate(dialogo, { opacity: [0, 1] }, { duration: 0.15 })
+        animate(dialogo, { opacity: [0, 1] }, TWEEN_REDUCIDO)
       } else {
         // Entra desde abajo del todo hasta su detent.
         colocar(panel.offsetHeight)
@@ -251,16 +274,22 @@ export function Sheet({
     onClose()
   }
 
+  /*
+    `aria-labelledby` va en el <dialog>, que es quien tiene el rol de diálogo:
+    colgado del `div role="document"` de dentro no nombra a nada, y al abrir la
+    hoja el lector puede anunciar "diálogo" sin decir cuál.
+  */
   return (
-    <dialog ref={dialogRef} className={styles.dialog} onCancel={alCancelar}>
+    <dialog
+      ref={dialogRef}
+      className={styles.dialog}
+      onCancel={alCancelar}
+      aria-labelledby={title ? 'sheet-titulo' : undefined}
+      aria-label={!title && ariaLabel ? ariaLabel : undefined}
+    >
       <div ref={veloRef} className={styles.velo} onClick={onClose} aria-hidden="true" />
 
-      <div
-        ref={panelRef}
-        className={styles.panel}
-        role="document"
-        aria-labelledby={title ? 'sheet-titulo' : undefined}
-      >
+      <div ref={panelRef} className={styles.panel} role="document">
         <div
           className={styles.agarre}
           onPointerDown={alBajar}
@@ -271,7 +300,13 @@ export function Sheet({
           <div className={styles.tirador} aria-hidden="true" />
         </div>
 
-        {(title || description) && (
+        {/*
+          La cabecera existe también SIN título, porque es donde vive la X.
+          Misma condición que `Modal`: mientras haya botón de cerrar, hay
+          cabecera. Antes colgaba solo de `title || description` y dejaba la
+          ficha de comercio sin salida visible en móvil.
+        */}
+        {(title || description || !hideClose) && (
           <div className={styles.cabecera}>
             <div className={styles.textos}>
               {title && (
@@ -281,14 +316,16 @@ export function Sheet({
               )}
               {description && <p className={styles.descripcion}>{description}</p>}
             </div>
-            <button
-              type="button"
-              className={styles.cerrar}
-              onClick={onClose}
-              aria-label="Cerrar"
-            >
-              <X className={styles.cerrarIcono} aria-hidden="true" />
-            </button>
+            {!hideClose && (
+              <button
+                type="button"
+                className={styles.cerrar}
+                onClick={onClose}
+                aria-label="Cerrar"
+              >
+                <X className={styles.cerrarIcono} aria-hidden="true" />
+              </button>
+            )}
           </div>
         )}
 

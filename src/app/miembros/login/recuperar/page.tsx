@@ -6,7 +6,10 @@ export const metadata: Metadata = { title: 'Recuperar contraseña · ORUM Miembr
 
 export default function RecuperarMiembroPage() {
   return (
-    <PantallaAuth subtitulo="Restablece tu contraseña">
+    <PantallaAuth
+      titular="Restablece tu contraseña"
+      apoyo="Te enviamos un enlace a tu correo para elegir una contraseña nueva."
+    >
       <RecuperarMiembroForm />
     </PantallaAuth>
   )

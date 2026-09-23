@@ -31,13 +31,67 @@
     border-color var(--dur-fast) var(--ease-out),
     color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out),
     transform var(--dur-instant) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-/* Feedback en la PRESIÓN, no al soltar. Esperar al click se siente muerto. */
+/* --- Levantar y hundir  ·  §3 de la dirección de arte v3 -------------------
+
+   PRESIONAR HUNDE. Un botón que al pulsarse baja 2px y se queda solo con el
+   contacto de su sombra —pierde el halo— comunica físicamente lo que un cambio
+   de color solo comunica por convención.
+
+   Y ocurre en `:active`, que es el equivalente en CSS puro de responder en
+   `pointerdown` y no en `click`: el navegador entra en `:active` al apretar,
+   no al soltar. Esperar al `click` es lo que hace que una interfaz se sienta
+   muerta (§3.1).
+
+   Sustituye al `scale: 0.97` anterior. No se acumulan: `scale` y `translate`
+   son propiedades independientes y las dos a la vez se leen como un fallo de
+   renderizado. Por eso aquí se repone `scale: 1`, que además desactiva la
+   regla global de `globals.css` §4b sin necesidad de `data-sin-press`.
+
+   El hover va SOLO bajo `@media (hover: hover)`: en un dispositivo táctil el
+   hover se queda pegado tras el toque y el botón se queda flotando solo.
+   -------------------------------------------------------------------------- */
+
 .button:active:not(:disabled):not([aria-disabled='true']) {
-  scale: 0.97;
+  scale: 1;
+  translate: 0 2px;
+  /* La ida es instantánea: el retardo aquí es lo que mata la sensación. */
+  transition-duration: var(--dur-press);
+}
+
+/*
+  La sombra se reduce SOLO en los botones que tienen sombra que perder, que
+  son los de relleno. El secundario y el fantasma son tinta sobre papel: no
+  están levantados, así que no pueden hundirse más allá del desplazamiento.
+  Darles una sombra al pulsar los haría SUBIR justo cuando se les empuja.
+*/
+.primary:active:not(:disabled):not([aria-disabled='true']),
+.danger:active:not(:disabled):not([aria-disabled='true']),
+.brand:active:not(:disabled):not([aria-disabled='true']),
+.gold:active:not(:disabled):not([aria-disabled='true']) {
+  box-shadow: var(--shadow-press);
+}
+
+/*
+  Movimiento reducido: el acuse SIGUE EXISTIENDO —la sombra se reduce igual—,
+  solo que el botón no se desplaza. Un equivalente no vestibular, no la
+  supresión del feedback.
+*/
+@media (prefers-reduced-motion: reduce) {
+  /*
+    `!important` a propósito: es una PREFERENCIA DEL USUARIO pisando al
+    diseño, que es exactamente para lo que existe. Sin él, cualquier variante
+    de más especificidad (`.primary:hover:not(:disabled)`) volvería a
+    desplazar el botón. Es el mismo patrón que usa globals.css §5.
+  */
+  .button:hover,
+  .button:active:not(:disabled):not([aria-disabled='true']) {
+    translate: none !important;
+  }
 }
 
 .button:disabled,
@@ -45,6 +99,7 @@
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+  translate: none;
 }
 
 /* Mientras carga NO se atenúa: sigue siendo el elemento activo de la pantalla. */
@@ -87,6 +142,31 @@
   gap: var(--space-1);
 }
 
+/*
+  Lo que se VE y lo que se TOCA son cosas distintas.
+
+  36px es la densidad correcta en una barra de escritorio, pero se queda corto
+  para el dedo. En vez de agrandar el botón —que descuadraría la fila de
+  acciones de `DataList`—, se amplía el área sensible con un `::after` centrado
+  de `var(--tap-min)`: el mismo patrón que ya usan `Copiar` e `InputButton`.
+
+  Es transparente y `content: ''`, así que no tapa nada ni añade nodo al árbol
+  de accesibilidad; y al ser pseudoelemento DEL PROPIO botón, el toque que
+  recibe lo recibe el botón. No colisiona con `.brand::before`, que es el otro
+  pseudo en uso.
+*/
+.sm::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+
+  width: 100%;
+  min-width: var(--tap-min);
+  height: var(--tap-min);
+}
+
 .md {
   min-height: var(--tap-min); /* 44px — objetivo táctil */
   padding: 0 var(--space-4);
@@ -118,34 +198,73 @@
 
 /* --- Variantes ------------------------------------------------------------ */
 
-/* Primario = TINTA, no oro. El oro es marca, no acción (spec §2.1). */
+/*
+  Primario = TINTA. Es el primario de ADMINISTRACIÓN y de la HERRAMIENTA DE
+  COMERCIOS, y ahí no cambia (§2.4): son herramientas de trabajo y el oro sería
+  ruido. En el Portal de Miembros y en las seis pantallas de acceso el primario
+  es `.brand`, el relleno dorado — esa diferencia la resuelve el `variant` del
+  componente, no hay que decidirla en cada pantalla.
+*/
 .primary {
   background: var(--action);
   color: var(--action-fg);
-  box-shadow: var(--shadow-1);
-}
-.primary:hover:not(:disabled) {
-  background: var(--action-hover);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-card);
 }
 
+/*
+  Hover que LEVANTA: sube 2px y pasa al siguiente escalón de sombra. Solo bajo
+  `@media (hover: hover)` — en táctil el hover se queda pegado tras el toque.
+*/
+@media (hover: hover) {
+  .primary:hover:not(:disabled) {
+    background: var(--action-hover);
+    translate: 0 -2px;
+    box-shadow: var(--shadow-raised);
+  }
+}
+
+/*
+  Botón con contorno. Conserva filo en reposo —es un CONTROL, no una superficie
+  (§2.5)— pero baja de tinta plena a tinta al 55 %: 4,42:1 contra el papel, muy
+  por encima del 3:1 de WCAG 1.4.11, y deja de leerse como papelería.
+
+  No lleva sombra en reposo a propósito: es tinta sobre papel, no un objeto
+  levantado. Al señalarlo se enciende el oro y aparece el primer escalón —ahí
+  sí se levanta—, que es el par de §2.3.
+*/
 .secondary {
   background: var(--surface);
   color: var(--text);
-  border-color: var(--border);
-}
-.secondary:hover:not(:disabled) {
-  background: var(--surface-hover);
-  border-color: var(--border-strong);
+  border-color: var(--border-control);
 }
 
+@media (hover: hover) {
+  .secondary:hover:not(:disabled) {
+    background: var(--surface-hover);
+    border-color: var(--brand-edge);
+    box-shadow: var(--shadow-card);
+  }
+}
+
+/*
+  El fantasma no tiene contorno: es el único botón que puede no declararse,
+  porque siempre vive DENTRO de una superficie que ya está declarada.
+
+  Su hover no puede confiar solo en `--surface-hover` (1,02:1 sobre papel):
+  aparece además el trazo, que es el segundo canal. El color nunca va solo.
+*/
 .ghost {
   background: transparent;
   color: var(--text-2);
+  border-color: transparent;
 }
-.ghost:hover:not(:disabled) {
-  background: var(--surface-hover);
-  color: var(--text);
+
+@media (hover: hover) {
+  .ghost:hover:not(:disabled) {
+    background: var(--surface-hover);
+    border-color: var(--border-subtle);
+    color: var(--text);
+  }
 }
 
 /*
@@ -157,36 +276,109 @@
 .danger {
   background: var(--danger);
   color: var(--text-on-accent);
+  box-shadow: var(--shadow-card);
 }
-.danger:hover:not(:disabled) {
-  filter: brightness(0.92);
+
+@media (hover: hover) {
+  .danger:hover:not(:disabled) {
+    filter: brightness(0.92);
+    translate: 0 -2px;
+    box-shadow: var(--shadow-raised);
+  }
+}
+
+/* --- brand: la acción ceremonial ------------------------------------------
+
+   Relleno dorado PLANO con texto en tinta. Es el primario del recorrido del
+   cliente y de las seis pantallas de acceso; dentro del panel y de la
+   herramienta de comercios el primario sigue siendo `.primary`, que es tinta.
+
+   Por qué plano y no el barrido de `.gold`: en tema claro `--gold-sheen` se
+   remapea a la mitad oscura de la rampa y su parada del 62% (#5c4b25) da
+   2,34:1 contra la tinta. Un botón de 277px reprobaría 1.4.3 en ~172px de su
+   recorrido. Plano da 5,40:1 en todo el relleno.
+
+   El relleno NO cambia de color en ningún estado, y no es pereza: aclararlo
+   hunde el borde por debajo de 3:1 contra la superficie clara (1.4.11) y
+   oscurecerlo hunde el texto por debajo de 4,5:1 (1.4.3). El intervalo legal
+   entre los dos muros es de 0,05 de luminancia — cualquier tono de hover
+   aterrizaría al borde de un umbral, donde deciden el antialiasing y el
+   monitor, no el diseño. Es además lo correcto en el idioma de Apple: un
+   botón de iOS no cambia de tono al pulsarse.
+   -------------------------------------------------------------------------- */
+.brand {
+  background: var(--action-gold);
+  color: var(--action-gold-fg);
+  box-shadow: var(--shadow-raised);
 }
 
 /*
-  Variante ceremonial. Reservada al CTA comercial (adquirir membresía).
-  NO usar como botón primario de la app: si el oro aparece en todas partes
-  deja de significar algo.
+  El hover se comunica con MATERIAL, no con color: sube la elevación y aparece
+  el filo de luz superior. En claro manda la sombra —el filo apenas se lee
+  sobre el oro—; en oscuro es al revés, porque una sombra negra sobre fondo
+  negro no se ve y el chaflán sí. Las dos señales conviven sin preguntar por
+  el tema, que es una condicional menos.
+*/
+.brand::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--gold-hairline);
 
-  El texto va en negro sobre el oro: 7.94:1, cumple AAA.
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .brand:hover:not(:disabled) {
+    translate: 0 -2px;
+    box-shadow: var(--shadow-flotante);
+  }
+
+  .brand:hover:not(:disabled)::before {
+    opacity: 1;
+  }
+}
+
+/*
+  Variante ceremonial de MATERIAL: el barrido metálico.
+
+  ⚠️ NO admite texto encima. En tema claro `globals.css` remapea el barrido a
+  la mitad oscura de la rampa de oro, y su parada del 62% (`--gold-800`) da
+  2,42:1 contra la tinta: reprueba WCAG 1.4.3 por casi el doble, y lo hace en
+  el 62% del recorrido del botón. Para un botón con etiqueta está `.brand`,
+  que es plano.
+
+  Lo que sí sirve: superficies ceremoniales sin texto —el filo del carnet, el
+  wordmark con `background-clip: text`, la barra de `ProgressBar`—.
 */
 .gold {
   background-image: var(--gold-sheen);
   background-size: 200% 100%;
   background-position: 0% 0;
-  color: var(--n-1000);
-  box-shadow: var(--shadow-2);
+  /* Tinta cálida, no `--text`: esta superficie es dorada en los DOS temas, así
+     que su texto tampoco puede seguir al tema. 4,84:1 contra la parada más
+     clara del barrido; la más oscura no admite texto — ver el aviso de arriba. */
+  color: var(--tinta-1);
+  box-shadow: var(--shadow-raised);
 
   transition:
     background-position var(--dur-slow) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out),
     transform var(--dur-instant) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
 /* El brillo VIAJA por el botón al pasar por encima: luz moviéndose sobre metal. */
-.gold:hover:not(:disabled) {
-  background-position: 28% 0;
-  box-shadow: var(--shadow-3);
+@media (hover: hover) {
+  .gold:hover:not(:disabled) {
+    background-position: 28% 0;
+    translate: 0 -2px;
+    box-shadow: var(--shadow-flotante);
+  }
 }
 
 /* --- Iconos --------------------------------------------------------------- */

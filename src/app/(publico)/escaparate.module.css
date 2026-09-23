@@ -1,0 +1,270 @@
+/* ==========================================================================
+   EL ESCAPARATE  ·  vocabulario compartido del portal público
+   --------------------------------------------------------------------------
+   Dos cosas viven aquí porque las comparten varios componentes del grupo de
+   rutas `(publico)`: las FRANJAS TONALES y la TIPOGRAFÍA CEREMONIAL.
+   ==========================================================================
+
+   1. FRANJAS TONALES
+   --------------------------------------------------------------------------
+   El escaparate es la pantalla que más rinde por unidad de impacto: la ve
+   alguien que todavía NO es socio y que decide en segundos. La v4 dejó cuatro
+   superficies —papel, crema, crema honda y cacao— y esto es el mecanismo que
+   las deja SANGRAR hasta el borde de la ventana.
+
+   Por qué a ancho completo y no una tarjeta de color: una franja que respeta
+   el margen del contenido se lee como una tarjeta gigante, no como una
+   sección. Lo que separa secciones sin dibujar una sola línea —lo que hace
+   Agence Cartier, sin una sombra en toda la página— es el campo de color de
+   borde a borde.
+
+   ⚠️ POR QUÉ ESTE ARCHIVO EXISTE Y NO ESTÁ DENTRO DE UN COMPONENTE.
+
+   La trampa nº 1 del log de Y1: las clases de franja se escribieron en un
+   módulo que el componente NO importaba, `estilos.franja` salió `undefined`,
+   el `className` quedó en la cadena `"undefined"` y no pasó absolutamente
+   nada — compilando, tipando y pasando lint. Aquí la franja la necesitan la
+   landing (`page.tsx`) y el héroe (`hero-publico.tsx`), que son dos archivos
+   distintos, así que el mecanismo vive en UN módulo que los dos importan.
+   Un módulo CSS importado desde varios componentes emite las MISMAS clases.
+
+   Ámbito: el grupo de rutas `(publico)`. No va a `src/styles/` porque no lo
+   comparte ninguna otra ruta del producto; si algún día lo hiciera, ese es el
+   momento de moverlo. Y no va dentro de `_components/` porque también lo usa
+   `page.tsx`, que está un nivel por encima.
+
+   LA ARITMÉTICA. `.main` es una columna centrada con `max-width`, así que el
+   margen negativo `50% - 50vw` lleva el borde de la franja hasta el borde de
+   la ventana y el relleno simétrico devuelve el texto a su columna. El `max`
+   protege el caso estrecho, donde `50vw - 50%` se vuelve menor que el relleno
+   propio del layout y el texto se pegaría al filo.
+
+   `--pad-contenido` lo publica `publico.module.css` sobre el `<main>`; el
+   valor de reserva está por si alguna franja acabara fuera de él.
+   ========================================================================== */
+
+.franja {
+  margin-inline: calc(50% - 50vw);
+  padding-inline: max(calc(50vw - 50%), var(--pad-contenido, var(--space-4)));
+  padding-block: var(--space-9);
+}
+
+/* Dos franjas seguidas ya no necesitan aire entre ellas: el cambio de campo de
+   color ES la separación. Cualquier margen propio de la sección se anula. */
+.franja + .franja {
+  margin-top: 0;
+}
+
+/*
+  LA PRIMERA FRANJA COME EL RELLENO SUPERIOR DEL `<main>`.
+
+  Sin esto, entre la cabecera pegajosa y el héroe de cacao queda una banda de
+  papel de `--pad-contenido-top` que se lee como un error de maquetación. El
+  número no se repite: se lee la variable que el layout publica.
+
+  `:first-child` y no una clase: cuando el visitante ES socio, la landing pinta
+  antes el puente «Ir a mi portal» y entonces esa banda de papel SÍ tiene
+  contenido y debe conservarse.
+*/
+.franja:first-child {
+  margin-top: calc(var(--pad-contenido-top, 0px) * -1);
+}
+
+/* --------------------------------------------------------------------------
+   LOS CUATRO TONOS
+
+   Alternan de verdad: ninguna sección larga queda en el mismo tono que la
+   anterior. El orden de la landing es cacao → crema honda → crema → papel →
+   cacao → papel, y el pie cierra en crema.
+   -------------------------------------------------------------------------- */
+
+/* PAPEL. Se declara explícito en vez de «no poner nada»: una franja de papel
+   entre dos de color es una decisión, y escribirla evita que la siguiente
+   persona la lea como un olvido. */
+.tonoPapel {
+  background: var(--bg);
+}
+
+/* CREMA. 1,04:1 contra el papel en claro; en oscuro la banda alterna es más
+   clara que el fondo, con el mismo 1,04:1. El token ya resuelve los dos. */
+.tonoCrema {
+  /* Las dos capas en UNA declaración: la forma corta `background` resetea
+     cualquier `background-image` anterior, y el fallo sería mudo. */
+  background: var(--fondo-franja-clara), var(--surface-alt);
+}
+
+/*
+  CREMA HONDA. Es superficie de RELLENO, no de párrafo tenue: `tokens.css` §1
+  mide `--tinta-3` a 4,18:1 y `--gold-700` a 4,21:1 contra ella, y los dos
+  reprueban AA. Aquí se usa para «Así funciona ORUM», que no lleva ni texto
+  terciario ni texto dorado ni tarjetas.
+
+  El colapso de `--text-3` en `--text-2` es la red de seguridad por si mañana
+  entra un texto tenue: se pierde un escalón de jerarquía y se gana que se
+  lea. En claro sube de 4,18:1 a 6,51:1; en oscuro (n-900) 5,95 → 8,82.
+
+  Lo que NO se remapea es `--brand`: en claro habría que bajarlo a
+  `--gold-800` (6,22:1) pero en oscuro el `--gold-300` de ahí ya da 11,07:1 y
+  oscurecerlo sería un fallo en el otro tema. Un remapeo que solo vale para un
+  tema no se escribe: se evita el texto dorado sobre crema honda, que es lo
+  que hace esta pantalla.
+*/
+.tonoHonda {
+  background: var(--fondo-franja-clara), var(--surface-alt-2);
+
+  --text-3: var(--text-2);
+}
+
+/*
+  CACAO  ·  la franja ceremonial, y el único sitio donde el oro claro es texto.
+
+  `--gold-400` da 7,83:1 aquí y 1,99:1 sobre crema: sobre claro está prohibido
+  y sobre esto es donde se lee METAL en vez de mostaza. Es lo que permite que
+  el titular del héroe vaya en oro sin inventarse el contraste.
+
+  `color-scheme: dark` no es decorativo: dentro de esta franja el navegador
+  pinta las barras de desplazamiento y los controles nativos en su variante
+  oscura. Sin esto, un carril con scroll visible saca una barra clara sobre
+  chocolate.
+
+  ⚠️ TRAMPA Nº 2 DEL LOG DE Y1: poner `color` NO BASTA. Dentro caen
+  componentes que resuelven sus PROPIOS tokens —`Button` su relleno, `Card` su
+  superficie, `ComercioLogo` su placa— y todos apuntan a los semánticos del
+  tema claro. Así que la franja se comporta como un ÁMBITO DE TEMA: reasigna
+  los semánticos a sus equivalentes de cacao, y cualquier componente que entre
+  se adapta sin saber dónde está.
+
+  Ratios medidos con el método WCAG 2.1 al aplicar esta tanda (Z2), contra
+  `--cacao-bg` #2b1a15:
+    --cacao-fg    (papel)    16,24:1
+    --cacao-fg-2  (n-300)     8,56:1
+    --cacao-fg-3  (n-400)     5,78:1
+    --cacao-brand (gold-400)  7,83:1   ← el titular
+  Y contra la TARJETA de cacao #3a251e: papel 14,00 · n-300 7,38 · gold-400
+  6,75 · n-400 4,98.
+*/
+.tonoCacao {
+  /* Luz de foco entrando por arriba a la izquierda, que es de donde viene la
+     luz en todo el sistema de sombras. El color plano va DETRÁS como respaldo:
+     si un navegador no resolviera el `color-mix`, la franja sigue siendo negra
+     y no transparente. */
+  background: var(--fondo-franja-oscura), var(--cacao-bg);
+  color-scheme: var(--cacao-scheme, dark);
+
+  --bg: var(--cacao-bg);
+  --surface: var(--cacao-surface);
+  --surface-alt: var(--cacao-surface);
+  --surface-alt-2: var(--cacao-surface);
+  --surface-hover: var(--cacao-hover);
+  --surface-sunk: var(--cacao-bg);
+
+  --text: var(--cacao-fg);
+  --text-2: var(--cacao-fg-2);
+  /*
+    `--text-3` NO baja a `--cacao-fg-3`, igual que en el catálogo. Los ratios
+    de ese token están calculados contra el FONDO de la franja, y el texto
+    tenue vive dentro de las tarjetas, que son más claras. Sobre una tarjeta
+    oscura no hay sitio para tres niveles de gris: se colapsa el tercero en el
+    segundo y se gana que el texto se lea.
+
+    (Nota de medición: recalculado aquí, `--cacao-fg-3` sobre `--cacao-surface`
+    da 4,98:1 y no los 4,02:1 que anotó Y1 — pasaría AA. Se mantiene el
+    colapso igualmente: es la decisión ya tomada para el catálogo y dos
+    ámbitos de cacao con jerarquías distintas serían dos sistemas.)
+  */
+  --text-3: var(--cacao-fg-2);
+
+  --brand: var(--cacao-brand);
+  --brand-edge: var(--cacao-edge);
+  --focus: var(--cacao-brand);
+
+  color: var(--text);
+}
+
+/* --------------------------------------------------------------------------
+   EL FILO DORADO DE 1px  ·  el device más rentable de las cinco referencias
+
+   Cuesta nada, se lee caro y encaja con la regla de que el oro aparece cuando
+   tocas algo. Va como `box-shadow` y no como `border` para que no mida: la
+   franja no cambia de alto al ganarlo o perderlo.
+   -------------------------------------------------------------------------- */
+
+.filoInferior {
+  box-shadow: inset 0 -1px 0 var(--brand-edge);
+}
+
+/*
+  LAS DOS FILOS, para la franja que va EMPAREDADA entre dos de papel.
+
+  El héroe solo necesita el de abajo: por arriba lo cierra la cabecera. El
+  cierre de la landing, en cambio, tiene papel encima y papel debajo.
+
+  Y en tema OSCURO esto deja de ser decoración y pasa a ser lo único que
+  delimita la franja: el cacao #2b1a15 contra el fondo raíz #14100e da
+  **1,15:1** medido. En claro el salto papel→cacao es evidente por sí solo y
+  el filo es el device caro de las referencias; en oscuro es el borde.
+*/
+.filoBanda {
+  box-shadow:
+    inset 0 1px 0 var(--brand-edge),
+    inset 0 -1px 0 var(--brand-edge);
+}
+
+/* ==========================================================================
+   2. TIPOGRAFÍA CEREMONIAL COMPARTIDA
+   --------------------------------------------------------------------------
+   El encabezado de sección del escaparate. Va aquí y no en cada módulo porque
+   lo usan «Así funciona ORUM», «Conoce a tus futuros aliados», «El club en
+   números» y «Hazte socio hoy», en cuatro archivos distintos: tres copias de
+   la misma escala son tres oportunidades de que una se quede atrás.
+
+   POR QUÉ SUBE A `--t-hero-2` (32 → 48px) Y NO SE QUEDA EN `--t-title-1`
+   (26px). Es el encargo de la v4: «un serif de display para titulares hace más
+   por el "se ve caro" que cualquier animación», y el rango de la escala subió
+   justo para esto. `--t-hero-*` es opt-in a propósito —ninguna pantalla de
+   trabajo lo hereda— y este es el sitio donde se opta.
+   ========================================================================== */
+
+.tituloSeccion {
+  margin: 0;
+
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  font-weight: var(--t-hero-2-weight);
+  color: var(--text);
+
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  -webkit-font-smoothing: auto;
+  text-wrap: balance;
+
+  /*
+    Tracking interpolado con el tamaño, por la misma razón que en el titular
+    del héroe: `--t-hero-2-tracking` es un único −0,024em para un tamaño que va
+    de 32px a 48px, y aprieta de más abajo y de menos arriba.
+
+    Los dos extremos están anclados a los anchos donde `--t-hero-2-size`
+    (clamp 2rem, 5vw, 3rem) alcanza sus topes: 5vw = 32px en 640px y 5vw = 48px
+    en 960px. Pendiente = 0,8px / 320px.
+  */
+  --tracking-32: -0.45px; /* −0,014em a 32px */
+  --tracking-48: -1.25px; /* −0,026em a 48px */
+  letter-spacing: clamp(
+    var(--tracking-48),
+    calc(var(--tracking-32) - (100vw - 640px) * 0.0025),
+    var(--tracking-32)
+  );
+}
+
+/* La segunda línea del encabezado: explica el criterio de la sección. Nunca
+   sube a serif — un serif en un párrafo de apoyo se lee como cita, no como
+   explicación. */
+.apoyoSeccion {
+  margin: var(--space-2) 0 0;
+  max-width: 52ch;
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  color: var(--text-2);
+  text-wrap: pretty;
+}

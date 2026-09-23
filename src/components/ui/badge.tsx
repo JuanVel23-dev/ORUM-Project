@@ -65,11 +65,24 @@ const ETIQUETA_MOTIVO: Record<MotivoInactiva, string> = {
  * secundario, no como un tercer color: en una lista larga lo que hay que poder
  * escanear es una sola cosa, si paga o no paga.
  */
+/**
+ * Forma que acepta `StatusBadge`.
+ *
+ * Es un SUPERCONJUNTO de `EstadoDerivado`: admite además la forma reducida de
+ * los orígenes que solo saben si la membresía vale y no por qué no vale —la
+ * herramienta de comercios recibe `vigente: boolean` de
+ * `buscar_miembro_comercio`, sin motivo—. Sin motivo no se inventa uno: se
+ * omite el texto secundario y el badge sigue diciendo lo único que importa.
+ */
+export type EstadoBadge =
+  | { activa: true; diasRestantes?: number }
+  | { activa: false; motivo?: MotivoInactiva }
+
 export function StatusBadge({
   estado,
   size = 'md',
 }: {
-  estado: EstadoDerivado
+  estado: EstadoBadge
   size?: 'sm' | 'md'
 }) {
   if (estado.activa) {
@@ -90,7 +103,9 @@ export function StatusBadge({
       icon={<span className={`${styles.punto} ${styles.puntoHueco}`} />}
     >
       Inactiva
-      <span className={styles.motivo}>· {ETIQUETA_MOTIVO[estado.motivo]}</span>
+      {estado.motivo && (
+        <span className={styles.motivo}>· {ETIQUETA_MOTIVO[estado.motivo]}</span>
+      )}
     </Badge>
   )
 }

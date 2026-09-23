@@ -1,0 +1,19 @@
+/*
+  Marco propio de la frontera de error.
+
+  `error.tsx` de este segmento sustituye a TODO lo que cuelga de `/miembros`,
+  incluido `(portal)/layout.tsx`. Cuando salta no existe el `<main>` que pone
+  el relleno y centra el contenido, así que el marco tiene que ponerlo ella.
+*/
+.marco {
+  display: grid;
+  place-items: center;
+
+  min-height: 100dvh;
+  padding: var(--space-6) var(--space-4);
+}
+
+.contenido {
+  width: 100%;
+  max-width: 460px;
+}

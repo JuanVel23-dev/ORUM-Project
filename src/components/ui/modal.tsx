@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { animate } from 'motion'
 import { X } from 'lucide-react'
-import { SPRING_UI, prefiereMovimientoReducido } from '@/lib/shared/motion'
+import {
+  SPRING_UI,
+  TWEEN_REDUCIDO,
+  leerTransformEnPantalla,
+  prefiereMovimientoReducido,
+  salidaDe,
+  transicionSegunPreferencia,
+} from '@/lib/shared/motion'
 import { Button } from './button'
 import styles from './modal.module.css'
 
@@ -18,6 +25,8 @@ type Props = {
   open: boolean
   onClose: () => void
   title?: string
+  /** Nombre accesible del diálogo cuando NO hay `title` visible. */
+  ariaLabel?: string
   description?: string
   /** Botonera inferior. En móvil se apila invertida (la acción principal arriba). */
   footer?: ReactNode
@@ -35,6 +44,7 @@ export function Modal({
   description,
   footer,
   width = '480px',
+  ariaLabel,
   hideClose = false,
   children,
 }: Props) {
@@ -58,16 +68,26 @@ export function Modal({
     }
 
     if (prefiereMovimientoReducido()) {
-      animate(dialogo, { opacity: 0 }, { duration: 0.15 }).finished.then(fin, fin)
+      animate(dialogo, { opacity: 0 }, TWEEN_REDUCIDO).finished.then(fin, fin)
       return
     }
 
-    // Sale por el MISMO camino por el que entró (spec §5.4): encogiendo hacia
-    // su centro. Entrar de una forma y salir de otra desorienta.
+    /*
+      Sale por el MISMO camino por el que entró (spec §5.4): encogiendo hacia
+      su centro. Entrar de una forma y salir de otra desorienta.
+
+      v4 §5: aquí había una curva ESCRITA A MANO, `[0.7, 0, 0.84, 0]`, que es
+      un `ease-in` — la única curva que esta dirección prohíbe en interfaz,
+      porque empieza lenta justo en el instante en que el usuario más mira. Y
+      además era un literal, así que no se veía en ninguna búsqueda de tokens.
+      Ahora es el mismo resorte de la entrada recortado por `salidaDe()`: mismo
+      carácter, ~0,20 s en vez de 0,30, sin rebote. La salida es más rápida que
+      la entrada, que es la regla 3.
+    */
     animate(
       dialogo,
       { opacity: 0, transform: 'scale(0.96)' },
-      { duration: 0.18, ease: [0.7, 0, 0.84, 0] },
+      salidaDe(SPRING_UI),
     ).finished.then(fin, fin)
   }, [])
 
@@ -78,15 +98,24 @@ export function Modal({
     if (open) {
       if (!dialogo.open) dialogo.showModal()
 
-      if (prefiereMovimientoReducido()) {
-        animate(dialogo, { opacity: [0, 1] }, { duration: 0.15 })
-      } else {
-        animate(
-          dialogo,
-          { opacity: [0, 1], transform: ['scale(0.96)', 'scale(1)'] },
-          SPRING_UI,
-        )
-      }
+      /*
+        INTERRUMPIBLE (v3 §3.3): se arranca desde lo que HAY PINTADO, no desde
+        un 0.96 fijo. Si el diálogo se reabre mientras todavía se estaba
+        encogiendo al cerrarse, partir del valor lógico lo haría saltar a 0.96
+        antes de crecer — y ese salto se ve, por bueno que sea el resorte que
+        viene después.
+      */
+      const { escala } = leerTransformEnPantalla(dialogo)
+      const desde = escala > 0 && escala < 1 ? escala : 0.96
+
+      const reducido = prefiereMovimientoReducido()
+      animate(
+        dialogo,
+        reducido
+          ? { opacity: [0, 1] }
+          : { opacity: [0, 1], transform: [`scale(${desde})`, 'scale(1)'] },
+        transicionSegunPreferencia(SPRING_UI, reducido),
+      )
     } else if (dialogo.open) {
       cerrarConAnimacion()
     }
@@ -115,6 +144,7 @@ export function Modal({
       onCancel={alCancelar}
       onClick={alPulsar}
       aria-labelledby={title ? 'modal-titulo' : undefined}
+      aria-label={!title && ariaLabel ? ariaLabel : undefined}
     >
       <div className={styles.contenido}>
         {tieneCabecera && (

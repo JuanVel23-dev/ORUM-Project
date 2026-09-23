@@ -7,7 +7,9 @@
      deja sitio para que la lista crezca hacia abajo. */
   margin: min(12dvh, 96px) auto auto;
 
-  border: 1px solid var(--border-subtle);
+  /* Superficie flotante sobre papel del mismo blanco. La define el escalón de
+     overlay, no un trazo (§2.1 / §2.2). */
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow-overlay), var(--edge);
@@ -38,7 +40,8 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--border-subtle);
+  /* Separador dentro de una superficie ya definida (§2.2). */
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -86,7 +89,9 @@
 .atajo {
   flex-shrink: 0;
   padding: 2px var(--space-2);
-  border: 1px solid var(--border-subtle);
+  /* La tecla es una pieza diminuta sobre el mismo papel: sin trazo visible no
+     se lee como tecla. */
+  border: 1px solid var(--border);
   border-radius: var(--radius-xs);
 
   font-size: var(--t-overline-size);
@@ -134,10 +139,27 @@
   cursor: pointer;
 }
 
-/* La selección la marca el teclado, no el hover: así flechas y ratón no se
-   pelean por decidir qué está resaltado. */
+/*
+  La selección la marca el teclado, no el hover: así flechas y ratón no se
+  pelean por decidir qué está resaltado.
+
+  Y NO puede marcarla solo el relleno: `--surface-hover` sobre papel blanco da
+  1,02:1, o sea que quien navega con flechas se quedaría sin saber dónde está
+  — que es la única forma de usar esta paleta. El trazo lleva el peso; el
+  relleno solo acompaña.
+*/
+/*
+  SELECCIONADA es uno de los estados que encienden el oro (§2.3): filo dorado
+  más relleno de `--surface-hover`. Y siguen haciendo falta los dos canales,
+  porque el relleno solo da 1,02:1 sobre papel y quien navega con flechas se
+  quedaría sin saber dónde está — que es la única forma de usar esta paleta.
+
+  El filo va `inset`: un anillo exterior en una fila de ancho casi completo se
+  saldría del relleno del panel.
+*/
 .opcion[data-seleccionada='true'] {
   background: var(--surface-hover);
+  box-shadow: var(--filo-activo-inset);
 }
 
 .opcionIcono {
@@ -199,7 +221,8 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-2) var(--space-5);
-  border-top: 1px solid var(--border-subtle);
+  /* El pie perdió su relleno distinto: la línea lo separa sola. */
+  border-top: 1px solid var(--border);
   background: var(--surface-sunk);
   flex-shrink: 0;
 

@@ -46,9 +46,17 @@ type Props<T> = {
   className?: string
 }
 
-/** Máximo de filas escalonadas: más allá, la cascada se percibe como lentitud. */
-const MAX_ESCALONADAS = 10
-const PASO_MS = 20
+/*
+  Entrada escalonada de filas. §4.2 de la dirección de arte v2 fija el paso en
+  30-40 ms y el TOPE en 8.
+
+  El tope es lo que importa. Con el 10 anterior la fila 11 entraba a 200 ms;
+  con 8 pasos de 35 el techo queda en 245 ms, que sigue estando por debajo de
+  lo que se percibe como espera, y el paso más largo hace que la secuencia se
+  lea como secuencia en vez de como un parpadeo.
+*/
+const MAX_ESCALONADAS = 8
+const PASO_MS = 35
 
 export function DataList<T>({
   items,

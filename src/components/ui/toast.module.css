@@ -34,10 +34,19 @@
   gap: var(--space-3);
 
   padding: var(--space-4);
-  border: 1px solid var(--border-subtle);
+  /*
+    Flota sobre cualquier pantalla, y todas son papel blanco: lo que lo recorta
+    del contenido de debajo es la sombra, en el escalón de lo que flota
+    (§2.2). Sin trazo (§2.1).
+
+    Token semántico y no `--shadow-3` crudo: en oscuro el escalón se remapea a
+    una sombra mucho más densa, y con el crudo el toast se fundía con la
+    pantalla.
+  */
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
   background: var(--surface);
-  box-shadow: var(--shadow-3), var(--edge);
+  box-shadow: var(--shadow-flotante), var(--edge);
 
   font-size: var(--t-callout-size);
   line-height: var(--t-callout-leading);
@@ -103,8 +112,14 @@
   border: none;
 }
 
-.accion:hover {
-  text-decoration: underline;
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .accion:hover {
+    text-decoration: underline;
+  }
 }
 
 .cerrar {
@@ -127,9 +142,16 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.cerrar:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .cerrar:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
 }
 
 .cerrarIcono {

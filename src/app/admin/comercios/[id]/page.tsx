@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { MapPin, MoreHorizontal, Pencil, Tag } from 'lucide-react'
+import { Images, MapPin, MoreHorizontal, Pencil, Tag } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AccionEstado } from '@/components/ui/accion-estado'
@@ -157,13 +157,24 @@ export default async function FichaComercioPage({
         title={comercio.nombre}
         description={comercio.descripcion ?? undefined}
         actions={
-          <Button
-            href={`/admin/comercios/${comercio.id}/editar`}
-            variant="secondary"
-            icon={<Pencil size={16} />}
-          >
-            Editar datos
-          </Button>
+          <>
+            <Button
+              href={`/admin/comercios/${comercio.id}/editar`}
+              variant="secondary"
+              icon={<Pencil size={16} />}
+            >
+              Editar datos
+            </Button>
+            {/* Logo, portada y galería. El gestor existía completo —página,
+                modal y acciones— pero ningún botón llevaba a él. */}
+            <Button
+              href={`/admin/comercios/${comercio.id}/imagenes`}
+              variant="secondary"
+              icon={<Images size={16} />}
+            >
+              Imágenes
+            </Button>
+          </>
         }
       />
 

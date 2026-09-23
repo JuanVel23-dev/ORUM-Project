@@ -21,6 +21,57 @@
   }
 }
 
+/*
+  LA SEGUNDA VÍA, EN TEXTO Y NO EN BOTÓN.
+
+  En reposo hay una sola acción grande —escanear—, porque es la que resuelve la
+  inmensa mayoría de las ventas. Escribir el número existe siempre, pero con el
+  peso de un enlace: dos botones grandes lado a lado obligan a decidir cuál, y
+  decidir de pie con el cliente delante cuesta más que el toque que ahorraría.
+
+  Va subrayado y en tinta, no en oro: aquí el oro sigue siendo marca, y este
+  portal se mantiene sobrio a propósito.
+*/
+.salida {
+  text-align: center;
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+.enlaceTexto {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/*
+  Lo que se VE y lo que se TOCA son cosas distintas. El enlace debe leerse
+  pequeño —no compite con el botón de escanear—, así que el área crece por
+  debajo con un `::after` centrado de `--tap-min` en vez de engordar el texto.
+*/
+.enlaceTexto::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: max(100%, var(--tap-min));
+  height: var(--tap-min);
+}
+
+.enlaceTexto:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-xs);
+}
+
 /* --- Escáner --------------------------------------------------------------- */
 
 .escaner {
@@ -91,16 +142,88 @@
 /* --- Veredicto ------------------------------------------------------------- */
 
 /*
-  El momento de la verdad. Se lee de un vistazo o no sirve: nombre grande,
-  estado con punto Y texto (nunca solo color), y el número en monoespaciada
-  para poder cotejarlo con el carnet carácter a carácter.
+  EL MOMENTO DE LA VERDAD, Y LO ÚNICO DE ESTE PORTAL CON PRESENCIA.
+
+  Se lee a un metro, de pie, con el pulgar tapando media pantalla y a veces con
+  sol encima. Todo lo demás de la herramienta es sobrio; esto no puede serlo.
+
+  Antes el dictamen era un `Badge`: la pieza que decide si se cobra o no era la
+  MÁS PEQUEÑA de la tarjeta (`AUDIT-a11y` #9). Ahora es una franja de color
+  sólido a todo el ancho, con el veredicto dentro en mayúsculas.
+
+  Contraste medido, texto `--surface` sobre relleno de estado —los dos tokens
+  giran con el tema en sentidos opuestos, así que el par funciona en claro y en
+  oscuro sin una sola rama de tema:
+
+    activa   claro  #137a3b / #fdfcfa .... 5,29:1      inactiva claro  6,07:1
+    activa   oscuro #45d67c / #211a16 .... 9,12:1      inactiva oscuro 5,59:1
+
+  Los cuatro pasan AA de texto con holgura, y el filo de la franja contra la
+  tarjeta va muy por encima del 3:1 de 1.4.11 con esos mismos números.
 */
 .veredicto {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-5);
 }
 
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-sm);
+
+  color: var(--surface);
+
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  font-weight: 700;
+  text-transform: uppercase;
+  /* Tracking POSITIVO: la escala lo trae negativo para titulares en caja baja,
+     y unas versales apretadas se leen como un bloque a un metro de distancia. */
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+
+.bannerActiva {
+  background: var(--success);
+}
+
+.bannerInactiva {
+  background: var(--danger);
+}
+
+/*
+  Disco LLENO contra anillo HUECO. La diferencia es de forma, no de color: es
+  lo que sostiene el veredicto cuando el color no llega —daltonismo, sol sobre
+  la pantalla— y lo que ya hace `StatusBadge` en el resto del producto. El
+  tamaño va en `em` para que siga al titular si algún día cambia la escala.
+*/
+.punto {
+  flex-shrink: 0;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+
+.puntoHueco {
+  background: none;
+  box-shadow: inset 0 0 0 0.16em currentColor;
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/*
+  EL NOMBRE, LO SEGUNDO QUE LEE EL OJO. Confirma que el carnet es de quien lo
+  está entregando; el número baja a dato de cotejo, que es su verdadera función.
+*/
 .nombre {
   font-size: var(--t-title-1-size);
   line-height: var(--t-title-1-leading);
@@ -117,15 +240,17 @@
   color: var(--text-3);
 }
 
-.estadoFila {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-
 .plan {
   font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+/* Qué hacer, no solo qué pasa: un veredicto negativo sin instrucción deja al
+   cajero decidiendo a solas delante del cliente. */
+.instruccion {
+  margin-top: var(--space-2);
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
   color: var(--text-2);
 }
 
@@ -148,8 +273,103 @@
 }
 
 /*
-  El valor final es la cifra que se le canta al cliente. Va aparte, en su
-  propia franja, para que no se confunda con los dos campos que la producen.
+  EL VALOR DE LA COMPRA SE VE MÁS GRANDE QUE CUALQUIER OTRO CAMPO.
+
+  Es el único dato que el cajero TECLEA, y el segundo número más mirado de la
+  pantalla después del veredicto. A cuerpo de formulario, un cero de más pasa
+  desapercibido; a `--t-title-2` con cifras tabulares y alineado a la derecha
+  —como una caja registradora o un datáfono— se ve de un vistazo.
+
+  La clase va en un envoltorio y se aplica por descendencia (`.importe input`)
+  en lugar de pasarse como `className` al propio `Input`. No es capricho:
+  `Input` concatena la clase recibida DESPUÉS de `.control`, pero las dos
+  tienen la misma especificidad (0,1,0) y quién gana depende del orden en que
+  el empaquetador junte los dos módulos CSS. Con el descendiente son (0,1,1)
+  contra (0,1,0) y el resultado deja de depender del orden de compilación.
+
+  `min-height` se queda donde lo puso `Input` (`--tap-min`): el texto crece, el
+  objetivo táctil ya cumplía.
+*/
+.importe input {
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/*
+  Dato mostrado con forma de campo.
+
+  El descuento calculado por la promoción NO es un campo: si fuera un `input`
+  readOnly seguiría siendo enfocable y en el móvil abriría el teclado para nada,
+  tapando el total. Se copia la métrica de `Field` —etiqueta, control, ayuda—
+  para que en la rejilla quede a la misma altura que "Valor de la compra".
+*/
+.campoLeido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.campoLeidoEtiqueta {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.campoLeidoValor {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: var(--space-3);
+
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-hueco);
+  color: var(--text);
+
+  /* Filo discontinuo y fondo hundido: la forma dice "esto no se escribe"
+     antes de que nadie intente escribirlo. */
+  font-size: var(--t-control-size);
+  line-height: var(--t-body-leading);
+  font-variant-numeric: tabular-nums;
+}
+
+.campoLeidoAyuda {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  letter-spacing: var(--t-footnote-tracking);
+  color: var(--text-2);
+}
+
+/*
+  EL TOTAL ES EL PIE DEL RECIBO, NO UNA CAJA DENTRO DE OTRA CAJA.
+
+  Antes era una franja con `border: 1px solid var(--border-strong)` y relleno
+  `--surface-sunk`. Las dos mitades de eso dejaron de existir con la v4:
+
+    · `--border-strong` es tinta plena (16,96:1). `CLAUDE.md` lo declara
+      literalmente «ya no se usa»: es el valor al que `prefers-contrast: more`
+      devuelve `--border-superficie`, no un trazo que se pida a mano. Un marco
+      de tinta plena dentro de una tarjeta es justo la cuadrícula de cajas que
+      hundió la v2.
+    · `--surface-sunk` es EL MISMO PAPEL que la tarjeta (v4: el blanco no tiene
+      escalones). Como relleno no separaba nada; el recuadro entero lo sostenía
+      el borde.
+
+  Lo que queda es lo que hace un recibo de caja de verdad: una regla horizontal
+  y la cifra grande debajo. `--border` es legal aquí y no por casualidad —es el
+  token de «divisiones DENTRO de una superficie: cabeceras, pies, Divider»— y
+  esto es exactamente el pie del formulario. Medido: 4,16:1 sobre papel.
+
+  El tamaño hace el resto del trabajo que hacía el marco: la cifra sube a
+  `--t-title-1`, que es el mismo peso que el nombre del socio en el veredicto.
+  Es el número que se dice en voz alta.
 */
 .total {
   display: flex;
@@ -157,9 +377,8 @@
   justify-content: space-between;
   gap: var(--space-3);
 
-  padding: var(--space-4);
-  border-radius: var(--radius-sm);
-  background: var(--surface-sunk);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
 }
 
 .totalEtiqueta {
@@ -167,11 +386,15 @@
   letter-spacing: var(--t-overline-tracking);
   font-weight: var(--t-overline-weight);
   text-transform: uppercase;
-  color: var(--text-3);
+  /* `--text-2` (7,34:1) y no `--text-3` (4,71:1): una versalita de 11px es
+     texto pequeño, y el mínimo de la escala no deja margen para leerla de pie
+     a un brazo de distancia. */
+  color: var(--text-2);
 }
 
 .totalValor {
   font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
   font-weight: var(--t-title-1-weight);
   letter-spacing: var(--t-title-1-tracking);
   font-variant-numeric: tabular-nums;
@@ -210,9 +433,39 @@
   letter-spacing: var(--t-title-2-tracking);
 }
 
+/* Los dos párrafos del acuse van juntos y separados del icono y del botón:
+   sin este agrupador, el `gap` de `.exito` repartía el mismo aire entre el ✓,
+   el título, la nota, el aviso y el CTA, y los cinco pesaban lo mismo. */
+.exitoTextos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
 .exitoNota {
-  font-size: var(--t-footnote-size);
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
   color: var(--text-2);
+}
+
+/*
+  LA LÍNEA HONESTA: «esto no se puede anular desde aquí».
+
+  Va en el tono más tenue de la tarjeta y con medida corta a propósito. Tiene
+  que estar —es lo único cierto que se le puede dar a un cajero que acaba de
+  equivocarse— pero no puede competir con el ✓ ni con «Verificar otro socio»,
+  que es lo que el 99 % de las veces se va a tocar a continuación.
+
+  `--text-3` sobre papel da 4,71:1, el mínimo de la escala y AA de cuerpo. No
+  baja más: el token ya está en su suelo (`tokens.css` §1) y aclararlo sería
+  reprobar.
+*/
+.exitoAviso {
+  max-width: 44ch;
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-3);
+  text-wrap: pretty;
 }
 
 /* Mientras el escáner se descarga. Sin esto, pulsar "Escanear QR" con mala
@@ -225,7 +478,7 @@
 
   min-height: 120px;
   border-radius: var(--radius-md);
-  background: var(--surface-sunk);
+  background: var(--surface-hueco);
 
   font-size: var(--t-footnote-size);
   color: var(--text-2);

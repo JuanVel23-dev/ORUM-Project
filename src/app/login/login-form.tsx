@@ -64,8 +64,15 @@ export function LoginForm({ mensajeInicial }: { mensajeInicial?: string }) {
 
       <Turnstile />
 
+      {/*
+        `brand` es el relleno dorado PLANO. Nunca `gold`: ese es el barrido
+        metálico, y en tema claro su parada del 62% da 2,34:1 contra la tinta.
+        Aquí la pantalla siempre es oscura, pero la variante es la misma en
+        las seis puertas y no se elige por tema.
+      */}
       <Button
         type="submit"
+        variant="brand"
         size="lg"
         fullWidth
         loading={pending}

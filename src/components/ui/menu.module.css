@@ -13,16 +13,53 @@
   min-width: 200px;
   max-width: min(320px, calc(100vw - var(--space-6)));
 
-  border: 1px solid var(--border-subtle);
+  /*
+    Superficie flotante, y lo que la delata es la sombra: exactamente lo que
+    la v3 pide (§2.1). `--shadow-flotante` es el escalón de menú/toast/popover,
+    por encima de una tarjeta y por debajo de un modal (§2.2).
+
+    Se pide el token SEMÁNTICO y no `--shadow-3` a pelo, porque en tema oscuro
+    el escalón se remapea a una sombra mucho más densa: con el crudo, el menú
+    se quedaba sin nada que lo separase de la tarjeta de debajo.
+  */
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
   background: var(--surface);
-  box-shadow: var(--shadow-3), var(--edge);
+  box-shadow: var(--shadow-flotante), var(--edge);
 
   overflow: visible;
 }
 
-.menu:popover-open {
-  animation: aparecer var(--dur-base) var(--ease-out);
+/*
+  ABRIR **Y CERRAR**, y por eso son transiciones y no un `@keyframes`.
+
+  Antes solo había animación de entrada: un popover se cierra quitándolo de la
+  capa superior, así que desaparecía de golpe — el encargo pedía animación «al
+  abrirlo y cerrarlo».
+
+  Para que un popover pueda animar su SALIDA hacen falta las dos entradas
+  `allow-discrete`: `display` y `overlay`. Sin ellas el navegador retira el
+  elemento en el primer fotograma y no queda nada que transicionar. Y
+  `@starting-style` es lo que da el valor de PARTIDA de la entrada, que en un
+  elemento que acaba de aparecer no existe.
+
+  Una transición además se reencamina a media animación: abrir y cerrar rápido
+  dos veces no reinicia el gesto desde cero, que es lo que haría un keyframe.
+
+  La salida va a `--dur-salida` (0,65x de la entrada): lento donde el usuario
+  decide, rápido donde el sistema responde — cerrar ya está decidido.
+*/
+.menu {
+  opacity: 0;
+  scale: 0.94;
+  translate: 0 var(--desplazamiento-entrada, -4px);
+
+  transition:
+    opacity var(--dur-salida) var(--ease-out),
+    scale var(--dur-salida) var(--ease-out),
+    translate var(--dur-salida) var(--ease-out),
+    display var(--dur-salida) allow-discrete,
+    overlay var(--dur-salida) allow-discrete;
 }
 
 /*
@@ -30,46 +67,90 @@
   fija JS según dónde acabe colocado el menú, para que la relación espacial
   entre disparador y contenido quede clara.
 */
-@keyframes aparecer {
-  from {
+.menu:popover-open {
+  opacity: 1;
+  scale: 1;
+  translate: 0 0;
+
+  transition-duration: var(--dur-base);
+}
+
+@starting-style {
+  .menu:popover-open {
     opacity: 0;
     scale: 0.94;
     translate: 0 var(--desplazamiento-entrada, -4px);
   }
-  to {
-    opacity: 1;
+}
+
+/*
+  Movimiento reducido: NO es ausencia de feedback. Se retira el viaje —la
+  escala y el desplazamiento, que es lo vestibular— y queda el fundido, que
+  sigue diciendo que algo apareció o se fue. `display` y `overlay` conservan
+  su `allow-discrete`: sin ellos el menú volvería a desaparecer de golpe, que
+  es peor para todo el mundo.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .menu,
+  .menu:popover-open {
     scale: 1;
     translate: 0 0;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .menu:popover-open {
-    animation: fundir var(--dur-fast) var(--ease-out);
-  }
-
-  @keyframes fundir {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
+  @starting-style {
+    .menu:popover-open {
+      scale: 1;
+      translate: 0 0;
     }
   }
 }
 
 /*
-  Las opciones entran escalonadas, 22ms entre una y otra. Es lo que convierte
-  "apareció una caja" en "se desplegó una lista": el ojo sigue la secuencia y
-  entiende que son elementos de un mismo grupo.
+  Las opciones entran escalonadas. Es lo que convierte "apareció una caja" en
+  "se desplegó una lista": el ojo sigue la secuencia y entiende que son
+  elementos de un mismo grupo.
   `backwards` mantiene el estado inicial durante el retardo, para que ninguna
   parpadee antes de empezar.
+
+  v4 §5: el paso sale de `--escalonado` (40 ms) en vez de los 22 ms que había
+  escritos a mano, y la duración de `--dur-base`. El escalonado tiene banda
+  —30 a 80 ms— y 22 quedaba por debajo: con ocho opciones la secuencia entera
+  duraba 176 ms y no se leía como secuencia, se leía como un parpadeo. El
+  arranque se retrasa un escalón para que el menú ya tenga forma cuando la
+  primera opción empieza a entrar.
 */
 .menu:popover-open .item,
 .menu:popover-open .separador,
 .menu:popover-open .etiquetaGrupo {
-  animation: entrarItem 200ms var(--ease-out) backwards;
-  animation-delay: calc(var(--indice, 0) * 22ms + 40ms);
+  animation: entrarItem var(--dur-fast) var(--ease-out) backwards;
+}
+
+/*
+  EL ESCALONADO SALE DE `nth-child`, NO DE UN TOKEN INYECTADO DESDE REACT.
+
+  Antes `DropdownMenu` clonaba cada hijo para pasarle `style={{'--indice': i}}`,
+  y eso rompía el menú entero: sus hijos los monta un Server Component y un
+  elemento que cruza la frontera RSC no se puede clonar (ver `menu.tsx`).
+
+  Y CON TOPE EN CUATRO, más corto que el de una rejilla. Es un desplegable que
+  se abre decenas de veces al día: con ocho pasos de 40 ms más 220 de entrada,
+  la última opción llegaba a los ~540 ms, y la banda de un desplegable es
+  150–250 ms (regla cero: la frecuencia manda). Ahora la entrada es
+  `--dur-fast` y el último escalón arranca a 160 ms: el menú entero está en
+  pantalla en ~300 ms y sigue leyéndose como una secuencia, no como un
+  parpadeo.
+*/
+.menu:popover-open > *:nth-child(2) {
+  animation-delay: var(--escalonado);
+}
+.menu:popover-open > *:nth-child(3) {
+  animation-delay: calc(var(--escalonado) * 2);
+}
+.menu:popover-open > *:nth-child(4) {
+  animation-delay: calc(var(--escalonado) * 3);
+}
+.menu:popover-open > *:nth-child(n + 5) {
+  animation-delay: calc(var(--escalonado) * 4);
 }
 
 @keyframes entrarItem {
@@ -112,27 +193,96 @@
   white-space: nowrap;
 
   cursor: pointer;
+
+  /*
+    EL «FONDO AZUL» ERA LA SELECCIÓN DE TEXTO.
+
+    Sin `user-select: none`, pulsar una fila —y más aún pulsar dos veces, o
+    arrastrar un píxel al hacer clic— selecciona su etiqueta, y el navegador la
+    pinta con SU azul de selección, que no sale de ningún token nuestro. En un
+    menú el texto no es contenido que se copie: es una etiqueta de un control.
+    Es la misma razón por la que ningún botón del sistema se deja seleccionar.
+
+    `-webkit-tap-highlight-color` hace lo propio en táctil, donde el navegador
+    dibuja su propio destello al tocar.
+  */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
   transition: background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-press) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.item:hover:not(:disabled),
+/*
+  El destacado de una fila de menú no puede ser solo el relleno:
+  `--surface-hover` sobre papel da 1,02:1. Se le añade el trazo como segundo
+  canal —una sombra interior de 1px, que no altera la caja ni desplaza el
+  texto— y el icono, que ya se movía un píxel en la dirección de la acción.
+*/
+/*
+  Señalar enciende el oro (§2.3). El filo va `inset` —y no en `--filo-activo`,
+  que es exterior— porque las filas ocupan casi todo el ancho de un panel con
+  `--space-2` de relleno: un anillo por fuera se comería el hueco de la fila
+  vecina. Es el mismo motivo por el que el foco también se dibuja por dentro.
+
+  Y sigue habiendo DOS canales: el relleno solo da 1,02:1 sobre papel.
+*/
 .item:focus-visible {
   background: var(--surface-hover);
-  outline: none;
+  box-shadow: var(--filo-activo-inset);
 }
 
-/* El icono se desplaza un pelo en la dirección de la acción al apuntar. */
-.item:hover:not(:disabled) .itemIcono {
-  opacity: 1;
-  transform: translateX(1px);
+/* En tactil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa, y aqui el dibujo del hover es
+   el MISMO que el del foco, asi que el socio ve una fila o un campo activo
+   que no lo esta. El `:focus-visible` se queda FUERA: un teclado existe en
+   cualquier dispositivo. */
+/*
+  EL REALCE, con un lavado DORADO en vez del gris del sistema.
+
+  `--surface-hover` es tinta al 6 %: da 1,02:1 sobre papel y en una fila ancha
+  no se ve. El oro al 12 % se lee, es de la marca y hace juego con el filo que
+  ya aparecía — el encargo pedía «algo más atractivo» y esto es lo que el
+  sistema ya tenía a mano.
+
+  Sigue habiendo DOS canales, que es la regla: el lavado y el filo. Y el texto
+  no pierde contraste: un 12 % de oro sobre papel deja la tinta muy por encima
+  del 4,5:1.
+*/
+@media (hover: hover) {
+  .item:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--brand) 12%, transparent);
+    box-shadow: var(--filo-activo-inset);
+  }
+
+  /* El icono se desplaza un pelo en la dirección de la acción al apuntar. */
+  .item:hover:not(:disabled) .itemIcono {
+    opacity: 1;
+    transform: translateX(1px);
+  }
 }
 
+/*
+  Fila de lista: el acuse es OPACIDAD, no sombra ni desplazamiento (§4.3).
+  El `scale` anterior deformaba una fila que ocupa casi todo el ancho del
+  panel y arrastraba consigo el texto.
+*/
 .item:active:not(:disabled) {
-  scale: 0.985;
+  scale: 1;
+  opacity: 0.62;
 }
 
+/*
+  El foco se dibuja POR DENTRO. Las filas ocupan casi todo el ancho del panel,
+  que solo tiene `--space-2` de relleno: un `outline` con desplazamiento se
+  saldría del menú y se comería el hueco de la fila vecina. La sombra interior
+  es el SUSTITUTO del outline —nunca se suprime uno sin el otro—, y por eso las
+  dos declaraciones viven en la misma regla: quien borre una ve la otra.
+*/
 .item:focus-visible {
+  outline: none;
   box-shadow: inset 0 0 0 2px var(--focus);
 }
 
@@ -145,9 +295,14 @@
   color: var(--danger);
 }
 
-.destructivo:hover:not(:disabled),
 .destructivo:focus-visible {
   background: var(--danger-bg);
+}
+
+@media (hover: hover) {
+  .destructivo:hover:not(:disabled) {
+    background: var(--danger-bg);
+  }
 }
 
 .itemIcono {
@@ -164,10 +319,23 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
+/* El check de la opción elegida. `margin-left: auto` lo empuja al filo derecho
+   sin necesidad de que la fila sepa cuántas columnas tiene. */
+.itemMarca {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  padding-left: var(--space-3);
+  color: var(--text-2);
+}
+
+/* Separa GRUPOS de opciones dentro de una superficie ya definida: `--border`.
+   Con el 22 % anterior los grupos dejaban de leerse como grupos. */
 .separador {
   height: 1px;
   margin: var(--space-2) calc(var(--space-2) * -1);
-  background: var(--border-subtle);
+  background: var(--border);
   border: none;
 }
 

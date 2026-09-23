@@ -50,3 +50,6 @@ next-env.d.ts
 .opencode
 
 .mcp.json
+
+# Registros de los servidores locales (next dev / next start)
+*.log

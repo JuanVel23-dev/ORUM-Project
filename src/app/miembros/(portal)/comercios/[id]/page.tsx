@@ -1,0 +1,781 @@
+import { cache } from 'react'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { ChevronLeft, ImageOff, MapPin, Phone, Store } from 'lucide-react'
+import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
+import { resolverVolverAlCatalogo } from '@/lib/miembros/volver-catalogo'
+import { createClient } from '@/lib/supabase/server'
+import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
+import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
+import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
+import { transicionComercio } from '@/lib/comercios/transiciones'
+import { hoyISO } from '@/lib/shared/fecha'
+import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { ComercioLogo } from '@/components/ui/comercio-logo'
+import { EmptyState } from '@/components/ui/feedback'
+import { Section } from '@/components/ui/layout'
+import { WhatsAppButton } from '@/components/ui/whatsapp-button'
+import estilos from './ficha.module.css'
+
+/*
+  FICHA DE COMERCIO — el MISMO componente en dos superficies.
+
+  Desde el catálogo se abre encima, en la ranura `@modal` del portal de
+  miembros (`enOverlay`). Por enlace directo se pinta a pantalla completa. El
+  porqué de que las dos convivan está en el bloque de `FichaComercioPage`, más
+  abajo, junto a la prop que las distingue.
+
+  Server Component sin una sola línea de cliente. Los `searchParams` —de donde
+  sale el destino de la vuelta— están disponibles en el servidor, así que la
+  barra de vuelta no necesita `useSearchParams()` ni la frontera de `Suspense`
+  que eso arrastraría al cromo. El único cliente de esta pantalla es el
+  envoltorio del overlay, que vive en la ranura y no aquí.
+*/
+
+const MENSAJE_SOPORTE_SEDES =
+  'Hola, quiero saber dónde puedo usar mi beneficio ORUM en este comercio.'
+
+/** Id numérico de la URL, o `null`. Entrada no confiable: llega de la ruta. */
+function idOnulo(valor: string): number | null {
+  const n = Number(valor)
+  return Number.isInteger(n) && n > 0 ? n : null
+}
+
+type Hero = {
+  id: number
+  nombre: string
+  descripcion: string | null
+  marcaNombre: string | null
+  categoriaNombre: string | null
+  logoUrl: string | null
+}
+
+/**
+ * El comercio y los dos nombres que lo acompañan.
+ *
+ * `cache()` de React memoiza la llamada DENTRO de la misma petición, que es lo
+ * que permite que `generateMetadata` y la página compartan una sola consulta
+ * en vez de duplicarla. No es caché entre peticiones —ninguna pantalla de este
+ * repositorio declara caché— y no cambia la frescura de nada: dos llamadas en
+ * el mismo render devuelven la misma fila.
+ *
+ * Devuelve `null` en los TRES casos fatales —no existe, `activo === false`,
+ * `deleted_at` no nulo— sin distinguirlos. Distinguirlos permitiría enumerar
+ * comercios inactivos probando ids.
+ */
+const cargarComercio = cache(async (id: number): Promise<Hero | null> => {
+  /*
+    `createClient()`, NUNCA `createAdminClient()`. El panel usa service role y
+    salta RLS; los portales de usuario final, jamás. `admin.ts` lleva
+    `server-only` para que el fallo sea de compilación, pero la regla se
+    escribe igual: la barrera técnica no sustituye a la intención.
+  */
+  const supabase = await createClient()
+
+  /*
+    Las tres consultas son independientes, así que van juntas. Encadenar
+    `await` —leer el comercio y solo después su marca— sería la regresión que
+    el commit `e1fc40a` vino a cerrar.
+
+    Marca y categoría se leen ENTERAS, como ya hace el catálogo: son
+    diccionarios de decenas de filas, y traerlos completos cuesta una consulta
+    paralela en vez de una encadenada al `marca_id` que todavía no conocemos.
+  */
+  const [{ data: comercio }, { data: marcas }, { data: categorias }] = await Promise.all([
+    supabase
+      .from('comercios')
+      .select('id, nombre, descripcion, marca_id, categoria_id, logo_url')
+      .eq('id', id)
+      .eq('activo', true)
+      .is('deleted_at', null)
+      .maybeSingle(),
+    supabase.from('marcas').select('id, nombre, logo_url').limit(100),
+    supabase.from('categorias').select('id, nombre').limit(100),
+  ])
+
+  if (!comercio) return null
+
+  const marca = comercio.marca_id
+    ? ((marcas ?? []).find((m) => m.id === comercio.marca_id) ?? null)
+    : null
+  const categoria = comercio.categoria_id
+    ? ((categorias ?? []).find((c) => c.id === comercio.categoria_id) ?? null)
+    : null
+
+  return {
+    id: comercio.id,
+    nombre: comercio.nombre,
+    descripcion: comercio.descripcion,
+    marcaNombre: marca?.nombre ?? null,
+    categoriaNombre: categoria?.nombre ?? null,
+    // La misma cadena comercio -> marca -> inicial que usa el catálogo.
+    logoUrl: resolverLogoComercio(comercio.logo_url, marca?.logo_url ?? null),
+  }
+})
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const numero = idOnulo(id)
+  const comercio = numero ? await cargarComercio(numero) : null
+
+  /* El título del caso fatal es el mismo para los tres motivos, igual que la
+     pantalla: no se filtra por la pestaña del navegador lo que la página
+     calla. */
+  return { title: comercio ? `${comercio.nombre} · ORUM` : 'Comercio no disponible · ORUM' }
+}
+
+type Beneficio = {
+  id: number
+  titulo: string
+  descripcion: string | null
+  tipoCodigo: TipoBeneficioCodigo
+  valor: number | null
+}
+
+type Sede = {
+  id: number
+  nombre: string
+  direccion: string | null
+  telefono: string | null
+  ciudadNombre: string | null
+}
+
+/*
+  LA MISMA FICHA EN DOS SUPERFICIES.
+
+  Desde el catálogo se abre ENCIMA, como overlay (ruta interceptada). Llegando
+  por enlace directo —WhatsApp, un buscador, recargar la página— se pinta a
+  pantalla completa. Es el mismo componente en las dos: duplicarlo en 456 líneas
+  habría garantizado que se desincronicen a la primera corrección.
+
+  Antes era solo página, y el comentario de este archivo defendía esa decisión
+  («no es un formulario: es contenido, y el contenido se empuja»). El propietario
+  decidió lo contrario el 14/09/2026: el catálogo se queda detrás, atenuado, y el
+  socio no pierde de vista de dónde salió. El razonamiento viejo no se borra
+  porque explica por qué la página completa SIGUE existiendo y no es un respaldo
+  de segunda: es la que recibe los enlaces compartidos.
+
+  `enOverlay` no lo pasa Next —solo entrega `params` y `searchParams`—; lo pasa
+  la página de la ranura `@modal` cuando importa este componente.
+*/
+export default async function FichaComercioPage({
+  params,
+  searchParams,
+  enOverlay = false,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ volver?: string | string[] }>
+  enOverlay?: boolean
+}) {
+  /*
+    SIN EXCEPCIÓN, y antes de leer nada. Un socio con la membresía vencida no
+    puede ver la ficha de un beneficio que no puede usar; enseñársela sería
+    prometer en la pantalla lo que la caja del comercio va a denegar delante
+    del cliente.
+  */
+  await requireMiembroVigente()
+
+  const [{ id }, paramsCrudos] = await Promise.all([params, searchParams])
+
+  const numero = idOnulo(id)
+  if (numero === null) notFound()
+
+  const supabase = await createClient()
+  /* Fecha civil 'YYYY-MM-DD' en America/Bogota. `toISOString().slice(0,10)` es
+     UTC y adelanta el día cada tarde: una promoción que vence hoy dejaría de
+     verse a partir de las 7pm hora Colombia. */
+  const hoy = hoyISO()
+
+  /*
+    Cuatro consultas más, todas independientes entre sí y de la del hero, así
+    que arrancan a la vez. Ninguna espera a la anterior.
+
+    Se lanzan ANTES de resolver el hero a propósito: si el comercio no existe
+    se descartan sus resultados, que cuesta menos que encadenar una espera
+    entera en el caso normal, que es el que existe.
+  */
+  const datos = Promise.all([
+    cargarComercio(numero),
+    supabase
+      .from('promociones')
+      .select('id, titulo, descripcion, valor, tipo_beneficio_id, activo, fecha_inicio, fecha_fin')
+      .eq('comercio_id', numero)
+      .eq('activo', true)
+      .is('deleted_at', null)
+      .order('titulo')
+      .limit(100),
+    supabase.from('tipos_beneficio').select('id, codigo').limit(100),
+    supabase
+      .from('sucursales')
+      .select('id, nombre, direccion, telefono, ciudad_id')
+      .eq('comercio_id', numero)
+      .eq('activo', true)
+      .is('deleted_at', null)
+      .order('nombre')
+      .limit(100),
+    supabase.from('ciudades').select('id, nombre').limit(100),
+    supabase
+      .from('configuracion')
+      .select('valor')
+      .eq('clave', 'whatsapp_soporte')
+      .maybeSingle(),
+    /*
+      LA GALERÍA. `comercio_imagenes` llega con la migración
+      `20260914090000_favoritos_y_mas_usados.sql`, que puede no estar aplicada
+      todavía: contra una base sin la tabla, PostgREST devuelve error y `data`
+      queda en `null`. Eso NO puede tumbar la ficha, así que el error se trata
+      igual que «este comercio no ha subido fotos» — que es además la verdad
+      desde el punto de vista del socio.
+    */
+    supabase
+      .from('comercio_imagenes')
+      .select('id, url, descripcion, orden')
+      .eq('comercio_id', numero)
+      .order('orden')
+      .limit(24),
+    /*
+      La portada va APARTE y no en `cargarComercio`, y esto costó un 404.
+
+      `comercios.portada_url` llega con la migración `20260913120000`, que puede
+      no estar aplicada. Si se pide esa columna en la consulta que decide si el
+      comercio EXISTE, PostgREST devuelve error, `data` queda en `null`, y la
+      ficha entera cae en `notFound()`: una columna que falta se convierte en
+      «este comercio no existe». Aislada aquí, el peor caso es no tener foto.
+    */
+    supabase.from('comercios').select('portada_url').eq('id', numero).maybeSingle(),
+  ])
+
+  const [
+    comercio,
+    { data: promociones },
+    { data: tipos },
+    { data: sucursales },
+    { data: ciudades },
+    { data: configSoporte },
+    { data: imagenesCrudas },
+    { data: portada },
+  ] = await datos
+
+  /* No existe, está inactivo o tiene `deleted_at`: los tres dan exactamente la
+     misma pantalla (`not-found.tsx` de esta carpeta). */
+  if (!comercio) notFound()
+
+  /* `portada_url` va primero: es la foto que el comercio eligió como cara. */
+  const imagenes = [
+    ...(portada?.portada_url
+      ? [{ id: -1, url: portada.portada_url, descripcion: null as string | null }]
+      : []),
+    ...(imagenesCrudas ?? []).map((i) => ({
+      id: i.id,
+      url: i.url,
+      descripcion: i.descripcion,
+    })),
+  ]
+
+  /*
+    LA PRIMERA FOTO ABRE LA FICHA  ·  Z1
+
+    Es lo que hace desear el sitio, así que entra a lo ancho del hero en vez de
+    esperar turno en un carril a media pantalla. Si el comercio eligió portada
+    es esa; si no, su primera imagen — que es exactamente lo que un dueño de
+    local entiende por «la foto de mi negocio».
+
+    Y se RETIRA de la galería. La misma fotografía dos veces, una encima de la
+    otra y a diez píxeles de distancia, no se lee como «esta es la portada»: se
+    lee como un fallo de datos duplicados.
+  */
+  const cubierta = imagenes[0] ?? null
+  const galeria = imagenes.slice(1)
+
+  const codigoTipo = new Map((tipos ?? []).map((t) => [t.id, t.codigo]))
+  const nombreCiudad = new Map((ciudades ?? []).map((c) => [c.id, c.nombre]))
+
+  /*
+    SOLO PROMOCIONES VIGENTES, con el mismo criterio que el catálogo. Una ficha
+    que anunciara un beneficio caducado contradiría a la tarjeta desde la que
+    se llegó, y sobre todo prometería lo que la caja del comercio rechaza.
+  */
+  const beneficios: Beneficio[] = (promociones ?? [])
+    .filter((p) => esPromocionVigente(p.activo, p.fecha_inicio, p.fecha_fin, hoy))
+    .flatMap((p) => {
+      const tipoCodigo = codigoTipo.get(p.tipo_beneficio_id)
+      if (!tipoCodigo) return []
+      return [
+        {
+          id: p.id,
+          titulo: p.titulo,
+          descripcion: p.descripcion,
+          tipoCodigo,
+          valor: p.valor,
+        },
+      ]
+    })
+
+  const sedes: Sede[] = (sucursales ?? []).map((s) => {
+    const ciudadNombre = nombreCiudad.get(s.ciudad_id) ?? null
+    return {
+      id: s.id,
+      /* `sucursales.nombre` es opcional. Un comercio de un solo local suele
+         dejarlo vacío: la ciudad es entonces el nombre más útil que tenemos,
+         y «Sede» a secas el último recurso. Nunca una fila sin encabezado. */
+      nombre: (s.nombre ?? '').trim() || ciudadNombre || 'Sede',
+      direccion: s.direccion,
+      telefono: s.telefono,
+      ciudadNombre,
+    }
+  })
+
+  const ciudadesDelComercio = Array.from(
+    new Set(sedes.map((s) => s.ciudadNombre).filter((c): c is string => Boolean(c))),
+  )
+
+  const soporte = configSoporte?.valor ?? null
+
+  /*
+    ENTRADA NO CONFIABLE. `?volver=` viaja en una URL que cualquiera puede
+    enviar; sin la lista blanca de `resolverVolverAlCatalogo` el botón de
+    vuelta de una pantalla autenticada sería una redirección abierta, y de las
+    peores, porque el socio la pulsa creyendo que vuelve al catálogo.
+  */
+  const hrefVolver = resolverVolverAlCatalogo(paramsCrudos.volver)
+
+  /*
+    EL OTRO EXTREMO DEL PAR (M5). Los mismos dos nombres que escribe la tarjeta
+    de la rejilla, derivados del mismo `id`, así que casan sin que ninguna de
+    las dos pantallas sepa nada de la otra.
+
+    Llegar aquí por enlace directo —desde WhatsApp, sin catálogo detrás— no
+    necesita ningún caso especial: si no hay elemento anterior con ese nombre,
+    no hay nada que emparejar y no hay transición. Un nombre huérfano es inerte,
+    no un error.
+  */
+  /*
+    EN OVERLAY NO HAY NOMBRES DE TRANSICIÓN, y es una decisión, no un olvido.
+
+    Con la ficha abierta encima, el catálogo SIGUE montado detrás: los mismos dos
+    nombres estarían vivos dos veces en el mismo documento, y eso anula la
+    transición entera en silencio —ni error, ni consola—. Además ya no hace
+    falta: el movimiento de ese par lo hace ahora el propio overlay, que nace de
+    la tarjeta que se tocó.
+
+    En página completa se conservan. No estorban: si no hay un elemento anterior
+    con ese nombre, no hay nada que emparejar y el nombre queda inerte.
+  */
+  const transicion = enOverlay
+    ? { placa: undefined, titulos: undefined }
+    : transicionComercio(comercio.id)
+
+  return (
+    <div className={enOverlay ? estilos.enOverlay : estilos.pagina}>
+      {/*
+        LA VUELTA ES CROMO DE LA FICHA, no un enlace dentro del contenido:
+        barra pegajosa anclada justo bajo la cabecera, con fondo sólido y su
+        hairline. Nunca se desplaza fuera de la vista.
+
+        El camino normal sigue siendo el gesto atrás del sistema, que conserva
+        filtros y scroll gratis porque los dos viven en la URL. Esta barra es
+        la salida de quien llega por enlace directo o pierde el gesto.
+
+        Sin `backdrop-filter`: apilar una segunda capa de material sobre la
+        cabecera es caro en gama media, y con fondo sólido la prohibición de
+        `CLAUDE.md` ni siquiera entra en juego.
+
+        La etiqueta es «Comercios» —el destino, como en iOS— y no «Volver»: no
+        promete devolver a unos resultados que puede que no existan.
+      */}
+      {/*
+        Dentro del overlay NO se pinta: el overlay ya tiene su cierre, el
+        `Escape`, el scrim y el arrastre. Dos salidas que hacen lo mismo, una
+        encima de la otra, es ruido — y la barra pegajosa se comería el alto
+        útil de la hoja en móvil.
+      */}
+      {!enOverlay && (
+        <div className={estilos.barraVuelta}>
+          <Link href={hrefVolver} className={estilos.volver}>
+            <ChevronLeft size={18} aria-hidden />
+            Comercios
+          </Link>
+        </div>
+      )}
+
+      <header className={estilos.hero}>
+        {/*
+          LA CUBIERTA. Si el comercio tiene foto, la ficha abre con ella a lo
+          ancho: es lo que hace desear el sitio, y ningún texto lo consigue.
+
+          Sin `next/image`: `next.config.ts` no declara `images` y estas URLs
+          son externas y arbitrarias. El hueco se reserva con `aspect-ratio`,
+          así que la foto no empuja el nombre al cargar (CLS) aunque no se
+          conozcan sus dimensiones.
+
+          `alt` con la descripción si la hay, y vacío si no: NUNCA el nombre
+          del comercio, que el `h1` de dos líneas más abajo ya dice.
+        */}
+        {cubierta && (
+          <div className={estilos.portada}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- URL externa, no un asset local */}
+            <img
+              src={cubierta.url}
+              alt={cubierta.descripcion ?? ''}
+              /* La cubierta es lo primero que se ve: cargarla con pereza sería
+                 pedirle al socio que espere a ver lo que ya está mirando. */
+              fetchPriority="high"
+              decoding="async"
+              className={estilos.portadaImagen}
+            />
+          </div>
+        )}
+
+        {/*
+          La placa monta sobre el borde inferior de la cubierta cuando la hay
+          —el margen negativo lo pone `.conPortada`— y el nombre baja a una
+          fila propia, a ancho completo.
+
+          Antes el nombre compartía fila con la placa de 144px y por eso estaba
+          atado a `--t-title-1` (24px fijo): a 375px le quedaban 187px y
+          cualquier tamaño mayor lo partía en cuatro líneas. Con la fila entera
+          para él puede llevar el serif y el peldaño `hero`, que es lo que hace
+          que la ficha se lea cara.
+        */}
+        <div
+          className={[estilos.placa, cubierta && estilos.conPortada].filter(Boolean).join(' ')}
+        >
+          <ComercioLogo
+            logoUrl={comercio.logoUrl}
+            nombre={comercio.nombre}
+            variante="hero"
+            nombreTransicion={transicion.placa}
+          />
+        </div>
+
+        <div
+          className={estilos.heroTextos}
+          style={transicion.titulos ? { viewTransitionName: transicion.titulos } : undefined}
+        >
+          {/* Único `h1` de la pantalla. */}
+          <h1 className={estilos.nombre}>{comercio.nombre}</h1>
+
+          {/* Es lo que explica por qué se ve ESE logotipo cuando el comercio
+              no tiene uno propio y hereda el de su marca (V4). */}
+          {comercio.marcaNombre && <p className={estilos.marca}>{comercio.marcaNombre}</p>}
+        </div>
+
+        {(comercio.categoriaNombre || ciudadesDelComercio.length > 0) && (
+          <p className={estilos.meta}>
+            {comercio.categoriaNombre && (
+              <span className={estilos.categoria}>{comercio.categoriaNombre}</span>
+            )}
+            {ciudadesDelComercio.length > 0 && (
+              <span className={estilos.ciudades}>
+                {/* El texto que sigue ya dice las ciudades. */}
+                <MapPin size={13} aria-hidden />
+                {ciudadesDelComercio.join(' · ')}
+              </span>
+            )}
+          </p>
+        )}
+      </header>
+
+      {/* V3 · Sin descripción, el bloque NO se renderiza y no deja hueco: un
+          «Sin descripción» de relleno sería peor que el silencio. */}
+      {comercio.descripcion && (
+        <p className={estilos.descripcion}>{comercio.descripcion}</p>
+      )}
+
+      {/*
+        EL CAMPO DE COLOR  ·  Z1
+
+        «Tus beneficios» es la respuesta a la pregunta por la que el socio abrió
+        esta ficha, así que deja de ser una sección más de la plancha blanca y
+        pasa a tener su propio campo en CREMA. Es la técnica de Agence Cartier:
+        separar sin dibujar una sola línea. Las tarjetas de dentro se quedan en
+        papel, así que son lo más claro de la pantalla y el ojo va ahí solo.
+
+        No sangra a ancho completo como las franjas del catálogo: esta misma
+        ficha se pinta dentro de una hoja modal, y un `margin-inline: 50% - 50vw`
+        ahí se saldría del overlay por los dos lados.
+      */}
+      <Section tono="crema" className={estilos.zonaBeneficios}>
+        <h2 className={estilos.tituloSeccion}>Tus beneficios</h2>
+
+        {beneficios.length > 0 ? (
+          /*
+            EL ÚNICO TRAZO DE 2px DE ESTA PANTALLA (§6 de la dirección v2).
+
+            La ficha existe para responder «qué me descuentan aquí». Todo lo
+            demás —el hero, la descripción, las sedes, la vuelta— es contexto de
+            esa respuesta, así que el grosor va donde está la respuesta y en
+            ningún otro sitio. Las tarjetas de sede se quedan en 1px a propósito:
+            son una lista de iguales, y si varias llevaran el trazo grueso el
+            grosor dejaría de significar «esto es lo importante».
+
+            NO se pone en la rama vacía. Esa rama es `Card variant="sunk"`, o
+            sea la ausencia de la respuesta: marcarla como principal ascendería
+            un estado vacío a protagonista de la pantalla. Con los datos de hoy
+            —cero promociones vigentes— eso significa que la ficha no tiene
+            ningún 2px, y es lo correcto: el trazo se gana, no se reparte.
+          */
+          <Card principal padding="none">
+            <ul className={estilos.listaBeneficios}>
+              {beneficios.map((b) => (
+                <li key={b.id} className={estilos.beneficio}>
+                  {/*
+                    LA JERARQUÍA SE INVIERTE  ·  Z1
+
+                    Antes el título de la promoción era el titular y el
+                    descuento una píldora dorada de 11px a la derecha: el dato
+                    que el socio vino a buscar era lo más pequeño de la fila, y
+                    encima en el color de menor contraste de la paleta.
+
+                    Ahora el VALOR es el titular —tinta, 24px, cifras
+                    tabulares— y el título de la promoción, su línea de apoyo.
+                    Se lee de un vistazo, que era el encargo.
+
+                    Y va en TINTA, no en oro. `--gold-700` sobre crema cumple
+                    AA (4,55:1) pero la tinta da 16,25:1, y el criterio que
+                    sustituye a las reglas levantadas es explícito: si el oro
+                    hace que el dato tarde más en leerse, el oro sobra. Aquí el
+                    lujo lo ponen la cubierta y el serif del nombre; esta línea
+                    es información pura.
+
+                    El `h3` sigue siendo el título de la promoción: es el
+                    nombre del elemento, y un encabezado que dijera «20% de
+                    descuento» convertiría el índice de la pantalla en una
+                    lista de cifras sin sujeto.
+                  */}
+                  <p className={estilos.beneficioValor}>
+                    {formatearBeneficio(b.tipoCodigo, b.valor)}
+                  </p>
+                  <h3 className={estilos.beneficioTitulo}>{b.titulo}</h3>
+                  {b.descripcion && (
+                    <p className={estilos.beneficioDetalle}>{b.descripcion}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : (
+          /* V1 · La sección CONSERVA su `h2` y pone un bloque de estado, no un
+             hueco: una ficha a medio dibujar se lee como error de carga. */
+          <Card variant="sunk" padding="none">
+            <EmptyState
+              icon={<Store size={24} />}
+              title="Sin beneficios vigentes hoy"
+              description="Este aliado no tiene ningún beneficio publicado en este momento. En cuanto lo tenga, aparecerá aquí."
+              actions={
+                <Button href="/miembros" variant="secondary">
+                  Ver otros comercios
+                </Button>
+              }
+            />
+          </Card>
+        )}
+      </Section>
+
+      {/*
+        LA FRANJA DE CACAO  ·  W1
+
+        La acción principal deja de ser un botón suelto sobre papel y pasa a
+        tener su propia franja. Tres motivos, en orden de peso:
+
+        1. ES EL SITIO DEL RECORRIDO DONDE EL SOCIO PASA DE LEER A ACTUAR.
+           Acaba de ver lo que le descuentan; el paso siguiente es enseñar el
+           carnet. Un cambio de material —de papel a chocolate— dice eso sin
+           una sola palabra de más.
+        2. LA FICHA ERA UNA PLANCHA. Con la franja el ritmo queda papel (hero)
+           → crema (beneficios) → cacao (carnet) → papel (fotos y sedes), que
+           es la herramienta tonal de la v4: estructura sin dibujar una línea.
+        3. EL ORO DE ACCIÓN NECESITA UN FONDO QUE LO SOSTENGA. `--gold-600`
+           sobre papel da 3,51:1 de filo; sobre cacao, 4,63:1. El mismo botón
+           se lee mejor aquí, y encima es el único material del sistema donde
+           el oro se lee metal.
+
+        `<Section tono="cacao">` remapea `--text`, `--surface`, `--brand` y
+        `--focus` hacia dentro, así que el `Button` de aquí no sabe que está
+        sobre chocolate. Lo que el componente NO remapea —`--action`,
+        `--action-fg`, los bordes, el `color-scheme`— lo añade `.zonaCarnet`:
+        un primario en tinta sobre cacao sería tinta sobre tinta.
+
+        Ratios medidos (sRGB, WCAG 2.x) contra `--cacao-bg` #2b1a15:
+          overline  --gold-400 ....... 7,83:1
+          titular   --cacao-fg ...... 16,24:1
+          apoyo     --cacao-fg-2 ..... 8,56:1
+          botón     filo --gold-600 ... 4,63:1  (1.4.11 pide 3)
+                    texto --tinta-1 sobre --gold-600  4,84:1  (1.4.3 pide 4,5)
+          foco      --gold-400 ....... 7,83:1
+
+        EL TITULAR VA EN SANS, no en el serif de display, y es deliberado: el
+        acento serif de esta pantalla ya lo lleva el `h1` con el nombre del
+        comercio. Dos Fraunces a la vista y el acento deja de serlo — es la
+        misma razón por la que el `h1` del carnet se quedó en sans.
+      */}
+      <Section tono="cacao" className={estilos.zonaCarnet}>
+        <div className={estilos.carnetTextos}>
+          <p className={estilos.carnetOverline}>Tu membresía ORUM</p>
+          <p className={estilos.carnetTitular}>Enséñalo en la caja, antes de pagar.</p>
+          <p className={estilos.carnetApoyo}>
+            El comercio escanea tu código y aplica el beneficio al momento.
+          </p>
+        </div>
+
+        {/*
+          `variant="brand"` es el relleno dorado PLANO, no `variant="gold"`,
+          que es el barrido metálico y no admite texto encima.
+
+          `fullWidth` con un tope: en el teléfono ocupa la franja entera —que
+          es lo que se quiere— y en escritorio se queda en su columna en vez de
+          convertirse en una barra dorada de 700px, que sí rompería el
+          presupuesto de oro por sí sola.
+        */}
+        <div className={estilos.carnetAccion}>
+          <Button href="/miembros/perfil" variant="brand" fullWidth>
+            Mostrar mi carnet
+          </Button>
+        </div>
+      </Section>
+
+      {/* ==================================================================
+          FOTOS  ·  encargo nº 7
+
+          Va DESPUÉS de los beneficios y ANTES de las sedes: el socio primero
+          decide si le interesa (el beneficio), luego quiere ver el sitio, y solo
+          entonces dónde queda.
+
+          El estado vacío es parte del encargo, no un respaldo: cuando no hay
+          fotos se dice con todas las letras. Un hueco mudo deja al socio
+          creyendo que la pantalla se rompió.
+          ================================================================== */}
+      {/*
+        La sección se omite ENTERA cuando la única foto del comercio es la que
+        ya abre la ficha: un encabezado «Fotos» sobre un carril vacío —o sobre
+        un «todavía no hay fotos» teniendo una arriba— se contradice solo.
+
+        El estado vacío se conserva para el caso real, que es no tener ninguna.
+      */}
+      {(galeria.length > 0 || imagenes.length === 0) && (
+      <section
+        className={`${estilos.seccion} ${estilos.zonaFotos}`}
+        aria-labelledby="titulo-fotos"
+      >
+        {/*
+          El conteo va en el encabezado y no debajo: el socio sabe cuántas
+          fotos hay ANTES de empezar a arrastrar el carril, que es lo que un
+          carril horizontal esconde por definición. `aria-hidden` porque la
+          lista que sigue ya tiene tantos elementos como dice el número, y el
+          lector de pantalla los cuenta solo.
+        */}
+        <div className={estilos.cabeceraSeccion}>
+          <h2 id="titulo-fotos" className={estilos.tituloSeccion}>
+            Fotos
+          </h2>
+          {galeria.length > 0 && (
+            <span className={estilos.conteo} aria-hidden>
+              {galeria.length}
+            </span>
+          )}
+        </div>
+
+        {galeria.length > 0 ? (
+          <ul className={estilos.galeria}>
+            {galeria.map((img) => (
+              <li key={img.id} className={estilos.foto}>
+                {/*
+                  Sin `next/image`: `next.config.ts` no declara `images` y estas
+                  URLs son externas y arbitrarias.
+
+                  `descripcion` vacía ⇒ `alt=""`, imagen decorativa. NUNCA el
+                  nombre del archivo ni el del comercio: repetiría al lector de
+                  pantalla lo que el `h1` ya dijo, una vez por foto.
+                */}
+                {/* eslint-disable-next-line @next/next/no-img-element -- URL externa, no un asset local */}
+                <img
+                  src={img.url}
+                  alt={img.descripcion ?? ''}
+                  loading="lazy"
+                  decoding="async"
+                  className={estilos.fotoImagen}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          /* En escritorio la galería cierra la página a ancho completo, y un
+             estado vacío de 1050px es un bloque muerto enorme: la tarjeta se
+             topa para que el «todavía no hay fotos» ocupe lo que pesa. */
+          <Card className={estilos.fotosVacias}>
+            <EmptyState
+              icon={<ImageOff size={22} />}
+              title="Todavía no hay fotos"
+              description="Este aliado aún no ha compartido imágenes de su local. En cuanto las suba, aparecerán aquí."
+            />
+          </Card>
+        )}
+      </section>
+      )}
+
+      <section
+        className={`${estilos.seccion} ${estilos.zonaSedes}`}
+        aria-labelledby="titulo-sedes"
+      >
+        <h2 id="titulo-sedes" className={estilos.tituloSeccion}>
+          Dónde usarlo
+        </h2>
+
+        {sedes.length > 0 ? (
+          <ul className={estilos.listaSedes}>
+            {sedes.map((s) => (
+              <li key={s.id}>
+                <Card className={estilos.sede}>
+                  <h3 className={estilos.sedeNombre}>{s.nombre}</h3>
+
+                  {(s.direccion || s.ciudadNombre) && (
+                    <p className={estilos.sedeDato}>
+                      {[s.direccion, s.ciudadNombre].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+
+                  {s.telefono && (
+                    /* El número es un enlace `tel:` y se conserva legible: en
+                       el teléfono abre el marcador, en escritorio no estorba. */
+                    <a href={`tel:${s.telefono.replace(/\s+/g, '')}`} className={estilos.sedeTelefono}>
+                      <Phone size={14} aria-hidden />
+                      {s.telefono}
+                    </a>
+                  )}
+                </Card>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          /* V2 · Misma regla que V1: encabezado conservado, bloque de estado y
+             una salida real. Sin número de soporte configurado, la salida es
+             el catálogo: nunca un callejón. */
+          <Card variant="sunk" padding="none">
+            <EmptyState
+              icon={<MapPin size={24} />}
+              title="Todavía sin sedes publicadas"
+              description={
+                soporte
+                  ? 'Este aliado todavía no ha publicado sus sedes. Escríbenos por WhatsApp y te decimos dónde encontrarlo.'
+                  : 'Este aliado todavía no ha publicado sus sedes. Vuelve pronto: en cuanto las registre, aparecerán aquí.'
+              }
+              actions={
+                soporte ? (
+                  <WhatsAppButton telefono={soporte} mensaje={MENSAJE_SOPORTE_SEDES}>
+                    Escribir a soporte
+                  </WhatsAppButton>
+                ) : (
+                  <Button href="/miembros" variant="secondary">
+                    Ver otros comercios
+                  </Button>
+                )
+              }
+            />
+          </Card>
+        )}
+      </section>
+    </div>
+  )
+}

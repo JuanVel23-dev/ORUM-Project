@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getPerfilActual, type PerfilActual } from '@/lib/auth/auth'
+import { hoyISO } from '@/lib/shared/fecha'
 import { esMembresiaVigente } from './membresia-vigente'
 import type { EstadoMembresia, TipoMembresia } from '@/lib/supabase/database.types'
 
@@ -79,7 +80,7 @@ export async function requireMiembroVigente(): Promise<MiembroActual> {
   }
 
   const ultima = membresias?.[0] ?? null
-  const hoy = new Date().toISOString().slice(0, 10)
+  const hoy = hoyISO()
 
   if (!ultima || !esMembresiaVigente(ultima.estado, ultima.fecha_fin, hoy)) {
     redirect('/miembros/inactiva')

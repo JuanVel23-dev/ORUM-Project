@@ -19,7 +19,13 @@
   gap: var(--space-6);
 }
 
-@media (max-width: 640px) {
+/*
+  `@container`, no `@media`: esta pantalla se pinta dentro de `.main` del shell
+  (`app-shell.module.css`, `container-name: contenido`), y su ancho útil cambia
+  según la barra lateral esté abierta o en rail. Un `@media` se equivoca en
+  ~200px justo en el rango de los portátiles.
+*/
+@container contenido (max-width: 640px) {
   .destacadoCuerpo {
     flex-direction: column;
     align-items: stretch;
@@ -71,9 +77,15 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.acceso:hover {
-  border-color: var(--border);
-  box-shadow: var(--shadow-raised), var(--edge);
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .acceso:hover {
+    border-color: var(--border);
+    box-shadow: var(--shadow-raised), var(--edge);
+  }
 }
 
 .acceso:active {
@@ -93,7 +105,6 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-sm);
-  background: var(--surface-sunk);
   color: var(--text-2);
 }
 
@@ -128,6 +139,13 @@
 }
 
 /* Apunta en la dirección del gesto: telegrafía a dónde lleva. */
-.acceso:hover .flecha {
-  transform: translateX(3px);
+
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .acceso:hover .flecha {
+    transform: translateX(3px);
+  }
 }

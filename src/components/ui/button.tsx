@@ -3,14 +3,30 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'reac
 import { Spinner } from './spinner'
 import styles from './button.module.css'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'gold'
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'ghost'
+  | 'danger'
+  | 'brand'
+  | 'gold'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 type Base = {
   /**
-   * `primary` es TINTA (negro en claro, blanco en oscuro), no oro.
-   * `gold` es ceremonial: reservada al CTA comercial. Si el oro aparece en
-   * todas partes deja de significar algo.
+   * `primary` es TINTA (negro en claro, blanco en oscuro).
+   *
+   * `brand` es la acción ceremonial: relleno dorado PLANO (`--action-gold`)
+   * con texto en tinta, 5,40:1. Habilitada en el recorrido del cliente y en
+   * las seis pantallas de acceso; dentro del panel y de la herramienta de
+   * comercios el primario sigue siendo tinta. Una sola por pantalla: si el
+   * oro aparece en todas partes deja de significar algo.
+   *
+   * `gold` es el barrido metálico (`--gold-sheen`) y NO admite texto encima:
+   * en tema claro el barrido baja hasta #5c4b25, que da 2,34:1 contra la
+   * tinta y reprueba WCAG 1.4.3 en el 62% del recorrido del botón. Sirve
+   * para superficies sin texto —filos, wordmark con `background-clip`, la
+   * barra de `ProgressBar`—. Para un botón con etiqueta, usa `brand`.
    */
   variant?: ButtonVariant
   size?: ButtonSize

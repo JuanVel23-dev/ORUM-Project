@@ -10,7 +10,17 @@
   width: var(--ancho, 100%);
   height: var(--alto, 1em);
   border-radius: var(--radio, var(--radius-xs));
-  background: var(--surface-sunk);
+
+  /*
+    `--surface-hueco`, no `--surface-sunk`: el hundido dejó de teñir y un
+    esqueleto blanco sobre papel blanco no es un esqueleto, es nada.
+
+    Y aquí NO se resuelve con trazo, que es lo que hace el resto de la
+    fundación: perfilar el esqueleto dibujaría el CONTORNO exacto del
+    contenido que aún no ha llegado, y un esqueleto no debe prometer una forma
+    que puede no cumplirse. En un hueco el relleno sí es información.
+  */
+  background: var(--surface-hueco);
 }
 
 /* Barrido de luz. Lleva `data-motion-esencial` en el TSX: si se congela,
@@ -28,7 +38,7 @@
     transparent
   );
 
-  animation: barrer 1400ms ease-in-out infinite;
+  animation: barrer var(--dur-barrido) var(--ease-in-out) infinite;
 }
 
 @keyframes barrer {
@@ -49,26 +59,42 @@
 
 /* --- ProgressBar ---------------------------------------------------------- */
 
+/*
+  El carril es quien redondea y quien recorta. La barra de dentro ocupa el
+  100% y se encoge con `scaleX`, que deformaría sus propias esquinas
+  redondeadas al escalarse: el `overflow: hidden` de aquí las dibuja por ella.
+*/
 .progreso {
   width: 100%;
   height: 3px;
   border-radius: var(--radius-full);
-  background: var(--surface-sunk);
+  /* Tres píxeles no tienen sitio para un borde: el carril se tiñe. */
+  background: var(--surface-hueco);
   overflow: hidden;
 }
 
+/*
+  El progreso se anima con `transform`, NUNCA con `width`: animar `width`
+  recalcula el layout en cada fotograma y es una prohibición dura del proyecto.
+  El porcentaje llega como token dinámico (`--progreso`, de 0 a 1) desde el TSX.
+*/
 .progresoBarra {
+  width: 100%;
   height: 100%;
-  border-radius: var(--radius-full);
   background: var(--gold-sheen);
   background-size: 200% 100%;
-  transition: width var(--dur-base) var(--ease-out);
+
+  transform: scaleX(var(--progreso, 0));
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-out);
 }
 
 /* Indeterminada: no se conoce el porcentaje, solo que hay actividad. */
 .indeterminada .progresoBarra {
   width: 40%;
-  animation: recorrer 1200ms var(--ease-in-out) infinite;
+  /* Aquí el `transform` lo escribe la animación: no hay porcentaje que escalar. */
+  transform: none;
+  animation: recorrer var(--dur-bucle) var(--ease-in-out) infinite;
 }
 
 @keyframes recorrer {
@@ -99,7 +125,9 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-full);
+  /* El disco sí se dibuja: es un contenedor, no un hueco. Papel + trazo. */
   background: var(--surface-sunk);
+  border: 1px solid var(--border);
   color: var(--text-3);
 }
 
@@ -111,6 +139,7 @@
 .estadoError .estadoIcono {
   color: var(--danger);
   background: var(--danger-bg);
+  border-color: var(--danger);
 }
 
 .estadoTextos {

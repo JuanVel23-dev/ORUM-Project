@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type FocusEvent } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
@@ -13,34 +13,71 @@ import { MENSAJE_ENLACE_INVALIDO, MENSAJE_ENLACE_VENCIDO, textosActivacion } fro
 
 type Estado = 'listo' | 'invalido' | 'guardando'
 
+/** A dónde entra el usuario una vez activada la cuenta. */
 const DESTINO_POR_ROL: Record<string, string> = {
   staff: '/admin',
   comercio: '/comercios',
 }
 
+/**
+ * A dónde se le manda cuando el enlace ya no sirve.
+ *
+ * Un enlace caducado sin salida es un callejón, y esta pantalla lo era: un
+ * aviso rojo y nada más. No hay ninguna acción que el usuario pueda ejecutar
+ * aquí que resuelva el problema, así que la salida es un enlace secundario y
+ * NO una acción principal: un botón grande que no arregla nada es peor que
+ * ninguno.
+ */
+const LOGIN_POR_ROL: Record<string, string> = {
+  staff: '/login',
+  comercio: '/comercios/login',
+}
+
+type Errores = {
+  password?: string
+  confirmar?: string
+  global?: string
+}
+
 export function ActivarForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const destino = DESTINO_POR_ROL[searchParams.get('rol') ?? ''] ?? '/miembros'
+  const rol = searchParams.get('rol') ?? ''
+  const destino = DESTINO_POR_ROL[rol] ?? '/miembros'
+  const login = LOGIN_POR_ROL[rol] ?? '/miembros/login'
+  // Activar una invitación o restablecer una contraseña: mismo formulario,
+  // otros textos (`?modo=recuperar`).
   const textos = textosActivacion(searchParams.get('modo') ?? undefined)
   const tokenHash = searchParams.get('token_hash')
   const tipo = searchParams.get('type')
 
+  // Sin llamada al montar: basta con que la URL traiga token_hash + type. El
+  // canje real (verifyOtp) ocurre recién al enviar el formulario — ver
+  // activar() — así un GET pasivo (un escaneo automático de enlaces, el
+  // propio Gmail revisando el correo) no gasta el token antes de que la
+  // persona lo use de verdad.
   const [estado, setEstado] = useState<Estado>(tokenHash && tipo ? 'listo' : 'invalido')
-  const [error, setError] = useState('')
+  const [errores, setErrores] = useState<Errores>({})
   const [mensajeInvalido, setMensajeInvalido] = useState(MENSAJE_ENLACE_INVALIDO)
   const [verPassword, setVerPassword] = useState(false)
 
+  /*
+    Los dos errores de contraseña son de CLIENTE y aquí sí sabemos cuál campo
+    falló, así que el mensaje va AL CAMPO —`Field` ya lo cablea con
+    `aria-describedby` y `aria-invalid`— en vez de al banner global. En los
+    accesos por credenciales se queda el banner porque el servidor devuelve una
+    frase y no dice qué campo la causó.
+  */
   async function activar(formData: FormData) {
     const nueva = String(formData.get('password') ?? '')
     const repetida = String(formData.get('confirmar') ?? '')
 
     if (nueva.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres.')
+      setErrores({ password: 'La contraseña debe tener al menos 8 caracteres.' })
       return
     }
     if (nueva !== repetida) {
-      setError('Las contraseñas no coinciden.')
+      setErrores({ confirmar: 'Las contraseñas no coinciden.' })
       return
     }
     if (!tokenHash || !tipo) {
@@ -48,8 +85,8 @@ export function ActivarForm() {
       return
     }
 
+    setErrores({})
     setEstado('guardando')
-    setError('')
 
     const supabase = createClient()
 
@@ -70,30 +107,68 @@ export function ActivarForm() {
     const { error: errUpdate } = await supabase.auth.updateUser({ password: nueva })
     if (errUpdate) {
       setEstado('listo')
-      setError('No se pudo activar la cuenta. Intenta de nuevo.')
+      setErrores({ global: 'No se pudo activar la cuenta. Vuelve a intentarlo.' })
       return
     }
 
     router.push(destino)
   }
 
+  /*
+    La confirmación se revisa AL SALIR del campo, no solo al enviar.
+
+    Con el teclado abierto en una pantalla de 667px, un error que aparece al
+    enviar empuja el botón fuera de la vista justo cuando el usuario lo está
+    buscando. Al validar en el blur, el desplazamiento ocurre mientras todavía
+    mira ese campo. No se llama a `scrollIntoView`: mover la vista bajo los
+    dedos de quien escribe es peor que un desplazamiento voluntario.
+  */
+  function revisarConfirmacion(evento: FocusEvent<HTMLInputElement>) {
+    const repetida = evento.currentTarget.value
+    const formulario = evento.currentTarget.form
+    if (!formulario || !repetida) return
+
+    const nueva = String(new FormData(formulario).get('password') ?? '')
+    setErrores((previos) => ({
+      ...previos,
+      confirmar: nueva === repetida ? undefined : 'Las contraseñas no coinciden.',
+    }))
+  }
+
   if (estado === 'invalido') {
     return (
-      <Alert tone="danger" className={estilosAuth.alerta}>
-        {mensajeInvalido}
-      </Alert>
+      // `pila`, no `formulario`: la sacudida es para un envío fallido. Este
+      // enlace llega ya roto y sacudir al aterrizar regaña al usuario por algo
+      // que no hizo.
+      <div className={estilosAuth.pila}>
+        <Alert tone="danger" className={estilosAuth.alerta}>
+          {mensajeInvalido}
+        </Alert>
+
+        <Button href={login} variant="secondary" size="lg" fullWidth>
+          Ir a iniciar sesión
+        </Button>
+      </div>
     )
   }
 
   return (
     <form action={activar} className={estilosAuth.formulario} noValidate>
-      {error && (
-        <Alert key={error} tone="danger" className={estilosAuth.alerta}>
-          {error}
+      {/*
+        La sacudida la dispara el CSS con `:has(.alerta)`. NO se pone `key` en
+        el <form>: eso lo remontaría y borraría lo ya tecleado.
+      */}
+      {errores.global && (
+        <Alert key={errores.global} tone="danger" className={estilosAuth.alerta}>
+          {errores.global}
         </Alert>
       )}
 
-      <Field label={textos.etiquetaPassword} help="Mínimo 8 caracteres.">
+      <Field
+        label={textos.etiquetaPassword}
+        help="Mínimo 8 caracteres."
+        error={errores.password ?? null}
+      >
         <Input
           name="password"
           type={verPassword ? 'text' : 'password'}
@@ -111,17 +186,25 @@ export function ActivarForm() {
         />
       </Field>
 
-      <Field label="Confirma tu contraseña">
+      <Field label="Confirma tu contraseña" error={errores.confirmar ?? null}>
         <Input
           name="confirmar"
           type={verPassword ? 'text' : 'password'}
           autoComplete="new-password"
           required
+          /*
+            Con la submisión implícita, el usuario NUNCA necesita alcanzar el
+            botón: envía desde el teclado. Es el arreglo real al botón que
+            queda bajo el teclado en 667px, y cuesta un atributo.
+          */
+          enterKeyHint="done"
+          onBlur={revisarConfirmacion}
         />
       </Field>
 
       <Button
         type="submit"
+        variant="brand"
         size="lg"
         fullWidth
         loading={estado === 'guardando'}

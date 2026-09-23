@@ -5,13 +5,32 @@
   min-height: var(--tap-min);
   padding: var(--space-3);
 
-  border: 1px solid var(--border);
+  /*
+    UN CAMPO SÍ CONSERVA SU BORDE EN REPOSO. Es la excepción explícita de §2.5
+    y no es negociable: la regla «sin bordes» de la v3 es para SUPERFICIES, no
+    para controles de entrada. Sin filo, un `<input>` vacío sobre papel blanco
+    es literalmente invisible y no hay forma de saber dónde se escribe. Una
+    sombra tampoco sirve: haría que el campo pareciera un botón.
+
+    Lo que sí cambia es la PRESENCIA: baja de tinta plena (21,0:1, que se lee
+    como formulario impreso) a tinta al 55 %. Da 4,42:1 contra el papel, muy
+    por encima del 3:1 que WCAG 1.4.11 pide en el límite de un control, y deja
+    de competir con el texto que el campo contiene.
+  */
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text);
 
   font-family: var(--font-sans);
-  font-size: var(--t-body-size);
+  /*
+    NO es --t-body-size. Bajo puntero grueso este token sube a 16px porque
+    Safari iOS hace zoom al enfocar cualquier campo por debajo de ese umbral,
+    y el acceso —que lleva `autoFocus`— se descentraba solo al abrirse.
+    El razonamiento completo está en tokens.css, junto al token.
+    En escritorio vale exactamente lo mismo que antes: 15px.
+  */
+  font-size: var(--t-control-size);
   line-height: var(--t-body-leading);
 
   /*
@@ -30,20 +49,47 @@
   color: var(--text-3);
 }
 
-.control:hover:not(:disabled):not(:focus-visible) {
-  border-color: var(--border-strong);
+/*
+  Señalar enciende el oro (§2.3). En un campo el filo ya existe, así que lo que
+  ocurre es que CAMBIA DE COLOR —no aparece de la nada— y el relleno acompaña.
+  Sin ensanchar el trazo: el único 2px que queda en el sistema es el del foco.
+*/
+/* En tactil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa, y aqui el dibujo del hover es
+   el MISMO que el del foco, asi que el socio ve una fila o un campo activo
+   que no lo esta. El `:focus-visible` se queda FUERA: un teclado existe en
+   cualquier dispositivo. */
+@media (hover: hover) {
+  .control:hover:not(:disabled):not(:focus-visible) {
+    border-color: var(--brand-edge);
+    background: var(--surface-hover);
+  }
 }
 
 .control:focus-visible {
-  outline: none; /* sustituido por el anillo de box-shadow, no eliminado */
+  /*
+    EL FOCO ES LO QUE SOSTIENE WCAG 1.4.11 (§2.5). Una sombra suave no llega a
+    3:1 en el límite de un control interactivo; el filo dorado del foco sí. Por
+    eso `outline: none` aquí es legal y en ningún otro sitio: está SUSTITUIDO,
+    no eliminado, por un anillo de `box-shadow` que además puede interpolarse
+    —un `outline` no— y crece desde 0 en vez de aparecer de golpe.
+  */
+  outline: none;
   border-color: var(--focus);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 30%, transparent);
 }
 
+/*
+  Deshabilitado. `--surface-sunk` ya no tiñe nada —es el mismo papel—, así que
+  el relleno pasa a `--surface-hueco`: aquí el color SÍ es información (no hay
+  nada que escribir), no decoración de superficie. No va solo: lo acompañan la
+  opacidad, el cursor y el atributo `disabled`, que es lo que oyen los
+  lectores de pantalla.
+*/
 .control:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-  background: var(--surface-sunk);
+  background: var(--surface-hueco);
 }
 
 .control[aria-invalid='true'] {
@@ -52,6 +98,28 @@
 
 .control[aria-invalid='true']:focus-visible {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+/*
+  `type="search"` hereda en Safari y en iOS el aspecto nativo `searchfield`,
+  que reimpone su propio borde, su radio y su relleno: el mismo campo se vería
+  de dos maneras según el navegador. Se neutraliza SOLO para ese tipo —`Select`
+  ya tiene su propia regla y `Textarea` no necesita ninguna—.
+
+  El botón nativo de limpiar se devuelve a mano, porque `appearance: none` se
+  lo lleva por delante y es un toque menos para el socio que no tenemos que
+  construir. PENDIENTE DE VERIFICAR EN IPHONE REAL: en las versiones recientes
+  de Safari la reactivación del pseudo-elemento no siempre surte efecto; si no
+  aparece, el campo se limpia igual borrando el texto y no hay regresión, solo
+  un atajo que no está.
+*/
+.control[type='search'] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.control[type='search']::-webkit-search-cancel-button {
+  -webkit-appearance: searchfield-cancel-button;
 }
 
 /* Cifras que se alinean en columna o se leen dígito a dígito: número de
@@ -94,8 +162,10 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.selectWrap:hover .flecha {
-  color: var(--text-2);
+@media (hover: hover) {
+  .selectWrap:hover .flecha {
+    color: var(--text-2);
+  }
 }
 
 /* --- Prefijo / sufijo ----------------------------------------------------- */
@@ -176,15 +246,20 @@
   height: var(--tap-min);
 }
 
-.botonAdorno:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+@media (hover: hover) {
+  .botonAdorno:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
 }
 
-/* Retroalimentación en el toque, no al soltar. */
+/* Retroalimentación en el toque, no al soltar. `--escala-press-sm` es el mismo
+   0,92 que usan los demás controles pequeños del sistema: estaba escrito a mano
+   aquí, y era el último superviviente de los trece que `globals.css` §4b
+   centralizó. */
 .botonAdorno:active {
   color: var(--text);
-  scale: 0.92;
+  scale: var(--escala-press-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {

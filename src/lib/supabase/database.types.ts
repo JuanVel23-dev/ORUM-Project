@@ -48,6 +48,8 @@ export type Database = {
         Row: {
           id: string // uuid = auth.users.id
           rol_id: number
+          /** Foto de quien trabaja en el club. Se muestra en bitácora y reportes. */
+          avatar_url: string | null
           activo: boolean
           created_at: Timestamp
           updated_at: Timestamp
@@ -55,6 +57,7 @@ export type Database = {
         Insert: {
           id: string
           rol_id: number
+          avatar_url?: string | null
           activo?: boolean
           created_at?: Timestamp
           updated_at?: Timestamp
@@ -97,6 +100,8 @@ export type Database = {
           nombre: string
           descripcion: string | null
           logo_url: string | null
+          /** Foto de portada 16/9. Alimenta el carrusel público. Migración 20260913120000. */
+          portada_url: string | null
           activo: boolean
           created_at: Timestamp
           updated_at: Timestamp
@@ -110,6 +115,7 @@ export type Database = {
           nombre: string
           descripcion?: string | null
           logo_url?: string | null
+          portada_url?: string | null
           activo?: boolean
           created_at?: Timestamp
           updated_at?: Timestamp
@@ -195,6 +201,8 @@ export type Database = {
           cedula: string
           telefono: string | null
           direccion: string | null
+          /** Foto del socio. Vive aquí y no en `perfiles` porque `perfil_id` es nullable. */
+          foto_url: string | null
           ciudad_id: number | null
           registrado_por: number | null
           fecha_registro: Timestamp
@@ -212,6 +220,7 @@ export type Database = {
           cedula: string
           telefono?: string | null
           direccion?: string | null
+          foto_url?: string | null
           ciudad_id?: number | null
           registrado_por?: number | null
           fecha_registro?: Timestamp
@@ -435,6 +444,41 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['ventas']['Insert']>
         Relationships: []
       }
+      favoritos: {
+        Row: {
+          miembro_id: number
+          comercio_id: number
+          created_at: Timestamp
+        }
+        Insert: {
+          miembro_id: number
+          comercio_id: number
+          created_at?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['favoritos']['Insert']>
+        Relationships: []
+      }
+      comercio_imagenes: {
+        Row: {
+          id: number
+          comercio_id: number
+          url: string
+          /** Texto alternativo. Vacío = imagen decorativa, nunca el nombre del archivo. */
+          descripcion: string | null
+          orden: number
+          created_at: Timestamp
+        }
+        Insert: {
+          id?: number
+          comercio_id: number
+          url: string
+          descripcion?: string | null
+          orden?: number
+          created_at?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['comercio_imagenes']['Insert']>
+        Relationships: []
+      }
       configuracion: {
         Row: {
           id: number
@@ -466,6 +510,42 @@ export type Database = {
           vigente: boolean
           membresia_id: number | null
           plan_nombre: string | null
+        }[]
+      }
+      /**
+       * Comercios donde el socio más ha usado su membresía.
+       *
+       * Es función y no consulta porque `ventas` guarda `sucursal_id`, no
+       * `comercio_id`: contarlo desde el cliente serían dos consultas y un
+       * agrupado en JavaScript sobre todo el historial.
+       */
+      /**
+       * Descuentos más usados del CLUB (global), no los del socio.
+       *
+       * Es función y no consulta porque contar esto exige leer `ventas` de
+       * todos los socios, y un socio no puede leer el historial de los demás.
+       * La función devuelve solo el agregado: cuántas veces se usó cada
+       * promoción, nunca quién la usó.
+       */
+      top_descuentos: {
+        Args: { p_limite?: number }
+        Returns: {
+          promocion_id: number
+          titulo: string
+          valor: number | null
+          tipo_beneficio_id: number
+          comercio_id: number
+          comercio_nombre: string
+          logo_url: string | null
+          usos: number
+        }[]
+      }
+      comercios_mas_usados: {
+        Args: { p_miembro_id: number; p_limite?: number }
+        Returns: {
+          comercio_id: number
+          usos: number
+          ultimo_uso: Timestamp
         }[]
       }
     }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useMemo, useState } from 'react'
+import { useActionState, useEffect, useId, useMemo, useState } from 'react'
 import { Check, Receipt, RotateCcw } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
 import { calcularDescuento, calcularValorFinal } from '@/lib/comercios/ventas'
+import { error as vibrarError, exito as vibrarExito } from '@/lib/shared/haptica'
 import { registrarVenta, type RegistrarVentaState } from '../actions'
 import type { MetodoRegistroVenta, TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 import styles from './verificar.module.css'
@@ -29,6 +30,22 @@ const PESOS = new Intl.NumberFormat('es-CO', {
   maximumFractionDigits: 0,
 })
 
+/** Separador de miles para lo que se está tecleando: `45000` → `45.000`. */
+const MILES = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 })
+
+
+/*
+  Los montos viajan como cadena de dígitos y el servidor los lee con `Number()`.
+  Cualquier separador o signo que se cuele daría `NaN` y la venta se rechazaría
+  con un error que el cajero no sabría corregir, así que se filtra al teclear.
+*/
+const soloDigitos = (valor: string) => valor.replace(/\D+/g, '')
+
+/** Tope de nueve dígitos: mil millones de pesos en una compra es un dedo pegado. */
+const MAX_DIGITOS = 9
+
+const enPesos = (digitos: string) => (digitos === '' ? '' : MILES.format(Number(digitos)))
+
 export function ConfirmarVentaForm({
   miembroId,
   membresiaId,
@@ -47,9 +64,15 @@ export function ConfirmarVentaForm({
   onExito: () => void
 }) {
   const [state, formAction, pending] = useActionState(registrarVenta, estadoInicial)
+  const idDescuento = useId()
   const [promocionId, setPromocionId] = useState('')
-  const [valorCompra, setValorCompra] = useState('0')
-  const [descuentoManual, setDescuentoManual] = useState('0')
+  /*
+    Vacíos, no `'0'`. Un cero de partida obliga a borrarlo antes de teclear —y
+    si no se borra, el importe sale multiplicado por diez—. Lo que se ve cuando
+    no hay nada escrito es el marcador de posición.
+  */
+  const [valorCompra, setValorCompra] = useState('')
+  const [descuentoManual, setDescuentoManual] = useState('')
 
   const promocionSeleccionada = promociones.find((p) => String(p.id) === promocionId) ?? null
 
@@ -72,25 +95,75 @@ export function ConfirmarVentaForm({
   }, [promocionSeleccionada, calculoAutomatico, valorCompra, descuentoManual])
 
   const valorFinal = calcularValorFinal(Number(valorCompra) || 0, valorDescuento)
+  const hayImporte = Number(valorCompra) > 0
+
+  /*
+    Con una sola sucursal no hay selector, y entonces la promoción se queda
+    sola en su fila: ocupa el ancho entero en vez de dejar media fila hueca.
+  */
+  const haySelectorSucursal = sucursales.length > 1
+  const clasePromocion = haySelectorSucursal ? undefined : styles.anchoCompleto
+
+  /*
+    LA HORA DEL ACUSE VIENE DEL SERVIDOR.
+
+    Es la del recibo: el reloj del teléfono del cajero puede estar desajustado y
+    el que vale es el del sistema que guardó la venta. Y de paso evita las dos
+    trampas que tuvo este bloque antes: un `setState` dentro de un efecto
+    —render en cascada, prohibido por la norma— y una `ref` leída durante el
+    render, que tampoco es legal. Llegando con `state`, no hay nada que
+    sincronizar.
+  */
+  const horaRegistro = state.hora ?? null
+
+  /* La vibración sí es un efecto de verdad: toca una API del sistema. Solo en
+     el flanco, al pasar a `ok`. */
+  useEffect(() => {
+    if (state.ok) vibrarExito()
+  }, [state.ok])
+
+  useEffect(() => {
+    if (state.error) vibrarError()
+  }, [state.error])
 
   if (state.ok) {
     return (
       <Card padding="lg">
-        <div className={styles.exito}>
+        <div className={styles.exito} role="status">
           <span className={styles.exitoIcono} aria-hidden="true">
             <Check size={28} strokeWidth={2.5} />
           </span>
 
-          <div>
+          <div className={styles.exitoTextos}>
             <p className={styles.exitoTitulo}>Venta registrada</p>
+
+            {/*
+              LOS TRES DATOS PARA RECLAMAR: monto, socio y hora. Antes el acuse
+              decía solo el número del socio, y un cajero que sospechaba un
+              error no tenía con qué llamar al administrador: «me equivoqué en
+              una venta de esta tarde» no localiza ninguna fila.
+            */}
             <p className={styles.exitoNota}>
-              Quedó anotada a nombre del miembro {numeroMembresia}.
+              Se cobraron {PESOS.format(valorFinal)} al socio N.º {numeroMembresia}
+              {horaRegistro && <>, a las {horaRegistro}</>}.
+            </p>
+
+            {/*
+              HONESTIDAD EN LUGAR DE UN BOTÓN QUE NO EXISTE. El contrato de
+              datos no expone ninguna anulación de venta (`API-CONTRACT.md` §4),
+              así que no se ofrece un «Deshacer» de mentira: se dice a quién
+              acudir y con qué datos, que es lo único cierto que se puede dar.
+              Escalado como propuesta de backend.
+            */}
+            <p className={styles.exitoAviso}>
+              ¿Te equivocaste? Esta venta no se puede anular desde aquí: escribe al
+              administrador con la hora y el número del socio.
             </p>
           </div>
 
           {/* La cola sigue: el camino de vuelta tiene que ser un solo toque. */}
-          <Button onClick={onExito} size="lg" icon={<RotateCcw size={17} />}>
-            Verificar otro miembro
+          <Button onClick={onExito} size="lg" fullWidth icon={<RotateCcw size={17} />}>
+            Verificar otro socio
           </Button>
         </div>
       </Card>
@@ -105,10 +178,60 @@ export function ConfirmarVentaForm({
         <input type="hidden" name="numero_membresia" value={numeroMembresia} />
         <input type="hidden" name="metodo_registro" value={metodo} />
 
-        {state.error && <Alert tone="danger">{state.error}</Alert>}
+        {/* Mismo motivo que en la búsqueda: sin `key`, dos fallos idénticos
+            seguidos no se vuelven a anunciar al lector de pantalla. */}
+        {state.error && (
+          <Alert key={state.error} tone="danger">
+            {state.error}
+          </Alert>
+        )}
 
         <div className={styles.campos}>
-          <div className={styles.anchoCompleto}>
+          {/*
+            EL IMPORTE VA PRIMERO. Es el único dato que el cajero tiene que
+            teclear y el que decide el total; la promoción y la sucursal son
+            elecciones de lista que puede resolver después, o que no tiene que
+            tocar en absoluto. Antes abría la pantalla el selector de promoción,
+            que en la mayoría de las ventas se deja como está.
+          */}
+          {/* `styles.importe` va en el ENVOLTORIO, no en el `Input`: ver el
+              porqué de la especificidad en `verificar.module.css`. */}
+          <div className={`${styles.anchoCompleto} ${styles.importe}`}>
+            <Field label="Valor de la compra">
+              <Input
+                /*
+                  El campo VISIBLE no se envía: lleva los puntos de millar para
+                  que el cajero vea de un vistazo si se le fue un cero. Lo que
+                  viaja son los dígitos limpios del `hidden` de abajo —el
+                  servidor los parsea con `Number()` y cualquier separador daría
+                  `NaN`—. Presentación y dato, separados a propósito.
+
+                  `text` con `inputMode="numeric"`, no `type="number"`: en
+                  Android el teclado de `number` trae `+`, `-` y coma —ninguno
+                  vale aquí, son pesos enteros— y los spinners nativos son un
+                  blanco de toque parásito para quien maneja el móvil de pie y
+                  con una mano.
+
+                  `enterKeyHint="done"`: con el teclado abierto, el total y el
+                  botón quedan debajo; la propia tecla de retorno lo cierra sin
+                  tener que ir a buscar un botón que no se ve.
+                */
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9.]*"
+                enterKeyHint="done"
+                autoComplete="off"
+                placeholder="0"
+                numeric
+                value={enPesos(valorCompra)}
+                onChange={(e) => setValorCompra(soloDigitos(e.target.value).slice(0, MAX_DIGITOS))}
+                required
+              />
+            </Field>
+            <input type="hidden" name="valor_compra" value={valorCompra || '0'} />
+          </div>
+
+          <div className={clasePromocion}>
             <Field label="Promoción aplicada">
               <Select
                 name="promocion_id"
@@ -126,61 +249,64 @@ export function ConfirmarVentaForm({
           </div>
 
           {/* Con una sola sucursal no hay nada que elegir: se manda oculta. */}
-          {sucursales.length > 1 ? (
-            <div className={styles.anchoCompleto}>
-              <Field label="Sucursal">
-                <Select name="sucursal_id" required defaultValue="">
-                  <option value="" disabled>
-                    Selecciona una sucursal
+          {haySelectorSucursal ? (
+            <Field label="Sucursal">
+              <Select name="sucursal_id" required defaultValue="">
+                <option value="" disabled>
+                  Selecciona una sucursal
+                </option>
+                {sucursales.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.nombre ?? `Sucursal ${s.id}`}
                   </option>
-                  {sucursales.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.nombre ?? `Sucursal ${s.id}`}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-            </div>
+                ))}
+              </Select>
+            </Field>
           ) : (
             <input type="hidden" name="sucursal_id" value={sucursales[0]?.id ?? ''} />
           )}
 
-          <Field label="Valor de la compra">
-            <Input
-              name="valor_compra"
-              type="number"
-              min={0}
-              step="1"
-              inputMode="numeric"
-              numeric
-              value={valorCompra}
-              onChange={(e) => setValorCompra(e.target.value)}
-              required
-            />
-          </Field>
-
-          <Field
-            label="Descuento"
-            help={
-              calculoAutomatico
-                ? 'Lo calcula la promoción.'
-                : editable
-                  ? 'Escribe cuánto se descontó.'
-                  : 'Elige una promoción primero.'
-            }
-          >
-            <Input
-              name="valor_descuento"
-              type="number"
-              min={0}
-              step="1"
-              inputMode="numeric"
-              numeric
-              value={valorDescuento}
-              onChange={(e) => setDescuentoManual(e.target.value)}
-              readOnly={!editable}
-            />
-          </Field>
+          {editable ? (
+            <div className={styles.anchoCompleto}>
+            <Field label="Descuento" help="Escribe cuánto se descontó.">
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9.]*"
+                enterKeyHint="done"
+                autoComplete="off"
+                placeholder="0"
+                numeric
+                value={enPesos(descuentoManual)}
+                onChange={(e) =>
+                  setDescuentoManual(soloDigitos(e.target.value).slice(0, MAX_DIGITOS))
+                }
+              />
+              <input type="hidden" name="valor_descuento" value={descuentoManual || '0'} />
+            </Field>
+            </div>
+          ) : (
+            /*
+              Cuando lo calcula la promoción esto NO es un campo: era un
+              `readOnly` que seguía siendo enfocable, así que el cajero lo
+              tocaba, se abría el teclado numérico sin poder escribir nada y
+              tapaba el total justo cuando hay que leerlo en voz alta. Ahora es
+              un dato mostrado —y un `hidden` que lo lleva en el envío—.
+              `<output>` se anuncia solo al cambiar de promoción.
+            */
+            <div className={`${styles.campoLeido} ${styles.anchoCompleto}`}>
+              <span className={styles.campoLeidoEtiqueta} id={idDescuento}>
+                Descuento
+              </span>
+              <output className={styles.campoLeidoValor} aria-labelledby={idDescuento}>
+                {PESOS.format(valorDescuento)}
+              </output>
+              <span className={styles.campoLeidoAyuda}>
+                {calculoAutomatico ? 'Lo calcula la promoción.' : 'Elige una promoción primero.'}
+              </span>
+              <input type="hidden" name="valor_descuento" value={valorDescuento} />
+            </div>
+          )}
         </div>
 
         {/*
@@ -197,8 +323,14 @@ export function ConfirmarVentaForm({
           <span className={styles.totalValor}>{PESOS.format(valorFinal)}</span>
         </div>
 
+        {/*
+          EL BOTÓN DICE EL NÚMERO. Es la última lectura del importe antes de
+          algo que no se puede deshacer, y es gratis: el cajero ya está mirando
+          el botón que va a tocar. Con el importe en cero se queda en «Registrar
+          venta» — repetir «Cobrar $0» no informa de nada.
+        */}
         <Button type="submit" size="lg" fullWidth loading={pending} icon={<Receipt size={17} />}>
-          Registrar venta
+          {hayImporte ? `Cobrar ${PESOS.format(valorFinal)}` : 'Registrar venta'}
         </Button>
       </form>
     </Card>

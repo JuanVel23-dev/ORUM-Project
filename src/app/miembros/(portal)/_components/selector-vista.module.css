@@ -1,0 +1,153 @@
+/* ==========================================================================
+   EJE 1 · LA VISTA  ·  pestañas, no chips
+   --------------------------------------------------------------------------
+   La fila de categorías usa chips con relleno de tinta. Esta usa pestañas con
+   subrayado. La diferencia es la que hace visible la jerarquía: primero se
+   elige QUÉ lista, después de QUÉ tipo.
+   ========================================================================== */
+
+.barra {
+  /* La pista deslizable la pone `CarrilPista`, con su sangrado auditado. Aquí
+     solo se reserva el hueco de la línea inferior. */
+  display: block;
+}
+
+.pestana {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  /* 44px de verdad, no un área ampliada con pseudo-elemento: es el control
+     principal de la pantalla junto con la búsqueda, y tiene que VERSE grande.
+     Mismo razonamiento —y mismo número— que el chip de categoría. */
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+
+  /* SIN BORDE Y SIN RELLENO EN REPOSO (dirección v3 §2.1): una superficie no
+     lleva borde; una pestaña, menos todavía. */
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  font-weight: var(--t-callout-weight);
+  color: var(--text-3);
+  text-decoration: none;
+  white-space: nowrap;
+
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-rebote) var(--ease-rebote);
+}
+
+/*
+  EL SUBRAYADO, que es la señal que pide el encargo nº 11.
+
+  Se dibuja con un pseudo-elemento y no con `text-decoration` por dos razones
+  concretas: `text-decoration` se ciñe al texto y dejaría el icono fuera de la
+  marca, y no se puede animar en el compositor. Este barra sí: entra escalando
+  en X desde el centro, que es solo `transform`.
+
+  Vive SIEMPRE en el DOM, con `scale-x: 0` en reposo. Un pseudo-elemento que
+  aparece y desaparece no puede transicionar.
+*/
+.pestana::after {
+  content: '';
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: var(--space-2);
+  height: 2px;
+  border-radius: var(--radius-full);
+
+  background: var(--action);
+
+  scale: 0 1;
+  transition: scale var(--dur-base) var(--ease-out);
+}
+
+/*
+  `@media (hover: hover)`: en un teléfono el `:hover` NO se retira al levantar
+  el dedo, y la pestaña recién tocada se quedaría oscura —el mismo aspecto que
+  la seleccionada, pero sin subrayado— hasta tocar otra cosa. En una fila de
+  filtros esa es exactamente la señal que no puede mentir.
+
+  El filo dorado es la respuesta del sistema al señalar (dirección v3 §2.3).
+*/
+@media (hover: hover) {
+  .pestana:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    box-shadow: var(--filo-activo-inset);
+  }
+}
+
+/* Ida instantánea, vuelta elástica: el reparto de la regla global de press. */
+.pestana:active {
+  scale: var(--escala-press);
+  transition-duration: var(--dur-press);
+}
+
+.pestana:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  ACTIVA. Cuatro portadores y ninguno es el color a solas:
+
+    1. el subrayado (forma),
+    2. el peso tipográfico,
+    3. el icono, que se agita al entrar,
+    4. `aria-current="true"` en el marcado.
+
+  El subrayado es TINTA, no oro. Un filtro activo codifica un dato —qué lista
+  estás mirando— y el oro no codifica datos. Es la misma decisión que ya tomó
+  el chip de categoría.
+*/
+.activa {
+  color: var(--text);
+  font-weight: 590;
+}
+
+.activa::after {
+  scale: 1 1;
+}
+
+.icono {
+  flex-shrink: 0;
+}
+
+.etiqueta {
+  /* El subrayado de la pestaña pasa por debajo del texto y del icono: se deja
+     aire para que no toque las letras. */
+  padding-bottom: var(--space-2);
+}
+
+/*
+  MOVIMIENTO REDUCIDO. NO es ausencia de feedback:
+
+  · El subrayado sigue estando — se pone de golpe en vez de crecer. El estado se
+    lee igual.
+  · Se retira el encogido al pulsar, que es lo vestibular, y el toque se acusa
+    con relleno, el equivalente no vestibular que la dirección pide.
+
+  Hay que reponer `scale`, no `transform`: son propiedades independientes y
+  `transform: none` no toca a `scale`.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .pestana::after {
+    transition: none;
+  }
+
+  .pestana:active {
+    scale: 1;
+    background: var(--surface-hover);
+  }
+}

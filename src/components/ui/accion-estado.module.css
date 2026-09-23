@@ -28,13 +28,27 @@
   transition:
     color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
     transform var(--dur-instant) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.boton:hover:not(:disabled) {
-  background: var(--surface-hover);
-  color: var(--text);
+/*
+  `--surface-hover` sobre papel blanco da 1,02:1: como única señal de hover no
+  existiría. El trazo es el segundo canal, y va en `box-shadow: inset` y no en
+  `border` para no cambiar la caja ni desplazar el icono un píxel.
+*/
+
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .boton:hover:not(:disabled) {
+    background: var(--surface-hover);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+    color: var(--text);
+  }
 }
 
 .boton:active:not(:disabled) {
@@ -48,9 +62,16 @@
 
 /* Desactivar es destructivo: el rojo aparece solo al apuntar, para no teñir
    toda la lista de advertencias en reposo. */
-.boton[data-destructivo='true']:hover:not(:disabled) {
-  color: var(--danger);
-  background: var(--danger-bg);
+
+/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
+   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
+   FUERA a propósito — un teclado existe en cualquier dispositivo. */
+
+@media (hover: hover) {
+  .boton[data-destructivo='true']:hover:not(:disabled) {
+    color: var(--danger);
+    background: var(--danger-bg);
+  }
 }
 
 /*

@@ -26,6 +26,13 @@ type Props = {
   onClose: () => void
   title?: string
   description?: string
+  /**
+   * Nombre accesible cuando la pantalla NO pasa `title` — el caso de la ficha
+   * de comercio, que trae su propio `h1` dentro del contenido. Ese `h1` no
+   * nombra al `<dialog>`: el rol de diálogo lo tiene el elemento, no lo que
+   * hay dentro.
+   */
+  ariaLabel?: string
   footer?: ReactNode
   /** Ancho del diálogo en escritorio. */
   width?: string
@@ -43,6 +50,7 @@ export function Overlay({
   onClose,
   title,
   description,
+  ariaLabel,
   footer,
   width,
   detent = 'large',
@@ -57,6 +65,7 @@ export function Overlay({
         onClose={onClose}
         title={title}
         description={description}
+        ariaLabel={ariaLabel}
         footer={footer}
         width={width}
       >
@@ -71,6 +80,7 @@ export function Overlay({
       onClose={onClose}
       title={title}
       description={description}
+      ariaLabel={ariaLabel}
       footer={footer}
       detent={detent}
     >

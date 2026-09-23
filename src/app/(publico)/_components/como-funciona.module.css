@@ -1,0 +1,166 @@
+/* ==========================================================================
+   CÓMO FUNCIONA
+   --------------------------------------------------------------------------
+   La franja (`escaparate.module.css`) pone el sangrado a ancho completo, el
+   relleno lateral, el relleno vertical y el tono de crema honda. Aquí solo va
+   lo propio de la sección.
+   ========================================================================== */
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+
+  /*
+    La cabecera es pegajosa: sin este margen, saltar aquí desde el ancla
+    «Cómo funciona» dejaría el h2 justo debajo del material translúcido y
+    parecería que el enlace no funcionó. `--cabecera-alto` lo publica el
+    layout público, así que el número vive en un solo sitio.
+  */
+  scroll-margin-block-start: calc(var(--cabecera-alto) + var(--space-4));
+}
+
+/* La escala y la familia las pone `.tituloSeccion` del módulo compartido.
+   Aquí solo la alineación, que es propia de esta sección. */
+@container contenido (min-width: 901px) {
+  .titulo {
+    text-align: center;
+  }
+}
+
+/* --- Los tres pasos -------------------------------------------------------
+   Móvil: una columna apilada. Tableta: dos, y la tercera baja de línea — se
+   prefiere a tres columnas estrechas porque el paso ③ quedaría con menos aire
+   que ① y ②, rompiendo la sensación de secuencia igualada. Escritorio: tres,
+   que es donde la secuencia se lee como un cómic de tres viñetas. */
+
+.pasos {
+  display: grid;
+  gap: var(--space-6);
+  list-style: none;
+}
+
+@container contenido (min-width: 561px) {
+  .pasos {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@container contenido (min-width: 901px) {
+  .pasos {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-7);
+  }
+}
+
+.paso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/*
+  El numeral: cifra grande en tinta atenuada sobre un disco hundido, con un
+  filo dorado de 1px. Nada de relleno de oro y nada de color de estado — no
+  codifica ni marca ni importancia; el filo es el device más barato de las
+  referencias y aparece igual en los tres, así que no distingue a ninguno.
+
+  El serif de display entra aquí porque la licencia v4 levantó «serif solo en
+  h1»: una cifra ceremonial en Fraunces se lee como numeral de índice.
+
+  `--text-2` sobre crema honda da 6,51:1 medido (`--text-3` daría 4,18:1 y
+  reprobaría; el ámbito `tonoHonda` ya lo colapsa por si acaso).
+*/
+.numero {
+  display: grid;
+  place-items: center;
+  width: var(--space-9);
+  height: var(--space-9);
+
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  /* `box-shadow` y no `border`: así el disco no cambia de tamaño al ganar el
+     filo, y ninguna capa de la lista lleva `none` dentro. */
+  box-shadow: 0 0 0 1px var(--brand-edge);
+
+  font-family: var(--font-display);
+  font-size: var(--t-title-2-size);
+  line-height: 1;
+  font-weight: var(--t-title-2-weight);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.texto {
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+/* El nombre del paso encabeza su frase sin ser un encabezado: bloque propio,
+   peso alto y color de tinta plena. */
+.pasoTitulo {
+  display: block;
+  margin-bottom: var(--space-1);
+
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: var(--t-title-3-weight);
+  color: var(--text);
+}
+
+/* ==========================================================================
+   ENTRADA AL DESPLAZAR
+   --------------------------------------------------------------------------
+   El `Revelar` que envuelve esta sección solo escribe `data-visible` sobre su
+   nodo; las reglas son de aquí porque solo este módulo sabe qué hijos hay.
+
+   El estado oculto va dentro de `@media (scripting: enabled)`: sin JavaScript
+   —o en un navegador que no conozca la consulta— el contenido se pinta visible
+   y sin animación, que es la degradación correcta. Nunca invisible.
+
+   Solo `transform` y `opacity`.
+   ========================================================================== */
+
+.titulo,
+.paso {
+  transition:
+    opacity var(--dur-page) var(--ease-out),
+    transform var(--dur-page) var(--ease-out);
+}
+
+/* Escalonado de 60ms: dentro de la banda 30–80 de la v4, y por encima del paso
+   de 40ms del cromo porque aquí las piezas son grandes y lentas de leer. */
+.pasos {
+  --paso-revelar: calc(var(--escalonado) * 1.5);
+}
+
+.paso:nth-child(1) {
+  transition-delay: var(--paso-revelar);
+}
+.paso:nth-child(2) {
+  transition-delay: calc(var(--paso-revelar) * 2);
+}
+.paso:nth-child(3) {
+  transition-delay: calc(var(--paso-revelar) * 3);
+}
+
+@media (scripting: enabled) {
+  [data-visible='false'] .titulo,
+  [data-visible='false'] .paso {
+    opacity: 0;
+    /* Nada entra desde `scale(0)`. */
+    transform: translate3d(0, var(--space-4), 0) scale(0.98);
+  }
+}
+
+/* Movimiento reducido: se retira el viaje y queda el fundido, que `globals.css`
+   comprime a 0,01ms. Va al final: misma especificidad, gana por orden. */
+@media (prefers-reduced-motion: reduce) {
+  [data-visible='false'] .titulo,
+  [data-visible='false'] .paso {
+    transform: none;
+  }
+}

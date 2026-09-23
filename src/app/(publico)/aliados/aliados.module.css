@@ -1,0 +1,46 @@
+/* ==========================================================================
+   ALÍA TU NEGOCIO  ·  la página real del formulario de comercio aliado
+   --------------------------------------------------------------------------
+   Es el RESPALDO OBLIGATORIO del overlay de la landing, no su alternativa: un
+   enlace compartido por WhatsApp, un resultado de buscador o un visitante sin
+   JavaScript aterrizan aquí.
+
+   SE QUEDA EN PAPEL, y es una decisión, no un olvido. La columna es estrecha
+   (640px) y lo único que hay es una tarjeta con un formulario: teñir el fondo
+   de una sola sección no separa nada de nada —la franja tonal separa SECCIONES
+   entre sí, y aquí no hay dos—. El cambio de tono de esta ruta lo da el pie,
+   que cierra en crema.
+   ========================================================================== */
+
+.pagina {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-8) 0 var(--space-10);
+}
+
+.encabezado {
+  margin-bottom: var(--space-6);
+}
+
+/*
+  La familia, la escala y el tracking los pone `escaparate.tituloSeccion`
+  (Fraunces a 32–48px). Aquí solo el margen y el ancho de quiebre: declarar
+  `font-size` otra vez empataría en especificidad con esa regla y el ganador
+  dependería del orden en que Next inyecte las dos hojas, que cambia entre
+  desarrollo y producción.
+*/
+.titulo {
+  margin: 0 0 var(--space-3);
+  max-width: 20ch;
+}
+
+/* `--text-2` sobre papel: 7,34:1 medido. */
+.bajada {
+  margin: 0;
+  max-width: 52ch;
+
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+  text-wrap: pretty;
+}

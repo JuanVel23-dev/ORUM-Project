@@ -141,6 +141,9 @@ export default async function NumerosRegistroPage({
                 }
                 variant={f.valor === filtro ? 'secondary' : 'ghost'}
                 size="sm"
+                // El filtro activo se marcaba SOLO con la variante de color, que
+                // no llega al lector de pantalla: `aria-current="page"` lo dice.
+                aria-current={f.valor === filtro ? 'page' : undefined}
               >
                 {f.etiqueta}
               </Button>

@@ -1,0 +1,95 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/*
+  Dos campos por fila en cuanto el contenedor da de sí, uno debajo de otro
+  cuando no. `@container contenido`, no `@media`: este formulario se pinta en
+  dos superficies de ancho muy distinto —la hoja inferior del móvil y el
+  diálogo de escritorio— y el viewport no distingue entre ellas.
+*/
+.pareja {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@container contenido (min-width: 520px) {
+  .pareja {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/*
+  EL CAMPO TRAMPA.
+
+  No usa `display: none` ni `visibility: hidden`: hay robots que saltan
+  justamente lo que está oculto de forma obvia. Se saca del flujo con posición
+  absoluta y tamaño nulo, que lo hace invisible sin declararse invisible. El
+  `aria-hidden` y el `tabIndex={-1}` del marcado lo retiran del lector de
+  pantalla y del orden de tabulación, así que ninguna persona lo alcanza.
+
+  Es la única excepción sancionada a «nunca `tabIndex={-1}` en algo accionable»:
+  esto no es accionable, es un señuelo que nadie debe poder accionar.
+*/
+.trampa {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- Éxito ---------------------------------------------------------------- */
+
+.exito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-2);
+  text-align: center;
+}
+
+.iconoExito {
+  display: grid;
+  place-items: center;
+
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+
+  /* Verde, y con icono además del color: la regla es que el color nunca sea el
+     único portador del significado, y aquí el «Recibimos tu solicitud» lo dice
+     con todas las letras justo debajo. */
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.tituloExito {
+  margin: 0;
+
+  font-size: var(--t-title-2-size);
+  line-height: var(--t-title-2-leading);
+  letter-spacing: var(--t-title-2-tracking);
+  font-weight: var(--t-title-2-weight);
+}
+
+.textoExito {
+  margin: 0;
+  max-width: 42ch;
+
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-leading);
+  color: var(--text-2);
+}
+
+.accionesExito {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}

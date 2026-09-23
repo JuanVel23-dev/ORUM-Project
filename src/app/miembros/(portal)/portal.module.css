@@ -2,6 +2,105 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+
+  /* La textura del club bajo todo el papel del portal. Las franjas tonales
+     pintan su propio fondo encima, así que solo asoma en las zonas blancas. */
+  background-image: var(--patron-club);
+  background-size: 240px 240px;
+
+  /*
+    LA COLUMNA DEL PORTAL, y por qué no es la del panel.
+
+    `--content-max` vale 1100px y sirve al panel de administración, que es una
+    pila de tablas: ahí una columna estrecha AYUDA a leer. El catálogo es una
+    rejilla de tarjetas, y con 1100px en una pantalla de 1920 quedaban ~410px
+    de papel muerto a cada lado — «dos pedazos vacíos», en palabras del
+    propietario. El vacío no sobraba: le faltaba columna.
+
+    Se publica aquí, en el contenedor, porque lo leen DOS: el `<main>` para
+    medirse y la cabecera para alinear su contenido con él. Un número, dos
+    consumidores — si cada uno llevara el suyo, la cabecera y la página se
+    desalinearían en el primer cambio.
+  */
+  --portal-max: var(--content-max);
+
+  /*
+    `clip` y NO `hidden`, y la diferencia importa aquí.
+
+    Las franjas sangran con `50vw`, que en escritorio incluye el ancho de la
+    barra de desplazamiento: sin recorte, eso son ~15px de desbordamiento
+    horizontal y una barra inferior en toda la página.
+
+    `overflow: hidden` lo arreglaría, pero crea un contenedor de scroll y eso
+    ROMPE `position: sticky` de la cabecera, que dejaría de pegarse al borde
+    de la ventana. `overflow: clip` recorta sin crear contenedor de scroll:
+    la cabecera sigue pegajosa y el desbordamiento desaparece.
+  */
+  overflow-x: clip;
+
+  /*
+    Alto real que ocupa la barra inferior, EN UN SOLO SITIO.
+
+    Lo consumen dos reglas que tienen que decir lo mismo siempre: la propia
+    `.tabbar` (como `min-height`) y la reserva de `.main` (que además le suma
+    aire). Antes cada una repetía `var(--tabbar-h) + env(safe-area-inset-bottom)`
+    por su cuenta: dos copias de la misma composición, y la primera que alguien
+    tocase dejaría la última fila del catálogo debajo de la barra sin que nada
+    fallara de forma visible.
+
+    `.tabbar` es `position: fixed`, pero sigue siendo descendiente de `.portal`
+    en el árbol, así que hereda la custom property con normalidad.
+  */
+  --tabbar-alto: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+
+  /*
+    Alto real que ocupa la CABECERA, por la misma razón y con el mismo patrón.
+
+    Lo consume la barra de vuelta de la ficha de comercio, que es
+    `position: sticky` y tiene que anclarse JUSTO DEBAJO de la cabecera. Sin un
+    número publicado, esa barra tendría que repetir aquí la aritmética del
+    relleno de `.cabecera`, y la primera vez que alguien tocase el relleno la
+    barra quedaría flotando o escondida sin que nada fallara de forma visible.
+
+    `--cabecera-contenido` es el alto del hijo MÁS ALTO del cromo. Es una
+    medida de componente, no un espaciado, así que vive aquí y no en
+    `tokens.css`: es geometría de esta pieza, como `--placa-pad` lo es de la
+    placa del logo.
+
+      móvil     28px — el avatar (`avatar.module.css:19-20`); el wordmark mide
+                26,4 (17px x 1,55) y la navegación está oculta.
+      >=768px   38px — un enlace de la navegación: 14px x 1,55 = 21,7 más los
+                dos `--space-2` de su relleno.
+
+    `.cabecera` lo aplica además como `min-height`, para que el número
+    publicado no pueda quedarse por debajo del real. El caso contrario —que el
+    contenido crezca, por ejemplo con Dynamic Type— degrada bien: la cabecera
+    se hace más alta y la barra de vuelta se desliza por debajo de ella, que es
+    el fallo inofensivo de los dos posibles.
+  */
+  --cabecera-contenido: 28px;
+  --cabecera-alto: calc(
+    max(var(--space-3), env(safe-area-inset-top, 0px)) + var(--cabecera-contenido) +
+      var(--space-3)
+  );
+}
+
+@media (min-width: 768px) {
+  .portal {
+    --cabecera-contenido: 38px;
+  }
+}
+
+/*
+  Solo a partir de 1200px: por debajo, 1100 ya es prácticamente todo el ancho
+  disponible y ensanchar no cambiaría nada. El tope no sube más porque una
+  rejilla de tarjetas de 290px a más de 1400 empieza a repartir seis columnas
+  y la tarjeta deja de leerse como unidad.
+*/
+@media (min-width: 1200px) {
+  .portal {
+    --portal-max: 1400px;
+  }
 }
 
 /* ==========================================================================
@@ -13,23 +112,95 @@
   top: 0;
   z-index: var(--z-sticky);
 
+  /* No cambia el alto de hoy: es exactamente el que ya tenía. Existe para que
+     `--cabecera-alto` no pueda mentir por debajo. */
+  min-height: var(--cabecera-alto);
+
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
+
+  /*
+    ZONAS SEGURAS. `src/app/layout.tsx` declara `statusBarStyle:
+    'black-translucent'` y `viewportFit: 'cover'`: en PWA instalada el
+    contenido llega hasta arriba del todo y el hueco de la barra de estado hay
+    que reservarlo a mano. Sin este `padding-top`, el wordmark y el AVATAR
+    quedaban debajo de la hora y la batería — y el avatar es la única puerta al
+    menú en móvil. El shell del panel ya lo hacía (`app-shell.module.css:414`);
+    este portal, no.
+
+    Los insets laterales cubren el otro caso: teléfono con muesca en
+    horizontal, donde el contenido se mete bajo el bisel. Se usan las
+    propiedades físicas, como en `pantalla-auth.module.css:30-31`.
+  */
+  padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
+  padding-bottom: var(--space-3);
+
+  /*
+    EL CONTENIDO DE LA CABECERA SE ALINEA CON LA COLUMNA.
+
+    El material translúcido sigue ocupando TODO el ancho —es la capa que separa
+    el cromo de la página, y una cabecera centrada con aire a los lados se lee
+    como una tarjeta flotante—, pero lo que hay dentro se mete hasta donde
+    empieza el contenido.
+
+    Antes el wordmark vivía pegado al filo izquierdo de la ventana y el catálogo
+    empezaba 410px más adentro: dos líneas verticales distintas en la misma
+    pantalla, que es lo que hacía que el contenido pareciera hundido en un
+    hueco. Con esto hay UNA sola.
+
+    El `max` protege el caso estrecho: mientras la ventana no supere la columna,
+    el reparto da menos que el relleno propio y manda el relleno.
+  */
+  padding-left: max(
+    var(--space-4),
+    env(safe-area-inset-left, 0px),
+    calc((100% - var(--portal-max)) / 2)
+  );
+  padding-right: max(
+    var(--space-4),
+    env(safe-area-inset-right, 0px),
+    calc((100% - var(--portal-max)) / 2)
+  );
 
   /*
     Material translúcido, no franja opaca: el contenido pasa por debajo y se
     ve que sigue habiendo página. Sin esto la cabecera corta la pantalla.
+
+    `--blur-lg` (24px) y no `--blur-xl` (40px), por paridad con el panel: son
+    dos superficies desenfocadas fijas sobre la lista más larga del producto, y
+    el desenfoque se recalcula en cada fotograma de scroll. La diferencia de
+    grosor percibido entre 24 y 40 no se ve; la de coste en gama media, sí.
   */
   background: var(--material);
-  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
-  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+
+  /*
+    DIRECCIÓN v2 · `--border`, no `--border-subtle`.
+
+    El cromo se distinguía del contenido por su material translúcido sobre un
+    fondo GRIS. Desde la fundación el fondo es papel blanco y el material es
+    blanco al 68 %: la diferencia de relleno cayó a casi nada y el filo pasó a
+    ser lo único que dice dónde acaba la cabecera y empieza la página. Al 22 %
+    de tinta no llegaba; al 55 % es la regla de una página impresa.
+
+    Con `prefers-contrast: more` globals.css ya lo sube a tinta plena.
+  */
+  border-bottom: 1px solid var(--border);
 }
 
 @media (min-width: 768px) {
   .cabecera {
-    padding: var(--space-3) var(--space-6);
+    padding-left: max(
+      var(--space-6),
+      env(safe-area-inset-left, 0px),
+      calc((100% - var(--portal-max)) / 2)
+    );
+    padding-right: max(
+      var(--space-6),
+      env(safe-area-inset-right, 0px),
+      calc((100% - var(--portal-max)) / 2)
+    );
     gap: var(--space-6);
   }
 }
@@ -103,12 +274,81 @@
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.enlace:hover {
-  color: var(--text);
-  background: var(--surface-hover);
+/* `@media (hover: hover)`, que faltaba. Esta navegación solo se muestra a
+   partir de 768px, pero eso incluye tabletas táctiles: sin la guarda, el
+   destino que el socio acaba de tocar se queda con relleno de hover y compite
+   con el indicador de ruta activa, que es la única señal que debe leerse. */
+@media (hover: hover) {
+  .enlace:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
+}
+
+/*
+  El relleno de hover es tinta al 6 %: perceptible, pero no es un portador
+  suficiente por sí solo. No hace falta un segundo canal aquí porque el hover no
+  codifica nada — la ruta activa la dicen el peso, la barra de
+  `.enlaceActivo::after` y `aria-current`, tres portadores que no dependen de
+  dónde esté el ratón.
+*/
+
+/*
+  En puntero grueso el enlace sube a 44px. Se muestra a partir de 768px, y eso
+  incluye tabletas y portátiles 2-en-1: `padding: 8px 12px` sobre un cuerpo de
+  14px deja el destino en ~38px, por debajo del mínimo del sistema. En
+  escritorio la densidad es una virtud, así que no se toca allí — es el mismo
+  patrón que ya usa `.resumen` en `filtros-form.module.css`.
+*/
+@media (pointer: coarse) {
+  .enlace {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+  }
 }
 
 .enlace:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  EL DISPARADOR DE «MI CUENTA».
+
+  Se VE de 28px —es el avatar, y agrandarlo desequilibraría la cabecera— pero
+  se TOCA de 44. Es la distinción que el sistema hace en todas partes: lo que
+  se ve y lo que se toca son cosas distintas, y el área crece con un `::after`
+  centrado para no alterar la maquetación.
+
+  Aquí importa más que en ningún otro sitio del portal: en móvil este botón es
+  la ÚNICA puerta al conmutador de tema, al soporte por WhatsApp y a cerrar
+  sesión. No hay menú del avatar en el pie de una barra lateral, porque en el
+  portal no hay barra lateral.
+*/
+.botonCuenta {
+  position: relative;
+  display: grid;
+  place-items: center;
+  -webkit-tap-highlight-color: transparent;
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.botonCuenta::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+}
+
+.botonCuenta:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
@@ -138,16 +378,13 @@
   margin-left: auto;
 }
 
-/* El botón de WhatsApp sobra en pantallas estrechas: vive en el menú de cuenta. */
-.soporteEscritorio {
-  display: none;
-}
-
-@media (min-width: 900px) {
-  .soporteEscritorio {
-    display: inline-flex;
-  }
-}
+/*
+  Aquí vivía `.soporteEscritorio`, que sacaba el botón de WhatsApp a la
+  cabecera a partir de 900px. Se retiró: la misma acción no puede estar dos
+  veces en la misma pantalla, y ya está en el menú de la cuenta (es el
+  precedente de "Mi contraseña" que documenta CLAUDE.md). Con eso el wordmark
+  vuelve a ser el único oro del cromo.
+*/
 
 .correoMenu {
   padding: var(--space-2) var(--space-3);
@@ -165,9 +402,29 @@
 .main {
   flex: 1;
   width: 100%;
-  max-width: var(--content-max);
+  /* La columna la publica `.portal`, que es también quien se la pasa a la
+     cabecera para que las dos compartan línea vertical. */
+  max-width: var(--portal-max);
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-10);
+
+  /*
+    `--pad-contenido` es el relleno lateral de ESTE layout, publicado para que
+    un carril pueda sangrar hasta el borde sin duplicar el número. No es un
+    token del sistema a propósito: si viviera en `tokens.css` habría que
+    mantener sincronizados dos sitios, y el sangrado se desincroniza en el
+    primer cambio de densidad. Lo consume `carril.module.css`.
+  */
+  --pad-contenido: var(--space-4);
+
+  /* Y el relleno superior, publicado por el mismo motivo: la barra de vuelta
+     de la ficha lo anula con un margen negativo para quedar pegada a la
+     cabecera. Un número, dos consumidores. */
+  --pad-contenido-top: var(--space-6);
+
+  padding-top: var(--pad-contenido-top);
+  padding-bottom: var(--space-10);
+  padding-left: max(var(--pad-contenido), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
 
   /* Mismo contenedor de consulta que el shell admin, para que los módulos
      de página se adapten al ancho útil y no al del viewport. */
@@ -177,16 +434,18 @@
 
 @media (min-width: 768px) {
   .main {
-    padding: var(--space-7) var(--space-6) var(--space-11);
+    --pad-contenido: var(--space-6);
+    --pad-contenido-top: var(--space-7);
+
+    padding-bottom: var(--space-11);
   }
 }
 
-/* Hueco para la barra inferior en móvil. */
+/* Hueco para la barra inferior en móvil. Sale del mismo `--tabbar-alto` que
+   dimensiona la barra: una sola definición, dos consumidores. */
 @media (max-width: 767px) {
   .main {
-    padding-bottom: calc(
-      var(--tabbar-h) + var(--space-8) + env(safe-area-inset-bottom, 0px)
-    );
+    padding-bottom: calc(var(--tabbar-alto) + var(--space-8));
   }
 }
 
@@ -202,12 +461,24 @@
   z-index: var(--z-sticky);
 
   display: flex;
-  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+
+  /*
+    `min-height`, NUNCA `height`. iOS aplica Dynamic Type como zoom de página:
+    la etiqueta crece y, con un alto fijo, se recorta. Es no-op en el caso
+    base y la única defensa cuando el socio sube el tamaño de texto.
+  */
+  min-height: var(--tabbar-alto);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 
   background: var(--material);
-  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
-  border-top: 1px solid var(--border-subtle);
+  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
+
+  /* Mismo motivo que la cabecera: es el filo del cromo contra el papel, no una
+     división interna. Y aquí importa más, porque debajo pasa la última fila
+     del catálogo. */
+  border-top: 1px solid var(--border);
 }
 
 @media (min-width: 768px) {
@@ -224,12 +495,17 @@
 }
 
 .tab {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
+
+  /* Con `min-height` la barra puede crecer; el relleno evita que la etiqueta
+     toque el filo cuando lo hace. */
+  padding: var(--space-2) var(--space-1);
 
   font-size: var(--t-overline-size);
   font-weight: 510;
@@ -239,21 +515,98 @@
   /* Retroalimentación en el toque, no al soltar. */
   transition:
     color var(--dur-instant) var(--ease-out),
-    transform var(--dur-instant) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
   -webkit-tap-highlight-color: transparent;
 }
 
+/*
+  FEEDBACK INMEDIATO, y aquí faltaban las dos mitades.
+
+  1. El VALOR era un literal, `0.94`. `globals.css` §4b se escribió justamente
+     para retirar los trece valores distintos que había sueltos por los módulos
+     (0.9, 0.94, 0.96, 0.97…); este era uno de los supervivientes. Pasa a
+     `--escala-press-sm`, que es el escalón que el sistema reserva a los
+     controles pequeños — y una pestaña de barra inferior lo es.
+
+  2. El TIEMPO. `.tab` declara su propia lista de transiciones y esa lista pisa
+     la global, donde `scale` va a `--dur-rebote` (200ms elásticos). Sin acortar
+     la ida, la pestaña tardaba casi medio segundo en acusar el toque: es el
+     control que más se pulsa del portal y el que peor se sentía.
+*/
 .tab:active {
-  scale: 0.94;
+  scale: var(--escala-press-sm);
+  transition-duration: var(--dur-press);
 }
 
 .tabActivo {
   color: var(--text);
+  font-weight: 620;
 }
 
+/*
+  El destino activo NO puede distinguirse solo por color. La navegación de
+  escritorio ya lo resuelve con una barra bajo el enlace (`.enlaceActivo::after`);
+  esta es la misma barra, arriba, encajada en el filo superior de la barra
+  inferior. Suma a los otros dos portadores que ya había —el trazo más grueso
+  del icono y `aria-current="page"`— y sobrevive a la ceguera al color.
+
+  Ancho fijo y centrada con `translateX`, no con `left/right`: es más barato de
+  componer y no depende del ancho de la etiqueta.
+*/
+.tabActivo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+
+  width: var(--space-6);
+  height: 2px;
+  border-radius: 0 0 1px 1px;
+  background: var(--text);
+}
+
+/*
+  Movimiento reducido NO es ausencia de feedback, es un equivalente no
+  vestibular: se anula el escalado y el toque se acusa con color.
+
+  Hay que anular `scale`, no `transform`: son propiedades independientes y
+  `transform: none` no toca a `scale`, así que el rebote seguía viéndose.
+*/
 @media (prefers-reduced-motion: reduce) {
   .tab:active {
-    transform: none;
+    scale: 1;
+    color: var(--text);
+  }
+}
+
+/* ==========================================================================
+   IMPRESIÓN  ·  el cromo no se imprime
+   --------------------------------------------------------------------------
+   Lo único del portal que alguien imprime es el carnet, y en esa hoja la
+   cabecera y la barra inferior no son navegación: son dos franjas de tinta
+   que se comen el papel y confunden sobre qué es el documento.
+
+   Vive aquí y no en `perfil.module.css` porque estas dos clases son de este
+   módulo: desde la hoja de la página no hay forma de alcanzarlas sin escribir
+   un selector global, que es peor.
+
+   `display: none` y no `visibility: hidden`: se quiere el hueco fuera, no
+   vacío. Para el lector de pantalla no cambia nada — `@media print` no aplica
+   a la pantalla.
+   ========================================================================== */
+@media print {
+  .cabecera,
+  .tabbar {
+    display: none;
+  }
+
+  /*
+    Sin la cabecera fija arriba ni la barra abajo, el contenido no tiene que
+    reservarles sitio. Sin esto la hoja sale con una franja en blanco arriba y
+    otra abajo del tamaño exacto del cromo que se acaba de ocultar.
+  */
+  .main {
+    padding: 0;
   }
 }

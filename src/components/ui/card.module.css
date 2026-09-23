@@ -1,15 +1,43 @@
+/*
+  Dirección de arte v3, §2.1: el papel del fondo y el de la tarjeta son EL
+  MISMO blanco, y lo que recorta uno del otro es LA SOMBRA. El trazo se va.
+
+  `--border-superficie` vale `transparent`. El borde se declara igualmente
+  —en vez de `border: none`— para que la caja mida lo mismo con filo y sin él:
+  así `prefers-contrast: more` puede devolverlo desde globals.css sin desplazar
+  ni un píxel. Es el mecanismo de §2.5, no un resto del sistema anterior.
+
+  Si una tarjeta no se ve, la respuesta es SUBIR DE SOMBRA, nunca devolverle
+  el trazo.
+*/
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
 
   background: var(--surface);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
 
-  /* En claro la elevación la da la sombra; en oscuro, el filo de luz superior
-     (`--edge`), porque una sombra negra sobre fondo negro no se ve. */
+  /* En claro la define la sombra; en oscuro, el anillo de luz de `--edge`,
+     porque una sombra negra sobre fondo negro no se ve. */
   box-shadow: var(--shadow-card), var(--edge);
+}
+
+/*
+  LA superficie principal: UNA por pantalla.
+
+  Ya no es un trazo de 2px —ese lenguaje se retiró con la v3—: es un escalón
+  más de sombra. La regla de §2.2 dice que la superficie grande se lee más
+  gruesa, y esta es la grande.
+
+  El riesgo cambia de signo pero no desaparece (§5): si todo sube de escalón,
+  la pantalla es una sopa de objetos levitando y nadie sabe cuál es el
+  principal. Si al mirar una captura no lo distingues, sobran sombras — y la
+  respuesta es quitar, no añadir.
+*/
+.principal {
+  box-shadow: var(--shadow-raised), var(--edge);
 }
 
 /* --- Relleno -------------------------------------------------------------- */
@@ -29,10 +57,20 @@
 
 /* --- Variantes ------------------------------------------------------------ */
 
-/* Hundida: para agrupar contenido secundario sin añadir otra capa elevada. */
+/*
+  Hundida: para agrupar contenido secundario sin añadir otra capa elevada.
+
+  No se tiñe y no se dibuja: se HUNDE. `--shadow-hundida` es la misma luz
+  entrando al revés —una sombra `inset`—, que es el vocabulario que la v3
+  abre y que el trazo no tenía. Un hundido no es un escalón negativo de la
+  escala: es otra dirección de la luz.
+
+  Lo acompaña un hairline, que §2.1 conserva expresamente para esto.
+*/
 .sunk {
   background: var(--surface-sunk);
-  box-shadow: none;
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-hundida);
 }
 
 /* Realce de marca. El oro va SOLO en el filo, nunca rellenando la tarjeta. */
@@ -61,17 +99,56 @@
     background-color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out),
     transform var(--dur-instant) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
-.interactive:hover {
-  border-color: var(--border);
-  box-shadow: var(--shadow-raised), var(--edge);
+/*
+  Hover que LEVANTA (§4.3). Solo bajo `@media (hover: hover)`: en un táctil el
+  hover se queda pegado después del toque y la tarjeta se queda flotando sin
+  que nadie la esté apuntando.
+
+  Se anima `translate`, propiedad independiente de `transform`, para no pisar
+  transformaciones que ya use el consumidor (ni el `scale` global de press).
+*/
+@media (hover: hover) {
+  .interactive:hover {
+    translate: 0 -2px;
+    /*
+      §2.3: al SEÑALAR aparece el filo dorado de 1px y la sombra sube un
+      escalón. Las dos señales juntas, y ninguna sola bastaría: la sombra no
+      llega a 3:1 en el límite del control y el filo solo no comunica altura.
+    */
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+  }
 }
 
+/*
+  Pulsación que HUNDE: baja 2px y pierde la mitad de su sombra. Es lo que
+  ocurriría físicamente, y comunica sin convención lo que un cambio de color
+  solo comunica por acuerdo.
+
+  Sustituye al `scale: 0.99` anterior, que en una tarjeta ancha deformaba el
+  texto de dentro. Con `translate` no se escala nada.
+*/
 .interactive:active {
-  scale: 0.99;
+  scale: 1;
+  translate: 0 2px;
+  box-shadow: var(--shadow-press), var(--edge);
+  transition-duration: var(--dur-press);
+}
+
+/*
+  Movimiento reducido: el cambio SIGUE OCURRIENDO, sin desplazamiento. El
+  equivalente no vestibular del levantar/hundir es el trazo y la sombra, que
+  no mueven nada.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .interactive:hover,
+  .interactive:active {
+    translate: none;
+  }
 }
 
 .interactive:focus-visible {
@@ -87,7 +164,8 @@
   justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-5) var(--space-6);
-  border-bottom: 1px solid var(--border-subtle);
+  /* Separador dentro de una superficie ya definida → `--border` (§2.2). */
+  border-bottom: 1px solid var(--border);
 }
 
 .headerTextos {
@@ -129,7 +207,12 @@
   justify-content: flex-end;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-6);
-  border-top: 1px solid var(--border-subtle);
+  /*
+    El pie ya no se distingue por relleno —es el mismo papel que el cuerpo—,
+    así que la línea que lo separa tiene que llevar el peso sola: sube de
+    `--border-subtle` a `--border`.
+  */
+  border-top: 1px solid var(--border);
   background: var(--surface-sunk);
   border-radius: 0 0 var(--radius-md) var(--radius-md);
 }

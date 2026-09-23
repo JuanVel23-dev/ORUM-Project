@@ -5,27 +5,71 @@ import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/avatar'
 import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
-import { WhatsAppButton } from '@/components/ui/whatsapp-button'
-import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { cerrarSesionMiembro } from '../login/actions'
+import { MenuTema } from './_components/menu-tema'
 import { PortalNav, PortalTabBar } from './_components/portal-nav'
+import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import styles from './portal.module.css'
 
 export const metadata = { title: 'Portal de Miembros · ORUM' }
 
 const MENSAJE_SOPORTE = 'Hola, necesito ayuda con mi membresía ORUM.'
 
-export default async function MiembrosLayout({ children }: { children: ReactNode }) {
+/*
+  La ranura `@modal` vive AQUÍ y solo aquí.
+
+  Una ruta interceptada solo intercepta si el layout que declara su ranura ya
+  está montado. En el panel de administración se aprendió por las malas: con una
+  ranura por sección, el mismo destino se abría encima o navegaba entero según de
+  dónde vinieras. Una sola ranura, en el layout del portal, y todos los overlays
+  cuelgan de ella.
+*/
+export default async function MiembrosLayout({
+  children,
+  modal,
+}: {
+  children: ReactNode
+  modal: ReactNode
+}) {
   const perfil = await requireRolMiembro()
 
   const supabase = await createClient()
-  const { data: config } = await supabase
-    .from('configuracion')
-    .select('valor')
-    .eq('clave', 'whatsapp_soporte')
-    .maybeSingle()
+
+  /*
+    LA FOTO DEL SOCIO EN EL CROMO, que faltaba.
+
+    El socio subía su foto y solo la veía en el carnet: aquí el avatar se
+    montaba sin `src`, así que la cabecera seguía enseñando sus iniciales para
+    siempre. Es el sitio donde más veces la va a ver, porque está en todas las
+    pantallas del portal.
+
+    Va en SU PROPIA consulta y no dentro de la de configuración, por la lección
+    que ya costó un 404 en la ficha de comercio: meter una columna nueva en la
+    consulta que decide si algo EXISTE convierte «falta una columna» en «esto no
+    existe». Aquí lo peor que puede pasar es quedarse sin foto, que es el estado
+    que el avatar ya sabe pintar.
+
+    Las dos van en paralelo: son independientes y encadenarlas sumaría sus
+    latencias en el cromo, que se renderiza en cada pantalla del portal.
+  */
+  const [{ data: config }, { data: ficha }] = await Promise.all([
+    supabase
+      .from('configuracion')
+      .select('valor')
+      .eq('clave', 'whatsapp_soporte')
+      .maybeSingle(),
+    supabase
+      .from('miembros')
+      .select('foto_url')
+      .eq('perfil_id', perfil.userId)
+      .is('deleted_at', null)
+      .maybeSingle(),
+  ])
 
   const soporte = config?.valor ?? null
+  /* Una cadena vacía no es una foto: sería un `<img src="">`, que el navegador
+     resuelve pidiendo otra vez la propia página. */
+  const fotoUrl = (ficha?.foto_url ?? '').trim() || null
   /* Supabase puede devolver una cuenta sin correo (acceso solo por teléfono);
      el avatar necesita algo de lo que sacar una inicial en ese caso. */
   const correo = perfil.email ?? 'Mi cuenta'
@@ -39,15 +83,19 @@ export default async function MiembrosLayout({ children }: { children: ReactNode
 
         <PortalNav />
 
+        {/*
+          La cabecera se queda con el wordmark, la navegación de escritorio y
+          UNA sola puerta: el avatar.
+
+          Salieron dos cosas. El botón de WhatsApp, porque la misma acción ya
+          estaba dentro del menú y `CLAUDE.md` condena listarla dos veces en la
+          misma pantalla. Y el conmutador de tema, que competía con las dos
+          únicas pestañas que importan; baja al menú, donde Apple lo entierra.
+          El corolario de la norma —"al sacar algo, comprueba el móvil"— está
+          cubierto: la cabecera y el avatar se renderizan a todos los anchos,
+          así que el destino no desaparece del teléfono.
+        */}
         <div className={styles.acciones}>
-          {soporte && (
-            <span className={styles.soporteEscritorio}>
-              <WhatsAppButton telefono={soporte} mensaje={MENSAJE_SOPORTE} size="sm" />
-            </span>
-          )}
-
-          <ThemeToggle />
-
           {/*
             El formulario envuelve el menú, no al revés: así el elemento
             "Cerrar sesión" es un submit real dentro de él y la server action
@@ -56,12 +104,27 @@ export default async function MiembrosLayout({ children }: { children: ReactNode
           <form action={cerrarSesionMiembro}>
             <DropdownMenu
               trigger={
-                <button type="button" aria-label="Mi cuenta">
-                  <Avatar nombre={correo} size="sm" decorativo />
+                <button
+                  type="button"
+                  className={styles.botonCuenta}
+                  aria-label="Mi cuenta"
+                >
+                  {/* `md` (36px) y no `sm` (28px): es la única puerta a la cuenta en móvil,
+                      y a 28px se leía como un adorno en vez de como un control. */}
+                  <Avatar nombre={correo} src={fotoUrl} size="md" decorativo />
                 </button>
               }
             >
               <p className={styles.correoMenu}>{correo}</p>
+
+              <MenuSeparator />
+
+              {/*
+                El único componente de cliente del cromo. No es un
+                `SegmentedControl`: sus radios, dentro de este `<form>`, hacían
+                que Enter cerrase la sesión. El porqué completo, en el archivo.
+              */}
+              <MenuTema />
 
               <MenuSeparator />
 
@@ -82,7 +145,16 @@ export default async function MiembrosLayout({ children }: { children: ReactNode
         </div>
       </header>
 
+      {/*
+        Uno por portal, con un único escuchador delegado. Es quien llama a
+        `document.startViewTransition`: escribir el `view-transition-name` no
+        anima nada por sí solo, y en Next 16.2.11 nadie más lo dispara.
+      */}
+      <TransicionesDeRuta />
+
       <main className={styles.main}>{children}</main>
+
+      {modal}
 
       <PortalTabBar />
     </div>
