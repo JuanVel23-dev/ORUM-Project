@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
@@ -9,9 +9,9 @@ import { Field } from '@/components/ui/field'
 import { Input, InputButton } from '@/components/ui/input'
 import { estilosAuth } from '@/components/ui/pantalla-auth'
 import { createClient } from '@/lib/supabase/client'
-import { interpretarEnlaceActivacion, MENSAJE_ENLACE_INVALIDO, textosActivacion } from '@/lib/auth/activacion'
+import { MENSAJE_ENLACE_INVALIDO, MENSAJE_ENLACE_VENCIDO, textosActivacion } from '@/lib/auth/activacion'
 
-type Estado = 'verificando' | 'listo' | 'invalido' | 'guardando'
+type Estado = 'listo' | 'invalido' | 'guardando'
 
 const DESTINO_POR_ROL: Record<string, string> = {
   staff: '/admin',
@@ -23,33 +23,13 @@ export function ActivarForm() {
   const searchParams = useSearchParams()
   const destino = DESTINO_POR_ROL[searchParams.get('rol') ?? ''] ?? '/miembros'
   const textos = textosActivacion(searchParams.get('modo') ?? undefined)
+  const tokenHash = searchParams.get('token_hash')
+  const tipo = searchParams.get('type')
 
-  const [estado, setEstado] = useState<Estado>('verificando')
+  const [estado, setEstado] = useState<Estado>(tokenHash && tipo ? 'listo' : 'invalido')
   const [error, setError] = useState('')
   const [mensajeInvalido, setMensajeInvalido] = useState(MENSAJE_ENLACE_INVALIDO)
   const [verPassword, setVerPassword] = useState(false)
-
-  // Chequeo único al montar (no una suscripción a store externo): confirma que
-  // el enlace de invitación dejó una sesión válida antes de mostrar el formulario.
-  // La URL se lee ANTES de crear el cliente: supabase-js consume y limpia el hash
-  // al inicializar. Solo una URL con credenciales prueba algo; una sesión previa
-  // del navegador, por sí sola, no.
-  useEffect(() => {
-    const enlace = interpretarEnlaceActivacion(window.location.hash, window.location.search)
-    const resolver: Promise<{ estado: Estado; mensaje?: string }> =
-      enlace.tipo === 'con-credenciales'
-        ? createClient()
-            .auth.getSession()
-            .then(({ data }) => ({ estado: data.session ? 'listo' : 'invalido' }))
-        : Promise.resolve({
-            estado: 'invalido',
-            mensaje: enlace.tipo === 'error' ? enlace.mensaje : undefined,
-          })
-    resolver.then((r) => {
-      if (r.mensaje) setMensajeInvalido(r.mensaje)
-      setEstado(r.estado)
-    })
-  }, [])
 
   async function activar(formData: FormData) {
     const nueva = String(formData.get('password') ?? '')
@@ -63,11 +43,30 @@ export function ActivarForm() {
       setError('Las contraseñas no coinciden.')
       return
     }
+    if (!tokenHash || !tipo) {
+      setEstado('invalido')
+      return
+    }
 
     setEstado('guardando')
     setError('')
 
     const supabase = createClient()
+
+    // El token se canjea justo aquí, al enviar el formulario — nunca al
+    // cargar la página. Así un GET pasivo (un escaneo automático de enlaces,
+    // el propio Gmail revisando el correo) no lo gasta antes de que la
+    // persona lo use de verdad.
+    const { error: errVerify } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: tipo as 'invite' | 'recovery',
+    })
+    if (errVerify) {
+      setMensajeInvalido(errVerify.code === 'otp_expired' ? MENSAJE_ENLACE_VENCIDO : MENSAJE_ENLACE_INVALIDO)
+      setEstado('invalido')
+      return
+    }
+
     const { error: errUpdate } = await supabase.auth.updateUser({ password: nueva })
     if (errUpdate) {
       setEstado('listo')
@@ -76,10 +75,6 @@ export function ActivarForm() {
     }
 
     router.push(destino)
-  }
-
-  if (estado === 'verificando') {
-    return <p className={estilosAuth.formulario}>Verificando el enlace…</p>
   }
 
   if (estado === 'invalido') {
