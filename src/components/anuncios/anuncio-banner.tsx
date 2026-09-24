@@ -5,6 +5,7 @@ import { Megaphone, X } from 'lucide-react'
 import { Section } from '@/components/ui/layout'
 import { Button } from '@/components/ui/button'
 import { usePreferenciaLocal } from '@/components/use-preferencia-local'
+import { useHidratado } from '@/components/use-hidratado'
 import type { AnuncioResumen } from '@/lib/anuncios/tipos'
 import styles from './anuncio-banner.module.css'
 
@@ -34,8 +35,16 @@ export function AnuncioBanner({
     anuncio ? `anuncio-cerrado-${anuncio.id}` : 'anuncio-cerrado-ninguno',
     false,
   )
+  const hidratado = useHidratado()
 
-  if (!anuncio || cerrado) return null
+  /*
+    Sin `hidratado`, el snapshot de servidor de `usePreferenciaLocal` (siempre
+    `false`) pintaría el banner en cada carga y lo haría desaparecer justo
+    después de hidratar para quien ya lo había cerrado — parpadeo y salto de
+    layout en las dos páginas más visitadas. Se espera a que el cliente
+    confirme AMBAS cosas: que hay anuncio y que no fue cerrado.
+  */
+  if (!hidratado || !anuncio || cerrado) return null
 
   return (
     <Section tono="cacao" className={styles.banner}>

@@ -112,8 +112,6 @@ export default async function LandingPublica() {
 
   return (
     <>
-      <AnuncioBanner anuncio={anuncios[0] ?? null} hrefHistorial="/novedades" />
-
       {/*
         EL SOCIO CON SESIÓN ABIERTA QUE LLEGA A `/`.
 
@@ -136,6 +134,8 @@ export default async function LandingPublica() {
       )}
 
       <HeroPublico soporte={soporte} comercios={comercios} hayVitrina={hayVitrina} />
+
+      <AnuncioBanner anuncio={anuncios[0] ?? null} hrefHistorial="/novedades" />
 
       {/*
         «Cómo funciona» ANTES que la vitrina, y no al revés.
