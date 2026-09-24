@@ -27,4 +27,5 @@ export const ANCLAS = [
   { href: '/#que-es-orum', texto: 'Qué es ORUM' },
   { href: '/#como-funciona', texto: 'Cómo funciona' },
   { href: '/#comercios-aliados', texto: 'Comercios aliados' },
+  { href: '/novedades', texto: 'Novedades' },
 ] as const

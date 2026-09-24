@@ -10,6 +10,9 @@ import {
   obtenerWhatsappSoporte,
   type ComercioVitrina,
 } from '@/lib/publico/datos-publicos'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
+import { AnuncioBanner } from '@/components/anuncios/anuncio-banner'
 import { AliadosOverlayTrigger } from './_components/aliados-overlay-trigger'
 import { ComoFunciona } from './_components/como-funciona'
 import { QueEsOrum } from './_components/que-es-orum'
@@ -77,11 +80,12 @@ export default async function LandingPublica() {
     `cache()` ya evita que el layout y esta página consulten dos veces el número
     de soporte dentro de la misma petición.
   */
-  const [vitrina, soporte, perfil, abiertoEn] = await Promise.all([
+  const [vitrina, soporte, perfil, abiertoEn, anuncios] = await Promise.all([
     obtenerVitrinaPublica(),
     obtenerWhatsappSoporte(),
     getPerfilActual(),
     obtenerInstanteServidor(),
+    obtenerAnunciosVisibles(createAdminClient(), 'publico'),
   ])
 
   /*
@@ -108,6 +112,8 @@ export default async function LandingPublica() {
 
   return (
     <>
+      <AnuncioBanner anuncio={anuncios[0] ?? null} hrefHistorial="/novedades" />
+
       {/*
         EL SOCIO CON SESIÓN ABIERTA QUE LLEGA A `/`.
 
