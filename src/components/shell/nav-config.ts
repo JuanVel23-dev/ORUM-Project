@@ -3,6 +3,7 @@ import {
   CreditCard,
   Home,
   LayoutGrid,
+  Megaphone,
   Search,
   ScrollText,
   Store,
@@ -53,6 +54,7 @@ const MIEMBROS: NavItem = { href: '/admin/miembros', label: 'Miembros', icon: Us
 const COMERCIOS: NavItem = { href: '/admin/comercios', label: 'Comercios', icon: Store }
 const USUARIOS: NavItem = { href: '/admin/usuarios', label: 'Usuarios', icon: UserCog }
 const PLANES: NavItem = { href: '/admin/planes', label: 'Planes', icon: CreditCard }
+const ANUNCIOS: NavItem = { href: '/admin/anuncios', label: 'Novedades', icon: Megaphone }
 const METRICAS: NavItem = { href: '/admin/metricas', label: 'Métricas', icon: BarChart3 }
 const BITACORA: NavItem = { href: '/admin/bitacora', label: 'Bitácora', icon: ScrollText }
 
@@ -77,7 +79,7 @@ export function navegacionPara(rol: RolCodigo): NavGroup[] {
       // Consultar, no operar. Métricas va primero: se mira a diario; la
       // bitácora solo cuando hay que averiguar quién hizo algo.
       { label: 'Análisis', items: [METRICAS, BITACORA] },
-      { label: 'Administración', items: [USUARIOS, PLANES] },
+      { label: 'Administración', items: [USUARIOS, PLANES, ANUNCIOS] },
     ]
   }
 
