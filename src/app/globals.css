@@ -20,7 +20,16 @@
    duplicación el fallo es imposible. Revisar cuando el soporte sea universal.
    ========================================================================== */
 
-:root {
+/*
+  `[data-theme='light']` además de `:root`: es la contraparte de lo que ya
+  hacen `PantallaAuth` y `/offline` con `data-theme="dark"` —un ámbito que
+  FIJA su tema aunque el resto del documento lleve el otro—. Lo usa la
+  fachada pública (`(publico)/layout.tsx`): la página que ve quien todavía no
+  es socio lleva los colores de la guía de marca en cualquier dispositivo,
+  también en uno con el modo oscuro puesto.
+*/
+:root,
+[data-theme='light'] {
   /* --------------------------------------------------------------------------
      CREMA  ·  dirección de arte v3 §2.1, con los valores de la v6
 
@@ -1203,7 +1212,10 @@ textarea:active,
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  :root {
+  /* `[data-theme]` además de `:root`: un ámbito que fija su tema redeclara
+     los tokens y, sin esto, deshacía la preferencia dentro de él. */
+  :root,
+  [data-theme] {
     --material: var(--surface);
   }
 }
@@ -1225,7 +1237,11 @@ textarea:active,
   quien ha pedido más señal, no menos.
 */
 @media (prefers-contrast: more) {
-  :root {
+  /* `[data-theme]` además de `:root`: un ámbito que fija su tema (la fachada
+     pública, la pantalla de acceso) redeclara los tokens y, sin esto,
+     devolvía el trazo transparente justo a quien pidió más contraste. */
+  :root,
+  [data-theme] {
     --border-superficie: var(--border-strong);
     --border: var(--border-strong);
     --border-subtle: var(--border);

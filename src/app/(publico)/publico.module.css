@@ -7,6 +7,12 @@
   flex-direction: column;
   min-height: 100dvh;
 
+  /* El fondo y el texto los pone la fachada y no el `<body>`: el `<body>`
+     sigue el tema del documento, y con el modo oscuro puesto se habría
+     visto negro entre sección y sección. */
+  background: var(--bg);
+  color: var(--text);
+
   /*
     Alto real de la cabecera, publicado UNA vez para sus consumidores: la
     propia cabecera (`min-height`), el primer bloque de cada página —que sube
@@ -81,4 +87,15 @@
 */
 .main section[id] {
   scroll-margin-block-start: var(--cabecera-alto);
+}
+
+/*
+  EL LIENZO DE DETRÁS, en claro también. Cuando la página rebota al hacer
+  scroll (iOS, trackpad) asoma el fondo del `<html>`, que sigue el tema del
+  dispositivo. `:has()` lo alcanza sin tocar el layout raíz, que comparten
+  los cuatro portales; donde no se soporta, solo se ve ese rebote en oscuro.
+*/
+:global(html):has(.fachada) {
+  color-scheme: light;
+  background: var(--w-0);
 }

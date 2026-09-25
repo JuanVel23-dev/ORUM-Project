@@ -40,7 +40,14 @@ export default async function PublicoLayout({
   const soporte = await obtenerWhatsappSoporte()
 
   return (
-    <div className={estilos.fachada}>
+    /*
+      `data-theme="light"`: LA FACHADA SIEMPRE EN LOS COLORES DE LA MARCA.
+      Encargo del propietario: esta página la ven personas en todo tipo de
+      dispositivos, y en uno con el modo oscuro puesto las franjas crema salían
+      negras. El tema oscuro sigue existiendo en los portales con sesión; aquí
+      no aplica. Mismo mecanismo que `PantallaAuth` usa para fijar el oscuro.
+    */
+    <div className={estilos.fachada} data-theme="light">
       <EncabezadoPublico />
 
       {/*

@@ -273,6 +273,14 @@ Priorizar el claro no es eliminar el oscuro: el menú de tema existe, hay usuari
 con la preferencia puesta y `prefers-color-scheme` sigue mandando en quien no ha
 elegido.
 
+⚠️ **Excepción: el Portal Público va SIEMPRE en claro** (encargo del
+propietario, 25/09/2026). La fachada la ve gente en todo tipo de
+dispositivos, y con el modo oscuro puesto las franjas crema salían negras.
+`(publico)/layout.tsx` fija `data-theme="light"` en su envoltorio —la
+contraparte del `data-theme="dark"` de `PantallaAuth`—, así que ahí no
+aplican ni la preferencia del sistema ni el tema elegido. Los otros tres
+portales siguen con los dos temas.
+
 **El claro es donde se diseña y se juzga.** En oscuro una sombra negra sobre
 fondo negro no se ve, así que allí el material lo declara **`--edge`**, que con
 la v3 pasó de ser un chaflán superior a un **anillo completo de luz**: es el
