@@ -11,7 +11,14 @@
 | 1 | `migrations/20260913120000_imagenes_y_avatares.sql` | Foto de portada del comercio, avatar de quien trabaja en el club, foto del socio, y los dos buckets de Storage |
 | 2 | `migrations/20260914090000_favoritos_y_mas_usados.sql` | Favoritos del socio, «los que más usas», y la galería de imágenes de la ficha |
 | 3 | `migrations/20260914140000_top_descuentos.sql` | El top de descuentos más usados del club (global). **Añadido después: si ya corriste los dos primeros, este es el único que te falta** |
-| 4 | `migrations/20260925090000_recursos_sitio.sql` | **Lo nuevo del 25/09/2026.** La tabla `recursos_sitio` y el bucket `recursos-sitio`: la imagen principal de la portada, los carteles de promociones y los logotipos de ORUM, todo administrado desde `/admin/recursos` |
+| 4 | `migrations/20260923140000_anuncios.sql` | Las novedades del club: tabla `anuncios`, su RLS y el bucket `imagenes-anuncios`. **Ya aplicada** |
+| 5 | `migrations/20260924090000_anuncios_rls_super_admin.sql` | Ajuste de la RLS de `anuncios` a super_admin. Depende del anterior. **Ya aplicada** |
+| 6 | `migrations/20260925090000_recursos_sitio.sql` | **Lo nuevo del 25/09/2026.** La tabla `recursos_sitio` y el bucket `recursos-sitio`: la imagen principal de la portada, los carteles de promociones y los logotipos de ORUM, todo administrado desde `/admin/recursos`. **Ya aplicada** |
+
+> Faltan a propósito los dos archivos de agosto (`20260819*`, las revocaciones
+> de `registrar_venta`) y los dos del 18/09 (`20260918*`, `fn_validar_venta` y
+> la limpieza de RLS): son parches de seguridad sueltos, no dependen de nada y
+> no tienen orden entre sí. Si montas un entorno desde cero, córrelos también.
 
 ## Cómo se corren
 
@@ -54,12 +61,16 @@ supabase db push
 
 Son **dos archivos y son independientes**: puedes correr uno sin el otro.
 
-### 1. `migrations/20260925090000_recursos_sitio.sql` — HACE FALTA
+### 1. `migrations/20260925090000_recursos_sitio.sql` — YA APLICADA
 
-Sin esto, `/admin/recursos` se abre pero avisa en rojo de que falta la tabla, y
-la página de inicio sigue funcionando exactamente como hoy (el héroe muestra el
-collage de aliados y no hay apartado de promociones). Nada se rompe, pero nada
-de lo nuevo funciona tampoco.
+Corrida contra la base el 25/09/2026 y verificada: la tabla, el bucket con sus
+límites, el `check` de `ubicacion`, el valor por defecto de `visible` y las
+cuatro políticas de RLS.
+
+Queda anotado por si hay que montar otro entorno: sin esto, `/admin/recursos`
+se abre pero avisa en rojo de que falta la tabla, y la página de inicio sigue
+funcionando igual —el héroe muestra la fotografía de marca y no hay apartado de
+promociones—. Nada se rompe, pero nada de lo nuevo funciona tampoco.
 
 Crea:
 
