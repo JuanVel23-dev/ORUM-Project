@@ -19,7 +19,7 @@
  *
  * Función pura, sin JSX y sin importar `lucide-react`: así se puede probar sin
  * montar React, y el mapeo clave → componente vive en el único sitio que
- * necesita el paquete (`_components/icono-categoria.tsx`).
+ * necesita el paquete (`components/ui/icono-categoria.tsx`).
  */
 
 /**
@@ -46,6 +46,8 @@ export type ClaveIconoCategoria =
   | 'ocio'
   | 'hogar'
   | 'servicios'
+  | 'fotografia'
+  | 'saludable'
   | 'generico'
 
 /** El respaldo. Se usa cuando ninguna palabra clave casa, y también con nombre vacío. */
@@ -75,6 +77,13 @@ export function normalizarNombre(texto: string): string {
 */
 const REGLAS: ReadonlyArray<readonly [ClaveIconoCategoria, readonly string[]]> = [
   ['mascotas', ['mascota', 'veterinar', 'canino', 'felino', 'pet']],
+  /*
+    «Alimentos saludables» ANTES que salud y que mercado: el nombre contiene
+    «salud» y, sin esta regla, una tienda de comida sana salía con el
+    fonendoscopio del médico.
+  */
+  ['saludable', ['saludable', 'organic', 'vegan', 'vegetarian', 'natural']],
+  ['fotografia', ['fotograf', 'foto']],
   ['cafe', ['cafe', 'cafeter', 'panader', 'reposter', 'pasteler', 'heladeri', 'postre']],
   [
     'comida',
@@ -111,7 +120,21 @@ const REGLAS: ReadonlyArray<readonly [ClaveIconoCategoria, readonly string[]]> =
       'fisioterap',
     ],
   ],
-  ['belleza', ['belleza', 'estetic', 'spa', 'peluquer', 'barber', 'unas', 'maquillaje']],
+  [
+    'belleza',
+    [
+      'belleza',
+      'estetic',
+      'spa',
+      'peluquer',
+      'barber',
+      'unas',
+      'manicur',
+      'maquillaje',
+      'estilista',
+      'masaje',
+    ],
+  ],
   ['deporte', ['deporte', 'gimnasio', 'gym', 'fitness', 'crossfit', 'yoga', 'entrenamiento']],
   ['moda', ['moda', 'ropa', 'calzado', 'zapat', 'boutique', 'vestuario', 'accesorio', 'joyer']],
   ['viajes', ['viaje', 'turismo', 'hotel', 'hospedaje', 'hostal', 'agencia de viaje', 'vuelo']],

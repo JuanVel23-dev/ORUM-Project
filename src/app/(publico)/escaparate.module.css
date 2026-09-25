@@ -56,18 +56,20 @@
 }
 
 /*
-  LA PRIMERA FRANJA COME EL RELLENO SUPERIOR DEL `<main>`.
+  LA PRIMERA FRANJA SUBE POR DETRÁS DE LA CABECERA.
 
-  Sin esto, entre la cabecera pegajosa y el héroe de cacao queda una banda de
-  papel de `--pad-contenido-top` que se lee como un error de maquetación. El
-  número no se repite: se lee la variable que el layout publica.
+  La cabecera es fija y está montada encima de la fotografía (guía de marca
+  v6), así que el `<main>` reserva su alto en el relleno superior para las
+  páginas que empiezan con texto, como `/aliados`. Cuando la página empieza
+  con una franja a sangre —el héroe, el banner del directorio—, esa franja
+  se come el relleno entero y arranca en el borde de la ventana; su propio
+  relleno superior (que suma `--cabecera-alto`) devuelve el texto a su sitio.
 
-  `:first-child` y no una clase: cuando el visitante ES socio, la landing pinta
-  antes el puente «Ir a mi portal» y entonces esa banda de papel SÍ tiene
-  contenido y debe conservarse.
+  `:first-child` y no una clase: así ninguna página tiene que acordarse de
+  pedirlo, y una página que empiece con otra cosa conserva el hueco.
 */
 .franja:first-child {
-  margin-top: calc(var(--pad-contenido-top, 0px) * -1);
+  margin-top: calc((var(--cabecera-alto, 0px) + var(--pad-contenido-top, 0px)) * -1);
 }
 
 /* --------------------------------------------------------------------------
@@ -267,4 +269,71 @@
   line-height: var(--t-callout-leading);
   color: var(--text-2);
   text-wrap: pretty;
+}
+
+/*
+  EL ACENTO EN CURSIVA DORADA (v6), compartido por los títulos de sección.
+
+  Es un `<em>` dentro de `.tituloSeccion` («¿Qué es <em>ORUM</em>?», «Así
+  funciona <em>ORUM</em>», «Conoce a tus futuros <em>aliados</em>»), nunca su
+  propio elemento: el oro sigue sin ser el único portador del énfasis, la
+  cursiva ya lo es, y el oro solo se suma encima.
+
+  La cursiva es REAL —Playfair Display la trae de fábrica, `font-style:
+  italic` pide el corte auténtico, no una oblicua sintética— y por eso este
+  acento no funcionaba con Plus Jakarta Sans en la v5: una geométrica no
+  tiene cursiva propia, y el navegador la habría inclinado a mano, que se ve
+  mal en un titular grande. Con Playfair Display de vuelta, vuelve a
+  funcionar.
+
+  El peso baja un escalón respecto al romano que lo rodea: una cursiva al
+  mismo peso que el titular se ve más pesada que el romano por la inclinación,
+  y aquí el acento debe leerse más ligero, no más grueso.
+*/
+.acento {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--brand);
+}
+
+/* ==========================================================================
+   3. SOBRE FOTOGRAFÍA  ·  el ámbito de los controles montados en el héroe
+   --------------------------------------------------------------------------
+   La cabecera, el héroe de la landing y el banner del directorio llevan
+   controles del sistema —`Button`— encima de una foto oscura. Igual que
+   `.tonoCacao`, esto es un ÁMBITO DE TEMA: reasigna los semánticos para que
+   los componentes se adapten sin saber dónde están.
+
+   Pero SIN fondo, y por eso no es `.tonoCacao`: la foto ya pone el negro.
+   Y se aplica al envoltorio de los controles, nunca a la raíz de la cabecera:
+   la hoja del menú móvil se monta DENTRO de la cabecera, y un `<dialog>`
+   hereda las propiedades personalizadas de sus ancestros del DOM aunque se
+   pinte en la capa superior. Remapear la raíz dejaba la hoja crema con el
+   texto crema encima.
+
+   Qué hace cada remapeo con los botones del sistema:
+     · `secondary` → la píldora de contorno claro de la guía de marca:
+       relleno transparente y filo de crema al 50 %. Ese filo mide ~4,6:1
+       contra el negro de la foto (WCAG 1.4.11 pide 3:1).
+     · `ghost` → texto `--cacao-fg-2` (8,56:1 sobre `--cacao-bg`).
+     · `brand` → relleno `--gold-300` con texto en tinta, 12,6:1: es el oro
+       pálido que pidió el cliente, legal aquí y SOLO aquí, sobre negro.
+   ========================================================================== */
+.sobreFoto {
+  color-scheme: dark;
+
+  --text: var(--cacao-fg);
+  --text-2: var(--cacao-fg-2);
+  --surface: transparent;
+  --surface-hover: color-mix(in srgb, var(--cacao-fg) 10%, transparent);
+  --border-control: color-mix(in srgb, var(--cacao-fg) 50%, transparent);
+  --border-subtle: color-mix(in srgb, var(--cacao-fg) 22%, transparent);
+  --brand: var(--gold-300);
+  --brand-edge: var(--gold-300);
+  --focus: var(--cacao-brand);
+  --action-gold: var(--gold-300);
+  --action-gold-fg: var(--tinta-1);
+  /* Una sombra negra sobre una foto negra no se ve; el hover de `secondary`
+     la pediría y solo ensuciaría el borde. */
+  --shadow-card: 0 0 rgba(0, 0, 0, 0);
 }

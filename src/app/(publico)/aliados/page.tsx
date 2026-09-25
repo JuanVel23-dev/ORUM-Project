@@ -61,7 +61,7 @@ export default async function AliadosPage() {
         {/*
           EL MISMO PELDAÑO CEREMONIAL QUE LOS ENCABEZADOS DE LA LANDING.
 
-          `escaparate.tituloSeccion` es Fraunces a 32–48px con el tracking
+          `escaparate.tituloSeccion` es Playfair Display a 32–48px con el tracking
           interpolado por tamaño. Se reutiliza en vez de copiarse: esa
           interpolación son cuatro números atados a dos anchos de ventana
           concretos, y una tercera copia es una tercera oportunidad de que una

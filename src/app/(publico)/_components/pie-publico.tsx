@@ -42,7 +42,12 @@ export function PiePublico({ soporte }: { soporte: string | null }) {
   return (
     <footer className={estilos.pie}>
       <div className={estilos.contenido}>
-        <p className={estilos.marca}>ORUM</p>
+        <p className={estilos.marca}>
+          <span className={estilos.destello} aria-hidden="true">
+            ✦
+          </span>
+          ORUM
+        </p>
 
         <nav className={estilos.puertas} aria-label="Accesos a los portales">
           {PUERTAS.map((puerta) => (
@@ -72,7 +77,9 @@ export function PiePublico({ soporte }: { soporte: string | null }) {
         )}
       </div>
 
-      <p className={estilos.derechos}>© {new Date().getFullYear()} ORUM</p>
+      <p className={estilos.derechos}>
+        © {new Date().getFullYear()} ORUM · Apoya lo local, te da más.
+      </p>
     </footer>
   )
 }

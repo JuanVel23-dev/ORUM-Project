@@ -1,390 +1,311 @@
 /* ==========================================================================
-   HÉROE  ·  la franja de cacao con el titular dorado
+   EL HÉROE  ·  foto oscura a sangre, cabecera montada encima (v6)
    --------------------------------------------------------------------------
-   La adaptación pregunta por `contenido`, el contenedor que declara el
-   `<main>` del layout público. El `@container` dejó de ser obligatorio con la
-   licencia v4, pero aquí sigue siendo lo correcto y ya estaba escrito.
+   Es una `.franja` de `escaparate.module.css`: sangra hasta los bordes de la
+   ventana, y por ser el primer hijo del `<main>` sube por detrás de la
+   cabecera fija. El relleno superior devuelve el texto por debajo de ella.
 
-   LA DECISIÓN DE FONDO: EL TITULAR DORADO VA SOBRE CACAO, NO SOBRE CREMA.
-   `--gold-400` sobre crema da 1,99:1 —medido, y ni siquiera llega al 3:1 de
-   texto grande—. Sobre `--cacao-bg` da 7,83:1, y además se lee METAL en vez de
-   mostaza. Así que el oro grande no vive sobre claro: vive aquí. La clase
-   `tonoCacao` de `franjas.module.css` es la que convierte esta sección en un
-   ámbito de tema para que todo lo que caiga dentro —`Button`, `ComercioLogo`—
-   resuelva sus propios tokens en oscuro.
+   El relleno inferior es más alto que el superior a propósito: la tarjeta
+   «Así es como te unes» se monta sobre el filo del héroe (margen negativo en
+   `como-funciona.module.css`) y no puede tapar las acciones. Los dos números
+   viven juntos aquí: `--solape-tarjeta` lo lee también ese módulo.
    ========================================================================== */
 
 .hero {
-  /* La franja pone el relleno lateral y el sangrado; esto solo ajusta el aire
-     vertical, que en el héroe es mayor que en el resto de secciones. */
-  padding-block: var(--space-9) var(--space-10);
-}
+  --solape-tarjeta: var(--space-9);
 
-@container contenido (min-width: 901px) {
-  .hero {
-    padding-block: var(--space-10) var(--space-11);
-  }
-}
-
-.rejilla {
-  display: grid;
-  gap: var(--space-8);
-  align-items: center;
-}
-
-/* Dos columnas solo cuando cada una tiene sitio de verdad. Por debajo de 900px
-   la columna del titular bajaría de ~340px y un titular de tres líneas se
-   partiría mal, así que se apilan: texto arriba, collage abajo. */
-@container contenido (min-width: 901px) {
-  .rejilla {
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: var(--space-9);
-  }
-}
-
-.textos {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-/* --- Overline ---------------------------------------------------------------
-   Versalitas pequeñas con tracking ABIERTO. Es el otro extremo del mismo
-   principio que el titular: las mayúsculas a 11px comparten demasiada masa
-   vertical y sin aire se leen como una mancha. Por eso un `letter-spacing`
-   único está mal en algún tamaño siempre.
-
-   `--text-2` dentro del ámbito de cacao = `--cacao-fg-2`: 8,56:1 medido. */
-
-.overline {
-  margin: 0;
-
-  font-size: var(--t-overline-size);
-  line-height: var(--t-overline-leading);
-  letter-spacing: var(--t-overline-tracking);
-  font-weight: var(--t-overline-weight);
-  text-transform: uppercase;
-  color: var(--text-2);
-}
-
-/* --- El titular -------------------------------------------------------------
-   `--t-hero-1`, el peldaño que X1 creó para esto y que ninguna pantalla de
-   trabajo hereda. Fraunces, hasta 72px.
-   -------------------------------------------------------------------------- */
-
-.titular {
-  margin: 0;
-  max-width: 16ch;
-
-  font-family: var(--font-display);
-  font-size: var(--t-hero-1-size);
-  line-height: var(--t-hero-1-leading);
-  font-weight: var(--t-hero-1-weight);
-  color: var(--text);
-
-  /* Ligaduras y alternancias contextuales: es lo que distingue una serif bien
-     compuesta de la misma serif puesta sin más. A 72px se ve. */
-  font-feature-settings: 'liga' 1, 'calt' 1;
-  /* Una serif de display con `antialiased` pierde las astas finas en Chrome
-     sobre macOS: aquí sí conviene el suavizado del sistema. */
-  -webkit-font-smoothing: auto;
-
-  /* Evita la línea huérfana de una sola palabra en el salto. */
-  text-wrap: balance;
-
-  /*
-    TRACKING ESPECÍFICO DEL TAMAÑO, interpolado con el tamaño real.
-
-    `--t-hero-1-tracking` es un valor único (−0,032em) para un tamaño que va de
-    44px a 72px, y un `letter-spacing` único está mal en algún tamaño siempre:
-    a 44px −0,032em aprieta las astas de la serif hasta que se tocan, y a 72px
-    −0,020em deja la palabra suelta.
-
-    Se interpola en PX y no en EM a propósito: un valor en em escala con la
-    fuente, o sea proporcionalmente, y el ajuste óptico correcto aprieta MÁS
-    que proporcionalmente al crecer. Los dos extremos son literales porque no
-    existe un token de tracking fluido; están anclados a los mismos anchos de
-    ventana donde `--t-hero-1-size` alcanza sus topes (7vw = 44px en 628px,
-    7vw = 72px en 1029px), así que los dos ramales van sincronizados.
-  */
-  --tracking-44: -0.88px; /* −0,020em a 44px */
-  --tracking-72: -2.45px; /* −0,034em a 72px */
-  letter-spacing: clamp(
-    var(--tracking-72),
-    calc(var(--tracking-44) - (100vw - 628px) * 0.003915),
-    var(--tracking-44)
-  );
-}
-
-/*
-  EL ORO DEL TITULAR. `--brand` dentro del ámbito de cacao es `--cacao-brand`
-  (`--gold-400`): 7,83:1 sobre la franja, medido. Fuera de esta franja el mismo
-  tono daría 1,99:1 y sería un fallo AA en la primera pantalla del producto.
-
-  El color NO es el único portador de nada: no codifica un dato, separa dos
-  mitades de una misma frase. El presupuesto del ≤5 % quedó levantado por la
-  licencia v4, así que un titular dorado ya es legítimo.
-*/
-.destacado {
-  color: var(--brand);
-}
-
-/* --- Lede ------------------------------------------------------------------ */
-
-.lede {
-  margin: 0;
-  max-width: 44ch;
-
-  font-size: var(--t-title-3-size);
-  line-height: var(--t-title-3-leading);
-  letter-spacing: var(--t-title-3-tracking);
-  font-weight: 400;
-  color: var(--text-2);
-
-  text-wrap: pretty;
-}
-
-/* --- Acciones -------------------------------------------------------------- */
-
-.acciones {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-3);
-
-  margin-top: var(--space-3);
-}
-
-/* En cuanto hay ancho, los dos CTA caben en línea y el primario deja de ocupar
-   todo el renglón: un botón de 900px de ancho no se lee como jerarquía. */
-@container contenido (min-width: 561px) {
-  .acciones {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-4);
-  }
-}
-
-/* Ancla secundaria: enlace de texto con icono, no un `Button secondary`.
-   Compite menos con el primario y sigue siendo un objetivo táctil completo. */
-
-.ancla {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  min-height: var(--tap-min);
-
-  padding-inline: var(--space-3);
-  border-radius: var(--radius-sm);
-
-  font-size: var(--t-callout-size);
-  line-height: var(--t-callout-leading);
-  font-weight: 510;
-  color: var(--text-2);
-  text-decoration: none;
-
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
-}
-
-/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
-   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
-   FUERA a propósito — un teclado existe en cualquier dispositivo. */
-
-@media (hover: hover) {
-  .ancla:hover {
-    color: var(--text);
-    background: var(--surface-hover);
-  }
-}
-
-.ancla:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-/* El icono baja un pelo al señalar: es la señal de «esto te lleva ahí abajo».
-   `translate` y no `margin`, que recalcularía layout cada fotograma. */
-.anclaIcono {
-  transition: translate var(--dur-fast) var(--ease-out);
-}
-
-@media (hover: hover) {
-  .ancla:hover .anclaIcono {
-    translate: 0 2px;
-  }
-}
-
-/* ==========================================================================
-   EL COLLAGE
-   --------------------------------------------------------------------------
-   Rejilla de tres celdas: la primera ocupa la fila entera y las otras dos se
-   reparten la siguiente. Da una composición con jerarquía —hay un aliado
-   principal— sin necesitar tres tamaños de tarjeta distintos.
-
-   YA NO SON SOLO LOGOTIPOS. `comercios.portada_url` existe y se consulta, así
-   que cuando el aliado tiene foto del local, la foto manda: vende mucho más
-   que un logotipo. Sin foto se conserva el retrato de marca, que no es un
-   hueco sino el mejor activo visual que ese comercio tiene hoy.
-   ========================================================================== */
-
-.collage {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-}
-
-.collage > :first-child {
-  grid-column: 1 / -1;
-}
-
-/* Cuando solo hay un aliado, la celda única no necesita estirarse a lo ancho
-   de dos columnas vacías. */
-.collage:has(> :only-child) {
-  grid-template-columns: 1fr;
-}
-
-/*
-  Cada celda es una cubierta: 4:3, superficie de la franja y filo de luz
-  superior. Dentro del ámbito de cacao `--surface` es `--cacao-surface`, así
-  que la celda se recorta del fondo sin necesitar un trazo.
-
-  `container-type: inline-size` NO es opcional: la variante `portada` de
-  `ComercioLogo` mide su placa en `cqi`, y sin contenedor ancestro `cqi`
-  mediría el viewport pequeño y la placa se descuadraría.
-*/
-.celda {
   position: relative;
-  display: grid;
-  place-items: center;
+  isolation: isolate;
   overflow: hidden;
 
-  aspect-ratio: 4 / 3;
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  background-image: var(--gold-halo);
-  background-repeat: no-repeat;
-  background-position: center;
-  box-shadow: var(--edge-light);
+  display: flex;
+  align-items: center;
+  /* En móvil el héroe mide lo que su contenido y poco más: a pantalla
+     completa sobraba aire por encima del titular (lo señaló el propietario
+     en la revisión del boceto). */
+  min-height: 30rem;
 
-  container-type: inline-size;
+  padding-top: calc(var(--cabecera-alto) + var(--space-7));
+  padding-bottom: calc(var(--solape-tarjeta) + var(--space-9));
+
+  /* Sin foto, el negro de la franja con su luz dorada. Con foto, esto queda
+     debajo y solo se ve mientras la imagen carga. */
+  background: var(--fondo-franja-oscura), var(--cacao-bg);
+  color: var(--cacao-fg);
+  color-scheme: dark;
 }
 
-/* La celda grande es más ancha que alta: 4:3 la haría demasiado alta y
-   empujaría el CTA fuera de pantalla en móvil. */
-.collage > :first-child.celda {
-  aspect-ratio: 16 / 9;
+@container contenido (min-width: 768px) {
+  .hero {
+    --solape-tarjeta: var(--space-10);
+
+    /* 680px en un portátil; en un monitor alto la foto crece con la
+       pantalla hasta 860px, para no quedarse en una franja baja. */
+    min-height: clamp(680px, 78svh, 860px);
+    padding-top: calc(var(--cabecera-alto) + var(--space-9));
+    padding-bottom: calc(var(--solape-tarjeta) + var(--space-11));
+  }
 }
 
-/*
-  LA FOTO. Se apila SOBRE el material, nunca en su lugar: si la imagen falla no
-  pinta nada —su `alt` está vacío— y la placa del logotipo queda a la vista sin
-  un escuchador de `onError`, sin `'use client'` y sin salto de layout, porque
-  la proporción la fija el contenedor y no la imagen.
-*/
 .foto {
   position: absolute;
   inset: 0;
+  z-index: -2;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  /* La socia está a la derecha de la foto y el texto a la izquierda. En un
+     teléfono, donde la foto se recorta a lo alto, se ancla a la derecha
+     para que ella y la tarjeta ORUM sigan en cuadro. En color: los dorados
+     de la foto son los de la marca. */
+  object-position: 72% center;
 }
 
-/* El velo existe para que la placa no flote sobre un punto claro de la
-   fotografía. NO es portador de contraste de texto: ningún texto se apoya
-   sobre el collage, y esa decisión es la que convierte un riesgo abierto —el
-   contraste dependería de lo que suba cada comercio— en un número firmable. */
+@container contenido (min-width: 768px) {
+  .foto {
+    object-position: center;
+  }
+}
+
+/*
+  EL VELO. Horizontal en escritorio —el texto vive a la izquierda y la foto
+  respira a la derecha— y vertical en móvil, donde el texto ocupa todo el
+  ancho y lo que hay que oscurecer es la parte de abajo. Es lo que sostiene
+  el contraste del texto sobre CUALQUIER foto: la lede (`--cacao-fg-2`) se
+  apoya en ≥ 72 % de negro.
+*/
 .velo {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, var(--scrim) 0%, transparent 62%);
+  z-index: -1;
+  /* Arriba solo están la cabecera (con su propio degradado) y la insignia:
+     ahí el velo se aclara para que se vea la foto. Donde empieza el texto ya
+     está por encima del 70 %. */
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--cacao-bg) 94%, transparent) 0%,
+    color-mix(in srgb, var(--cacao-bg) 74%, transparent) 50%,
+    color-mix(in srgb, var(--cacao-bg) 30%, transparent) 100%
+  );
 }
 
-/* Con foto, la placa es una firma en la esquina de arranque. Su tamaño y su
-   radio los pone `ComercioLogo` con su variante; aquí solo se la coloca. */
-.placaSobreFoto {
-  position: absolute;
-  inset-inline-start: var(--space-3);
-  inset-block-end: var(--space-3);
-}
-
-/* ==========================================================================
-   ENTRADA  ·  al cargar, no al desplazar
-   --------------------------------------------------------------------------
-   El héroe está sobre el pliegue: no hay desplazamiento que esperar, así que
-   lo correcto es una entrada de carga y no un `IntersectionObserver` que
-   dispararía en el primer fotograma de todas formas.
-
-   `--ease-hero` —la curva medida en Agence Cartier— y no `--ease-out`: este es
-   el recorrido largo y deliberado de la página, el único que se permite
-   sentirse ceremonioso. Nunca `ease-in`.
-
-   `backwards` para que el estado inicial valga durante el retardo; sin él cada
-   pieza se ve un fotograma antes de empezar. Escalonado de `--escalonado`
-   (40ms), dentro de la banda 30–80.
-
-   Solo `transform` y `opacity`.
-   ========================================================================== */
-
-.textos > *,
-.celda {
-  animation: entrarHeroe var(--dur-page) var(--ease-hero) backwards;
-}
-
-.textos > :nth-child(1) {
-  animation-delay: 0ms;
-}
-.textos > :nth-child(2) {
-  animation-delay: var(--escalonado);
-}
-.textos > :nth-child(3) {
-  animation-delay: calc(var(--escalonado) * 2);
-}
-.textos > :nth-child(4) {
-  animation-delay: calc(var(--escalonado) * 3);
-}
-
-/* El collage entra detrás del texto: primero se entiende, después se desea. */
-.celda:nth-child(1) {
-  animation-delay: calc(var(--escalonado) * 4);
-}
-.celda:nth-child(2) {
-  animation-delay: calc(var(--escalonado) * 5);
-}
-.celda:nth-child(3) {
-  animation-delay: calc(var(--escalonado) * 6);
-}
-
-@keyframes entrarHeroe {
-  from {
-    opacity: 0;
-    /* Desde 0,97 y no desde 0: en el mundo real nada aparece de la nada, y un
-       bloque grande que crece desde 0,95 se lee como un zoom. */
-    transform: translate3d(0, var(--space-4), 0) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: none;
+@container contenido (min-width: 768px) {
+  .velo {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--cacao-bg) 94%, transparent) 0%,
+      color-mix(in srgb, var(--cacao-bg) 72%, transparent) 34%,
+      color-mix(in srgb, var(--cacao-bg) 18%, transparent) 62%,
+      color-mix(in srgb, var(--cacao-bg) 6%, transparent) 100%
+    );
   }
 }
 
-/* Movimiento reducido: se retira el viaje y queda el fundido. `globals.css` ya
-   comprime la duración, así que en la práctica aparece. Aparecer no marea. */
-@media (prefers-reduced-motion: reduce) {
-  .textos > *,
-  .celda {
-    animation-name: aparecerHeroe;
+/* --- Contenido ------------------------------------------------------------ */
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+  max-width: 40rem;
+}
+
+.puente {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  color: var(--gold-300);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.puente:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+.insignia {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--cacao-fg) 8%, transparent);
+
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-300);
+}
+
+@container contenido (min-width: 1024px) {
+  .insignia {
+    display: none;
   }
 }
 
-@keyframes aparecerHeroe {
-  from {
-    opacity: 0;
+.titular {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  line-height: 1.14;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--cacao-fg);
+  -webkit-font-smoothing: auto;
+  text-wrap: balance;
+}
+
+/* El salto de la guía («Descubre lo mejor / de tu ciudad») solo donde hay
+   ancho para que la primera línea no se parta sola. */
+.salto {
+  display: none;
+}
+
+@container contenido (min-width: 560px) {
+  .salto {
+    display: inline;
   }
-  to {
-    opacity: 1;
+}
+
+/* El acento en cursiva REAL de Playfair y en oro pálido (`--gold-300`,
+   13,95:1 sobre el negro): legal aquí porque el fondo es negro siempre. */
+.acento {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--gold-300);
+}
+
+.lede {
+  margin: 0;
+  max-width: 38ch;
+  font-size: var(--t-body-size);
+  line-height: 1.65;
+  color: var(--cacao-fg-2);
+  text-wrap: pretty;
+}
+
+@container contenido (min-width: 768px) {
+  .lede {
+    font-size: 1rem;
+  }
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/*
+  EN UNA FILA SI CABEN, Y SI NO, APILADAS A TODO EL ANCHO.
+
+  Las dos píldoras juntas son la decisión de la pantalla —«únete» o «mira
+  primero»—. En un teléfono común (390px) caben en una fila si se estrechan
+  un poco y la brújula se retira. En uno pequeño (320px, iPhone SE) no caben:
+  antes se forzaba la fila y el segundo botón se salía de la pantalla. Ahora
+  envuelven, y `flex: 1` hace que cada una ocupe el ancho entero de su fila:
+  dos píldoras completas una encima de otra, nunca una cortada.
+*/
+@container contenido (max-width: 479px) {
+  .acciones {
+    gap: var(--space-2);
+  }
+
+  /* `> a` y no `> *`: con la especificidad de `.pildora` y `.lg` empatada,
+     el ganador lo decidiría el orden de inyección de las hojas. */
+  .acciones > a {
+    flex: 1 1 auto;
+    min-height: 48px;
+    padding-inline: var(--space-4);
+    font-size: var(--t-footnote-size);
+  }
+
+  .iconoAncho {
+    display: none;
+  }
+}
+
+/* --- Ornamento vertical (escritorio) -------------------------------------- */
+
+.ornamento {
+  display: none;
+}
+
+@container contenido (min-width: 1024px) {
+  .ornamento {
+    position: absolute;
+    top: 50%;
+    right: var(--space-10);
+    translate: 0 -50%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+}
+
+.ornamentoDestello {
+  font-size: 0.875rem;
+  color: var(--gold-300);
+}
+
+.ornamentoTexto {
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cacao-fg-3);
+}
+
+.ornamentoFilo {
+  width: 1px;
+  height: 56px;
+  background: color-mix(in srgb, var(--cacao-fg) 20%, transparent);
+}
+
+.ornamentoPunto {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--gold-300);
+}
+
+/*
+  PANTALLAS BAJAS  ·  el teléfono en horizontal (844 × 390)
+
+  El ancho dice «escritorio» y el héroe pedía 680px de alto en una pantalla
+  de 390: el titular arrancaba casi al fondo y las dos acciones quedaban
+  fuera de vista. Aquí manda el ALTO, así que es `@media` sobre la ventana y
+  no `@container` sobre el ancho. Va al final: misma especificidad que las
+  reglas que corrige, gana por orden.
+*/
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero {
+    min-height: auto;
+    padding-top: calc(var(--cabecera-alto) + var(--space-3));
+  }
+
+  /* El lema ya vive en el ornamento y en el pie; aquí cada línea cuenta
+     para que las acciones entren en la primera pantalla. */
+  .insignia {
+    display: none;
+  }
+
+  .titular {
+    font-size: 2.25rem;
   }
 }

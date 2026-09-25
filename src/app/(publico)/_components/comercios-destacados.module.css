@@ -1,0 +1,258 @@
+/* ==========================================================================
+   COMERCIOS DESTACADOS  ·  franja negra, tarjetas de retrato
+   ========================================================================== */
+
+/* Clase duplicada: convive con `.franja` de `escaparate.module.css` en el
+   mismo elemento y los dos declaran relleno. Con la especificidad empatada,
+   el ganador lo decidiría el orden de inyección de las hojas. */
+.seccion.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding-block: var(--space-10);
+}
+
+@container contenido (min-width: 768px) {
+  .seccion.seccion {
+    gap: var(--space-8);
+    padding-block: var(--space-11);
+  }
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+/* El titular en cursiva de Playfair, crema sobre negro, como en la guía. */
+.titulo {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--text);
+  -webkit-font-smoothing: auto;
+}
+
+.apoyo {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  color: var(--text-2);
+}
+
+/* «Ver todos»: la píldora de contorno, en oro pálido. El filo al 40 % mide
+   ~5:1 contra el negro, sobrado para WCAG 1.4.11. */
+.verTodos {
+  display: contents;
+
+  --text: var(--gold-300);
+  --border-control: color-mix(in srgb, var(--gold-300) 40%, transparent);
+}
+
+/* --- La fila ---------------------------------------------------------------
+
+   MÓVIL: carril deslizable a sangre por la derecha, con `scroll-snap` de
+   proximidad y sin barra visible —la guía la retiró—; lo que avisa de que
+   hay más es la tarjeta cortada y el desvanecido del borde.
+
+   ESCRITORIO: cinco columnas, sin desplazamiento. */
+
+.marco {
+  position: relative;
+  /* Sangra hasta el borde derecho de la ventana, nunca por la izquierda: el
+     borde izquierdo es la banda del gesto «atrás» del sistema (ver
+     `carril.module.css`). */
+  margin-right: calc(var(--pad-contenido, var(--space-4)) * -1);
+}
+
+.fila {
+  margin: 0;
+  padding: var(--space-1) var(--pad-contenido, var(--space-4)) var(--space-2) 0;
+  list-style: none;
+
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(72%, 260px);
+  gap: var(--space-4);
+
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.fila::-webkit-scrollbar {
+  display: none;
+}
+
+.celda {
+  scroll-snap-align: start;
+}
+
+.desvanecido {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: var(--space-9);
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--cacao-bg));
+}
+
+@container contenido (min-width: 900px) {
+  .marco {
+    margin-right: 0;
+  }
+
+  .fila {
+    padding: 0;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-5);
+    overflow: visible;
+  }
+
+  .desvanecido {
+    display: none;
+  }
+}
+
+/* --- La tarjeta ------------------------------------------------------------ */
+
+/*
+  EL FILO CREMA AL 30 % ES ENCARGO DEL CLIENTE («quiero las cards con borde
+  blanco»), y es la excepción consciente a «ninguna superficie lleva trazo en
+  reposo»: sobre negro, una sombra negra no despega nada, y es el filo lo que
+  separa la foto oscura de la franja oscura. Es lo mismo que hace `--edge` en
+  el tema oscuro, escrito más visible.
+*/
+.tarjeta {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+
+  border: 1px solid color-mix(in srgb, var(--cacao-fg) 30%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--cacao-surface);
+  color: var(--cacao-fg);
+  text-decoration: none;
+
+  --placa-logo-w: 36px;
+
+  transition:
+    translate var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+@container contenido (min-width: 900px) {
+  .tarjeta {
+    --placa-logo-w: 44px;
+  }
+}
+
+/* Apuntar levanta y aparece el filo dorado — solo con ratón. */
+@media (hover: hover) {
+  .tarjeta:hover {
+    translate: 0 -2px;
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+  }
+
+  .tarjeta:hover .foto {
+    scale: 1.04;
+  }
+}
+
+.tarjeta:active {
+  translate: 0 1px;
+}
+
+.tarjeta:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.foto,
+.sinFoto {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+}
+
+.foto {
+  object-fit: cover;
+  transition: scale var(--dur-slow) var(--ease-out);
+}
+
+.sinFoto {
+  background: var(--fondo-franja-oscura), var(--cacao-surface);
+}
+
+.degradado {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--cacao-bg) 90%, transparent) 0%,
+    color-mix(in srgb, var(--cacao-bg) 25%, transparent) 55%,
+    transparent 78%
+  );
+}
+
+.pie {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-family: var(--font-display);
+  font-size: var(--t-title-3-size);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--cacao-fg);
+  -webkit-font-smoothing: auto;
+}
+
+.categoria {
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cacao-fg-2);
+}
+
+.ver {
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  color: var(--gold-300);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta,
+  .foto {
+    transition: none;
+  }
+}

@@ -1,0 +1,91 @@
+/* ==========================================================================
+   DESCUBRE · DISFRUTA · APOYA · EXPERIENCIAS
+   ========================================================================== */
+
+/* Clase duplicada: convive con `.franja` de `escaparate.module.css` en el
+   mismo elemento y los dos declaran relleno. Con la especificidad empatada,
+   el ganador lo decidiría el orden de inyección de las hojas. */
+.seccion.seccion {
+  padding-top: var(--space-4);
+}
+
+/* 2 x 2 en móvil, 4 columnas desde 768px. */
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  row-gap: var(--space-8);
+}
+
+@container contenido (min-width: 768px) {
+  .lista {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.valor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding-inline: var(--space-3);
+  text-align: center;
+}
+
+/* La división vertical entre columnas: en la segunda de cada par en móvil,
+   en todas menos la primera en escritorio. */
+.valor:nth-child(even) {
+  border-left: 1px solid var(--border-subtle);
+}
+
+@container contenido (min-width: 768px) {
+  .valor {
+    gap: var(--space-4);
+    padding-inline: var(--space-6);
+  }
+
+  .valor:not(:first-child) {
+    border-left: 1px solid var(--border-subtle);
+  }
+}
+
+/* El anillo: 1,5px de oro legible sobre crema (`--brand`). Es el único
+   grosor fuera de la regla del 1px, y no es un trazo de superficie sino el
+   dibujo del emblema, igual que el trazo del icono de dentro. */
+.anillo {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1.5px var(--brand);
+  color: var(--brand);
+}
+
+@container contenido (min-width: 768px) {
+  .anillo {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+.titulo {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.texto {
+  margin: 0;
+  max-width: 28ch;
+  font-size: var(--t-footnote-size);
+  line-height: 1.6;
+  color: var(--text-2);
+  text-wrap: pretty;
+}

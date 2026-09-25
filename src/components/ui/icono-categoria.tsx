@@ -1,5 +1,6 @@
 import {
   Briefcase,
+  Camera,
   Car,
   Coffee,
   Dumbbell,
@@ -7,6 +8,7 @@ import {
   Hotel,
   Laptop,
   PawPrint,
+  Salad,
   Shirt,
   ShoppingBasket,
   Sofa,
@@ -25,6 +27,11 @@ import {
 /*
   EL GLIFO DE CADA CATEGORÍA  ·  encargo nº 10
   ---------------------------------------------------------------------------
+  Vive en `components/ui/` y no en el `_components/` del portal de miembros
+  porque ahora lo usan DOS portales: el catálogo del socio y el directorio
+  público (`/explorar`). Una ruta pública importando de una ruta privada
+  invertiría la dependencia.
+
   Server Component: es una tabla de consulta y un `<svg>`. Cero JavaScript en el
   cliente.
 
@@ -55,6 +62,8 @@ const GLIFOS: Record<ClaveIconoCategoria, LucideIcon> = {
   ocio: Ticket,
   hogar: Sofa,
   servicios: Briefcase,
+  fotografia: Camera,
+  saludable: Salad,
   /* EL RESPALDO. Una etiqueta: no promete un tipo de negocio, solo dice "esto
      es una categoría". Nunca se devuelve `null`. */
   generico: Tag,

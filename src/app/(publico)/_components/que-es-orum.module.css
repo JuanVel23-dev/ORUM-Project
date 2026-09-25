@@ -1,73 +1,110 @@
-/* Clase duplicada: convive con `.bloque` de `Revelar` en el mismo elemento, y
-   así no depende del orden en que Next inyecte las dos hojas. */
-.bloque.bloque {
-  display: flex;
-  flex-direction: column;
+/* ==========================================================================
+   QUÉ ES ORUM  ·  texto + carrusel, a la misma altura
+   ========================================================================== */
+
+.bloque {
+  display: grid;
   gap: var(--space-8);
+  padding-block: var(--space-6);
 }
 
-.cabecera {
+/*
+  En escritorio, dos columnas: el carrusel toma ~60 % (1,6 fr contra 1) con
+  un techo de 680px, y `align-items: stretch` lo estira a la altura del
+  TEXTO. El carrusel no tiene alto propio en esta disposición —sus fotos son
+  absolutas—, así que nunca puede ser más alto que la columna de al lado.
+*/
+@container contenido (min-width: 900px) {
+  .conFotos {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    align-items: stretch;
+    gap: var(--space-10);
+  }
+}
+
+.texto {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  max-width: 60ch;
+  gap: var(--space-5);
+}
+
+.salto {
+  display: none;
+}
+
+@container contenido (min-width: 560px) {
+  .salto {
+    display: inline;
+  }
 }
 
 .lede {
   margin: 0;
-  font-size: var(--t-title-3-size);
-  line-height: var(--t-body-leading);
+  max-width: 46ch;
+  font-size: 1.0625rem;
+  line-height: 1.7;
   color: var(--text-2);
   text-wrap: pretty;
 }
 
 .pilares {
-  display: grid;
-  gap: var(--space-5);
-}
-
-@container contenido (min-width: 720px) {
-  .pilares {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Superficie levantada con sombra, sin trazo: la regla del sistema. */
-.pilar {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-6);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-card), var(--edge);
+  gap: var(--space-5);
+  margin-top: var(--space-2);
 }
 
-/* Glifo de marca en un círculo de oro tenue; --gold-700 sobre ese fondo pasa
-   AA de sobra (es texto/icono dorado sobre claro). */
-.icono {
+.pilar {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+/* La insignia: oro al 10 % con su sombra corta. Es un objeto levantado —el
+   icono vive en él—, no un chip de estado: por eso sí lleva sombra. */
+.insignia {
+  flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  width: var(--tap-min);
+  height: var(--tap-min);
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--gold-500) 16%, var(--surface));
-  color: var(--gold-700);
+  background: var(--gold-bg);
+  box-shadow: var(--shadow-card), var(--edge);
+  color: var(--brand);
 }
 
 .pilarTitulo {
-  margin: 0;
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
   font-size: var(--t-title-2-size);
+  font-style: italic;
+  font-weight: 600;
   line-height: var(--t-title-2-leading);
-  letter-spacing: var(--t-title-2-tracking);
-  font-weight: 700;
-  color: var(--text);
+  color: var(--brand);
+  -webkit-font-smoothing: auto;
 }
 
 .pilarTexto {
   margin: 0;
-  font-size: var(--t-body-size);
-  line-height: var(--t-body-leading);
+  max-width: 52ch;
+  font-size: 0.90625rem;
+  line-height: 1.6;
   color: var(--text-2);
-  text-wrap: pretty;
+}
+
+/* En móvil el carrusel va debajo y necesita alto propio: 4:5, un retrato
+   que llena el ancho sin empujar la sección hasta el infinito. */
+.carrusel {
+  aspect-ratio: 4 / 5;
+  max-height: 70svh;
+}
+
+@container contenido (min-width: 900px) {
+  .carrusel {
+    aspect-ratio: auto;
+    max-height: none;
+    max-width: 680px;
+    min-height: 360px;
+  }
 }

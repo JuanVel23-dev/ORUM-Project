@@ -1,166 +1,72 @@
 /* ==========================================================================
-   LA LANDING  ·  lo propio de cada sección de `page.tsx`
-   --------------------------------------------------------------------------
-   El sangrado a ancho completo, el relleno lateral y el TONO de cada franja
-   los pone `escaparate.module.css`, que este archivo NO duplica. Aquí solo
-   vive lo que es de una sección concreta.
-
-   ⚠️ POR QUÉ ESTE ARCHIVO SE REESCRIBIÓ (W2). La tanda anterior pasó
-   `page.tsx` a franjas tonales y no llegó a tocar esta hoja, así que quedaron
-   tres clases citadas desde el TSX que no existían aquí —`.franjaCierre`,
-   `.bloqueCierre`, `.tarjetaCifra`—. Es exactamente la trampa nº 1 del log de
-   Y1: `estilos.franjaCierre` sale `undefined`, el `className` acaba con la
-   cadena literal `"undefined"` dentro y no pasa absolutamente nada. Compila,
-   tipa y pasa lint. Solo se ve mirando.
-
-   Y quedaban vivos los estilos de la versión anterior del cierre —tarjeta
-   hundida con `border-strong`, `border-radius` y un `padding` en forma corta—.
-   Ese `padding` era el más caro de los tres: la forma corta pisa el
-   `padding-inline` de `.franja`, que es lo que devuelve el texto a su columna
-   después del sangrado, así que el cierre habría quedado con el texto pegado
-   al borde de la ventana.
+   LA LANDING  ·  lo que solo `page.tsx` pinta: el cierre y la puerta del
+   comercio. Cada sección con componente propio trae su módulo.
    ========================================================================== */
-
-/*
-  EL PUENTE DEL SOCIO CON SESIÓN.
-
-  Una franja discreta, no un banner: informa sin secuestrar la primera pantalla
-  de quien todavía no es socio, que es a quien va dirigida la página.
-
-  Conserva su borde a propósito: no es una superficie en reposo, es un control
-  —enlaza a otro sitio— y la norma solo retira el trazo de las superficies.
-*/
-.puente {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-
-  /* El área táctil se amplía con relleno, no con `::after`: es una fila ancha
-     y aquí agrandar el propio control no estorba a nada. */
-  min-height: var(--tap-min);
-  padding: var(--space-2) var(--space-4);
-  margin-bottom: var(--space-5);
-  border-radius: var(--radius-full);
-
-  background: var(--surface-sunk);
-  border: 1px solid var(--border);
-  color: var(--text);
-  text-decoration: none;
-
-  font-size: var(--t-footnote-size);
-  line-height: var(--t-footnote-leading);
-
-  transition: background-color var(--dur-fast) var(--ease-out);
-}
-
-/* `:hover` siempre dentro de `@media (hover: hover)`: en táctil se queda
-   pegado tras el toque. */
-@media (hover: hover) {
-  .puente:hover {
-    background: var(--surface-hover);
-  }
-}
-
-.puente:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
 
 /* ==========================================================================
-   EL CLUB EN NÚMEROS  ·  franja de PAPEL
+   EL CIERRE «HAZTE SOCIO HOY»  ·  franja negra
    --------------------------------------------------------------------------
-   Papel entre la crema de la vitrina y el cacao del cierre. Es la sección que
-   respira: dos cifras grandes y nada más.
+   El aire vertical es mayor que el de una sección normal: es el final de la
+   página y necesita sentirse como tal. El fondo lo pone `.tonoCacao` y no
+   se redeclara aquí: dos `background` con la misma especificidad dejarían el
+   resultado al orden de inyección de las hojas.
    ========================================================================== */
 
-.cifras {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+/* Clase duplicada: convive con `.franja` de `escaparate.module.css` en el
+   mismo elemento y los dos declaran relleno. Con la especificidad empatada,
+   el ganador lo decidiría el orden de inyección de las hojas. */
+.franjaCierre.franjaCierre {
+  padding-block: var(--space-11);
 }
 
-/* El h2 lo viste `.tituloSeccion` del módulo compartido (Fraunces a 32–48px).
-   Esta clase existe para dos cosas que sí son de esta sección: centrarlo y
-   poder ESCALONARLO desde aquí. El `Revelar` de esta sección va en
-   `modo="contenedor"`, y las reglas de entrada las escribe quien conoce a sus
-   hijos, que es este archivo. */
-.tituloCifras {
-  text-align: center;
-}
-
-.rejillaCifras {
-  display: grid;
-  gap: var(--space-4);
-}
-
-@container contenido (min-width: 560px) {
-  .rejillaCifras {
-    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+@container contenido (min-width: 768px) {
+  .franjaCierre.franjaCierre {
+    padding-block: var(--space-12);
   }
-}
-
-/* La tarjeta de cifra NO se levanta al señalar: no es pulsable, y un objeto
-   que se levanta promete que se puede pulsar. Se queda en su `--shadow-card`,
-   que sobre papel es lo único que la separa del fondo. */
-.tarjetaCifra {
-  text-align: center;
-}
-
-/* ==========================================================================
-   EL CIERRE  ·  franja de CACAO
-   --------------------------------------------------------------------------
-   Vuelve al mismo material con el que abrió la página: entrada y salida por el
-   mismo camino. Ya NO es una tarjeta hundida centrada —una tarjeta de ancho de
-   columna se lee como un aviso; una franja, como un final—.
-
-   EL TITULAR DE AQUÍ VA EN TINTA (`--text`, que dentro del ámbito de cacao es
-   `--cacao-fg`: 16,24:1 medido), NO EN ORO. No es una restricción de
-   contraste —el oro de display daría aquí los mismos 7,83:1 que en el héroe—
-   sino de jerarquía: el acento dorado de esta franja es el CTA, que es lo que
-   el visitante tiene que pulsar. Dos oros del mismo tamaño en la misma
-   pantalla se anulan, y el que perdería es el que importa.
-   ========================================================================== */
-
-/* El aire vertical del cierre es mayor que el de una sección normal: es el
-   final de la página y necesita sentirse como tal. */
-.franjaCierre {
-  padding-block: var(--space-10) var(--space-11);
-}
-
-.cierre {
-  text-align: center;
 }
 
 /*
   Clase duplicada a propósito. `Revelar` pone su `.bloque` en el MISMO
-  elemento, y `.bloque` declara `display: block` con la misma especificidad que
-  esto: el ganador lo decidiría el orden en que Next inyecta las dos hojas, que
-  cambia entre desarrollo y producción. Repetida, la especificidad es mayor y
-  deja de depender del orden. Es el mismo remedio que ya usa
-  `vitrina-publica.module.css` con `.pista.pista`.
+  elemento, y `.bloque` declara `display: block` con la misma especificidad
+  que esto: el ganador lo decidiría el orden en que Next inyecta las dos
+  hojas, que cambia entre desarrollo y producción. Repetida, la
+  especificidad es mayor y deja de depender del orden.
 */
 .bloqueCierre.bloqueCierre {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-5);
+  text-align: center;
+}
+
+.destelloCierre {
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--gold-300);
 }
 
 /* Solo la anchura del quiebre: la familia, la escala y el tracking los pone
-   `.tituloSeccion` del módulo compartido. Si aquí se volviera a declarar
-   `font-size`, las dos reglas empatarían en especificidad y el resultado
-   dependería del orden de las hojas. */
+   `.tituloSeccion`. Redeclarar `font-size` aquí empataría en especificidad
+   y el resultado dependería del orden de las hojas. */
 .tituloCierre {
-  max-width: 18ch;
+  max-width: 16ch;
+}
+
+/* El acento del cierre es el oro pálido de la franja negra (`--gold-300`,
+   13,95:1), no el `--brand` del ámbito. */
+.acentoCierre {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--gold-300);
 }
 
 /* `--text-2` dentro del ámbito de cacao es `--cacao-fg-2`: 8,56:1 medido. */
 .textoCierre {
   margin: 0;
   max-width: 46ch;
-
-  font-size: var(--t-body-size);
-  line-height: var(--t-body-leading);
+  font-size: 1rem;
+  line-height: 1.6;
   color: var(--text-2);
   text-wrap: pretty;
 }
@@ -168,20 +74,17 @@
 .accionesCierre {
   display: flex;
   justify-content: center;
-  margin-top: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 /* ==========================================================================
-   LA PUERTA DEL COMERCIO  ·  franja de PAPEL
+   LA PUERTA DEL COMERCIO  ·  franja crema
    --------------------------------------------------------------------------
-   Subordinada al cierre, y vuelve a papel justo después del cacao para que no
-   compita con él. Ya no lleva `border-top`: lo que la separa de la franja
-   anterior es el salto de campo de color, y dibujar además una línea sería
-   decir dos veces lo mismo — que es justo lo que la v2 hacía en todas partes.
+   Subordinada al cierre, y vuelve a crema justo después del negro para que
+   no compita con él.
    ========================================================================== */
 
-/* Duplicada por la misma razón que `.bloqueCierre`: convive con `.bloque` de
-   `Revelar` en el mismo elemento. */
+/* Duplicada por la misma razón que `.bloqueCierre`. */
 .aliados.aliados {
   display: flex;
   flex-direction: column;
@@ -200,69 +103,20 @@
 
 .tituloAliados {
   margin: 0 0 var(--space-2);
-
-  font-size: var(--t-title-2-size);
-  line-height: var(--t-title-2-leading);
-  letter-spacing: var(--t-title-2-tracking);
-  font-weight: var(--t-title-2-weight);
+  font-family: var(--font-display);
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  font-weight: 700;
+  color: var(--text);
+  -webkit-font-smoothing: auto;
 }
 
-/* `--text-2` sobre papel: 7,34:1 medido. */
+/* `--text-2` sobre crema: 7,30:1 medido. */
 .textoAliados {
   margin: 0;
-  max-width: 48ch;
-
+  max-width: 52ch;
   font-size: var(--t-callout-size);
-  line-height: var(--t-callout-leading);
+  line-height: 1.6;
   color: var(--text-2);
   text-wrap: pretty;
-}
-
-/* ==========================================================================
-   ENTRADA AL DESPLAZAR  ·  lo que el `Revelar` en `modo="contenedor"` no puede
-   --------------------------------------------------------------------------
-   En modo contenedor el envoltorio se queda en `display: contents` y no se
-   mueve: son sus descendientes los que entran, y las reglas las escribe el
-   módulo que sabe qué hijos hay. Es el caso de la sección de cifras.
-
-   Solo `transform` y `opacity`. El estado oculto vive dentro de
-   `@media (scripting: enabled)`: sin JavaScript el contenido se pinta visible
-   y sin animación, que es la degradación correcta. Nunca invisible.
-   ========================================================================== */
-
-.tituloCifras,
-.tarjetaCifra {
-  transition:
-    opacity var(--dur-page) var(--ease-out),
-    transform var(--dur-page) var(--ease-out);
-}
-
-/* Escalonado dentro de la banda 30–80ms de la v4, y el paso sale del token en
-   vez de escribirse a mano. Con dos tarjetas el tope de 8 pasos no llega a
-   tocarse; la regla de tope la resuelve por su cuenta cada lista larga
-   (`vitrina-publica.tsx` la aplica con `TOPE_ESCALONADO_MS`). */
-.tarjetaCifra:nth-child(1) {
-  transition-delay: var(--escalonado);
-}
-.tarjetaCifra:nth-child(2) {
-  transition-delay: calc(var(--escalonado) * 2);
-}
-
-@media (scripting: enabled) {
-  [data-visible='false'] .tituloCifras,
-  [data-visible='false'] .tarjetaCifra {
-    opacity: 0;
-    /* Nada entra desde `scale(0)`: en el mundo real nada aparece de la nada. */
-    transform: translate3d(0, var(--space-4), 0) scale(0.98);
-  }
-}
-
-/* Movimiento reducido: se retira el viaje y queda el fundido, que `globals.css`
-   comprime a 0,01ms. Aparecer no marea; viajar sí. Va al final: misma
-   especificidad que lo que corrige, así que gana por orden. */
-@media (prefers-reduced-motion: reduce) {
-  [data-visible='false'] .tituloCifras,
-  [data-visible='false'] .tarjetaCifra {
-    transform: none;
-  }
 }

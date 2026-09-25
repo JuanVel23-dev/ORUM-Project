@@ -3,35 +3,38 @@
    ========================================================================== */
 
 /*
-  EL PIE CIERRA EN CREMA, y con eso el ritmo tonal de la página queda completo:
-  cacao → crema honda → crema → papel → cacao → papel → CREMA.
+  EL PIE CIERRA EN NEGRO (guía de marca v6), el mismo negro de la franja y de
+  la cabecera: la página abre y cierra con el mismo material.
 
-  Ninguna sección larga repite el tono de su vecina, y lo que las separa es el
-  campo de color y no una línea — que es lo que hace Agence Cartier con cero
-  sombras en toda su página. Por eso este bloque perdió su `border-top`: con el
-  salto de tinte, el trazo decía dos veces lo mismo.
+  Es un ÁMBITO DE TEMA, igual que `.tonoCacao`: reasigna los semánticos en
+  vez de pintar cada texto a mano, así que los enlaces, el foco y el hover
+  salen solos. No usa `.tonoCacao` directamente porque el pie está FUERA del
+  `<main>` y `escaparate.module.css` es vocabulario de las franjas de dentro.
 
-  El pie está FUERA del `<main>`, así que el tinte se lo pone él mismo con
-  `--surface-alt` en vez de pasar por `.franja` de `escaparate.module.css`, que
-  es un mecanismo de sangrado para elementos que SÍ están dentro de la columna
-  centrada. Aquí el elemento ya ocupa el ancho completo.
+  Negro en los DOS temas: como la franja, no sigue a la preferencia.
 
-  Ratios medidos sobre crema (`--w-50` #faf7f0), método WCAG 2.1:
-    CLARO   --text 16,25:1 · --text-2 7,04:1 · --text-3 4,52:1 · --brand 4,55:1
-    OSCURO  (--surface-alt = --n-950) --text 15,96 · --text-2 9,31 ·
-            --text-3 6,28 · --brand 11,68
-  `--text-3` pasa AA por poco en claro (4,52 contra 4,5): es el token que
-  `CLAUDE.md` marca como «el MÍNIMO, no aclarar», y aquí se queda a un pelo.
-  Si alguien oscurece la crema, ESTE es el par que hay que recalcular antes.
+  Ratios contra `--cacao-bg` (#0a0a0c), método WCAG 2.1:
+    --cacao-fg (crema) 18,3:1 · --cacao-fg-2 11,9:1 · --cacao-fg-3 7,1:1
 */
 .pie {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-7);
 
-  background: var(--surface-alt);
+  background: var(--cacao-bg);
+  color-scheme: dark;
 
-  padding-top: var(--space-8);
+  --text: var(--cacao-fg);
+  --text-2: var(--cacao-fg-2);
+  --text-3: var(--cacao-fg-3);
+  --brand: var(--gold-300);
+  --focus: var(--cacao-brand);
+  --surface-hover: var(--cacao-hover);
+  --border-subtle: color-mix(in srgb, var(--cacao-fg) 10%, transparent);
+
+  color: var(--text);
+
+  padding-top: var(--space-10);
   padding-bottom: max(var(--space-8), env(safe-area-inset-bottom, 0px));
   padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
   padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
@@ -68,12 +71,22 @@
   }
 }
 
-/* El wordmark pequeño. Oro de marca, como el de la cabecera. */
+/* El wordmark pequeño: «✦ ORUM», como el de la cabecera. */
 .marca {
-  font-size: var(--t-callout-size);
-  font-weight: 680;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--t-title-2-size);
+  line-height: 1;
+  font-weight: 700;
+  color: var(--text);
+  -webkit-font-smoothing: auto;
+}
+
+.destello {
+  font-size: 0.8em;
   color: var(--brand);
 }
 
@@ -108,7 +121,7 @@
   gap: 2px;
   min-height: var(--tap-min);
 
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-3) var(--space-2);
   margin-left: calc(var(--space-2) * -1);
   border-radius: var(--radius-sm);
 

@@ -9,22 +9,29 @@
  * que `MenuMovilPublico` llega como `undefined` y React lanza
  * «Element type is invalid: … but got: undefined».
  *
- * Y había un segundo problema encima del primero: `menu-movil-publico.tsx`
- * lleva `'use client'`, así que al importar del encabezado arrastraba un módulo
- * de servidor al grafo del cliente.
- *
  * Una constante compartida por dos módulos va en un tercero. Sin JSX y sin
  * `'use client'`: lo pueden leer los dos lados.
  *
  * ── Por qué ruta absoluta (`/#…`) y no solo `#…` ──────────────────────────
  *
- * Esta cabecera la comparten la landing y `/aliados`. Con `#como-funciona` a
- * secas, pulsarla desde `/aliados` no haría nada: ahí esa sección no existe.
- * Con `/#como-funciona`, Next navega a la landing y luego desplaza; dentro de
- * la propia landing se comporta como un ancla normal, sin recargar.
+ * Esta cabecera la comparten la landing, `/explorar` y `/aliados`. Con
+ * `#nosotros` a secas, pulsarla desde `/explorar` no haría nada: ahí esa
+ * sección no existe. Con `/#nosotros`, Next navega a la landing y luego
+ * desplaza; dentro de la propia landing se comporta como un ancla normal.
+ *
+ * ── Los ids que apuntan ─────────────────────────────────────────────────
+ *
+ * Son los de la guía de marca, y cada uno existe en `page.tsx`: `inicio` (el
+ * héroe), `nosotros` («Qué es ORUM»), `comercios` («Comercios destacados») y
+ * `membresias` («Elige tu membresía»). Cambiar uno sin el otro deja un enlace
+ * que no lleva a ninguna parte, sin error.
  */
 export const ANCLAS = [
-  { href: '/#que-es-orum', texto: 'Qué es ORUM' },
-  { href: '/#como-funciona', texto: 'Cómo funciona' },
-  { href: '/#comercios-aliados', texto: 'Comercios aliados' },
+  { href: '/#inicio', texto: 'Inicio' },
+  { href: '/#nosotros', texto: 'Nosotros' },
+  { href: '/#comercios', texto: 'Comercios' },
+  { href: '/#membresias', texto: 'Membresías' },
 ] as const
+
+/** Destino de «Únete»: los planes, que es donde se decide y se adquiere. */
+export const HREF_UNETE = '/#membresias'

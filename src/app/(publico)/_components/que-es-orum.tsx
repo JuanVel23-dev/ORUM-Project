@@ -1,21 +1,28 @@
-import { Eye, Target } from 'lucide-react'
+import { Sparkles, Target } from 'lucide-react'
+import type { FotoPublica } from '@/lib/publico/datos-publicos'
 import escaparate from '../escaparate.module.css'
+import { CarruselFotos } from './carrusel-fotos'
 import { Revelar } from './revelar'
 import estilos from './que-es-orum.module.css'
 
 /*
-  QUÉ ES ORUM  ·  la identidad del club, justo después del héroe
+  QUÉ ES ORUM  ·  «Una red de valor que se nota»
   ---------------------------------------------------------------------------
-  Texto entregado por el propietario: qué es ORUM, su misión y su visión. Va
-  antes de «Así funciona» porque responde a la pregunta anterior: antes de
-  saber CÓMO se usa, quien llega quiere saber QUÉ es.
+  Dos columnas: el texto —qué es, misión y visión, una debajo de la otra con
+  su insignia— y a su lado un carrusel de fotos reales de comercios aliados,
+  estirado a la altura del texto para que no se vea más grande que él.
 
-  Franja de PAPEL entre el héroe (champán en claro) y «Así funciona» (gris
-  hondo): ninguna sección repite el tono de su vecina.
+  Sin fotos cargadas, el carrusel no se pinta y el texto ocupa el ancho: un
+  rectángulo negro vacío junto a «una red de valor que se nota» diría lo
+  contrario de lo que dice el titular.
 
-  Misión y visión son dos piezas hermanas, cada una con su glifo y su título:
-  `article`, porque cada una se entiende sola.
+  Misión, visión y la definición de ORUM son TEXTO DEL CLIENTE, literal. No
+  se resumen ni se reescriben: el boceto los acortó y el cliente pidió los
+  suyos.
+
+  Misión y visión son `article`: cada una se entiende sola.
 */
+
 const PILARES = [
   {
     titulo: 'Misión',
@@ -25,40 +32,55 @@ const PILARES = [
   },
   {
     titulo: 'Visión',
-    Icono: Eye,
+    Icono: Sparkles,
     texto:
       'Convertirnos en el ecosistema de beneficios y conexión comercial más relevante de Colombia, transformando la manera en que las personas descubren, eligen y consumen en los negocios locales.',
   },
 ] as const
 
-export function QueEsOrum() {
+export function QueEsOrum({ fotos }: { fotos: FotoPublica[] }) {
+  const hayFotos = fotos.length > 0
+
   return (
     <section
+      id="nosotros"
       className={[escaparate.franja, escaparate.tonoPapel].join(' ')}
-      id="que-es-orum"
-      aria-labelledby="titulo-que-es-orum"
+      aria-labelledby="titulo-nosotros"
     >
-      <Revelar className={estilos.bloque}>
-        <div className={estilos.cabecera}>
-          <h2 id="titulo-que-es-orum" className={escaparate.tituloSeccion}>
-            ¿Qué es ORUM?
-          </h2>
-          <p className={estilos.lede}>
-            ORUM es una plataforma de beneficios que conecta consumidores y comercios locales
-            dentro de un mismo ecosistema.
-          </p>
-        </div>
+      <Revelar>
+        <div className={[estilos.bloque, hayFotos && estilos.conFotos].filter(Boolean).join(' ')}>
+          <div className={estilos.texto}>
+            <h2 id="titulo-nosotros" className={escaparate.tituloSeccion}>
+              Una red de valor <br className={estilos.salto} />
+              que <em className={escaparate.acento}>se nota</em>
+            </h2>
+            <p className={estilos.lede}>
+              ORUM es una plataforma de beneficios que conecta consumidores y comercios locales
+              dentro de un mismo ecosistema.
+            </p>
 
-        <div className={estilos.pilares}>
-          {PILARES.map(({ titulo, Icono, texto }) => (
-            <article key={titulo} className={estilos.pilar}>
-              <span className={estilos.icono} aria-hidden="true">
-                <Icono size={22} />
-              </span>
-              <h3 className={estilos.pilarTitulo}>{titulo}</h3>
-              <p className={estilos.pilarTexto}>{texto}</p>
-            </article>
-          ))}
+            <div className={estilos.pilares}>
+              {PILARES.map(({ titulo, Icono, texto }) => (
+                <article key={titulo} className={estilos.pilar}>
+                  <span className={estilos.insignia} aria-hidden="true">
+                    <Icono size={20} />
+                  </span>
+                  <div>
+                    <h3 className={estilos.pilarTitulo}>{titulo}</h3>
+                    <p className={estilos.pilarTexto}>{texto}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          {hayFotos && (
+            <CarruselFotos
+              fotos={fotos}
+              etiqueta="Fotos de comercios aliados"
+              className={estilos.carrusel}
+            />
+          )}
         </div>
       </Revelar>
     </section>

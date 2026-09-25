@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CROMO PÚBLICO  ·  cabecera pegajosa, contenido y pie
+   CROMO PÚBLICO  ·  cabecera fija montada encima, contenido y pie
    ========================================================================== */
 
 .fachada {
@@ -8,26 +8,27 @@
   min-height: 100dvh;
 
   /*
-    Alto real de la cabecera, publicado UNA vez para sus dos consumidores: la
-    propia cabecera (`min-height`) y el `scroll-margin` de las secciones a las
-    que apuntan las anclas de navegación. Sin este número, un ancla dejaría su
-    encabezado debajo de la cabecera translúcida y parecería que el enlace no
-    funcionó.
+    Alto real de la cabecera, publicado UNA vez para sus consumidores: la
+    propia cabecera (`min-height`), el primer bloque de cada página —que sube
+    por debajo de ella y reserva este hueco para su texto— y el
+    `scroll-margin` de las secciones a las que apuntan las anclas. Sin este
+    número, un ancla dejaría su encabezado debajo de la cabecera fija y
+    parecería que el enlace no funcionó.
 
-    28px es el alto del hijo más alto del cromo en móvil (el wordmark mide
-    26,4 = 17px x 1,55); a partir de 768px manda el botón de la navegación.
-    Mismo patrón y mismos números que `portal.module.css`.
+    44px es el hijo más alto del cromo en móvil: el botón del menú, que mide
+    el objetivo táctil completo. En escritorio manda el wordmark de la guía
+    de marca, más grande, y la cabecera respira más.
   */
-  --cabecera-contenido: 28px;
+  --cabecera-contenido: var(--tap-min);
   --cabecera-alto: calc(
     max(var(--space-3), env(safe-area-inset-top, 0px)) + var(--cabecera-contenido) +
-      var(--space-3)
+      var(--space-5)
   );
 }
 
 @media (min-width: 768px) {
   .fachada {
-    --cabecera-contenido: 38px;
+    --cabecera-contenido: 56px;
   }
 }
 
@@ -47,7 +48,10 @@
   --pad-contenido: var(--space-4);
   --pad-contenido-top: var(--space-6);
 
-  padding-top: var(--pad-contenido-top);
+  /* La cabecera es fija y no ocupa sitio en el flujo: el contenido empieza
+     debajo de ella. El primer bloque a sangre (el héroe, el banner) se come
+     este relleno entero para subir por detrás —ver `escaparate.module.css`. */
+  padding-top: calc(var(--cabecera-alto) + var(--pad-contenido-top));
   padding-bottom: var(--space-10);
   padding-left: max(var(--pad-contenido), env(safe-area-inset-left, 0px));
   padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
@@ -66,4 +70,15 @@
 
     padding-bottom: var(--space-11);
   }
+}
+
+/*
+  EL DESTINO DE LAS ANCLAS NO QUEDA DEBAJO DE LA CABECERA.
+
+  Una regla para todas las secciones con `id` —`#nosotros`, `#comercios`,
+  `#membresias`—, en vez de una por módulo: la sección que se añada mañana
+  la hereda sin que nadie se acuerde.
+*/
+.main section[id] {
+  scroll-margin-block-start: var(--cabecera-alto);
 }

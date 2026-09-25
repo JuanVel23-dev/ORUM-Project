@@ -230,10 +230,17 @@ export function MenuItem({
   )
 
   if (href && !disabled) {
+    /*
+      Un enlace también puede ser la opción de un grupo excluyente: la ciudad
+      o el orden del directorio público, donde cada opción NAVEGA (el filtro
+      vive en la URL) y a la vez una de ellas es la elegida. `menuitemradio`
+      sobre un `<a>` es ARIA válido y el lector anuncia «marcado» igual.
+    */
     return (
       <Link
         href={href}
-        role="menuitem"
+        role={excluyente ? 'menuitemradio' : 'menuitem'}
+        aria-checked={excluyente ? selected : undefined}
         className={clase}
         onClick={(e) => cerrarMenu(e.currentTarget)}
       >

@@ -7,8 +7,8 @@ import estilos from './publico.module.css'
 /*
   EL CROMO DEL CUARTO PORTAL
   ---------------------------------------------------------------------------
-  `(publico)` es un grupo de rutas: no añade segmento, así que `/` y `/aliados`
-  quedan tal cual. Comparten un único layout porque son la misma fachada — si
+  `(publico)` es un grupo de rutas: no añade segmento, así que `/`, `/explorar`
+  y `/aliados` quedan tal cual. Comparten un único layout porque son la misma fachada — si
   `/aliados` tuviera cromo propio, quien llega por un enlace compartido por
   WhatsApp no reconocería que sigue en ORUM.
 
@@ -24,7 +24,19 @@ import estilos from './publico.module.css'
   tienen que verse al momento, sin redesplegar. Dentro de una misma petición,
   `cache()` evita que layout y página consulten dos veces.
 */
-export default async function PublicoLayout({ children }: { children: ReactNode }) {
+/*
+  LA RANURA `@modal` vive AQUÍ y solo aquí: la ficha pública de un comercio
+  (`@modal/(.)explorar/[id]`) se abre encima tanto desde el directorio como
+  desde «Comercios destacados» de la landing, y una ruta interceptada solo
+  intercepta si el layout que declara su ranura ya está montado.
+*/
+export default async function PublicoLayout({
+  children,
+  modal,
+}: {
+  children: ReactNode
+  modal: ReactNode
+}) {
   const soporte = await obtenerWhatsappSoporte()
 
   return (
@@ -42,6 +54,8 @@ export default async function PublicoLayout({ children }: { children: ReactNode 
         secciones se reutilizara bajo otro cromo.
       */}
       <main className={estilos.main}>{children}</main>
+
+      {modal}
 
       <PiePublico soporte={soporte} />
     </div>

@@ -6,27 +6,40 @@
 > porque ya pasó una vez: dos sesiones trabajaron en paralelo y construyeron dos
 > sistemas de diseño incompatibles sobre los mismos archivos.
 >
-> **Dirección de arte vigente: v5 — «negro, oro brillante y blanco»**, fijada
-> el 15/09/2026. Lo aplicado y lo medido está en
-> [`.claude/docs/log/v5-negro-oro.md`](.claude/docs/log/v5-negro-oro.md).
+> **Dirección de arte vigente: v6 — «negro, crema y oro cálido»**, fijada
+> el 22/09/2026 a partir de la guía de marca entregada por el cliente. Lo
+> aplicado y lo medido está en
+> [`.claude/docs/log/v6-crema-oro.md`](.claude/docs/log/v6-crema-oro.md).
 >
-> Hereda de la v3 y la v4 todo lo que no nombra —la sombra en vez del trazo, el
-> oro como respuesta al toque, las franjas tonales, las curvas y duraciones— y
-> cambia dos cosas de raíz:
+> **Reemplaza formalmente a la v5** ([`.claude/docs/log/v5-negro-oro.md`](.claude/docs/log/v5-negro-oro.md),
+> 15/09/2026), que había ido en la dirección contraria en las dos cosas que
+> esta versión deshace. No es un vaivén de gusto de sesión: la v6 viene de una
+> identidad de marca real del cliente (logo, paleta y tipografía nombrados por
+> archivo), no de una preferencia de quien programaba ese día.
 >
-> 1. **Los neutrales pasan de cálidos a NEUTROS**, el papel crema pasa a blanco
->    puro y la franja de cacao pasa a **negra**. El oro sube de brillo.
-> 2. **Una sola familia tipográfica** (Plus Jakarta Sans). El serif de display
->    sale del sistema.
+> Hereda de la v3, la v4 y la v5 todo lo que no nombra —la sombra en vez del
+> trazo, el oro como respuesta al toque, las franjas tonales, las curvas y
+> duraciones, la disciplina de los cuatro trabajos del oro— y cambia dos cosas
+> de raíz, las mismas dos que la v5 había cambiado, ahora en la dirección
+> opuesta:
 >
-> ⚠️ **Quedan DEROGADAS**: la regla de los neutrales cálidos de la v4, la de los
-> neutrales fríos de la v3 (que la v4 ya había derogado) y **toda la frontera
-> serif/sans**. Si las encuentras escritas en algún sitio, ese sitio está sin
-> actualizar.
+> 1. **Los neutrales claros pasan de NEUTROS a CÁLIDOS**: el blanco puro de la
+>    v5 vuelve a ser un crema (`#FAF6EC`). La franja negra **sigue siendo
+>    negra en los dos temas** —eso NO cambia— y de hecho se corrigió un bug
+>    real donde en tema claro no lo era (ver «Tonalidades» y el log v6, §3).
+>    El oro **no se tocó**: se calibró el crema alrededor del oro ya probado.
+> 2. **Dos familias tipográficas**: Playfair Display (títulos, vía
+>    `--font-display`) + Montserrat (texto, vía `--font-sans`). El serif de
+>    display vuelve al sistema, por nombre, porque la guía de marca del
+>    cliente lo pide así.
 >
-> ⚠️ **Los tokens `--cacao-*` siguen llamándose así y ya NO son marrones.** Son
-> la franja negra. El nombre se conservó a propósito para no dejar `var()`
-> huérfanos; el renombrado está en «Deuda conocida».
+> ⚠️ **Queda DEROGADA**: la regla de «una sola familia tipográfica» de la v5.
+> Si la encuentras escrita en algún sitio, ese sitio está sin actualizar.
+>
+> ⚠️ **Los tokens `--cacao-*` siguen llamándose así y siguen sin ser
+> marrones.** Son la franja negra, en los dos temas, sin excepción. El nombre
+> se conservó a propósito para no dejar `var()` huérfanos; el renombrado sigue
+> en «Deuda conocida».
 >
 > Cada dirección sustituye a la anterior
 > ([`.claude/docs/DIRECCION-ARTE-v4.md`](.claude/docs/DIRECCION-ARTE-v4.md),
@@ -87,7 +100,7 @@ Romper cualquiera de estas es un bug, no una preferencia.
 | `transition: all` | Anima propiedades que no sabes que existen, incluidas las caras. Enumera. |
 | `ease-in` en interfaz | Empieza lento justo en el instante que el usuario más mira. El token se eliminó. |
 | Que algo entre desde `scale(0)` | En el mundo real nada aparece de la nada. Desde `0.95` + `opacity: 0`. |
-| Una segunda familia tipográfica | Encargo del propietario: **una sola**. Todo sale de `--font-sans`, y `--font-display` apunta a ella. |
+| Una **tercera** familia tipográfica | v6: Montserrat (`--font-sans`) y Playfair Display (`--font-display`), y ninguna más. El serif solo entra por `--font-display`. |
 | `--gold-400` o `--gold-500` sobre una superficie clara | 1,61:1 y 2,03:1. Ni el 3:1 de texto grande. El oro brillante **solo vive sobre negro**. |
 | `none` dentro de una lista de sombras | Invalida la declaración ENTERA en silencio. Usa `0 0 rgba(0,0,0,0)`. |
 | `outline: none` sin sustituto | Deja la interfaz sin foco visible. |
@@ -107,21 +120,25 @@ Romper cualquiera de estas es un bug, no una preferencia.
 
 ## Blanco, luz y sombra
 
-La frase entera: **blanco, ninguna línea, luz y sombra — y el oro aparece cuando
-tocas algo.** El blanco no es un fondo, es el material. Lo que lo separa en capas
+La frase entera: **crema, ninguna línea, luz y sombra — y el oro aparece cuando
+tocas algo.** El crema no es un fondo, es el material. Lo que lo separa en capas
 es la luz.
 
-### El blanco no tiene escalones
+### El crema no tiene escalones
 
 En tema claro **`--bg`, `--surface` y `--surface-sunk` son el mismo `--w-0`**
-—que desde la v5 es **blanco puro `#FFFFFF`**; el papel cálido `#FDFCFA` de la v4
-queda retirado—. La separación entre superficies **no la da un gris más claro ni
-un trazo**: la da la sombra.
+—que desde la v6 es un **crema cálido `#FAF6EC`**; el blanco puro `#FFFFFF` de
+la v5 queda retirado, no por volver a la v4 (aquel papel `#FDFCFA` era casi
+blanco con un susurro cálido; este crema es visiblemente crema, a propósito,
+porque así lo pide la guía de marca del cliente)—. La separación entre
+superficies **no la da un gris más claro ni un trazo**: la da la sombra. Eso
+no cambió con la v6 ni cambiará con la próxima versión que toque el color: es
+el principio que sobrevive a cualquier paleta.
 
 ⚠️ **Esto NO lo derogan las franjas tonales**, y confundirlo es el error fácil:
-`--surface-alt` separa **secciones**, no superficies. Dos franjas a 1,08:1 no
-despegan una tarjeta de su fondo — eso lo sigue haciendo la sombra, y solo la
-sombra.
+`--surface-alt` separa **secciones**, no superficies. Dos franjas a 1,04:1 (v6;
+era 1,08:1 en la v5) no despegan una tarjeta de su fondo — eso lo sigue
+haciendo la sombra, y solo la sombra.
 
 Consecuencia directa y buscada: **si una superficie no tiene sombra,
 desaparece.** Cuando algo «se pierde» sobre el fondo no es un fallo del token:
@@ -129,11 +146,14 @@ es que a esa superficie le falta su escalón. **La respuesta es subir de sombra,
 nunca devolverle un borde.**
 
 La única excepción que conserva tinte es `--surface-hover`. **Es deliberadamente
-tenue: 1,13:1 sobre blanco.** Por eso, donde el hover o la selección sean la ÚNICA
-señal —fila de menú, opción de la paleta de comandos, destino activo—, **hace
-falta un segundo canal**: el filo dorado que aparece (`box-shadow: inset`, que no
-mueve la caja), las acciones que se revelan, o `aria-current`. Nunca el color
-solo.
+tenue: 1,07:1 sobre crema** (v6; era 1,13:1 sobre blanco puro en la v5 — la
+mezcla de tinta bajó de 6 % a 3,5 % porque al 6 % el filo dorado de
+`Button variant="brand"` caía bajo el 3:1 de 1.4.11 contra este hover; ver
+`.claude/docs/log/v6-crema-oro.md`). Por eso, donde el hover o la selección
+sean la ÚNICA señal —fila de menú, opción de la paleta de comandos, destino
+activo—, **hace falta un segundo canal**: el filo dorado que aparece
+(`box-shadow: inset`, que no mueve la caja), las acciones que se revelan, o
+`aria-current`. Nunca el color solo.
 
 Un hundido **se hunde**: `--shadow-hundida`, que es una sombra `inset` — la misma
 luz entrando al revés. No es un escalón negativo de la escala, porque no existe
@@ -161,12 +181,12 @@ modo.
 
 Lo que queda de trazo, y para qué:
 
-| Token | Valor en claro | Ratio sobre blanco | Para qué |
+| Token | Valor en claro | Ratio sobre crema (v6) | Para qué |
 |---|---|---|---|
 | `--border-superficie` | `transparent` | — | El filo de una superficie. **Transparente en reposo**; lo repone `prefers-contrast: more` |
-| `--border` | tinta al 55 % | 4,17:1 | Divisiones **dentro** de una superficie (cabeceras, pies, `Divider`), cromo fijo del shell, y el **borde en reposo de un control de entrada** |
+| `--border` | tinta al 55 % | 4,08:1 | Divisiones **dentro** de una superficie (cabeceras, pies, `Divider`), cromo fijo del shell, y el **borde en reposo de un control de entrada** |
 | `--border-subtle` | tinta al 22 % | 1,62:1 | Hairlines de fila. No define nada |
-| `--border-strong` | tinta plena | 18,69:1 | **Ya no se usa.** Es el valor al que alto contraste devuelve `--border-superficie` |
+| `--border-strong` | tinta plena | 17,47:1 | **Ya no se usa.** Es el valor al que alto contraste devuelve `--border-superficie` |
 
 ✅ **El borde en reposo de un control de entrada es `--border-control`, no
 `--border`.** En claro valen lo mismo; en OSCURO `--border` da 1,92:1 contra la
@@ -180,9 +200,8 @@ trazo. El único 2px que queda en el sistema es el de `:focus-visible`.
 
 1. **Un campo de formulario conserva borde en reposo.** `Input`, `Select`,
    `Textarea`, `Checkbox`, `Radio` y `Button secondary`. Sin él no hay forma de
-   saber dónde se escribe — y sobre blanco puro, menos todavía. Va a `--border`
-   (4,17:1 en claro), por encima del 3:1 de WCAG 1.4.11. **En oscuro no llega**;
-   ver el aviso de arriba.
+   saber dónde se escribe. Va a `--border` (4,08:1 en claro, v6), por encima
+   del 3:1 de WCAG 1.4.11. **En oscuro no llega**; ver el aviso de arriba.
 2. **Todo control que recibe foco lleva su filo en `:focus-visible`.** Una sombra
    suave **no cumple** el 3:1 que 1.4.11 exige en el límite de un control
    interactivo. El foco no es decorativo: es lo que sostiene el criterio ahora
@@ -192,13 +211,16 @@ trazo. El único 2px que queda en el sistema es el de `:focus-visible`.
 ### La sombra hace todo el trabajo, así que tiene que poder
 
 **Dos capas por escalón**: un contacto corto y oscuro que ancla el objeto al
-fondo, y un halo amplio y muy suave que le da volumen. Lleva el mismo tinte que
-los neutrales, y con la v5 ese tinte es **neutro: rgb 10/10/14**. El principio
-no cambia —la sombra hereda la temperatura de la paleta, nunca la contraria—;
-cambia la paleta. Sobre blanco puro el tinte cálido de la v4 se leía sepia.
+fondo, y un halo amplio y muy suave que le da volumen. Lleva el tinte
+`rgb 10/10/14` desde la v5, y **la v6 no lo tocó**: el crema nuevo no cambió
+la temperatura de la sombra, solo la del fondo sobre el que se ve. El
+principio sigue siendo el mismo —la sombra hereda la temperatura de la
+paleta, nunca la contraria.
 
-**Las geometrías y las opacidades no se tocaron** en la v5: son las de W1. Sobre
-blanco puro se ven **más** que sobre el papel cálido, no menos.
+**Las geometrías y las opacidades no se tocaron** desde W1, ni con la v5 ni
+con la v6. Sobre el crema se ven parecido a como se veían sobre el blanco
+puro de la v5 — el salto grande fue el de la v4 (papel cálido) a la v5
+(blanco puro); el de la v6 (blanco puro → crema) es menor.
 
 **Regla de grosor: la superficie grande se lee más gruesa.**
 
@@ -290,9 +312,11 @@ contraste de esta sección. Donde no se cumplan, sigue siendo tinta.
 - **Presupuesto: levantado.** El ≤5 % del área visible lo retiró el propietario
   en `LICENCIA-CREATIVA-v4.md`. El oro puede ocupar lo que la pantalla pida. Lo
   que **no** se levantó es el contraste.
-- El oro de marca sobre blanco **sigue prohibido** (2,03:1, y ahora es peor que
-  en la v4 porque el oro subió y el fondo también). `--gold-600` sigue siendo el
-  único tono que cumple los dos criterios en claro.
+- El oro de marca sobre el crema de la v6 **sigue prohibido** (1,89:1 — peor
+  todavía que los 2,03:1 sobre el blanco puro de la v5, porque el crema es más
+  oscuro). `--gold-600` sigue siendo el único tono que cumple los dos criterios
+  en claro, y **no cambió de valor** con la v6: se recalibró el crema
+  alrededor de él.
 
 ### El oro es la respuesta al toque
 
@@ -328,47 +352,42 @@ típico —poner el oro brillante sobre una superficie clara— es el que arruin
 accesibilidad de una pantalla entera de un plumazo.
 
 **La regla física, en una línea: sobre NEGRO el oro brillante gana contraste;
-sobre BLANCO lo pierde.** Es la misma fórmula leída en direcciones opuestas, así
-que ningún oro puede ser a la vez más brillante y más legible sobre blanco. Por
-eso la v5 sube mucho los tres que viven sobre negro y **no puede** subir los dos
-que viven sobre blanco.
+sobre CREMA lo pierde.** Es la misma fórmula leída en direcciones opuestas, así
+que ningún oro puede ser a la vez más brillante y más legible sobre un fondo
+claro. Por eso la v6 **no tocó ninguno de los cuatro oros**: recalibró el
+crema alrededor de ellos en vez de perseguir el brillo otra vez.
 
 | Trabajo | Token | Ratio | Prohibición |
 |---|---|---|---|
-| **Display, solo sobre negro** | `--gold-400` | **12,27:1** sobre `--cacao-bg` · 11,69:1 sobre el fondo oscuro | ⛔ Sobre blanco da **1,61:1** y sobre gris claro **1,49:1**. Ni el 3:1 de texto grande |
-| **Marca · acción en oscuro** | `--gold-500` | 9,26:1 sobre el fondo oscuro · 8,25:1 de filo sobre la tarjeta | ⛔ Sobre blanco da 2,03:1 |
-| **Relleno de acción · filo** | `--gold-600` | **5,30:1** con texto `--tinta-1` (1.4.3) · **3,53:1** de filo sobre blanco, 3,27 sobre gris claro, 3,08 sobre gris hondo, 5,61 sobre la franja negra (1.4.11) | — |
-| **Texto e iconos dorados** | `--gold-700` | 5,26:1 blanco · 4,87:1 gris claro · **4,58:1 gris hondo** | Ya ninguna en claro: desde la v5 cumple sobre **las tres** |
-| Texto dorado sobre oscuro | `--gold-300` | 13,95:1 sobre el fondo · 14,64:1 sobre la franja negra | — |
+| **Display, solo sobre negro** | `--gold-400` | **12,27:1** sobre `--cacao-bg` · 11,69:1 sobre el fondo oscuro — sin cambio | ⛔ Sobre crema da **1,64:1** y sobre gris claro **1,54:1**. Ni el 3:1 de texto grande |
+| **Marca · acción en oscuro** | `--gold-500` | 9,26:1 sobre el fondo oscuro · 8,25:1 de filo sobre la tarjeta — sin cambio | ⛔ Sobre crema da 1,89:1 |
+| **Relleno de acción · filo** | `--gold-600` | **4,84:1** con texto `--tinta-1` (1.4.3) · **3,27:1** de filo sobre crema, 3,13 sobre gris claro, 3,07 sobre gris hondo, 3,04 sobre `--surface-hover`, 5,61 sobre la franja negra (1.4.11) | — |
+| **Texto e iconos dorados** | `--gold-700` | 4,87:1 crema · 4,67:1 gris claro · **4,58:1 gris hondo** | Cumple sobre **las tres** — el margen sobre la más honda no cambió desde la v5 |
+| Texto dorado sobre oscuro | `--gold-300` | 13,95:1 sobre el fondo · 14,64:1 sobre la franja negra — sin cambio | — |
 
 **El titular dorado grande vive sobre la franja negra, nunca sobre un gris.**
-El mismo oro que da 1,49:1 sobre gris claro da 12,27:1 sobre negro. La salida
-accesible es también la más impactante — y con negro en vez de cacao el margen
-pasó de 7,83 a 12,27, que es exactamente lo que permitió subir el brillo.
+El mismo oro que da 1,54:1 sobre gris claro da 12,27:1 sobre negro. La salida
+accesible es también la más impactante.
 
-**Dónde está el techo, y no es negociable**: `--gold-600` está a **0,08 puntos**
-del suelo de 1.4.11 contra `--surface-alt-2`. No se puede subir más sin aclarar
-`--w-100`, y aclarar `--w-100` deshace la franja alterna. Cualquier cambio en
-`--w-0`, `--w-100` o `--gold-600` obliga a **recalcular ese par** antes de tocar
-nada más.
+**Dónde está el techo, y no es negociable**: `--gold-600` está a **0,07 puntos**
+del suelo de 1.4.11 contra `--surface-alt-2` (era 0,08 en la v5 — el margen no
+cambió casi nada, porque el crema se calibró exactamente para conservarlo). No
+se puede subir el oro ni oscurecer `--w-100` sin recalcular ese par. Cualquier
+cambio futuro en `--w-0`, `--w-100` o `--gold-600` obliga a recalcularlo antes
+de tocar nada más.
 
-**Y `--gold-700` BAJÓ de luminancia** (−9 %) aunque el encargo pidiera subir. A
-cambio pasa a cumplir AA sobre las tres superficies claras, cosa que antes no
-hacía. Un oro de texto legible sobre blanco es oscuro por obligación; el brillo
-se ve en la franja negra.
+**`--gold-700` no se movió desde la v5** y sigue cumpliendo AA sobre las tres
+superficies claras. Un oro de texto legible sobre un fondo claro es oscuro por
+obligación; el brillo se ve en la franja negra.
 
 ---
 
-## Tonalidades: blanco, grises, negro
+## Tonalidades: crema, grises, negro
 
-**Los neutrales de ORUM son NEUTROS.** Encargo literal del propietario:
-«cambiar tonos cafés a negros, además de utilizar dorados (no tan oscuros, más
-brillantes) y blanco. Además de tonos grises».
-
-Eso deroga la regla cálida de la v4, que a su vez había derogado la fría de la
-v3. **No es volver a la v3**: aquello era un gris azulado visible (matiz ~240°);
-esto es gris, con un desvío frío de ≈2 % del canal que solo existe para que el
-gris no vire a caqui junto al oro.
+**Los neutrales claros de ORUM son CÁLIDOS.** Esto deroga la regla NEUTRA de la
+v5 (que a su vez había derogado la cálida de la v4, que a su vez había
+derogado la fría de la v3). No es un vaivén de gusto: la v6 viene de una guía
+de marca real del cliente, con la paleta nombrada por archivo.
 
 Sigue vigente el encargo que las franjas resuelven: «fondos que no sean solo
 blanco o negro» y que **los espacios vacíos de escritorio se veían feos**. El
@@ -376,15 +395,14 @@ vacío no sobraba: **le faltaba estructura**.
 
 | Superficie | Token | Para qué |
 |---|---|---|
-| **Blanco** `#FFFFFF` | `--bg` · `--surface` | Fondo y tarjeta. Sigue sin haber escalones entre ellos |
-| **Gris claro** `#F6F6F8` | `--surface-alt` | Franja alterna. **1,08:1** contra el blanco: separa **sin trazo** |
-| **Gris hondo** `#EFEFF3` | `--surface-alt-2` | Relleno: hueco, carril, esqueleto. Superficie de relleno, no de párrafo |
-| **Negro** `#0A0A0C` | `--cacao-bg` | La franja oscura. El único sitio donde vive el oro de display |
+| **Crema** `#FAF6EC` | `--bg` · `--surface` | Fondo y tarjeta. Sigue sin haber escalones entre ellos |
+| **Gris claro** `#F7F1E4` | `--surface-alt` | Franja alterna. **1,04:1** contra el crema: separa **sin trazo** |
+| **Gris hondo** `#F5EFDF` | `--surface-alt-2` | Relleno: hueco, carril, esqueleto. Superficie de relleno, no de párrafo |
+| **Negro** `#0A0A0C` | `--cacao-bg` | La franja oscura. El único sitio donde vive el oro de display. Negra en los DOS temas — ver el aviso de abajo |
 
-La separación de las franjas **subió** de 1,04 a 1,08:1, y hacía falta: un gris
-sobre blanco se percibe menos que una crema sobre papel cálido a la misma
-diferencia de luminancia, porque la crema cambiaba también de tono y el gris solo
-cambia de claridad. Un solo canal de diferencia necesita más recorrido.
+La separación de las franjas **bajó** de 1,08:1 (v5) a 1,04:1 (v6): el crema se
+calibró para conservar el margen de `--gold-600` contra `--w-100` (ver «El
+oro»), y eso no dejaba sitio para separar más las franjas sin romper ese par.
 
 Herramienta: **`<Section tono="crema" | "honda" | "cacao">`**. ⚠️ **Los valores
 de la prop conservan los nombres de la v4** (el componente está fuera del alcance
@@ -392,68 +410,95 @@ de esta tanda): `crema` es ahora gris claro, `honda` gris hondo y `cacao` negro.
 Una franja **no es una tarjeta**: no lleva sombra ni borde, porque no está
 levantada, está teñida.
 
-La franja **negra no sigue al tema** —es negra en claro y en oscuro, igual que el
-`QrCode`— y **remapea sus tokens de texto hacia dentro**, así que lo que viva ahí
-no hay que vestirlo a mano. En oscuro se separa del fondo por 1,05:1, así que
-sigue leyéndose como franja en vez de desaparecer.
+⚠️ **CERRADO EN LA v6 — la franja `cacao` en tema claro tenía un bug real.**
+`globals.css` mapeaba `--cacao-bg` a un marfil claro (`--champan-100`) SOLO en
+tema claro, contradiciendo el propio comentario de la línea anterior en ese
+archivo y contradiciendo este documento. Confirmado con el propietario: la
+franja **negra no sigue al tema** —es negra en claro y en oscuro, igual que el
+`QrCode`, sin excepción— y **remapea sus tokens de texto hacia dentro**, así
+que lo que viva ahí no hay que vestirlo a mano. En oscuro se separa del fondo
+por 1,05:1, así que sigue leyéndose como franja en vez de desaparecer. Detalle
+en `.claude/docs/log/v6-crema-oro.md` §3.
 
-**El tema oscuro también es neutro**, y **se audita aparte**: los criterios se
-comprueban por tema, nunca una vez para los dos.
+**El tema oscuro NO cambió con la v6**, y **se audita aparte**: los criterios
+de contraste se comprueban por tema, nunca una vez para los dos.
 
 ⚠️ **Al cambiar la temperatura o la claridad de la rampa cambia la luminancia, y
-un ratio firmado deja de valer.** Ya ha costado dos veces: en la v4 el filo de la
-placa de logo era `--n-400` y al pasar a cálido cayó a 2,81:1 (hubo que añadir
-`--n-450`); en la v5 esos mismos cuatro números volvieron a moverse y hubo que
-recalcularlos otra vez. **Ningún valor entra sin recalcular.**
+un ratio firmado deja de valer.** Ya ha costado tres veces: en la v4 el filo de
+la placa de logo era `--n-400` y al pasar a cálido cayó a 2,81:1 (hubo que
+añadir `--n-450`); en la v5 esos mismos cuatro números volvieron a moverse y
+hubo que recalcularlos otra vez. **La v6 NO tocó la placa de logo** —vive en
+`--n-*`, la rampa oscura, que no cambió— así que esos cuatro números se
+quedan como estaban en la v5. **Ningún valor entra sin recalcular.**
 
-✅ **Cerrado en la v5, y sin tocar un token de texto**: `--text-3` y
-`--gold-700` sobre la superficie más honda reprobaban AA en la v4 (4,18:1 y
-4,21:1). Sobre blanco puro dan **4,59:1 y 4,58:1** y pasan. El margen es corto,
-así que **`--w-100` no puede oscurecerse** sin recalcular ese par.
+✅ **`--text-3` y `--gold-700` sobre la superficie más honda**: reprobaban AA
+en la v4 (4,18:1 y 4,21:1), se cerró en la v5 (4,59:1 y 4,58:1 sobre blanco
+puro) y con la v6 se recalculó otra vez sobre el crema: **6,35:1 y 4,58:1**.
+`--text-3` ganó margen (ahora tiene valor propio, ya no comparte token con la
+rampa oscura); `--gold-700` se quedó en el mismo número exacto — no es
+casualidad, fue el par que decidió dónde calibrar el crema. El margen sigue
+siendo corto, así que **`--w-100` no puede oscurecerse** sin recalcular.
 
 ---
 
-## Tipografía: UNA familia
+## Tipografía: DOS familias
 
-Encargo literal del propietario: «tipografía similar a la de Avianca. Y que toda
-sea de la misma familia, **no combinar**».
+⚠️ **ESTO DEROGA «UNA SOLA FAMILIA» DE LA v5.** Encargo literal de la guía de
+marca del cliente: **Playfair Display** para títulos, **Montserrat** para
+texto. No es un vaivén de gusto de sesión — es una identidad de marca
+entregada por el cliente, con las dos familias nombradas por archivo.
 
-**Plus Jakarta Sans** viste el sistema entero. Es una geométrica humanista —caja
-alta grande, aperturas abiertas, terminales cortadas en ángulo, `a` de doble
-piso— que es lo que hace el lenguaje de Avianca. Se cargó con `next/font/google`,
-subconjunto latino, `display: swap`, variable en `wght` (200–800).
+**Montserrat** viste todo lo que no es titular ceremonial: nav, botones,
+formularios, tablas, cuerpo de párrafo. Reemplaza a Plus Jakarta Sans en el
+mismo rol exacto. Se carga con `next/font/google`, subconjunto latino,
+`display: swap`, variable en `wght` (el sistema consume 400–800).
+
+**Playfair Display** entra por primera vez desde que la v5 retiró a Fraunces.
+Serif de contraste alto, con cursiva real (`style: ['normal', 'italic']`) —
+los acentos en cursiva dorada del héroe y los títulos de sección dependen de
+que sea un corte auténtico, no una oblicua sintética. Pesos 500–800.
 
 | Token | Valor | Dónde |
 |---|---|---|
-| `--font-sans` | Plus Jakarta Sans | **Todo** |
-| `--font-display` | `var(--font-sans)` | La misma familia. **Sigue existiendo** y no se puede borrar |
+| `--font-sans` | Montserrat | Todo lo que NO es titular ceremonial |
+| `--font-display` | Playfair Display | Solo donde ya vivía antes: héroe, «así funciona», `Cifra`, la ficha de comercio, el carnet del socio |
 
-⚠️ **`--font-display` no es un alias muerto**: lo consumen ocho módulos CSS. Un
-`var()` que apunta a un token inexistente **no falla** —la propiedad se queda en
-su valor inicial y el texto se pinta con la fuente por defecto del navegador—,
-así que borrarlo rompería ocho titulares en silencio. Se deriva de `--font-sans`
-para que no puedan divergir nunca.
+`--font-display` sigue siendo la ÚNICA puerta por la que un serif puede
+entrar a una pantalla: la lista de consumidores no creció con la v6, solo
+cambió qué familia hay detrás de la puerta. Nada que no pidiera
+`--font-display` antes lo hace ahora.
 
-**Lo que queda DEROGADO de la v4**: «serif solo en `h1`», «nunca en
-Administración», «nunca por debajo de 28px», «un acento por pantalla». No hay un
-segundo tipo que racionar.
+**Lo que sigue DEROGADO de la v4** (no vuelve con la v6): «nunca en
+Administración», «nunca por debajo de 28px», «un acento por pantalla». Lo que
+SÍ vuelve, porque la familia física es otra vez un serif de contraste alto:
 
-- **Un sans de display necesita más peso y tracking más cerrado que un serif.**
-  Un serif crea presencia con la modulación de sus astas; una geométrica tiene el
-  asta constante y a 600 se lee delgada a 72px. Por eso `hero-1` sube a **800** y
-  `hero-2` / `hero-cifra` a **700**, y el tracking de `hero-1` cierra de −0,032 a
-  **−0,040em**. `display-1` (48px) sube igual, a 700 / −0,030em.
-- **De `display-2` (36px) hacia abajo el peso 600 no se toca**: subirlo engordaría
-  los encabezados de todas las páginas de Administración.
-- **`hero` sigue separado de `display`.** La frontera ya no es de familia, es de
-  escala: 72px contra 48px, con tracking y peso propios.
+- **Un serif de display necesita MENOS peso y tracking más abierto que un
+  sans geométrico** — es el motivo inverso al que subió el peso en la v5. Un
+  serif crea presencia con la modulación de sus astas; a 72px, 600 le basta.
+  `hero-1` baja de 800 a **600** y su tracking se abre de −0,040 a **−0,032em**
+  — de vuelta a los valores de la v4. `hero-2` y `hero-cifra` bajan igual, de
+  700 a **600**.
+- ⚠️ **`display-1` (48px) NO baja de peso.** Es la trampa fácil de esta
+  versión: `.t-display-1` vive en `--font-sans` (Montserrat), no en
+  `--font-display` — sigue siendo un sans geométrico, así que el motivo de la
+  v5 para subirlo a 700 sigue siendo cierto. Se queda en 700 / −0,030em.
+- **De `display-2` (36px) hacia abajo el peso 600 no se toca**: subirlo
+  engordaría los encabezados de todas las páginas de Administración.
+- **`hero` sigue separado de `display`.** La frontera sigue siendo de escala
+  (72px contra 48px) Y ahora también de familia otra vez, pero son la MISMA
+  frontera: lo que pide `--font-display` es lo que sube a `hero`.
 - **El rango no cambia**: `hero-1` llega a 72px contra 15 de cuerpo, 4,8x.
-- **Tracking específico del tamaño**: negativo al crecer, **positivo al
-  encoger** (`--t-overline-tracking` sigue en 0,09em porque las mayúsculas a 11px
-  sin aire se leen como una mancha).
-- **Coste medido** (`.next/static/media` tras `build`): **57,6 KB** de woff2 en
-  total, de los que `next/font` precarga **26,6 KB**. La v4 cargaba dos familias;
-  el presupuesto de fuentes baja, no sube.
+- **`-webkit-font-smoothing: auto` vuelve** en `.t-hero-1/.t-hero-2/.t-hero-cifra`:
+  Playfair Display pierde sus astas finas con `antialiased` en Chrome/macOS,
+  el mismo motivo que en la v4. Los módulos que ya usaban `--font-display`
+  (héroe público, `Cifra`, la ficha de comercio, el carnet) YA tenían esta
+  propiedad escrita desde antes de la v5 — nunca se limpió al retirarla del
+  sistema global, así que vuelve a ser correcta sin tocar esos archivos.
+- **Coste medido** (`.next/static/media` tras `build`): **364 KB** de woff2 en
+  total (todos los cortes de `unicode-range`), de los que aproximadamente
+  **110 KB** están marcados para precarga. La v5 había bajado el presupuesto a
+  57,6 KB / 26,6 KB con una sola familia; la v6 lo sube de vuelta al tener dos
+  — es un costo aceptado por mandato explícito del cliente, no un descuido.
 
 ---
 
@@ -1011,14 +1056,20 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    pide al usuario una captura o usa un dispositivo real.
 4. El Portal de Miembros solo se ha visto en su pantalla de acceso: el resto exige un
    miembro con membresía vigente y esas credenciales no están disponibles aquí.
-5. **La v5 no se ha visto renderizada.** Entró entera por tokens: `tsc`, `eslint`,
-   253 pruebas y `next build` pasan, y los 84 pares de contraste están calculados
-   con la fórmula WCAG 2.1 desde los hex — pero **nadie ha mirado una pantalla**.
-   Lo que hay que juzgar a ojo está listado en
+5. **La v6 solo se ha visto en el Portal Público** (landing y `/explorar`,
+   24/09/2026, en el navegador del panel, a 1280px y emulando 390px). El resto
+   de portales sigue sin mirarse: entraron por tokens, `tsc`, `eslint`, las
+   pruebas y `next build` pasan, y los pares de contraste están calculados con
+   la fórmula WCAG 2.1 desde los hex. En esta máquina las capturas con la
+   página desplazada salen corridas; se mide con `getBoundingClientRect` o se
+   agranda el viewport para capturar sin desplazar. Lo que hay que juzgar a ojo de la v6 está
+   listado en
+   [`.claude/docs/log/v6-crema-oro.md`](.claude/docs/log/v6-crema-oro.md) §8;
+   el historial de la v5 sigue en
    [`.claude/docs/log/v5-negro-oro.md`](.claude/docs/log/v5-negro-oro.md).
 6. **Los tokens `--cacao-*` se llaman así y son NEGROS.** Once tokens (tres crudos
    y ocho semánticos) conservan un nombre que ya no describe su valor. Se
-   mantuvieron a propósito: seis módulos los consumen y un `var()` huérfano no
+   mantuvieron a propósito: varios módulos los consumen y un `var()` huérfano no
    falla, hereda en silencio. El renombrado a `--negro-*` / `--franja-*` es una
    tanda propia, y tiene que tocar `<Section tono="cacao">` a la vez.
 7. ~~En tema oscuro `--border` reprobaba WCAG 1.4.11 en el borde de los
@@ -1028,6 +1079,22 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    `Textarea`, `Checkbox`/`Radio`, `SegmentedControl` y `Button secondary`. Un
    control de entrada nuevo **pide `--border-control`, no `--border`**.
 8. ~~Tres copias a mano de la paleta seguían en los colores de la v4.~~
-   **Cerrado**: `manifest.ts`, `apple-icon.tsx` e `icon.svg` ya van en v5. Si la
-   paleta vuelve a cambiar, se mueven A MANO — ninguno puede leer una variable
-   CSS (ver la nota en `src/app/layout.tsx`).
+   **Cerrado desde la v5, y verificado que sigue cerrado en la v6**:
+   `manifest.ts` fija su color a propósito al del TEMA OSCURO (es lo que se ve
+   en la pantalla de arranque antes de resolver la preferencia real), que no
+   cambió con la v6, así que no necesitó tocarse. `apple-icon.tsx` e
+   `icon.svg` tampoco: su fondo (`--n-1000`) y su oro (`--gold-300/400/500/600`)
+   son exactamente los mismos tokens, sin cambio de valor. Si la paleta vuelve
+   a cambiar, revisar los tres a mano — ninguno puede leer una variable CSS.
+9. ~~`--cacao-bg` en tema claro mapeaba a un marfil claro en vez de negro,
+   contradiciendo `CLAUDE.md`.~~ **Cerrado en la v6**: era un bloque de
+   `globals.css` con un comentario sin versión que citaba un encargo posterior
+   nunca recogido aquí. Confirmado con el propietario, corregido. Detalle en
+   `.claude/docs/log/v6-crema-oro.md` §3.
+10. **Los comentarios de `escaparate.module.css`, `hero-publico.module.css` y
+    otros módulos que consumen `--font-display` citan «Fraunces»** por nombre.
+    Con la v6 eso vuelve a ser conceptualmente cierto (hay un serif de verdad
+    otra vez, con las mismas propiedades de `font-feature-settings` y
+    `-webkit-font-smoothing` que esos comentarios describían) pero el nombre
+    de la familia que citan sigue siendo el viejo (Fraunces, no Playfair
+    Display). No afecta al render — se limpia cuando se toque cada módulo.
