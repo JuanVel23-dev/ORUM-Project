@@ -16,6 +16,17 @@ type WhatsAppButtonProps = {
   pildora?: boolean
   fullWidth?: boolean
   className?: string
+  /**
+   * Icono delante del texto. Por defecto la burbuja de chat; `null` lo
+   * retira, para cuando el diseño pide solo el texto (el «Adquirir →» de los
+   * planes de la fachada, que ya dice a dónde lleva con su flecha).
+   */
+  icon?: ReactNode
+  /**
+   * Nombre accesible cuando el texto visible se repite en la pantalla (dos
+   * «Adquirir» seguidos). Debe CONTENER el texto visible (WCAG 2.5.3).
+   */
+  ariaLabel?: string
   children?: ReactNode
 }
 
@@ -34,6 +45,8 @@ export function WhatsAppButton({
   pildora = false,
   fullWidth = false,
   className,
+  icon = <MessageCircle size={16} />,
+  ariaLabel,
   children = 'Soporte por WhatsApp',
 }: WhatsAppButtonProps) {
   const numero = limpiarTelefono(telefono)
@@ -49,7 +62,8 @@ export function WhatsAppButton({
       pildora={pildora}
       fullWidth={fullWidth}
       className={className}
-      icon={<MessageCircle size={16} />}
+      icon={icon ?? undefined}
+      aria-label={ariaLabel}
     >
       {children}
     </Button>

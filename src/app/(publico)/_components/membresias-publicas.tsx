@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import { formatearPesos, type PlanPublico } from '@/lib/publico/planes'
 import escaparate from '../escaparate.module.css'
@@ -101,8 +101,14 @@ export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
                         size="lg"
                         pildora
                         fullWidth
+                        /* Como en el boceto: solo «Adquirir →». El nombre del
+                           plan lo recibe el lector de pantalla, porque dos
+                           «Adquirir» seguidos no dirían cuál es cuál. */
+                        icon={null}
+                        ariaLabel={`Adquirir el plan ${plan.nombre} por WhatsApp`}
                       >
-                        Adquirir {plan.nombre.toLowerCase()}
+                        Adquirir
+                        <ArrowRight size={16} aria-hidden="true" className={escaparate.flecha} />
                       </WhatsAppButton>
                     </span>
                   )}
