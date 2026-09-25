@@ -58,7 +58,10 @@ export function EncabezadoPublico() {
           className={[estilos.soloEscritorio, escaparate.sobreFoto, ENTRADA].join(' ')}
           style={retardoEntrada(2)}
         >
-          <Button href="/miembros/login" variant="ghost" size="sm">
+          {/* El mismo botón que «Únete»: píldora de contorno claro, misma
+              tipografía, tamaño y color (encargo del propietario). Las dos
+              puertas pesan lo mismo; se distinguen por su texto. */}
+          <Button href="/miembros/login" variant="secondary" size="sm" pildora>
             Iniciar sesión
           </Button>
           <Button href={HREF_UNETE} variant="secondary" size="sm" pildora>

@@ -31,8 +31,9 @@ export const ANCLAS = [
   { href: '/#nosotros', texto: 'Nosotros' },
   { href: '/#comercios', texto: 'Comercios' },
   { href: '/#membresias', texto: 'Membresías' },
-  /* No es un ancla: es la página de anuncios del club (`/novedades`). */
-  { href: '/novedades', texto: 'Novedades' },
+  /* «Novedades» se retiró de la cabecera por encargo del propietario: no es
+     una sección de la portada. La página `/novedades` sigue existiendo y se
+     llega a ella desde el banner de anuncios («Ver más»). */
 ] as const
 
 /** Destino de «Únete»: los planes, que es donde se decide y se adquiere. */
