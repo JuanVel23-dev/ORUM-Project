@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import Link from 'next/link'
 import { ArrowUpDown, ChevronDown, LayoutGrid, MapPin, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { EmptyState } from '@/components/ui/feedback'
-import { IconoCategoria } from '@/components/ui/icono-categoria'
 import {
   obtenerDirectorioPublico,
   obtenerInstanteServidor,
@@ -30,6 +28,7 @@ import {
   revelarEscalonado,
 } from '../_components/revelado'
 import escaparate from '../escaparate.module.css'
+import { CategoriasDirectorio } from './_components/categorias-directorio'
 import { TarjetaDirectorio } from './_components/tarjeta-directorio'
 import estilos from './explorar.module.css'
 
@@ -162,43 +161,28 @@ export default async function ExplorarPage({
       {/* ── CATEGORÍAS + CIUDAD + ORDEN ─────────────────────────────────── */}
       <section className={[estilos.panel, REVELAR].join(' ')} aria-label="Filtros del directorio">
         {directorio.categorias.length > 0 && (
-          <nav aria-label="Categorías">
-            <ul className={estilos.categorias}>
-              <li className={REVELAR}>
-                <Link
-                  href={hrefDirectorio(filtros, { categoriaId: null })}
-                  className={estilos.categoria}
-                  aria-current={filtros.categoriaId === null ? 'true' : undefined}
-                  scroll={false}
-                >
-                  <span className={estilos.categoriaIcono} aria-hidden="true">
-                    <LayoutGrid size={20} />
-                  </span>
-                  <span className={estilos.categoriaNombre}>Todas</span>
-                </Link>
-              </li>
-              {directorio.categorias.map((c, i) => {
+          <CategoriasDirectorio
+            total={comercios.length}
+            opciones={[
+              {
+                id: null,
+                nombre: 'Todas',
+                href: hrefDirectorio(filtros, { categoriaId: null }),
+                activa: filtros.categoriaId === null,
+              },
+              ...directorio.categorias.map((c) => {
                 const activa = c.id === filtros.categoriaId
-                return (
-                  <li key={c.id} className={revelarEscalonado(i + 1)}>
-                    <Link
-                      /* Tocar la categoría activa la apaga: encender y apagar
-                         con el mismo dedo, en el mismo sitio. */
-                      href={hrefDirectorio(filtros, { categoriaId: activa ? null : c.id })}
-                      className={estilos.categoria}
-                      aria-current={activa ? 'true' : undefined}
-                      scroll={false}
-                    >
-                      <span className={estilos.categoriaIcono} aria-hidden="true">
-                        <IconoCategoria nombre={c.nombre} size={20} />
-                      </span>
-                      <span className={estilos.categoriaNombre}>{c.nombre}</span>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </nav>
+                return {
+                  id: c.id,
+                  nombre: c.nombre,
+                  /* Tocar la categoría activa la apaga: encender y apagar con
+                     el mismo dedo, en el mismo sitio. */
+                  href: hrefDirectorio(filtros, { categoriaId: activa ? null : c.id }),
+                  activa,
+                }
+              }),
+            ]}
+          />
         )}
 
         <div className={estilos.herramientas}>
