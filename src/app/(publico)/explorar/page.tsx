@@ -160,37 +160,36 @@ export default async function ExplorarPage({
 
       {/* ── CATEGORÍAS + CIUDAD + ORDEN ─────────────────────────────────── */}
       <section className={[estilos.panel, REVELAR].join(' ')} aria-label="Filtros del directorio">
-        {directorio.categorias.length > 0 && (
-          <CategoriasDirectorio
-            total={comercios.length}
-            opciones={[
-              {
-                id: null,
-                nombre: 'Todas',
-                href: hrefDirectorio(filtros, { categoriaId: null }),
-                activa: filtros.categoriaId === null,
-              },
-              ...directorio.categorias.map((c) => {
-                const activa = c.id === filtros.categoriaId
-                return {
-                  id: c.id,
-                  nombre: c.nombre,
-                  /* Tocar la categoría activa la apaga: encender y apagar con
-                     el mismo dedo, en el mismo sitio. */
-                  href: hrefDirectorio(filtros, { categoriaId: activa ? null : c.id }),
-                  activa,
-                }
-              }),
-            ]}
-          />
-        )}
-
         <div className={estilos.herramientas}>
           <p className={estilos.recuento} aria-live="polite">
             {comercios.length === 1 ? '1 comercio' : `${comercios.length} comercios`}
           </p>
 
           <div className={estilos.menus}>
+            {directorio.categorias.length > 0 && (
+              <CategoriasDirectorio
+                total={comercios.length}
+                opciones={[
+                  {
+                    id: null,
+                    nombre: 'Todas',
+                    href: hrefDirectorio(filtros, { categoriaId: null }),
+                    activa: filtros.categoriaId === null,
+                  },
+                  ...directorio.categorias.map((c) => {
+                    const activa = c.id === filtros.categoriaId
+                    return {
+                      id: c.id,
+                      nombre: c.nombre,
+                      /* Tocar la categoría activa la apaga: encender y apagar con
+                         el mismo dedo, en el mismo sitio. */
+                      href: hrefDirectorio(filtros, { categoriaId: activa ? null : c.id }),
+                      activa,
+                    }
+                  }),
+                ]}
+              />
+            )}
             {/* Con una sola ciudad el menú sigue estando: es el filtro que el
                 cliente pidió, y dice en qué ciudad está el club hoy. Sin
                 ninguna sede cargada no hay nada que elegir y se retira. */}

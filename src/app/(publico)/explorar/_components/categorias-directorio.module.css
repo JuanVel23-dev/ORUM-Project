@@ -1,24 +1,6 @@
 /* ==========================================================================
-   CATEGORÍAS DEL DIRECTORIO  ·  rejilla (escritorio) y ventana (móvil)
+   CATEGORÍAS DEL DIRECTORIO  ·  botón + ventana con todas
    ========================================================================== */
-
-/* --- Cuál se ve dónde ------------------------------------------------------
-   Por debajo de 768px de contenido la rejilla se retira y queda el botón;
-   por encima, al revés. `@container` porque las dos piezas viven dentro del
-   `<main>` (contenedor `contenido`). */
-.disparador {
-  display: none;
-}
-
-@container contenido (max-width: 767px) {
-  .enLinea {
-    display: none;
-  }
-
-  .disparador {
-    display: flex;
-  }
-}
 
 /* --- La rejilla ------------------------------------------------------------ */
 
@@ -128,9 +110,10 @@
    El mismo lenguaje que Ciudad y Ordenar (`explorar.module.css`): píldora
    blanca, icono en anillo de oro, filo de tinta al 15 % y sombra corta. */
 .disparador {
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  width: 100%;
+  max-width: 100%;
   min-height: var(--tap-min);
   padding: 0 var(--space-4) 0 var(--space-2);
 
@@ -184,4 +167,13 @@
 .chevron {
   flex-shrink: 0;
   color: var(--text-3);
+}
+
+/* En el teléfono ocupa su fila entera: es el filtro principal y así se lee
+   de un vistazo cuál está puesto. En escritorio mide su texto, al lado de
+   Ciudad y Ordenar. */
+@container contenido (max-width: 767px) {
+  .disparador {
+    width: 100%;
+  }
 }

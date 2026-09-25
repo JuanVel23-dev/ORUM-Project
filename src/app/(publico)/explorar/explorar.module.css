@@ -214,10 +214,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding-top: var(--space-4);
-  /* Una división DENTRO de la superficie, no el borde de la superficie. Tinta
-     al 10 %, la del rediseño: separa sin dibujar. */
-  border-top: 1px solid color-mix(in srgb, var(--tinta-1) 10%, transparent);
 }
 
 .recuento {
@@ -231,6 +227,23 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+/* En el teléfono los filtros ocupan el ancho del panel: Categorías en su
+   fila, Ciudad y Ordenar debajo. */
+@container contenido (max-width: 767px) {
+  .menus {
+    width: 100%;
+  }
+
+  /* Cada filtro en su fila y a todo el ancho, como en el boceto móvil: tres
+     píldoras de anchos distintos una debajo de otra se leían desordenadas.
+     `:not(dialog)`: la ventana de categorías también es hija de esta fila, y
+     su ancho lo decide la hoja, no esto. */
+  .menus > :not(dialog),
+  .menus .disparador {
+    width: 100%;
+  }
 }
 
 /*

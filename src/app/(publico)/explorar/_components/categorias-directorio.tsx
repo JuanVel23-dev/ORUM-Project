@@ -10,12 +10,12 @@ import { Overlay } from '@/components/ui/overlay'
 import estilos from './categorias-directorio.module.css'
 
 /*
-  LAS CATEGORÍAS DEL DIRECTORIO  ·  rejilla en escritorio, ventana en móvil
+  LAS CATEGORÍAS DEL DIRECTORIO  ·  un botón que abre una ventana con todas
   ---------------------------------------------------------------------------
-  Encargo del propietario: en el teléfono, las quince categorías ya no ocupan
-  media pantalla antes de los comercios. Hay un botón «Categorías» y al
-  tocarlo se abre una ventana con todas (hoja inferior, el `Overlay` del
-  sistema). En escritorio, donde sobra ancho, siguen a la vista en su rejilla.
+  Encargo del propietario: las quince categorías ya no ocupan el panel antes
+  de los comercios. Hay un botón «Categorías», junto a Ciudad y Ordenar, y al
+  tocarlo se abre una ventana con todas: diálogo centrado en escritorio, hoja
+  inferior en móvil (el `Overlay` del sistema decide).
 
   CADA CATEGORÍA TIEMBLA AL TOCARLA, con `Agitar` —el acento de «seleccionado»
   del sistema, corto y sin repetición para que no se lea como error—. Se agita
@@ -83,12 +83,6 @@ export function CategoriasDirectorio({ opciones, total }: Props) {
 
   return (
     <>
-      {/* Escritorio: la rejilla a la vista. */}
-      <nav aria-label="Categorías" className={estilos.enLinea}>
-        {lista}
-      </nav>
-
-      {/* Móvil: el botón que abre la ventana. */}
       <button
         type="button"
         className={estilos.disparador}

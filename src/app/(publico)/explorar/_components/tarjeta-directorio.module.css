@@ -9,8 +9,11 @@
 
   border: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg);
-  background: var(--surface-alt-2);
-  box-shadow: var(--shadow-card), var(--edge);
+  /* Blanca como la página (encargo del propietario): la despega la sombra,
+     un escalón más alta que la de una tarjeta normal porque sobre blanco no
+     hay tinte que ayude. */
+  background: var(--surface);
+  box-shadow: var(--shadow-raised), var(--edge);
   color: var(--text);
   text-decoration: none;
 
@@ -31,7 +34,7 @@
 @media (hover: hover) {
   .tarjeta:hover {
     translate: 0 -2px;
-    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+    box-shadow: var(--filo-activo), var(--shadow-flotante), var(--edge);
   }
 }
 
@@ -108,7 +111,7 @@
   }
 }
 
-/* `--text-3`, el gris del rediseño: 6,35:1 sobre el gris hondo. */
+/* `--text-3`, el gris del rediseño: 7,29:1 sobre la tarjeta blanca. */
 .detalle {
   font-size: var(--t-caption-size);
   line-height: var(--t-caption-leading);
