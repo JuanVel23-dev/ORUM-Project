@@ -1,0 +1,19 @@
+/* src/app/admin/anuncios/_components/anuncio-form.module.css */
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  border: none;
+  margin: 0;
+}
+
+.etiquetaGrupo {
+  font-size: var(--t-callout-size);
+  line-height: var(--t-callout-leading);
+  letter-spacing: var(--t-callout-tracking);
+  font-weight: 600;
+  color: var(--text);
+  padding: 0;
+}

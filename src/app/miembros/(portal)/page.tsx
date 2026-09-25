@@ -40,6 +40,8 @@ import { FiltrosForm } from './_components/filtros-form'
 import { SeccionFavoritos } from './_components/seccion-favoritos'
 import { SelectorVista } from './_components/selector-vista'
 import { TopDescuentos } from './_components/top-descuentos'
+import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
+import { AnuncioBanner } from '@/components/anuncios/anuncio-banner'
 import {
   ComercioCard,
   ComercioCardCompacta,
@@ -182,6 +184,7 @@ export default async function MiembrosHomePage({
     { data: filasFavoritos },
     { data: filasMasUsados },
     { data: filasTop },
+    anuncios,
   ] = await Promise.all([
     /*
       Esta consulta poblaba el desplegable "Comercio", que ya no existe. En vez
@@ -255,6 +258,7 @@ export default async function MiembrosHomePage({
     sinFiltrar
       ? supabase.rpc('top_descuentos', { p_limite: TOPE_TOP_DESCUENTOS })
       : Promise.resolve({ data: [] as FilaTopDescuento[] }),
+    obtenerAnunciosVisibles(supabase, 'miembros'),
   ])
 
   /* Ids de favoritos en el orden en que llegan. Alimenta el estado optimista
@@ -566,6 +570,8 @@ export default async function MiembrosHomePage({
     */
     <FavoritosProvider inicial={idsFavoritos}>
       <div className={estilos.pagina}>
+        <AnuncioBanner anuncio={anuncios[0] ?? null} hrefHistorial="/miembros/novedades" />
+
         <EncabezadoCatalogo />
 
         <FiltrosForm

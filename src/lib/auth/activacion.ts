@@ -13,15 +13,26 @@ export function urlBaseSitio(): string {
   return 'http://localhost:3000'
 }
 
-/** URL a la que Supabase redirige tras seguir el enlace del correo. */
-export function construirUrlActivacion(
+/**
+ * Enlace que se envía por correo. Apunta directo a nuestra página con el
+ * token en la URL — nunca al endpoint /verify de Supabase, que consume el
+ * token con solo un GET. Un escaneo automático de enlaces (el propio Gmail,
+ * un antivirus corporativo) que visita el enlace sin que la persona lo haya
+ * tocado lo dejaría vencido antes de que alguien lo abriera de verdad. El
+ * token solo se canjea al enviar el formulario (ver activar-form.tsx), así
+ * un GET pasivo no gasta nada.
+ */
+export function construirEnlaceActivacion(
   urlBase: string,
   rol: RolActivacion,
+  tokenHash: string,
+  tipo: string,
   modo: ModoActivacion = 'invitar',
 ): string {
   const base = urlBase.replace(/\/+$/, '')
   const sufijo = modo === 'recuperar' ? '&modo=recuperar' : ''
-  return `${base}/activar-cuenta?rol=${rol}${sufijo}`
+  const params = new URLSearchParams({ token_hash: tokenHash, type: tipo })
+  return `${base}/activar-cuenta?rol=${rol}${sufijo}&${params.toString()}`
 }
 
 export function textosActivacion(modo: string | undefined) {
@@ -42,28 +53,4 @@ export function textosActivacion(modo: string | undefined) {
 export const MENSAJE_ENLACE_INVALIDO =
   'Este enlace no es válido o ya expiró. Pide que te envíen uno nuevo.'
 
-export type InterpretacionEnlace =
-  | { tipo: 'error'; mensaje: string }
-  | { tipo: 'con-credenciales' }
-  | { tipo: 'sin-credenciales' }
-
-/**
- * Decide qué trae la URL a la que Supabase redirige tras el enlace del correo.
- * Un enlace vencido o ya usado llega como `#error=access_denied&error_code=otp_expired`;
- * uno bueno trae `#access_token=…` (implícito) o `?code=…` (PKCE). Sin ninguno de
- * los dos, una sesión previa del navegador NO prueba nada sobre este enlace.
- */
-export function interpretarEnlaceActivacion(hash: string, search: string): InterpretacionEnlace {
-  const h = new URLSearchParams(hash.replace(/^#/, ''))
-  const q = new URLSearchParams(search.replace(/^\?/, ''))
-
-  if (h.has('error') || h.has('error_description') || h.has('error_code')) {
-    const mensaje =
-      h.get('error_code') === 'otp_expired'
-        ? 'Este enlace ya expiró o ya se usó. Pide uno nuevo.'
-        : MENSAJE_ENLACE_INVALIDO
-    return { tipo: 'error', mensaje }
-  }
-  if (h.has('access_token') || h.has('type') || q.has('code')) return { tipo: 'con-credenciales' }
-  return { tipo: 'sin-credenciales' }
-}
+export const MENSAJE_ENLACE_VENCIDO = 'Este enlace ya expiró o ya se usó. Pide uno nuevo.'

@@ -28,6 +28,35 @@ type Timestamp = string // timestamptz llega como ISO string
 export type Database = {
   public: {
     Tables: {
+      anuncios: {
+        Row: {
+          id: number
+          titulo: string
+          cuerpo: string
+          imagen_url: string | null
+          mostrar_publico: boolean
+          mostrar_miembros: boolean
+          activo: boolean
+          /** uuid = perfiles.id de quien lo publicó. */
+          creado_por: string | null
+          created_at: Timestamp
+          deleted_at: Timestamp | null
+        }
+        Insert: {
+          id?: number
+          titulo: string
+          cuerpo: string
+          imagen_url?: string | null
+          mostrar_publico?: boolean
+          mostrar_miembros?: boolean
+          activo?: boolean
+          creado_por?: string | null
+          created_at?: Timestamp
+          deleted_at?: Timestamp | null
+        }
+        Update: Partial<Database['public']['Tables']['anuncios']['Insert']>
+        Relationships: []
+      }
       roles: {
         Row: {
           id: number

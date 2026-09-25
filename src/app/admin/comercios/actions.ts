@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { enviarCorreoInvitacion } from '@/lib/correo/correo'
-import { construirUrlActivacion, urlBaseSitio } from '@/lib/auth/activacion'
+import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
 async function exigirSuperAdmin(): Promise<boolean> {
@@ -60,7 +60,7 @@ export async function crearComercio(
   const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
     type: 'invite',
     email,
-    options: { redirectTo: construirUrlActivacion(urlBaseSitio(), 'comercio') },
+    options: { redirectTo: urlBaseSitio() },
   })
   if (errAuth || !creado?.user) {
     const msg = /already been registered|already registered|exists/i.test(errAuth?.message ?? '')
@@ -100,7 +100,12 @@ export async function crearComercio(
   await enviarCorreoInvitacion({
     nombre: campos.nombre,
     correo: email,
-    urlInvitacion: creado.properties.action_link,
+    urlInvitacion: construirEnlaceActivacion(
+      urlBaseSitio(),
+      'comercio',
+      creado.properties.hashed_token,
+      creado.properties.verification_type,
+    ),
   })
 
   revalidatePath('/admin/comercios')

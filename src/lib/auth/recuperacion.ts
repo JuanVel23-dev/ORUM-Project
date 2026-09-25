@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { enviarCorreoRecuperacion } from '@/lib/correo/correo'
-import { construirUrlActivacion, urlBaseSitio } from './activacion'
+import { construirEnlaceActivacion, urlBaseSitio } from './activacion'
 
 /**
  * Genera el enlace de recuperación y lo envía por correo. Nunca lanza y no
@@ -40,7 +40,7 @@ export async function enviarRecuperacion(
     const { data, error } = await admin.auth.admin.generateLink({
       type: 'recovery',
       email: correo,
-      options: { redirectTo: construirUrlActivacion(urlBaseSitio(), rol, 'recuperar') },
+      options: { redirectTo: urlBaseSitio() },
     })
     if (error || !data?.user) return
 
@@ -51,7 +51,13 @@ export async function enviarRecuperacion(
 
     await enviarCorreoRecuperacion({
       correo,
-      urlRecuperacion: data.properties.action_link,
+      urlRecuperacion: construirEnlaceActivacion(
+        urlBaseSitio(),
+        rol,
+        data.properties.hashed_token,
+        data.properties.verification_type,
+        'recuperar',
+      ),
     })
   } catch (err) {
     console.error('No se pudo procesar la recuperación de contraseña:', err)

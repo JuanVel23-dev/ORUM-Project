@@ -22,6 +22,7 @@
 */
 
 export const BUCKET_IMAGENES_COMERCIOS = 'imagenes-comercios'
+export const BUCKET_IMAGENES_ANUNCIOS = 'imagenes-anuncios'
 export const BUCKET_AVATARES = 'avatares'
 
 export function rutaLogoComercio(comercioId: number, extension: string): string {
@@ -30,6 +31,15 @@ export function rutaLogoComercio(comercioId: number, extension: string): string 
 
 export function rutaPortadaComercio(comercioId: number, extension: string): string {
   return `comercios/${comercioId}/portada.${extension}`
+}
+
+/**
+ * `imagenes-anuncios/anuncios/{id}/imagen.{ext}` — nombre fijo por destino,
+ * igual que el logo o la portada de un comercio: subir dos veces SUSTITUYE
+ * en vez de acumular archivos huérfanos.
+ */
+export function rutaImagenAnuncio(anuncioId: number, extension: string): string {
+  return `anuncios/${anuncioId}/imagen.${extension}`
 }
 
 export function rutaLogoMarca(marcaId: number, extension: string): string {

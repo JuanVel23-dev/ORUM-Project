@@ -6,6 +6,9 @@ import {
   obtenerVitrinaPublica,
   obtenerWhatsappSoporte,
 } from '@/lib/publico/datos-publicos'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
+import { AnuncioBanner } from '@/components/anuncios/anuncio-banner'
 import { AliadosOverlayTrigger } from './_components/aliados-overlay-trigger'
 import { ComerciosDestacados } from './_components/comercios-destacados'
 import { ComoFunciona } from './_components/como-funciona'
@@ -65,12 +68,13 @@ export default async function LandingPublica() {
     sitio. `cache()` evita que el layout y esta página consulten dos veces el
     número de soporte dentro de la misma petición.
   */
-  const [vitrina, planes, soporte, perfil, abiertoEn] = await Promise.all([
+  const [vitrina, planes, soporte, perfil, abiertoEn, anuncios] = await Promise.all([
     obtenerVitrinaPublica(),
     obtenerPlanesPublicos(),
     obtenerWhatsappSoporte(),
     getPerfilActual(),
     obtenerInstanteServidor(),
+    obtenerAnunciosVisibles(createAdminClient(), 'publico'),
   ])
 
   return (
@@ -78,6 +82,13 @@ export default async function LandingPublica() {
       <HeroPublico esSocio={perfil?.rolCodigo === 'miembro'} />
 
       <ComoFunciona />
+
+      {/*
+        EL ANUNCIO DEL CLUB, después de la tarjeta de pasos y no justo tras el
+        héroe: esa tarjeta se monta sobre el filo de la foto, y una franja en
+        medio la dejaría flotando sobre el anuncio en vez de sobre la foto.
+      */}
+      <AnuncioBanner anuncio={anuncios[0] ?? null} hrefHistorial="/novedades" />
 
       <QueEsOrum fotos={vitrina.fotos} />
 
