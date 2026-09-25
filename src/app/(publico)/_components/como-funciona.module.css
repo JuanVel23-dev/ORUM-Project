@@ -38,7 +38,10 @@
 
   border: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg);
-  background: var(--surface-alt-2);
+  /* Blanca, como el fondo: la resalta la sombra flotante, no un tinte
+     (encargo del propietario). Es la regla de siempre —lo que separa una
+     superficie de su fondo es la luz— llevada al pie de la letra. */
+  background: var(--surface);
   box-shadow: var(--shadow-flotante), var(--edge);
 }
 
@@ -92,7 +95,9 @@
   height: var(--tap-min);
   border-radius: var(--radius-full);
   background: var(--surface);
-  box-shadow: var(--shadow-card), var(--edge);
+  /* Blanco sobre blanco: el anillo dorado de 1px lo dibuja como emblema y la
+     sombra corta lo levanta (filo `--gold-600`, 3,53:1 sobre blanco). */
+  box-shadow: var(--filo-activo-inset), var(--shadow-card), var(--edge);
 
   font-family: var(--font-display);
   font-size: 1.1875rem;
@@ -126,6 +131,6 @@
 @media (hover: hover) {
   .paso:hover .numero {
     scale: 1.1;
-    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+    box-shadow: var(--filo-activo-inset), var(--shadow-raised), var(--edge);
   }
 }
