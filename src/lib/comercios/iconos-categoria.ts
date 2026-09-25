@@ -48,6 +48,13 @@ export type ClaveIconoCategoria =
   | 'servicios'
   | 'fotografia'
   | 'saludable'
+  | 'heladeria'
+  | 'spa'
+  | 'unas'
+  | 'maquillaje'
+  | 'estilista'
+  | 'masajes'
+  | 'otros'
   | 'generico'
 
 /** El respaldo. Se usa cuando ninguna palabra clave casa, y también con nombre vacío. */
@@ -84,7 +91,19 @@ const REGLAS: ReadonlyArray<readonly [ClaveIconoCategoria, readonly string[]]> =
   */
   ['saludable', ['saludable', 'organic', 'vegan', 'vegetarian', 'natural']],
   ['fotografia', ['fotograf', 'foto']],
-  ['cafe', ['cafe', 'cafeter', 'panader', 'reposter', 'pasteler', 'heladeri', 'postre']],
+  /*
+    UN ICONO POR CATEGORÍA DEL CLIENTE (encargo del 25/09): Heladería salía con
+    la taza de Café, y Spa, Uñas, Maquillaje, Estilista y Masajes compartían
+    los mismos destellos de «belleza». Cada una tiene ahora su clave, y van
+    ANTES que las genéricas (`cafe`, `belleza`) para ganarles.
+  */
+  ['heladeria', ['heladeri', 'helado', 'gelato', 'paleteri']],
+  ['unas', ['unas', 'manicur', 'pedicur', 'nail']],
+  ['maquillaje', ['maquillaje', 'makeup', 'cosmet']],
+  ['estilista', ['estilista', 'peluquer', 'barber', 'corte de cabello']],
+  ['masajes', ['masaje', 'masoterap', 'quiromasaj']],
+  ['spa', ['spa']],
+  ['cafe', ['cafe', 'cafeter', 'panader', 'reposter', 'pasteler', 'postre']],
   [
     'comida',
     [
@@ -122,18 +141,7 @@ const REGLAS: ReadonlyArray<readonly [ClaveIconoCategoria, readonly string[]]> =
   ],
   [
     'belleza',
-    [
-      'belleza',
-      'estetic',
-      'spa',
-      'peluquer',
-      'barber',
-      'unas',
-      'manicur',
-      'maquillaje',
-      'estilista',
-      'masaje',
-    ],
+    ['belleza', 'estetic', 'cejas', 'pestan'],
   ],
   ['deporte', ['deporte', 'gimnasio', 'gym', 'fitness', 'crossfit', 'yoga', 'entrenamiento']],
   ['moda', ['moda', 'ropa', 'calzado', 'zapat', 'boutique', 'vestuario', 'accesorio', 'joyer']],
@@ -161,6 +169,11 @@ export function claveIconoCategoria(nombre: string | null | undefined): ClaveIco
 
   const limpio = normalizarNombre(nombre)
   if (!limpio) return CLAVE_GENERICA
+
+  /* «Otros» es el cajón de sastre: su propio glifo («…»), distinto del
+     respaldo genérico de una categoría que no se reconoce. Comparación
+     exacta: como subcadena, «otro» casaría dentro de otras palabras. */
+  if (/^otr[oa]s?$/.test(limpio)) return 'otros'
 
   for (const [clave, palabras] of REGLAS) {
     if (palabras.some((p) => limpio.includes(p))) return clave

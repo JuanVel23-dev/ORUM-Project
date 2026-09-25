@@ -9,21 +9,35 @@ describe('claveIconoCategoria · categorías del cliente', () => {
   it.each([
     ['Restaurante', 'comida'],
     ['Café', 'cafe'],
-    ['Heladería', 'cafe'],
+    ['Heladería', 'heladeria'],
     ['Ropa', 'moda'],
-    ['Spa', 'belleza'],
-    ['Uñas', 'belleza'],
-    ['Maquillaje', 'belleza'],
-    ['Estilista', 'belleza'],
-    ['Masajes', 'belleza'],
+    ['Spa', 'spa'],
+    ['Uñas', 'unas'],
+    ['Maquillaje', 'maquillaje'],
+    ['Estilista', 'estilista'],
+    ['Masajes', 'masajes'],
     ['Fotografía', 'fotografia'],
     ['Alimentos saludables', 'saludable'],
     ['Veterinaria', 'mascotas'],
     ['Salud', 'salud'],
     ['Deporte', 'deporte'],
-    ['Otros', 'generico'],
+    ['Otros', 'otros'],
   ] as const)('%s → %s', (nombre, clave) => {
     expect(claveIconoCategoria(nombre)).toBe(clave)
+  })
+
+  it('ningún icono se repite entre las quince categorías del cliente', () => {
+    const categorias = [
+      'Restaurante', 'Café', 'Heladería', 'Ropa', 'Spa', 'Uñas', 'Maquillaje', 'Estilista',
+      'Masajes', 'Fotografía', 'Alimentos saludables', 'Veterinaria', 'Salud', 'Deporte', 'Otros',
+    ]
+    const claves = categorias.map(claveIconoCategoria)
+    expect(new Set(claves).size).toBe(categorias.length)
+  })
+
+  it('una categoría desconocida cae en el respaldo, no en «Otros»', () => {
+    expect(claveIconoCategoria('Artesanías')).toBe('generico')
+    expect(claveIconoCategoria('otros servicios')).toBe('servicios')
   })
 
   it('nunca devuelve vacío', () => {

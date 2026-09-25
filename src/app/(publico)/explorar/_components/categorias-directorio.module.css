@@ -86,24 +86,38 @@
 }
 
 /*
-  LA ELEGIDA: relleno dorado de acción con el icono en tinta (4,84:1), y el
-  nombre en tinta plena y subrayado —el subrayado es el portador que
-  sobrevive a la ceguera al color; `aria-current`, el del lector—.
+  LA ELEGIDA, LIMPIA (encargo del propietario: sin relleno de color).
+
+  El círculo sigue blanco. Lo que cambia es el filo: pasa de 1px a un anillo
+  de 2,5px en `--gold-600` (3,53:1 sobre blanco) con un halo dorado muy
+  tenue alrededor, el glifo pasa a tinta plena y el círculo crece un 8 %.
+  Es un emblema, como el anillo de los cuatro verbos de la portada: por eso
+  este grosor no cuenta contra la regla del trazo de 1px, que es para filos
+  de superficie.
+
+  Portadores que no dependen del color: el tamaño, el grosor del anillo, el
+  nombre en negrita subrayado y `aria-current` para el lector.
 */
 .opcion[aria-current='true'] {
   color: var(--text);
 }
 
 .opcion[aria-current='true'] .icono {
-  background: var(--gold-600);
+  scale: 1.08;
   color: var(--tinta-1);
-  box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+  box-shadow:
+    inset 0 0 0 2.5px var(--gold-600),
+    0 0 0 var(--space-1) color-mix(in srgb, var(--gold-600) 14%, transparent),
+    var(--shadow-raised),
+    var(--edge);
 }
 
 .opcion[aria-current='true'] .nombre {
+  font-weight: 700;
   text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  text-decoration-color: var(--gold-600);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 /* --- El botón de móvil ------------------------------------------------------
