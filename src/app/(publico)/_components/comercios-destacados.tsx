@@ -5,6 +5,7 @@ import { ComercioLogo } from '@/components/ui/comercio-logo'
 import type { ComercioVitrina } from '@/lib/publico/datos-publicos'
 import escaparate from '../escaparate.module.css'
 import { Revelar } from './revelar'
+import { REVELAR, revelarEscalonado } from './revelado'
 import estilos from './comercios-destacados.module.css'
 
 /*
@@ -37,7 +38,7 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
       aria-labelledby="titulo-destacados"
     >
       <Revelar>
-        <div className={estilos.cabecera}>
+        <div className={[estilos.cabecera, REVELAR].join(' ')}>
           <div>
             <h2 id="titulo-destacados" className={estilos.titulo}>
               Comercios destacados
@@ -52,7 +53,7 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
             <span className={estilos.verTodos}>
               <Button href="/explorar" variant="secondary" pildora>
                 Ver todos los comercios
-                <ArrowRight size={16} aria-hidden="true" />
+                <ArrowRight size={16} aria-hidden="true" className={escaparate.flecha} />
               </Button>
             </span>
           </span>
@@ -61,8 +62,9 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
 
       <div className={estilos.marco}>
         <ul className={estilos.fila}>
-          {comercios.map((c) => (
-            <li key={c.id} className={estilos.celda}>
+          {comercios.map((c, i) => (
+            // El revelado va en la celda y no en la tarjeta, que se levanta al apuntarla.
+            <li key={c.id} className={[estilos.celda, revelarEscalonado(i)].join(' ')}>
               <Link href={`/explorar/${c.id}`} className={estilos.tarjeta} scroll={false}>
                 {c.portadaUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
@@ -86,7 +88,10 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
                       <span className={estilos.categoria}>{c.categoriaNombre}</span>
                     )}
                     <span className={estilos.ver}>
-                      Ver beneficios <span aria-hidden="true">→</span>
+                      Ver beneficios{' '}
+                      <span aria-hidden="true" className={escaparate.flecha}>
+                        →
+                      </span>
                     </span>
                   </span>
                 </span>

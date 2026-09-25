@@ -4,6 +4,7 @@ import { formatearPesos, type PlanPublico } from '@/lib/publico/planes'
 import escaparate from '../escaparate.module.css'
 import { CtaSocio } from './cta-socio'
 import { Revelar } from './revelar'
+import { REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from './revelado'
 import estilos from './membresias-publicas.module.css'
 
 /*
@@ -48,7 +49,7 @@ export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
     >
       <Revelar>
         <div className={estilos.bloque}>
-          <div className={estilos.texto}>
+          <div className={[estilos.texto, REVELAR_IZQ].join(' ')}>
             <div>
               <h2 id="titulo-membresias" className={escaparate.tituloSeccion}>
                 Elige tu <em className={escaparate.acento}>membresía</em>
@@ -59,8 +60,8 @@ export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
             </div>
 
             <ul className={estilos.ventajas}>
-              {ventajas.map((v) => (
-                <li key={v} className={estilos.ventaja}>
+              {ventajas.map((v, i) => (
+                <li key={v} className={[estilos.ventaja, revelarEscalonado(i)].join(' ')}>
                   <Check size={16} strokeWidth={2.5} aria-hidden="true" className={estilos.check} />
                   {v}
                 </li>
@@ -70,10 +71,14 @@ export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
 
           {planes.length > 0 ? (
             <ul className={estilos.planes}>
-              {planes.map((plan) => (
+              {planes.map((plan, i) => (
                 <li
                   key={plan.id}
-                  className={[estilos.plan, plan.destacado && estilos.destacado]
+                  className={[
+                    estilos.plan,
+                    plan.destacado && estilos.destacado,
+                    i === 0 ? REVELAR_DER : revelarEscalonado(i),
+                  ]
                     .filter(Boolean)
                     .join(' ')}
                 >

@@ -1,6 +1,7 @@
 import { CalendarDays, Heart, Search, Sparkles } from 'lucide-react'
 import escaparate from '../escaparate.module.css'
 import { Revelar } from './revelar'
+import { revelarEscalonado } from './revelado'
 import estilos from './valores-orum.module.css'
 
 /*
@@ -48,8 +49,8 @@ export function ValoresOrum() {
     >
       <Revelar>
         <ul className={estilos.lista}>
-          {VALORES.map(({ titulo, Icono, texto }) => (
-            <li key={titulo} className={estilos.valor}>
+          {VALORES.map(({ titulo, Icono, texto }, i) => (
+            <li key={titulo} className={[estilos.valor, revelarEscalonado(i)].join(' ')}>
               <span className={estilos.anillo} aria-hidden="true">
                 <Icono size={24} strokeWidth={1.8} />
               </span>

@@ -17,6 +17,7 @@ import { HeroPublico } from './_components/hero-publico'
 import { MembresiasPublicas } from './_components/membresias-publicas'
 import { QueEsOrum } from './_components/que-es-orum'
 import { Revelar } from './_components/revelar'
+import { REVELAR, REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from './_components/revelado'
 import { ValoresOrum } from './_components/valores-orum'
 import escaparate from './escaparate.module.css'
 import estilos from './landing.module.css'
@@ -117,21 +118,23 @@ export default async function LandingPublica() {
         aria-labelledby="titulo-cierre"
       >
         <Revelar className={estilos.bloqueCierre}>
-          <span className={estilos.destelloCierre} aria-hidden="true">
+          <span className={[estilos.destelloCierre, REVELAR].join(' ')} aria-hidden="true">
             ✦
           </span>
           <h2
             id="titulo-cierre"
-            className={[escaparate.tituloSeccion, estilos.tituloCierre].join(' ')}
+            className={[escaparate.tituloSeccion, estilos.tituloCierre, revelarEscalonado(1)].join(
+              ' ',
+            )}
           >
             Hazte socio <em className={estilos.acentoCierre}>hoy</em>
           </h2>
-          <p className={estilos.textoCierre}>
+          <p className={[estilos.textoCierre, revelarEscalonado(2)].join(' ')}>
             Escríbenos por WhatsApp y te contamos los planes, los precios y cómo recibir tu
             carnet.
           </p>
 
-          <div className={[estilos.accionesCierre, escaparate.sobreFoto].join(' ')}>
+          <div className={[estilos.accionesCierre, escaparate.sobreFoto, REVELAR].join(' ')}>
             <CtaSocio soporte={soporte} size="lg" avisarSinNumero />
           </div>
         </Revelar>
@@ -144,7 +147,7 @@ export default async function LandingPublica() {
       */}
       <section className={[escaparate.franja, escaparate.tonoPapel].join(' ')}>
         <Revelar className={estilos.aliados}>
-          <div>
+          <div className={REVELAR_IZQ}>
             <h2 className={estilos.tituloAliados}>¿Tienes un negocio?</h2>
             <p className={estilos.textoAliados}>
               Los socios de ORUM buscan dónde comer, cuidarse y consentirse. Súmate al club y
@@ -154,7 +157,12 @@ export default async function LandingPublica() {
 
           {/* `Date.now()` del SERVIDOR: el reloj del visitante puede ir mal y
               la comprobación anti-robot necesita un reloj del que fiarse. */}
-          <AliadosOverlayTrigger abiertoEn={abiertoEn} soporte={soporte} />
+          {/* El revelado en un envoltorio: el botón se levanta al apuntarlo, y
+              el diálogo que abre no hereda nada de aquí (se pinta en la capa
+              superior). */}
+          <div className={REVELAR_DER}>
+            <AliadosOverlayTrigger abiertoEn={abiertoEn} soporte={soporte} />
+          </div>
         </Revelar>
       </section>
     </>

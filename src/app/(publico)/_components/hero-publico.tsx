@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowRight, Compass } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HREF_UNETE } from './anclas'
+import { ENTRADA, retardoEntrada } from './revelado'
 import fotoHero from './hero-orum.webp'
 import escaparate from '../escaparate.module.css'
 import estilos from './hero-publico.module.css'
@@ -68,10 +69,16 @@ export function HeroPublico({ esSocio }: Props) {
         mismo texto ya es legible en la insignia.
       */}
       <div className={estilos.ornamento} aria-hidden="true">
-        <span className={estilos.ornamentoDestello}>✦</span>
-        <span className={estilos.ornamentoTexto}>Apoya lo local. Te da más.</span>
-        <span className={estilos.ornamentoFilo} />
-        <span className={estilos.ornamentoPunto} />
+        {/* La entrada va en cada pieza y no en `.ornamento`: el contenedor se
+            centra con `translate`, y la animación se lo pisaría. */}
+        <span className={[estilos.ornamentoDestello, ENTRADA].join(' ')} style={retardoEntrada(6)}>
+          ✦
+        </span>
+        <span className={[estilos.ornamentoTexto, ENTRADA].join(' ')} style={retardoEntrada(7)}>
+          Apoya lo local. Te da más.
+        </span>
+        <span className={[estilos.ornamentoFilo, ENTRADA].join(' ')} style={retardoEntrada(8)} />
+        <span className={[estilos.ornamentoPunto, ENTRADA].join(' ')} style={retardoEntrada(9)} />
       </div>
 
       <div className={[estilos.contenido, escaparate.sobreFoto].join(' ')}>
@@ -84,31 +91,41 @@ export function HeroPublico({ esSocio }: Props) {
           quedaría tapado por ella.
         */}
         {esSocio && (
-          <Link href="/miembros" className={estilos.puente}>
+          <Link
+            href="/miembros"
+            className={[estilos.puente, ENTRADA].join(' ')}
+            style={retardoEntrada(0)}
+          >
             Ya eres socio. Ir a mi portal
             <ArrowRight size={14} aria-hidden="true" />
           </Link>
         )}
 
-        <p className={estilos.insignia}>
+        <p className={[estilos.insignia, ENTRADA].join(' ')} style={retardoEntrada(1)}>
           <span aria-hidden="true">✦ </span>
           Apoya lo local · Te da más
         </p>
 
-        <h1 id="titulo-hero" className={estilos.titular}>
+        <h1
+          id="titulo-hero"
+          className={[estilos.titular, ENTRADA].join(' ')}
+          style={retardoEntrada(2)}
+        >
           Descubre lo mejor <br className={estilos.salto} />
           de <em className={estilos.acento}>tu ciudad</em>
         </h1>
 
-        <p className={estilos.lede}>
+        <p className={[estilos.lede, ENTRADA].join(' ')} style={retardoEntrada(3)}>
           Una red de valor que conecta personas con los mejores comercios y experiencias
           locales.
         </p>
 
-        <div className={estilos.acciones}>
+        {/* En el envoltorio y no en los botones: fijaría su `translate` y dejarían
+            de levantarse al apuntarlos. */}
+        <div className={[estilos.acciones, ENTRADA].join(' ')} style={retardoEntrada(4)}>
           <Button href={HREF_UNETE} variant="brand" size="lg" pildora>
             Únete a ORUM
-            <ArrowRight size={16} aria-hidden="true" />
+            <ArrowRight size={16} aria-hidden="true" className={escaparate.flecha} />
           </Button>
           <Button
             href="/explorar"

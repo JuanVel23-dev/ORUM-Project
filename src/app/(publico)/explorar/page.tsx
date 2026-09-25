@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpDown, ChevronDown, LayoutGrid, MapPin, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -8,7 +9,6 @@ import { IconoCategoria } from '@/components/ui/icono-categoria'
 import {
   obtenerDirectorioPublico,
   obtenerInstanteServidor,
-  obtenerVitrinaPublica,
   obtenerWhatsappSoporte,
 } from '@/lib/publico/datos-publicos'
 import {
@@ -20,6 +20,15 @@ import {
   type OrdenDirectorio,
 } from '@/lib/publico/directorio'
 import { AliadosOverlayTrigger } from '../_components/aliados-overlay-trigger'
+import fotoMarca from '../_components/hero-orum.webp'
+import {
+  ENTRADA,
+  REVELAR,
+  REVELAR_DER,
+  REVELAR_IZQ,
+  retardoEntrada,
+  revelarEscalonado,
+} from '../_components/revelado'
 import escaparate from '../escaparate.module.css'
 import { TarjetaDirectorio } from './_components/tarjeta-directorio'
 import estilos from './explorar.module.css'
@@ -64,17 +73,15 @@ export default async function ExplorarPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const [crudos, directorio, vitrina, soporte, abiertoEn] = await Promise.all([
+  const [crudos, directorio, soporte, abiertoEn] = await Promise.all([
     searchParams,
     obtenerDirectorioPublico(),
-    obtenerVitrinaPublica(),
     obtenerWhatsappSoporte(),
     obtenerInstanteServidor(),
   ])
 
   const filtros = leerFiltrosDirectorio(crudos)
   const comercios = filtrarDirectorio(directorio.comercios, filtros)
-  const foto = vitrina.fotos[0] ?? null
 
   /* La ciudad elegida puede no existir ya (un enlace viejo): se muestra
      «Todas» en vez de un id suelto, y el filtro no casa con nada. */
@@ -87,17 +94,29 @@ export default async function ExplorarPage({
         className={[escaparate.franja, estilos.banner].join(' ')}
         aria-labelledby="titulo-directorio"
       >
-        {foto && (
-          // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
-          <img className={estilos.bannerFoto} src={foto.url} alt="" fetchPriority="high" />
-        )}
+        {/* La misma foto de marca que el héroe de la landing: la portada y el
+            directorio son la misma fachada. Decorativa (`alt=""`). */}
+        <Image
+          className={estilos.bannerFoto}
+          src={fotoMarca}
+          alt=""
+          fill
+          sizes="100vw"
+          quality={80}
+          placeholder="blur"
+          preload
+        />
         <div className={estilos.bannerVelo} aria-hidden="true" />
 
         <div className={[estilos.bannerContenido, escaparate.sobreFoto].join(' ')}>
-          <h1 id="titulo-directorio" className={estilos.titulo}>
+          <h1
+            id="titulo-directorio"
+            className={[estilos.titulo, ENTRADA].join(' ')}
+            style={retardoEntrada(1)}
+          >
             Comercios
           </h1>
-          <p className={estilos.bajada}>
+          <p className={[estilos.bajada, ENTRADA].join(' ')} style={retardoEntrada(2)}>
             Descubre todos los comercios aliados de ORUM y comienza a disfrutar tus beneficios.
           </p>
 
@@ -106,7 +125,13 @@ export default async function ExplorarPage({
             en campos ocultos: buscar no puede borrar la categoría o la ciudad
             que el visitante ya había elegido.
           */}
-          <form className={estilos.buscador} method="get" action="/explorar" role="search">
+          <form
+            className={[estilos.buscador, ENTRADA].join(' ')}
+            style={retardoEntrada(3)}
+            method="get"
+            action="/explorar"
+            role="search"
+          >
             <label htmlFor="busqueda-directorio" className="sr-only">
               Buscar comercios
             </label>
@@ -135,11 +160,11 @@ export default async function ExplorarPage({
       </section>
 
       {/* ── CATEGORÍAS + CIUDAD + ORDEN ─────────────────────────────────── */}
-      <section className={estilos.panel} aria-label="Filtros del directorio">
+      <section className={[estilos.panel, REVELAR].join(' ')} aria-label="Filtros del directorio">
         {directorio.categorias.length > 0 && (
           <nav aria-label="Categorías">
             <ul className={estilos.categorias}>
-              <li>
+              <li className={REVELAR}>
                 <Link
                   href={hrefDirectorio(filtros, { categoriaId: null })}
                   className={estilos.categoria}
@@ -152,10 +177,10 @@ export default async function ExplorarPage({
                   <span className={estilos.categoriaNombre}>Todas</span>
                 </Link>
               </li>
-              {directorio.categorias.map((c) => {
+              {directorio.categorias.map((c, i) => {
                 const activa = c.id === filtros.categoriaId
                 return (
-                  <li key={c.id}>
+                  <li key={c.id} className={revelarEscalonado(i + 1)}>
                     <Link
                       /* Tocar la categoría activa la apaga: encender y apagar
                          con el mismo dedo, en el mismo sitio. */
@@ -246,8 +271,9 @@ export default async function ExplorarPage({
       <section className={estilos.resultados} aria-label="Comercios aliados">
         {comercios.length > 0 ? (
           <ul className={estilos.rejilla}>
-            {comercios.map((c) => (
-              <li key={c.id}>
+            {comercios.map((c, i) => (
+              /* En la celda y no en la tarjeta: la tarjeta se levanta al apuntarla. */
+              <li key={c.id} className={revelarEscalonado(i)}>
                 <TarjetaDirectorio comercio={c} />
               </li>
             ))}
@@ -273,8 +299,11 @@ export default async function ExplorarPage({
       </section>
 
       {/* ── ¿TIENES UN COMERCIO? ────────────────────────────────────────── */}
-      <section className={estilos.bandaAliados} aria-labelledby="titulo-ser-aliado">
-        <div>
+      <section
+        className={[estilos.bandaAliados, REVELAR].join(' ')}
+        aria-labelledby="titulo-ser-aliado"
+      >
+        <div className={REVELAR_IZQ}>
           <h2 id="titulo-ser-aliado" className={estilos.bandaTitulo}>
             ¿Tienes un comercio y quieres ser parte?
           </h2>
@@ -285,12 +314,14 @@ export default async function ExplorarPage({
         {/* El oro pálido va en la clase del BOTÓN y no en un envoltorio: el
             diálogo del formulario se monta junto al botón, y un envoltorio con
             los tokens remapeados le pasaría el tema oscuro al formulario. */}
-        <AliadosOverlayTrigger
-          abiertoEn={abiertoEn}
-          soporte={soporte}
-          variant="brand"
-          className={estilos.botonOro}
-        />
+        <div className={REVELAR_DER}>
+          <AliadosOverlayTrigger
+            abiertoEn={abiertoEn}
+            soporte={soporte}
+            variant="brand"
+            className={estilos.botonOro}
+          />
+        </div>
       </section>
     </>
   )

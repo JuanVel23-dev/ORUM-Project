@@ -115,3 +115,17 @@
   font-weight: 700;
   color: var(--text);
 }
+
+/* Al apuntar un paso, su numeral se levanta con el filo dorado. */
+.numero {
+  transition:
+    scale var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .paso:hover .numero {
+    scale: 1.1;
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+  }
+}

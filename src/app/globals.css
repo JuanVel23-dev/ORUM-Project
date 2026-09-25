@@ -1305,10 +1305,171 @@ textarea:active,
   }
 }
 
+/*
+  VARIANTES DEL REVELADO  ·  escalonado y entrada lateral
+
+  Tres piezas en la misma fila (los pasos, los verbos, los destacados)
+  entran en el MISMO instante con `.revelar-vista`, porque su posición en la
+  vista es la misma. `.revelar-paso-2` y `.revelar-paso-3` las desfasan:
+  sus fotogramas empiezan un 12 % y un 24 % más tarde dentro de la entrada,
+  el equivalente en scroll de un retardo de 40 ms. El desfase va en los
+  fotogramas y no en `animation-range`, porque con fotogramas atados a
+  rangos con nombre (`entry 0%`), recortar el rango no los desplaza.
+
+  `.revelar-izq` y `.revelar-der` entran de lado: para las dos columnas de
+  una sección, que llegan cada una desde su borde y se encuentran.
+
+  Se combinan con `.revelar-vista` (que pone la línea de tiempo); solo
+  cambian el nombre de la animación. La salida por arriba es la misma en
+  todas: al subir, lo que reaparece vuelve a entrar.
+*/
+@supports (animation-timeline: view()) {
+  .revelar-vista.revelar-paso-2 {
+    animation-name: revelar-vista-2;
+  }
+
+  .revelar-vista.revelar-paso-3 {
+    animation-name: revelar-vista-3;
+  }
+
+  .revelar-vista.revelar-izq {
+    animation-name: revelar-izq;
+  }
+
+  .revelar-vista.revelar-der {
+    animation-name: revelar-der;
+  }
+}
+
+@keyframes revelar-vista-2 {
+  entry 0%,
+  entry 12% {
+    opacity: 0;
+    translate: 0 28px;
+    scale: 0.97;
+  }
+  entry 82% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+    scale: 0.98;
+  }
+}
+
+@keyframes revelar-vista-3 {
+  entry 0%,
+  entry 24% {
+    opacity: 0;
+    translate: 0 28px;
+    scale: 0.97;
+  }
+  entry 94% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+    scale: 0.98;
+  }
+}
+
+@keyframes revelar-izq {
+  entry 0% {
+    opacity: 0;
+    translate: -40px 0;
+  }
+  entry 75% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+  }
+}
+
+@keyframes revelar-der {
+  entry 0% {
+    opacity: 0;
+    translate: 40px 0;
+    scale: 0.97;
+  }
+  entry 75% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+    scale: 0.98;
+  }
+}
+
 /* Movimiento reducido: sin revelado. La animación ligada al scroll no usa la
-   duración, así que el recorte global de §5 no la alcanza. */
+   duración, así que el recorte global de §5 no la alcanza. El selector
+   compuesto gana a las variantes de arriba, que también lo son. */
 @media (prefers-reduced-motion: reduce) {
-  .revelar-vista {
+  .revelar-vista,
+  .revelar-vista.revelar-paso-2,
+  .revelar-vista.revelar-paso-3,
+  .revelar-vista.revelar-izq,
+  .revelar-vista.revelar-der {
     animation: none;
+  }
+}
+
+/*
+  ENTRADA AL CARGAR  ·  `.entrada-carga`
+
+  Para la primera pantalla, que ya está a la vista al abrir la página y por
+  tanto no tiene scroll con el que revelarse: el héroe de la landing y el
+  banner del directorio. Una sola vez por carga (regla cero de frecuencia:
+  la portada la ve alguien que llega, no alguien que trabaja).
+
+  `--retardo-entrada` escalona las piezas; lo pone cada módulo. Arranca
+  desde `0.96` y `opacity: 0`, nunca desde `scale(0)`. Movimiento reducido:
+  el recorte global de §5 la deja en 0,01 ms — aparece, no viaja.
+*/
+.entrada-carga {
+  animation: entrada-carga var(--dur-page) var(--ease-out) both;
+  animation-delay: var(--retardo-entrada, 0ms);
+}
+
+@keyframes entrada-carga {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
   }
 }

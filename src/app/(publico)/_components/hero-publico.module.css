@@ -59,6 +59,19 @@
      para que ella y la tarjeta ORUM sigan en cuadro. En color: los dorados
      de la foto son los de la marca. */
   object-position: 72% center;
+
+  /* Al cargar, la foto se acerca despacio hasta su sitio: la cámara que se
+     asienta. Una vez por carga, solo `scale`. */
+  animation: foto-asienta calc(var(--dur-page) * 4) var(--ease-out) both;
+}
+
+@keyframes foto-asienta {
+  from {
+    scale: 1.08;
+  }
+  to {
+    scale: 1;
+  }
 }
 
 @container contenido (min-width: 768px) {

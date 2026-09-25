@@ -4,6 +4,7 @@ import { useState, type MouseEvent } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Button, type ButtonVariant } from '@/components/ui/button'
 import { Overlay } from '@/components/ui/overlay'
+import escaparate from '@/app/(publico)/escaparate.module.css'
 import { FormularioAliado } from '@/app/(publico)/aliados/_components/formulario-aliado'
 
 /*
@@ -81,7 +82,7 @@ export function AliadosOverlayTrigger({
         onClick={interceptar}
       >
         Quiero ser aliado
-        <ArrowRight size={16} aria-hidden="true" />
+        <ArrowRight size={16} aria-hidden="true" className={escaparate.flecha} />
       </Button>
 
       {/*

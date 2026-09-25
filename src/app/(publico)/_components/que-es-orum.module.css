@@ -108,3 +108,17 @@
     min-height: 360px;
   }
 }
+
+/* Al apuntar misión o visión, su insignia se levanta: crece y sube de sombra. */
+.insignia {
+  transition:
+    scale var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .pilar:hover .insignia {
+    scale: 1.08;
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+  }
+}

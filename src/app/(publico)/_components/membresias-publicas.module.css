@@ -176,3 +176,18 @@
   align-items: flex-start;
   gap: var(--space-4);
 }
+
+/*
+  Al apuntar un plan aparece el filo dorado y la sombra sube un escalón. Sin
+  desplazamiento: el `<li>` lleva el revelado al desplazar, que fija su
+  `translate`, y un hover que también lo pidiera no haría nada.
+*/
+.plan {
+  transition: box-shadow var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .plan:hover {
+    box-shadow: var(--filo-activo), var(--shadow-flotante), var(--edge);
+  }
+}

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { ANCLAS, HREF_UNETE } from './anclas'
 import { MenuMovilPublico } from './menu-movil-publico'
 import escaparate from '../escaparate.module.css'
+import { ENTRADA, retardoEntrada } from './revelado'
 import estilos from './encabezado-publico.module.css'
 
 /*
@@ -28,7 +29,7 @@ export function EncabezadoPublico() {
       {/* El destello ✦ es decorativo —el nombre de la marca ya está en el
           texto—, así que va `aria-hidden` y no parte el enlace en dos palabras
           para un lector de pantalla. */}
-      <Link href="/" className={estilos.marca}>
+      <Link href="/" className={[estilos.marca, ENTRADA].join(' ')} style={retardoEntrada(0)}>
         <span className={estilos.destello} aria-hidden="true">
           ✦
         </span>
@@ -36,7 +37,8 @@ export function EncabezadoPublico() {
       </Link>
 
       <nav
-        className={[estilos.nav, escaparate.sobreFoto].join(' ')}
+        className={[estilos.nav, escaparate.sobreFoto, ENTRADA].join(' ')}
+        style={retardoEntrada(1)}
         aria-label="Secciones de la página">
         {ANCLAS.map((ancla) => (
           <Link key={ancla.href} href={ancla.href} className={estilos.enlace}>
@@ -52,7 +54,10 @@ export function EncabezadoPublico() {
           tiene «Únete» a un clic de los planes. En móvil las dos viven dentro
           de la hoja del menú.
         */}
-        <span className={[estilos.soloEscritorio, escaparate.sobreFoto].join(' ')}>
+        <span
+          className={[estilos.soloEscritorio, escaparate.sobreFoto, ENTRADA].join(' ')}
+          style={retardoEntrada(2)}
+        >
           <Button href="/miembros/login" variant="ghost" size="sm">
             Iniciar sesión
           </Button>

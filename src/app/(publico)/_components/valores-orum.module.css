@@ -89,3 +89,18 @@
   color: var(--text-2);
   text-wrap: pretty;
 }
+
+/* Al apuntar un verbo, su anillo se llena de oro tenue y crece un poco. Solo
+   el anillo: el `<li>` lleva el revelado al desplazar y fija su `translate`. */
+.anillo {
+  transition:
+    scale var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .valor:hover .anillo {
+    scale: 1.08;
+    background: var(--gold-bg);
+  }
+}

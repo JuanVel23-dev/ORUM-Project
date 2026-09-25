@@ -337,3 +337,22 @@
      la pediría y solo ensuciaría el borde. */
   --shadow-card: 0 0 rgba(0, 0, 0, 0);
 }
+
+/* ==========================================================================
+   4. LA FLECHA QUE EMPUJA  ·  micro-respuesta de las acciones con «→»
+
+   Al apuntar un botón o enlace que lleva flecha, la flecha avanza 4px hacia
+   donde lleva el enlace: dice «esto te lleva allá» sin texto. Solo con
+   ratón (`hover: hover`) y solo `translate`. La transición va en la flecha,
+   así que vuelve suave al salir.
+   ========================================================================== */
+.flecha {
+  transition: translate var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  :global(a):hover .flecha,
+  :global(button):hover .flecha {
+    translate: var(--space-1) 0;
+  }
+}

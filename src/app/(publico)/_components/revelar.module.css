@@ -46,9 +46,18 @@
   pinta visible: la degradación es correcta en los dos sentidos.
 */
 @media (scripting: enabled) {
-  .bloque[data-visible='false'] {
-    opacity: 0;
-    transform: translate3d(0, var(--space-5), 0) scale(0.985);
+  /*
+    SOLO DONDE NO HAY ANIMACIÓN LIGADA AL SCROLL. Donde el navegador conoce
+    `view()`, las piezas de dentro llevan `.revelar-vista` (globals.css), que
+    entra al bajar Y al subir; si este bloque también se ocultara, cada
+    sección se animaría dos veces a la vez. Este `Revelar` queda como red
+    para Firefox y los navegadores sin `view()`: entrada única al bajar.
+  */
+  @supports not (animation-timeline: view()) {
+    .bloque[data-visible='false'] {
+      opacity: 0;
+      transform: translate3d(0, var(--space-5), 0) scale(0.985);
+    }
   }
 }
 

@@ -3,6 +3,7 @@ import type { FotoPublica } from '@/lib/publico/datos-publicos'
 import escaparate from '../escaparate.module.css'
 import { CarruselFotos } from './carrusel-fotos'
 import { Revelar } from './revelar'
+import { REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from './revelado'
 import estilos from './que-es-orum.module.css'
 
 /*
@@ -49,7 +50,7 @@ export function QueEsOrum({ fotos }: { fotos: FotoPublica[] }) {
     >
       <Revelar>
         <div className={[estilos.bloque, hayFotos && estilos.conFotos].filter(Boolean).join(' ')}>
-          <div className={estilos.texto}>
+          <div className={[estilos.texto, REVELAR_IZQ].join(' ')}>
             <h2 id="titulo-nosotros" className={escaparate.tituloSeccion}>
               Una red de valor <br className={estilos.salto} />
               que <em className={escaparate.acento}>se nota</em>
@@ -60,8 +61,8 @@ export function QueEsOrum({ fotos }: { fotos: FotoPublica[] }) {
             </p>
 
             <div className={estilos.pilares}>
-              {PILARES.map(({ titulo, Icono, texto }) => (
-                <article key={titulo} className={estilos.pilar}>
+              {PILARES.map(({ titulo, Icono, texto }, i) => (
+                <article key={titulo} className={[estilos.pilar, revelarEscalonado(i + 1)].join(' ')}>
                   <span className={estilos.insignia} aria-hidden="true">
                     <Icono size={20} />
                   </span>
@@ -78,7 +79,7 @@ export function QueEsOrum({ fotos }: { fotos: FotoPublica[] }) {
             <CarruselFotos
               fotos={fotos}
               etiqueta="Fotos de comercios aliados"
-              className={estilos.carrusel}
+              className={[estilos.carrusel, REVELAR_DER].join(' ')}
             />
           )}
         </div>
