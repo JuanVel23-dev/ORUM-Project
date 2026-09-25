@@ -350,10 +350,13 @@
 
 /* --- ¿Tienes un comercio? · banda negra redondeada ------------------------ */
 
+/* En móvil, centrada —título, texto y botón en el eje— para que se lea mejor
+   (encargo del propietario); desde 768px, fila texto | botón. */
 .bandaAliados {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   gap: var(--space-5);
   margin-top: var(--space-10);
   padding: var(--space-8) var(--space-6);
@@ -371,6 +374,7 @@
     justify-content: space-between;
     gap: var(--space-8);
     padding: var(--space-9) var(--space-8);
+    text-align: start;
   }
 }
 
