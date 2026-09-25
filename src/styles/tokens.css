@@ -77,6 +77,10 @@
      (4,58 contra el mínimo de 4,50) — el mismo 0,08 de margen que ya tenía la
      v5 en ese mismo par. NO se puede oscurecer `--w-100` sin recalcular. */
   --w-0: #faf6ec; /* CREMA: fondo y tarjeta en claro */
+  /* BLANCO PURO: el fondo de la fachada pública (encargo del propietario,
+     25/09/2026). Sobre él: tinta 1 17,09 · 2 7,88 · 3 7,29 · oro de texto
+     (`--gold-700`) 5,26 · filo `--gold-600` 3,53 · borde de control 4,28. */
+  --blanco: #ffffff;
   --w-50: #f7f1e4; /* GRIS CLARO: superficie alterna, la que separa sin trazo */
   --w-100: #f5efdf; /* GRIS HONDO: relleno, hueco, franja. Ver el aviso ↑ */
   --w-200: #e1e1e7; /* filos y divisiones sobre gris */

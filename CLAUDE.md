@@ -279,7 +279,9 @@ dispositivos, y con el modo oscuro puesto las franjas crema salían negras.
 `(publico)/layout.tsx` fija `data-theme="light"` en su envoltorio —la
 contraparte del `data-theme="dark"` de `PantallaAuth`—, así que ahí no
 aplican ni la preferencia del sistema ni el tema elegido. Los otros tres
-portales siguen con los dos temas.
+portales siguen con los dos temas. Y su fondo es **blanco puro**
+(`--blanco`, no el crema `--w-0`): `publico.module.css` remapea `--w-0` en
+la fachada; las franjas tintadas siguen en crema.
 
 **El claro es donde se diseña y se juzga.** En oscuro una sombra negra sobre
 fondo negro no se ve, así que allí el material lo declara **`--edge`**, que con
