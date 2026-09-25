@@ -63,12 +63,13 @@
      `carril.module.css`, igual que en el portal de miembros. */
   --pad-contenido: var(--space-4);
   --pad-contenido-top: var(--space-6);
+  --pad-contenido-bottom: var(--space-10);
 
   /* La cabecera es fija y no ocupa sitio en el flujo: el contenido empieza
      debajo de ella. El primer bloque a sangre (el héroe, el banner) se come
      este relleno entero para subir por detrás —ver `escaparate.module.css`. */
   padding-top: calc(var(--cabecera-alto) + var(--pad-contenido-top));
-  padding-bottom: var(--space-10);
+  padding-bottom: var(--pad-contenido-bottom);
   padding-left: max(var(--pad-contenido), env(safe-area-inset-left, 0px));
   padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
 
@@ -83,8 +84,9 @@
   .main {
     --pad-contenido: var(--space-6);
     --pad-contenido-top: var(--space-8);
+    --pad-contenido-bottom: var(--space-11);
 
-    padding-bottom: var(--space-11);
+    padding-bottom: var(--pad-contenido-bottom);
   }
 }
 

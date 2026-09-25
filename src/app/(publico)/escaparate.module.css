@@ -72,6 +72,19 @@
   margin-top: calc((var(--cabecera-alto, 0px) + var(--pad-contenido-top, 0px)) * -1);
 }
 
+/*
+  LA ÚLTIMA FRANJA LLEGA HASTA EL PIE.
+
+  El `<main>` deja aire abajo para las páginas que terminan en texto. Cuando
+  la página termina en una franja (la landing, con «¿Tienes un negocio?»),
+  ese aire quedaba DEBAJO de la franja y la descentraba: 48px de relleno
+  arriba y 112px de hueco abajo. La franja se come ese hueco y queda
+  centrada en su propio relleno simétrico.
+*/
+.franja:last-child {
+  margin-bottom: calc(var(--pad-contenido-bottom, 0px) * -1);
+}
+
 /* --------------------------------------------------------------------------
    LOS CUATRO TONOS
 
