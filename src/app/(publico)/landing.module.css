@@ -126,15 +126,20 @@
 }
 
 /*
-  «Quiero ser aliado», como en el rediseño: píldora gris hondo con su sombra
-  corta y sin filo. Es `Button secondary` con sus tokens remapeados en el
-  propio botón (no en un envoltorio: el diálogo del formulario se monta al
-  lado y heredaría el remapeo). El nombre del control lo da su texto, 15,18:1
-  en tinta, así que no necesita el filo de 3:1 de un campo de formulario.
+  «Quiero ser aliado»: píldora BLANCA sobre la franja blanca (encargo del
+  propietario), así que lo que la hace visible es la luz. Sombra flotante
+  en reposo —el escalón de un menú, no el de una tarjeta— y un filo dorado
+  al 35 % que dibuja su contorno sin pesar. Al apuntarla, `Button
+  secondary` pide `--shadow-card` para su hover: se redirige a la escala
+  del overlay, así que sube en vez de bajar.
+
+  Tokens remapeados en el propio botón, no en un envoltorio: el diálogo del
+  formulario se monta al lado y heredaría el remapeo. El nombre del control
+  lo da su texto (tinta, 17,09:1 sobre blanco).
 */
 .botonAliado {
-  --surface: var(--surface-alt-2);
-  --border-control: transparent;
+  --border-control: color-mix(in srgb, var(--gold-600) 35%, transparent);
+  --shadow-card: var(--shadow-overlay);
 
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-flotante);
 }
