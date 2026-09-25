@@ -1,0 +1,26 @@
+/* src/components/anuncios/lista-anuncios.module.css */
+
+.imagen {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+}
+
+.fecha {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-3);
+}
+
+.titulo {
+  font-weight: 700;
+  margin-top: var(--space-1);
+}
+
+.cuerpo {
+  color: var(--text-2);
+  margin-top: var(--space-2);
+  white-space: pre-wrap;
+}

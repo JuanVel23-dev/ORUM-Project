@@ -12,6 +12,10 @@ type WhatsAppButtonProps = {
   mensaje?: string
   variant?: ButtonVariant
   size?: ButtonSize
+  /** Radio completo, como las acciones de la fachada pública. */
+  pildora?: boolean
+  fullWidth?: boolean
+  className?: string
   children?: ReactNode
 }
 
@@ -27,6 +31,9 @@ export function WhatsAppButton({
   mensaje,
   variant = 'secondary',
   size = 'md',
+  pildora = false,
+  fullWidth = false,
+  className,
   children = 'Soporte por WhatsApp',
 }: WhatsAppButtonProps) {
   const numero = limpiarTelefono(telefono)
@@ -39,6 +46,9 @@ export function WhatsAppButton({
       rel="noopener noreferrer"
       variant={variant}
       size={size}
+      pildora={pildora}
+      fullWidth={fullWidth}
+      className={className}
       icon={<MessageCircle size={16} />}
     >
       {children}

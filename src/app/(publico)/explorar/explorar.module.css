@@ -1,0 +1,401 @@
+/* ==========================================================================
+   EL DIRECTORIO PÚBLICO  ·  /explorar
+   ========================================================================== */
+
+/* --- El banner: foto oscura a sangre, cabecera montada encima ------------- */
+
+.banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  display: flex;
+  align-items: flex-end;
+  min-height: 360px;
+
+  padding-top: calc(var(--cabecera-alto) + var(--space-7));
+  padding-bottom: var(--space-8);
+
+  background: var(--fondo-franja-oscura), var(--cacao-bg);
+  color: var(--cacao-fg);
+  color-scheme: dark;
+}
+
+@container contenido (min-width: 768px) {
+  .banner {
+    min-height: 420px;
+    padding-bottom: var(--space-10);
+  }
+}
+
+.bannerFoto {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* La socia está a la derecha: en un teléfono la foto se ancla ahí para
+     que siga en cuadro. A color, como en el héroe de la landing. */
+  object-position: 72% center;
+  animation: foto-asienta calc(var(--dur-page) * 4) var(--ease-out) both;
+}
+
+@container contenido (min-width: 768px) {
+  .bannerFoto {
+    object-position: center 35%;
+  }
+}
+
+/* La cámara que se asienta al cargar: una vez, solo `scale`. Misma
+   animación que la foto del héroe de la landing. */
+@keyframes foto-asienta {
+  from {
+    scale: 1.08;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+/* El texto vive abajo: el velo es más denso abajo que arriba. */
+.bannerVelo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--cacao-bg) 88%, transparent) 0%,
+    color-mix(in srgb, var(--cacao-bg) 58%, transparent) 60%,
+    color-mix(in srgb, var(--cacao-bg) 32%, transparent) 100%
+  );
+}
+
+.bannerContenido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 44rem;
+}
+
+.titulo {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  font-weight: 500;
+  color: var(--cacao-fg);
+  -webkit-font-smoothing: auto;
+}
+
+.bajada {
+  margin: 0;
+  max-width: 52ch;
+  font-size: var(--t-body-size);
+  line-height: 1.6;
+  color: var(--cacao-fg-2);
+}
+
+/*
+  EL BUSCADOR. Una píldora crema con su sombra y el botón dorado dentro. Es
+  un control de entrada, así que CONSERVA su borde en reposo —la regla «sin
+  bordes» es para superficies—: `--border-control` del tema claro, porque la
+  píldora es crema aunque viva sobre negro.
+*/
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 560px;
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-5);
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: var(--w-0);
+  box-shadow: var(--shadow-raised);
+  color-scheme: light;
+}
+
+/* El foco del campo se dibuja en el contenedor: el anillo rodea la píldora
+   entera, que es lo que el visitante percibe como «el buscador». */
+.buscador:focus-within {
+  outline: 2px solid var(--gold-300);
+  outline-offset: 2px;
+}
+
+.campo {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-min);
+  border: none;
+  background: transparent;
+
+  font-family: var(--font-sans);
+  /* 16px en móvil: por debajo, iOS amplía la página al enfocar el campo. */
+  font-size: max(1rem, var(--t-control-size));
+  color: var(--tinta-1);
+}
+
+.campo::placeholder {
+  /* `--tinta-3` sobre crema: 6,76:1. */
+  color: var(--tinta-3);
+}
+
+/* El anillo lo pinta `.buscador:focus-within`; el del campo sobraría. */
+.campo:focus-visible {
+  outline: none;
+}
+
+.botonBuscar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border: none;
+  border-radius: var(--radius-full);
+  /* `--gold-600` con icono en tinta: 4,84:1 (el icono es texto a efectos de
+     contraste, WCAG 1.4.11 pide 3:1). */
+  background: var(--gold-600);
+  /* Blanco, como en el rediseño: 3,53:1 sobre el oro, por encima del 3:1 que
+     WCAG 1.4.11 pide a un icono. */
+  color: var(--blanco);
+  cursor: pointer;
+  transition: scale var(--dur-press) var(--ease-out);
+}
+
+.botonBuscar:active {
+  scale: var(--escala-press-sm);
+}
+
+.botonBuscar:focus-visible {
+  outline: 2px solid var(--tinta-1);
+  outline-offset: 2px;
+}
+
+/* --- El panel: categorías arriba, ciudad y orden abajo -------------------- */
+
+/*
+  EL PANEL DE FILTROS, BLANCO. Encargo del propietario: fondo blanco y que
+  lo resalten las sombras, no un tinte. Sube a la sombra de tarjeta
+  principal (`--shadow-raised`) porque sobre el fondo, también blanco, es
+  lo único que lo despega; dentro, cada control lleva su propia sombra corta
+  y su filo dorado o de tinta.
+*/
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+  padding: var(--space-6) var(--space-4) var(--space-5);
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+@container contenido (min-width: 768px) {
+  .panel {
+    padding: var(--space-7) var(--space-7) var(--space-5);
+  }
+}
+
+/* Las categorías (rejilla en escritorio, botón + ventana en móvil) viven en
+   `_components/categorias-directorio.module.css`. */
+
+/* --- Recuento, ciudad y orden --------------------------------------------- */
+
+.herramientas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.recuento {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.menus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* En el teléfono los filtros ocupan el ancho del panel: Categorías en su
+   fila, Ciudad y Ordenar debajo. */
+@container contenido (max-width: 767px) {
+  .menus {
+    width: 100%;
+  }
+
+  /* Cada filtro en su fila y a todo el ancho, como en el boceto móvil: tres
+     píldoras de anchos distintos una debajo de otra se leían desordenadas.
+     `:not(dialog)`: la ventana de categorías también es hija de esta fila, y
+     su ancho lo decide la hoja, no esto. */
+  .menus > :not(dialog),
+  .menus .disparador {
+    width: 100%;
+  }
+}
+
+/*
+  EL DISPARADOR: una píldora con su icono en un anillo de oro, filo de tinta
+  al 15 % y su sombra corta, como en el rediseño. No es un campo donde se
+  escribe: es un botón con texto («Ciudad: Todas»), y es el texto lo que lo
+  identifica, así que no necesita el filo de 3:1 de un `<input>`. El foco
+  sigue teniendo su anillo de 2px.
+*/
+.disparador {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4) 0 var(--space-2);
+
+  border: 1px solid color-mix(in srgb, var(--tinta-1) 15%, transparent);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+
+  font-family: var(--font-sans);
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .disparador:hover {
+    border-color: var(--brand-edge);
+    box-shadow: var(--shadow-raised);
+  }
+}
+
+.disparador:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.disparadorIcono {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1.5px var(--brand);
+  color: var(--brand);
+}
+
+.chevron {
+  color: var(--text-3);
+}
+
+/*
+  LA OPCIÓN ELEGIDA del menú, como en el rediseño: texto dorado sobre el
+  fondo de insignia. El menú se pinta en la capa superior pero sigue siendo
+  descendiente de `.menus` en el DOM, así que esto lo alcanza. `--gold-800`
+  y no el oro de texto de la fachada: sobre el fondo de insignia
+  `--gold-650` da 4,21:1 y `--gold-700` 4,4956:1, los dos bajo AA; el 800
+  da 6,58:1. El check del sistema sigue siendo el segundo portador.
+*/
+.menus :global([role='menuitemradio'][aria-checked='true']) {
+  background: var(--gold-bg);
+  color: var(--gold-800);
+  font-weight: 700;
+}
+
+/* --- La rejilla ----------------------------------------------------------- */
+
+.resultados {
+  margin-top: var(--space-6);
+}
+
+.rejilla {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-3);
+}
+
+@container contenido (min-width: 640px) {
+  .rejilla {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+}
+
+@container contenido (min-width: 960px) {
+  .rejilla {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-7);
+  }
+}
+
+/* --- ¿Tienes un comercio? · banda negra redondeada ------------------------ */
+
+.bandaAliados {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+  margin-top: var(--space-10);
+  padding: var(--space-8) var(--space-6);
+
+  border-radius: var(--radius-lg);
+  background: var(--fondo-franja-oscura), var(--cacao-bg);
+  box-shadow: var(--shadow-raised);
+  color: var(--cacao-fg);
+}
+
+@container contenido (min-width: 768px) {
+  .bandaAliados {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+    padding: var(--space-9) var(--space-8);
+  }
+}
+
+.bandaTitulo {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  font-weight: 700;
+  color: var(--cacao-fg);
+  -webkit-font-smoothing: auto;
+}
+
+.bandaTexto {
+  margin: 0;
+  max-width: 48ch;
+  font-size: var(--t-callout-size);
+  line-height: 1.6;
+  color: var(--cacao-fg-2);
+}
+
+/* El botón en oro pálido: tokens sobre el propio botón (ver `page.tsx`).
+   `--gold-300` con texto en tinta, 12,6:1; filo 14:1 contra el negro. */
+.botonOro {
+  --action-gold: var(--gold-300);
+  --action-gold-fg: var(--tinta-1);
+  --focus: var(--cacao-brand);
+}

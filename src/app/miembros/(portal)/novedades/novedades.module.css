@@ -1,0 +1,5 @@
+.pagina {
+  max-width: 640px;
+  margin-inline: auto;
+  padding-block: var(--space-6);
+}

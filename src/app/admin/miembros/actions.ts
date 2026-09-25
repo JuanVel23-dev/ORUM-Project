@@ -11,7 +11,7 @@ import {
   calcularFechaInicioRenovacion,
 } from '@/lib/miembros/membresias'
 import { esNumeroRegistroValido } from '@/lib/miembros/numeros-registro'
-import { construirUrlActivacion, urlBaseSitio } from '@/lib/auth/activacion'
+import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
 
 type Admin = ReturnType<typeof createAdminClient>
 
@@ -116,7 +116,7 @@ export async function registrarMiembro(
   const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
     type: 'invite',
     email: correo,
-    options: { redirectTo: construirUrlActivacion(urlBaseSitio(), 'miembro') },
+    options: { redirectTo: urlBaseSitio() },
   })
   if (errAuth || !creado?.user) {
     const msg = /already been registered|already registered|exists/i.test(errAuth?.message ?? '')
@@ -233,7 +233,12 @@ export async function registrarMiembro(
   await enviarCorreoInvitacion({
     nombre: `${nombres} ${apellidos}`.trim(),
     correo,
-    urlInvitacion: creado.properties.action_link,
+    urlInvitacion: construirEnlaceActivacion(
+      urlBaseSitio(),
+      'miembro',
+      creado.properties.hashed_token,
+      creado.properties.verification_type,
+    ),
   })
 
   revalidatePath('/admin/miembros')

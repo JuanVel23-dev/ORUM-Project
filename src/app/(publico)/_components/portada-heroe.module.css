@@ -1,94 +1,86 @@
 /* ==========================================================================
-   LA IMAGEN PRINCIPAL DE LA PORTADA
+   LA FOTOGRAFÍA DEL HÉROE, ADMINISTRABLE
 
-   Vive dentro de la franja del héroe, que desde el rediseño de septiembre es
-   champán en tema claro y negra en oscuro. Por eso el botón de pausa NO se
-   viste con los tokens de la franja: se apoya en una fotografía arbitraria
-   que alguien sube desde el panel, y ahí el contraste no puede depender ni
-   del tema ni de lo que traiga la imagen. Velo propio oscuro y glifo blanco,
-   que es la única combinación que se sostiene sobre las dos.
+   Estas reglas son el gemelo de `.foto` en `hero-publico.module.css`, que es
+   la foto de marca fija a la que sustituyen. No se reutiliza aquella clase
+   —aunque se podría pasar por prop— por dos razones:
+
+     1. `object-position` tiene que ser DISTINTO. Allí vale `72% center`,
+        calibrado a mano para que la socia y su tarjeta sigan en cuadro cuando
+        el teléfono recorta la foto a lo alto. Aquí la imagen la sube alguien
+        desde el panel y no hay forma de saber dónde está su sujeto, así que
+        el único encuadre honesto es el centro.
+     2. Componer dos clases de módulos distintos deja la precedencia en manos
+        del orden en que Next inyecte las hojas, que no es algo sobre lo que
+        se pueda razonar. Dos reglas peleando por `object-position` y ganando
+        una u otra según el día es peor que doce líneas repetidas.
+
+   ⚠️ Lo que SÍ tiene que seguir igual es la geometría: `inset: 0` y
+   `z-index: -2`, porque el velo del héroe vive en `-1` y el contenido encima.
+   Si allí cambia la capa, aquí también.
    ========================================================================== */
 
-.portada {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  /* La proporción la fija el hueco y no el archivo: si la fijara el archivo,
-     subir una foto vertical movería el titular de sitio. */
-  aspect-ratio: 4 / 3;
-  box-shadow: var(--edge-light);
-}
-
-/*
-  901px Y NO 900: es EXACTAMENTE el corte en el que `hero-publico.module.css`
-  pasa la rejilla a dos columnas. Con 900 aquí, a un ancho de 900px justos la
-  imagen ya sería vertical mientras la rejilla todavía está apilada, y una
-  foto en retrato a ancho completo del móvil empuja el resto de la página una
-  pantalla hacia abajo. Si allí se toca el corte, aquí también.
-*/
-@container contenido (min-width: 901px) {
-  .portada {
-    aspect-ratio: 3 / 4;
-  }
-}
-
-/*
-  Las imágenes se apilan una encima de otra en la misma celda de rejilla. No
-  se usa `position: absolute` para apilarlas porque entonces la pila no mide
-  nada y el contenedor necesitaría alto propio; con `grid-area: 1 / 1` la pila
-  mide lo que mide la mayor y el `aspect-ratio` del padre manda igual.
-*/
-.pila {
-  display: grid;
-  width: 100%;
-  height: 100%;
-}
-
-.imagen {
-  grid-area: 1 / 1;
+.capa {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 
   opacity: 0;
-  /* Enumerada, nunca `all`. Y la salida más rápida que la entrada no aplica
-     aquí: en un fundido cruzado las dos capas se mueven a la vez, y que una
-     tarde más que la otra deja un parpadeo de fondo entre medias. */
+  /*
+    Enumerada, nunca `all`. Y aquí la salida NO es más rápida que la entrada,
+    al revés que en el resto del sistema: en un fundido cruzado las dos capas
+    se mueven a la vez, y que una tarde menos que la otra abre un hueco por el
+    que se ve el fondo negro a media transición.
+  */
   transition: opacity var(--dur-page) var(--ease-hero);
 }
 
-.imagen[data-visible='true'] {
+.capa[data-visible='true'] {
   opacity: 1;
 }
 
 /*
-  MOVIMIENTO REDUCIDO. El componente ya no rota, pero la primera imagen sigue
-  necesitando estar opaca: sin esta regla, si el JavaScript no llegara nunca
-  el hueco se quedaría en negro. Es la misma red de seguridad que `Revelar`.
+  LA RED DE SEGURIDAD. Sin JavaScript, `data-visible` se queda como lo pintó
+  el servidor —que ya marca la primera— pero nada garantiza que la transición
+  llegue a correr. Sin esto el héroe podría quedarse en negro, que es el fallo
+  más caro posible en la primera pantalla del sitio.
 */
-@media (prefers-reduced-motion: reduce) {
-  .imagen {
-    transition-duration: 0.01ms;
+@media (scripting: none) {
+  .capa:first-of-type {
+    opacity: 1;
   }
 }
 
-@media (scripting: none) {
-  .imagen:first-child {
-    opacity: 1;
+@media (prefers-reduced-motion: reduce) {
+  .capa {
+    transition-duration: 0.01ms;
   }
 }
 
 /* --- El botón de pausa ---------------------------------------------------- */
 
 /*
+  Abajo a la derecha, por ENCIMA del solape de la tarjeta de pasos.
+
+  `--solape-tarjeta` lo publica `.hero` y se hereda hasta aquí: la tarjeta de
+  «Así es como te unes» se monta sobre el filo inferior del héroe, y un botón
+  a ras del borde quedaría debajo de ella. Se lee la variable en vez de
+  repetir el número, para que mover el solape mueva también el botón.
+
   Pequeño a la vista y grande al dedo: el objetivo táctil se amplía con un
-  `::after` centrado de `--tap-min` en vez de engordar el botón, que es la
-  norma del sistema para el ojo de la contraseña y el botón de copiar.
+  `::after` de `--tap-min`, que es la norma del sistema para el ojo de la
+  contraseña y el botón de copiar. Agrandar el botón lo volvería un elemento
+  de interfaz dentro de una fotografía que no debe tener ninguno.
 */
 .pausa {
   position: absolute;
-  inset-block-end: var(--space-3);
-  inset-inline-end: var(--space-3);
+  z-index: 1;
+  inset-block-end: calc(var(--solape-tarjeta, 0px) + var(--space-4));
+  inset-inline-end: var(--space-4);
 
   display: grid;
   place-items: center;
@@ -99,11 +91,14 @@
   cursor: pointer;
 
   /*
-    Los dos tokens crudos, y no literales: `--cacao-900` es el negro del
-    sistema y `--w-0` su blanco. Al 78 % el velo tapa lo suficiente como para
-    que el glifo dé 11:1 incluso sobre la zona más clara posible de una foto,
-    y 21:1 sobre la más oscura. Sin `backdrop-filter`: es un desenfoque de
-    capa por un botón de 32px, y el sistema lo reserva para el cromo fijo.
+    Tokens crudos y no literales: `--cacao-900` es el negro del sistema y
+    `--w-0` su blanco. NO se usan los semánticos del héroe (`--cacao-bg`,
+    `--cacao-fg`) a propósito: aquellos siguen al tema, y este botón se apoya
+    en una fotografía arbitraria que alguien sube desde el panel. Ahí el
+    contraste no puede depender ni del tema ni de lo que traiga la imagen.
+
+    Al 78 % el velo tapa lo suficiente para que el glifo dé ~11:1 incluso
+    sobre la zona más clara posible de una foto, y 21:1 sobre la más oscura.
   */
   background: color-mix(in srgb, var(--cacao-900) 78%, transparent);
   color: var(--w-0);
@@ -128,6 +123,8 @@
   }
 }
 
+/* Presionar hunde. Ocurre en `:active`, que el navegador enciende al APRETAR
+   y no al soltar. */
 .pausa:active {
   scale: 0.94;
 }

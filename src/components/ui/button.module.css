@@ -196,6 +196,17 @@
   width: 100%;
 }
 
+/* La píldora de la fachada pública. Más aire lateral: con el radio completo
+   el texto se acerca a la curva y el botón se lee apretado. */
+.pildora {
+  border-radius: var(--radius-full);
+  padding-inline: var(--space-6);
+}
+
+.pildora.sm {
+  padding-inline: var(--space-5);
+}
+
 /* --- Variantes ------------------------------------------------------------ */
 
 /*

@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, User } from 'lucide-react'
+import { Home, Megaphone, User } from 'lucide-react'
 import { esDestinoActivo } from '@/lib/miembros/navegacion-portal'
 import styles from '../portal.module.css'
 
 const DESTINOS = [
   { href: '/miembros', etiqueta: 'Inicio', Icono: Home },
+  { href: '/miembros/novedades', etiqueta: 'Novedades', Icono: Megaphone },
   { href: '/miembros/perfil', etiqueta: 'Mi perfil', Icono: User },
 ] as const
 

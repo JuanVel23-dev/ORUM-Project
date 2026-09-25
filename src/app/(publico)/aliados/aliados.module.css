@@ -24,7 +24,7 @@
 
 /*
   La familia, la escala y el tracking los pone `escaparate.tituloSeccion`
-  (Fraunces a 32–48px). Aquí solo el margen y el ancho de quiebre: declarar
+  (Playfair Display a 32–48px). Aquí solo el margen y el ancho de quiebre: declarar
   `font-size` otra vez empataría en especificidad con esa regla y el ganador
   dependería del orden en que Next inyecte las dos hojas, que cambia entre
   desarrollo y producción.

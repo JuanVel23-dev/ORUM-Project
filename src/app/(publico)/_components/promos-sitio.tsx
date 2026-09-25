@@ -17,11 +17,14 @@ import estilos from './promos-sitio.module.css'
   del propio club en su portada. El parecido de nombre es la trampa: de ahí
   que el modelo se llame `recursos_sitio` y la ubicación `promo`.
 
-  VA JUSTO DESPUÉS DE «¿QUÉ ES ORUM?» y en tono CREMA: la franja anterior es
-  papel y la siguiente («Así funciona») es crema honda, así que ninguna
-  sección repite el tono de su vecina. Si esta no se pinta —que es lo normal
-  hasta que alguien suba el primer cartel— el ritmo vuelve a ser el de antes,
-  papel → honda, sin que nadie tenga que tocar nada.
+  TONO CREMA HONDA, y es el único sitio de la landing que lo usa. Sus dos
+  vecinas en la v6 son papel («Descubre · Disfruta · …») y negro («Comercios
+  destacados»), así que no repite tono con ninguna. Y la honda es superficie
+  de RELLENO —donde reprueban AA el texto terciario y el dorado—, que es justo
+  lo que hay aquí: un titular y fotografías, nada tenue y nada en oro.
+
+  Si esta sección no se pinta —lo normal hasta que alguien suba el primer
+  cartel— el ritmo vuelve solo al de la v6, sin que nadie toque nada.
 
   SI NO HAY NADA VISIBLE, NO HAY SECCIÓN. Un encabezado «Promociones» sobre un
   hueco dice que el club no tiene ninguna, que es bastante peor que no decir
@@ -31,7 +34,7 @@ import estilos from './promos-sitio.module.css'
 export function PromosSitio({ promos }: { promos: RecursoPublico[] }) {
   return (
     <section
-      className={[escaparate.franja, escaparate.tonoCrema].join(' ')}
+      className={[escaparate.franja, escaparate.tonoHonda].join(' ')}
       id="promociones"
       aria-labelledby="titulo-promociones"
     >

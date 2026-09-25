@@ -35,6 +35,12 @@ type Base = {
   /** Botón cuadrado de solo icono. Exige `aria-label`. */
   iconOnly?: boolean
   fullWidth?: boolean
+  /**
+   * Radio completo. Es la forma de las acciones de la fachada pública —la
+   * guía de marca del cliente las dibuja en píldora—; las pantallas de
+   * trabajo conservan el radio del sistema.
+   */
+  pildora?: boolean
   /** Icono a la izquierda del texto. */
   icon?: ReactNode
   children?: ReactNode
@@ -54,6 +60,7 @@ function clases(
   size: ButtonSize,
   iconOnly: boolean,
   fullWidth: boolean,
+  pildora: boolean,
   extra?: string,
 ) {
   return [
@@ -62,6 +69,7 @@ function clases(
     styles[size],
     iconOnly && styles.iconOnly,
     fullWidth && styles.fullWidth,
+    pildora && styles.pildora,
     extra,
   ]
     .filter(Boolean)
@@ -84,6 +92,7 @@ export function Button(props: ButtonProps) {
     loading = false,
     iconOnly = false,
     fullWidth = false,
+    pildora = false,
     icon,
     children,
     className,
@@ -104,7 +113,7 @@ export function Button(props: ButtonProps) {
     </>
   )
 
-  const nombreClase = clases(variant, size, iconOnly, fullWidth, className)
+  const nombreClase = clases(variant, size, iconOnly, fullWidth, pildora, className)
 
   if (typeof resto.href === 'string') {
     const { href, ...propsEnlace } = resto as AnchorHTMLAttributes<HTMLAnchorElement> & {

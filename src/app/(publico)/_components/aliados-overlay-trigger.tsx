@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, type MouseEvent } from 'react'
-import { Button } from '@/components/ui/button'
+import { ArrowRight } from 'lucide-react'
+import { Button, type ButtonVariant } from '@/components/ui/button'
 import { Overlay } from '@/components/ui/overlay'
+import escaparate from '@/app/(publico)/escaparate.module.css'
 import { FormularioAliado } from '@/app/(publico)/aliados/_components/formulario-aliado'
 
 /*
@@ -36,9 +38,24 @@ type Props = {
    */
   abiertoEn: number
   soporte: string | null
+  /**
+   * `secondary` sobre crema (la landing); `brand` sobre la banda negra del
+   * directorio, donde el ámbito `sobreFoto` lo pinta en oro pálido.
+   */
+  variant?: Extract<ButtonVariant, 'secondary' | 'brand'>
+  /**
+   * Clase para el BOTÓN, no para un envoltorio: el diálogo se monta junto a
+   * él, y un envoltorio que remapeara tokens se los pasaría al formulario.
+   */
+  className?: string
 }
 
-export function AliadosOverlayTrigger({ abiertoEn, soporte }: Props) {
+export function AliadosOverlayTrigger({
+  abiertoEn,
+  soporte,
+  variant = 'secondary',
+  className,
+}: Props) {
   const [abierto, setAbierto] = useState(false)
 
   const interceptar = (e: MouseEvent<HTMLAnchorElement>) => {
@@ -56,8 +73,16 @@ export function AliadosOverlayTrigger({ abiertoEn, soporte }: Props) {
 
   return (
     <>
-      <Button href="/aliados" variant="secondary" size="lg" onClick={interceptar}>
-        Postular mi negocio
+      <Button
+        href="/aliados"
+        variant={variant}
+        size="lg"
+        pildora
+        className={className}
+        onClick={interceptar}
+      >
+        Quiero ser aliado
+        <ArrowRight size={16} aria-hidden="true" className={escaparate.flecha} />
       </Button>
 
       {/*

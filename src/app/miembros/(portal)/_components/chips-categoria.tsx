@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { LayoutGrid } from 'lucide-react'
 import { CarrilPista } from '@/components/ui/carril'
-import { IconoCategoria } from './icono-categoria'
+import { IconoCategoria } from '@/components/ui/icono-categoria'
 import styles from './chips-categoria.module.css'
 import { Agitar } from '@/components/ui/agitar'
 

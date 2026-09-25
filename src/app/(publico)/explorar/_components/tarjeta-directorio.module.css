@@ -1,0 +1,149 @@
+/* ==========================================================================
+   TARJETA DEL DIRECTORIO  ·  foto 4:3, logo grande junto al nombre
+   ========================================================================== */
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  /* Blanca como la página (encargo del propietario): la despega la sombra,
+     un escalón más alta que la de una tarjeta normal porque sobre blanco no
+     hay tinte que ayude. */
+  background: var(--surface);
+  box-shadow: var(--shadow-raised), var(--edge);
+  color: var(--text);
+  text-decoration: none;
+
+  --placa-logo-w: 52px;
+
+  transition:
+    translate var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+@container contenido (min-width: 900px) {
+  .tarjeta {
+    --placa-logo-w: 72px;
+  }
+}
+
+/* Apuntar levanta, aparece el filo dorado y la sombra sube un escalón. */
+@media (hover: hover) {
+  .tarjeta:hover {
+    translate: 0 -2px;
+    box-shadow: var(--filo-activo), var(--shadow-flotante), var(--edge);
+  }
+}
+
+/* Presionar hunde: baja y se queda con el contacto de su sombra. */
+.tarjeta:active {
+  translate: 0 1px;
+  box-shadow: var(--shadow-press), var(--edge);
+}
+
+.tarjeta:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.portada {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--cacao-surface);
+}
+
+.foto,
+.sinFoto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.foto {
+  object-fit: cover;
+}
+
+.sinFoto {
+  background: var(--fondo-franja-oscura), var(--cacao-surface);
+}
+
+.cuerpo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+@container contenido (min-width: 900px) {
+  .cuerpo {
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.nombre {
+  font-family: var(--font-display);
+  font-size: var(--t-callout-size);
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--text);
+  -webkit-font-smoothing: auto;
+  overflow-wrap: anywhere;
+}
+
+@container contenido (min-width: 900px) {
+  .nombre {
+    font-size: var(--t-title-3-size);
+  }
+}
+
+/* `--text-3`, el gris del rediseño: 7,29:1 sobre la tarjeta blanca. */
+.detalle {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  color: var(--text-3);
+}
+
+.beneficio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.candado {
+  flex-shrink: 0;
+  color: var(--brand);
+}
+
+/*
+  EL DESENFOQUE. `user-select: none` para que no baste con seleccionar y
+  copiar; no es seguridad —el texto está en el HTML—, es el gesto del
+  encargo: se ve que hay algo y no se lee sin ser socio.
+*/
+.borroso {
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  color: var(--brand);
+  filter: blur(4px);
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta {
+    transition: none;
+  }
+}

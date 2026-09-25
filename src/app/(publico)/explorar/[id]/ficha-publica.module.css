@@ -1,0 +1,246 @@
+/* ==========================================================================
+   FICHA PÚBLICA DE COMERCIO  ·  página completa u overlay
+   ========================================================================== */
+
+/*
+  A pantalla completa la ficha pone su propia superficie (la sombra la
+  despega del crema). Dentro del overlay NO: la superficie la pone el
+  diálogo o la hoja, y una tarjeta dentro de otra se lee como un error.
+*/
+.ficha {
+  max-width: 720px;
+  margin: 0 auto;
+  overflow: hidden;
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+/* Dentro del diálogo no se sangra la portada hasta su borde: el relleno del
+   cuerpo cambia entre diálogo y hoja, y un margen negativo que lo adivine se
+   rompe en cuanto uno de los dos cambia. La foto se redondea dentro. */
+.enOverlay {
+  max-width: none;
+  overflow: visible;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.enOverlay .portadaFoto,
+.enOverlay .portadaVacia {
+  border-radius: var(--radius-md);
+}
+
+.enOverlay .cuerpo {
+  padding-inline: 0;
+  padding-bottom: 0;
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap-min);
+  margin: var(--space-2) var(--space-4) 0;
+
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  color: var(--text-2);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .volver:hover {
+    color: var(--text);
+  }
+}
+
+.volver:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* --- Portada con el logo montado en el canto ----------------------------- */
+
+.portada {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  /* Sin `overflow: hidden`: el logo sale por el canto inferior. Las
+     esquinas de arriba las recorta `.ficha`. */
+
+  --placa-logo-w: 72px;
+}
+
+.portadaFoto,
+.portadaVacia {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.portadaFoto {
+  object-fit: cover;
+}
+
+.portadaVacia {
+  background: var(--fondo-franja-oscura), var(--cacao-surface);
+}
+
+/* La placa del logo con un aro de crema que la separa de la foto y su
+   sombra flotante: es el objeto que se monta sobre el canto. */
+.logo {
+  position: absolute;
+  left: var(--space-6);
+  bottom: 0;
+  translate: 0 50%;
+  display: inline-flex;
+  border-radius: var(--radius-full);
+  box-shadow:
+    0 0 0 var(--space-1) var(--surface),
+    var(--shadow-flotante);
+}
+
+/* --- Cuerpo -------------------------------------------------------------- */
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: calc(var(--space-9) + var(--space-2)) var(--space-6) var(--space-6);
+}
+
+.nombre {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  font-weight: 700;
+  color: var(--text);
+  -webkit-font-smoothing: auto;
+}
+
+.detalle {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  color: var(--text-3);
+}
+
+.sedes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sede {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--t-callout-size);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.sedeIcono {
+  flex-shrink: 0;
+  /* Centrado óptico con la primera línea (15px de icono, 21px de línea). */
+  margin-top: calc((1lh - 15px) / 2);
+  color: var(--brand);
+}
+
+.sedeNombre {
+  color: var(--text-3);
+}
+
+.descripcion {
+  margin: 0;
+  font-size: var(--t-body-size);
+  line-height: 1.6;
+  color: var(--text-2);
+  text-wrap: pretty;
+  white-space: pre-line;
+}
+
+.galeria {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.galeriaCelda {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hueco);
+}
+
+.galeriaFoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- El beneficio desenfocado ------------------------------------------- */
+
+/* Hundido, no levantado: es un hueco dentro de la ficha. */
+.beneficio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--surface-alt-2);
+  box-shadow: var(--shadow-hundida);
+}
+
+.beneficioTextos {
+  min-width: 0;
+}
+
+.beneficioEtiqueta {
+  margin: 0 0 var(--space-1);
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.beneficioValor {
+  margin: 0;
+  font-size: var(--t-title-3-size);
+  font-weight: 700;
+  color: var(--brand);
+  filter: blur(5px);
+  user-select: none;
+}
+
+.beneficioPronto {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  color: var(--text-2);
+}
+
+/*
+  «Preguntar por WhatsApp» en el oro pálido del rediseño (`--gold-300`) con
+  texto en tinta: 12,65:1. Sobre la ficha blanca el relleno pálido no marca
+  un borde de 3:1, pero no lo necesita: el texto nombra el botón, y la
+  sombra lo levanta. Tokens sobre el propio botón, no en un envoltorio.
+*/
+.botonOro {
+  --action-gold: var(--gold-300);
+  --action-gold-fg: var(--tinta-1);
+}

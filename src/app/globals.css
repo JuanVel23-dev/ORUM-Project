@@ -20,14 +20,24 @@
    duplicación el fallo es imposible. Revisar cuando el soporte sea universal.
    ========================================================================== */
 
-:root {
+/*
+  `[data-theme='light']` además de `:root`: es la contraparte de lo que ya
+  hacen `PantallaAuth` y `/offline` con `data-theme="dark"` —un ámbito que
+  FIJA su tema aunque el resto del documento lleve el otro—. Lo usa la
+  fachada pública (`(publico)/layout.tsx`): la página que ve quien todavía no
+  es socio lleva los colores de la guía de marca en cualquier dispositivo,
+  también en uno con el modo oscuro puesto.
+*/
+:root,
+[data-theme='light'] {
   /* --------------------------------------------------------------------------
-     BLANCO  ·  dirección de arte v3 §2.1, con los valores de la v5
+     CREMA  ·  dirección de arte v3 §2.1, con los valores de la v6
 
-     El blanco no tiene escalones: fondo, tarjeta y hundido son EL MISMO
-     blanco. Eso no cambia — lo que cambia con la v5 es que ese blanco es ahora
-     `#FFFFFF` de verdad y no el papel cálido `#FDFCFA`. Lo que separa una
-     superficie de otra sigue siendo LA SOMBRA, sola.
+     El crema no tiene escalones: fondo, tarjeta y hundido son EL MISMO
+     crema. Eso no cambia — lo que cambia con la v6 es que el blanco puro
+     `#FFFFFF` de la v5 vuelve a ser un crema cálido, `#FAF6EC`, por mandato de
+     la guía de marca del cliente. Lo que separa una superficie de otra sigue
+     siendo LA SOMBRA, sola — ese principio no depende del tono de base.
 
      Consecuencia directa y buscada: una superficie sin sombra DESAPARECE. Si
      al añadir una pantalla algo se "pierde" sobre el fondo, no es un bug del
@@ -40,9 +50,17 @@
      Y es TINTA DILUIDA, no un gris de la rampa `--w-*`. La primera versión de
      la dirección v2 lo fijó en `--w-50`, que sobre el fondo es un 1,5 % de
      diferencia de luminosidad: literalmente imperceptible, y menos visible que
-     el `--w-100` al que sustituía. Tinta al 6 % da 1,13:1 sobre blanco —
-     medido— y además pertenece a la misma familia que los tres trazos, que es
-     la coherencia que persigue toda la dirección.
+     el `--w-100` al que sustituía. Pertenece a la misma familia que los tres
+     trazos, que es la coherencia que persigue toda la dirección.
+
+     ⚠️ EL PORCENTAJE BAJÓ CON LA v6, de 6 % a 3,5 %, y no por gusto: el crema
+     de la v6 parte de una luminancia más baja que el blanco puro de la v5
+     (0,923 contra 1,000), así que la MISMA tinta al 6 % oscurecía el hover lo
+     suficiente para que `--gold-600` (el filo de `Button variant="brand"` y de
+     `Badge tone="gold"` cuando aparecen sobre una fila señalada) cayera a
+     2,89:1 contra `--surface-hover` — bajo el 3:1 de 1.4.11. Al 3,5 % el hover
+     da 1,07:1 contra el crema (menos que el 1,13:1 de la v5, pero sigue siendo
+     una tinta perceptible) y el filo dorado vuelve a pasar, en 3,04:1.
 
      Aun así sigue siendo tenue a propósito: donde el hover o la selección sean
      la ÚNICA señal —fila de menú, opción de la paleta, destino activo—, hace
@@ -52,7 +70,7 @@
   --bg: var(--w-0);
   --surface: var(--w-0);
   --surface-sunk: var(--w-0);
-  --surface-hover: color-mix(in srgb, var(--n-1000) 6%, var(--w-0));
+  --surface-hover: color-mix(in srgb, var(--n-1000) 3.5%, var(--w-0));
 
   /* --------------------------------------------------------------------------
      SUPERFICIES TONALES  ·  v4 §1 y §4, con los grises de la v5
@@ -65,11 +83,11 @@
      dibujar una sola línea, que es lo que hace Agence Cartier con cero
      sombras.
 
-     v5: el tinte pasa de CREMA a GRIS NEUTRO, y de paso se separa un poco más
-     (1,08:1 en vez de 1,04:1). Hacía falta: un gris neutro sobre blanco se
-     percibe MENOS que una crema sobre papel cálido a la misma diferencia de
-     luminancia, porque la crema también cambiaba de tono y el gris solo cambia
-     de claridad. Un solo canal de diferencia necesita más recorrido.
+     v5: el tinte había pasado de CREMA a GRIS NEUTRO (1,08:1). v6: vuelve a
+     crema — recalibrado alrededor del mismo `--gold-600`/`--gold-700` que ya
+     estaba probado, así que la separación baja un poco (1,04:1) porque el
+     margen contra el oro no daba para más sin recalcular la escala entera.
+     Ver `.claude/docs/log/v6-crema-oro.md`.
 
      NO son escalones de elevación y no sustituyen a la sombra: dos franjas a
      1,08:1 no separan una tarjeta de su fondo. Separan una SECCIÓN de otra. La
@@ -114,9 +132,9 @@
                                            alto contraste (18,7:1 en la v5)
        --border          tinta al 55 % ... divisiones internas, cromo fijo y el
                                            borde en reposo de un CONTROL DE
-                                           ENTRADA (4,17:1 sobre blanco, y
-                                           4,00:1 sobre el gris hondo — los dos
-                                           muy por encima del 3:1 de 1.4.11)
+                                           ENTRADA (4,08:1 sobre crema, y
+                                           4,01:1 sobre el gris hondo — v6, los
+                                           dos muy por encima del 3:1 de 1.4.11)
        --border-subtle   tinta al 22 % ... hairline de fila (1,62:1)
 
      ⚠️ Y EN OSCURO NO SE CUMPLE, que es la deuda que esta tanda deja abierta:
@@ -137,7 +155,7 @@
     `--border` hace dos trabajos: los divisores del cromo y de dentro de las
     superficies, y el filo de `Input`, `Select`, `Textarea`, `Checkbox`,
     `Radio`, `SegmentedControl` y `Button secondary`. En claro los dos casos
-    caben en el mismo valor (4,17:1 sobre blanco). En OSCURO no: `--n-700` da
+    caben en el mismo valor (4,08:1 sobre crema, v6). En OSCURO no: `--n-700` da
     1,92:1 contra la tarjeta y reprueba el 3:1 de WCAG 1.4.11 en el límite de
     un control — y subirlo para todos engordaría cada divisor del panel.
 
@@ -163,8 +181,7 @@
          alguien la olvide el fallo es invisible para quien no usa el modo.
 
     NO es para controles de entrada: un `<input>` conserva su borde real en
-    reposo (§2.5) porque sin él un campo vacío sobre blanco es invisible — y
-    con la v5 el fondo es blanco PURO, así que lo es todavía más.
+    reposo (§2.5) porque sin él un campo vacío sobre su fondo es invisible.
   */
   --border-superficie: transparent;
 
@@ -210,16 +227,15 @@
     LA TINTA. Los tres eran LITERALES aquí (#141418, #5b5b66, #6b6b76); desde
     la v4 salen de `tokens.css`, que es donde se puede buscar un color.
 
-    RATIOS v5, sobre las tres superficies claras:
-      --text ..... 18,69:1 blanco · 17,31:1 gris claro · 16,29:1 gris hondo
-      --text-2 ....  7,37:1 blanco ·  6,82:1 gris claro ·  6,42:1 gris hondo
-      --text-3 ....  5,27:1 blanco ·  4,88:1 gris claro ·  4,59:1 gris hondo
+    RATIOS v6, sobre las tres superficies claras (crema / gris claro / gris
+    hondo — hex nuevos en `tokens.css` §1):
+      --text ..... 15,83:1 crema · 15,18:1 gris claro · 14,89:1 gris hondo
+      --text-2 ....  7,30:1 crema ·  7,00:1 gris claro ·  6,86:1 gris hondo
+      --text-3 ....  6,76:1 crema ·  6,48:1 gris claro ·  6,35:1 gris hondo
 
-    ✅ `--text-3` sobre el gris hondo era el ÚNICO caso del sistema que no
-    llegaba a AA (4,18:1 con el papel cálido), y se cierra con la v5 sin tocar
-    el token: lo arregla el fondo, que subió de 0,858 a 0,866 de luminancia, y
-    sobre todo `--w-0`, que subió de 0,974 a 1,000. El margen que queda es
-    corto (4,59 contra 4,50), así que `--w-100` no puede oscurecerse.
+    Los tres pasan con margen holgado — el ajuste fino de la v6 no está aquí,
+    está en el oro (ver `tokens.css` §2): `--gold-700` sobre gris hondo sigue
+    en 4,58:1, el mismo margen corto que ya tenía en la v5.
   */
   --text: var(--tinta-1);
   --text-2: var(--tinta-2);
@@ -281,19 +297,24 @@
      puede ocupar lo que la pantalla pida.
      -------------------------------------------------------------------------- */
   /*
-    LA FRANJA DEPENDE DEL TEMA. En claro es champán con tinta y oro de texto;
-    en oscuro sigue siendo negra con oro brillante (bloques de más abajo). El
-    nombre `--cacao-*` se conserva para no dejar `var()` huérfanos.
+    ⚠️ CERRADO EN LA v6 — AQUÍ HABÍA UN BLOQUE «CHAMPÁN» QUE CONTRADECÍA EL
+    COMENTARIO DE ARRIBA. Mapeaba estos ocho tokens a un marfil claro SOLO en
+    tema claro, citando un encargo posterior del propietario que `CLAUDE.md`
+    nunca recogió. Confirmado con el propietario para la v6: la franja es
+    negra en los dos temas, sin excepción — coincide además con la guía de
+    marca del cliente (la fotografía del héroe es oscura en los dos temas).
+    Estos ocho tokens se declaran ahora UNA SOLA VEZ, iguales a los del bloque
+    `[data-theme='dark']` de más abajo — es la misma franja, siempre.
   */
-  --cacao-bg: var(--champan-100);
-  --cacao-surface: var(--w-0);
-  --cacao-hover: var(--champan-200);
-  --cacao-fg: var(--tinta-1);
-  --cacao-fg-2: var(--tinta-2);
-  --cacao-fg-3: var(--tinta-2);
-  --cacao-brand: var(--gold-700);
-  --cacao-edge: var(--gold-600);
-  --cacao-scheme: light;
+  --cacao-bg: var(--cacao-900);
+  --cacao-surface: var(--cacao-800);
+  --cacao-hover: var(--cacao-700);
+  --cacao-fg: var(--w-0);
+  --cacao-fg-2: var(--n-300);
+  --cacao-fg-3: var(--n-400);
+  --cacao-brand: var(--gold-400);
+  --cacao-edge: var(--gold-500);
+  --cacao-scheme: dark;
 
   /* --------------------------------------------------------------------------
      ACCIÓN CEREMONIAL  ·  el par dorado de `Button variant=brand`
@@ -310,26 +331,27 @@
      desfavorable y no contra su promedio. El barrido es MARCA —el wordmark— y
      nunca relleno de acción.
 
-     RATIOS RECALCULADOS PARA LA v5. Los de la v4 dejaron de valer en cuanto se
-     movieron `--w-0` y `--gold-600`: cambiar la claridad de la superficie
-     cambia la luminancia de los dos lados del par.
-       texto --action-gold-fg sobre --action-gold ....... 5,30:1  ok 1.4.3
-       filo contra --surface (blanco) ................... 3,53:1  ok 1.4.11
-       filo contra --surface-alt (gris claro) ........... 3,27:1  ok 1.4.11
-       filo contra --surface-alt-2 (gris hondo) ......... 3,08:1  ok 1.4.11
-       filo contra --cacao-bg (la franja negra) ......... 5,61:1  ok 1.4.11
-       filo contra --surface-hover ...................... 3,12:1  ok 1.4.11
+     RATIOS RECALCULADOS PARA LA v6. `--gold-600` NO se movió, pero `--w-0` sí
+     (blanco puro → crema) y eso cambia la luminancia de un lado de cada par:
+       texto --action-gold-fg sobre --action-gold ....... 4,84:1  ok 1.4.3
+       filo contra --surface (crema) ..................... 3,27:1  ok 1.4.11
+       filo contra --surface-alt (gris claro) ............ 3,13:1  ok 1.4.11
+       filo contra --surface-alt-2 (gris hondo) .......... 3,07:1  ok 1.4.11
+       filo contra --cacao-bg (la franja negra) .......... 5,61:1  ok 1.4.11
+       filo contra --surface-hover (al 3,5 %, ver arriba) . 3,04:1  ok 1.4.11
 
-     EL MARGEN DE 1.4.3 MEJORÓ (4,84 → 5,30) Y EL DE 1.4.11 CASI NO (3,51 →
-     3,53), y esa asimetría es la que hay que entender antes de tocar nada:
-     aclarar la superficie sube el numerador de los dos criterios, pero el oro
-     también subió, y lo que topa el oro es justamente 1.4.11 contra la
-     superficie MÁS OSCURA del tema claro. Quedan 0,08 puntos sobre el suelo en
-     `--surface-alt-2`. NO se puede subir más el oro sin aclarar `--w-100`
-     primero, y aclarar `--w-100` deshace la franja alterna.
+     TODOS LOS MÁRGENES SE ESTRECHARON respecto a la v5 (5,30→4,84 de 1.4.3;
+     3,53→3,27 de 1.4.11 contra la superficie), porque el crema es más oscuro
+     que el blanco puro y `--gold-600` no se tocó a propósito: calibré el
+     crema para que el oro ya probado siguiera pasando, en vez de mover un
+     cuarto token. El más ajustado sigue siendo el mismo de la v5 —el filo
+     contra `--surface-alt-2`, la superficie MÁS OSCURA del tema claro—, ahora
+     con 0,07 puntos sobre el suelo (era 0,08). NO se puede subir más el oro
+     ni oscurecer `--w-100` sin recalcular este par entero.
 
      `--gold-600` sigue siendo el único tono que cumple los dos criterios en
-     tema CLARO: el oro de marca de la v5 sobre blanco da 2,03:1 de filo y
+     tema CLARO: el oro de marca sobre el crema de la v6 da 1,89:1 de filo (era
+     2,03:1 sobre blanco puro — peor todavía, porque el crema es más oscuro) y
      reprueba 1.4.11 por más del doble. Esa es la restricción que fija el valor
      aquí, y no se toca.
 
@@ -349,20 +371,24 @@
   --action-gold: var(--gold-600);
   --action-gold-fg: var(--tinta-1);
 
-  /* 3,53:1 sobre blanco · 3,27:1 sobre gris claro · 3,08:1 sobre gris hondo ·
+  /* v6: 3,27:1 sobre crema · 3,13:1 sobre gris claro · 3,07:1 sobre gris hondo ·
      5,61:1 sobre la franja negra. Cumple 1.4.11 en las cuatro superficies del
-     tema, que es lo que un anillo de foco tiene que hacer. */
+     tema, que es lo que un anillo de foco tiene que hacer — con menos margen
+     que en la v5 (3,53/3,27/3,08), porque el crema es más oscuro que el
+     blanco puro. */
   --focus: var(--gold-600);
-  /* 5,26:1 blanco · 4,87:1 gris claro · 4,58:1 gris hondo. v5: por primera vez
-     el oro de texto cumple AA sobre LAS TRES; antes reprobaba sobre la más
-     honda (4,21:1) y había que sustituirlo por `--gold-800` a mano. */
+  /* v6: 4,87:1 crema · 4,67:1 gris claro · 4,58:1 gris hondo. Sigue cumpliendo
+     AA sobre las TRES superficies, igual que desde la v5 — el margen sobre la
+     más honda no cambió (4,58 en las dos versiones): fue justo el par que
+     decidió dónde calibrar el crema. */
   --brand: var(--gold-700);
   --brand-edge: var(--gold-600); /* filos dorados en claro */
 
   /* El barrido metálico de tokens.css está calibrado para fondo oscuro; sobre
-     blanco se lava y el wordmark pierde presencia —y con la v5 el fondo es
-     blanco PURO, así que se lava más. Aquí baja a la mitad oscura de la rampa
-     para conservar el brillo metálico siendo legible. */
+     un fondo claro se lava y el wordmark pierde presencia —y con el crema de
+     la v6 el fondo sigue siendo lo bastante claro para que el efecto se note.
+     Aquí baja a la mitad oscura de la rampa para conservar el brillo
+     metálico siendo legible. */
   --gold-sheen: linear-gradient(
     135deg,
     var(--gold-600) 0%,
@@ -455,6 +481,10 @@
   claro, y cada uno se audita en SU tema.
 */
 [data-theme='dark'] {
+  /* v6: estos ocho `--cacao-*` ya no cambian de un tema al otro — el `:root`
+     de más arriba los fija igual — así que redeclararlos aquí es redundante
+     pero inofensivo (mismo valor). Se dejan por si el día de mañana alguien
+     necesita diferenciar la franja por tema otra vez; no borrar sin motivo. */
   --cacao-bg: var(--cacao-900);
   --cacao-surface: var(--cacao-800);
   --cacao-hover: var(--cacao-700);
@@ -809,16 +839,19 @@ a {
    ========================================================================== */
 
 /*
-  UNA SOLA FAMILIA (v5 §4).
+  LA FRONTERA DE FAMILIA, DE VUELTA (v6 §7).
 
-  ⚠️ Aquí ponía «DOS FAMILIAS, Y LA FRONTERA ESTÁ AQUÍ». Esa frontera se
-  retira: encargo del propietario, «que toda sea de la misma familia, no
-  combinar». Plus Jakarta Sans viste el sistema entero.
+  ⚠️ Esto deroga «una sola familia» de la v5. Con Montserrat + Playfair
+  Display de vuelta, esta lista vuelve a ser la frontera real: todo lo que
+  está aquí es `--font-sans` (Montserrat) — INCLUIDO `.t-display-1`, que es
+  fácil confundir con la escala `hero` pero vive en la interfaz de trabajo,
+  no en el recorrido ceremonial (ver `tokens.css` §7). Lo que NO está en esta
+  lista —`.t-hero-1`, `.t-hero-2`, `.t-hero-cifra`, más abajo— es
+  `--font-display` (Playfair Display).
 
-  Estas declaraciones de `font-family` se conservan aunque ahora sean
-  redundantes con la del `body`, y no por inercia: son la defensa contra que un
-  contenedor con `font-family` propio se cuele en un peldaño tipográfico. El
-  día que vuelva a haber dos familias, este es el sitio donde se dice cuál.
+  Estas declaraciones de `font-family` se conservan aunque sean redundantes
+  con la del `body`, y no por inercia: son la defensa contra que un
+  contenedor con `font-family` propio se cuele en un peldaño tipográfico.
 */
 .t-display-1,
 .t-display-2,
@@ -836,29 +869,23 @@ a {
 /* ----------------------------------------------------------------------------
    EL PELDAÑO `hero`  ·  la escala ceremonial
 
-   ⚠️ LO QUE ESTE BLOQUE YA NO DICE. Hasta la v4 aquí vivían tres prohibiciones
-   —«serif, y solo aquí», «prohibido en Administración», «nunca por debajo de
-   28px»— y las tres se caen con la familia única: no hay un segundo tipo que
-   racionar, así que un `h1` del panel a 72px ya no es una infracción, es
-   simplemente un tamaño que el panel no quiere.
+   `hero` es la escala del recorrido del socio y de las puertas. Administración
+   y la Herramienta de Comercios son pantallas de trabajo y viven en
+   `.t-display-*` hacia abajo, en `--font-sans` — no porque un serif esté
+   prohibido ahí (esa regla ya no existe, se retiró con la licencia v4), sino
+   porque 72px de titular en una pantalla de caja es espacio robado a la tabla.
 
-   Lo que SÍ queda, y sigue siendo criterio: `hero` es la escala del recorrido
-   del socio y de las puertas. Administración y la Herramienta de Comercios son
-   pantallas de trabajo y viven en `.t-display-*` hacia abajo — no porque esté
-   prohibido, sino porque 72px de titular en una pantalla de caja es espacio
-   robado a la tabla.
-
-   El suavizado: aquí había `-webkit-font-smoothing: auto` porque una serif de
-   contraste alto pierde sus astas finas con `antialiased` en Chrome sobre
-   macOS. Con una geométrica de asta constante ese problema no existe, y forzar
-   el suavizado del sistema solo en tres clases dejaba los titulares con un
-   peso distinto al del resto de la página. Se retira: se hereda el
-   `antialiased` del `body`, que es lo coherente.
+   ⚠️ EL SUAVIZADO VUELVE CON LA v6. La v5 lo retiraba aquí porque un sans
+   geométrico de asta constante no lo necesita. Con Playfair Display de vuelta
+   —serif de contraste alto— el motivo original reaparece tal cual: pierde sus
+   astas finas con `antialiased` en Chrome sobre macOS, así que estas tres
+   clases fuerzan `-webkit-font-smoothing: auto` otra vez.
    -------------------------------------------------------------------------- */
 .t-hero-1,
 .t-hero-2,
 .t-hero-cifra {
   font-family: var(--font-display);
+  -webkit-font-smoothing: auto;
 }
 
 .t-hero-1 {
@@ -866,9 +893,8 @@ a {
   line-height: var(--t-hero-1-leading);
   letter-spacing: var(--t-hero-1-tracking);
   font-weight: var(--t-hero-1-weight);
-  /* Ligaduras y alternancias contextuales. Siguen valiendo la pena con una
-     geométrica: `calt` es lo que corrige el espaciado de los pares difíciles
-     —Ty, Va, rn— y a 72px esos pares son lo primero que se ve mal. */
+  /* Ligaduras y alternancias contextuales: es lo que distingue un serif bien
+     compuesto de la misma serif puesta sin más. A 72px se ve. */
   font-feature-settings: 'liga' 1, 'calt' 1;
 }
 .t-hero-2 {
@@ -1186,7 +1212,10 @@ textarea:active,
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  :root {
+  /* `[data-theme]` además de `:root`: un ámbito que fija su tema redeclara
+     los tokens y, sin esto, deshacía la preferencia dentro de él. */
+  :root,
+  [data-theme] {
     --material: var(--surface);
   }
 }
@@ -1208,7 +1237,11 @@ textarea:active,
   quien ha pedido más señal, no menos.
 */
 @media (prefers-contrast: more) {
-  :root {
+  /* `[data-theme]` además de `:root`: un ámbito que fija su tema (la fachada
+     pública, la pantalla de acceso) redeclara los tokens y, sin esto,
+     devolvía el trazo transparente justo a quien pidió más contraste. */
+  :root,
+  [data-theme] {
     --border-superficie: var(--border-strong);
     --border: var(--border-strong);
     --border-subtle: var(--border);
@@ -1272,10 +1305,171 @@ textarea:active,
   }
 }
 
+/*
+  VARIANTES DEL REVELADO  ·  escalonado y entrada lateral
+
+  Tres piezas en la misma fila (los pasos, los verbos, los destacados)
+  entran en el MISMO instante con `.revelar-vista`, porque su posición en la
+  vista es la misma. `.revelar-paso-2` y `.revelar-paso-3` las desfasan:
+  sus fotogramas empiezan un 12 % y un 24 % más tarde dentro de la entrada,
+  el equivalente en scroll de un retardo de 40 ms. El desfase va en los
+  fotogramas y no en `animation-range`, porque con fotogramas atados a
+  rangos con nombre (`entry 0%`), recortar el rango no los desplaza.
+
+  `.revelar-izq` y `.revelar-der` entran de lado: para las dos columnas de
+  una sección, que llegan cada una desde su borde y se encuentran.
+
+  Se combinan con `.revelar-vista` (que pone la línea de tiempo); solo
+  cambian el nombre de la animación. La salida por arriba es la misma en
+  todas: al subir, lo que reaparece vuelve a entrar.
+*/
+@supports (animation-timeline: view()) {
+  .revelar-vista.revelar-paso-2 {
+    animation-name: revelar-vista-2;
+  }
+
+  .revelar-vista.revelar-paso-3 {
+    animation-name: revelar-vista-3;
+  }
+
+  .revelar-vista.revelar-izq {
+    animation-name: revelar-izq;
+  }
+
+  .revelar-vista.revelar-der {
+    animation-name: revelar-der;
+  }
+}
+
+@keyframes revelar-vista-2 {
+  entry 0%,
+  entry 12% {
+    opacity: 0;
+    translate: 0 28px;
+    scale: 0.97;
+  }
+  entry 82% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+    scale: 0.98;
+  }
+}
+
+@keyframes revelar-vista-3 {
+  entry 0%,
+  entry 24% {
+    opacity: 0;
+    translate: 0 28px;
+    scale: 0.97;
+  }
+  entry 94% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+    scale: 0.98;
+  }
+}
+
+@keyframes revelar-izq {
+  entry 0% {
+    opacity: 0;
+    translate: -40px 0;
+  }
+  entry 75% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+  }
+}
+
+@keyframes revelar-der {
+  entry 0% {
+    opacity: 0;
+    translate: 40px 0;
+    scale: 0.97;
+  }
+  entry 75% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 30% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 0 -20px;
+    scale: 0.98;
+  }
+}
+
 /* Movimiento reducido: sin revelado. La animación ligada al scroll no usa la
-   duración, así que el recorte global de §5 no la alcanza. */
+   duración, así que el recorte global de §5 no la alcanza. El selector
+   compuesto gana a las variantes de arriba, que también lo son. */
 @media (prefers-reduced-motion: reduce) {
-  .revelar-vista {
+  .revelar-vista,
+  .revelar-vista.revelar-paso-2,
+  .revelar-vista.revelar-paso-3,
+  .revelar-vista.revelar-izq,
+  .revelar-vista.revelar-der {
     animation: none;
+  }
+}
+
+/*
+  ENTRADA AL CARGAR  ·  `.entrada-carga`
+
+  Para la primera pantalla, que ya está a la vista al abrir la página y por
+  tanto no tiene scroll con el que revelarse: el héroe de la landing y el
+  banner del directorio. Una sola vez por carga (regla cero de frecuencia:
+  la portada la ve alguien que llega, no alguien que trabaja).
+
+  `--retardo-entrada` escalona las piezas; lo pone cada módulo. Arranca
+  desde `0.96` y `opacity: 0`, nunca desde `scale(0)`. Movimiento reducido:
+  el recorte global de §5 la deja en 0,01 ms — aparece, no viaja.
+*/
+.entrada-carga {
+  animation: entrada-carga var(--dur-page) var(--ease-out) both;
+  animation-delay: var(--retardo-entrada, 0ms);
+}
+
+@keyframes entrada-carga {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
   }
 }

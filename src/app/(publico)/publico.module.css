@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CROMO PÚBLICO  ·  cabecera pegajosa, contenido y pie
+   CROMO PÚBLICO  ·  cabecera fija montada encima, contenido y pie
    ========================================================================== */
 
 .fachada {
@@ -7,27 +7,44 @@
   flex-direction: column;
   min-height: 100dvh;
 
-  /*
-    Alto real de la cabecera, publicado UNA vez para sus dos consumidores: la
-    propia cabecera (`min-height`) y el `scroll-margin` de las secciones a las
-    que apuntan las anclas de navegación. Sin este número, un ancla dejaría su
-    encabezado debajo de la cabecera translúcida y parecería que el enlace no
-    funcionó.
+  /* El fondo y el texto los pone la fachada y no el `<body>`: el `<body>`
+     sigue el tema del documento, y con el modo oscuro puesto se habría
+     visto negro entre sección y sección. */
+  background: var(--bg);
+  color: var(--text);
 
-    28px es el alto del hijo más alto del cromo en móvil (el wordmark mide
-    26,4 = 17px x 1,55); a partir de 768px manda el botón de la navegación.
-    Mismo patrón y mismos números que `portal.module.css`.
+  /*
+    BLANCO Y NO CREMA en la fachada pública, por encargo del propietario.
+    Basta con cambiar el crudo AQUÍ: `--bg` y `--surface` valen
+    `var(--w-0)` en el bloque claro de `globals.css`, y ese bloque se evalúa
+    en este mismo elemento (lleva `data-theme="light"`), así que toman el
+    blanco. Las franjas tintadas (`--w-50`, `--w-100`) y los portales con
+    sesión siguen en crema.
   */
-  --cabecera-contenido: 28px;
+  --w-0: var(--blanco);
+
+  /*
+    Alto real de la cabecera, publicado UNA vez para sus consumidores: la
+    propia cabecera (`min-height`), el primer bloque de cada página —que sube
+    por debajo de ella y reserva este hueco para su texto— y el
+    `scroll-margin` de las secciones a las que apuntan las anclas. Sin este
+    número, un ancla dejaría su encabezado debajo de la cabecera fija y
+    parecería que el enlace no funcionó.
+
+    44px es el hijo más alto del cromo en móvil: el botón del menú, que mide
+    el objetivo táctil completo. En escritorio manda el wordmark de la guía
+    de marca, más grande, y la cabecera respira más.
+  */
+  --cabecera-contenido: var(--tap-min);
   --cabecera-alto: calc(
     max(var(--space-3), env(safe-area-inset-top, 0px)) + var(--cabecera-contenido) +
-      var(--space-3)
+      var(--space-5)
   );
 }
 
 @media (min-width: 768px) {
   .fachada {
-    --cabecera-contenido: 38px;
+    --cabecera-contenido: 56px;
   }
 }
 
@@ -46,9 +63,13 @@
      `carril.module.css`, igual que en el portal de miembros. */
   --pad-contenido: var(--space-4);
   --pad-contenido-top: var(--space-6);
+  --pad-contenido-bottom: var(--space-10);
 
-  padding-top: var(--pad-contenido-top);
-  padding-bottom: var(--space-10);
+  /* La cabecera es fija y no ocupa sitio en el flujo: el contenido empieza
+     debajo de ella. El primer bloque a sangre (el héroe, el banner) se come
+     este relleno entero para subir por detrás —ver `escaparate.module.css`. */
+  padding-top: calc(var(--cabecera-alto) + var(--pad-contenido-top));
+  padding-bottom: var(--pad-contenido-bottom);
   padding-left: max(var(--pad-contenido), env(safe-area-inset-left, 0px));
   padding-right: max(var(--pad-contenido), env(safe-area-inset-right, 0px));
 
@@ -63,7 +84,56 @@
   .main {
     --pad-contenido: var(--space-6);
     --pad-contenido-top: var(--space-8);
+    --pad-contenido-bottom: var(--space-11);
 
-    padding-bottom: var(--space-11);
+    padding-bottom: var(--pad-contenido-bottom);
   }
+}
+
+/*
+  EL DESTINO DE LAS ANCLAS NO QUEDA DEBAJO DE LA CABECERA.
+
+  Una regla para todas las secciones con `id` —`#nosotros`, `#comercios`,
+  `#membresias`—, en vez de una por módulo: la sección que se añada mañana
+  la hereda sin que nadie se acuerde.
+*/
+.main section[id] {
+  scroll-margin-block-start: var(--cabecera-alto);
+}
+
+/*
+  EL LIENZO DE DETRÁS, en claro también. Cuando la página rebota al hacer
+  scroll (iOS, trackpad) asoma el fondo del `<html>`, que sigue el tema del
+  dispositivo. `:has()` lo alcanza sin tocar el layout raíz, que comparten
+  los cuatro portales; donde no se soporta, solo se ve ese rebote en oscuro.
+*/
+:global(html):has(.fachada) {
+  color-scheme: light;
+  background: var(--blanco);
+}
+
+/*
+  LOS COLORES DEL REDISEÑO, EXACTOS  ·  encargo del propietario (25/09/2026)
+
+  La fachada usa la paleta del boceto aprobado donde difiere de la del
+  sistema. Especificidad doble a propósito: estos tokens los declara también
+  el bloque `[data-theme='light']` de `globals.css` sobre ESTE mismo elemento,
+  y con la especificidad empatada ganaría la hoja que Next inyecte después.
+
+    · `--brand` → `--gold-650` (#8E6B13), el oro de texto del boceto. 4,93:1
+      sobre blanco. Sobre el gris hondo de las tarjetas da 4,29:1: ahí solo
+      lo usa texto grande (el acento de «te unes», 26px) o iconos.
+    · `--gold-bg` → oro al 12 %, la insignia del boceto (era 10 %).
+    · Sombras → la escala del boceto (`--sombra-fachada-*`), más densa: sobre
+      blanco puro la tarjeta tiene que despegarse más.
+    · `--border-subtle` → tinta al 12 %, el filo interno del boceto (era un
+      negro al 22 %, que sobre blanco se leía como línea dibujada).
+*/
+.fachada[data-theme='light'] {
+  --brand: var(--gold-650);
+  --gold-bg: color-mix(in srgb, var(--gold-700) 12%, transparent);
+  --shadow-card: var(--sombra-fachada-1);
+  --shadow-raised: var(--sombra-fachada-2);
+  --shadow-flotante: var(--sombra-fachada-3);
+  --border-subtle: color-mix(in srgb, var(--tinta-1) 12%, transparent);
 }

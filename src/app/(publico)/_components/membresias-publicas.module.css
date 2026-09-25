@@ -1,0 +1,195 @@
+/* ==========================================================================
+   ELIGE TU MEMBRESÍA  ·  texto a la izquierda, planes a la derecha
+   ========================================================================== */
+
+.bloque {
+  display: grid;
+  gap: var(--space-8);
+  padding-block: var(--space-6);
+}
+
+/* Dos columnas en escritorio, como «Qué es ORUM»: con el título solo arriba
+   las tarjetas quedaban en una franja estrecha y sobraba crema a la derecha. */
+@container contenido (min-width: 900px) {
+  .bloque {
+    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-10);
+  }
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.apoyo {
+  margin: var(--space-3) 0 0;
+  font-size: var(--t-body-size);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+.ventajas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ventaja {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--t-callout-size);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.check {
+  flex-shrink: 0;
+  color: var(--brand);
+}
+
+/* --- Los planes ----------------------------------------------------------- */
+
+.planes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  display: grid;
+  gap: var(--space-8);
+}
+
+@container contenido (min-width: 600px) {
+  .planes {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-7);
+  }
+}
+
+.plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-7);
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+/* El destacado sube un escalón de sombra. Uno por pantalla, como `Card
+   principal`: si los dos lo llevaran, ninguno lo llevaría. */
+.destacado {
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+/* La etiqueta de ahorro, montada en el canto superior. Filo `--gold-600`
+   (3,27:1 sobre crema) y texto en tinta: es un objeto sobre la tarjeta, por
+   eso lleva su sombra corta. */
+.etiqueta {
+  position: absolute;
+  top: 0;
+  right: var(--space-6);
+  translate: 0 -50%;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+
+  border: 1px solid var(--gold-600);
+  border-radius: var(--radius-full);
+  background: var(--surface-alt-2);
+  box-shadow: var(--shadow-card);
+
+  font-size: var(--t-overline-size);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.nombre {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-title-2-size);
+  font-weight: 600;
+  color: var(--text);
+  -webkit-font-smoothing: auto;
+}
+
+.precio {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cifra {
+  font-size: clamp(2rem, 4vw, 2.375rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.periodo {
+  font-size: var(--t-footnote-size);
+  color: var(--text-3);
+}
+
+.descripcion {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+/*
+  «Adquirir»: el fondo de la tarjeta y un filo dorado, como pidió el
+  cliente. Es `Button secondary` con su filo de control remapeado a
+  `--gold-600` (3,27:1 sobre crema, WCAG 1.4.11) y el texto en tinta. No
+  lleva relleno dorado: el oro relleno es el de la acción del héroe.
+*/
+.accion {
+  display: contents;
+  --border-control: var(--gold-600);
+}
+
+/* El botón al pie de la tarjeta, alineado entre planes aunque las
+   descripciones midan distinto. `.accion` es `display: contents`, así que el
+   margen automático actúa sobre el flex de `.plan`. */
+.accion > a {
+  margin-top: auto;
+  /* La sombra del rediseño: el botón es un objeto sobre la tarjeta. */
+  box-shadow: var(--shadow-raised);
+}
+
+.sinPlanes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+/*
+  Al apuntar un plan aparece el filo dorado y la sombra sube un escalón. Sin
+  desplazamiento: el `<li>` lleva el revelado al desplazar, que fija su
+  `translate`, y un hover que también lo pidiera no haría nada.
+*/
+.plan {
+  transition: box-shadow var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .plan:hover {
+    box-shadow: var(--filo-activo), var(--shadow-flotante), var(--edge);
+  }
+}

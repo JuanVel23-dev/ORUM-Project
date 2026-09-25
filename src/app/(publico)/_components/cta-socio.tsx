@@ -4,9 +4,10 @@ import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 /*
   LA ACCIÓN PRIMARIA DE TODA LA LANDING  ·  una decisión, dos posiciones
   ---------------------------------------------------------------------------
-  Aparece en el héroe y otra vez en el CTA final. No es redundancia: en una
-  página que ya se desplazó varias pantallas, el botón del héroe quedó arriba y
-  fuera de vista, y repetirlo abajo es la razón de ser de esa sección.
+  Vive en el cierre «Hazte socio hoy». El héroe ya no lo lleva: su acción
+  principal baja a los planes, porque quien llega todavía no sabe el precio y
+  mandarlo a un chat antes de verlo es pedirle que pregunte lo que la página
+  ya podía decirle. Aquí, al final, ya lo sabe.
 
   VA EN ORO (`variant="brand"`), Y ANTES NO PODÍA.
 
@@ -28,8 +29,8 @@ import { WhatsAppButton } from '@/components/ui/whatsapp-button'
       texto sobre relleno ................................ 6,71:1  ok 1.4.3
       filo contra cacao / fondo / tarjeta ....... 6,43 / 7,30 / 6,62  ok 1.4.11
 
-  Este botón vive en dos sitios y los dos son franja de cacao: el héroe y el
-  cierre. Ahí el filo dorado es el par con más holgura de los cuatro.
+  Vive sobre la franja negra, dentro del ámbito `sobreFoto`, que lo pasa al
+  oro pálido de la guía (`--gold-300` con texto en tinta, 12,6:1).
 
   EL PRESUPUESTO. La v4 avisa de que un CTA de ancho completo a 44-52px ronda
   el 6-8 % del viewport móvil por sí solo. La licencia levantó el tope del 5 %,
@@ -84,8 +85,8 @@ export function CtaSocio({ soporte, size = 'md', avisarSinNumero = false }: Prop
   }
 
   return (
-    <WhatsAppButton telefono={soporte} mensaje={MENSAJE} variant="brand" size={size}>
-      Quiero ser socio
+    <WhatsAppButton telefono={soporte} mensaje={MENSAJE} variant="brand" size={size} pildora>
+      Escríbenos por WhatsApp
     </WhatsAppButton>
   )
 }

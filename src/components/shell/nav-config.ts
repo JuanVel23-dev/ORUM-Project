@@ -4,6 +4,7 @@ import {
   Home,
   Images,
   LayoutGrid,
+  Megaphone,
   Search,
   ScrollText,
   Store,
@@ -54,6 +55,7 @@ const MIEMBROS: NavItem = { href: '/admin/miembros', label: 'Miembros', icon: Us
 const COMERCIOS: NavItem = { href: '/admin/comercios', label: 'Comercios', icon: Store }
 const USUARIOS: NavItem = { href: '/admin/usuarios', label: 'Usuarios', icon: UserCog }
 const PLANES: NavItem = { href: '/admin/planes', label: 'Planes', icon: CreditCard }
+const ANUNCIOS: NavItem = { href: '/admin/anuncios', label: 'Novedades', icon: Megaphone }
 const METRICAS: NavItem = { href: '/admin/metricas', label: 'Métricas', icon: BarChart3 }
 /*
   «Recursos» y no «Imágenes»: hay imágenes en tres sitios más del panel —el
@@ -85,7 +87,14 @@ export function navegacionPara(rol: RolCodigo): NavGroup[] {
       // Consultar, no operar. Métricas va primero: se mira a diario; la
       // bitácora solo cuando hay que averiguar quién hizo algo.
       { label: 'Análisis', items: [METRICAS, BITACORA] },
-      { label: 'Administración', items: [USUARIOS, PLANES, RECURSOS] },
+      /*
+        ANUNCIOS y RECURSOS son vecinos y NO son lo mismo, que es justo por lo
+        que conviene que se vean juntos: un anuncio tiene titular y cuerpo y
+        cuenta algo —«nuevo aliado en Chapinero»—; un recurso es una imagen
+        sin texto que se coloca en un sitio de la web. Quien llega buscando
+        «dónde cambio el cartel» encuentra los dos y elige.
+      */
+      { label: 'Administración', items: [USUARIOS, PLANES, ANUNCIOS, RECURSOS] },
     ]
   }
 

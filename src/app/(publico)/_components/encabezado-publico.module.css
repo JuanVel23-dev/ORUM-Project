@@ -1,79 +1,112 @@
 /* ==========================================================================
-   CABECERA PÚBLICA
+   CABECERA PÚBLICA  ·  negra arriba, fundida a transparente, montada encima
    --------------------------------------------------------------------------
-   Pegajosa como la del portal de miembros, por consistencia de producto. La
-   reserva de `env(safe-area-inset-top)` se hace igual por higiene, aunque aquí
-   no sea urgente: esta pantalla no se instala como PWA —`start_url` sigue en
-   `/miembros`— así que nunca se ve bajo `black-translucent`.
+   FIJA y por encima del contenido: el primer bloque de cada página pública
+   (el héroe, el banner del directorio) sube por debajo de ella, así que la
+   cabecera se lee como parte de la fotografía. `publico.module.css` publica su
+   alto en `--cabecera-alto` para que ese primer bloque reserve el hueco.
+
+   EL DEGRADADO, y por qué no es un material translúcido con `backdrop-filter`.
+   La versión anterior era transparente con desenfoque y, al bajar a las
+   franjas crema, el texto crema de la navegación desaparecía. Ahora la banda
+   donde vive la tipografía es negra casi opaca (97 % → 82 %) y solo el
+   último tercio, vacío de texto, se funde a transparente. El peor punto de
+   contraste —el borde inferior de una letra, sobre ~64 % de negro encima de
+   crema— sigue por encima de 6:1.
+
+   `--cacao-bg` y no un negro literal: es el mismo negro de la franja, en los
+   dos temas, y el `color-mix` lo lleva a transparente sin salir del token.
    ========================================================================== */
 
 .cabecera {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: var(--z-header);
 
   min-height: var(--cabecera-alto);
-
   display: flex;
   align-items: center;
   gap: var(--space-4);
 
+  /* La barra de estado de iOS y la muesca: la marca nunca queda debajo. */
   padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
-  padding-bottom: var(--space-3);
+  padding-bottom: var(--space-5);
   padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
   padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
-  /* Material translúcido, no franja opaca: el contenido pasa por debajo y se
-     ve que sigue habiendo página. `backdrop-filter` está permitido aquí —es
-     cromo fijo—, nunca en las filas de una lista. */
-  background: var(--material);
-  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  border-bottom: 1px solid var(--border-subtle);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--cacao-bg) 97%, transparent) 0%,
+    color-mix(in srgb, var(--cacao-bg) 82%, transparent) 55%,
+    color-mix(in srgb, var(--cacao-bg) 0%, transparent) 100%
+  );
+  color: var(--cacao-fg);
 }
 
+/*
+  ALINEADA CON LA COLUMNA DEL CONTENIDO, en cualquier ancho.
+
+  El contenido de la página vive en una columna de `--content-max` centrada
+  (`publico.module.css`). Con un relleno fijo, en un monitor de 1920px el
+  logo quedaba pegado al borde izquierdo y el titular del héroe 350px más
+  adentro: dos márgenes distintos en la misma pantalla. Este relleno es el
+  mismo cálculo que centra la columna, así que el logo cae exactamente sobre
+  el borde del titular y «Únete» sobre el borde derecho del contenido. Por
+  debajo de `--content-max` manda el mínimo, igual que en el `<main>`.
+*/
 @media (min-width: 768px) {
   .cabecera {
-    padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
-    gap: var(--space-6);
+    --margen-columna: max(
+      var(--space-6),
+      calc((100% - var(--content-max)) / 2 + var(--space-6))
+    );
+
+    gap: var(--space-8);
+    padding-left: max(var(--margen-columna), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--margen-columna), env(safe-area-inset-right, 0px));
   }
 }
 
-/* Si el usuario pide menos transparencia, se vuelve sólida. */
+/* Quien pide menos transparencia recibe la banda sólida. */
 @media (prefers-reduced-transparency: reduce) {
   .cabecera {
-    background: var(--surface);
-    backdrop-filter: none;
+    background: var(--cacao-bg);
   }
 }
 
 /* --- Wordmark -------------------------------------------------------------
-   Mismo tratamiento que el del portal: barrido metálico con `background-clip`
-   y color plano de respaldo. Es texto de marca, no un botón. */
-
+   «✦ ORUM» de la guía de marca: el destello en oro pálido y el nombre en
+   Playfair Display crema. Es MARCA, no acción: enlaza a la propia landing. */
 .marca {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  font-family: var(--font-display);
+  /*
+    Crece con la pantalla: 26px en un teléfono, ~33px en una tableta y 48px
+    (el tamaño de la guía de marca) en un escritorio ancho. Un tamaño fijo
+    obligaba a elegir entre un logo diminuto en escritorio o uno que apretaba
+    la hamburguesa en móvil. `vw` y no `cqi`: la cabecera vive fuera del
+    contenedor `contenido`.
+  */
+  font-size: clamp(1.625rem, 1rem + 2.2vw, 3rem);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--cacao-fg);
   text-decoration: none;
-
-  font-size: var(--t-title-3-size);
-  font-weight: 680;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-
-  color: var(--brand);
-  background: var(--gold-sheen);
-  -webkit-background-clip: text;
-  background-clip: text;
+  -webkit-font-smoothing: auto;
 }
 
-@supports (-webkit-background-clip: text) or (background-clip: text) {
-  .marca {
-    -webkit-text-fill-color: transparent;
-  }
+.destello {
+  font-size: 0.62em;
+  color: var(--gold-300);
 }
 
 .marca:focus-visible {
-  outline: 2px solid var(--focus);
+  outline: 2px solid var(--cacao-brand);
   outline-offset: 4px;
   border-radius: var(--radius-xs);
 }
@@ -83,22 +116,26 @@
 .nav {
   display: none;
   flex: 1;
-  gap: var(--space-1);
+  justify-content: center;
+  gap: var(--space-2);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .nav {
     display: flex;
   }
 }
 
 .enlace {
-  position: relative;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
 
   font-size: var(--t-callout-size);
-  font-weight: 510;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--text-2);
   text-decoration: none;
 
@@ -107,10 +144,8 @@
     background-color var(--dur-fast) var(--ease-out);
 }
 
-/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
-   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
-   FUERA a propósito — un teclado existe en cualquier dispositivo. */
-
+/* En táctil el `:hover` se queda pegado tras el toque. El `:focus-visible`
+   se queda FUERA a propósito — un teclado existe en cualquier dispositivo. */
 @media (hover: hover) {
   .enlace:hover {
     color: var(--text);
@@ -133,21 +168,23 @@
 }
 
 /*
-  El acceso de texto y el menú de hamburguesa son la MISMA puerta con dos
-  formas, así que nunca se ven a la vez: en móvil «Iniciar sesión» vive dentro
-  de la hoja del menú, junto a las anclas y al CTA de alianza.
+  «Iniciar sesión» + «Únete» y el menú de hamburguesa son las MISMAS puertas
+  con dos formas, así que nunca se ven a la vez. El umbral es el de la
+  navegación (900px): por debajo, las cuatro anclas y las dos acciones no
+  caben en una fila sin apretarse, y se van juntas a la hoja.
 
-  El umbral es el mismo 768px que usa el resto del cromo del producto. Es
-  `@media` y no `@container` a propósito: la cabecera está FUERA del contenedor
-  `contenido` —lo declara el `<main>` que va debajo— y un `@container` sin
+  Es `@media` y no `@container` a propósito: la cabecera está FUERA del
+  contenedor `contenido` —lo declara el `<main>`— y un `@container` sin
   contenedor ancestro no casaría nunca.
 */
 .soloEscritorio {
   display: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .soloEscritorio {
     display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
   }
 }

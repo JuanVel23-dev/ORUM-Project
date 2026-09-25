@@ -12,26 +12,24 @@
 
 :root {
   /* ==========================================================================
-     1. NEUTRALES  ·  NEGRO, BLANCO Y GRISES  (dirección de arte v5, §1)
+     1. NEUTRALES  ·  NEGRO, CREMA Y GRISES  (dirección de arte v6, §1)
      --------------------------------------------------------------------------
-     ⚠️ ESTO DEROGA LA RAMPA CÁLIDA DE LA v4. Hasta ayer aquí ponía «matiz
-     ~20–30°, saturación 6–12%, nada de gris puro». Encargo literal del
-     propietario: «cambiar tonos cafés a negros, además de utilizar dorados (no
-     tan oscuros, más brillantes) y blanco. Además de tonos grises».
+     ⚠️ ESTO DEROGA LA RAMPA NEUTRA DE LA v5. La v5 (15/09/2026) había pasado
+     el papel a blanco puro; la v6 (guía de marca del cliente) lo devuelve a un
+     CREMA CÁLIDO — no es volver a la v4: aquel papel (`#FDFCFA`) era casi
+     blanco con un susurro cálido; este crema (`#FAF6EC`) es visiblemente
+     crema, a propósito, porque así lo pide la identidad de marca entregada
+     (Playfair Display + Montserrat, negro/crema/oro).
 
-     La rampa es NEUTRA. El único desvío es un susurro FRÍO de 3–10 puntos de
-     azul sobre rojo (≈2 % del canal), y existe por una razón medible, no
-     estética: el oro es amarillo saturado, y un gris exactamente neutro a su
-     lado se percibe empujado hacia el caqui por contraste simultáneo. Tres
-     puntos de azul lo cancelan y el gris sigue leyéndose gris.
-
-     ⚠️ Y OJO CON LA HISTORIA: la v3 pedía frío (matiz ~240°, azul EVIDENTE),
-     la v4 lo derogó por cálido. Esto no es «volver a la v3»: aquello era un
-     gris azulado visible; esto es gris, y el desvío está por debajo del umbral
-     de percepción salvo junto al oro.
+     ⚠️ Y OJO CON LA HISTORIA, otra vez: v3 pidió frío, v4 lo derogó por
+     cálido, v5 lo derogó por neutro, v6 lo derogó por cálido de nuevo — pero
+     esta vez no es un vaivén de gusto: viene de una guía de marca real del
+     cliente, no de una preferencia de sesión. Ver
+     `.claude/docs/log/v6-crema-oro.md`.
 
      RATIOS MEDIDOS con la fórmula WCAG 2.1 desde los hex, par por par y TEMA
-     POR TEMA. La tabla completa está en `.claude/docs/log/v5-negro-oro.md`.
+     POR TEMA. La tabla completa está en `.claude/docs/log/v6-crema-oro.md`;
+     la v5 queda en `.claude/docs/log/v5-negro-oro.md` como historial.
      ======================================================================== */
 
   /* Oscuros — la rampa del tema oscuro. Se audita APARTE del claro: los
@@ -59,46 +57,49 @@
      la herramienta que le da estructura a una pantalla ancha sin dibujar una
      línea.
 
-     LO QUE CAMBIA CON LA v5: el papel cálido `#FDFCFA` pasa a BLANCO PURO, y
-     las dos franjas pasan de crema a gris neutro.
-
-     Y no es solo cosmético: subir `--w-0` de 0,974 a 1,000 de luminancia
-     REGALA margen a todo lo que se mide contra él. Dos deudas de la v4 se
-     cierran con ese solo cambio (ver abajo).
+     LO QUE CAMBIA CON LA v6: el blanco puro `#FFFFFF` de la v5 pasa a CREMA
+     CÁLIDO, y las dos franjas se recalibran alrededor de él — pero el oro de
+     acción (`--gold-600`/`--gold-700`) NO CAMBIA: calculé el crema para que
+     siga pasando contra los mismos tonos de oro que ya estaban validados,
+     porque tocar el oro habría obligado a re-auditar cuatro tokens en vez de
+     tres. Ver `.claude/docs/log/v6-crema-oro.md`.
 
      Contrastes medidos entre superficies:
-       blanco vs gris claro .... 1,08:1   separa sin trazo
-       blanco vs gris hondo .... 1,15:1
-       gris claro vs hondo ..... 1,06:1
+       crema vs gris claro ..... 1,04:1   separa sin trazo
+       crema vs gris hondo ..... 1,06:1
+       gris claro vs hondo ..... 1,02:1
 
-     ✅ CERRADO EN LA v5 — QUÉ TEXTO ADMITE CADA UNA. Con papel cálido, el gris
-     hondo NO llegaba a AA con los dos tonos más tenues (tinta 3 a 4,18:1 y
-     `--gold-700` a 4,21:1). Sobre blanco puro los dos pasan:
-       sobre BLANCO ....... tinta 1 (18,69) · 2 (7,37) · 3 (5,27) · oro (5,26) ✓
-       sobre GRIS CLARO ... tinta 1 (17,31) · 2 (6,82) · 3 (4,88) · oro (4,87) ✓
-       sobre GRIS HONDO ... tinta 1 (16,29) · 2 (6,42) · 3 (4,59) · oro (4,58) ✓
-     El margen es estrecho en la tercera columna (4,58–4,59 contra 4,50), así
-     que el gris hondo NO puede oscurecerse ni un punto sin recalcular. Sigue
-     siendo superficie de RELLENO por criterio de diseño; ya no por deuda. */
-  --w-0: #ffffff; /* BLANCO: fondo y tarjeta en claro */
-  --w-50: #f6f6f8; /* GRIS CLARO: superficie alterna, la que separa sin trazo */
-  --w-100: #efeff3; /* GRIS HONDO: relleno, hueco, franja. Ver el aviso ↑ */
+     ⚠️ EL MARGEN ES MÁS ESTRECHO QUE EN LA v5, otra vez, y en el mismo sitio:
+       sobre CREMA ........ tinta 1 (15,83) · 2 (7,30) · 3 (6,76) · oro (4,87) ✓
+       sobre GRIS CLARO ... tinta 1 (15,18) · 2 (7,00) · 3 (6,48) · oro (4,67) ✓
+       sobre GRIS HONDO ... tinta 1 (14,89) · 2 (6,86) · 3 (6,35) · oro (4,58) ✓
+     El oro de texto (`--gold-700`) vuelve a rozar el suelo sobre gris hondo
+     (4,58 contra el mínimo de 4,50) — el mismo 0,08 de margen que ya tenía la
+     v5 en ese mismo par. NO se puede oscurecer `--w-100` sin recalcular. */
+  --w-0: #faf6ec; /* CREMA: fondo y tarjeta en claro */
+  /* BLANCO PURO: el fondo de la fachada pública (encargo del propietario,
+     25/09/2026). Sobre él: tinta 1 17,09 · 2 7,88 · 3 7,29 · oro de texto
+     (`--gold-700`) 5,26 · filo `--gold-600` 3,53 · borde de control 4,28. */
+  --blanco: #ffffff;
+  --w-50: #f7f1e4; /* GRIS CLARO: superficie alterna, la que separa sin trazo */
+  --w-100: #f5efdf; /* GRIS HONDO: relleno, hueco, franja. Ver el aviso ↑ */
   --w-200: #e1e1e7; /* filos y divisiones sobre gris */
   --w-300: #c8c8d1;
   --w-400: #a4a4b0;
 
-  /* TINTA NEUTRA  ·  los tres pesos de texto sobre blanco (v5 §1)
+  /* TINTA CÁLIDA  ·  los tres pesos de texto sobre crema (v6 §1)
      --------------------------------------------------------------------------
-       --tinta-1 .... 18,69:1 blanco · 17,31:1 gris claro · 16,29:1 gris hondo
-       --tinta-2 .....  7,37:1 blanco ·  6,82:1 gris claro ·  6,42:1 gris hondo
-       --tinta-3 .....  5,27:1 blanco ·  4,88:1 gris claro ·  4,59:1 gris hondo
+       --tinta-1 .... 15,83:1 crema · 15,18:1 gris claro · 14,89:1 gris hondo
+       --tinta-2 .....  7,30:1 crema ·  7,00:1 gris claro ·  6,86:1 gris hondo
+       --tinta-3 .....  6,76:1 crema ·  6,48:1 gris claro ·  6,35:1 gris hondo
 
-     `--tinta-3` ya no es «el mínimo que no se puede aclarar»: sobre blanco le
-     sobran 0,77 puntos. Lo que sí es mínimo ahora es su margen sobre el GRIS
-     HONDO (4,59). Es el par que hay que recalcular si alguien toca `--w-100`. */
-  --tinta-1: #121216;
-  --tinta-2: #55555f;
-  --tinta-3: var(--n-500);
+     `--tinta-3` deja de derivarse de `--n-500` (la rampa OSCURA): con la v5
+     coincidía por casualidad de valor, pero ahora la tinta clara es cálida y
+     la rampa oscura sigue siendo neutra — son dos escalas distintas y ya no
+     deben compartir un token. Valor propio, sin relación con `--n-*`. */
+  --tinta-1: #201b15;
+  --tinta-2: #5a5044;
+  --tinta-3: #5f5548;
 
   /* LA FRANJA NEGRA  ·  antes «cacao»  (v5 §2)
      --------------------------------------------------------------------------
@@ -126,16 +127,18 @@
      es negro sobre blanco en los dos. En oscuro se separa del fondo por 1,05:1
      —el mismo orden que el gris claro sobre blanco—, así que sigue leyéndose
      como franja y no desaparece. Sus tokens semánticos están en `globals.css`
-     con el prefijo `--cacao-*`. */
-  /*
-    CHAMPÁN · la franja «ceremonial» del TEMA CLARO.
+     con el prefijo `--cacao-*`.
 
-    Encargo del propietario: «el modo claro es el primordial… el negro no lo
-    uses en ese modo, el contraste es feo». La franja negra pasó a vivir solo
-    en oscuro; en claro es este marfil dorado, que separa sin pesar.
-    Ratios medidos: tinta-1 16,74:1 · tinta-2 6,60:1 · gold-700 4,71:1 ·
-    filo gold-600 3,16:1. Contra el blanco del fondo, 1,12:1.
-  */
+     ⚠️ CERRADO EN LA v6 — HABÍA UN SEGUNDO COMENTARIO AQUÍ, CONTRADICTORIO.
+     Un bloque etiquetado «CHAMPÁN · la franja ceremonial del TEMA CLARO»
+     citaba un encargo posterior del propietario («el modo claro es el
+     primordial… el negro no lo uses en ese modo») y hacía que `globals.css`
+     mapeara `--cacao-bg` a un marfil claro SOLO en tema claro — exactamente lo
+     que este párrafo de arriba dice que no debía pasar. `CLAUDE.md` nunca
+     recogió esa excepción. Confirmado con el propietario para la v6: la
+     franja es negra en los dos temas, sin excepción; el comentario champán y
+     el bloque `:root` que lo implementaba se retiraron. Ver
+     `.claude/docs/log/v6-crema-oro.md`. */
   /*
     EL DETALLE DE FONDO. Encargo: «pon algún detalle en el fondo para que no se
     sienta tan blanco; iconos o cosas muy pequeñas y poco visibles, pero que se
@@ -144,9 +147,6 @@
     contenido. SVG embebido: cero peticiones.
   */
   --patron-club: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22240%22%20height%3D%22240%22%20fill%3D%22none%22%20stroke%3D%22%23ae8118%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%220.16%22%3E%3Cg%20transform%3D%22translate%2826%2030%29%22%3E%3Cpath%20d%3D%22M1%207.5%207.5%201H14v6.5L7.5%2014z%22/%3E%3Ccircle%20cx%3D%2210.5%22%20cy%3D%224.5%22%20r%3D%221.1%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28150%2022%29%22%3E%3Cpath%20d%3D%22M7%201l1.8%203.9%204.2.5-3.1%202.9.8%204.2L7%2010.4%203.3%2012.5l.8-4.2L1%205.4l4.2-.5z%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2896%20112%29%22%3E%3Ccircle%20cx%3D%223%22%20cy%3D%223%22%20r%3D%222%22/%3E%3Ccircle%20cx%3D%2211%22%20cy%3D%2211%22%20r%3D%222%22/%3E%3Cpath%20d%3D%22M12%202%202%2012%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28196%20146%29%22%3E%3Cpath%20d%3D%22M7%2012.5S1%209%201%205a3%203%200%200%201%206-1%203%203%200%200%201%206%201c0%204-6%207.5-6%207.5z%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2836%20180%29%22%3E%3Crect%20x%3D%221%22%20y%3D%223%22%20width%3D%2214%22%20height%3D%229%22%20rx%3D%221.5%22/%3E%3Cpath%20d%3D%22M5%203v9%22/%3E%3C/g%3E%3Ccircle%20cx%3D%22140%22%20cy%3D%22200%22%20r%3D%221.4%22%20fill%3D%22%23ae8118%22%20stroke%3D%22none%22/%3E%3Ccircle%20cx%3D%22210%22%20cy%3D%2284%22%20r%3D%221.4%22%20fill%3D%22%23ae8118%22%20stroke%3D%22none%22/%3E%3Ccircle%20cx%3D%2272%22%20cy%3D%2276%22%20r%3D%221.4%22%20fill%3D%22%23ae8118%22%20stroke%3D%22none%22/%3E%3C/svg%3E");
-
-  --champan-100: #f8f2e4;
-  --champan-200: #f1e8d3;
 
   --cacao-900: #0a0a0c; /* la franja */
   --cacao-800: #18181c; /* tarjeta elevada dentro de la franja (1,12:1) */
@@ -162,7 +162,8 @@
      alcance de esta tanda. Anotado en `.claude/docs/log/v5-negro-oro.md`. */
 
   /* ==========================================================================
-     2. ORO  ·  CUATRO OROS, CADA UNO CON SU TRABAJO  (v5 §3)
+     2. ORO  ·  CUATRO OROS, CADA UNO CON SU TRABAJO  (v6 §2 — la escala en sí
+     no cambió desde la v5; lo que cambió es el crema que la rodea)
      --------------------------------------------------------------------------
      Encargo: «dorados no tan oscuros, más brillantes». Se cumplió — pero NO
      por igual en los cuatro, y entender por qué es lo único que impide
@@ -201,29 +202,33 @@
        --gold-700  TEXTO E ICONOS dorados ........ 5,26 / 4,87 / 4,58 sobre las
                                                    tres superficies claras
 
-     ⚠️ DÓNDE ESTÁ EL TECHO DE `--gold-600`, porque es el token que más tienta
-     subir: su filo tiene que dar 3:1 contra la superficie MÁS OSCURA del tema
-     claro, que es `--w-100` (gris hondo). Eso lo topa en 0,254 de luminancia.
-     Está en 0,248, o sea a 0,08 puntos de contraste del suelo. NO HAY SITIO
-     para subirlo más sin aclarar `--w-100` primero — y aclarar `--w-100`
-     estropea la franja alterna, que es lo que da estructura a la pantalla.
+     ⚠️ DÓNDE ESTÁ EL TECHO DE `--gold-600`, RECALCULADO PARA LA v6: su filo
+     tiene que dar 3:1 contra la superficie MÁS OSCURA del tema claro, que es
+     `--w-100` (gris hondo, ahora `#F5EFDF`, luminancia 0,865). Eso pone el
+     techo de `--gold-600` en 0,255 de luminancia. Sigue en 0,248 (no se tocó),
+     a 0,007 de margen — igual de ajustado que en la v5, por diseño: calibré
+     el crema alrededor del oro que ya estaba probado, no al revés. NO HAY
+     SITIO para aclarar `--gold-600` ni para oscurecer `--w-100` sin
+     recalcular este par.
 
      El presupuesto del ≤5 % quedó LEVANTADO por el propietario
      (`.claude/docs/LICENCIA-CREATIVA-v4.md`): el oro puede ocupar lo que la
      pantalla pida. Lo que NO se levantó es el contraste.
 
-     Tabla completa, verificada con la fórmula WCAG 2.1 desde los hex:
-       gold-400 sobre la franja .... 12,27:1 ✓  gold-400 sobre blanco  1,68 ⛔
-       gold-400 sobre n-1000 ....... 11,69:1 ✓  gold-400 sobre gris    1,49 ⛔
+     Tabla completa v6, verificada con la fórmula WCAG 2.1 desde los hex
+     (crema `#FAF6EC` / gris claro `#F7F1E4` / gris hondo `#F5EFDF`; los pares
+     contra la franja negra y el tema oscuro no cambiaron, se repiten igual):
+       gold-400 sobre la franja .... 12,27:1 ✓  gold-400 sobre crema   1,64 ⛔
+       gold-400 sobre n-1000 ....... 11,69:1 ✓  gold-400 sobre gris    1,54 ⛔
        gold-300 sobre n-1000 ....... 13,95:1 ✓  gold-300 sobre franja 14,64 ✓
        gold-500 sobre n-1000 ........ 9,26:1 ✓  n-1000 sobre gold-500  9,26 ✓
        gold-500 filo vs n-900 ....... 8,25:1 ✓  gold-500 sobre franja  9,72 ✓
-       tinta-1 sobre gold-600 ....... 5,30:1 ✓  gold-600 filo/blanco   3,53 ✓
-       gold-600 filo vs gris claro .. 3,27:1 ✓  filo vs gris hondo     3,08 ✓
+       tinta-1 sobre gold-600 ....... 4,84:1 ✓  gold-600 filo/crema    3,27 ✓
+       gold-600 filo vs gris claro .. 3,13:1 ✓  filo vs gris hondo     3,07 ✓
        gold-600 filo vs la franja ... 5,61:1 ✓
-       gold-700 sobre blanco ........ 5,26:1 ✓  gold-700 gris claro    4,87 ✓
-       gold-700 sobre gris hondo .... 4,58:1 ✓  (la v4 reprobaba aquí)
-       gold-800 sobre blanco ........ 7,69:1 ✓  gold-800 gris hondo    6,70 ✓
+       gold-700 sobre crema ......... 4,87:1 ✓  gold-700 gris claro    4,67 ✓
+       gold-700 sobre gris hondo .... 4,58:1 ✓  (el mismo margen que en v5)
+       gold-800 sobre crema ......... 7,12:1 ✓  gold-800 gris hondo    6,70 ✓
      ======================================================================== */
 
   --gold-200: #fbeecb; /* halos, fondo de badge en dark */
@@ -231,7 +236,12 @@
   --gold-400: #edc85f; /* DISPLAY sobre la franja negra / oscuro · focus en dark */
   --gold-500: #dfaf35; /* ORO DE MARCA · relleno de acción en dark */
   --gold-600: #ae8118; /* RELLENO DE ACCIÓN en claro · FILO / hairline */
-  --gold-700: #886712; /* TEXTO e iconos dorados sobre claro (las TRES) */
+  --gold-700: #886712;
+  /* El oro de texto de la FACHADA PÚBLICA, tal cual el rediseño aprobado
+     (25/09/2026): un punto más claro que `--gold-700`. Sobre blanco 4,93:1
+     (AA de texto normal); sobre el gris hondo `--w-100` 4,29:1, así que ahí
+     SOLO vale para texto grande (≥ 24px, o ≥ 18,66px en negrita) e iconos. */
+  --gold-650: #8e6b13; /* TEXTO e iconos dorados sobre claro (las TRES) */
   --gold-800: #675010; /* dorado enfático · oro sobre relleno dorado */
 
   /* Oro como material: barrido que simula luz sobre metal.
@@ -488,6 +498,14 @@
   /* modal, hoja, paleta — cae sobre un scrim, así que aguanta más densidad */
   --shadow-4: 0 8px 20px rgba(10, 10, 14, 0.18), 0 40px 88px rgba(10, 10, 14, 0.2);
 
+  /* LA ESCALA DEL REDISEÑO de la fachada pública, copiada del boceto
+     aprobado. Misma gramática de dos capas y mismo tinte; más densa que la
+     del sistema porque sobre blanco puro la tarjeta tiene que despegarse más.
+     Solo la consume `(publico)/publico.module.css`. */
+  --sombra-fachada-1: 0 1px 2px rgba(10, 10, 14, 0.1), 0 6px 18px rgba(10, 10, 14, 0.08);
+  --sombra-fachada-2: 0 2px 4px rgba(10, 10, 14, 0.12), 0 18px 40px rgba(10, 10, 14, 0.14);
+  --sombra-fachada-3: 0 10px 16px rgba(10, 10, 14, 0.2), 0 30px 60px rgba(10, 10, 14, 0.2);
+
   /* Un HUNDIDO no es un escalón negativo de la escala: es la misma luz entrando
      al revés. Va `inset`, y por eso no puede salir de --shadow-1 invertido.
 
@@ -517,80 +535,70 @@
      para toda la app está mal en algún sitio, siempre: los títulos grandes
      necesitan tracking negativo, el texto pequeño ligeramente positivo.
 
-     ── v5 §4 · UNA SOLA FAMILIA ─────────────────────────────────────────────
+     ── v6 §7 · DOS FAMILIAS, DE VUELTA ──────────────────────────────────────
 
-     ⚠️ ESTO DEROGA «DOS FAMILIAS Y LA FRONTERA IMPORTA» DE LA v4. Encargo
-     literal del propietario: «tipografía similar a la de Avianca. Y que toda
-     sea de la misma familia, no combinar». El serif de display (Fraunces) SALE
-     del sistema, y con él salen las tres reglas que lo acotaban: «nunca en
-     Administración», «nunca por debajo de 28px», «un acento por pantalla».
-     Ya no hay un acento tipográfico que racionar.
+     ⚠️ ESTO DEROGA «UNA SOLA FAMILIA» DE LA v5. La v5 fusionó `--font-display`
+     en `--font-sans` porque el encargo de entonces pedía una sola familia sin
+     combinar. La v6 llega con una guía de marca real del cliente que especifica
+     dos, por nombre: **Playfair Display** para títulos, **Montserrat** para
+     texto. No es un vaivén de gusto — es la diferencia entre una preferencia
+     de sesión y una identidad de marca entregada por el cliente.
 
-       --font-sans      Plus Jakarta Sans. TODO.
-       --font-display   LA MISMA FAMILIA. Existe todavía, y a propósito.
+       --font-sans      Montserrat. Todo lo que NO es titular ceremonial.
+       --font-display   Playfair Display. Solo donde ya vivía antes.
 
-     POR QUÉ `--font-display` NO SE BORRA: lo consumen ocho módulos CSS que
-     están fuera del alcance de esta tanda. Un `var()` que apunta a un token
-     inexistente NO FALLA —la propiedad se queda en su valor inicial y el texto
-     se pinta con la fuente por defecto del navegador—, así que borrarlo habría
-     roto ocho titulares en silencio. Se deriva de `--font-sans` en vez de
-     repetir la lista: así no pueden separarse nunca.
+     La frontera es la MISMA que ya existía: los ocho módulos que piden
+     `--font-display` (el héroe público, «así funciona», `Cifra`, la ficha de
+     comercio, el carnet, `layout.module.css`) siguen siendo los ÚNICOS que
+     reciben la familia de titulares. No se añadió ni un consumidor nuevo: la
+     regla «`--font-display` es la única puerta» ya impedía que un serif se
+     colara en un sitio nuevo sin decidirlo aquí primero, y sigue cumpliendo
+     ese trabajo — ahora con una familia genuinamente distinta detrás.
 
-     LO QUE UN SANS DE DISPLAY NECESITA Y UN SERIF NO: más PESO y el tracking
-     más CERRADO. Un serif a 72px se sostiene con 600 porque su modulación de
-     asta ya crea contraste; un sans geométrico a 600 y tracking −0,032em se ve
-     flojo y suelto a ese tamaño. Los tres peldaños `hero` de abajo suben a
-     700–800 y cierran el tracking. Eso es todo lo que hacía falta cambiar.
+     LO QUE UN SERIF DE DISPLAY RECUPERA Y UN SANS GEOMÉTRICO NO TENÍA: la
+     MODULACIÓN de asta. Playfair Display es un serif de contraste alto —
+     grueso y fino alternando— y esa modulación ya crea presencia a 72px sin
+     necesitar el peso 800 que le hacía falta a Plus Jakarta Sans. Los pesos de
+     los peldaños `hero` bajan de nuevo hacia 600–700 (ver §4 más abajo) — el
+     motivo es el inverso exacto del que subió el peso en la v5.
 
-     EL RANGO NO SE TOCA y sigue siendo el de la v4: `hero-1` llega a 72px
-     contra 15px de cuerpo, 4,8x. Un sistema tipográfico sin rango no tiene
-     jerarquía, tiene tamaños.
+     EL RANGO NO SE TOCA: `hero-1` sigue en 72px contra 15px de cuerpo, 4,8x.
 
-     POR QUÉ SIGUE HABIENDO UN PELDAÑO `hero` SEPARADO DE `display`, ahora que
-     no hay dos familias: porque son dos tamaños distintos (72 contra 48) con
-     tracking y peso propios, y porque `--t-display-*` lo consumen los
-     encabezados del PANEL, que no quieren 72px. La frontera ya no es de
-     familia; sigue siendo de escala.
+     COSTE DE FUENTE: la v5 bajó el presupuesto de dos familias a una
+     (57,6 KB). La v6 vuelve a subirlo — es un costo aceptado por mandato
+     explícito del cliente, no un descuido. Medir tras el primer `next build`
+     y anotarlo en `.claude/docs/log/v6-crema-oro.md`.
      ======================================================================== */
 
   /*
-    PLUS JAKARTA SANS  ·  la única familia del sistema (v5 §4).
+    MONTSERRAT  ·  el cuerpo del sistema (v6 §7).
 
-    El encargo pide «similar a la de Avianca». La de Avianca es una geométrica
-    humanista de caja alta grande y aperturas abiertas. De lo que hay en el
-    catálogo libre, las tres candidatas reales eran estas:
-
-      · OUTFIT es la más geométrica de las tres y la que más se parece de lejos
-        — pero sus letras son casi círculos perfectos y a 13px la `a`, la `o` y
-        la `e` comparten demasiada silueta. En una tabla de cédulas y montos
-        eso se paga en lecturas dobles.
-      · DM SANS habría servido; es la más neutra y por eso la menos
-        característica. No aporta carácter de marca.
-      · PLUS JAKARTA SANS  <-- ESTA. Geométrica con correcciones humanistas:
-        terminales cortadas en ángulo, `a` de doble piso, caja alta grande.
-        Mantiene la lectura geométrica a 72px y sigue siendo distinguible a
-        13px, que es donde vive la mayor parte de esta aplicación.
-
-    Es VARIABLE en `wght` (200–800): un solo archivo cubre desde el cuerpo a
-    400 hasta el titular a 800, sin pesos sintéticos y sin una descarga por
-    peso. Ese rango es lo que hace posible que una sola familia sostenga toda
-    la jerarquía — un peso único sí obligaría a un segundo tipo.
+    La guía de marca del cliente la nombra por nombre: «Montserrat (textos)».
+    Geométrica humanista, variable en `wght` (100–900 en la fuente; el sistema
+    solo consume 400–800). Reemplaza a Plus Jakarta Sans en TODOS los roles que
+    tenía: nav, botones, formularios, tablas, cuerpo de párrafo.
 
     El fallback es la pila del sistema, no `sans-serif` a secas: son las
     geométricas/neo-grotescas con métricas más parecidas presentes en Windows,
     macOS, Android e iOS, así que el intercambio (`display: swap`) desplaza
     poco. `next/font` calcula además el ajuste de métricas del fallback.
   */
-  --font-sans: var(--font-jakarta), system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-montserrat), system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /*
-    MISMA FAMILIA, distinto nombre. No es un alias muerto: es la puerta por la
-    que ocho módulos piden «la tipografía de los titulares», y derivarlo de
-    `--font-sans` garantiza que nunca puedan divergir. Si algún día vuelve a
-    haber dos familias, este es el único sitio donde hay que decirlo.
+    PLAYFAIR DISPLAY  ·  la familia de titulares (v6 §7), de vuelta después de
+    la v5. La guía de marca la nombra por nombre: «Playfair Display (títulos)».
+    Serif de contraste alto con cursiva real (no oblicua sintética) — los
+    acentos en cursiva dorada del héroe y las secciones («*tu ciudad*»,
+    «*sí se sienten*») dependen de que la cursiva sea un corte de verdad, no
+    una inclinación del romano.
+
+    El fallback es serif del sistema (Georgia / Times New Roman), nunca
+    `sans-serif`: un titular que cae a la fuente por defecto del navegador
+    mientras carga debe seguir leyéndose como titular, no como error.
   */
-  --font-display: var(--font-sans);
+  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
 
   /*
     Solo para datos que se dictan, se teclean o se comparan carácter a
@@ -609,23 +617,20 @@
      crecer. Un `letter-spacing` único está mal en algún tamaño siempre — aquí
      más, porque el rango es de 28 a 72px.
 
-     ── QUÉ CAMBIÓ AL PASAR DE SERIF A SANS, y por qué no bastaba con cambiar
-        el `font-family` ────────────────────────────────────────────────────
+     ── v6 · VUELVE EL SERIF, Y CON ÉL BAJA EL PESO ─────────────────────────
 
-     SUBE EL PESO: 600 → 800 en `hero-1`, 700 en los otros dos. Un serif de
-     contraste alto crea presencia con la MODULACIÓN de sus astas —gruesas y
-     finas alternando— y por eso 600 le sobra a 72px. Un sans geométrico tiene
-     el asta de grosor constante: a 600 y a ese tamaño se lee delgado y sin
-     autoridad, que es exactamente lo que el encargo de la v4 («falta
-     impacto») venía a resolver. El peso es lo que sustituye a la modulación.
+     BAJA EL PESO: 800 → 600 en `hero-1`, 700 → 600 en los otros dos —de
+     vuelta a los valores de la v4—. Un serif de contraste alto crea presencia
+     con la MODULACIÓN de sus astas —gruesas y finas alternando—, así que 600
+     le basta a 72px. Fue exactamente al revés en la v5: un sans geométrico
+     tiene el asta de grosor constante y necesitaba el peso 800 para no verse
+     delgado. Con Playfair Display de vuelta, ese peso extra sobra.
 
-     SE CIERRA EL TRACKING: −0,032 → −0,040em en `hero-1`. Una geométrica tiene
-     las contraformas más redondas y abiertas que una serif de estilo antiguo,
-     así que al crecer abre más hueco entre letras. La regla de oficio es que
-     el tracking negativo escale con el tamaño y con la redondez; aquí suben
-     los dos factores a la vez.
+     SE ABRE EL TRACKING: −0,040 → −0,032em en `hero-1`, también de vuelta a
+     la v4. Un serif de estilo antiguo tiene las contraformas más cerradas que
+     una geométrica, así que necesita menos tracking negativo al crecer.
 
-     Lo que NO cambió: los tamaños y los leadings. Son los de la v4, medidos.
+     Lo que NO cambió: los tamaños y los leadings. Son los mismos desde la v4.
 
      `hero-cifra` existe aparte de `hero-2` por una razón que no es estética:
      una cifra de negocio necesita `font-variant-numeric: tabular-nums` (lo
@@ -638,29 +643,32 @@
   /* hero-1 — el titular de una pantalla de recibimiento. 44 → 72px */
   --t-hero-1-size: clamp(2.75rem, 7vw, 4.5rem);
   --t-hero-1-leading: 1;
-  --t-hero-1-tracking: -0.04em;
-  --t-hero-1-weight: 800;
+  --t-hero-1-tracking: -0.032em;
+  --t-hero-1-weight: 600;
 
   /* hero-2 — titular de sección con peso. 32 → 48px */
   --t-hero-2-size: clamp(2rem, 5vw, 3rem);
   --t-hero-2-leading: 1.08;
-  --t-hero-2-tracking: -0.03em;
-  --t-hero-2-weight: 700;
+  --t-hero-2-tracking: -0.024em;
+  --t-hero-2-weight: 600;
 
   /* hero-cifra — el número grande de un carnet o un panel. 36 → 52px */
   --t-hero-cifra-size: clamp(2.25rem, 5.5vw, 3.25rem);
   --t-hero-cifra-leading: 1;
-  --t-hero-cifra-tracking: -0.022em;
-  --t-hero-cifra-weight: 700;
+  --t-hero-cifra-tracking: -0.018em;
+  --t-hero-cifra-weight: 600;
 
   /* display-1 — el peldaño grande de las pantallas de trabajo y las cifras del
      panel. 36 → 48px.
 
-     v5: sube de 600 a 700 y cierra el tracking, por el mismo motivo que los
-     `hero` — a 48px una geométrica a 600 se lee delgada. Es el ÚNICO peldaño
-     por debajo de `hero` que se toca: de `display-2` (36px) hacia abajo el
-     peso 600 sigue siendo correcto, y subirlo engordaría los encabezados de
-     todas las páginas de Administración, que no es lo que se pidió. */
+     ⚠️ NO SE TOCA CON LA v6, y hay que decirlo explícito porque es fácil
+     confundirlo con `hero`. `.t-display-1` vive en `--font-sans` (Montserrat),
+     NO en `--font-display` (Playfair) — ver `globals.css` §4, el bloque «UNA
+     SOLA FAMILIA» donde `.t-display-1` está listada junto a `.t-body` y el
+     resto de peldaños de interfaz. Montserrat sigue siendo un sans sin
+     modulación de asta, así que el motivo de la v5 para subir a 700 y cerrar
+     el tracking —«a 48px una geométrica a 600 se lee delgada»— NO desaparece
+     con el cambio de familia. Se queda en 700 / −0,030em. */
   --t-display-1-size: clamp(2.25rem, 5vw, 3rem);
   --t-display-1-leading: 1.04;
   --t-display-1-tracking: -0.03em;
@@ -693,8 +701,9 @@
   /* body — texto general */
   --t-body-size: 0.9375rem;
   --t-body-leading: 1.55;
-  /* +0,01em: Plus Jakarta Sans viene apretada de serie a 13–15px y en pantalla
-     el cuerpo se leía comprimido. El 0 venía calibrado para Inter. */
+  /* +0,01em: se mantiene desde la v5 (calibrado para que el cuerpo no se lea
+     comprimido a 13–15px). Con Montserrat (v6) sigue leyéndose bien — revisar
+     si algún día se nota apretado, pero no hay motivo para tocarlo a ciegas. */
   --t-body-tracking: 0.01em;
   --t-body-weight: 400;
 

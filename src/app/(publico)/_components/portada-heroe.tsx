@@ -11,36 +11,46 @@ import {
 import estilos from './portada-heroe.module.css'
 
 /*
-  LA IMAGEN PRINCIPAL DE LA PORTADA
+  LA FOTOGRAFÍA DEL HÉROE, ADMINISTRABLE
   ---------------------------------------------------------------------------
-  Encargo del propietario (25/09/2026): poder cambiar la imagen principal, o
-  poner varias para que se vayan alternando cada cierto tiempo. Las sube y las
-  enciende `/admin/recursos`; aquí solo llegan las que están visibles.
+  Encargo del propietario (25/09/2026): poder cambiar la imagen principal —la
+  de la socia en el café con su tarjeta— o poner varias para que se vayan
+  alternando cada cierto tiempo. Se suben y se encienden en `/admin/recursos`;
+  aquí solo llegan las que están visibles.
 
-  TRES COMPORTAMIENTOS, Y LOS TRES IMPORTAN:
+  SUSTITUYE A LA FOTO FIJA, NO SE AÑADE AL LADO. `hero-publico.tsx` pinta
+  `hero-orum.webp` —la foto de marca que entregó el cliente— cuando no hay
+  ninguna subida, y este componente cuando sí. Así el día que se borre la
+  última desde el panel, la portada vuelve sola a la foto de marca en vez de
+  quedarse en negro.
 
-    · Ninguna imagen → este componente no se monta. Lo decide `HeroPublico`,
-      que cae al collage de comercios aliados. La portada nunca se queda con
-      un hueco.
-    · Una imagen    → se pinta quieta. Sin temporizador, sin controles, sin
-      una sola línea de JavaScript corriendo en bucle en la primera pantalla
-      del sitio. Es el caso más probable y es el que tiene que salir gratis.
-    · Varias        → se alternan con un fundido cruzado.
+  TRES COMPORTAMIENTOS:
+
+    · Ninguna → este componente no se monta. Lo decide `HeroPublico`.
+    · Una     → se pinta quieta. Sin temporizador, sin controles, sin una sola
+                línea de JavaScript en bucle en la primera pantalla del sitio.
+                Es el caso más probable y el que tiene que salir gratis.
+    · Varias  → se alternan con un fundido cruzado.
 
   POR QUÉ UN FUNDIDO Y NO UN CARRUSEL QUE SE DESLIZA. Un desplazamiento
   lateral es movimiento vestibular y compite con la lectura del titular, que
-  está justo al lado y es lo único que esta pantalla necesita que se lea. La
-  opacidad cambia lo que se ve sin mover nada: es la regla de «solo transform
-  y opacity» resuelta por el lado barato.
+  está encima. La opacidad cambia lo que se ve sin mover nada: es la regla de
+  «solo transform y opacity» resuelta por el lado barato.
 
   EL BOTÓN DE PAUSA NO ES OPCIONAL. WCAG 2.2.2 exige poder parar cualquier
   contenido que se mueva o se actualice solo durante más de cinco segundos, y
-  seis es justo lo que dura cada imagen. No basta con pararlo al señalar con
-  el ratón: quien navega con teclado o con lector de pantalla no señala nada.
+  seis es lo que dura cada imagen. No basta con pararlo al señalar con el
+  ratón: quien navega con teclado o con lector de pantalla no señala nada.
 
   Y `prefers-reduced-motion` lo para de raíz: ahí no rota, se queda con la
   primera. Eso NO es quedarse sin feedback —no hay ningún gesto del usuario
-  que quedara sin respuesta—, es que la rotación entera era el movimiento.
+  que quede sin respuesta—, es que la rotación entera era el movimiento.
+
+  `<img>` Y NO `next/image`, al revés que la foto de marca. Aquella es un
+  import estático y Next conoce su tamaño; estas son URLs de Storage
+  arbitrarias, y `next.config.ts` no declara `images.remotePatterns`. Es la
+  misma razón por la que el resto del producto pinta las imágenes subidas con
+  `<img>`.
 */
 
 export function PortadaHeroe({ imagenes }: { imagenes: RecursoPublico[] }) {
@@ -49,9 +59,8 @@ export function PortadaHeroe({ imagenes }: { imagenes: RecursoPublico[] }) {
 
   const reduce = useMediaQuery('(prefers-reduced-motion: reduce)')
 
-  // Una sola imagen no rota, así que no hay temporizador que montar. La
-  // condición vive en el efecto y no fuera porque los hooks no se pueden
-  // llamar condicionalmente.
+  // Con una sola imagen no hay temporizador que montar. La condición vive en
+  // el efecto y no fuera porque los hooks no se pueden llamar condicionalmente.
   const rota = imagenes.length > 1 && !pausado && !reduce
 
   useEffect(() => {
@@ -72,35 +81,35 @@ export function PortadaHeroe({ imagenes }: { imagenes: RecursoPublico[] }) {
   const actual = indice < imagenes.length ? indice : 0
 
   return (
-    <div className={estilos.portada}>
+    <>
       {/*
         TODAS las imágenes se montan y se apilan; lo que cambia es cuál está
         opaca. Montar solo la visible obligaría al navegador a descargar la
-        siguiente en el momento del cambio, y el fundido entraría a un hueco.
+        siguiente en el instante del cambio, y el fundido entraría a un hueco.
 
-        `aria-hidden` en el apilado entero: el texto alternativo de cada
-        cartel describe una fotografía decorativa de la portada, y anunciar
-        tres seguidas mientras el titular está justo al lado es ruido. El
-        contenido real de esta pantalla es el h1.
+        `alt=""` en todas, igual que la foto de marca a la que sustituyen: son
+        ambiente, no información —el titular dice lo que hay que saber— y
+        describirlas antes del `h1` desordenaría la lectura. El texto
+        alternativo que se escribe en el panel sirve al apartado de
+        promociones, donde la imagen SÍ es el contenido.
       */}
-      <div className={estilos.pila} aria-hidden="true">
-        {imagenes.map((imagen, i) => (
-          // eslint-disable-next-line @next/next/no-img-element -- URL de Storage arbitraria, no un asset local
-          <img
-            key={imagen.id}
-            src={imagen.url}
-            alt=""
-            className={estilos.imagen}
-            data-visible={i === actual}
-            /* La primera entra con la pantalla: es la imagen más grande de la
-               portada y diferirla la convierte en el peor LCP del sitio. Las
-               demás no se ven hasta dentro de seis segundos como mínimo. */
-            loading={i === 0 ? 'eager' : 'lazy'}
-            fetchPriority={i === 0 ? 'high' : 'auto'}
-            decoding="async"
-          />
-        ))}
-      </div>
+      {imagenes.map((imagen, i) => (
+        // eslint-disable-next-line @next/next/no-img-element -- URL de Storage arbitraria, no un asset local
+        <img
+          key={imagen.id}
+          src={imagen.url}
+          alt=""
+          className={estilos.capa}
+          data-visible={i === actual}
+          /* La primera entra con la pantalla: es la imagen más grande de la
+             primera pantalla, o sea el LCP. Diferirla sería el peor cambio
+             posible en esta página. Las demás no se ven hasta dentro de seis
+             segundos como mínimo. */
+          loading={i === 0 ? 'eager' : 'lazy'}
+          fetchPriority={i === 0 ? 'high' : 'auto'}
+          decoding="async"
+        />
+      ))}
 
       {/* Con una sola imagen no hay nada que pausar, y con movimiento
           reducido tampoco: el control sobraría y sería una promesa falsa. */}
@@ -120,6 +129,6 @@ export function PortadaHeroe({ imagenes }: { imagenes: RecursoPublico[] }) {
           )}
         </button>
       )}
-    </div>
+    </>
   )
 }

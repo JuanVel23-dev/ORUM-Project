@@ -1,11 +1,11 @@
-/* El botón desaparece donde las mismas entradas ya son texto en la cabecera.
-   Mismo umbral que el resto del cromo del producto, y `@media` porque la
-   cabecera vive fuera del contenedor `contenido`. */
+/* El botón desaparece donde las mismas entradas ya son texto en la cabecera:
+   el mismo umbral de 900px que `encabezado-publico.module.css`, y `@media`
+   porque la cabecera vive fuera del contenedor `contenido`. */
 .soloMovil {
   display: inline-flex;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .soloMovil {
     display: none;
   }
@@ -58,4 +58,11 @@
 .fila:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: -2px;
+}
+
+/* La fila de «Únete»: la acción de la hoja, en el oro legible sobre crema
+   (`--brand` = `--gold-700`, 4,87:1). El peso la distingue de las anclas. */
+.filaAccion {
+  font-weight: 700;
+  color: var(--brand);
 }

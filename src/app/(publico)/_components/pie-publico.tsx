@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
+import { REVELAR, revelarEscalonado } from './revelado'
 import estilos from './pie-publico.module.css'
 
 /*
@@ -42,11 +43,20 @@ export function PiePublico({ soporte }: { soporte: string | null }) {
   return (
     <footer className={estilos.pie}>
       <div className={estilos.contenido}>
-        <p className={estilos.marca}>ORUM</p>
+        <p className={[estilos.marca, REVELAR].join(' ')}>
+          <span className={estilos.destello} aria-hidden="true">
+            ✦
+          </span>
+          ORUM
+        </p>
 
         <nav className={estilos.puertas} aria-label="Accesos a los portales">
-          {PUERTAS.map((puerta) => (
-            <Link key={puerta.href} href={puerta.href} className={estilos.puerta}>
+          {PUERTAS.map((puerta, i) => (
+            <Link
+              key={puerta.href}
+              href={puerta.href}
+              className={[estilos.puerta, revelarEscalonado(i)].join(' ')}
+            >
               <span className={estilos.puertaTexto}>{puerta.texto}</span>
               <span className={estilos.puertaDestino}>{puerta.destino}</span>
             </Link>
@@ -72,7 +82,9 @@ export function PiePublico({ soporte }: { soporte: string | null }) {
         )}
       </div>
 
-      <p className={estilos.derechos}>© {new Date().getFullYear()} ORUM</p>
+      <p className={estilos.derechos}>
+        © {new Date().getFullYear()} ORUM · Apoya lo local, te da más.
+      </p>
     </footer>
   )
 }

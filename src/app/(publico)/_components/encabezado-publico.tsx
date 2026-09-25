@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ANCLAS } from './anclas'
+import { ANCLAS, HREF_UNETE } from './anclas'
 import { MenuMovilPublico } from './menu-movil-publico'
+import escaparate from '../escaparate.module.css'
+import { ENTRADA, retardoEntrada } from './revelado'
 import estilos from './encabezado-publico.module.css'
 
 /*
@@ -11,24 +13,33 @@ import estilos from './encabezado-publico.module.css'
   que YA entró —wordmark, dos pestañas y avatar de sesión—; esta sirve a
   alguien que no sabe qué es ORUM.
 
-  NO LLEVA AVATAR, y no por falta de espacio: nadie tiene sesión activa en esta
-  pantalla. Si la tuviera y fuera socio, la landing ya lo habría redirigido a
-  `/miembros` antes de pintar nada.
+  MONTADA SOBRE LA FOTO, Y FIJA (guía de marca v6). Negra arriba y fundida a
+  transparente hacia abajo: sobre el héroe se lee como parte de la fotografía,
+  y al bajar por las franjas crema el texto nunca se pierde, porque la banda
+  donde vive la tipografía es prácticamente opaca (≥ 82 % de negro). Es la
+  corrección de la primera versión, que era transparente de arriba abajo y
+  desaparecía sobre el crema.
 
   Server Component. Lo único que se hidrata es el menú de móvil, que necesita
   estado para abrir su hoja.
 */
-
 export function EncabezadoPublico() {
   return (
     <header className={estilos.cabecera}>
-      {/* El wordmark es el único oro sólido del cromo, y es MARCA, no acción:
-          enlaza a la propia landing, no a ningún catálogo. */}
-      <Link href="/" className={estilos.marca}>
+      {/* El destello ✦ es decorativo —el nombre de la marca ya está en el
+          texto—, así que va `aria-hidden` y no parte el enlace en dos palabras
+          para un lector de pantalla. */}
+      <Link href="/" className={[estilos.marca, ENTRADA].join(' ')} style={retardoEntrada(0)}>
+        <span className={estilos.destello} aria-hidden="true">
+          ✦
+        </span>
         ORUM
       </Link>
 
-      <nav className={estilos.nav} aria-label="Secciones de la página">
+      <nav
+        className={[estilos.nav, escaparate.sobreFoto, ENTRADA].join(' ')}
+        style={retardoEntrada(1)}
+        aria-label="Secciones de la página">
         {ANCLAS.map((ancla) => (
           <Link key={ancla.href} href={ancla.href} className={estilos.enlace}>
             {ancla.texto}
@@ -38,16 +49,22 @@ export function EncabezadoPublico() {
 
       <div className={estilos.acciones}>
         {/*
-          Acción terciaria: quien ya es socio no debe leer una landing entera
-          para encontrar su acceso, pero tampoco puede competir con el CTA del
-          héroe. De ahí `ghost`.
+          En escritorio, las dos puertas a la vista: quien ya es socio no debe
+          leer una landing entera para encontrar su acceso, y quien no lo es
+          tiene «Únete» a un clic de los planes. En móvil las dos viven dentro
+          de la hoja del menú.
         */}
-        <span className={estilos.soloEscritorio}>
+        <span
+          className={[estilos.soloEscritorio, escaparate.sobreFoto, ENTRADA].join(' ')}
+          style={retardoEntrada(2)}
+        >
           <Button href="/miembros/login" variant="ghost" size="sm">
             Iniciar sesión
           </Button>
+          <Button href={HREF_UNETE} variant="secondary" size="sm" pildora>
+            Únete
+          </Button>
         </span>
-
         <MenuMovilPublico />
       </div>
     </header>
