@@ -96,7 +96,8 @@
   de superficie.
 
   Portadores que no dependen del color: el tamaño, el grosor del anillo, el
-  nombre en negrita subrayado y `aria-current` para el lector.
+  nombre en negrita y `aria-current` para el lector. Sin subrayado, por
+  encargo del propietario: con el anillo y el tamaño ya se distingue.
 */
 .opcion[aria-current='true'] {
   color: var(--text);
@@ -114,10 +115,6 @@
 
 .opcion[aria-current='true'] .nombre {
   font-weight: 700;
-  text-decoration: underline;
-  text-decoration-color: var(--gold-600);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
 }
 
 /* --- El botón de móvil ------------------------------------------------------
@@ -190,4 +187,16 @@
   .disparador {
     width: 100%;
   }
+}
+
+/*
+  «Ver comercios», como los demás botones de la fachada («Adquirir»):
+  píldora blanca con filo `--gold-600` (3,53:1 sobre blanco) y sombra de
+  tarjeta principal, no relleno dorado. Es `Button secondary` con sus
+  tokens remapeados en el propio botón.
+*/
+.botonVer {
+  --border-control: var(--gold-600);
+
+  box-shadow: var(--shadow-raised);
 }

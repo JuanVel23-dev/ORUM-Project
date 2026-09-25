@@ -107,7 +107,13 @@ export function CategoriasDirectorio({ opciones, total }: Props) {
         detent="large"
         width="640px"
         footer={
-          <Button variant="brand" pildora fullWidth onClick={() => setAbierta(false)}>
+          <Button
+            variant="secondary"
+            pildora
+            fullWidth
+            className={estilos.botonVer}
+            onClick={() => setAbierta(false)}
+          >
             {total === 1 ? 'Ver 1 comercio' : `Ver ${total} comercios`}
           </Button>
         }
