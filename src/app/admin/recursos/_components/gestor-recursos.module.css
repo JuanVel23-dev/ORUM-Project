@@ -1,0 +1,174 @@
+/* ==========================================================================
+   RECURSOS DEL SITIO  ·  cuatro bloques en una columna
+
+   Hermano de `gestor-imagenes.module.css`, y a propósito: es la misma tarea
+   —subir, describir, ordenar, quitar— y dos gramáticas distintas para la
+   misma tarea es lo que hace que una pantalla se sienta de otra aplicación.
+
+   El hairline entre bloques es una DIVISIÓN INTERNA, que es lo único para lo
+   que el sistema conserva el trazo. La superficie ya la pone el `FormCard` de
+   la página.
+   ========================================================================== */
+
+.gestor {
+  display: grid;
+  gap: var(--space-7);
+}
+
+.bloque {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.bloque + .bloque {
+  padding-top: var(--space-7);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* El encabezado y su recuento en la misma línea: el recuento cualifica al
+   título, no es una nota aparte. */
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.titulo {
+  font-size: var(--t-title-3-size);
+  line-height: var(--t-title-3-leading);
+  letter-spacing: var(--t-title-3-tracking);
+  font-weight: var(--t-title-3-weight);
+}
+
+.nota {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+  max-width: 70ch;
+  text-wrap: pretty;
+}
+
+/* Nombre y orden, en el formulario de subida. */
+.meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .meta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.vacia {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-3);
+}
+
+/* --- Lo ya alojado -------------------------------------------------------- */
+
+.lista {
+  display: grid;
+  gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/*
+  Una fila de lista NO flota: se HUNDE. Mismo tratamiento que `Card.sunk`
+  —hairline y sombra hacia dentro—, que agrupa sin añadir otra capa elevada a
+  una pantalla que ya tiene su tarjeta.
+
+  Y sin transición de sombra ni desplazamiento al señalar: el techo del
+  sistema para filas de lista es la opacidad, porque quien paga la factura es
+  un móvil de gama media.
+*/
+.pieza {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-4);
+
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunk);
+  box-shadow: var(--shadow-hundida);
+}
+
+@media (max-width: 900px) {
+  .pieza {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.miniatura {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+
+  width: 128px;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-xs);
+  background: var(--placa-logo-bg);
+  border: 1px solid var(--placa-logo-borde);
+}
+
+.miniaturaImagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.campos {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.filaCampos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: var(--space-3);
+}
+
+@media (max-width: 640px) {
+  .filaCampos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.piePieza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* El rótulo del botón de copiar: es una etiqueta, no el valor. La dirección
+   completa de un objeto de Storage ocupa dos líneas y no aporta nada leída. */
+.direccion {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+/* Publicar y borrar, apartados de los campos: son las dos únicas acciones de
+   la fila que cambian algo sin pasar por «Guardar». */
+.acciones {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .acciones {
+    grid-auto-flow: column;
+    justify-content: start;
+    align-items: center;
+  }
+}

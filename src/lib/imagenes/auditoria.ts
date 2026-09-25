@@ -22,7 +22,15 @@ import type { createAdminClient } from '@/lib/supabase/admin'
 
 type Admin = ReturnType<typeof createAdminClient>
 
-export type EntidadImagen = 'comercio' | 'perfil' | 'miembro' | 'comercio_imagen' | 'anuncio'
+export type EntidadImagen =
+  | 'comercio'
+  | 'perfil'
+  | 'miembro'
+  | 'comercio_imagen'
+  /** Una novedad del club: `anuncios.imagen_url`. */
+  | 'anuncio'
+  /** Una imagen del sitio público: `recursos_sitio.url`. */
+  | 'recurso_sitio'
 
 export type CambioImagen = {
   actorId: string | null

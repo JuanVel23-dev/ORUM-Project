@@ -8,6 +8,7 @@ import {
 } from '@/lib/publico/datos-publicos'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
+import { obtenerRecursosVisibles } from '@/lib/sitio/datos-sitio'
 import { AnuncioBanner } from '@/components/anuncios/anuncio-banner'
 import { AliadosOverlayTrigger } from './_components/aliados-overlay-trigger'
 import { ComerciosDestacados } from './_components/comercios-destacados'
@@ -15,6 +16,7 @@ import { ComoFunciona } from './_components/como-funciona'
 import { CtaSocio } from './_components/cta-socio'
 import { HeroPublico } from './_components/hero-publico'
 import { MembresiasPublicas } from './_components/membresias-publicas'
+import { PromosSitio } from './_components/promos-sitio'
 import { QueEsOrum } from './_components/que-es-orum'
 import { Revelar } from './_components/revelar'
 import { REVELAR, REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from './_components/revelado'
@@ -50,6 +52,7 @@ export const metadata: Metadata = {
  *   Así es como te unes .......... tarjeta sobre el filo del héroe
  *   Qué es ORUM .................. CREMA         ← texto + carrusel de fotos reales
  *   Descubre · Disfruta · … ...... CREMA         ← los cuatro verbos del club
+ *   Promociones .................. CREMA HONDA   ← solo si hay carteles publicados
  *   Comercios destacados ......... NEGRO         ← cinco reales + «Ver todos»
  *   Elige tu membresía ........... CREMA         ← precios de la base, con ahorro calculado
  *   Hazte socio hoy .............. NEGRO         ← el cierre, con el WhatsApp
@@ -69,18 +72,30 @@ export default async function LandingPublica() {
     sitio. `cache()` evita que el layout y esta página consulten dos veces el
     número de soporte dentro de la misma petición.
   */
-  const [vitrina, planes, soporte, perfil, abiertoEn, anuncios] = await Promise.all([
-    obtenerVitrinaPublica(),
-    obtenerPlanesPublicos(),
-    obtenerWhatsappSoporte(),
-    getPerfilActual(),
-    obtenerInstanteServidor(),
-    obtenerAnunciosVisibles(createAdminClient(), 'publico'),
-  ])
+  const [vitrina, planes, soporte, perfil, abiertoEn, anuncios, portadas, promos] =
+    await Promise.all([
+      obtenerVitrinaPublica(),
+      obtenerPlanesPublicos(),
+      obtenerWhatsappSoporte(),
+      getPerfilActual(),
+      obtenerInstanteServidor(),
+      obtenerAnunciosVisibles(createAdminClient(), 'publico'),
+      /*
+        Las imágenes que administra el panel (`/admin/recursos`). Entran en
+        el mismo `Promise.all` por el motivo de arriba: son independientes y
+        encadenarlas sumaría sus latencias al camino más caliente del sitio.
+
+        Las dos devuelven lista vacía si la migración 20260925090000 no está
+        aplicada, y eso es lo que hace que la página siga pintándose entera
+        mientras tanto.
+      */
+      obtenerRecursosVisibles('heroe'),
+      obtenerRecursosVisibles('promo'),
+    ])
 
   return (
     <>
-      <HeroPublico esSocio={perfil?.rolCodigo === 'miembro'} />
+      <HeroPublico esSocio={perfil?.rolCodigo === 'miembro'} portadas={portadas} />
 
       <ComoFunciona />
 
@@ -94,6 +109,29 @@ export default async function LandingPublica() {
       <QueEsOrum fotos={vitrina.fotos} />
 
       <ValoresOrum />
+
+      {/*
+        LAS PROMOCIONES DEL CLUB, donde el propietario las pidió: «junto a la
+        misión y la visión», que viven dentro de «Qué es ORUM». Van después de
+        los cuatro verbos porque esos dos bloques son una misma idea contada
+        dos veces —qué es el club y qué hace— y meterse en medio la partiría.
+
+        NO ES LO MISMO QUE EL BANNER DE NOVEDADES de más arriba, y conviven a
+        propósito: un anuncio tiene titular y cuerpo y CUENTA algo; un cartel
+        de promoción es una imagen que se coloca y se quita. El banner abre la
+        página con la novedad del día; esto es el escaparate de campañas.
+
+        CREMA HONDA, y es el único sitio de la página que la usa. Sus dos
+        vecinas son papel y negro, así que no repite tono con ninguna; y la
+        honda es superficie de RELLENO —nada de texto terciario ni dorado, que
+        es donde reprueba AA—, que es exactamente lo que hay aquí: un titular
+        y fotografías.
+
+        SIN CARTELES NO HAY SECCIÓN. Un encabezado «Promociones» sobre un
+        hueco afirma que el club no tiene ninguna, y eso es peor que no decir
+        nada. Al desaparecer, el ritmo vuelve solo al de la v6.
+      */}
+      {promos.length > 0 && <PromosSitio promos={promos} />}
 
       <ComerciosDestacados comercios={vitrina.destacados} />
 

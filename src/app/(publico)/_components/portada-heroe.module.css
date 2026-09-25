@@ -1,0 +1,141 @@
+/* ==========================================================================
+   LA FOTOGRAFÍA DEL HÉROE, ADMINISTRABLE
+
+   Estas reglas son el gemelo de `.foto` en `hero-publico.module.css`, que es
+   la foto de marca fija a la que sustituyen. No se reutiliza aquella clase
+   —aunque se podría pasar por prop— por dos razones:
+
+     1. `object-position` tiene que ser DISTINTO. Allí vale `72% center`,
+        calibrado a mano para que la socia y su tarjeta sigan en cuadro cuando
+        el teléfono recorta la foto a lo alto. Aquí la imagen la sube alguien
+        desde el panel y no hay forma de saber dónde está su sujeto, así que
+        el único encuadre honesto es el centro.
+     2. Componer dos clases de módulos distintos deja la precedencia en manos
+        del orden en que Next inyecte las hojas, que no es algo sobre lo que
+        se pueda razonar. Dos reglas peleando por `object-position` y ganando
+        una u otra según el día es peor que doce líneas repetidas.
+
+   ⚠️ Lo que SÍ tiene que seguir igual es la geometría: `inset: 0` y
+   `z-index: -2`, porque el velo del héroe vive en `-1` y el contenido encima.
+   Si allí cambia la capa, aquí también.
+   ========================================================================== */
+
+.capa {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+
+  opacity: 0;
+  /*
+    Enumerada, nunca `all`. Y aquí la salida NO es más rápida que la entrada,
+    al revés que en el resto del sistema: en un fundido cruzado las dos capas
+    se mueven a la vez, y que una tarde menos que la otra abre un hueco por el
+    que se ve el fondo negro a media transición.
+  */
+  transition: opacity var(--dur-page) var(--ease-hero);
+}
+
+.capa[data-visible='true'] {
+  opacity: 1;
+}
+
+/*
+  LA RED DE SEGURIDAD. Sin JavaScript, `data-visible` se queda como lo pintó
+  el servidor —que ya marca la primera— pero nada garantiza que la transición
+  llegue a correr. Sin esto el héroe podría quedarse en negro, que es el fallo
+  más caro posible en la primera pantalla del sitio.
+*/
+@media (scripting: none) {
+  .capa:first-of-type {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capa {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* --- El botón de pausa ---------------------------------------------------- */
+
+/*
+  Abajo a la derecha, por ENCIMA del solape de la tarjeta de pasos.
+
+  `--solape-tarjeta` lo publica `.hero` y se hereda hasta aquí: la tarjeta de
+  «Así es como te unes» se monta sobre el filo inferior del héroe, y un botón
+  a ras del borde quedaría debajo de ella. Se lee la variable en vez de
+  repetir el número, para que mover el solape mueva también el botón.
+
+  Pequeño a la vista y grande al dedo: el objetivo táctil se amplía con un
+  `::after` de `--tap-min`, que es la norma del sistema para el ojo de la
+  contraseña y el botón de copiar. Agrandar el botón lo volvería un elemento
+  de interfaz dentro de una fotografía que no debe tener ninguno.
+*/
+.pausa {
+  position: absolute;
+  z-index: 1;
+  inset-block-end: calc(var(--solape-tarjeta, 0px) + var(--space-4));
+  inset-inline-end: var(--space-4);
+
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+
+  /*
+    Tokens crudos y no literales: `--cacao-900` es el negro del sistema y
+    `--w-0` su blanco. NO se usan los semánticos del héroe (`--cacao-bg`,
+    `--cacao-fg`) a propósito: aquellos siguen al tema, y este botón se apoya
+    en una fotografía arbitraria que alguien sube desde el panel. Ahí el
+    contraste no puede depender ni del tema ni de lo que traiga la imagen.
+
+    Al 78 % el velo tapa lo suficiente para que el glifo dé ~11:1 incluso
+    sobre la zona más clara posible de una foto, y 21:1 sobre la más oscura.
+  */
+  background: color-mix(in srgb, var(--cacao-900) 78%, transparent);
+  color: var(--w-0);
+
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
+}
+
+.pausa::after {
+  content: '';
+  position: absolute;
+  inset: 50%;
+  translate: -50% -50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+}
+
+@media (hover: hover) {
+  .pausa:hover {
+    background: color-mix(in srgb, var(--cacao-900) 90%, transparent);
+  }
+}
+
+/* Presionar hunde. Ocurre en `:active`, que el navegador enciende al APRETAR
+   y no al soltar. */
+.pausa:active {
+  scale: 0.94;
+}
+
+.pausa:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pausa:active {
+    scale: none;
+  }
+}

@@ -2,6 +2,7 @@ import {
   BarChart3,
   CreditCard,
   Home,
+  Images,
   LayoutGrid,
   Megaphone,
   Search,
@@ -56,6 +57,13 @@ const USUARIOS: NavItem = { href: '/admin/usuarios', label: 'Usuarios', icon: Us
 const PLANES: NavItem = { href: '/admin/planes', label: 'Planes', icon: CreditCard }
 const ANUNCIOS: NavItem = { href: '/admin/anuncios', label: 'Novedades', icon: Megaphone }
 const METRICAS: NavItem = { href: '/admin/metricas', label: 'Métricas', icon: BarChart3 }
+/*
+  «Recursos» y no «Imágenes»: hay imágenes en tres sitios más del panel —el
+  logo de un comercio, la foto de un socio, el avatar de quien trabaja aquí— y
+  todas se gestionan donde vive su dueño. Lo que cuelga de este destino es lo
+  que NO tiene dueño: lo que se ve en la página pública.
+*/
+const RECURSOS: NavItem = { href: '/admin/recursos', label: 'Recursos', icon: Images }
 const BITACORA: NavItem = { href: '/admin/bitacora', label: 'Bitácora', icon: ScrollText }
 
 /*
@@ -79,7 +87,14 @@ export function navegacionPara(rol: RolCodigo): NavGroup[] {
       // Consultar, no operar. Métricas va primero: se mira a diario; la
       // bitácora solo cuando hay que averiguar quién hizo algo.
       { label: 'Análisis', items: [METRICAS, BITACORA] },
-      { label: 'Administración', items: [USUARIOS, PLANES, ANUNCIOS] },
+      /*
+        ANUNCIOS y RECURSOS son vecinos y NO son lo mismo, que es justo por lo
+        que conviene que se vean juntos: un anuncio tiene titular y cuerpo y
+        cuenta algo —«nuevo aliado en Chapinero»—; un recurso es una imagen
+        sin texto que se coloca en un sitio de la web. Quien llega buscando
+        «dónde cambio el cartel» encuentra los dos y elige.
+      */
+      { label: 'Administración', items: [USUARIOS, PLANES, ANUNCIOS, RECURSOS] },
     ]
   }
 

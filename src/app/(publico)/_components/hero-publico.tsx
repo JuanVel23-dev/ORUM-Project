@@ -2,7 +2,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, Compass } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import type { RecursoPublico } from '@/lib/sitio/recursos'
 import { HREF_UNETE } from './anclas'
+import { PortadaHeroe } from './portada-heroe'
 import { ENTRADA, retardoEntrada } from './revelado'
 import fotoHero from './hero-orum.webp'
 import escaparate from '../escaparate.module.css'
@@ -16,11 +18,18 @@ import estilos from './hero-publico.module.css'
   cursiva de oro pálido. Dos acciones en píldora: el alta, en oro, y el
   directorio, en contorno.
 
-  LA FOTOGRAFÍA ES DE LA MARCA, fija: la socia en el café con su tarjeta
-  ORUM, entregada por el cliente. Antes salía la portada del primer comercio
-  del catálogo, y eso ponía en la primera pantalla lo que cada comercio
-  hubiera subido (una etiqueta de producto, por ejemplo). Las portadas de
-  los comercios siguen en el carrusel de «Qué es ORUM» y en los destacados.
+  LA FOTOGRAFÍA ES DE LA MARCA: la socia en el café con su tarjeta ORUM,
+  entregada por el cliente. Antes salía la portada del primer comercio del
+  catálogo, y eso ponía en la primera pantalla lo que cada comercio hubiera
+  subido (una etiqueta de producto, por ejemplo). Las portadas de los
+  comercios siguen en el carrusel de «Qué es ORUM» y en los destacados.
+
+  YA NO ES FIJA, PERO SIGUE SIENDO EL RESPALDO. El propietario pidió poder
+  cambiarla desde el panel, o poner varias que se alternen; eso lo resuelve
+  `PortadaHeroe` con lo que haya visible en `/admin/recursos`. Cuando no hay
+  ninguna subida se pinta esta, y por eso el import estático NO se borra: el
+  día que se borre la última imagen desde el panel, la portada tiene que
+  volver sola a la foto de marca en vez de quedarse en negro.
 
   Import estático con `next/image`: Next conoce su tamaño (no hay salto de
   maquetación), la sirve en el ancho que pide cada pantalla y trae un
@@ -37,9 +46,16 @@ import estilos from './hero-publico.module.css'
 type Props = {
   /** El visitante tiene sesión de socio: se le tiende el puente a su portal. */
   esSocio: boolean
+  /**
+   * Las imágenes de portada publicadas desde `/admin/recursos`. Si hay
+   * alguna MANDA SOBRE LA FOTO DE MARCA; si hay varias, se alternan.
+   * Vacía —que es lo normal hasta que alguien suba la primera— deja el héroe
+   * exactamente como estaba.
+   */
+  portadas: RecursoPublico[]
 }
 
-export function HeroPublico({ esSocio }: Props) {
+export function HeroPublico({ esSocio, portadas }: Props) {
   return (
     <section
       id="inicio"
@@ -47,19 +63,32 @@ export function HeroPublico({ esSocio }: Props) {
       aria-labelledby="titulo-hero"
     >
       {/*
-        `alt=""`: la foto es ambiente, no información —el titular dice lo que
-        hay que saber—, y describirla antes del `h1` desordenaría la lectura.
+        `alt=""` en las dos ramas: la foto es ambiente, no información —el
+        titular dice lo que hay que saber—, y describirla antes del `h1`
+        desordenaría la lectura.
+
+        La foto de marca se sirve con `next/image` porque es un import
+        estático: Next conoce su tamaño (no hay salto de maquetación), la
+        sirve en el ancho que pide cada pantalla y trae un desenfoque de
+        respaldo mientras carga. Las subidas desde el panel NO pueden pasar
+        por ahí —son URLs de Storage arbitrarias y `next.config.ts` no
+        declara `images.remotePatterns`—, así que `PortadaHeroe` usa `<img>`,
+        igual que el resto del producto con las imágenes subidas.
       */}
-      <Image
-        className={estilos.foto}
-        src={fotoHero}
-        alt=""
-        fill
-        sizes="100vw"
-        quality={80}
-        placeholder="blur"
-        preload
-      />
+      {portadas.length > 0 ? (
+        <PortadaHeroe imagenes={portadas} />
+      ) : (
+        <Image
+          className={estilos.foto}
+          src={fotoHero}
+          alt=""
+          fill
+          sizes="100vw"
+          quality={80}
+          placeholder="blur"
+          preload
+        />
+      )}
       <div className={estilos.velo} aria-hidden="true" />
 
       {/*

@@ -31,6 +31,15 @@ export type TipoImagen = (typeof TIPOS_IMAGEN)[number]
  */
 export const LIMITE_IMAGENES_COMERCIOS = 1_048_576 // 1 MB — logo, portada, galería
 export const LIMITE_AVATARES = 524_288 // 512 KB — avatar de perfil, foto de socio
+/*
+  2 MB para los recursos del sitio, y es el único límite que sube.
+
+  La imagen principal de la portada es una fotografía que se pinta a ancho de
+  pantalla en escritorio: comprimirla a 1 MB como un logo de 72px la deja con
+  artefactos justo en lo primero que ve quien llega. Los carteles de promoción
+  viven en el mismo bucket y heredan el mismo techo.
+*/
+export const LIMITE_RECURSOS_SITIO = 2_097_152 // 2 MB — héroe, promociones, logos
 
 /**
  * Extensión de archivo por tipo. `jpg` y no `jpeg` porque es lo que escribe

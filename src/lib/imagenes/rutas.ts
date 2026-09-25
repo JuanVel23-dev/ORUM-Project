@@ -24,6 +24,7 @@
 export const BUCKET_IMAGENES_COMERCIOS = 'imagenes-comercios'
 export const BUCKET_IMAGENES_ANUNCIOS = 'imagenes-anuncios'
 export const BUCKET_AVATARES = 'avatares'
+export const BUCKET_RECURSOS_SITIO = 'recursos-sitio'
 
 export function rutaLogoComercio(comercioId: number, extension: string): string {
   return `comercios/${comercioId}/logo.${extension}`
@@ -79,6 +80,29 @@ export function claveGaleria(ahora: number, aleatorio: number): string {
     .toString(36)
     .padStart(4, '0')
   return `${ahora.toString(36)}-${sufijo}`
+}
+
+/**
+ * Una imagen del sitio público: el héroe, un cartel de promoción, un logo.
+ *
+ *   recursos-sitio/{ubicacion}/{clave}.{ext}
+ *
+ * La ubicación va EN LA RUTA aunque ninguna política la mire: el bucket se
+ * abre a mano en el panel de Supabase más veces de las que se piensa, y
+ * `promo/lk9x-0f21.webp` se entiende de un vistazo donde `lk9x-0f21.webp`
+ * obliga a cruzar la tabla.
+ *
+ * La clave es OPACA y la genera `claveGaleria`, nunca el nombre del archivo
+ * que trae quien sube: viene con espacios, tildes y a veces una ruta de
+ * Windows entera. Y es por pieza, no fija por destino: aquí cada imagen es
+ * una imagen distinta, no la sustitución de la anterior.
+ */
+export function rutaRecursoSitio(
+  ubicacion: string,
+  clave: string,
+  extension: string,
+): string {
+  return `${ubicacion}/${clave}.${extension}`
 }
 
 /**
