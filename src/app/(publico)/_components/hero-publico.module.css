@@ -268,7 +268,9 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--cacao-fg-3);
+  /* Crema plena y no `--cacao-fg-3`: el lema va sobre la foto, y el gris
+     se perdía donde la imagen es clara (pedido del cliente). */
+  color: var(--cacao-fg);
 }
 
 .ornamentoFilo {
