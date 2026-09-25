@@ -161,7 +161,11 @@ export default async function LandingPublica() {
               el diálogo que abre no hereda nada de aquí (se pinta en la capa
               superior). */}
           <div className={REVELAR_DER}>
-            <AliadosOverlayTrigger abiertoEn={abiertoEn} soporte={soporte} />
+            <AliadosOverlayTrigger
+              abiertoEn={abiertoEn}
+              soporte={soporte}
+              className={estilos.botonAliado}
+            />
           </div>
         </Revelar>
       </section>

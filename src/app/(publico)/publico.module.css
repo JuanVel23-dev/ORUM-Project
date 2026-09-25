@@ -109,3 +109,29 @@
   color-scheme: light;
   background: var(--blanco);
 }
+
+/*
+  LOS COLORES DEL REDISEÑO, EXACTOS  ·  encargo del propietario (25/09/2026)
+
+  La fachada usa la paleta del boceto aprobado donde difiere de la del
+  sistema. Especificidad doble a propósito: estos tokens los declara también
+  el bloque `[data-theme='light']` de `globals.css` sobre ESTE mismo elemento,
+  y con la especificidad empatada ganaría la hoja que Next inyecte después.
+
+    · `--brand` → `--gold-650` (#8E6B13), el oro de texto del boceto. 4,93:1
+      sobre blanco. Sobre el gris hondo de las tarjetas da 4,29:1: ahí solo
+      lo usa texto grande (el acento de «te unes», 26px) o iconos.
+    · `--gold-bg` → oro al 12 %, la insignia del boceto (era 10 %).
+    · Sombras → la escala del boceto (`--sombra-fachada-*`), más densa: sobre
+      blanco puro la tarjeta tiene que despegarse más.
+    · `--border-subtle` → tinta al 12 %, el filo interno del boceto (era un
+      negro al 22 %, que sobre blanco se leía como línea dibujada).
+*/
+.fachada[data-theme='light'] {
+  --brand: var(--gold-650);
+  --gold-bg: color-mix(in srgb, var(--gold-700) 12%, transparent);
+  --shadow-card: var(--sombra-fachada-1);
+  --shadow-raised: var(--sombra-fachada-2);
+  --shadow-flotante: var(--sombra-fachada-3);
+  --border-subtle: color-mix(in srgb, var(--tinta-1) 12%, transparent);
+}

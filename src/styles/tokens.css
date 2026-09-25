@@ -236,7 +236,12 @@
   --gold-400: #edc85f; /* DISPLAY sobre la franja negra / oscuro · focus en dark */
   --gold-500: #dfaf35; /* ORO DE MARCA · relleno de acción en dark */
   --gold-600: #ae8118; /* RELLENO DE ACCIÓN en claro · FILO / hairline */
-  --gold-700: #886712; /* TEXTO e iconos dorados sobre claro (las TRES) */
+  --gold-700: #886712;
+  /* El oro de texto de la FACHADA PÚBLICA, tal cual el rediseño aprobado
+     (25/09/2026): un punto más claro que `--gold-700`. Sobre blanco 4,93:1
+     (AA de texto normal); sobre el gris hondo `--w-100` 4,29:1, así que ahí
+     SOLO vale para texto grande (≥ 24px, o ≥ 18,66px en negrita) e iconos. */
+  --gold-650: #8e6b13; /* TEXTO e iconos dorados sobre claro (las TRES) */
   --gold-800: #675010; /* dorado enfático · oro sobre relleno dorado */
 
   /* Oro como material: barrido que simula luz sobre metal.
@@ -492,6 +497,14 @@
   --shadow-3: 0 4px 10px rgba(10, 10, 14, 0.14), 0 20px 52px rgba(10, 10, 14, 0.14);
   /* modal, hoja, paleta — cae sobre un scrim, así que aguanta más densidad */
   --shadow-4: 0 8px 20px rgba(10, 10, 14, 0.18), 0 40px 88px rgba(10, 10, 14, 0.2);
+
+  /* LA ESCALA DEL REDISEÑO de la fachada pública, copiada del boceto
+     aprobado. Misma gramática de dos capas y mismo tinte; más densa que la
+     del sistema porque sobre blanco puro la tarjeta tiene que despegarse más.
+     Solo la consume `(publico)/publico.module.css`. */
+  --sombra-fachada-1: 0 1px 2px rgba(10, 10, 14, 0.1), 0 6px 18px rgba(10, 10, 14, 0.08);
+  --sombra-fachada-2: 0 2px 4px rgba(10, 10, 14, 0.12), 0 18px 40px rgba(10, 10, 14, 0.14);
+  --sombra-fachada-3: 0 10px 16px rgba(10, 10, 14, 0.2), 0 30px 60px rgba(10, 10, 14, 0.2);
 
   /* Un HUNDIDO no es un escalón negativo de la escala: es la misma luz entrando
      al revés. Va `inset`, y por eso no puede salir de --shadow-1 invertido.

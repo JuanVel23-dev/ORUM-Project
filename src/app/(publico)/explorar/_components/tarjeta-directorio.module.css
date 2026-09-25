@@ -108,11 +108,11 @@
   }
 }
 
-/* `--text-2` y no `--text-3` sobre el gris hondo: 6,86:1, con margen. */
+/* `--text-3`, el gris del rediseño: 6,35:1 sobre el gris hondo. */
 .detalle {
   font-size: var(--t-caption-size);
   line-height: var(--t-caption-leading);
-  color: var(--text-2);
+  color: var(--text-3);
 }
 
 .beneficio {

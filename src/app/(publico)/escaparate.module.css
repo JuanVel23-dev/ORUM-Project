@@ -207,9 +207,13 @@
   el filo es el device caro de las referencias; en oscuro es el borde.
 */
 .filoBanda {
+  /* Oro al 30 %, como en el rediseño: un filo que se intuye, no una línea.
+     Sobre negro no delimita nada que el salto de color no delimite ya. */
+  --filo-banda: color-mix(in srgb, var(--gold-400) 30%, transparent);
+
   box-shadow:
-    inset 0 1px 0 var(--brand-edge),
-    inset 0 -1px 0 var(--brand-edge);
+    inset 0 1px 0 var(--filo-banda),
+    inset 0 -1px 0 var(--filo-banda);
 }
 
 /* ==========================================================================

@@ -241,7 +241,8 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--cacao-fg-2);
+  /* El gris del boceto: 6,35:1 sobre la tarjeta negra, 7,10:1 sobre el negro. */
+  color: var(--cacao-fg-3);
 }
 
 .ver {

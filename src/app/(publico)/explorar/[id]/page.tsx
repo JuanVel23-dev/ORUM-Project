@@ -159,6 +159,7 @@ export default async function FichaPublicaPage({
             size="lg"
             pildora
             fullWidth
+            className={estilos.botonOro}
           >
             Preguntar por WhatsApp
           </WhatsAppButton>

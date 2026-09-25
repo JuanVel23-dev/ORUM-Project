@@ -283,6 +283,36 @@ portales siguen con los dos temas. Y su fondo es **blanco puro**
 (`--blanco`, no el crema `--w-0`): `publico.module.css` remapea `--w-0` en
 la fachada; las franjas tintadas siguen en crema.
 
+### La paleta de la fachada pública es la del rediseño aprobado
+
+Encargo del propietario (25/09/2026): el Portal Público usa **exactamente**
+los colores del boceto (artifact «ORUM — Rediseño Portal Inicial»). Donde el
+boceto y el sistema difieren, en la fachada manda el boceto. Todo vive en
+`publico.module.css` (`.fachada[data-theme='light']`) y en tokens propios, así
+que los otros tres portales no cambian:
+
+| Qué | Sistema | Fachada pública | Contraste |
+|---|---|---|---|
+| Fondo y tarjeta | `--w-0` crema | `--blanco` #FFFFFF | — |
+| Oro de texto (`--brand`) | `--gold-700` | **`--gold-650`** #8E6B13 | 4,93 blanco · 4,29 gris hondo → ahí solo texto grande o iconos |
+| Fondo de insignia (`--gold-bg`) | oro 10 % | oro 12 % | — |
+| Sombras de escalón 1–3 | `--shadow-1..3` | `--sombra-fachada-1..3` (más densas) | — |
+| Filo interno (`--border-subtle`) | negro 22 % | tinta 12 % | decorativo |
+| Texto sobre negro, 3.er nivel | colapsa a `--cacao-fg-2` | `--cacao-fg-3` donde el boceto lo pide | 6,35 tarjeta negra |
+
+**Reglas que se relajan SOLO en la fachada**, porque el boceto las pide y el
+contraste AA de texto se sigue cumpliendo:
+
+- **Relleno `--gold-300` sobre claro** (el botón de WhatsApp de la ficha): el
+  texto en tinta da 12,65:1; el relleno pálido no marca un filo de 3:1 contra
+  el blanco, y no hace falta porque el texto nombra el botón.
+- **Botones con texto sin filo de 3:1** («Quiero ser aliado», los disparadores
+  Ciudad/Ordenar): los identifica su texto. El filo de 3:1 sigue siendo
+  obligatorio en los **campos donde se escribe** (`Input`, el buscador).
+- **Lo que NO se relaja**: 4,5:1 en texto normal. Cuando el color exacto del
+  boceto no llega, se oscurece un paso y se anota (la opción elegida de los
+  desplegables va en `--gold-800`: el oro del boceto da 4,21:1 ahí).
+
 **El claro es donde se diseña y se juzga.** En oscuro una sombra negra sobre
 fondo negro no se ve, así que allí el material lo declara **`--edge`**, que con
 la v3 pasó de ser un chaflán superior a un **anillo completo de luz**: es el

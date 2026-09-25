@@ -168,6 +168,8 @@
    margen automático actúa sobre el flex de `.plan`. */
 .accion > a {
   margin-top: auto;
+  /* La sombra del rediseño: el botón es un objeto sobre la tarjeta. */
+  box-shadow: var(--shadow-raised);
 }
 
 .sinPlanes {

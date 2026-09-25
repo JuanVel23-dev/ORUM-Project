@@ -159,7 +159,9 @@
   /* `--gold-600` con icono en tinta: 4,84:1 (el icono es texto a efectos de
      contraste, WCAG 1.4.11 pide 3:1). */
   background: var(--gold-600);
-  color: var(--tinta-1);
+  /* Blanco, como en el rediseño: 3,53:1 sobre el oro, por encima del 3:1 que
+     WCAG 1.4.11 pide a un icono. */
+  color: var(--blanco);
   cursor: pointer;
   transition: scale var(--dur-press) var(--ease-out);
 }
@@ -308,8 +310,9 @@
   justify-content: space-between;
   gap: var(--space-3);
   padding-top: var(--space-4);
-  /* Una división DENTRO de la superficie, no el borde de la superficie. */
-  border-top: 1px solid var(--border-subtle);
+  /* Una división DENTRO de la superficie, no el borde de la superficie. Tinta
+     al 10 %, la del rediseño: separa sin dibujar. */
+  border-top: 1px solid color-mix(in srgb, var(--tinta-1) 10%, transparent);
 }
 
 .recuento {
@@ -326,9 +329,11 @@
 }
 
 /*
-  EL DISPARADOR: una píldora con su icono en un anillo de oro. Es un
-  control, así que lleva borde en reposo (`--border-control`) además de su
-  sombra corta.
+  EL DISPARADOR: una píldora con su icono en un anillo de oro, filo de tinta
+  al 15 % y su sombra corta, como en el rediseño. No es un campo donde se
+  escribe: es un botón con texto («Ciudad: Todas»), y es el texto lo que lo
+  identifica, así que no necesita el filo de 3:1 de un `<input>`. El foco
+  sigue teniendo su anillo de 2px.
 */
 .disparador {
   display: inline-flex;
@@ -337,7 +342,7 @@
   min-height: var(--tap-min);
   padding: 0 var(--space-4) 0 var(--space-2);
 
-  border: 1px solid var(--border-control);
+  border: 1px solid color-mix(in srgb, var(--tinta-1) 15%, transparent);
   border-radius: var(--radius-full);
   background: var(--surface);
   box-shadow: var(--shadow-card);
@@ -379,6 +384,20 @@
 
 .chevron {
   color: var(--text-3);
+}
+
+/*
+  LA OPCIÓN ELEGIDA del menú, como en el rediseño: texto dorado sobre el
+  fondo de insignia. El menú se pinta en la capa superior pero sigue siendo
+  descendiente de `.menus` en el DOM, así que esto lo alcanza. `--gold-800`
+  y no el oro de texto de la fachada: sobre el fondo de insignia
+  `--gold-650` da 4,21:1 y `--gold-700` 4,4956:1, los dos bajo AA; el 800
+  da 6,58:1. El check del sistema sigue siendo el segundo portador.
+*/
+.menus :global([role='menuitemradio'][aria-checked='true']) {
+  background: var(--gold-bg);
+  color: var(--gold-800);
+  font-weight: 700;
 }
 
 /* --- La rejilla ----------------------------------------------------------- */

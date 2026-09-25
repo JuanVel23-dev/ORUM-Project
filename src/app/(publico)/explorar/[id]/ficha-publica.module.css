@@ -216,7 +216,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--text-2);
+  color: var(--text-3);
 }
 
 .beneficioValor {
@@ -232,4 +232,15 @@
   margin: 0;
   font-size: var(--t-callout-size);
   color: var(--text-2);
+}
+
+/*
+  «Preguntar por WhatsApp» en el oro pálido del rediseño (`--gold-300`) con
+  texto en tinta: 12,65:1. Sobre la ficha blanca el relleno pálido no marca
+  un borde de 3:1, pero no lo necesita: el texto nombra el botón, y la
+  sombra lo levanta. Tokens sobre el propio botón, no en un envoltorio.
+*/
+.botonOro {
+  --action-gold: var(--gold-300);
+  --action-gold-fg: var(--tinta-1);
 }

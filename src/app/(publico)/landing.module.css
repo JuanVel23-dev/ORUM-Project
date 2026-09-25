@@ -120,3 +120,17 @@
   color: var(--text-2);
   text-wrap: pretty;
 }
+
+/*
+  «Quiero ser aliado», como en el rediseño: píldora gris hondo con su sombra
+  corta y sin filo. Es `Button secondary` con sus tokens remapeados en el
+  propio botón (no en un envoltorio: el diálogo del formulario se monta al
+  lado y heredaría el remapeo). El nombre del control lo da su texto, 15,18:1
+  en tinta, así que no necesita el filo de 3:1 de un campo de formulario.
+*/
+.botonAliado {
+  --surface: var(--surface-alt-2);
+  --border-control: transparent;
+
+  box-shadow: var(--shadow-card);
+}
