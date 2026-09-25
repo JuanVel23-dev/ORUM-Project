@@ -2,8 +2,10 @@ import Link from 'next/link'
 import { ArrowDown } from 'lucide-react'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import type { ComercioVitrina } from '@/lib/publico/datos-publicos'
+import type { RecursoPublico } from '@/lib/sitio/recursos'
 import escaparate from '../escaparate.module.css'
 import { CtaSocio } from './cta-socio'
+import { PortadaHeroe } from './portada-heroe'
 import estilos from './hero-publico.module.css'
 
 /*
@@ -43,10 +45,22 @@ type Props = {
   comercios: ComercioVitrina[]
   /** Si la vitrina no se renderiza, el ancla secundaria no tiene destino. */
   hayVitrina: boolean
+  /**
+   * La imagen principal, administrada desde `/admin/recursos`. Si hay al
+   * menos una visible MANDA SOBRE EL COLLAGE, y si hay varias se alternan.
+   *
+   * El collage no se borra: pasa a ser el respaldo. Una portada sin imagen
+   * subida no puede quedarse con una columna vacía —y este archivo no puede
+   * decidir que la segunda columna desaparezca, porque entonces el día que el
+   * propietario borre la última foto la pantalla cambiaría de maquetación sin
+   * que nadie haya tocado nada—.
+   */
+  portadas: RecursoPublico[]
 }
 
-export function HeroPublico({ soporte, comercios, hayVitrina }: Props) {
+export function HeroPublico({ soporte, comercios, hayVitrina, portadas }: Props) {
   const collage = comercios.slice(0, TOPE_COLLAGE)
+  const hayPortada = portadas.length > 0
 
   return (
     <section
@@ -97,19 +111,25 @@ export function HeroPublico({ soporte, comercios, hayVitrina }: Props) {
         </div>
 
         {/*
-          EL COLLAGE, decorativo a propósito.
+          LA SEGUNDA COLUMNA, en dos estados y con el mismo hueco.
 
-          Son aliados reales, y esos mismos comercios aparecen nombrados en la
-          vitrina de más abajo: anunciarlos aquí otra vez al lector de pantalla
-          sería repetir la lista dos veces. `ComercioLogo` ya va `aria-hidden`
-          por dentro; el contenedor lo marca entero.
+          Con imagen principal subida manda ella. Sin ninguna, el collage de
+          aliados — que es decorativo a propósito: son comercios reales y esos
+          mismos comercios aparecen nombrados en la vitrina de más abajo, así
+          que anunciarlos aquí otra vez al lector de pantalla sería repetir la
+          lista dos veces. `ComercioLogo` ya va `aria-hidden` por dentro; el
+          contenedor lo marca entero.
         */}
-        {collage.length > 0 && (
-          <div className={estilos.collage} aria-hidden="true">
-            {collage.map((comercio) => (
-              <CeldaCollage key={comercio.id} comercio={comercio} />
-            ))}
-          </div>
+        {hayPortada ? (
+          <PortadaHeroe imagenes={portadas} />
+        ) : (
+          collage.length > 0 && (
+            <div className={estilos.collage} aria-hidden="true">
+              {collage.map((comercio) => (
+                <CeldaCollage key={comercio.id} comercio={comercio} />
+              ))}
+            </div>
+          )
         )}
       </div>
     </section>

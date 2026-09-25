@@ -2,6 +2,7 @@ import {
   BarChart3,
   CreditCard,
   Home,
+  Images,
   LayoutGrid,
   Search,
   ScrollText,
@@ -54,6 +55,13 @@ const COMERCIOS: NavItem = { href: '/admin/comercios', label: 'Comercios', icon:
 const USUARIOS: NavItem = { href: '/admin/usuarios', label: 'Usuarios', icon: UserCog }
 const PLANES: NavItem = { href: '/admin/planes', label: 'Planes', icon: CreditCard }
 const METRICAS: NavItem = { href: '/admin/metricas', label: 'Métricas', icon: BarChart3 }
+/*
+  «Recursos» y no «Imágenes»: hay imágenes en tres sitios más del panel —el
+  logo de un comercio, la foto de un socio, el avatar de quien trabaja aquí— y
+  todas se gestionan donde vive su dueño. Lo que cuelga de este destino es lo
+  que NO tiene dueño: lo que se ve en la página pública.
+*/
+const RECURSOS: NavItem = { href: '/admin/recursos', label: 'Recursos', icon: Images }
 const BITACORA: NavItem = { href: '/admin/bitacora', label: 'Bitácora', icon: ScrollText }
 
 /*
@@ -77,7 +85,7 @@ export function navegacionPara(rol: RolCodigo): NavGroup[] {
       // Consultar, no operar. Métricas va primero: se mira a diario; la
       // bitácora solo cuando hay que averiguar quién hizo algo.
       { label: 'Análisis', items: [METRICAS, BITACORA] },
-      { label: 'Administración', items: [USUARIOS, PLANES] },
+      { label: 'Administración', items: [USUARIOS, PLANES, RECURSOS] },
     ]
   }
 

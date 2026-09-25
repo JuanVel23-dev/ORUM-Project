@@ -15,6 +15,15 @@ export type RolCodigo = 'super_admin' | 'empleado' | 'comercio' | 'miembro'
 /** Códigos de tipo_beneficio tal como están en la tabla `tipos_beneficio`. */
 export type TipoBeneficioCodigo = 'porcentaje' | 'dos_por_uno' | 'monto_fijo' | 'regalo'
 
+/**
+ * Dónde se usa un recurso del sitio (`recursos_sitio.ubicacion`).
+ *
+ * No es un enum de Postgres sino un `check` (migración 20260925090000).
+ * Aquí se tipa igual de estrecho, así que una ubicación mal escrita es un
+ * error de compilación y no una fila que nadie pinta nunca.
+ */
+export type UbicacionRecurso = 'heroe' | 'promo' | 'logo' | 'general'
+
 /** Valores del enum `metodo_registro_venta`. */
 export type MetodoRegistroVenta = 'qr' | 'numero'
 
@@ -495,6 +504,46 @@ export type Database = {
           updated_at?: Timestamp
         }
         Update: Partial<Database['public']['Tables']['configuracion']['Insert']>
+        Relationships: []
+      }
+      /**
+       * Imágenes del sitio público que administra el panel: la imagen
+       * principal del héroe, los carteles de promociones del club, los
+       * logotipos de ORUM y cualquier otro recurso.
+       *
+       * NO confundir con `promociones`, que son los descuentos de los
+       * COMERCIOS. Migración 20260925090000.
+       */
+      recursos_sitio: {
+        Row: {
+          id: number
+          ubicacion: UbicacionRecurso
+          titulo: string
+          /** Texto alternativo. Vacío = decorativa, nunca el nombre del archivo. */
+          descripcion: string | null
+          url: string
+          enlace_url: string | null
+          orden: number
+          /** El interruptor de «se ve en la página». Arranca apagado. */
+          visible: boolean
+          creado_por: string | null
+          created_at: Timestamp
+          updated_at: Timestamp
+        }
+        Insert: {
+          id?: number
+          ubicacion: UbicacionRecurso
+          titulo: string
+          descripcion?: string | null
+          url: string
+          enlace_url?: string | null
+          orden?: number
+          visible?: boolean
+          creado_por?: string | null
+          created_at?: Timestamp
+          updated_at?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['recursos_sitio']['Insert']>
         Relationships: []
       }
     }

@@ -10,8 +10,10 @@ import {
   obtenerWhatsappSoporte,
   type ComercioVitrina,
 } from '@/lib/publico/datos-publicos'
+import { obtenerRecursosVisibles } from '@/lib/sitio/datos-sitio'
 import { AliadosOverlayTrigger } from './_components/aliados-overlay-trigger'
 import { ComoFunciona } from './_components/como-funciona'
+import { PromosSitio } from './_components/promos-sitio'
 import { QueEsOrum } from './_components/que-es-orum'
 import { CtaSocio } from './_components/cta-socio'
 import { HeroPublico } from './_components/hero-publico'
@@ -57,6 +59,8 @@ export const metadata: Metadata = {
  *
  *   Héroe .............. CACAO        ← la única superficie donde el oro grande
  *                                       es legible: 7,83:1 (sobre crema, 1,99:1)
+ *   ¿Qué es ORUM? ...... PAPEL
+ *   Promociones ........ CREMA        ← solo si hay carteles publicados
  *   Así funciona ....... CREMA HONDA  ← relleno sin texto tenue ni tarjetas
  *   Vitrina ............ CREMA
  *   El club en números . PAPEL
@@ -77,11 +81,23 @@ export default async function LandingPublica() {
     `cache()` ya evita que el layout y esta página consulten dos veces el número
     de soporte dentro de la misma petición.
   */
-  const [vitrina, soporte, perfil, abiertoEn] = await Promise.all([
+  const [vitrina, soporte, perfil, abiertoEn, portadas, promos] = await Promise.all([
     obtenerVitrinaPublica(),
     obtenerWhatsappSoporte(),
     getPerfilActual(),
     obtenerInstanteServidor(),
+    /*
+      Las imágenes que administra el panel (`/admin/recursos`). Entran en el
+      mismo `Promise.all` que el resto por el motivo de arriba: son dos
+      lecturas independientes y encadenarlas sumaría sus latencias al camino
+      más caliente del sitio.
+
+      Las dos devuelven lista vacía si la migración 20260925090000 no está
+      aplicada, y eso es lo que hace que esta página siga pintándose entera
+      mientras tanto.
+    */
+    obtenerRecursosVisibles('heroe'),
+    obtenerRecursosVisibles('promo'),
   ])
 
   /*
@@ -129,7 +145,12 @@ export default async function LandingPublica() {
         </Link>
       )}
 
-      <HeroPublico soporte={soporte} comercios={comercios} hayVitrina={hayVitrina} />
+      <HeroPublico
+        soporte={soporte}
+        comercios={comercios}
+        hayVitrina={hayVitrina}
+        portadas={portadas}
+      />
 
       {/*
         «Cómo funciona» ANTES que la vitrina, y no al revés.
@@ -142,6 +163,21 @@ export default async function LandingPublica() {
       {/* Qué es ORUM, su misión y su visión: responde a «qué es» antes de «cómo
           se usa». Texto del propietario. */}
       <QueEsOrum />
+
+      {/*
+        LAS PROMOCIONES DEL CLUB, justo al lado de la misión y la visión, que
+        es donde el propietario las pidió.
+
+        SI NO HAY CARTELES PUBLICADOS, NO HAY SECCIÓN. Un encabezado
+        «Promociones» sobre un hueco afirma que el club no tiene ninguna, y eso
+        es peor que no decir nada — el mismo criterio que ya gobierna «El club
+        en números» unas líneas más abajo.
+
+        Y al desaparecer, el ritmo tonal vuelve solo al de antes: papel →
+        crema honda. Ninguna sección queda en el mismo tono que su vecina en
+        ninguno de los dos casos.
+      */}
+      {promos.length > 0 && <PromosSitio promos={promos} />}
 
       <ComoFunciona />
 

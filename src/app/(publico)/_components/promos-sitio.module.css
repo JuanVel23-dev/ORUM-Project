@@ -1,0 +1,125 @@
+/* ==========================================================================
+   PROMOCIONES DEL CLUB  ·  los carteles de la portada
+
+   Una rejilla de cubiertas, no una lista de tarjetas con texto: lo que se
+   sube es un cartel y el cartel ya lleva dentro lo que tiene que decir.
+   ========================================================================== */
+
+.bloque.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/*
+  `@container` y no `@media`: el ancho útil del contenido no es el del
+  viewport. Aquí la landing no tiene barra lateral, pero el contenedor lo
+  publica el `<main>` del portal público igual que en el resto de secciones, y
+  mezclar las dos formas de preguntar dentro de la misma página es lo que hace
+  que una sección rompa 200px antes que su vecina.
+*/
+@container contenido (min-width: 720px) {
+  .rejilla {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container contenido (min-width: 1040px) {
+  .rejilla {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/*
+  La celda ES la superficie levantada: sombra, sin trazo. `overflow: hidden`
+  para que la imagen respete el radio sin que haya que redondearla a ella.
+*/
+.celda {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+.imagen {
+  display: block;
+  width: 100%;
+  /* La proporción la fija la celda y no el archivo: sin esto, tres carteles
+     exportados a tamaños distintos dejan la fila desalineada y la página da
+     un salto cuando cargan. */
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+/* --- Con destino ---------------------------------------------------------- */
+
+.enlace {
+  display: block;
+  position: relative;
+  border-radius: inherit;
+  /* Enumeradas, nunca `all`. Y `translate`, que es propiedad independiente de
+     `transform`: así no pisa nada que el navegador ya esté componiendo. */
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/*
+  El filo dorado de «te estoy respondiendo». `box-shadow: inset` y no
+  `border`: no toca la caja, así que aparece y desaparece sin mover un píxel
+  de la imagen.
+*/
+.filo {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/*
+  SOLO bajo `hover: hover`. En táctil el hover se queda pegado tras el toque y
+  el cartel se quedaría levantado hasta que se toque otra cosa.
+*/
+@media (hover: hover) {
+  .enlace:hover {
+    translate: 0 -2px;
+  }
+
+  .enlace:hover .filo {
+    box-shadow: inset 0 0 0 1px var(--brand-edge);
+  }
+}
+
+/* Presionar hunde: pierde el halo y baja. Ocurre en `:active`, que el
+   navegador enciende al APRETAR y no al soltar. */
+.enlace:active {
+  translate: 0 1px;
+}
+
+/* Los dos 2px literales del sistema, y son los únicos admitidos: es el
+   anillo de `:focus-visible`, escrito igual que en el resto de módulos. */
+.enlace:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* El desplazamiento es vestibular: se retira. El filo no, porque es el canal
+   que queda cuando el movimiento se va. */
+@media (prefers-reduced-motion: reduce) {
+  .enlace:hover,
+  .enlace:active {
+    translate: none;
+  }
+}

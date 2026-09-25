@@ -1,0 +1,144 @@
+/* ==========================================================================
+   LA IMAGEN PRINCIPAL DE LA PORTADA
+
+   Vive dentro de la franja del héroe, que desde el rediseño de septiembre es
+   champán en tema claro y negra en oscuro. Por eso el botón de pausa NO se
+   viste con los tokens de la franja: se apoya en una fotografía arbitraria
+   que alguien sube desde el panel, y ahí el contraste no puede depender ni
+   del tema ni de lo que traiga la imagen. Velo propio oscuro y glifo blanco,
+   que es la única combinación que se sostiene sobre las dos.
+   ========================================================================== */
+
+.portada {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  /* La proporción la fija el hueco y no el archivo: si la fijara el archivo,
+     subir una foto vertical movería el titular de sitio. */
+  aspect-ratio: 4 / 3;
+  box-shadow: var(--edge-light);
+}
+
+/*
+  901px Y NO 900: es EXACTAMENTE el corte en el que `hero-publico.module.css`
+  pasa la rejilla a dos columnas. Con 900 aquí, a un ancho de 900px justos la
+  imagen ya sería vertical mientras la rejilla todavía está apilada, y una
+  foto en retrato a ancho completo del móvil empuja el resto de la página una
+  pantalla hacia abajo. Si allí se toca el corte, aquí también.
+*/
+@container contenido (min-width: 901px) {
+  .portada {
+    aspect-ratio: 3 / 4;
+  }
+}
+
+/*
+  Las imágenes se apilan una encima de otra en la misma celda de rejilla. No
+  se usa `position: absolute` para apilarlas porque entonces la pila no mide
+  nada y el contenedor necesitaría alto propio; con `grid-area: 1 / 1` la pila
+  mide lo que mide la mayor y el `aspect-ratio` del padre manda igual.
+*/
+.pila {
+  display: grid;
+  width: 100%;
+  height: 100%;
+}
+
+.imagen {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  opacity: 0;
+  /* Enumerada, nunca `all`. Y la salida más rápida que la entrada no aplica
+     aquí: en un fundido cruzado las dos capas se mueven a la vez, y que una
+     tarde más que la otra deja un parpadeo de fondo entre medias. */
+  transition: opacity var(--dur-page) var(--ease-hero);
+}
+
+.imagen[data-visible='true'] {
+  opacity: 1;
+}
+
+/*
+  MOVIMIENTO REDUCIDO. El componente ya no rota, pero la primera imagen sigue
+  necesitando estar opaca: sin esta regla, si el JavaScript no llegara nunca
+  el hueco se quedaría en negro. Es la misma red de seguridad que `Revelar`.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .imagen {
+    transition-duration: 0.01ms;
+  }
+}
+
+@media (scripting: none) {
+  .imagen:first-child {
+    opacity: 1;
+  }
+}
+
+/* --- El botón de pausa ---------------------------------------------------- */
+
+/*
+  Pequeño a la vista y grande al dedo: el objetivo táctil se amplía con un
+  `::after` centrado de `--tap-min` en vez de engordar el botón, que es la
+  norma del sistema para el ojo de la contraseña y el botón de copiar.
+*/
+.pausa {
+  position: absolute;
+  inset-block-end: var(--space-3);
+  inset-inline-end: var(--space-3);
+
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+
+  /*
+    Los dos tokens crudos, y no literales: `--cacao-900` es el negro del
+    sistema y `--w-0` su blanco. Al 78 % el velo tapa lo suficiente como para
+    que el glifo dé 11:1 incluso sobre la zona más clara posible de una foto,
+    y 21:1 sobre la más oscura. Sin `backdrop-filter`: es un desenfoque de
+    capa por un botón de 32px, y el sistema lo reserva para el cromo fijo.
+  */
+  background: color-mix(in srgb, var(--cacao-900) 78%, transparent);
+  color: var(--w-0);
+
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
+}
+
+.pausa::after {
+  content: '';
+  position: absolute;
+  inset: 50%;
+  translate: -50% -50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+}
+
+@media (hover: hover) {
+  .pausa:hover {
+    background: color-mix(in srgb, var(--cacao-900) 90%, transparent);
+  }
+}
+
+.pausa:active {
+  scale: 0.94;
+}
+
+.pausa:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pausa:active {
+    scale: none;
+  }
+}
