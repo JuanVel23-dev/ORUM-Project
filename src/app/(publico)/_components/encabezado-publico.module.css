@@ -74,35 +74,22 @@
   }
 }
 
-/* --- Wordmark -------------------------------------------------------------
-   «✦ ORUM» de la guía de marca: el destello en oro pálido y el nombre en
-   Playfair Display crema. Es MARCA, no acción: enlaza a la propia landing. */
+/* --- Logotipo ------------------------------------------------------------
+   El PNG del cliente («ORUM» dorado con la estrella en la O). Crece con la
+   pantalla: 26px de alto en un teléfono, 44px en un escritorio ancho. Un alto
+   fijo obligaba a elegir entre un logo diminuto en escritorio o uno que
+   apretaba la hamburguesa en móvil. `vw` y no `cqi`: la cabecera vive fuera
+   del contenedor `contenido`. Es MARCA, no acción: enlaza a la portada. */
 .marca {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-
-  font-family: var(--font-display);
-  /*
-    Crece con la pantalla: 26px en un teléfono, ~33px en una tableta y 48px
-    (el tamaño de la guía de marca) en un escritorio ancho. Un tamaño fijo
-    obligaba a elegir entre un logo diminuto en escritorio o uno que apretaba
-    la hamburguesa en móvil. `vw` y no `cqi`: la cabecera vive fuera del
-    contenedor `contenido`.
-  */
-  font-size: clamp(1.625rem, 1rem + 2.2vw, 3rem);
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--cacao-fg);
+  border-radius: var(--radius-xs);
   text-decoration: none;
-  -webkit-font-smoothing: auto;
 }
 
-.destello {
-  font-size: 0.62em;
-  color: var(--gold-300);
+.logo {
+  height: clamp(1.625rem, 0.9rem + 1.9vw, 2.75rem);
 }
 
 .marca:focus-visible {

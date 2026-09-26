@@ -49,9 +49,9 @@
   color: var(--text-2);
 }
 
+/* La estrella del cliente como viñeta: el mismo dibujo que vive en la O. */
 .check {
-  flex-shrink: 0;
-  color: var(--brand);
+  height: 0.95rem;
 }
 
 /* --- Los planes ----------------------------------------------------------- */

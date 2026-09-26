@@ -1,6 +1,7 @@
 import type { FotoPublica } from '@/lib/publico/datos-publicos'
 import escaparate from '../escaparate.module.css'
 import { CarruselFotos } from './carrusel-fotos'
+import { AdornoEstrella } from './marca/marca'
 import { Revelar } from './revelar'
 import { REVELAR_DER, REVELAR_IZQ } from './revelado'
 import estilos from './que-es-orum.module.css'
@@ -35,10 +36,13 @@ export function QueEsOrum({ fotos }: { fotos: FotoPublica[] }) {
       <Revelar>
         <div className={[estilos.bloque, hayFotos && estilos.conFotos].filter(Boolean).join(' ')}>
           <div className={[estilos.texto, REVELAR_IZQ].join(' ')}>
-            <h2 id="titulo-nosotros" className={escaparate.tituloSeccion}>
-              Una red de valor <br className={estilos.salto} />
-              que <em className={escaparate.acento}>se nota</em>
-            </h2>
+            <div>
+              <AdornoEstrella />
+              <h2 id="titulo-nosotros" className={escaparate.tituloSeccion}>
+                Una red de valor <br className={estilos.salto} />
+                que <em className={escaparate.acento}>se nota</em>
+              </h2>
+            </div>
             <p className={estilos.lede}>
               ORUM es una plataforma de beneficios que conecta consumidores y comercios locales
               dentro de un mismo ecosistema.

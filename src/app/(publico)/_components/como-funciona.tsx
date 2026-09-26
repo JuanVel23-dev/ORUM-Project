@@ -1,4 +1,5 @@
 import escaparate from '../escaparate.module.css'
+import { AdornoEstrella } from './marca/marca'
 import { Revelar } from './revelar'
 import { REVELAR, revelarEscalonado } from './revelado'
 import estilos from './como-funciona.module.css'
@@ -51,9 +52,12 @@ export function ComoFunciona() {
           especificidad ganaría la hoja que Next inyecte después. */}
       <Revelar>
         <div className={[estilos.tarjeta, REVELAR].join(' ')}>
-        <h2 id="titulo-como-te-unes" className={estilos.titulo}>
-          Así es como <em className={escaparate.acento}>te unes</em>
-        </h2>
+        <div>
+          <AdornoEstrella />
+          <h2 id="titulo-como-te-unes" className={estilos.titulo}>
+            Así es como <em className={escaparate.acento}>te unes</em>
+          </h2>
+        </div>
 
         <ol className={estilos.pasos}>
           {PASOS.map((paso, indice) => (

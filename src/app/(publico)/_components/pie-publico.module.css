@@ -71,23 +71,14 @@
   }
 }
 
-/* El wordmark pequeño: «✦ ORUM», como el de la cabecera. */
+/* El logotipo del cliente, dorado sobre el negro del pie. */
 .marca {
   margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--t-title-2-size);
-  line-height: 1;
-  font-weight: 700;
-  color: var(--text);
-  -webkit-font-smoothing: auto;
+  display: flex;
 }
 
-.destello {
-  font-size: 0.8em;
-  color: var(--brand);
+.logo {
+  height: 2rem;
 }
 
 /* --- Las tres puertas ----------------------------------------------------- */
@@ -218,6 +209,15 @@
   font-size: var(--t-caption-size);
   line-height: var(--t-caption-leading);
   color: var(--text-3);
+}
+
+/* La estrella del cliente como separador de los derechos, en plata: sobre
+   el negro del pie el oro se apaga. */
+.estrellaDerechos {
+  display: inline-block;
+  height: 0.7rem;
+  margin-inline: var(--space-2);
+  vertical-align: -0.05em;
 }
 
 .legal {

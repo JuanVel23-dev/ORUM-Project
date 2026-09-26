@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
+import { EstrellaOrum, LogoOrum } from './marca/marca'
 import { REVELAR, revelarEscalonado } from './revelado'
 import estilos from './pie-publico.module.css'
 
@@ -44,10 +45,7 @@ export function PiePublico({ soporte }: { soporte: string | null }) {
     <footer className={estilos.pie}>
       <div className={estilos.contenido}>
         <p className={[estilos.marca, REVELAR].join(' ')}>
-          <span className={estilos.destello} aria-hidden="true">
-            ✦
-          </span>
-          ORUM
+          <LogoOrum variante="plata" className={estilos.logo} />
         </p>
 
         <nav className={estilos.puertas} aria-label="Accesos a los portales">
@@ -84,7 +82,9 @@ export function PiePublico({ soporte }: { soporte: string | null }) {
 
       <div className={estilos.base}>
         <p className={estilos.derechos}>
-          © {new Date().getFullYear()} ORUM · Apoya lo local, te da más.
+          © {new Date().getFullYear()} ORUM
+          <EstrellaOrum tono="plata" className={estilos.estrellaDerechos} />
+          Apoya lo local, te da más.
         </p>
 
         <nav className={estilos.legal} aria-label="Legal">

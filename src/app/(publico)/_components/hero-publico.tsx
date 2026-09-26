@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowRight, Compass } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HREF_UNETE } from './anclas'
+import { EstrellaOrum } from './marca/marca'
 import { ENTRADA, retardoEntrada } from './revelado'
 import fotoHero from './hero-orum.webp'
 import escaparate from '../escaparate.module.css'
@@ -72,7 +73,7 @@ export function HeroPublico({ esSocio }: Props) {
         {/* La entrada va en cada pieza y no en `.ornamento`: el contenedor se
             centra con `translate`, y la animación se lo pisaría. */}
         <span className={[estilos.ornamentoDestello, ENTRADA].join(' ')} style={retardoEntrada(6)}>
-          ✦
+          <EstrellaOrum tono="plata" className={estilos.estrellaOrnamento} />
         </span>
         <span className={[estilos.ornamentoTexto, ENTRADA].join(' ')} style={retardoEntrada(7)}>
           Apoya lo local. Te da más.
@@ -102,7 +103,7 @@ export function HeroPublico({ esSocio }: Props) {
         )}
 
         <p className={[estilos.insignia, ENTRADA].join(' ')} style={retardoEntrada(1)}>
-          <span aria-hidden="true">✦ </span>
+          <EstrellaOrum tono="plata" className={estilos.estrellaInsignia} />
           Apoya lo local · Te da más
         </p>
 
