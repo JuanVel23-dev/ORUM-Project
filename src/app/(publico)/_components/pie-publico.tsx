@@ -82,9 +82,20 @@ export function PiePublico({ soporte }: { soporte: string | null }) {
         )}
       </div>
 
-      <p className={estilos.derechos}>
-        © {new Date().getFullYear()} ORUM · Apoya lo local, te da más.
-      </p>
+      <div className={estilos.base}>
+        <p className={estilos.derechos}>
+          © {new Date().getFullYear()} ORUM · Apoya lo local, te da más.
+        </p>
+
+        <nav className={estilos.legal} aria-label="Legal">
+          <Link href="/terminos" className={estilos.enlaceLegal}>
+            Términos y condiciones
+          </Link>
+          <Link href="/privacidad" className={estilos.enlaceLegal}>
+            Política de privacidad
+          </Link>
+        </nav>
+      </div>
     </footer>
   )
 }

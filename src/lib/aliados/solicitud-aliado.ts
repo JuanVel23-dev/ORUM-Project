@@ -259,10 +259,16 @@ export function pareceAutomatico(
  */
 export type SolicitudAliadoState = {
   ok?: boolean
-  /** Fallo que NO es de un campo concreto: envío caído, configuración ausente. */
+  /**
+   * Fallo que NO es de un campo concreto: envío caído, configuración ausente,
+   * o no haber marcado la casilla de Términos y política de privacidad — esa
+   * casilla no es un dato del comercio, así que no vive en `ErroresSolicitud`.
+   */
   error?: string
   errores?: ErroresSolicitud
   valores?: EntradaSolicitudAliado
+  /** Para repintar la casilla marcada tras un error de otro campo. */
+  aceptaTerminos?: boolean
 }
 
 /** Nombre del campo trampa. Suena plausible para un robot y no existe para nadie más. */

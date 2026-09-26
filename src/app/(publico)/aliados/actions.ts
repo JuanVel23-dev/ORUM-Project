@@ -45,6 +45,7 @@ export async function enviarSolicitudAliado(
   formData: FormData,
 ): Promise<SolicitudAliadoState> {
   const valores = leerEntrada(formData)
+  const aceptaTerminos = formData.get('aceptaTerminos') === 'true'
 
   const trampa = String(formData.get(CAMPO_TRAMPA) ?? '')
 
@@ -69,6 +70,7 @@ export async function enviarSolicitudAliado(
     return {
       error: 'No pudimos verificar el envío. Espera un momento e inténtalo otra vez.',
       valores,
+      aceptaTerminos,
     }
   }
 
@@ -78,7 +80,22 @@ export async function enviarSolicitudAliado(
     del navegador.
   */
   const resultado = validarSolicitudAliado(valores)
-  if (!resultado.ok) return { errores: resultado.errores, valores }
+  if (!resultado.ok) return { errores: resultado.errores, valores, aceptaTerminos }
+
+  /*
+    La casilla no es un campo del comercio —no va al correo de la solicitud—,
+    así que se comprueba aparte y como error de página, igual que el «elige al
+    menos un portal» de anuncios: no es un dato inválido, es un permiso que
+    falta.
+  */
+  if (!aceptaTerminos) {
+    return {
+      error:
+        'Debes aceptar los Términos y condiciones y la Política de privacidad para enviar la solicitud.',
+      valores,
+      aceptaTerminos,
+    }
+  }
 
   try {
     await enviarCorreoSolicitudAliado(resultado.datos)

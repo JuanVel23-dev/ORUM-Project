@@ -1,12 +1,14 @@
 'use client'
 
 import { useActionState } from 'react'
+import Link from 'next/link'
 import { CheckCircle2, Send } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, Select, Textarea } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { Checkbox } from '@/components/ui/toggle'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import {
   CAMPO_ABIERTO_EN,
@@ -261,6 +263,42 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
           />
         </Field>
       </Stack>
+
+      {/*
+        Enlaces reales dentro de la etiqueta del checkbox: un `<a>` anidado en
+        un `<label>` navega sin además marcar la casilla —es el comportamiento
+        estándar del navegador con hijos interactivos—, así que es seguro.
+        `target="_blank"` para no perder los otros nueve campos ya escritos.
+      */}
+      <Checkbox
+        name="aceptaTerminos"
+        value="true"
+        required
+        defaultChecked={state.aceptaTerminos ?? false}
+        label={
+          <>
+            Leí y acepto los{' '}
+            <Link
+              href="/terminos"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={estilos.enlaceLegal}
+            >
+              Términos y condiciones
+            </Link>{' '}
+            y la{' '}
+            <Link
+              href="/privacidad"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={estilos.enlaceLegal}
+            >
+              Política de privacidad
+            </Link>
+            .
+          </>
+        }
+      />
 
       {/*
         Tinta, no oro: `CLAUDE.md` retiró al Portal Público de la lista de

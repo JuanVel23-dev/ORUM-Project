@@ -190,9 +190,9 @@
   outline-offset: 2px;
 }
 
-/* --- Derechos ------------------------------------------------------------- */
+/* --- Base: derechos + legal ------------------------------------------------ */
 
-.derechos {
+.base {
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
@@ -200,7 +200,65 @@
   padding-top: var(--space-5);
   border-top: 1px solid var(--border-subtle);
 
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .base {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.derechos {
+  margin: 0;
   font-size: var(--t-caption-size);
   line-height: var(--t-caption-leading);
   color: var(--text-3);
+}
+
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+}
+
+/*
+  Mismos tokens locales que `.pie` ya remapea (`--text-3`, `--surface-hover`,
+  `--focus`): este enlace hereda el negro de los dos temas sin pintar nada a
+  mano.
+*/
+.enlaceLegal {
+  min-height: var(--tap-min);
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0 var(--space-1);
+  margin-left: calc(var(--space-1) * -1);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  color: var(--text-3);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .enlaceLegal:hover {
+    color: var(--text-2);
+    background: var(--surface-hover);
+  }
+}
+
+.enlaceLegal:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
