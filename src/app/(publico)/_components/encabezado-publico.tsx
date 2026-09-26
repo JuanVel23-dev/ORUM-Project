@@ -36,7 +36,7 @@ export function EncabezadoPublico() {
         style={retardoEntrada(0)}
         aria-label="ORUM, ir al inicio"
       >
-        <LogoOrum variante="dorado" className={estilos.logo} preload />
+        <LogoOrum variante="plata" className={estilos.logo} preload />
       </Link>
 
       <nav

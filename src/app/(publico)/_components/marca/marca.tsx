@@ -1,9 +1,12 @@
 import Image from 'next/image'
 import estrella from './estrella.png'
+import estrellaPlata from './estrella-plata.png'
 import monograma from './monograma.png'
+import monogramaPlata from './monograma-plata.png'
 import orumBlanco from './orum-blanco.png'
 import orumDorado from './orum-dorado.png'
 import orumNegro from './orum-negro.png'
+import orumPlata from './orum-plata.png'
 import estilos from './marca.module.css'
 
 /*
@@ -22,18 +25,34 @@ import estilos from './marca.module.css'
 
   Si el cliente cambia el logo, se reemplaza el PNG aquí (recortado igual).
 
+  LA REGLA DEL METAL: SOBRE NEGRO, PLATA; SOBRE BLANCO, ORO. El logo dorado
+  sobre la banda negra «casi no se veía» (propietario, 26/09): el oro del
+  cliente es oscuro y de brillo cálido, y sobre negro pierde el contorno. Las
+  piezas `-plata` se generaron desaturando las doradas —conservan su
+  sombreado metálico— y aclarándolas hacia un gris plata claro. Sobre blanco
+  la plata desaparecería, así que ahí sigue mandando el oro.
+
   Los tamaños los pone quien los usa, con una clase y SOLO el alto: el ancho
   sale de la proporción del archivo (`width: auto` en `marca.module.css`).
 */
 
-type Variante = 'dorado' | 'blanco' | 'negro'
+type Variante = 'plata' | 'dorado' | 'blanco' | 'negro'
 
-const LOGOS = { dorado: orumDorado, blanco: orumBlanco, negro: orumNegro } as const
+const LOGOS = {
+  plata: orumPlata,
+  dorado: orumDorado,
+  blanco: orumBlanco,
+  negro: orumNegro,
+} as const
+
+/** El metal de las piezas pequeñas: plata sobre negro, oro sobre blanco. */
+export type Tono = 'oro' | 'plata'
 
 type LogoProps = {
   /**
-   * `dorado` sobre negro (la cabecera y el pie de la fachada); `blanco` y
-   * `negro` para fondos donde el dorado no se lea.
+   * `plata` sobre negro (la cabecera y el pie de la fachada); `dorado` sobre
+   * blanco; `blanco` y `negro` quedan para fondos donde ninguno de los dos
+   * metales se lea.
    */
   variante?: Variante
   /** Clase que fija el ALTO. */
@@ -49,7 +68,7 @@ type LogoProps = {
  * accesible. Donde el nombre ya esté escrito al lado, pásalo por un
  * contenedor `aria-hidden`.
  */
-export function LogoOrum({ variante = 'dorado', className, preload = false }: LogoProps) {
+export function LogoOrum({ variante = 'plata', className, preload = false }: LogoProps) {
   return (
     <Image
       src={LOGOS[variante]}
@@ -62,10 +81,10 @@ export function LogoOrum({ variante = 'dorado', className, preload = false }: Lo
 }
 
 /** El monograma: la «O» con la estrella dentro. Decorativo. */
-export function MonogramaOrum({ className }: { className?: string }) {
+export function MonogramaOrum({ className, tono = 'oro' }: { className?: string; tono?: Tono }) {
   return (
     <Image
-      src={monograma}
+      src={tono === 'plata' ? monogramaPlata : monograma}
       alt=""
       aria-hidden="true"
       className={[estilos.imagen, className].filter(Boolean).join(' ')}
@@ -74,15 +93,49 @@ export function MonogramaOrum({ className }: { className?: string }) {
   )
 }
 
-/** La estrella dorada de cuatro puntas. Decorativa: sustituye al «✦» tipográfico. */
-export function EstrellaOrum({ className }: { className?: string }) {
+/** La estrella de cuatro puntas. Decorativa: sustituye al «✦» tipográfico. */
+export function EstrellaOrum({ className, tono = 'oro' }: { className?: string; tono?: Tono }) {
   return (
     <Image
-      src={estrella}
+      src={tono === 'plata' ? estrellaPlata : estrella}
       alt=""
       aria-hidden="true"
       className={[estilos.imagen, className].filter(Boolean).join(' ')}
       sizes="48px"
     />
+  )
+}
+
+/**
+ * EL ADORNO DE TÍTULO: la estrella encima de un encabezado de sección.
+ *
+ * `lineas` la flanquea con dos filos finos, para los títulos centrados; sin
+ * ellas es la estrella sola, para los alineados a la izquierda. Es un acento
+ * de marca que se repite en toda la página —la misma estrella que vive en la
+ * O del logotipo—, nunca un portador de significado: siempre `aria-hidden`.
+ */
+export function AdornoEstrella({
+  tono = 'oro',
+  lineas = false,
+  className,
+}: {
+  tono?: Tono
+  lineas?: boolean
+  className?: string
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={[
+        estilos.adorno,
+        tono === 'plata' ? estilos.adornoPlata : estilos.adornoOro,
+        lineas && estilos.conLineas,
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <EstrellaOrum tono={tono} className={estilos.estrellaAdorno} />
+    </span>
   )
 }

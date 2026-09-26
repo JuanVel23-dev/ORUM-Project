@@ -1,8 +1,9 @@
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import { formatearPesos, type PlanPublico } from '@/lib/publico/planes'
 import escaparate from '../escaparate.module.css'
 import { CtaSocio } from './cta-socio'
+import { AdornoEstrella, EstrellaOrum } from './marca/marca'
 import { Revelar } from './revelar'
 import { REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from './revelado'
 import estilos from './membresias-publicas.module.css'
@@ -51,6 +52,7 @@ export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
         <div className={estilos.bloque}>
           <div className={[estilos.texto, REVELAR_IZQ].join(' ')}>
             <div>
+              <AdornoEstrella />
               <h2 id="titulo-membresias" className={escaparate.tituloSeccion}>
                 Elige tu <em className={escaparate.acento}>membresía</em>
               </h2>
@@ -62,7 +64,7 @@ export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
             <ul className={estilos.ventajas}>
               {ventajas.map((v, i) => (
                 <li key={v} className={[estilos.ventaja, revelarEscalonado(i)].join(' ')}>
-                  <Check size={16} strokeWidth={2.5} aria-hidden="true" className={estilos.check} />
+                  <EstrellaOrum className={estilos.check} />
                   {v}
                 </li>
               ))}

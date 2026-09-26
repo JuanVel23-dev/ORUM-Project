@@ -73,7 +73,7 @@ export function HeroPublico({ esSocio }: Props) {
         {/* La entrada va en cada pieza y no en `.ornamento`: el contenedor se
             centra con `translate`, y la animación se lo pisaría. */}
         <span className={[estilos.ornamentoDestello, ENTRADA].join(' ')} style={retardoEntrada(6)}>
-          <EstrellaOrum className={estilos.estrellaOrnamento} />
+          <EstrellaOrum tono="plata" className={estilos.estrellaOrnamento} />
         </span>
         <span className={[estilos.ornamentoTexto, ENTRADA].join(' ')} style={retardoEntrada(7)}>
           Apoya lo local. Te da más.
@@ -103,7 +103,7 @@ export function HeroPublico({ esSocio }: Props) {
         )}
 
         <p className={[estilos.insignia, ENTRADA].join(' ')} style={retardoEntrada(1)}>
-          <EstrellaOrum className={estilos.estrellaInsignia} />
+          <EstrellaOrum tono="plata" className={estilos.estrellaInsignia} />
           Apoya lo local · Te da más
         </p>
 

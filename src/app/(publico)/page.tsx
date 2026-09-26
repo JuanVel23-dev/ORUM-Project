@@ -124,7 +124,7 @@ export default async function LandingPublica() {
           {/* El monograma del cliente —la O con la estrella— abre el cierre:
               la marca firma el final de la página. */}
           <span className={[estilos.destelloCierre, REVELAR].join(' ')}>
-            <MonogramaOrum className={estilos.monogramaCierre} />
+            <MonogramaOrum tono="plata" className={estilos.monogramaCierre} />
           </span>
           <h2
             id="titulo-cierre"

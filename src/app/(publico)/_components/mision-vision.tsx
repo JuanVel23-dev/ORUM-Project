@@ -1,5 +1,6 @@
 import { Sparkles, Target } from 'lucide-react'
 import escaparate from '../escaparate.module.css'
+import { AdornoEstrella } from './marca/marca'
 import { Revelar } from './revelar'
 import { REVELAR, revelarEscalonado } from './revelado'
 import estilos from './mision-vision.module.css'
@@ -42,12 +43,15 @@ export function MisionVision() {
     >
       <Revelar>
         <div className={estilos.bloque}>
-          <h2
-            id="titulo-proposito"
-            className={[escaparate.tituloSeccion, estilos.titulo, REVELAR].join(' ')}
-          >
-            Nuestro <em className={escaparate.acento}>propósito</em>
-          </h2>
+          <div>
+            <AdornoEstrella lineas className={REVELAR} />
+            <h2
+              id="titulo-proposito"
+              className={[escaparate.tituloSeccion, estilos.titulo, REVELAR].join(' ')}
+            >
+              Nuestro <em className={escaparate.acento}>propósito</em>
+            </h2>
+          </div>
 
           <div className={estilos.pilares}>
             {PILARES.map(({ titulo, Icono, texto }, i) => (

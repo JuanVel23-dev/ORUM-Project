@@ -195,3 +195,12 @@
   line-height: var(--t-caption-leading);
   color: var(--text-3);
 }
+
+/* La estrella del cliente como separador de los derechos, en plata: sobre
+   el negro del pie el oro se apaga. */
+.estrellaDerechos {
+  display: inline-block;
+  height: 0.7rem;
+  margin-inline: var(--space-2);
+  vertical-align: -0.05em;
+}

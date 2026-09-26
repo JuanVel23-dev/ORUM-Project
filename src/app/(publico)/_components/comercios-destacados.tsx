@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import type { ComercioVitrina } from '@/lib/publico/datos-publicos'
 import escaparate from '../escaparate.module.css'
+import { AdornoEstrella } from './marca/marca'
 import { Revelar } from './revelar'
 import { REVELAR, revelarEscalonado } from './revelado'
 import estilos from './comercios-destacados.module.css'
@@ -40,6 +41,7 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
       <Revelar>
         <div className={[estilos.cabecera, REVELAR].join(' ')}>
           <div>
+            <AdornoEstrella tono="plata" />
             <h2 id="titulo-destacados" className={estilos.titulo}>
               Comercios destacados
             </h2>

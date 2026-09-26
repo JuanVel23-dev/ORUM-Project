@@ -14,3 +14,38 @@
   user-select: none;
   -webkit-user-drag: none;
 }
+
+/* --- El adorno de título --------------------------------------------------- */
+
+.adorno {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-block-end: var(--space-3);
+}
+
+.adornoOro {
+  color: color-mix(in srgb, var(--gold-600) 55%, transparent);
+}
+
+.adornoPlata {
+  color: color-mix(in srgb, var(--cacao-fg) 35%, transparent);
+}
+
+.conLineas {
+  justify-content: center;
+}
+
+/* Los dos filos que flanquean la estrella en un título centrado: 1px, el
+   único grosor de trazo del sistema. */
+.conLineas::before,
+.conLineas::after {
+  content: '';
+  width: var(--space-10);
+  height: 1px;
+  background: currentColor;
+}
+
+.estrellaAdorno {
+  height: 1.5rem;
+}
