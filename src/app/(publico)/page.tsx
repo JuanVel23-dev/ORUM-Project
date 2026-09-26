@@ -15,6 +15,7 @@ import { ComoFunciona } from './_components/como-funciona'
 import { CtaSocio } from './_components/cta-socio'
 import { HeroPublico } from './_components/hero-publico'
 import { MembresiasPublicas } from './_components/membresias-publicas'
+import { MisionVision } from './_components/mision-vision'
 import { QueEsOrum } from './_components/que-es-orum'
 import { Revelar } from './_components/revelar'
 import { REVELAR, REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from './_components/revelado'
@@ -48,12 +49,13 @@ export const metadata: Metadata = {
  *
  *   Héroe ........................ NEGRO (foto)  ← «Descubre lo mejor de tu ciudad»
  *   Así es como te unes .......... tarjeta sobre el filo del héroe
- *   Qué es ORUM .................. CREMA         ← texto + carrusel de fotos reales
- *   Descubre · Disfruta · … ...... CREMA         ← los cuatro verbos del club
+ *   Qué es ORUM .................. BLANCO        ← texto + carrusel de fotos reales
+ *   Descubre · Disfruta · … ...... BLANCO        ← los cuatro verbos del club
  *   Comercios destacados ......... NEGRO         ← cinco reales + «Ver todos»
- *   Elige tu membresía ........... CREMA         ← precios de la base, con ahorro calculado
+ *   Elige tu membresía ........... BLANCO        ← precios de la base, con ahorro calculado
  *   Hazte socio hoy .............. NEGRO         ← el cierre, con el WhatsApp
- *   ¿Tienes un negocio? .......... CREMA
+ *   Nuestro propósito ............ BLANCO        ← misión y visión (bajaron aquí)
+ *   ¿Tienes un negocio? .......... BLANCO
  *   Pie .......................... NEGRO         (lo pone el layout)
  *
  * Crema y negro alternan: lo que separa las secciones es el campo de color,
@@ -139,6 +141,10 @@ export default async function LandingPublica() {
           </div>
         </Revelar>
       </section>
+
+      {/* Misión y visión, después del cierre por encargo del cliente: quien
+          llega hasta aquí ya sabe qué es ORUM; ahora, por qué existe. */}
+      <MisionVision />
 
       {/*
         LA PUERTA DEL COMERCIO, subordinada y al final. Es una audiencia

@@ -47,52 +47,6 @@
   text-wrap: pretty;
 }
 
-.pilares {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  margin-top: var(--space-2);
-}
-
-.pilar {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
-}
-
-/* La insignia: oro al 10 % con su sombra corta. Es un objeto levantado —el
-   icono vive en él—, no un chip de estado: por eso sí lleva sombra. */
-.insignia {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: var(--tap-min);
-  height: var(--tap-min);
-  border-radius: var(--radius-full);
-  background: var(--gold-bg);
-  box-shadow: var(--shadow-card), var(--edge);
-  color: var(--brand);
-}
-
-.pilarTitulo {
-  margin: 0 0 var(--space-1);
-  font-family: var(--font-display);
-  font-size: var(--t-title-2-size);
-  font-style: italic;
-  font-weight: 600;
-  line-height: var(--t-title-2-leading);
-  color: var(--brand);
-  -webkit-font-smoothing: auto;
-}
-
-.pilarTexto {
-  margin: 0;
-  max-width: 52ch;
-  font-size: 0.90625rem;
-  line-height: 1.6;
-  color: var(--text-2);
-}
-
 /* En móvil el carrusel va debajo y necesita alto propio: 4:5, un retrato
    que llena el ancho sin empujar la sección hasta el infinito. */
 .carrusel {
@@ -105,20 +59,15 @@
     aspect-ratio: auto;
     max-height: none;
     max-width: 680px;
-    min-height: 360px;
+    /* Sin misión y visión la columna de texto es corta: el carrusel ya no
+       se estira a ella, pone su propio alto mínimo. */
+    min-height: 420px;
   }
 }
 
-/* Al apuntar misión o visión, su insignia se levanta: crece y sube de sombra. */
-.insignia {
-  transition:
-    scale var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
-}
-
-@media (hover: hover) {
-  .pilar:hover .insignia {
-    scale: 1.08;
-    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+/* El texto, ahora corto, se centra en vertical junto al carrusel. */
+@container contenido (min-width: 900px) {
+  .conFotos .texto {
+    justify-content: center;
   }
 }
