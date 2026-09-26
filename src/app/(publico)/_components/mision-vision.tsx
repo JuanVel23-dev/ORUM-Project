@@ -43,15 +43,13 @@ export function MisionVision() {
     >
       <Revelar>
         <div className={estilos.bloque}>
-          <div>
-            <AdornoEstrella lineas className={REVELAR} />
-            <h2
-              id="titulo-proposito"
-              className={[escaparate.tituloSeccion, estilos.titulo, REVELAR].join(' ')}
-            >
-              Nuestro <em className={escaparate.acento}>propósito</em>
-            </h2>
-          </div>
+          <h2
+            id="titulo-proposito"
+            className={[escaparate.tituloSeccion, estilos.titulo, REVELAR].join(' ')}
+          >
+            <AdornoEstrella />
+            Nuestro <em className={escaparate.acento}>propósito</em>
+          </h2>
 
           <div className={estilos.pilares}>
             {PILARES.map(({ titulo, Icono, texto }, i) => (

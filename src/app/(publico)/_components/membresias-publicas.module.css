@@ -12,7 +12,7 @@
    las tarjetas quedaban en una franja estrecha y sobraba crema a la derecha. */
 @container contenido (min-width: 900px) {
   .bloque {
-    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
     align-items: start;
     gap: var(--space-10);
   }

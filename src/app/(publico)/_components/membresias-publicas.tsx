@@ -52,8 +52,8 @@ export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
         <div className={estilos.bloque}>
           <div className={[estilos.texto, REVELAR_IZQ].join(' ')}>
             <div>
-              <AdornoEstrella />
               <h2 id="titulo-membresias" className={escaparate.tituloSeccion}>
+                <AdornoEstrella />
                 Elige tu <em className={escaparate.acento}>membresía</em>
               </h2>
               <p className={estilos.apoyo}>

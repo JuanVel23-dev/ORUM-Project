@@ -965,8 +965,8 @@ Supabase (`recursos-sitio/`) traen lienzos de 1280×720 casi vacíos, por eso se
 recortaron. **Sobre negro, plata; sobre blanco, oro** (propietario,
 26/09/2026): el dorado del cliente casi no se veía sobre la banda negra, así
 que cabecera, pie, cierre y héroe usan las piezas `-plata` (`tono="plata"`).
-La estrella se repite como acento con `AdornoEstrella` sobre los títulos de
-sección; siempre decorativa (`aria-hidden`). La imagen para compartir en redes es `(publico)/opengraph-image.jpg`
+La estrella se repite como acento con `AdornoEstrella` AL LADO de los títulos de
+sección (dentro del `<h2>`, nunca encima); siempre decorativa (`aria-hidden`). La imagen para compartir en redes es `(publico)/opengraph-image.jpg`
 (logo dorado sobre negro, el JPG con fondo incrustado: solo ahí).
 
 **`QrCode` va en negro sobre blanco en los dos temas.** No es estética: invertirlo en
