@@ -15,37 +15,18 @@
   -webkit-user-drag: none;
 }
 
-/* --- El adorno de título --------------------------------------------------- */
+/* --- El adorno de título ---------------------------------------------------
+   En línea con el texto del `<h2>`: centrado en la altura de la primera
+   línea y separado del título por un hueco fijo. `em` para que acompañe al
+   tamaño de cada título sin una clase por sección. */
 
 .adorno {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-block-end: var(--space-3);
-}
-
-.adornoOro {
-  color: color-mix(in srgb, var(--gold-600) 55%, transparent);
-}
-
-.adornoPlata {
-  color: color-mix(in srgb, var(--cacao-fg) 35%, transparent);
-}
-
-.conLineas {
-  justify-content: center;
-}
-
-/* Los dos filos que flanquean la estrella en un título centrado: 1px, el
-   único grosor de trazo del sistema. */
-.conLineas::before,
-.conLineas::after {
-  content: '';
-  width: var(--space-10);
-  height: 1px;
-  background: currentColor;
+  display: inline-flex;
+  vertical-align: middle;
+  margin-inline-end: 0.3em;
+  translate: 0 -0.08em;
 }
 
 .estrellaAdorno {
-  height: 1.5rem;
+  height: 0.6em;
 }

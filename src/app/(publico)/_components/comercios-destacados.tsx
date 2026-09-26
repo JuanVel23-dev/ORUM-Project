@@ -41,8 +41,8 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
       <Revelar>
         <div className={[estilos.cabecera, REVELAR].join(' ')}>
           <div>
-            <AdornoEstrella tono="plata" />
             <h2 id="titulo-destacados" className={estilos.titulo}>
+              <AdornoEstrella tono="plata" />
               Comercios destacados
             </h2>
             <p className={estilos.apoyo}>

@@ -107,34 +107,16 @@ export function EstrellaOrum({ className, tono = 'oro' }: { className?: string; 
 }
 
 /**
- * EL ADORNO DE TÍTULO: la estrella encima de un encabezado de sección.
- *
- * `lineas` la flanquea con dos filos finos, para los títulos centrados; sin
- * ellas es la estrella sola, para los alineados a la izquierda. Es un acento
- * de marca que se repite en toda la página —la misma estrella que vive en la
- * O del logotipo—, nunca un portador de significado: siempre `aria-hidden`.
+ * EL ADORNO DE TÍTULO: la estrella AL LADO de un encabezado de sección, no
+ * encima (encargo del propietario). Va DENTRO del `<h2>`, como primer hijo,
+ * así se alinea con la primera línea del título y lo acompaña al centrarse o
+ * al partirse en dos renglones. Es un acento de marca —la misma estrella que
+ * vive en la O del logotipo—, nunca un portador de significado: `aria-hidden`
+ * y `alt=""`, así que no altera el nombre accesible del título.
  */
-export function AdornoEstrella({
-  tono = 'oro',
-  lineas = false,
-  className,
-}: {
-  tono?: Tono
-  lineas?: boolean
-  className?: string
-}) {
+export function AdornoEstrella({ tono = 'oro', className }: { tono?: Tono; className?: string }) {
   return (
-    <span
-      aria-hidden="true"
-      className={[
-        estilos.adorno,
-        tono === 'plata' ? estilos.adornoPlata : estilos.adornoOro,
-        lineas && estilos.conLineas,
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-    >
+    <span aria-hidden="true" className={[estilos.adorno, className].filter(Boolean).join(' ')}>
       <EstrellaOrum tono={tono} className={estilos.estrellaAdorno} />
     </span>
   )

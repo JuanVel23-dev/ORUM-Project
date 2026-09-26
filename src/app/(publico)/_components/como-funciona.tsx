@@ -52,12 +52,10 @@ export function ComoFunciona() {
           especificidad ganaría la hoja que Next inyecte después. */}
       <Revelar>
         <div className={[estilos.tarjeta, REVELAR].join(' ')}>
-        <div>
+        <h2 id="titulo-como-te-unes" className={estilos.titulo}>
           <AdornoEstrella />
-          <h2 id="titulo-como-te-unes" className={estilos.titulo}>
-            Así es como <em className={escaparate.acento}>te unes</em>
-          </h2>
-        </div>
+          Así es como <em className={escaparate.acento}>te unes</em>
+        </h2>
 
         <ol className={estilos.pasos}>
           {PASOS.map((paso, indice) => (
