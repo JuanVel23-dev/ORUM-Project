@@ -41,9 +41,11 @@
 }
 
 .destelloCierre {
-  font-size: 1.25rem;
-  line-height: 1;
-  color: var(--gold-300);
+  display: flex;
+}
+
+.monogramaCierre {
+  height: 3.5rem;
 }
 
 /* Solo la anchura del quiebre: la familia, la escala y el tracking los pone

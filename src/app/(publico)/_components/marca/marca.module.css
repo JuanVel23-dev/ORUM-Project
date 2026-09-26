@@ -1,0 +1,16 @@
+/* ==========================================================================
+   MARCA  ·  logo, monograma y estrella
+   --------------------------------------------------------------------------
+   Quien usa una pieza de marca fija su ALTO con su propia clase; el ancho
+   sale de la proporción del archivo. `max-width: none` evita que una regla
+   global de imágenes la encoja dentro de un contenedor estrecho y la deforme.
+   ========================================================================== */
+
+.imagen {
+  display: block;
+  width: auto;
+  max-width: none;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+}

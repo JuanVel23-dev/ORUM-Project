@@ -956,6 +956,15 @@ Son dos puertas al mismo club: si una tuviera dirección de arte propia, parecer
 empresa. Sus clases de formulario se toman de `estilosAuth`, no de un módulo local —
 la sacudida al fallar usa `:has(.alerta)` y ambas clases deben salir del mismo módulo CSS.
 
+**La marca del cliente son imágenes, no texto.** Logotipo «ORUM» (dorado,
+blanco, negro), monograma y estrella viven recortados en
+`src/app/(publico)/_components/marca/` y se usan con `LogoOrum`,
+`MonogramaOrum` y `EstrellaOrum` (`marca.tsx`), que solo piden el ALTO por
+clase. No se vuelve a escribir «✦ ORUM» con la tipografía: los originales de
+Supabase (`recursos-sitio/`) traen lienzos de 1280×720 casi vacíos, por eso se
+recortaron. La imagen para compartir en redes es `(publico)/opengraph-image.jpg`
+(logo dorado sobre negro, el JPG con fondo incrustado: solo ahí).
+
 **`QrCode` va en negro sobre blanco en los dos temas.** No es estética: invertirlo en
 oscuro rompe el escaneo en algunos lectores, y el fallo ocurre en la caja del comercio
 delante del cliente. Ese es el único sitio del sistema con colores literales.

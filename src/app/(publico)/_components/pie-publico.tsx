@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
+import { LogoOrum } from './marca/marca'
 import { REVELAR, revelarEscalonado } from './revelado'
 import estilos from './pie-publico.module.css'
 
@@ -44,10 +45,7 @@ export function PiePublico({ soporte }: { soporte: string | null }) {
     <footer className={estilos.pie}>
       <div className={estilos.contenido}>
         <p className={[estilos.marca, REVELAR].join(' ')}>
-          <span className={estilos.destello} aria-hidden="true">
-            ✦
-          </span>
-          ORUM
+          <LogoOrum variante="dorado" className={estilos.logo} />
         </p>
 
         <nav className={estilos.puertas} aria-label="Accesos a los portales">

@@ -324,3 +324,14 @@
     font-size: 2.25rem;
   }
 }
+
+/* La estrella del cliente en lugar del «✦» tipográfico: el mismo dibujo que
+   vive dentro de la O del logotipo. */
+.estrellaOrnamento {
+  height: 1.25rem;
+}
+
+.estrellaInsignia {
+  height: 0.95rem;
+  margin-right: var(--space-2);
+}

@@ -14,6 +14,7 @@ import { ComerciosDestacados } from './_components/comercios-destacados'
 import { ComoFunciona } from './_components/como-funciona'
 import { CtaSocio } from './_components/cta-socio'
 import { HeroPublico } from './_components/hero-publico'
+import { MonogramaOrum } from './_components/marca/marca'
 import { MembresiasPublicas } from './_components/membresias-publicas'
 import { MisionVision } from './_components/mision-vision'
 import { QueEsOrum } from './_components/que-es-orum'
@@ -120,8 +121,10 @@ export default async function LandingPublica() {
         aria-labelledby="titulo-cierre"
       >
         <Revelar className={estilos.bloqueCierre}>
-          <span className={[estilos.destelloCierre, REVELAR].join(' ')} aria-hidden="true">
-            ✦
+          {/* El monograma del cliente —la O con la estrella— abre el cierre:
+              la marca firma el final de la página. */}
+          <span className={[estilos.destelloCierre, REVELAR].join(' ')}>
+            <MonogramaOrum className={estilos.monogramaCierre} />
           </span>
           <h2
             id="titulo-cierre"

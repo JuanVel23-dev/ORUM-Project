@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ANCLAS, HREF_UNETE } from './anclas'
+import { LogoOrum } from './marca/marca'
 import { MenuMovilPublico } from './menu-movil-publico'
 import escaparate from '../escaparate.module.css'
 import { ENTRADA, retardoEntrada } from './revelado'
@@ -26,14 +27,16 @@ import estilos from './encabezado-publico.module.css'
 export function EncabezadoPublico() {
   return (
     <header className={estilos.cabecera}>
-      {/* El destello ✦ es decorativo —el nombre de la marca ya está en el
-          texto—, así que va `aria-hidden` y no parte el enlace en dos palabras
-          para un lector de pantalla. */}
-      <Link href="/" className={[estilos.marca, ENTRADA].join(' ')} style={retardoEntrada(0)}>
-        <span className={estilos.destello} aria-hidden="true">
-          ✦
-        </span>
-        ORUM
+      {/* El logotipo del cliente, en dorado sobre la banda negra. Es la
+          imagen la que da nombre al enlace (`alt="ORUM"`). Se precarga: está
+          en la primera pantalla de todas las páginas públicas. */}
+      <Link
+        href="/"
+        className={[estilos.marca, ENTRADA].join(' ')}
+        style={retardoEntrada(0)}
+        aria-label="ORUM, ir al inicio"
+      >
+        <LogoOrum variante="dorado" className={estilos.logo} preload />
       </Link>
 
       <nav
