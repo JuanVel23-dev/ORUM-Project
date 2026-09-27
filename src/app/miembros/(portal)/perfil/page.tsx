@@ -12,27 +12,25 @@ import styles from './perfil.module.css'
 export const metadata = { title: 'Mi carnet · ORUM' }
 
 /*
-  EL CARNET  ·  Z1
+  EL CARNET  ·  Z2
 
   Es lo que el socio enseña con orgullo en la caja, con una mano y con prisa.
-  Con la licencia creativa v4 —sin presupuesto de oro y sin disciplina de
-  trazo— es lo que tenía que ser: una tarjeta de CHOCOLATE con el wordmark y
-  los datos en oro. El porqué de cada decisión de color, y los ratios medidos,
-  están en `perfil.module.css`; el marcado del objeto, en
-  `_components/carnet.tsx`; aquí solo los datos y el reparto de la pantalla.
+  26/09/2026 · rediseño total del propietario: la tarjeta de chocolate de la
+  Z1 pasa a ser una tarjeta BLANCA, horizontal, a todo el ancho del
+  contenido — «que sea una card en fondo blanco» y, antes, «que ocupe toda la
+  página, y si es PC que sea horizontal». El porqué de cada decisión, y el
+  quiebre de contenedor que la tumba, están en `perfil.module.css`; el
+  marcado del objeto, en `_components/carnet.tsx`; aquí solo los datos y el
+  reparto de la pantalla.
 
-  Lo que manda la forma, tras el encargo del propietario del 15/09/2026:
+  Lo que sigue igual, porque el objeto no cambió, solo el material:
 
-  - UN SOLO EJE VERTICAL, centrado, como un carnet de verdad: emisor, foto,
-    nombre, plan, estado, número, vigencia y QR sobre la misma línea. Antes la
-    foto estaba en la esquina del pasaporte y el texto corría desde la
-    izquierda: se leía como una ficha de datos.
-  - La FOTO manda la jerarquía (128px, circular), no el nombre — que baja de
-    `hero-2` a `display-2`.
-  - Ancho propio (460px) y UNA sola columna a todos los anchos. Un carnet de
-    1100px no es un carnet.
+  - UN SOLO EJE, como un carnet de verdad: emisor, foto, nombre, plan, estado,
+    número, vigencia y QR sobre la misma línea (apilados de pie, en fila a
+    partir de 640px de contenedor).
+  - La FOTO manda la jerarquía, no el nombre.
   - Se AMPLÍA por encima de la página, con velo, sin navegar: `CarnetAmpliable`.
-  - El QR va en su placa BLANCA, pase lo que pase con el tema y con el fondo.
+  - El QR va negro sobre blanco, pase lo que pase con el tema.
   - La foto del socio, si la hay. Si no la hay, sus iniciales — nunca un hueco
     ni un icono genérico de persona, que es lo que hace que una credencial
     parezca rota.
@@ -61,14 +59,16 @@ function fechaLegible(iso: string): string {
 }
 
 /*
-  Onboarding permanente. No cuesta un clic, no se descarta y es lo que llena la
-  columna lateral en escritorio en lugar del hueco muerto. Texto plano, sin
-  iconos: son instrucciones, no una fila de características.
+  Onboarding permanente. No cuesta un clic, no se descarta. Ya no llena una
+  columna lateral —con la tarjeta a todo el ancho no queda ninguna—: vive
+  debajo del carnet, en tres columnas con el mismo círculo numerado que
+  «Así es como te unes» en el Portal Público. `titulo` es lo primero que se
+  lee en negrita; `frase` completa la instrucción.
 */
 const PASOS = [
-  'Busca el comercio en el catálogo y mira qué beneficio tiene.',
-  'Toca «Ampliar carnet» y muestra el código en la caja, antes de pagar.',
-  'El comercio lo escanea y aplica tu beneficio al momento.',
+  { titulo: 'Busca el comercio', frase: 'en el catálogo y mira qué beneficio tiene.' },
+  { titulo: 'Toca «Ampliar carnet»', frase: 'y muestra el código en la caja, antes de pagar.' },
+  { titulo: 'El comercio lo escanea', frase: 'y aplica tu beneficio al momento.' },
 ]
 
 const MENSAJE_SOPORTE = 'Hola, tengo una duda con mi carnet ORUM.'
@@ -140,61 +140,69 @@ export default async function PerfilMiembroPage() {
         <p className={styles.lede}>Muestra este código en la caja.</p>
       </header>
 
-      <div className={styles.columnas}>
-        {/*
-          Las dos copias del carnet se crean AQUÍ, en el servidor, y viajan
-          como props al componente de cliente. Así el QR y el retrato siguen
-          siendo marcado de servidor: lo único que se hidrata es el booleano
-          de «abierto».
+      {/*
+        Las dos copias del carnet se crean AQUÍ, en el servidor, y viajan
+        como props al componente de cliente. Así el QR y el retrato siguen
+        siendo marcado de servidor: lo único que se hidrata es el booleano
+        de «abierto».
 
-          «Cambiar foto» va FUERA de la tarjeta. Es mantenimiento —se hace una
-          vez— y dentro competía con el nombre y con el QR: lo que se enseña
-          en una caja no lleva botones de administración impresos encima.
+        «Cambiar foto» va FUERA de la tarjeta. Es mantenimiento —se hace una
+        vez— y dentro competía con el nombre y con el QR: lo que se enseña
+        en una caja no lleva botones de administración impresos encima.
 
-          Un formulario no navega: `/miembros/perfil/foto` está interceptada
-          por la ranura `@modal` del portal y se abre encima del carnet.
-        */}
-        <CarnetAmpliable
-          ampliado={<Carnet {...datos} variante="ampliado" />}
-          acciones={
-            <Button
-              href="/miembros/perfil/foto"
-              variant="ghost"
-              size="sm"
-              icon={<Camera size={15} aria-hidden="true" />}
-            >
-              {fotoUrl ? 'Cambiar foto' : 'Añadir mi foto'}
-            </Button>
-          }
-        >
-          <Carnet {...datos} />
-        </CarnetAmpliable>
+        Un formulario no navega: `/miembros/perfil/foto` está interceptada
+        por la ranura `@modal` del portal y se abre encima del carnet.
+      */}
+      <CarnetAmpliable
+        ampliado={<Carnet {...datos} variante="ampliado" />}
+        acciones={
+          <Button
+            href="/miembros/perfil/foto"
+            variant="ghost"
+            size="sm"
+            icon={<Camera size={15} aria-hidden="true" />}
+          >
+            {fotoUrl ? 'Cambiar foto' : 'Añadir mi foto'}
+          </Button>
+        }
+      >
+        <Carnet {...datos} />
+      </CarnetAmpliable>
 
-        {/*
-          Sin `Card`: la pantalla ya tiene su superficie y duplicarla
-          convertiría el carnet en «una caja más».
-        */}
-        <section className={styles.como}>
-          <h2 className={styles.comoTitulo}>Cómo usarlo</h2>
+      {/*
+        A TODO EL ANCHO, debajo del carnet: con la tarjeta ocupando el
+        contenido entero ya no queda una columna lateral que llenar. Sin
+        `Card`: la pantalla ya tiene su superficie —el carnet— y duplicarla
+        la convertiría en «una caja más».
+      */}
+      <section className={styles.como}>
+        <h2 className={styles.comoTitulo}>Cómo usarlo</h2>
 
-          <ol className={styles.pasos}>
-            {PASOS.map((paso) => (
-              <li key={paso}>{paso}</li>
-            ))}
-          </ol>
-
-          {soporte && (
-            <div className={styles.soporte}>
-              <p className={styles.soporteTexto}>
-                ¿Algo no cuadra? El carnet es donde se nota primero: escríbenos y lo revisamos.
+        <ol className={styles.pasos}>
+          {PASOS.map((paso, indice) => (
+            <li key={paso.titulo} className={styles.paso}>
+              {/* Decorativo: el orden ya lo transporta el `<ol>`. */}
+              <span className={styles.numeroPaso} aria-hidden="true">
+                {indice + 1}
+              </span>
+              <p className={styles.pasoTexto}>
+                <strong className={styles.pasoTitulo}>{paso.titulo}</strong> {paso.frase}
               </p>
-              <WhatsAppButton telefono={soporte} mensaje={MENSAJE_SOPORTE}>
-                Escríbenos por WhatsApp
-              </WhatsAppButton>
-            </div>
-          )}
-        </section>
-      </div>
+            </li>
+          ))}
+        </ol>
+
+        {soporte && (
+          <div className={styles.soporte}>
+            <p className={styles.soporteTexto}>
+              ¿Algo no cuadra? El carnet es donde se nota primero: escríbenos y lo revisamos.
+            </p>
+            <WhatsAppButton telefono={soporte} mensaje={MENSAJE_SOPORTE}>
+              Escríbenos por WhatsApp
+            </WhatsAppButton>
+          </div>
+        )}
+      </section>
     </div>
   )
 }

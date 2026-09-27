@@ -977,9 +977,10 @@ los cuatro portales, no solo la fachada. No se vuelve a escribir «✦ ORUM» co
 la tipografía: los originales de Supabase (`recursos-sitio/`) traen lienzos
 de 1280×720 casi vacíos, por eso se recortaron. **Sobre negro, plata; sobre
 blanco, oro** (propietario, 26/09/2026): el dorado del cliente casi no se
-veía sobre la banda negra, así que cabecera, pie, cierre y héroe del público,
-el carnet y las seis pantallas de acceso usan las piezas `-plata`
-(`tono="plata"`/`variante="plata"`). La estrella se repite como acento con
+veía sobre la banda negra, así que cabecera, pie, cierre y héroe del público
+y las seis pantallas de acceso usan las piezas `-plata`
+(`tono="plata"`/`variante="plata"`). El carnet volvió a `dorado` con la Z2
+(ver «El carnet, Z2» más abajo): su fondo ya no es negro. La estrella se repite como acento con
 `AdornoEstrella` AL LADO de los títulos de sección (dentro del `<h2>`, nunca
 encima); siempre decorativa (`aria-hidden`). La imagen para compartir en
 redes es `(publico)/opengraph-image.jpg` (logo dorado sobre negro, el JPG con
