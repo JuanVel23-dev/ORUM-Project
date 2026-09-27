@@ -28,7 +28,7 @@ import {
   revelarEscalonado,
 } from '../_components/revelado'
 import escaparate from '../escaparate.module.css'
-import { CategoriasDirectorio } from './_components/categorias-directorio'
+import { CategoriasDirectorio } from '@/components/comercios/categorias-directorio'
 import { TarjetaDirectorio } from './_components/tarjeta-directorio'
 import estilos from './explorar.module.css'
 

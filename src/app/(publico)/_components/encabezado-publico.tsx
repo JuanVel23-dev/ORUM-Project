@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ANCLAS, HREF_UNETE } from './anclas'
-import { LogoOrum } from './marca/marca'
+import { LogoOrum } from '@/components/ui/marca/marca'
 import { MenuMovilPublico } from './menu-movil-publico'
 import escaparate from '../escaparate.module.css'
 import { ENTRADA, retardoEntrada } from './revelado'

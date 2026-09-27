@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
-import { EstrellaOrum, LogoOrum } from './marca/marca'
+import { EstrellaOrum, LogoOrum } from '@/components/ui/marca/marca'
 import { REVELAR, revelarEscalonado } from './revelado'
 import estilos from './pie-publico.module.css'
 

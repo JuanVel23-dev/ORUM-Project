@@ -4,6 +4,7 @@ import { LogOut, MessageCircle } from 'lucide-react'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/avatar'
+import { LogoOrumTema } from '@/components/ui/marca/marca'
 import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
 import { cerrarSesionMiembro } from '../login/actions'
 import { MenuTema } from './_components/menu-tema'
@@ -77,8 +78,8 @@ export default async function MiembrosLayout({
   return (
     <div className={styles.portal}>
       <header className={styles.cabecera}>
-        <Link href="/miembros" className={styles.marca}>
-          ORUM
+        <Link href="/miembros" className={styles.marca} aria-label="ORUM, ir al inicio del portal">
+          <LogoOrumTema className={styles.logo} preload />
         </Link>
 
         <PortalNav />

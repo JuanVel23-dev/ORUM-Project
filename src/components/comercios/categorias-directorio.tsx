@@ -10,12 +10,26 @@ import { Overlay } from '@/components/ui/overlay'
 import estilos from './categorias-directorio.module.css'
 
 /*
-  LAS CATEGORÍAS DEL DIRECTORIO  ·  un botón que abre una ventana con todas
+  LAS CATEGORÍAS  ·  un botón que abre una ventana con todas
   ---------------------------------------------------------------------------
-  Encargo del propietario: las quince categorías ya no ocupan el panel antes
-  de los comercios. Hay un botón «Categorías», junto a Ciudad y Ordenar, y al
-  tocarlo se abre una ventana con todas: diálogo centrado en escritorio, hoja
-  inferior en móvil (el `Overlay` del sistema decide).
+  Nació en el directorio del Portal Público (encargo del propietario: las
+  quince categorías ya no ocupan el panel antes de los comercios) y se
+  compartió con el catálogo del Portal de Miembros, que hasta entonces filtraba
+  con una fila de chips en línea — dos lenguajes distintos para la misma
+  tarea. Vive en `src/components/comercios/` y no en la ruta del público
+  porque ahora lo consumen los dos: `CLAUDE.md` reserva las rutas para lo que
+  solo usa esa ruta.
+
+  Hay un botón «Categorías», junto a Ciudad y Ordenar (o solo), y al tocarlo se
+  abre una ventana con todas: diálogo centrado en escritorio, hoja inferior en
+  móvil (el `Overlay` del sistema decide).
+
+  ES SEGURO EN LOS DOS TEMAS a propósito, a diferencia de la mayoría de lo que
+  vive bajo `(publico)`: el Portal Público fuerza claro, pero el Portal de
+  Miembros sostiene los dos. Por eso el glifo seleccionado y el filo del
+  disparador usan `--text` y `--border-subtle` — semánticos que SÍ cambian de
+  valor por tema — y no `--tinta-1`, que es un primitivo fijo y oscuro: en
+  oscuro habría pintado un glifo negro sobre negro y un filo invisible.
 
   CADA CATEGORÍA TIEMBLA AL TOCARLA, con `Agitar` —el acento de «seleccionado»
   del sistema, corto y sin repetición para que no se lea como error—. Se agita

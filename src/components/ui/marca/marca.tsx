@@ -80,6 +80,46 @@ export function LogoOrum({ variante = 'plata', className, preload = false }: Log
   )
 }
 
+/**
+ * EL LOGOTIPO QUE SIGUE AL TEMA: plata en oscuro, oro en claro.
+ *
+ * Existe para el cromo que —a diferencia de una franja fija— cambia de fondo
+ * con el tema del portal: la cabecera del Portal de Miembros es material
+ * blanco en claro y material casi negro en oscuro. Ahí ninguna variante fija
+ * sirve a los dos casos.
+ *
+ * Las DOS imágenes se montan a la vez, superpuestas en la misma celda de
+ * grid, y CSS decide cuál se ve — el mismo selector de tres ramas que ya usa
+ * `globals.css` para todo lo que depende de `data-theme` (explícito en
+ * `[data-theme]`, o la preferencia del sistema si el script anti-flash
+ * todavía no estampó el atributo). Cero JavaScript: no hace falta saber el
+ * tema en el servidor para elegir la imagen correcta.
+ *
+ * Las DOS llevan `alt="ORUM"`: nunca están visibles a la vez, así que no hay
+ * nombre accesible duplicado — la que CSS oculta con `display: none` sale
+ * también del árbol de accesibilidad, sea cual sea el motivo del ocultado.
+ */
+export function LogoOrumTema({ className, preload = false }: { className?: string; preload?: boolean }) {
+  return (
+    <span className={[estilos.logoTema, className].filter(Boolean).join(' ')}>
+      <Image
+        src={orumDorado}
+        alt="ORUM"
+        className={[estilos.imagen, estilos.logoTemaOro].join(' ')}
+        sizes="240px"
+        preload={preload}
+      />
+      <Image
+        src={orumPlata}
+        alt="ORUM"
+        className={[estilos.imagen, estilos.logoTemaPlata].join(' ')}
+        sizes="240px"
+        preload={preload}
+      />
+    </span>
+  )
+}
+
 /** El monograma: la «O» con la estrella dentro. Decorativo. */
 export function MonogramaOrum({ className, tono = 'oro' }: { className?: string; tono?: Tono }) {
   return (

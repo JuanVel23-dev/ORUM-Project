@@ -2,6 +2,7 @@ import { iniciales } from '@/components/ui/avatar'
 import { StatusBadge, VenceEn } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Copiar } from '@/components/ui/copiar'
+import { LogoOrum } from '@/components/ui/marca/marca'
 import { QrCode } from '@/components/ui/qr-code'
 import type { EstadoDerivado } from '@/lib/miembros/membresias'
 import estilos from '../perfil.module.css'
@@ -79,8 +80,10 @@ export function Carnet({
       <div className={estilos.carnetInterior}>
         <header className={estilos.emisor}>
           {/* Una credencial sin el nombre de quien la emite no parece una
-              credencial. */}
-          <p className={estilos.wordmark}>ORUM</p>
+              credencial. El carnet es cacao —negro— en los dos temas, así
+              que el logotipo es siempre la variante plata (CLAUDE.md → «sobre
+              negro, plata»), la imagen del cliente y no un wordmark de texto. */}
+          <LogoOrum variante="plata" className={estilos.wordmark} />
           <p className={estilos.tipo}>Carnet de socio</p>
         </header>
 

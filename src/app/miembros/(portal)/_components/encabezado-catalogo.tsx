@@ -1,3 +1,4 @@
+import { AdornoEstrella } from '@/components/ui/marca/marca'
 import styles from './encabezado-catalogo.module.css'
 
 /*
@@ -23,7 +24,10 @@ export function EncabezadoCatalogo() {
         {/* En minúsculas en el marcado y en versalitas por CSS: escrito
             "TU MEMBRESÍA" hay lectores que lo deletrean letra a letra. */}
         <p className={styles.overline}>Tu membresía</p>
-        <h1 className={styles.titulo}>Beneficios del club</h1>
+        <h1 className={styles.titulo}>
+          <AdornoEstrella />
+          Beneficios del club
+        </h1>
         <p className={styles.lede}>
           Muestra tu carnet en la caja y el comercio aplica tu beneficio.
         </p>

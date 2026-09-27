@@ -213,30 +213,28 @@
   }
 }
 
+/*
+  EL LOGOTIPO DEL CLIENTE, NO EL WORDMARK DE TEXTO.
+  ---------------------------------------------------------------------------
+  Sustituye al «ORUM» tipográfico con el barrido dorado: la marca son las
+  imágenes del cliente en todo el producto, no un texto con degradado
+  (`CLAUDE.md` → «La marca del cliente son imágenes, no texto»).
+
+  El logo tiene que responder al tema porque esta cabecera es la única pieza
+  del sistema que cambia de fondo con él —blanco en claro, casi negro en
+  oscuro—, a diferencia de una franja fija: `LogoOrumTema` monta las dos
+  variantes y CSS decide cuál se ve. Ver `marca.module.css`.
+*/
 .marca {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-xs);
   text-decoration: none;
-
-  font-size: var(--t-title-3-size);
-  font-weight: 680;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-
-  /*
-    El wordmark es el único oro de la cabecera. Barrido metálico calibrado por
-    tema en globals.css; el color plano es el respaldo si no hay soporte de
-    background-clip.
-  */
-  color: var(--brand);
-  background: var(--gold-sheen);
-  -webkit-background-clip: text;
-  background-clip: text;
 }
 
-@supports (-webkit-background-clip: text) or (background-clip: text) {
-  .marca {
-    -webkit-text-fill-color: transparent;
-  }
+.logo {
+  height: clamp(1.375rem, 0.95rem + 1.1vw, 1.75rem);
 }
 
 .marca:focus-visible {

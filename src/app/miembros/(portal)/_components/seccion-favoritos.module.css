@@ -28,10 +28,12 @@
      favorito, esta franja se convierte en una estantería y el encabezado NO
      cambia de tamaño. Un título que encoge al aparecer contenido se lee como
      dos secciones distintas. */
+  font-family: var(--font-display);
   font-size: var(--t-title-2-size);
   line-height: var(--t-title-2-leading);
   letter-spacing: var(--t-title-2-tracking);
-  font-weight: var(--t-title-2-weight);
+  font-weight: 700;
+  -webkit-font-smoothing: auto;
   color: var(--text);
 }
 

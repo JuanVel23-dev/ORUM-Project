@@ -12,11 +12,16 @@
 
 .titulo {
   margin: 0;
+  display: flex;
+  align-items: center;
+
+  font-family: var(--font-display);
   font-size: var(--t-title-2-size);
   line-height: var(--t-title-2-leading);
   letter-spacing: var(--t-title-2-tracking);
   font-weight: 700;
   color: var(--text);
+  -webkit-font-smoothing: auto;
 }
 
 .apoyo {

@@ -33,7 +33,7 @@ import { CintaRotativa } from './_components/cinta-rotativa'
 import { EmptyState } from '@/components/ui/feedback'
 import { Grid } from '@/components/ui/layout'
 import { EncabezadoCatalogo } from './_components/encabezado-catalogo'
-import { ChipsCategoria } from './_components/chips-categoria'
+import { CategoriasDirectorio } from '@/components/comercios/categorias-directorio'
 import { CarruselDestacados } from './_components/carrusel-destacados'
 import { FavoritosProvider } from './_components/favoritos-contexto'
 import { FiltrosForm } from './_components/filtros-form'
@@ -66,6 +66,20 @@ function numeroONulo(valor: string | undefined): number | null {
   if (!valor) return null
   const n = Number(valor)
   return Number.isFinite(n) ? n : null
+}
+
+/**
+ * URL del catálogo con los parámetros dados y, si se pasa, una categoría.
+ *
+ * Alimenta a `CategoriasDirectorio` (compartido con el Portal Público), que
+ * solo conoce enlaces ya calculados: no sabe ni le importa la forma de la
+ * URL de cada portal que lo use.
+ */
+function hrefCon(base: Record<string, string>, categoriaId?: number): string {
+  const params = new URLSearchParams(base)
+  if (categoriaId !== undefined) params.set('categoria_id', String(categoriaId))
+  const consulta = params.toString()
+  return consulta ? `/miembros?${consulta}` : '/miembros'
 }
 
 /**
@@ -592,14 +606,40 @@ export default async function MiembrosHomePage({
         */}
         <SelectorVista activa={vista} paramsBase={paramsVista} />
 
-        {/* EJE 2 · LA CATEGORÍA. La fila sigue visible sobre un resultado
-            vacío: el socio debe poder cambiar de categoría sin dar marcha
-            atrás. */}
-        <ChipsCategoria
-          categorias={categoriasConComercios}
-          activaId={categoriaIdFiltro}
-          paramsBase={paramsBase}
-        />
+        {/*
+          EJE 2 · LA CATEGORÍA, con el mismo botón + ventana que ya aprobaste
+          en el directorio del Portal Público — antes era una fila de chips en
+          línea, un lenguaje distinto para la misma tarea de filtrar.
+
+          Sigue visible sobre un resultado vacío: el socio debe poder cambiar
+          de categoría sin dar marcha atrás. Por debajo de dos categorías el
+          componente no discrimina nada, así que no se pinta — mismo umbral
+          que ya aplicaba la fila de chips que sustituye.
+        */}
+        {categoriasConComercios.length >= 2 && (
+          <CategoriasDirectorio
+            total={comerciosListado.length}
+            opciones={[
+              {
+                id: null,
+                nombre: 'Todas',
+                href: hrefCon(paramsBase),
+                activa: categoriaIdFiltro === null,
+              },
+              ...categoriasConComercios.map((c) => {
+                const activa = c.id === categoriaIdFiltro
+                return {
+                  id: c.id,
+                  nombre: c.nombre,
+                  /* Tocar la categoría activa la apaga: encender y apagar con
+                     el mismo dedo, en el mismo sitio. */
+                  href: activa ? hrefCon(paramsBase) : hrefCon(paramsBase, c.id),
+                  activa,
+                }
+              }),
+            ]}
+          />
+        )}
 
         {/*
           La portada va AQUÍ: después de la búsqueda y de los filtros, y antes

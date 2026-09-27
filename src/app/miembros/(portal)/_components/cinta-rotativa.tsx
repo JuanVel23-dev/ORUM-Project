@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
+import { AdornoEstrella } from '@/components/ui/marca/marca'
 import estilos from './cinta-rotativa.module.css'
 
 /*
@@ -38,7 +39,10 @@ export function CintaRotativa({
   return (
     <section className={`${estilos.seccion} revelar-vista`} aria-label={titulo}>
       <div className={estilos.cabecera}>
-        <h2 className={estilos.titulo}>{titulo}</h2>
+        <h2 className={estilos.titulo}>
+          <AdornoEstrella />
+          {titulo}
+        </h2>
         {apoyo && <p className={estilos.apoyo}>{apoyo}</p>}
       </div>
 

@@ -105,7 +105,12 @@
 
 .opcion[aria-current='true'] .icono {
   scale: 1.08;
-  color: var(--tinta-1);
+  /* `--text`, no `--tinta-1`: el fondo del círculo sigue siendo `--surface`
+     en los dos temas, y lo que hace falta aquí es el mismo contraste fuerte
+     que ya tiene cualquier texto sobre esa superficie — `--tinta-1` es un
+     primitivo oscuro fijo que en tema oscuro pintaría el glifo negro sobre
+     negro. */
+  color: var(--text);
   box-shadow:
     inset 0 0 0 2.5px var(--gold-600),
     0 0 0 var(--space-1) color-mix(in srgb, var(--gold-600) 14%, transparent),
@@ -128,7 +133,11 @@
   min-height: var(--tap-min);
   padding: 0 var(--space-4) 0 var(--space-2);
 
-  border: 1px solid color-mix(in srgb, var(--tinta-1) 15%, transparent);
+  /* `--border-subtle`, no un `color-mix` de `--tinta-1`: ese primitivo es
+     fijo y oscuro, y en tema oscuro un filo mezclado con él sería invisible
+     contra una superficie ya oscura. `--border-subtle` es el semántico
+     calibrado para un hairline sobre `--surface` en los dos temas. */
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   background: var(--surface);
   box-shadow: var(--shadow-card);

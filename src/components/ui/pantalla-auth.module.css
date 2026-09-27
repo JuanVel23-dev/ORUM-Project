@@ -218,31 +218,17 @@
   margin-bottom: var(--space-7);
 }
 
+/*
+  EL LOGOTIPO DEL CLIENTE, no un wordmark de texto con degradado.
+
+  Esta pantalla es siempre oscura (`data-theme="dark"` en `.pantalla`, pase lo
+  que pase con el tema elegido), así que la variante es siempre `plata`
+  (CLAUDE.md → «sobre negro, plata»). Solo se fija el alto; el ancho sale de
+  la proporción del archivo. Crece un poco en escritorio, que es donde el
+  halo dorado de detrás también crece.
+*/
 .wordmark {
-  /*
-    Toma su tamaño de la rampa (--t-display-2) en vez del 1.75rem literal que
-    llevaba, que estaba fuera de la escala sin motivo. Al ser un clamp crece en
-    escritorio, que es donde el halo también crece.
-
-    El tracking SÍ es propio y no sale de la rampa: en mayúsculas y a este
-    tamaño las letras se leen apretadas si no se abren, y la rampa declara
-    explícitamente que cada tamaño lleva el suyo. CLAUDE.md prohíbe literales
-    de color, espaciado, radio y duración; el tracking no está en esa lista, y
-    dos tokens con un solo uso cada uno serían ruido.
-  */
-  font-size: var(--t-display-2-size);
-  line-height: var(--t-display-2-leading);
-  font-weight: var(--t-display-2-weight);
-  letter-spacing: 0.22em;
-  /* Compensa el tracking del último carácter: sin esto el conjunto queda
-     ópticamente descentrado hacia la izquierda. */
-  padding-left: 0.22em;
-
-  background: var(--gold-sheen);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-
+  height: clamp(1.5rem, 1.1rem + 1.2vw, 1.875rem);
   margin-bottom: var(--space-8);
 }
 

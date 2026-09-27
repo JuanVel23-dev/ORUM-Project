@@ -30,3 +30,42 @@
 .estrellaAdorno {
   height: 0.6em;
 }
+
+/* --- El logotipo que sigue al tema ------------------------------------------
+   Las dos imágenes ocupan la MISMA celda de grid, superpuestas; solo una
+   está en pantalla a la vez. Mismo selector de tres ramas que `globals.css`
+   usa para todo lo que depende de `data-theme`: explícito por atributo, o la
+   preferencia del sistema mientras el script anti-flash no lo haya estampado
+   todavía. `display: none` saca a la oculta del árbol de accesibilidad, así
+   que las dos pueden compartir `alt="ORUM"` sin duplicar el nombre. */
+
+.logoTema {
+  display: inline-grid;
+}
+
+.logoTemaOro,
+.logoTemaPlata {
+  grid-area: 1 / 1;
+}
+
+.logoTemaPlata {
+  display: none;
+}
+
+[data-theme='dark'] .logoTemaOro {
+  display: none;
+}
+
+[data-theme='dark'] .logoTemaPlata {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) .logoTemaOro {
+    display: none;
+  }
+
+  :root:not([data-theme='light']):not([data-theme='dark']) .logoTemaPlata {
+    display: block;
+  }
+}

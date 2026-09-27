@@ -895,6 +895,15 @@ parece un bug de código y no lo es.
 
 Todo vive en `src/components/ui/`, en **kebab-case**. Antes de crear uno, mira si ya existe.
 
+Lo que es de un DOMINIO en vez de una primitiva de interfaz, pero lo comparten varias
+rutas o varios portales, vive en `src/components/<dominio>/` — mismo principio que
+`src/lib/`, aplicado a componentes: `anuncios/` (`AnuncioBanner`, portal público y de
+miembros) y `comercios/` (`CategoriasDirectorio`, directorio público y catálogo de
+miembros: nació en `(publico)/explorar` y se movió aquí cuando el catálogo de
+miembros dejó de tener su propia fila de chips para usar el mismo botón + ventana).
+Si algo bajo la `_components/` de una ruta empieza a importarlo una segunda ruta,
+esa es la señal de moverlo aquí — nunca duplicarlo.
+
 `Button` `Spinner` · `Field` `Input` `Select` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·
 `Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` · `Alert` `Toast` · `Modal` `Sheet`
@@ -955,19 +964,36 @@ JavaScript. `MenuItem href` renderiza un `<Link>` — nunca un `<a>` dentro de u
 Son dos puertas al mismo club: si una tuviera dirección de arte propia, parecería otra
 empresa. Sus clases de formulario se toman de `estilosAuth`, no de un módulo local —
 la sacudida al fallar usa `:has(.alerta)` y ambas clases deben salir del mismo módulo CSS.
+Su wordmark es `<LogoOrum variante="plata">`: la pantalla es siempre oscura
+(`data-theme="dark"` en el contenedor, pase lo que pase con el tema elegido), así que
+la variante nunca cambia.
 
 **La marca del cliente son imágenes, no texto.** Logotipo «ORUM» (plata,
 dorado, blanco, negro), monograma y estrella viven recortados en
-`src/app/(publico)/_components/marca/` y se usan con `LogoOrum`,
-`MonogramaOrum` y `EstrellaOrum` (`marca.tsx`), que solo piden el ALTO por
-clase. No se vuelve a escribir «✦ ORUM» con la tipografía: los originales de
-Supabase (`recursos-sitio/`) traen lienzos de 1280×720 casi vacíos, por eso se
-recortaron. **Sobre negro, plata; sobre blanco, oro** (propietario,
-26/09/2026): el dorado del cliente casi no se veía sobre la banda negra, así
-que cabecera, pie, cierre y héroe usan las piezas `-plata` (`tono="plata"`).
-La estrella se repite como acento con `AdornoEstrella` AL LADO de los títulos de
-sección (dentro del `<h2>`, nunca encima); siempre decorativa (`aria-hidden`). La imagen para compartir en redes es `(publico)/opengraph-image.jpg`
-(logo dorado sobre negro, el JPG con fondo incrustado: solo ahí).
+`src/components/ui/marca/` y se usan con `LogoOrum`, `MonogramaOrum`,
+`EstrellaOrum` y `AdornoEstrella` (`marca.tsx`), que solo piden el ALTO por
+clase. Vive en `components/ui` y no bajo `(publico)` porque ya la consumen
+los cuatro portales, no solo la fachada. No se vuelve a escribir «✦ ORUM» con
+la tipografía: los originales de Supabase (`recursos-sitio/`) traen lienzos
+de 1280×720 casi vacíos, por eso se recortaron. **Sobre negro, plata; sobre
+blanco, oro** (propietario, 26/09/2026): el dorado del cliente casi no se
+veía sobre la banda negra, así que cabecera, pie, cierre y héroe del público,
+el carnet y las seis pantallas de acceso usan las piezas `-plata`
+(`tono="plata"`/`variante="plata"`). La estrella se repite como acento con
+`AdornoEstrella` AL LADO de los títulos de sección (dentro del `<h2>`, nunca
+encima); siempre decorativa (`aria-hidden`). La imagen para compartir en
+redes es `(publico)/opengraph-image.jpg` (logo dorado sobre negro, el JPG con
+fondo incrustado: solo ahí).
+
+**`LogoOrumTema`** es la excepción a «una variante por superficie fija»: monta
+plata y oro superpuestos y CSS elige por `data-theme`, con el mismo selector
+de tres ramas que `globals.css` usa para todo lo que sigue al tema (explícito
+por atributo, o la preferencia del sistema mientras el script anti-flash no lo
+haya estampado). Existe porque la cabecera del Portal de Miembros —a
+diferencia de una franja fija— cambia de fondo con el tema del propio portal:
+ahí ninguna variante única sirve a los dos casos. No la copies a una
+superficie que no cambie de fondo con el tema — ahí una variante fija basta y
+sobra.
 
 **`QrCode` va en negro sobre blanco en los dos temas.** No es estética: invertirlo en
 oscuro rompe el escaneo en algunos lectores, y el fallo ocurre en la caja del comercio

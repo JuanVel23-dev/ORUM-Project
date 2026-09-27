@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { LogoOrum } from './marca/marca'
 import styles from './pantalla-auth.module.css'
 
 /**
@@ -68,7 +69,10 @@ export function PantallaAuth({ titular, apoyo, pie, children }: PantallaAuthProp
       <div className={styles.marco}>
         <div className={styles.tarjeta}>
           <header className={styles.cabecera}>
-            <span className={styles.wordmark}>ORUM</span>
+            {/* Siempre `data-theme="dark"` en esta pantalla: la variante es
+                siempre plata (CLAUDE.md → «sobre negro, plata»). La imagen del
+                cliente, no un wordmark de texto con degradado. */}
+            <LogoOrum variante="plata" className={styles.wordmark} preload />
             <h1 className={styles.titular}>{titular}</h1>
             {apoyo && <p className={styles.apoyo}>{apoyo}</p>}
           </header>

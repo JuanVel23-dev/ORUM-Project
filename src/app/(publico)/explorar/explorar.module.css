@@ -204,7 +204,7 @@
 }
 
 /* Las categorías (rejilla en escritorio, botón + ventana en móvil) viven en
-   `_components/categorias-directorio.module.css`. */
+   `src/components/comercios/categorias-directorio.module.css`. */
 
 /* --- Recuento, ciudad y orden --------------------------------------------- */
 

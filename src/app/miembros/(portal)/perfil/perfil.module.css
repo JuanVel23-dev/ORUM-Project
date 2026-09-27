@@ -276,21 +276,6 @@
   --info-bg: color-mix(in srgb, var(--info) 12%, transparent);
   --gold-bg: color-mix(in srgb, var(--gold-400) 14%, transparent);
 
-  /*
-    EL BARRIDO DEL WORDMARK. En tema claro `--gold-sheen` se remapea a la mitad
-    OSCURA de la rampa (gold-600/700/800) y sobre chocolate su parada del 62%
-    daría 2,17:1: el wordmark se apagaría justo en el centro. Aquí se reescribe
-    con la mitad clara, y la parada más oscura es `--gold-500` a 6,43:1 — con
-    holgura sobre el 4,5 que pide un texto de este cuerpo.
-  */
-  --gold-sheen: linear-gradient(
-    135deg,
-    var(--gold-200) 0%,
-    /* luz */ var(--gold-400) 38%,
-    /* cuerpo */ var(--gold-500) 62%,
-    /* sombra */ var(--gold-300) 100% /* reflejo de retorno */
-  );
-
   /* En claro `--edge` es transparente porque lo que recorta es la sombra. El
      carnet es oscuro en los dos temas, así que necesita el anillo de luz. */
   --edge: var(--edge-light);
@@ -439,31 +424,14 @@
 }
 
 /*
-  EL WORDMARK, con el barrido metálico. Es la única pieza del sistema que
-  quiere oro como MATERIAL y no como color plano, y el carnet es la marca en la
-  mano del socio: si hay un sitio donde el barrido se gana el gasto, es este.
+  EL LOGOTIPO DEL CLIENTE, no un wordmark de texto con barrido.
 
-  Color plano de respaldo antes del `@supports`: si `background-clip: text` no
-  existe, el texto se pinta en `--brand` y se lee igual. Sin esa precaución un
-  navegador sin soporte mostraría el wordmark transparente, o sea nada.
+  El carnet es cacao —negro— en los DOS temas, así que aquí no hay que seguir
+  ningún tema: la variante siempre es `plata` (CLAUDE.md → «sobre negro,
+  plata»). Solo se fija el alto; el ancho sale de la proporción del archivo.
 */
 .wordmark {
-  font-size: var(--t-footnote-size);
-  line-height: var(--t-footnote-leading);
-  font-weight: 680;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-
-  color: var(--brand);
-  background: var(--gold-sheen);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-@supports (-webkit-background-clip: text) or (background-clip: text) {
-  .wordmark {
-    -webkit-text-fill-color: transparent;
-  }
+  height: 0.875rem;
 }
 
 /*
@@ -897,14 +865,10 @@
     display: none;
   }
 
-  /* El barrido metálico no sobrevive a una impresora: el wordmark vuelve a
-     tinta plana. Sin esto quedaría transparente —el `-webkit-text-fill-color`
-     del `@supports` sigue activo— y el emisor del carnet desaparecería. */
-  .wordmark {
-    background: none;
-    color: var(--n-1000);
-    -webkit-text-fill-color: var(--n-1000);
-  }
+  /* El logotipo ya es una imagen, no texto con degradado: no hay nada que
+     revertir a tinta plana. La plata se imprime tal cual —un gris pálido,
+     sin el coste de tinta que preocupaba al chocolate de fondo, que aquí ya
+     se convirtió en papel blanco. */
 
   .numero {
     color: var(--n-1000);
