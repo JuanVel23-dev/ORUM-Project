@@ -32,8 +32,10 @@ const PASOS = [
     frase: 'Escríbenos por WhatsApp, elige tu plan y recibe tu carnet.',
   },
   {
-    titulo: 'Muestra tu carnet.',
-    frase: 'Al pagar, enséñalo desde tu teléfono o con tu tarjeta física.',
+    /* 29/09/2026: el comercio también pide la cédula (o el documento de
+       identidad) para comprobar que el carnet es de quien lo enseña. */
+    titulo: 'Muestra tu carnet y tu cédula.',
+    frase: 'Al pagar, enseña tu carnet ORUM (en el teléfono o la tarjeta física) y tu documento de identidad.',
   },
   {
     titulo: 'Disfruta el beneficio.',
