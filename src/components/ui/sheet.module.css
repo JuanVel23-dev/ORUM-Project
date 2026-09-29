@@ -207,7 +207,10 @@
   .cuerpo::after {
     content: '';
     position: sticky;
-    bottom: 0;
+    /* Menos el relleno inferior del cuerpo: el filo pegajoso se mide desde
+       su caja de contenido, y con `0` quedaba una franja blanca de 24px
+       debajo del degradado, cortándolo. */
+    bottom: calc(-1 * var(--space-6));
     display: block;
     height: 72px;
     margin: -72px calc(-1 * var(--space-6)) 0;
