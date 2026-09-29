@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import { CheckCircle2, Send } from 'lucide-react'
+import { CheckCircle2, LayoutGrid, MapPin, Send } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
@@ -140,7 +140,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
             type="text"
             defaultValue={previos?.nombreComercio}
             autoComplete="organization"
-            placeholder="Panadería La Espiga"
             required
           />
         </Field>
@@ -162,7 +161,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
               type="text"
               defaultValue={previos?.cargo}
               autoComplete="organization-title"
-              placeholder="Propietario"
             />
           </Field>
         </div>
@@ -178,7 +176,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
                  el `+` y los ceros a la izquierda. */
               inputMode="tel"
               autoComplete="tel"
-              placeholder="3001234567"
               required
             />
           </Field>
@@ -189,7 +186,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
               type="email"
               defaultValue={previos?.correo}
               autoComplete="email"
-              placeholder="contacto@minegocio.com"
               required
             />
           </Field>
@@ -197,29 +193,55 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
 
         <div className={estilos.pareja}>
           <Field label="Ciudad" error={errores.ciudad}>
-            <Select name="ciudad" defaultValue={previos?.ciudad ?? ''} required>
-              <option value="" disabled>
-                Selecciona una ciudad
-              </option>
-              {CIUDADES_ALIADO.map((ciudad) => (
-                <option key={ciudad} value={ciudad}>
-                  {ciudad}
+            {/*
+              Los dos desplegables con el lenguaje de los filtros del
+              directorio: icono en anillo dorado a la izquierda y flecha
+              dorada. Sigue siendo el `<select>` nativo —en móvil abre la
+              rueda del sistema, más rápida y accesible que una lista propia—.
+            */}
+            <div className={estilos.desplegable}>
+              <span className={estilos.desplegableIcono} aria-hidden="true">
+                <MapPin size={14} />
+              </span>
+              <Select
+                name="ciudad"
+                defaultValue={previos?.ciudad ?? ''}
+                required
+                className={estilos.selectDiseno}
+              >
+                <option value="" disabled>
+                  Selecciona una ciudad
                 </option>
-              ))}
-            </Select>
+                {CIUDADES_ALIADO.map((ciudad) => (
+                  <option key={ciudad} value={ciudad}>
+                    {ciudad}
+                  </option>
+                ))}
+              </Select>
+            </div>
           </Field>
 
           <Field label="Categoría" error={errores.categoria}>
-            <Select name="categoria" defaultValue={previos?.categoria ?? ''} required>
-              <option value="" disabled>
-                Selecciona una categoría
-              </option>
-              {CATEGORIAS_ALIADO.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                  {categoria}
+            <div className={estilos.desplegable}>
+              <span className={estilos.desplegableIcono} aria-hidden="true">
+                <LayoutGrid size={14} />
+              </span>
+              <Select
+                name="categoria"
+                defaultValue={previos?.categoria ?? ''}
+                required
+                className={estilos.selectDiseno}
+              >
+                <option value="" disabled>
+                  Selecciona una categoría
                 </option>
-              ))}
-            </Select>
+                {CATEGORIAS_ALIADO.map((categoria) => (
+                  <option key={categoria} value={categoria}>
+                    {categoria}
+                  </option>
+                ))}
+              </Select>
+            </div>
           </Field>
         </div>
 
@@ -229,7 +251,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
             type="text"
             defaultValue={previos?.direccion}
             autoComplete="street-address"
-            placeholder="Calle 10 # 4-32"
           />
         </Field>
 
@@ -259,7 +280,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
             defaultValue={previos?.enlace}
             inputMode="url"
             autoComplete="url"
-            placeholder="instagram.com/minegocio"
           />
         </Field>
       </Stack>
