@@ -244,6 +244,13 @@
   --gold-650: #8e6b13; /* TEXTO e iconos dorados sobre claro (las TRES) */
   --gold-800: #675010; /* dorado enfático · oro sobre relleno dorado */
 
+  /* EL VERDE DE WHATSAPP, solo para el botón flotante (29/09/2026). No es
+     color de marca de ORUM: es el del canal, y se usa porque es lo que el ojo
+     reconoce sin leer. Oscurecido desde el `#25D366` oficial, que con el
+     glifo blanco daba 1,98:1: este da 3,48:1 con el glifo blanco y 3,22:1 de
+     filo contra el crema (WCAG 1.4.11, los dos). No se usa en nada más. */
+  --whatsapp: #1a9e4b;
+
   /* Oro como material: barrido que simula luz sobre metal.
 
      SIGUE ACOTADO AL WORDMARK, y ahora por un motivo distinto del de la v4.

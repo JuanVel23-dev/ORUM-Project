@@ -1,0 +1,84 @@
+/* ==========================================================================
+   WHATSAPP FLOTANTE
+   --------------------------------------------------------------------------
+   Fijo en la esquina inferior derecha de la VENTANA, respetando las zonas
+   seguras (PWA instalada, teléfonos con barra de gestos). Por debajo de los
+   diálogos y las hojas (`--z-sticky` < `--z-overlay`): cuando algo se abre
+   encima, el botón no debe competir con ello.
+
+   Flota, así que SÍ lleva sombra: es de lo poco del sistema que el dedo
+   levanta de verdad. Se levanta al apuntar y se hunde al pulsar, como el
+   resto de lo elevado.
+   ========================================================================== */
+
+.boton {
+  position: fixed;
+  right: max(var(--space-5), calc(env(safe-area-inset-right, 0px) + var(--space-4)));
+  bottom: max(var(--space-5), calc(env(safe-area-inset-bottom, 0px) + var(--space-4)));
+  z-index: var(--z-sticky);
+
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+
+  background: var(--whatsapp);
+  color: var(--blanco);
+  box-shadow: var(--shadow-flotante);
+
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+@media (min-width: 768px) {
+  .boton {
+    width: 60px;
+    height: 60px;
+    right: max(var(--space-7), calc(env(safe-area-inset-right, 0px) + var(--space-4)));
+    bottom: max(var(--space-7), calc(env(safe-area-inset-bottom, 0px) + var(--space-4)));
+  }
+}
+
+.glifo {
+  width: 55%;
+  height: 55%;
+  fill: currentColor;
+}
+
+@media (hover: hover) {
+  .boton:hover {
+    translate: 0 -2px;
+    scale: 1;
+    box-shadow: var(--shadow-overlay);
+  }
+}
+
+.boton:active {
+  translate: 0 2px;
+  scale: 1;
+  box-shadow: var(--shadow-press);
+  transition-duration: var(--dur-press);
+}
+
+/* El anillo de foco del sistema, separado del círculo para que se lea. */
+.boton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton:hover,
+  .boton:active {
+    translate: none;
+  }
+}
+
+/* Un atajo de pantalla no pertenece a una hoja impresa. */
+@media print {
+  .boton {
+    display: none;
+  }
+}

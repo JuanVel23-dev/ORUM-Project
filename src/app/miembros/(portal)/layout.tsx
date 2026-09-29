@@ -11,6 +11,7 @@ import { PortalNav, PortalTabBar } from './_components/portal-nav'
 import { CabeceraPortal } from './_components/cabecera-portal'
 import { PieSitio } from '@/components/pie/pie-sitio'
 import { PiePortal } from './_components/pie-portal'
+import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import styles from './portal.module.css'
 
@@ -176,6 +177,12 @@ export default async function MiembrosLayout({
       {modal}
 
       <PortalTabBar />
+
+      {/*
+        El atajo a WhatsApp, fijo en la esquina (encargo del 29/09/2026). En
+        móvil sube por encima de la barra inferior: ver `.whatsapp`.
+      */}
+      <WhatsAppFlotante telefono={soporte} mensaje={MENSAJE_SOPORTE} className={styles.whatsapp} />
     </div>
   )
 }

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
 import { EncabezadoPublico } from './_components/encabezado-publico'
 import { PieSitio } from '@/components/pie/pie-sitio'
+import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import estilos from './publico.module.css'
 
 /*
@@ -65,6 +66,12 @@ export default async function PublicoLayout({
       {modal}
 
       <PieSitio soporte={soporte} />
+
+      {/* El atajo a WhatsApp, fijo en la esquina (encargo del 29/09/2026). */}
+      <WhatsAppFlotante
+        telefono={soporte}
+        mensaje="Hola, quiero saber más sobre el club de beneficios ORUM."
+      />
     </div>
   )
 }

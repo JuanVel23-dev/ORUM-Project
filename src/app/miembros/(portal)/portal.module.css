@@ -484,6 +484,19 @@
   enlaces legales. Doble clase para ganarle al relleno propio del pie sin
   depender del orden en que se carguen los dos módulos.
 */
+/*
+  EL WHATSAPP FLOTANTE, POR ENCIMA DE LA BARRA INFERIOR EN MÓVIL.
+
+  La barra es fija y ocupa `--tabbar-alto` desde abajo: con la posición por
+  defecto del botón, lo taparía (o taparía «Mi perfil»). Doble clase para
+  ganarle a la regla del componente sin depender del orden de los módulos.
+*/
+@media (max-width: 767px) {
+  .portal .whatsapp {
+    bottom: calc(var(--tabbar-alto) + var(--space-4));
+  }
+}
+
 /* El contenido del pie se alinea con la columna del portal, no con la de
    1100px del Portal Público: si no, empezaba en otra línea vertical. */
 .portal .pie {
