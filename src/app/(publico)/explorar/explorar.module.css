@@ -313,7 +313,7 @@
   da 6,58:1. El check del sistema sigue siendo el segundo portador.
 */
 .menus :global([role='menuitemradio'][aria-checked='true']) {
-  background: var(--gold-bg);
+  /* Sin fondo (29/09/2026): la dicen el texto dorado, el peso y el check. */
   color: var(--gold-800);
   font-weight: 700;
 }

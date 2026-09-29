@@ -145,7 +145,21 @@ desaparece.** Cuando algo «se pierde» sobre el fondo no es un fallo del token:
 es que a esa superficie le falta su escalón. **La respuesta es subir de sombra,
 nunca devolverle un borde.**
 
-La única excepción que conserva tinte es `--surface-hover`. **Es deliberadamente
+⚠️ **DESDE EL 29/09/2026, NINGÚN TINTE AL APUNTAR NI AL ELEGIR** (encargo del
+propietario: «prefiero que quede sin fondo y simplemente haga alguna
+animación», para todos los componentes). `--surface-hover` vale
+`transparent` en todos los temas y ámbitos, y las opciones elegidas de los
+menús ya no llevan `--gold-bg`. La respuesta al apuntar es **movimiento**:
+los textos y enlaces suben 1–2px (`translate`), las filas de menú se deslizan
+3px, las X de cerrar giran 90°, los iconos de campo crecen, los anillos de
+«Así funciona» suben y crecen. Las filas de `DataList` no se mueven (regla de
+listas largas): solo cursor y acuse de pulsación por opacidad. Lo elegido se
+dice con filo dorado, check, peso y `aria-*` — nunca con un relleno. **No
+reintroducir un fondo de hover en un componente nuevo.** El párrafo que sigue
+describe el tinte que había y por qué necesitaba segundo canal; el segundo
+canal sigue siendo obligatorio, ahora como único canal visible.
+
+La única excepción que conservaba tinte era `--surface-hover`. **Es deliberadamente
 tenue: 1,07:1 sobre crema** (v6; era 1,13:1 sobre blanco puro en la v5 — la
 mezcla de tinta bajó de 6 % a 3,5 % porque al 6 % el filo dorado de
 `Button variant="brand"` caía bajo el 3:1 de 1.4.11 contra este hover; ver

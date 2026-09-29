@@ -99,8 +99,10 @@
    FUERA a propósito — un teclado existe en cualquier dispositivo. */
 
 @media (hover: hover) {
+  /* Sin relleno (29/09/2026). Una fila de lista no se mueve al apuntar
+     —la factura la paga el móvil—: el cursor y el acuse de pulsación bastan. */
   .fila:hover {
-    background: var(--surface-hover);
+    cursor: pointer;
   }
 }
 
@@ -144,7 +146,6 @@
 */
 @media (hover: none) {
   .fila:active {
-    background: var(--surface-hover);
     opacity: 0.62;
   }
 }
@@ -158,7 +159,6 @@
 
 /* El enlace de fila hereda el mismo acuse en escritorio. */
 .fila:has(.enlace:active) {
-  background: var(--surface-hover);
   opacity: 0.62;
 }
 

@@ -70,7 +70,13 @@
   --bg: var(--w-0);
   --surface: var(--w-0);
   --surface-sunk: var(--w-0);
-  --surface-hover: color-mix(in srgb, var(--n-1000) 3.5%, var(--w-0));
+  /* 29/09/2026 · SIN TINTE AL APUNTAR NI AL ELEGIR (encargo del propietario:
+     «prefiero que quede sin fondo y simplemente haga alguna animación»).
+     El token sigue existiendo para no dejar `var()` huérfanos, pero vale
+     `transparent` en todos los temas y ámbitos: quien lo pedía como relleno
+     de hover ahora responde con movimiento (ver cada módulo), y los estados
+     elegidos se dicen con el filo dorado, el check, el peso y `aria-*`. */
+  --surface-hover: transparent;
 
   /* --------------------------------------------------------------------------
      SUPERFICIES TONALES  ·  v4 §1 y §4, con los grises de la v5
@@ -496,7 +502,7 @@
   --bg: var(--n-1000);
   --surface: var(--n-900);
   --surface-sunk: var(--n-950);
-  --surface-hover: var(--n-850);
+  --surface-hover: transparent;
   --surface-hueco: var(--n-850);
 
   /* En oscuro la banda alterna es MÁS CLARA que el fondo: aquí lo que avanza
@@ -614,7 +620,7 @@
     --bg: var(--n-1000);
     --surface: var(--n-900);
     --surface-sunk: var(--n-950);
-    --surface-hover: var(--n-850);
+    --surface-hover: transparent;
     --surface-hueco: var(--n-850);
 
     /* Copia EXACTA del bloque `[data-theme='dark']` de arriba: si tocas uno,

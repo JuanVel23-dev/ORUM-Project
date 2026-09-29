@@ -170,7 +170,7 @@
   --surface: var(--cacao-surface);
   --surface-alt: var(--cacao-surface);
   --surface-alt-2: var(--cacao-surface);
-  --surface-hover: var(--cacao-hover);
+  --surface-hover: transparent;
   --surface-sunk: var(--cacao-bg);
 
   --text: var(--cacao-fg);
@@ -342,7 +342,7 @@
   --text: var(--cacao-fg);
   --text-2: var(--cacao-fg-2);
   --surface: transparent;
-  --surface-hover: color-mix(in srgb, var(--cacao-fg) 10%, transparent);
+  --surface-hover: transparent;
   --border-control: color-mix(in srgb, var(--cacao-fg) 50%, transparent);
   --border-subtle: color-mix(in srgb, var(--cacao-fg) 22%, transparent);
   --brand: var(--gold-300);

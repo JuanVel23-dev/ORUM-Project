@@ -29,7 +29,7 @@
   --text-3: var(--cacao-fg-3);
   --brand: var(--gold-300);
   --focus: var(--cacao-brand);
-  --surface-hover: var(--cacao-hover);
+  --surface-hover: transparent;
   --border-subtle: color-mix(in srgb, var(--cacao-fg) 10%, transparent);
 
   color: var(--text);
@@ -120,14 +120,14 @@
   border-radius: var(--radius-sm);
 
   text-decoration: none;
-  transition: background-color var(--dur-fast) var(--ease-out);
+  transition: translate var(--dur-fast) var(--ease-out);
 }
 
 /* `:hover` siempre dentro de `@media (hover: hover)`: en táctil el hover se
    queda pegado tras el toque y la fila parece seleccionada sin estarlo. */
 @media (hover: hover) {
   .puerta:hover {
-    background: var(--surface-hover);
+    translate: 0 -2px;
   }
 }
 
@@ -169,13 +169,13 @@
 
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    translate var(--dur-fast) var(--ease-out);
 }
 
 @media (hover: hover) {
   .soporte:hover {
     color: var(--text);
-    background: var(--surface-hover);
+    translate: 0 -2px;
   }
 }
 
@@ -261,13 +261,13 @@
 
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    translate var(--dur-fast) var(--ease-out);
 }
 
 @media (hover: hover) {
   .enlaceLegal:hover {
     color: var(--text-2);
-    background: var(--surface-hover);
+    translate: 0 -1px;
   }
 }
 

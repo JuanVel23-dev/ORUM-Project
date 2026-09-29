@@ -100,7 +100,7 @@
   --bg: var(--cacao-bg);
   --surface: var(--cacao-surface);
   --surface-alt: var(--cacao-surface);
-  --surface-hover: var(--cacao-hover);
+  --surface-hover: transparent;
   --surface-sunk: var(--cacao-bg);
 
   --text: var(--cacao-fg);
@@ -539,7 +539,7 @@
    oro de texto no llega a 4,5:1. El menú se pinta en la capa superior pero
    sigue siendo descendiente del panel en el DOM. */
 .panelFiltros :global([role='menuitemradio'][aria-checked='true']) {
-  background: var(--gold-bg);
+  /* Sin fondo (29/09/2026): la dicen el texto dorado, el peso y el check. */
   color: var(--gold-800);
   font-weight: 700;
 }

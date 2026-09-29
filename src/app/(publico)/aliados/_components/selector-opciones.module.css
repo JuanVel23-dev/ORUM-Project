@@ -52,7 +52,7 @@
    el check del menú como segundo portador. El menú se pinta en la capa
    superior pero sigue siendo descendiente de `.selector` en el DOM. */
 .selector :global([role='menuitemradio'][aria-checked='true']) {
-  background: var(--gold-bg);
+  /* Sin fondo (29/09/2026): la dicen el texto dorado, el peso y el check. */
   color: var(--gold-800);
   font-weight: 700;
 }

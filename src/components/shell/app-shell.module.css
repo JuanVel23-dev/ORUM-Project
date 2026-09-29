@@ -274,7 +274,7 @@
   cursor: pointer;
   text-align: left;
 
-  transition: background-color var(--dur-fast) var(--ease-out),
+  transition: translate var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
@@ -288,8 +288,7 @@
 
 @media (hover: hover) {
   .perfilBoton:hover {
-    background: var(--surface-hover);
-    box-shadow: inset 0 0 0 1px var(--border-subtle);
+    translate: 0 -1px;
   }
 }
 
@@ -339,7 +338,7 @@
 
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
@@ -351,8 +350,7 @@
 @media (hover: hover) {
   .colapsar:hover {
     color: var(--text);
-    background: var(--surface-hover);
-    box-shadow: inset 0 0 0 1px var(--border-subtle);
+    translate: 0 -1px;
   }
 }
 

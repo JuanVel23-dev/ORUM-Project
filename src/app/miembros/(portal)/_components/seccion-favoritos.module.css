@@ -16,7 +16,6 @@
 
   padding: var(--space-4);
   border-radius: var(--radius-md);
-  background: var(--surface-hover);
 }
 
 .titulo {

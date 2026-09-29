@@ -307,7 +307,7 @@
 
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
 
@@ -318,7 +318,7 @@
 @media (hover: hover) {
   .enlace:hover {
     color: var(--text);
-    background: var(--surface-hover);
+    translate: 0 -2px;
   }
 }
 

@@ -215,7 +215,7 @@
   --surface: var(--cacao-surface);
   --surface-alt: var(--cacao-surface);
   --surface-alt-2: var(--cacao-surface);
-  --surface-hover: var(--cacao-hover);
+  --surface-hover: transparent;
   --surface-sunk: var(--cacao-bg);
 
   --text: var(--cacao-fg);

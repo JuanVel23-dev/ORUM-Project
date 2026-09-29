@@ -32,7 +32,7 @@
 
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
 }
@@ -82,7 +82,7 @@
 @media (hover: hover) {
   .boton:hover {
     color: var(--text);
-    background: var(--surface-hover);
+    translate: 0 -2px;
   }
 
   .boton[data-marcado='true']:hover {
