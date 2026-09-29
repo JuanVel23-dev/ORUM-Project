@@ -210,7 +210,7 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
                 className={estilos.selectDiseno}
               >
                 <option value="" disabled>
-                  Selecciona una ciudad
+                  Elige una ciudad
                 </option>
                 {CIUDADES_ALIADO.map((ciudad) => (
                   <option key={ciudad} value={ciudad}>
@@ -233,7 +233,7 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
                 className={estilos.selectDiseno}
               >
                 <option value="" disabled>
-                  Selecciona una categoría
+                  Elige una categoría
                 </option>
                 {CATEGORIAS_ALIADO.map((categoria) => (
                   <option key={categoria} value={categoria}>
