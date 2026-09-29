@@ -117,8 +117,11 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
-  padding: 0 var(--space-3);
+  /* Siete destinos: relleno algo más corto y nunca en dos líneas
+     («Cómo funciona» se partía). */
+  padding: 0 var(--space-2);
   border-radius: var(--radius-full);
+  white-space: nowrap;
 
   font-size: var(--t-callout-size);
   font-weight: 500;
