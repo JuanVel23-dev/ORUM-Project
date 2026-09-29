@@ -484,6 +484,12 @@
   enlaces legales. Doble clase para ganarle al relleno propio del pie sin
   depender del orden en que se carguen los dos módulos.
 */
+/* El contenido del pie se alinea con la columna del portal, no con la de
+   1100px del Portal Público: si no, empezaba en otra línea vertical. */
+.portal .pie {
+  --content-max: var(--portal-max);
+}
+
 @media (max-width: 767px) {
   .portal .pie {
     padding-bottom: calc(var(--tabbar-alto) + var(--space-6));

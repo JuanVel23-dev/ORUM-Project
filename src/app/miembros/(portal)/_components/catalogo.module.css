@@ -32,8 +32,11 @@
 
 /* Dos franjas del mismo tono seguidas serían una sola más alta: el aire entre
    ellas es lo que las separa, y solo hace falta cuando cambian de color. */
+/* Dos franjas seguidas van PEGADAS, como en la maqueta: el hueco de la
+   página entre ellas dejaba una raya crema. `.pagina` es flex con `gap`, así
+   que no basta con `margin-top: 0`: hay que restar el hueco. */
 .franja + .franja {
-  margin-top: 0;
+  margin-top: calc(-1 * var(--gap-pagina, 0px));
 }
 
 .franjaCrema {
@@ -140,14 +143,16 @@
   color ya hace de separador; esto gobierna lo que queda sobre papel.
 */
 .pagina {
+  /* Publicado para que dos franjas seguidas puedan anularlo (ver abajo). */
+  --gap-pagina: var(--space-7);
   display: flex;
   flex-direction: column;
-  gap: var(--space-7);
+  gap: var(--gap-pagina);
 }
 
 @container contenido (min-width: 900px) {
   .pagina {
-    gap: var(--space-8);
+    --gap-pagina: var(--space-8);
   }
 }
 

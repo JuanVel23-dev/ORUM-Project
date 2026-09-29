@@ -140,7 +140,24 @@
   outline-offset: 3px;
 }
 
-/* El logo de ORUM llena el vacío del fondo: plata y muy tenue, marca de agua. */
+/* La portada del comercio, cuando la hay: la tarjeta-foto de la maqueta. */
+.foto {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale var(--dur-page) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .tarjeta:hover .foto {
+    scale: 1.05;
+  }
+}
+
+/* Sin portada, el logo de ORUM llena el vacío del fondo: plata y muy tenue, marca de agua. */
 .marcaAgua {
   position: absolute;
   top: 42%;

@@ -40,11 +40,14 @@ export function TopDescuentos({
   items,
   volver = null,
   apoyo = 'Los descuentos que más usan los socios',
+  portadas,
 }: {
   items: TopDescuento[]
   volver?: string | null
   /** El criterio del ranking, en palabras: por uso o, de respaldo, por descuento. */
   apoyo?: string
+  /** La foto de portada de cada comercio, por id. Sin foto, la marca de agua. */
+  portadas?: ReadonlyMap<number, string | null>
 }) {
   /*
     LA PUERTA. Con menos de tres, la sección NO SE PINTA: ni encabezado ni
@@ -77,7 +80,18 @@ export function TopDescuentos({
               en el mismo documento anulan la transición ENTERA en silencio.
             */}
             <Link href={hrefFicha(item.comercioId, volver)} className={estilos.tarjeta}>
-              <LogoOrum variante="plata" className={estilos.marcaAgua} />
+              {portadas?.get(item.comercioId) ? (
+                // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+                <img
+                  src={portadas.get(item.comercioId) ?? undefined}
+                  alt=""
+                  className={estilos.foto}
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <LogoOrum variante="plata" className={estilos.marcaAgua} />
+              )}
               <span className={estilos.velo} aria-hidden="true" />
 
               {/* El número visible es lo que convierte una fila de beneficios

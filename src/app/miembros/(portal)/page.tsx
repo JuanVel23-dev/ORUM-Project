@@ -673,6 +673,7 @@ export default async function MiembrosHomePage({
             <TopDescuentos
               items={topDelClub}
               volver={volver}
+              portadas={new Map(comerciosListado.map((c) => [c.id, c.portadaUrl ?? null]))}
               apoyo={
                 topEsPorUso
                   ? 'Los descuentos que más usan los socios'
