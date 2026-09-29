@@ -911,7 +911,7 @@ miembros: nació en `(publico)/explorar` y se movió aquí cuando el catálogo d
 miembros dejó de tener su propia fila de chips para usar el mismo botón + ventana).
 Si algo bajo la `_components/` de una ruta empieza a importarlo una segunda ruta,
 esa es la señal de moverlo aquí — nunca duplicarlo.
-`pie/` (`PieSitio`) es el pie de las tres puertas: lo montan el Portal Público y,
+`pie/` (`PieSitio`) es el pie de las puertas de socio y comercio (la de administración se retiró el 29/09/2026: el pie es público y no anuncia el panel): lo montan el Portal Público y,
 desde el rediseño del 27/09/2026, el Portal de Miembros. Las clases de revelado al
 desplazar (`REVELAR`, `revelarEscalonado`…) viven en `src/lib/shared/revelado.ts`
 por la misma razón.

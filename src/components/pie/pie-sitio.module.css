@@ -63,9 +63,12 @@
   que la norma prohíbe. El ancho útil de este bloque ES el del viewport.
 */
 @media (min-width: 768px) {
+  /* Todo en la misma línea media: logo, puertas y soporte. Con
+     `flex-start` el logo (32px) se quedaba arriba mientras el texto de las
+     puertas bajaba con su relleno de toque — «no se ve alineado». */
   .contenido {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: var(--space-8);
   }
@@ -81,7 +84,7 @@
   height: 2rem;
 }
 
-/* --- Las tres puertas ----------------------------------------------------- */
+/* --- Las puertas (socio y comercio) ----------------------------------------------------- */
 
 .puertas {
   display: flex;
@@ -173,6 +176,16 @@
   .soporte:hover {
     color: var(--text);
     background: var(--surface-hover);
+  }
+}
+
+/* En fila, centrado con el resto y con el texto rematando en el mismo filo
+   derecho que los enlaces legales de abajo: el relleno de toque se compensa
+   con margen negativo a los dos lados, no solo a la izquierda. */
+@media (min-width: 768px) {
+  .soporte {
+    align-self: center;
+    margin-right: calc(var(--space-2) * -1);
   }
 }
 

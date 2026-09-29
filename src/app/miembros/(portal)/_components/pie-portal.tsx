@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 /*
   EL PIE DEL PORTAL SEGÚN LA PANTALLA (maquetas del 29/09/2026)
 
-  Inicio lleva el pie completo del Portal Público —las tres puertas, soporte
+  Inicio lleva el pie completo del Portal Público —las puertas de socio y comercio, soporte
   y enlaces legales—; las pantallas interiores (carnet, novedades) llevan el
   compacto: logotipo y derechos. Los dos llegan ya renderizados del servidor;
   esto solo lee la ruta y elige.

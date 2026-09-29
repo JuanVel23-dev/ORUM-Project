@@ -5,7 +5,7 @@ import { REVELAR, revelarEscalonado } from '@/lib/shared/revelado'
 import estilos from './pie-sitio.module.css'
 
 /*
-  EL PIE  ·  el sitio del producto donde conviven las tres puertas
+  EL PIE  ·  el sitio del producto donde conviven las puertas
   ---------------------------------------------------------------------------
   Lo usan el Portal Público y, desde el 27/09/2026, el Portal de Miembros
   (encargo del propietario: «un footer como los otros»). Vive en
@@ -32,7 +32,12 @@ const PUERTAS = [
     texto: 'Tengo un comercio',
     destino: 'Herramienta de comercios',
   },
-  { href: '/login', texto: 'Administro ORUM', destino: 'Administración' },
+  /*
+    «Administro ORUM» se RETIRÓ (29/09/2026, encargo del propietario): el pie
+    es público y la puerta del panel de administración no debe anunciarse a
+    cualquiera que visite la web. El acceso sigue existiendo en `/login` para
+    quien lo conoce; simplemente no se enlaza desde aquí.
+  */
 ] as const
 
 const MENSAJE_SOPORTE = 'Hola, quiero saber más sobre el club de beneficios ORUM.'
@@ -55,7 +60,7 @@ export function PieSitio({
   className?: string
   /**
    * Solo logotipo y derechos, en una fila (maqueta del carnet, 29/09/2026).
-   * Lo usan las pantallas interiores del Portal de Miembros: las tres puertas
+   * Lo usan las pantallas interiores del Portal de Miembros: las puertas
    * y el soporte ya están en el pie del Inicio y en el menú de la cuenta.
    */
   compacto?: boolean
