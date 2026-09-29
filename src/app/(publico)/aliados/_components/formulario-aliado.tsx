@@ -2,11 +2,11 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import { CheckCircle2, LayoutGrid, MapPin, Send } from 'lucide-react'
+import { CheckCircle2, Send } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input, Select, Textarea } from '@/components/ui/input'
+import { Input, Textarea } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
 import { Checkbox } from '@/components/ui/toggle'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
@@ -19,6 +19,7 @@ import {
   type SolicitudAliadoState,
 } from '@/lib/aliados/solicitud-aliado'
 import { enviarSolicitudAliado } from '../actions'
+import { SelectorOpciones } from './selector-opciones'
 import estilos from './formulario-aliado.module.css'
 
 const ESTADO_INICIAL: SolicitudAliadoState = {}
@@ -194,54 +195,27 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
         <div className={estilos.pareja}>
           <Field label="Ciudad" error={errores.ciudad}>
             {/*
-              Los dos desplegables con el lenguaje de los filtros del
-              directorio: icono en anillo dorado a la izquierda y flecha
-              dorada. Sigue siendo el `<select>` nativo —en móvil abre la
-              rueda del sistema, más rápida y accesible que una lista propia—.
+              El campo se ve como los demás; la lista que abre es el menú del
+              sistema (ver `selector-opciones.tsx`): la del `<select>` nativo
+              no admite diseño.
             */}
-            <div className={estilos.desplegable}>
-              <span className={estilos.desplegableIcono} aria-hidden="true">
-                <MapPin size={14} />
-              </span>
-              <Select
-                name="ciudad"
-                defaultValue={previos?.ciudad ?? ''}
-                required
-                className={estilos.selectDiseno}
-              >
-                <option value="" disabled>
-                  Elige una ciudad
-                </option>
-                {CIUDADES_ALIADO.map((ciudad) => (
-                  <option key={ciudad} value={ciudad}>
-                    {ciudad}
-                  </option>
-                ))}
-              </Select>
-            </div>
+            <SelectorOpciones
+              name="ciudad"
+              etiqueta="Ciudad"
+              opciones={CIUDADES_ALIADO}
+              invitacion="Elige una ciudad"
+              defaultValue={previos?.ciudad}
+            />
           </Field>
 
           <Field label="Categoría" error={errores.categoria}>
-            <div className={estilos.desplegable}>
-              <span className={estilos.desplegableIcono} aria-hidden="true">
-                <LayoutGrid size={14} />
-              </span>
-              <Select
-                name="categoria"
-                defaultValue={previos?.categoria ?? ''}
-                required
-                className={estilos.selectDiseno}
-              >
-                <option value="" disabled>
-                  Elige una categoría
-                </option>
-                {CATEGORIAS_ALIADO.map((categoria) => (
-                  <option key={categoria} value={categoria}>
-                    {categoria}
-                  </option>
-                ))}
-              </Select>
-            </div>
+            <SelectorOpciones
+              name="categoria"
+              etiqueta="Categoría"
+              opciones={CATEGORIAS_ALIADO}
+              invitacion="Elige una categoría"
+              defaultValue={previos?.categoria}
+            />
           </Field>
         </div>
 
