@@ -29,15 +29,15 @@ import estilos from './membresias-publicas.module.css'
 type Props = {
   planes: PlanPublico[]
   soporte: string | null
-  totalComercios: number
 }
 
-export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
+export function MembresiasPublicas({ planes, soporte }: Props) {
   const ventajas = [
     'Beneficio activo desde el primer día',
-    totalComercios > 0
-      ? `Válido en ${totalComercios === 1 ? 'el comercio aliado' : `los ${totalComercios.toLocaleString('es-CO')} comercios aliados`}`
-      : 'Válido en todos los comercios aliados',
+    /* Sin la cifra (encargo del 29/09/2026): «los 6 comercios aliados»
+       dejaba contado el club, y un número pequeño juega en contra de quien
+       todavía está decidiendo si hacerse socio. */
+    'Válido en todos los comercios aliados',
     'Sin cobros automáticos: pagas por WhatsApp y renuevas solo si quieres',
     'Incluye tarjeta física de la membresía',
   ]

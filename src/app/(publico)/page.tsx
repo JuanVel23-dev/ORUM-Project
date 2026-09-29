@@ -100,11 +100,7 @@ export default async function LandingPublica() {
 
       <ComerciosDestacados comercios={vitrina.destacados} />
 
-      <MembresiasPublicas
-        planes={planes}
-        soporte={soporte}
-        totalComercios={vitrina.totalComercios}
-      />
+      <MembresiasPublicas planes={planes} soporte={soporte} />
 
       {/*
         EL CIERRE. Repite la invitación a propósito: quien llega hasta aquí
