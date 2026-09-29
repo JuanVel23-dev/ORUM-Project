@@ -188,6 +188,8 @@
     display: block;
     height: 72px;
     margin: -72px calc(-1 * var(--space-6)) 0;
+    /* Las esquinas del diálogo: sin esto el degradado asomaba por fuera. */
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     pointer-events: none;
 
     background: linear-gradient(
