@@ -1,7 +1,6 @@
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/feedback'
 import { Grid, Stack } from '@/components/ui/layout'
-import { CarruselDestacadosEsqueleto } from './_components/carrusel-destacados'
 import estilos from './_components/catalogo.module.css'
 import tarjeta from './_components/comercio-card.module.css'
 
@@ -19,22 +18,6 @@ import tarjeta from './_components/comercio-card.module.css'
 
   `Skeleton` ya lleva `data-motion-esencial`, así que el barrido sigue vivo con
   `prefers-reduced-motion`: un esqueleto congelado parece contenido roto.
-*/
-
-/*
-  UN SOLO CAMPO, no tres.
-
-  Antes se dibujaban dos desplegables más la búsqueda, que era la forma de
-  entonces. Hoy "Comercio" no existe —lo sustituye la propia búsqueda—,
-  "Categoría" subió a los chips, y "Marca"/"Ciudad" viven dentro de un
-  `<details>` cerrado que solo se renderiza con dos o más opciones: con los
-  diccionarios de hoy no se renderiza ninguno. Un esqueleto que dibuja campos
-  que luego no llegan produce exactamente el salto que este archivo existe para
-  evitar.
-
-  Los chips tampoco se dibujan: la fila no reserva hueco cuando no hay
-  categorías, así que reservarlo aquí volvería a desplazar la rejilla al
-  resolverse.
 */
 
 /** La misma silueta que `ComercioCard`: logo + títulos, texto y el bloque inferior. */
@@ -77,7 +60,7 @@ function TarjetaComercio() {
 
 export default function Loading() {
   return (
-    <div className={estilos.pagina}>
+    <div>
       {/* Anunciado por el `role="status"`; el dibujo se oculta al lector para
           que no lea una retahíla de cajas vacías. */}
       <p role="status" className="sr-only">
@@ -85,38 +68,33 @@ export default function Loading() {
       </p>
 
       <div aria-hidden="true" className={estilos.pagina}>
-        <Stack gap={1}>
-          <Skeleton width="96px" height="13px" />
-          <Skeleton width="220px" height="30px" />
-          <Skeleton width="80%" height="18px" />
-        </Stack>
-
-        <Stack gap={2}>
-          <Skeleton width="64px" height="13px" />
-          <Skeleton height="44px" radius="var(--radius-sm)" />
-        </Stack>
+        {/*
+          EL HÉROE NEGRO SÍ SE DIBUJA, con sus clases reales: es lo primero
+          que se ve en Inicio y va pegado a la cabecera negra. Sin él, la
+          cabecera quedaría flotando sobre crema hasta que llegaran los datos,
+          y el salto al negro se vería justo donde el socio está mirando.
+        */}
+        <section className={estilos.heroInicio} data-theme="dark">
+          <div className={estilos.heroContenido}>
+            <Skeleton width="120px" height="12px" />
+            <Skeleton width="min(420px, 80%)" height="44px" radius="var(--radius-sm)" />
+            <Skeleton width="min(460px, 90%)" height="16px" />
+            <Skeleton width="min(480px, 100%)" height="52px" radius="var(--radius-full)" />
+          </div>
+        </section>
 
         {/*
-          LA PORTADA SÍ SE DIBUJA, y es la excepción argumentada a la regla de
-          arriba —no dibujar lo que luego no llega—.
-
-          Este archivo no recibe props, así que no puede saber si habrá filtros
-          y por tanto si el carrusel se renderizará. Se dibuja siempre porque la
-          entrada SIN filtros es la dominante: es la pestaña "Inicio", el
-          destino de la PWA y el de cada toque de la barra de navegación. No
-          dibujarlo haría saltar el caso dominante para evitar un salto en el
-          caso raro.
-
-          Y con filtros el desplazamiento es barato: lo que se mueve al
-          resolverse es la rejilla, mientras la búsqueda —donde está mirando
-          quien filtra— se queda quieta, porque el carrusel va debajo de ella.
-
-          La silueta la pone el propio componente, con sus clases reales.
+          Las secciones curadas NO se dibujan: dependen de si hay favoritos,
+          novedades o un top, y un esqueleto que promete una forma que luego
+          no llega produce el salto que este archivo existe para evitar.
         */}
-        <CarruselDestacadosEsqueleto />
-
         <div className={estilos.rejilla}>
-          <Skeleton width="180px" height="24px" />
+          <div className={estilos.panelFiltros}>
+            <Skeleton width="180px" height="44px" radius="var(--radius-full)" />
+            <Skeleton width="150px" height="44px" radius="var(--radius-full)" />
+          </div>
+
+          <Skeleton width="220px" height="28px" />
 
           {/* Mismo `min` que la rejilla real: idénticas columnas a idéntico ancho. */}
           <Grid min="290px">

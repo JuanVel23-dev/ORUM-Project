@@ -1,7 +1,7 @@
 import { CalendarDays, Heart, Search, Sparkles } from 'lucide-react'
 import escaparate from '../escaparate.module.css'
 import { Revelar } from './revelar'
-import { revelarEscalonado } from './revelado'
+import { revelarEscalonado } from '@/lib/shared/revelado'
 import estilos from './valores-orum.module.css'
 
 /*

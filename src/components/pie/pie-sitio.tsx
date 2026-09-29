@@ -1,16 +1,18 @@
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
 import { EstrellaOrum, LogoOrum } from '@/components/ui/marca/marca'
-import { REVELAR, revelarEscalonado } from './revelado'
-import estilos from './pie-publico.module.css'
+import { REVELAR, revelarEscalonado } from '@/lib/shared/revelado'
+import estilos from './pie-sitio.module.css'
 
 /*
-  EL PIE  ·  el único sitio del producto donde conviven las tres puertas
+  EL PIE  ·  el sitio del producto donde conviven las tres puertas
   ---------------------------------------------------------------------------
-  Ningún otro portal tiene pie: el shell de administración y el del portal de
-  miembros terminan en su barra de navegación. Este lo necesita porque es la
-  única pantalla pública, y las otras tres asumen que ya sabes cuál es tu
-  puerta.
+  Lo usan el Portal Público y, desde el 27/09/2026, el Portal de Miembros
+  (encargo del propietario: «un footer como los otros»). Vive en
+  `src/components/pie/` y no en `(publico)/_components/` porque lo comparten
+  dos portales: una pieza compartida guardada dentro de una ruta se rompe en
+  la primera reorganización. El shell de administración y la herramienta de
+  comercios siguen terminando en su barra de navegación.
 
   SON ENLACES DE TEXTO, NO BOTONES. Tres salidas de igual peso para tres
   audiencias distintas que ya saben lo que buscan: competir por atención con
@@ -40,9 +42,19 @@ function limpiarTelefono(telefono: string): string {
   return telefono.replace(/\D/g, '')
 }
 
-export function PiePublico({ soporte }: { soporte: string | null }) {
+export function PieSitio({
+  soporte,
+  mensajeSoporte = MENSAJE_SOPORTE,
+  className,
+}: {
+  soporte: string | null
+  /** Lo que llega escrito en WhatsApp. Cada portal pregunta lo suyo. */
+  mensajeSoporte?: string
+  /** Solo para que el portal que lo monta reserve el hueco de su propio cromo. */
+  className?: string
+}) {
   return (
-    <footer className={estilos.pie}>
+    <footer className={[estilos.pie, className].filter(Boolean).join(' ')}>
       <div className={estilos.contenido}>
         <p className={[estilos.marca, REVELAR].join(' ')}>
           <LogoOrum variante="plata" className={estilos.logo} />
@@ -70,7 +82,7 @@ export function PiePublico({ soporte }: { soporte: string | null }) {
         {soporte && (
           <a
             className={estilos.soporte}
-            href={`https://wa.me/${limpiarTelefono(soporte)}?text=${encodeURIComponent(MENSAJE_SOPORTE)}`}
+            href={`https://wa.me/${limpiarTelefono(soporte)}?text=${encodeURIComponent(mensajeSoporte)}`}
             target="_blank"
             rel="noopener noreferrer"
           >

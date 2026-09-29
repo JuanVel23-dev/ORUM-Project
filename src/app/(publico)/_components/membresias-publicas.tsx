@@ -5,7 +5,7 @@ import escaparate from '../escaparate.module.css'
 import { CtaSocio } from './cta-socio'
 import { AdornoEstrella, EstrellaOrum } from '@/components/ui/marca/marca'
 import { Revelar } from './revelar'
-import { REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from './revelado'
+import { REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from '@/lib/shared/revelado'
 import estilos from './membresias-publicas.module.css'
 
 /*

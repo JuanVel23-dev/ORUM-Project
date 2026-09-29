@@ -9,6 +9,8 @@ import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
 import { cerrarSesionMiembro } from '../login/actions'
 import { MenuTema } from './_components/menu-tema'
 import { PortalNav, PortalTabBar } from './_components/portal-nav'
+import { CabeceraPortal } from './_components/cabecera-portal'
+import { PieSitio } from '@/components/pie/pie-sitio'
 import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import styles from './portal.module.css'
 
@@ -77,7 +79,7 @@ export default async function MiembrosLayout({
 
   return (
     <div className={styles.portal}>
-      <header className={styles.cabecera}>
+      <CabeceraPortal>
         <Link href="/miembros" className={styles.marca} aria-label="ORUM, ir al inicio del portal">
           <LogoOrumTema className={styles.logo} preload />
         </Link>
@@ -144,7 +146,7 @@ export default async function MiembrosLayout({
             </DropdownMenu>
           </form>
         </div>
-      </header>
+      </CabeceraPortal>
 
       {/*
         Uno por portal, con un único escuchador delegado. Es quien llama a
@@ -154,6 +156,14 @@ export default async function MiembrosLayout({
       <TransicionesDeRuta />
 
       <main className={styles.main}>{children}</main>
+
+      {/*
+        EL MISMO PIE QUE EL PORTAL PÚBLICO (encargo del 27/09/2026: «un footer
+        como los otros»). Fuera de `<main>`, a todo el ancho: es cromo, no
+        contenido. `.pie` solo le reserva en móvil el alto de la barra
+        inferior, que es fija y lo taparía.
+      */}
+      <PieSitio soporte={soporte} mensajeSoporte={MENSAJE_SOPORTE} className={styles.pie} />
 
       {modal}
 

@@ -1,7 +1,7 @@
 import escaparate from '../escaparate.module.css'
 import { AdornoEstrella } from '@/components/ui/marca/marca'
 import { Revelar } from './revelar'
-import { REVELAR, revelarEscalonado } from './revelado'
+import { REVELAR, revelarEscalonado } from '@/lib/shared/revelado'
 import estilos from './como-funciona.module.css'
 
 /*

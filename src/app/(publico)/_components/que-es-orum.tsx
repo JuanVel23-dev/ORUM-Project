@@ -3,7 +3,7 @@ import escaparate from '../escaparate.module.css'
 import { CarruselFotos } from './carrusel-fotos'
 import { AdornoEstrella } from '@/components/ui/marca/marca'
 import { Revelar } from './revelar'
-import { REVELAR_DER, REVELAR_IZQ } from './revelado'
+import { REVELAR_DER, REVELAR_IZQ } from '@/lib/shared/revelado'
 import estilos from './que-es-orum.module.css'
 
 /*

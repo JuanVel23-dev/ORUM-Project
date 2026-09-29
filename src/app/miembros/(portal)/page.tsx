@@ -1,14 +1,11 @@
 import type { ReactNode } from 'react'
-import { Heart, Repeat2, SearchX, Store } from 'lucide-react'
+import Link from 'next/link'
+import { ChevronDown, Heart, MapPin, Repeat2, Search, SearchX, Store, Tag } from 'lucide-react'
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
-import {
-  seleccionarBeneficiosDelMomento,
-  seleccionarDestacados,
-  seleccionarNovedades,
-} from '@/lib/comercios/estanterias'
+import { seleccionarNovedades } from '@/lib/comercios/estanterias'
 import {
   prepararTopDescuentos,
   TOPE_TOP_DESCUENTOS,
@@ -16,7 +13,6 @@ import {
 } from '@/lib/comercios/top-descuentos'
 import {
   seleccionarFavoritos,
-  seleccionarMasUsados,
   TOPE_VISTA_MAS_USADOS,
   type FilaMasUsado,
 } from '@/lib/miembros/favoritos'
@@ -32,16 +28,14 @@ import { Button } from '@/components/ui/button'
 import { CintaRotativa } from './_components/cinta-rotativa'
 import { EmptyState } from '@/components/ui/feedback'
 import { Grid } from '@/components/ui/layout'
-import { EncabezadoCatalogo } from './_components/encabezado-catalogo'
 import { CategoriasDirectorio } from '@/components/comercios/categorias-directorio'
-import { CarruselDestacados } from './_components/carrusel-destacados'
 import { FavoritosProvider } from './_components/favoritos-contexto'
-import { FiltrosForm } from './_components/filtros-form'
 import { SeccionFavoritos } from './_components/seccion-favoritos'
-import { SelectorVista } from './_components/selector-vista'
 import { TopDescuentos } from './_components/top-descuentos'
 import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
-import { AnuncioBanner } from '@/components/anuncios/anuncio-banner'
+import { AdornoEstrella } from '@/components/ui/marca/marca'
+import { DropdownMenu, MenuItem } from '@/components/ui/menu'
+import { CarruselNovedades } from './_components/carrusel-novedades'
 import {
   ComercioCard,
   ComercioCardCompacta,
@@ -78,6 +72,23 @@ function numeroONulo(valor: string | undefined): number | null {
 function hrefCon(base: Record<string, string>, categoriaId?: number): string {
   const params = new URLSearchParams(base)
   if (categoriaId !== undefined) params.set('categoria_id', String(categoriaId))
+  const consulta = params.toString()
+  return consulta ? `/miembros?${consulta}` : '/miembros'
+}
+
+/**
+ * URL del catálogo cambiando solo las claves dadas; `null` quita la clave.
+ *
+ * Alimenta a los desplegables de Marca y Ciudad del panel de filtros: cada
+ * opción conserva todo lo demás —búsqueda, categoría y el otro desplegable—,
+ * así que elegir una ciudad no borra lo que el socio ya había escrito.
+ */
+function hrefCambiando(base: Record<string, string>, cambios: Record<string, string | null>): string {
+  const params = new URLSearchParams(base)
+  for (const [clave, valor] of Object.entries(cambios)) {
+    if (valor === null) params.delete(clave)
+    else params.set(clave, valor)
+  }
   const consulta = params.toString()
   return consulta ? `/miembros?${consulta}` : '/miembros'
 }
@@ -470,37 +481,7 @@ export default async function MiembrosHomePage({
      cerraba una búsqueda. */
   const hayFiltros = !sinFiltrar
 
-  /*
-    Con filtros activos NO hay estanterías: en modo búsqueda el resultado es el
-    contenido, y una selección curada al lado es una distracción.
-
-    Las dos son de duplicación, no de enlace: todo lo que muestran está también
-    en la rejilla de abajo. Por eso sus cabeceras no llevan "Ver todos" —no
-    habría a dónde ir que no fuera esta misma URL— y por eso deslizar nunca es
-    el único camino a nada.
-  */
-  /*
-    LA PORTADA, con la MISMA puerta que las estanterías y por la misma razón:
-    con filtros activos el resultado ES el contenido, y una selección curada al
-    lado es una distracción. Tres bloques deslizables con tres condiciones
-    distintas serían imposibles de predecir.
-
-    Cero consultas nuevas: se calcula en memoria sobre `comerciosListado`, que
-    esta página ya construye. Si alguien añade una consulta para esta pieza,
-    algo se entendió mal.
-
-    Y no hay deduplicación con las estanterías ni con la rejilla: un comercio
-    puede salir en la portada y también en "Nuevos en el club". Quitarlo de la
-    estantería haría que la estantería MINTIERA sobre su criterio, y un aliado
-    recién sumado ausente de "Nuevos en el club" es peor defecto que un nombre
-    repetido.
-  */
-  const destacados = hayFiltros ? [] : seleccionarDestacados(comerciosListado)
-
   const novedades = hayFiltros ? [] : seleccionarNovedades(comerciosListado, new Date())
-  const beneficiosDelMomento = hayFiltros
-    ? []
-    : seleccionarBeneficiosDelMomento(comerciosListado)
 
   /* Solo se ofrecen como chips las categorías que tienen algún comercio. */
   const categoriasConComercios = (todasCategorias ?? []).filter((cat) =>
@@ -519,7 +500,6 @@ export default async function MiembrosHomePage({
     la lista sin vista deja claro que no dependen de ella.
   */
   const favoritosEstanteria = seleccionarFavoritos(comerciosListado, idsFavoritos)
-  const masUsadosEstanteria = seleccionarMasUsados(comerciosListado, masUsados)
 
   /*
     EL TOP DEL CLUB. `filasTop` llega vacío si la función todavía no está
@@ -540,13 +520,15 @@ export default async function MiembrosHomePage({
   if (ciudad_id) paramsBase.ciudad_id = ciudad_id
   if (vista !== VISTA_POR_DEFECTO) paramsBase.ver = vista
 
-  /* Y lo que cada pestaña de VISTA conserva: todo menos la propia vista,
-     categoría incluida — "tus favoritos de comida" es una frase con sentido. */
-  const paramsVista: Record<string, string> = {}
-  if (busqueda) paramsVista.q = busqueda
-  if (marca_id) paramsVista.marca_id = marca_id
-  if (ciudad_id) paramsVista.ciudad_id = ciudad_id
-  if (categoriaIdFiltro !== null) paramsVista.categoria_id = String(categoriaIdFiltro)
+  /* Todo lo que el catálogo está mostrando ahora mismo. Lo usan los
+     desplegables de Marca y Ciudad, que cambian solo su propia clave. */
+  const paramsTodos: Record<string, string> = { ...paramsBase }
+  if (categoriaIdFiltro !== null) paramsTodos.categoria_id = String(categoriaIdFiltro)
+
+  const marcas = todasMarcas ?? []
+  const ciudades = todasCiudades ?? []
+  const marcaActual = marcas.find((m) => String(m.id) === marca_id) ?? null
+  const ciudadActual = ciudades.find((c) => String(c.id) === ciudad_id) ?? null
 
   const vacio = construirVacio({
     hayFiltros,
@@ -578,164 +560,95 @@ export default async function MiembrosHomePage({
       estado envuelve, pero no posee, lo de dentro.
 
       Y es necesario: un mismo comercio puede salir a la vez en la portada, en
-      "Tus favoritos", en "Los que más usas", en una estantería y en la rejilla.
+      "Tus favoritos", en "Más recientes", en el top del club y en la rejilla.
       Con estado por botón, el socio llenaría un corazón y vería los otros
       cuatro seguir vacíos.
     */
     <FavoritosProvider inicial={idsFavoritos}>
       <div className={estilos.pagina}>
-        <AnuncioBanner anuncio={anuncios[0] ?? null} hrefHistorial="/miembros/novedades" />
-
-        <EncabezadoCatalogo />
-
-        <FiltrosForm
-          q={busqueda}
-          marcaId={marca_id ?? ''}
-          ciudadId={ciudad_id ?? ''}
-          categoriaId={categoria_id ?? ''}
-          ver={vista === VISTA_POR_DEFECTO ? '' : vista}
-          marcas={todasMarcas ?? []}
-          ciudades={todasCiudades ?? []}
-        />
-
         {/*
-          EJE 1 · LA VISTA — qué lista se mira. Va ENCIMA de las categorías
-          porque las subordina: la categoría recorta lo que la vista eligió.
-          Y habla otro lenguaje visual —pestañas con subrayado, no chips con
-          relleno— para que la jerarquía se vea antes de leer una palabra.
+          EL HÉROE NEGRO  ·  rediseño del 27/09/2026 (`Miembros.dc.html`)
+
+          Continúa la cabecera, que en Inicio va en negro (`CabeceraPortal`):
+          juntas se leen como una sola pieza, el mismo lenguaje que la vitrina
+          de comercios del Portal Público. Sangra a todo el ancho y sube hasta
+          pegarse a la cabecera (ver `.heroInicio`).
+
+          El buscador vive AQUÍ, arriba del todo: el socio recurrente abre la
+          aplicación para buscar «pizza», y no puede tener que desplazarse para
+          encontrar el campo. Es un GET a esta misma página: funciona sin
+          JavaScript y conserva la categoría, la marca y la ciudad elegidas.
         */}
-        <SelectorVista activa={vista} paramsBase={paramsVista} />
+        <section className={estilos.heroInicio} data-theme="dark" aria-labelledby="titulo-catalogo">
+          <div className={estilos.heroContenido}>
+            <p className={estilos.heroOverline}>
+              <span className={estilos.heroPunto} aria-hidden="true" />
+              Tu membresía
+            </p>
+            <h1 id="titulo-catalogo" className={estilos.heroTitulo}>
+              Beneficios del <em className={estilos.heroAcento}>club</em>
+            </h1>
+            <p className={estilos.heroLede}>
+              Muestra tu carnet en la caja y el comercio aplica tu beneficio.
+            </p>
+
+            <form className={estilos.buscador} method="get" action="/miembros" role="search">
+              <label htmlFor="busqueda-catalogo" className="sr-only">
+                Buscar comercios o beneficios
+              </label>
+              <input
+                id="busqueda-catalogo"
+                className={estilos.campo}
+                type="search"
+                name="q"
+                defaultValue={busqueda}
+                placeholder="Busca un comercio o un beneficio"
+                autoComplete="off"
+                enterKeyHint="search"
+              />
+              {marca_id && <input type="hidden" name="marca_id" value={marca_id} />}
+              {ciudad_id && <input type="hidden" name="ciudad_id" value={ciudad_id} />}
+              {categoriaIdFiltro !== null && (
+                <input type="hidden" name="categoria_id" value={categoriaIdFiltro} />
+              )}
+              {vista !== VISTA_POR_DEFECTO && <input type="hidden" name="ver" value={vista} />}
+              <button type="submit" className={estilos.botonBuscar} aria-label="Buscar">
+                <Search size={18} aria-hidden="true" />
+              </button>
+            </form>
+          </div>
+        </section>
 
         {/*
-          EJE 2 · LA CATEGORÍA, con el mismo botón + ventana que ya aprobaste
-          en el directorio del Portal Público — antes era una fila de chips en
-          línea, un lenguaje distinto para la misma tarea de filtrar.
-
-          Sigue visible sobre un resultado vacío: el socio debe poder cambiar
-          de categoría sin dar marcha atrás. Por debajo de dos categorías el
-          componente no discrimina nada, así que no se pinta — mismo umbral
-          que ya aplicaba la fila de chips que sustituye.
+          NOVEDADES  ·  los anuncios de ORUM como carrusel de imágenes. Solo
+          sin filtros: con una búsqueda activa el resultado es el contenido, y
+          un carrusel encima lo empujaría fuera de la pantalla.
         */}
-        {categoriasConComercios.length >= 2 && (
-          <CategoriasDirectorio
-            total={comerciosListado.length}
-            opciones={[
-              {
-                id: null,
-                nombre: 'Todas',
-                href: hrefCon(paramsBase),
-                activa: categoriaIdFiltro === null,
-              },
-              ...categoriasConComercios.map((c) => {
-                const activa = c.id === categoriaIdFiltro
-                return {
-                  id: c.id,
-                  nombre: c.nombre,
-                  /* Tocar la categoría activa la apaga: encender y apagar con
-                     el mismo dedo, en el mismo sitio. */
-                  href: activa ? hrefCon(paramsBase) : hrefCon(paramsBase, c.id),
-                  activa,
-                }
-              }),
-            ]}
-          />
-        )}
+        {sinFiltrar && anuncios.length > 0 && <CarruselNovedades anuncios={anuncios} />}
 
         {/*
-          La portada va AQUÍ: después de la búsqueda y de los filtros, y antes
-          de cualquier contenido curado —ninguna estantería la precede—.
-
-          Las dos cosas se cumplen a la vez, y era el punto difícil. Puesta
-          antes de la búsqueda, la portada empujaría el campo a ~610px y el
-          socio recurrente —el que abre la aplicación para buscar "pizza"—
-          tendría que desplazar media pantalla para encontrarlo: eso es un paso
-          añadido, y la regla nº1 manda. La búsqueda es herramienta, no
-          contenido; una portada de revista no va antes del índice por estar
-          antes en el papel, va antes de los artículos.
-        */}
-        <CarruselDestacados
-          destacados={destacados}
-          comerciosDelResultado={comerciosListado.length}
-          mostrarCiudades={mostrarCiudades}
-          volver={volver}
-        />
-
-        {/*
-          LO DEL SOCIO ANTES QUE LO DEL CLUB, y en este orden exacto:
-
-            1. Tus favoritos      — lo que él eligió a mano.
-            2. Los que más usas   — lo que su propio historial dice de él.
-            3. Top del club       — lo que hace todo el mundo.
-
-          De más personal a menos. Lo contrario pondría delante el ranking
-          global, que es lo único de esta pantalla que es idéntico para todos
-          los socios.
-
-          Las tres solo existen sin filtros. "Tus favoritos" es la única que se
-          pinta vacía: es la que enseña un mecanismo que, si no, nadie
-          descubriría.
-        */}
-        {/*
-          LAS DOS LISTAS PERSONALES COMPARTEN UNA FRANJA DE CREMA.
-
-          Favoritos y «los que más usas» responden a la misma pregunta —«lo
-          mío»— y separarlas en dos campos de color las convertiría en dos
-          temas distintos. El tono las agrupa sin necesidad de un encabezado
-          que las englobe.
+          LO DEL SOCIO ANTES QUE LO DEL CLUB: primero lo que él eligió a mano
+          (favoritos), luego lo nuevo, y al final el ranking global, que es lo
+          único idéntico para todos los socios. Cada sección en su propio campo
+          de color, para distinguirlas sin leer el título.
         */}
         {sinFiltrar && (
           <div className={`${estilos.franja} ${estilos.franjaCrema}`}>
             <SeccionFavoritos favoritos={favoritosEstanteria} volver={volver} />
-
-            {masUsadosEstanteria.length > 0 && (
-              <CintaRotativa
-              titulo="Los que más usas"
-              apoyo="Donde más has usado tu membresía"
-              items={masUsadosEstanteria.map((c) => (
-                <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
-              ))}
-            />
-            )}
           </div>
         )}
 
         {/*
-          EL TOP DEL CLUB, SOBRE CACAO.
-
-          Es la única sección ceremonial del catálogo —lo que presume el club,
-          no lo que el socio vino a buscar— y por eso es la que se lleva la
-          franja oscura. Además es la única condición bajo la que el oro claro
-          (`--gold-400`) es legible: da 7,83:1 sobre cacao y 1,99:1 sobre crema.
-
-          Se pinta sola si hay al menos tres descuentos con uso. Si la función
-          `top_descuentos` no está aplicada en la base, `topDelClub` llega vacío
-          y la franja entera no aparece — no queda una banda oscura hueca.
-        */}
-        {sinFiltrar && topDelClub.length > 0 && (
-          <div className={`${estilos.franja} ${estilos.franjaCacao}`}>
-            <TopDescuentos items={topDelClub} volver={volver} />
-          </div>
-        )}
-
-        {/*
-          CADA SECCIÓN EN SU PROPIO CAMPO DE COLOR.
-
-          Encargo del propietario: «que se pueda diferenciar cada sección sin
-          tener que leer el título». Un encabezado en negrita no sirve para eso
-          —hay que leerlo—; el campo de color sí, porque se ve antes de enfocar
-          la vista. Es lo que hace Agence Cartier sin dibujar una sola línea.
-
-          El orden de la página queda: papel (portada) → crema (lo mío) →
-          cacao (el top del club) → crema honda (novedades) → cacao (beneficios
-          del momento) → papel (la rejilla). Ninguna repite el tono de su
-          vecina, y las dos franjas de cacao son las dos ceremoniales: lo que
-          presume el club y lo que caduca pronto.
+          MÁS RECIENTES  ·  encargo del propietario: «que haya una sección para
+          más recientes». Deja de ser una pestaña de vista y pasa a ser su
+          propia franja curada, en el gris más hondo para que no se confunda
+          con la de favoritos.
         */}
         {novedades.length > 0 && (
           <div className={`${estilos.franja} ${estilos.franjaHonda}`}>
             <CintaRotativa
-              titulo="Nuevos en el club"
-              apoyo="Los últimos aliados que se sumaron"
+              titulo="Más recientes"
+              apoyo="Los últimos aliados que se sumaron al club"
               items={novedades.map((c) => (
                 <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
               ))}
@@ -743,44 +656,152 @@ export default async function MiembrosHomePage({
           </div>
         )}
 
-        {beneficiosDelMomento.length > 0 && (
+        {/*
+          EL TOP DEL CLUB, SOBRE NEGRO. La única sección ceremonial del
+          catálogo, y el único sitio donde el oro claro es legal. Si la función
+          `top_descuentos` no está aplicada, `topDelClub` llega vacío y la
+          franja entera no aparece — no queda una banda oscura hueca.
+        */}
+        {sinFiltrar && topDelClub.length > 0 && (
           <div className={`${estilos.franja} ${estilos.franjaCacao}`}>
-            <CintaRotativa
-              titulo="Beneficios del momento"
-              apoyo="Lo que puedes usar esta semana"
-              items={beneficiosDelMomento.map((c) => (
-                <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
-              ))}
-            />
+            <TopDescuentos items={topDelClub} volver={volver} />
           </div>
         )}
 
-        {comerciosVisibles.length === 0 ? (
-          <EmptyState
-            icon={vacio.icono}
-            title={vacio.titulo}
-            description={vacio.descripcion}
-            actions={
-              vacio.conSalida ? (
-                <>
-                  <Button href="/miembros" variant="secondary">
-                    Ver todos los comercios
-                  </Button>
-                  {vacio.hrefQuitarFiltros && (
-                    <Button href={vacio.hrefQuitarFiltros} variant="ghost">
-                      Quitar los filtros
-                    </Button>
-                  )}
-                </>
-              ) : undefined
-            }
-          />
-        ) : (
-          <section className={estilos.rejilla}>
-            <h2 className={estilos.tituloRejilla}>{tituloRejilla}</h2>
+        <section className={estilos.rejilla} aria-labelledby="titulo-rejilla">
+          {/*
+            LOS FILTROS, PEGADOS A LA ÚNICA SECCIÓN QUE FILTRAN (encargo:
+            «que estén encima y afecten al apartado de Todos los comercios»).
+            El mismo panel blanco del directorio público: categoría en su
+            ventana, marca y ciudad en desplegables. Cada opción es una URL,
+            así que funciona sin JavaScript y el botón atrás deshace el filtro.
 
-            {/* `escalonado`: las tarjetas entran una tras otra en la primera
-                pintura, 40ms de paso y tope de 8 — lo que ya traía `Grid`. */}
+            Siguen visibles sobre un resultado vacío: el socio debe poder
+            cambiar de filtro sin dar marcha atrás.
+          */}
+          <div className={estilos.panelFiltros} role="group" aria-label="Filtros del catálogo">
+            {categoriasConComercios.length >= 2 && (
+              <CategoriasDirectorio
+                total={comerciosVisibles.length}
+                opciones={[
+                  {
+                    id: null,
+                    nombre: 'Todas',
+                    href: hrefCon(paramsBase),
+                    activa: categoriaIdFiltro === null,
+                  },
+                  ...categoriasConComercios.map((c) => {
+                    const activa = c.id === categoriaIdFiltro
+                    return {
+                      id: c.id,
+                      nombre: c.nombre,
+                      /* Tocar la categoría activa la apaga: encender y apagar
+                         con el mismo dedo, en el mismo sitio. */
+                      href: activa ? hrefCon(paramsBase) : hrefCon(paramsBase, c.id),
+                      activa,
+                    }
+                  }),
+                ]}
+              />
+            )}
+
+            {marcas.length > 0 && (
+              <DropdownMenu
+                align="end"
+                trigger={
+                  <button type="button" className={estilos.disparador}>
+                    <span className={estilos.disparadorIcono} aria-hidden="true">
+                      <Tag size={13} />
+                    </span>
+                    Marca: {marcaActual?.nombre ?? 'Todas'}
+                    <ChevronDown size={14} aria-hidden="true" className={estilos.chevron} />
+                  </button>
+                }
+              >
+                <MenuItem href={hrefCambiando(paramsTodos, { marca_id: null })} selected={!marcaActual}>
+                  Todas
+                </MenuItem>
+                {marcas.map((m) => (
+                  <MenuItem
+                    key={m.id}
+                    href={hrefCambiando(paramsTodos, { marca_id: String(m.id) })}
+                    selected={m.id === marcaActual?.id}
+                  >
+                    {m.nombre}
+                  </MenuItem>
+                ))}
+              </DropdownMenu>
+            )}
+
+            {ciudades.length > 0 && (
+              <DropdownMenu
+                align="end"
+                trigger={
+                  <button type="button" className={estilos.disparador}>
+                    <span className={estilos.disparadorIcono} aria-hidden="true">
+                      <MapPin size={13} />
+                    </span>
+                    Ciudad: {ciudadActual?.nombre ?? 'Todas'}
+                    <ChevronDown size={14} aria-hidden="true" className={estilos.chevron} />
+                  </button>
+                }
+              >
+                <MenuItem href={hrefCambiando(paramsTodos, { ciudad_id: null })} selected={!ciudadActual}>
+                  Todas
+                </MenuItem>
+                {ciudades.map((c) => (
+                  <MenuItem
+                    key={c.id}
+                    href={hrefCambiando(paramsTodos, { ciudad_id: String(c.id) })}
+                    selected={c.id === ciudadActual?.id}
+                  >
+                    {c.nombre}
+                  </MenuItem>
+                ))}
+              </DropdownMenu>
+            )}
+          </div>
+
+          {/*
+            EL TÍTULO DE LA REJILLA DICE QUÉ LISTA ES. «Todos los comercios»
+            sobre cuatro favoritos sería una mentira pequeña y constante (las
+            vistas siguen vivas por URL, `?ver=`, aunque ya no tengan pestañas).
+          */}
+          <div className={estilos.cabeceraRejilla}>
+            <h2 id="titulo-rejilla" className={estilos.tituloRejilla}>
+              <AdornoEstrella />
+              {tituloRejilla}
+            </h2>
+            {hayFiltros && (
+              <Link href="/miembros" className={estilos.limpiar}>
+                Quitar filtros
+              </Link>
+            )}
+          </div>
+
+          {comerciosVisibles.length === 0 ? (
+            <EmptyState
+              icon={vacio.icono}
+              title={vacio.titulo}
+              description={vacio.descripcion}
+              actions={
+                vacio.conSalida ? (
+                  <>
+                    <Button href="/miembros" variant="secondary">
+                      Ver todos los comercios
+                    </Button>
+                    {vacio.hrefQuitarFiltros && (
+                      <Button href={vacio.hrefQuitarFiltros} variant="ghost">
+                        Quitar los filtros
+                      </Button>
+                    )}
+                  </>
+                ) : undefined
+              }
+            />
+          ) : (
+            /* `escalonado`: las tarjetas entran una tras otra en la primera
+               pintura, 40ms de paso y tope de 8 — lo que ya traía `Grid`. */
             <Grid min="290px" escalonado>
               {comerciosVisibles.map((c) => (
                 <ComercioCard
@@ -791,8 +812,8 @@ export default async function MiembrosHomePage({
                 />
               ))}
             </Grid>
-          </section>
-        )}
+          )}
+        </section>
       </div>
     </FavoritosProvider>
   )

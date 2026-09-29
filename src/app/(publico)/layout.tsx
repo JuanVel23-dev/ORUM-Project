@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
 import { EncabezadoPublico } from './_components/encabezado-publico'
-import { PiePublico } from './_components/pie-publico'
+import { PieSitio } from '@/components/pie/pie-sitio'
 import estilos from './publico.module.css'
 
 /*
@@ -64,7 +64,7 @@ export default async function PublicoLayout({
 
       {modal}
 
-      <PiePublico soporte={soporte} />
+      <PieSitio soporte={soporte} />
     </div>
   )
 }

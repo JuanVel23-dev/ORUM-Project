@@ -903,6 +903,10 @@ miembros: nació en `(publico)/explorar` y se movió aquí cuando el catálogo d
 miembros dejó de tener su propia fila de chips para usar el mismo botón + ventana).
 Si algo bajo la `_components/` de una ruta empieza a importarlo una segunda ruta,
 esa es la señal de moverlo aquí — nunca duplicarlo.
+`pie/` (`PieSitio`) es el pie de las tres puertas: lo montan el Portal Público y,
+desde el rediseño del 27/09/2026, el Portal de Miembros. Las clases de revelado al
+desplazar (`REVELAR`, `revelarEscalonado`…) viven en `src/lib/shared/revelado.ts`
+por la misma razón.
 
 `Button` `Spinner` · `Field` `Input` `Select` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·
@@ -995,6 +999,13 @@ diferencia de una franja fija— cambia de fondo con el tema del propio portal:
 ahí ninguna variante única sirve a los dos casos. No la copies a una
 superficie que no cambie de fondo con el tema — ahí una variante fija basta y
 sobra.
+
+**En Inicio (`/miembros`) la cabecera del portal va en NEGRO** (rediseño del
+27/09/2026, `Miembros.dc.html`): `CabeceraPortal` le pone `data-theme="dark"`
+solo en esa ruta, para que continúe el héroe negro del catálogo; en el resto del
+portal sigue siendo el material claro. La navegación de escritorio ya **no marca
+la ruta activa** (encargo: «que no se resalten ni se subrayen»); la dice
+`aria-current`, y la barra inferior de móvil la sigue marcando.
 
 **`QrCode` va en negro sobre blanco en los dos temas.** No es estética: invertirlo en
 oscuro rompe el escaneo en algunos lectores, y el fallo ocurre en la caja del comercio

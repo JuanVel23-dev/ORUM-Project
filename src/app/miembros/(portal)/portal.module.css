@@ -214,6 +214,24 @@
 }
 
 /*
+  EN INICIO, LA CABECERA ES LA PRIMERA LÍNEA DEL HÉROE NEGRO.
+
+  Opaca y no el material translúcido: en su sitio de reposo lo que hay debajo
+  es el fondo crema del portal, y un negro al 68 % sobre crema se lee como un
+  gris sucio, no como el mismo negro del héroe que empieza justo debajo. Sin
+  filo inferior por lo mismo: la línea partiría el héroe en dos.
+
+  Los colores de dentro no se escriben aquí: los remapea el
+  `data-theme="dark"` que pone `CabeceraPortal`.
+*/
+.cabeceraInicio,
+.cabeceraInicio.cabeceraInicio {
+  background: var(--cacao-bg);
+  backdrop-filter: none;
+  border-bottom-color: transparent;
+}
+
+/*
   EL LOGOTIPO DEL CLIENTE, NO EL WORDMARK DE TEXTO.
   ---------------------------------------------------------------------------
   Sustituye al «ORUM» tipográfico con el barrido dorado: la marca son las
@@ -247,7 +265,9 @@
 .nav {
   display: none;
   flex: 1;
-  gap: var(--space-1);
+  /* El mismo aire que la navegación del Portal Público: tres destinos
+     sueltos, sin caja, separados por el vacío y no por un trazo. */
+  gap: var(--space-5);
 }
 
 @media (min-width: 768px) {
@@ -262,7 +282,8 @@
   border-radius: var(--radius-sm);
 
   font-size: var(--t-callout-size);
-  font-weight: 510;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--text-2);
   text-decoration: none;
 
@@ -286,9 +307,8 @@
 /*
   El relleno de hover es tinta al 6 %: perceptible, pero no es un portador
   suficiente por sí solo. No hace falta un segundo canal aquí porque el hover no
-  codifica nada — la ruta activa la dicen el peso, la barra de
-  `.enlaceActivo::after` y `aria-current`, tres portadores que no dependen de
-  dónde esté el ratón.
+  codifica nada — la ruta activa ya no se pinta en escritorio (ver
+  `.enlaceActivo`) y la dice `aria-current`.
 */
 
 /*
@@ -351,22 +371,18 @@
   outline-offset: 2px;
 }
 
-.enlaceActivo {
-  color: var(--text);
-  font-weight: 590;
-}
+/*
+  LA RUTA ACTIVA YA NO SE PINTA (encargo del propietario, 27/09/2026: «no
+  quiero que se resalten ni se subrayen»). Los tres destinos van iguales,
+  como en la navegación del Portal Público. No es un fallo de «solo color»:
+  no hay color que lo diga — lo dice `aria-current="page"`, que el lector de
+  pantalla anuncia, y en móvil la barra inferior sigue marcándolo.
 
-/* El indicador es una barra, no un cambio de color: sobrevive a la ceguera
-   al color y no depende del peso tipográfico para leerse. */
-.enlaceActivo::after {
-  content: '';
-  position: absolute;
-  left: var(--space-3);
-  right: var(--space-3);
-  bottom: 2px;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--text);
+  La clase se conserva vacía a propósito: `portal-nav.tsx` la sigue
+  aplicando, y el día que vuelva a pedirse una señal se escribe aquí.
+*/
+.enlaceActivo {
+  color: var(--text-2);
 }
 
 .acciones {
@@ -441,9 +457,18 @@
 
 /* Hueco para la barra inferior en móvil. Sale del mismo `--tabbar-alto` que
    dimensiona la barra: una sola definición, dos consumidores. */
+/*
+  EN MÓVIL, QUIEN RESERVA EL HUECO DE LA BARRA INFERIOR ES EL PIE.
+
+  Antes era `.main`, porque el portal terminaba en su contenido. Desde que
+  lleva el pie del Portal Público, lo último de la página es el pie: si la
+  reserva siguiera en `.main`, la barra fija taparía los derechos y los
+  enlaces legales. Doble clase para ganarle al relleno propio del pie sin
+  depender del orden en que se carguen los dos módulos.
+*/
 @media (max-width: 767px) {
-  .main {
-    padding-bottom: calc(var(--tabbar-alto) + var(--space-8));
+  .portal .pie {
+    padding-bottom: calc(var(--tabbar-alto) + var(--space-6));
   }
 }
 
@@ -542,10 +567,9 @@
 }
 
 /*
-  El destino activo NO puede distinguirse solo por color. La navegación de
-  escritorio ya lo resuelve con una barra bajo el enlace (`.enlaceActivo::after`);
-  esta es la misma barra, arriba, encajada en el filo superior de la barra
-  inferior. Suma a los otros dos portadores que ya había —el trazo más grueso
+  El destino activo NO puede distinguirse solo por color. En la barra
+  inferior se marca con una barra encajada en su filo superior (la navegación
+  de escritorio dejó de marcarlo por encargo; ver `.enlaceActivo`). Suma a los otros dos portadores que ya había —el trazo más grueso
   del icono y `aria-current="page"`— y sobrevive a la ceguera al color.
 
   Ancho fijo y centrada con `translateX`, no con `left/right`: es más barato de
@@ -595,7 +619,8 @@
    ========================================================================== */
 @media print {
   .cabecera,
-  .tabbar {
+  .tabbar,
+  .portal .pie {
     display: none;
   }
 

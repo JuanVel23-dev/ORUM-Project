@@ -26,7 +26,7 @@ import {
   REVELAR_IZQ,
   retardoEntrada,
   revelarEscalonado,
-} from '../_components/revelado'
+} from '@/lib/shared/revelado'
 import escaparate from '../escaparate.module.css'
 import { CategoriasDirectorio } from '@/components/comercios/categorias-directorio'
 import { TarjetaDirectorio } from './_components/tarjeta-directorio'

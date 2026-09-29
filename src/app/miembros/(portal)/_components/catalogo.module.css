@@ -278,3 +278,287 @@
     animation: none;
   }
 }
+
+/* ==========================================================================
+   REDISEÑO DEL 27/09/2026  ·  `Miembros.dc.html`
+   --------------------------------------------------------------------------
+   Héroe negro con buscador, panel de filtros pegado a la rejilla. El mismo
+   lenguaje que la vitrina de comercios del Portal Público
+   (`explorar.module.css`), con los tokens del sistema y no los de la
+   fachada: aquí el fondo es el crema real, no el blanco forzado.
+   ========================================================================== */
+
+/*
+  EL HÉROE. Sangra a todo el ancho como una franja y sube lo que mide el
+  relleno superior de `.main` (`--pad-contenido-top`), para quedar pegado a la
+  cabecera negra de Inicio: juntas son una sola pieza.
+
+  `data-theme="dark"` en el propio elemento remapea los semánticos; el fondo
+  pide los `--cacao-*`, que son negros en los dos temas.
+*/
+.heroInicio {
+  margin-inline: calc(50% - 50vw);
+  margin-top: calc(-1 * var(--pad-contenido-top, var(--space-6)));
+  padding-inline: max(calc(50vw - 50%), var(--pad-contenido, var(--space-4)));
+  padding-block: var(--space-8) var(--space-9);
+
+  background:
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--cacao-900) 88%, transparent) 0%,
+      color-mix(in srgb, var(--cacao-900) 55%, transparent) 60%,
+      color-mix(in srgb, var(--cacao-900) 28%, transparent) 100%
+    ),
+    radial-gradient(120% 90% at 75% 20%, var(--cacao-700) 0%, var(--cacao-800) 45%, var(--cacao-900) 100%);
+  color: var(--cacao-fg);
+  color-scheme: dark;
+}
+
+@container contenido (min-width: 768px) {
+  .heroInicio {
+    padding-block: var(--space-10) var(--space-11);
+  }
+}
+
+/* La entrada en bloque de `.pagina > *` desplaza 12px hacia abajo: en el
+   héroe dejaría ver una franja crema entre él y la cabecera. Entra quieto. */
+.pagina > .heroInicio {
+  animation: none;
+}
+
+.heroContenido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 760px;
+}
+
+.heroOverline {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  font-size: var(--t-overline-size);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-300);
+}
+
+.heroPunto {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--gold-300);
+}
+
+.heroTitulo {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  letter-spacing: var(--t-hero-2-tracking);
+  font-weight: 700;
+  color: var(--cacao-fg);
+  -webkit-font-smoothing: auto;
+}
+
+/* Cursiva real de Playfair y el oro claro: sobre negro es 14,64:1. */
+.heroAcento {
+  font-style: italic;
+  color: var(--gold-300);
+}
+
+.heroLede {
+  margin: 0;
+  max-width: 52ch;
+  font-size: var(--t-body-size);
+  line-height: 1.6;
+  color: var(--cacao-fg-2);
+}
+
+/* El buscador: la píldora clara del directorio público, sobre negro. */
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 480px;
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-5);
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: var(--w-0);
+  box-shadow: var(--shadow-raised);
+  color-scheme: light;
+}
+
+.buscador:focus-within {
+  outline: 2px solid var(--gold-300);
+  outline-offset: 2px;
+}
+
+.campo {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-min);
+  border: none;
+  background: transparent;
+
+  font-family: var(--font-sans);
+  /* 16px como mínimo: por debajo, iOS amplía la página al enfocar. */
+  font-size: max(1rem, var(--t-control-size));
+  color: var(--tinta-1);
+}
+
+.campo::placeholder {
+  color: var(--tinta-3);
+}
+
+/* El foco lo dibuja la píldora entera (`:focus-within`). */
+.campo:focus-visible {
+  outline: none;
+}
+
+.botonBuscar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--gold-600);
+  color: var(--blanco);
+  cursor: pointer;
+  transition: scale var(--dur-press) var(--ease-out);
+}
+
+.botonBuscar:active {
+  scale: var(--escala-press-sm);
+}
+
+.botonBuscar:focus-visible {
+  outline: 2px solid var(--tinta-1);
+  outline-offset: 2px;
+}
+
+/*
+  EL PANEL DE FILTROS. Una superficie: se despega del crema con la sombra,
+  nunca con un trazo en reposo.
+*/
+.panelFiltros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4);
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+@container contenido (min-width: 768px) {
+  .panelFiltros {
+    gap: var(--space-3);
+    padding: var(--space-5) var(--space-6);
+  }
+}
+
+/* En teléfono, una columna de controles del mismo ancho: tres píldoras de
+   anchos distintos una debajo de otra se leían desordenadas. */
+@container contenido (max-width: 559px) {
+  .panelFiltros > :not(dialog),
+  .panelFiltros .disparador {
+    width: 100%;
+  }
+}
+
+.disparador {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4) 0 var(--space-2);
+
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+
+  font-family: var(--font-sans);
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .disparador:hover {
+    box-shadow: var(--filo-activo);
+  }
+}
+
+.disparador:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.disparadorIcono {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1.5px var(--brand);
+  color: var(--brand);
+}
+
+.chevron {
+  margin-left: auto;
+  color: var(--text-3);
+}
+
+/* La opción elegida: texto dorado sobre el fondo de insignia, con el check
+   del sistema como segundo portador. `--gold-800` porque sobre ese fondo el
+   oro de texto no llega a 4,5:1. El menú se pinta en la capa superior pero
+   sigue siendo descendiente del panel en el DOM. */
+.panelFiltros :global([role='menuitemradio'][aria-checked='true']) {
+  background: var(--gold-bg);
+  color: var(--gold-800);
+  font-weight: 700;
+}
+
+.cabeceraRejilla {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.limpiar {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  border-radius: var(--radius-xs);
+
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.limpiar:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
