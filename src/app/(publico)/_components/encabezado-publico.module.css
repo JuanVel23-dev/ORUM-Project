@@ -107,7 +107,7 @@
   gap: var(--space-2);
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 900px) {
   .nav {
     display: flex;
   }
@@ -117,8 +117,7 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
-  /* Siete destinos: relleno algo más corto y nunca en dos líneas
-     («Cómo funciona» se partía). */
+  /* Nunca en dos líneas: un destino partido se lee como dos. */
   padding: 0 var(--space-2);
   border-radius: var(--radius-full);
   white-space: nowrap;
@@ -160,9 +159,8 @@
 /*
   «Iniciar sesión» + «Únete» y el menú de hamburguesa son las MISMAS puertas
   con dos formas, así que nunca se ven a la vez. El umbral es el de la
-  navegación (1200px desde el 29/09/2026, con siete destinos): por debajo,
-  los destinos y las dos acciones no caben en una fila sin apretarse, y se
-  van juntos a la hoja.
+  navegación (900px, con cinco destinos): por debajo, los destinos y las dos
+  acciones no caben en una fila sin apretarse, y se van juntos a la hoja.
 
   Es `@media` y no `@container` a propósito: la cabecera está FUERA del
   contenedor `contenido` —lo declara el `<main>`— y un `@container` sin
@@ -172,7 +170,7 @@
   display: none;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 900px) {
   .soloEscritorio {
     display: inline-flex;
     align-items: center;

@@ -21,29 +21,25 @@
  *
  * ── Los ids que apuntan ─────────────────────────────────────────────────
  *
- * Cada uno existe en la portada: `inicio` (el héroe), `como-funciona` («Así
- * es como te unes»), `nosotros` («Qué es ORUM»), `membresias` («Elige tu
+ * Cada uno existe en la portada: `inicio` (el héroe), `nosotros` («Qué es
+ * ORUM»), `comercios` («Comercios destacados»), `membresias` («Elige tu
  * membresía») y `proposito` (misión y visión). Cambiar uno sin el otro deja
  * un enlace que no lleva a ninguna parte, sin error.
  */
 /*
-  29/09/2026 · ACTUALIZADA A LAS SECCIONES DE HOY (encargo del propietario:
-  «la barra de opciones está desactualizada, mira cada sección del portal»).
-  En el orden en que aparecen en la portada, más las dos páginas propias de
-  la fachada: el directorio completo de comercios y la puerta de aliados.
-  «Novedades» sigue fuera: no es una sección de la portada y se llega desde
-  el banner de anuncios.
+  29/09/2026 · LOS CINCO DESTINOS DEL PROPIETARIO, y solo esos: Inicio,
+  Nosotros, Comercios, Membresías y Propósito, todos secciones de la
+  portada. «Comercios» baja a los destacados de la portada, NO al
+  directorio (`/explorar`): es lo que pidió. «Cómo funciona» y «Aliados» se
+  probaron y se retiraron. «Novedades» sigue fuera: se llega desde el banner
+  de anuncios.
 */
 export const ANCLAS = [
   { href: '/#inicio', texto: 'Inicio' },
-  { href: '/#como-funciona', texto: 'Cómo funciona' },
   { href: '/#nosotros', texto: 'Nosotros' },
-  /* El directorio COMPLETO, no la selección de destacados de la portada:
-     quien pulsa «Comercios» quiere ver todos los aliados y filtrarlos. */
-  { href: '/explorar', texto: 'Comercios' },
+  { href: '/#comercios', texto: 'Comercios' },
   { href: '/#membresias', texto: 'Membresías' },
   { href: '/#proposito', texto: 'Propósito' },
-  { href: '/aliados', texto: 'Aliados' },
 ] as const
 
 /** Destino de «Únete»: los planes, que es donde se decide y se adquiere. */
