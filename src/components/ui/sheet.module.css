@@ -193,7 +193,7 @@
 
     · Solo existe si el cuerpo DESPLAZA: con una línea de tiempo de scroll
       inactiva (nada que desplazar) se queda en su `opacity: 0` de base.
-    · Se DESVANECE al llegar al final (del 85 % al 100 % del recorrido): así
+    · Se APAGA al llegar al final (en los últimos 48px del recorrido): así
       nunca tapa el último contenido, que es el que se busca al bajar.
     · Sin JavaScript: `animation-timeline: scroll()`. Donde el navegador no
       lo soporta (`@supports`), no se pinta nada — mejor sin pista que una
@@ -225,14 +225,17 @@
     opacity: 0;
     animation: pistaHayMas linear both;
     animation-timeline: scroll(nearest block);
+    /* Se apaga en los ÚLTIMOS 48px del recorrido, no en un porcentaje: en
+       una ficha larga el 15 % final eran cientos de píxeles con el efecto a
+       medias. Al tocar fondo vale 0, sea cual sea la longitud. */
+    animation-range: calc(100% - 48px) 100%;
   }
 
   @keyframes pistaHayMas {
-    0%,
-    85% {
+    from {
       opacity: 1;
     }
-    100% {
+    to {
       opacity: 0;
     }
   }
