@@ -1,5 +1,6 @@
 import { Alert } from '@/components/ui/alert'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
+import { MENSAJE_WHATSAPP_PUBLICO } from '@/lib/publico/whatsapp'
 
 /*
   LA ACCIÓN PRIMARIA DE TODA LA LANDING  ·  una decisión, dos posiciones
@@ -49,8 +50,6 @@ type Props = {
   avisarSinNumero?: boolean
 }
 
-const MENSAJE = 'Hola, quiero hacerme socio de ORUM. ¿Cómo empiezo?'
-
 export function CtaSocio({ soporte, size = 'md', avisarSinNumero = false }: Props) {
   /*
     SIN NÚMERO DE WHATSAPP (SPEC §5.2).
@@ -85,7 +84,7 @@ export function CtaSocio({ soporte, size = 'md', avisarSinNumero = false }: Prop
   }
 
   return (
-    <WhatsAppButton telefono={soporte} mensaje={MENSAJE} variant="brand" size={size} pildora>
+    <WhatsAppButton telefono={soporte} mensaje={MENSAJE_WHATSAPP_PUBLICO} variant="brand" size={size} pildora>
       Escríbenos por WhatsApp
     </WhatsAppButton>
   )

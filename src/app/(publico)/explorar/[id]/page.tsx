@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import { obtenerFichaPublica, obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
+import { MENSAJE_WHATSAPP_PUBLICO } from '@/lib/publico/whatsapp'
 import estilos from './ficha-publica.module.css'
 
 /*
@@ -154,7 +155,7 @@ export default async function FichaPublicaPage({
         {soporte && (
           <WhatsAppButton
             telefono={soporte}
-            mensaje={`Hola, quiero saber más de ${ficha.nombre} en ORUM.`}
+            mensaje={MENSAJE_WHATSAPP_PUBLICO}
             variant="brand"
             size="lg"
             pildora
