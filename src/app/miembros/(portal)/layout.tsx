@@ -4,10 +4,9 @@ import { LogOut, MessageCircle } from 'lucide-react'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/avatar'
-import { LogoOrumTema } from '@/components/ui/marca/marca'
+import { LogoOrum } from '@/components/ui/marca/marca'
 import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
 import { cerrarSesionMiembro } from '../login/actions'
-import { MenuTema } from './_components/menu-tema'
 import { PortalNav, PortalTabBar } from './_components/portal-nav'
 import { CabeceraPortal } from './_components/cabecera-portal'
 import { PieSitio } from '@/components/pie/pie-sitio'
@@ -78,10 +77,22 @@ export default async function MiembrosLayout({
   const correo = perfil.email ?? 'Mi cuenta'
 
   return (
-    <div className={styles.portal}>
+    /*
+      `data-theme="light"`: EL PORTAL SIEMPRE EN CLARO (encargo del
+      propietario, 29/09/2026). Con el modo oscuro del teléfono puesto, las
+      franjas crema del rediseño salían negras y la pantalla no se parecía en
+      nada a lo aprobado. Mismo mecanismo que la fachada pública. La única
+      pieza oscura es la cabecera de Inicio, que fija su propio
+      `data-theme="dark"` (ver `CabeceraPortal`).
+    */
+    <div className={styles.portal} data-theme="light">
       <CabeceraPortal>
         <Link href="/miembros" className={styles.marca} aria-label="ORUM, ir al inicio del portal">
-          <LogoOrumTema className={styles.logo} preload />
+          {/* Dos variantes fijas y CSS elige por la cabecera, no por el tema:
+              oro sobre la cabecera clara, plata sobre la negra de Inicio
+              (CLAUDE.md → «sobre negro, plata; sobre blanco, oro»). */}
+          <LogoOrum variante="dorado" className={`${styles.logo} ${styles.logoClaro}`} preload />
+          <LogoOrum variante="plata" className={`${styles.logo} ${styles.logoOscuro}`} preload />
         </Link>
 
         <PortalNav />
@@ -120,15 +131,7 @@ export default async function MiembrosLayout({
             >
               <p className={styles.correoMenu}>{correo}</p>
 
-              <MenuSeparator />
-
-              {/*
-                El único componente de cliente del cromo. No es un
-                `SegmentedControl`: sus radios, dentro de este `<form>`, hacían
-                que Enter cerrase la sesión. El porqué completo, en el archivo.
-              */}
-              <MenuTema />
-
+              {/* Sin selector de tema: el portal va siempre en claro. */}
               <MenuSeparator />
 
               {soporte && (

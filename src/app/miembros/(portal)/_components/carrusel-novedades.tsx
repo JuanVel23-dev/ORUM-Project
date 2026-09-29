@@ -85,14 +85,32 @@ export function CarruselNovedades({ anuncios }: { anuncios: AnuncioResumen[] }) 
           {lista.map((anuncio, i) => (
             <div key={anuncio.id} className={estilos.diapositiva} data-activa={i === actual}>
               {anuncio.imagenUrl && (
-                // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
-                <img
-                  src={anuncio.imagenUrl}
-                  alt=""
-                  className={estilos.foto}
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
-                />
+                <>
+                  {/*
+                    DOS COPIAS DE LA MISMA IMAGEN. Los anuncios no son fotos:
+                    muchos son carteles con texto, y recortarlos a la caja
+                    apaisada partía las frases. La de delante va ENTERA
+                    (`contain`); la de detrás, ampliada y desenfocada, llena
+                    los márgenes con sus propios colores para que no queden
+                    dos bandas vacías. El navegador la descarga una sola vez.
+                  */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local */}
+                  <img
+                    src={anuncio.imagenUrl}
+                    alt=""
+                    className={estilos.fondo}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local */}
+                  <img
+                    src={anuncio.imagenUrl}
+                    alt=""
+                    className={estilos.foto}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                  />
+                </>
               )}
             </div>
           ))}

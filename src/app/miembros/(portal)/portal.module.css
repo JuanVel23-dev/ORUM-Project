@@ -5,6 +5,12 @@
 
   /* La textura del club bajo todo el papel del portal. Las franjas tonales
      pintan su propio fondo encima, así que solo asoma en las zonas blancas. */
+  /* El portal fija `data-theme="light"`, pero `body` sigue pintándose con el
+     tema del documento: sin fondo y color propios, en un teléfono en modo
+     oscuro se veía el negro del `body` a través del patrón. */
+  background-color: var(--bg);
+  color: var(--text);
+  color-scheme: light;
   background-image: var(--patron-club);
   background-size: 240px 240px;
 
@@ -253,6 +259,21 @@
 
 .logo {
   height: clamp(1.375rem, 0.95rem + 1.1vw, 1.75rem);
+}
+
+/* Oro en la cabecera clara, plata en la negra de Inicio. `.marca` delante
+   para ganarle al `display: block` de la pieza de marca sin depender del
+   orden en que se carguen los dos módulos. */
+.marca .logoOscuro {
+  display: none;
+}
+
+.cabeceraInicio .marca .logoClaro {
+  display: none;
+}
+
+.cabeceraInicio .marca .logoOscuro {
+  display: block;
 }
 
 .marca:focus-visible {

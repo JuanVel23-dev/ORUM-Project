@@ -54,11 +54,12 @@
   box-shadow: var(--shadow-flotante), var(--edge);
 }
 
-/* Apaisado de verdad a partir de un contenido ancho: a 21/6 una foto de
-   escritorio no se come la pantalla y sigue leyéndose como imagen. */
+/* Apaisado a partir de un contenido ancho, pero no tan plano como el 21/6 de
+   la maqueta: los anuncios reales son carteles, y a 21/6 su texto quedaba
+   diminuto. */
 @container contenido (min-width: 900px) {
   .carrusel {
-    aspect-ratio: 21 / 6;
+    aspect-ratio: 21 / 8;
   }
 }
 
@@ -87,11 +88,27 @@
   opacity: 1;
 }
 
+/* La imagen entera, sin recortar: un cartel con texto no se puede partir. */
 .foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* La misma imagen, ampliada y desenfocada, rellena los márgenes. Quieta: el
+   desenfoque se pinta una vez y no se anima. */
+.fondo {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  scale: 1.15;
+  filter: blur(24px) brightness(0.55);
 }
 
 /* El velo inferior sostiene el contraste del título sobre cualquier foto. */

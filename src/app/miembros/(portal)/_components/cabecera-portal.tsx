@@ -15,8 +15,8 @@ import styles from '../portal.module.css'
 
   `data-theme="dark"` en el propio `<header>` y no una lista de colores a
   mano: `globals.css` remapea TODOS los tokens bajo ese atributo sea cual sea
-  el elemento, así que la navegación, el foco y el avatar se visten solos, y
-  `LogoOrumTema` enseña la variante plata (CLAUDE.md → «sobre negro, plata»).
+  el elemento, así que la navegación, el foco y el avatar se visten solos. El
+  logo pasa a plata por `.cabeceraInicio` (CLAUDE.md → «sobre negro, plata»).
 
   Es la única pieza de cliente que se añade, y solo lee la ruta: todo lo que
   va dentro llega por `children` desde el layout, que sigue siendo servidor.

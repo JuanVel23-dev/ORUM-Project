@@ -278,8 +278,16 @@ propietario, 25/09/2026). La fachada la ve gente en todo tipo de
 dispositivos, y con el modo oscuro puesto las franjas crema salían negras.
 `(publico)/layout.tsx` fija `data-theme="light"` en su envoltorio —la
 contraparte del `data-theme="dark"` de `PantallaAuth`—, así que ahí no
-aplican ni la preferencia del sistema ni el tema elegido. Los otros tres
-portales siguen con los dos temas. Y su fondo es **blanco puro**
+aplican ni la preferencia del sistema ni el tema elegido.
+
+⚠️ **Y el Portal de Miembros también, desde el 29/09/2026** (mismo encargo,
+mismo motivo: con el teléfono en modo oscuro las franjas crema del rediseño
+salían negras). `miembros/(portal)/layout.tsx` fija `data-theme="light"` en
+`.portal`, que además pinta su propio `background-color`/`color` —el `body`
+sigue con el tema del documento—, y el menú de la cuenta ya no ofrece
+selector de tema. La cabecera de Inicio es la única pieza oscura, con su
+propio `data-theme="dark"`. Administración y Comercios siguen con los dos
+temas. Y su fondo es **blanco puro**
 (`--blanco`, no el crema `--w-0`): `publico.module.css` remapea `--w-0` en
 la fachada; las franjas tintadas siguen en crema.
 
@@ -990,7 +998,9 @@ encima); siempre decorativa (`aria-hidden`). La imagen para compartir en
 redes es `(publico)/opengraph-image.jpg` (logo dorado sobre negro, el JPG con
 fondo incrustado: solo ahí).
 
-**`LogoOrumTema`** es la excepción a «una variante por superficie fija»: monta
+**`LogoOrumTema`** (hoy sin consumidores: la cabecera de miembros pasó a dos
+variantes fijas, oro y plata, elegidas por `.cabeceraInicio` al fijarse el
+portal en claro) es la excepción a «una variante por superficie fija»: monta
 plata y oro superpuestos y CSS elige por `data-theme`, con el mismo selector
 de tres ramas que `globals.css` usa para todo lo que sigue al tema (explícito
 por atributo, o la preferencia del sistema mientras el script anti-flash no lo
@@ -1003,7 +1013,8 @@ sobra.
 **En Inicio (`/miembros`) la cabecera del portal va en NEGRO** (rediseño del
 27/09/2026, `Miembros.dc.html`): `CabeceraPortal` le pone `data-theme="dark"`
 solo en esa ruta, para que continúe el héroe negro del catálogo; en el resto del
-portal sigue siendo el material claro. La navegación de escritorio ya **no marca
+portal sigue siendo el material claro. El logo es `LogoOrum` dorado + plata y
+CSS enseña uno u otro según `.cabeceraInicio`. La navegación de escritorio ya **no marca
 la ruta activa** (encargo: «que no se resalten ni se subrayen»); la dice
 `aria-current`, y la barra inferior de móvil la sigue marcando.
 
