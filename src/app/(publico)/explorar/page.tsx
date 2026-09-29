@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { INDEXAR_CATALOGO } from '@/lib/publico/sitio'
 import Image from 'next/image'
 import { ArrowUpDown, ChevronDown, LayoutGrid, MapPin, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -33,6 +34,9 @@ import { TarjetaDirectorio } from './_components/tarjeta-directorio'
 import estilos from './explorar.module.css'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/explorar' },
+  // Catálogo con datos de prueba: ver `INDEXAR_CATALOGO` en `lib/publico/sitio.ts`.
+  robots: INDEXAR_CATALOGO ? { index: true, follow: true } : { index: false, follow: false },
   title: 'Comercios aliados · ORUM',
   description:
     'Descubre todos los comercios aliados de ORUM por categoría y ciudad, y comienza a disfrutar tus beneficios.',

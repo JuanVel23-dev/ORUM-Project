@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { PaginaLegal } from '../_components/pagina-legal'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/terminos' },
   title: 'Términos y condiciones · ORUM',
   description: 'Las condiciones que rigen el uso del club de beneficios ORUM.',
 }

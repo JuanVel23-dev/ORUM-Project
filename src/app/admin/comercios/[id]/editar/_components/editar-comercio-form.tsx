@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { Switch } from '@/components/ui/toggle'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { editarComercio, type EditarComercioState } from '../../../actions'
 import styles from '@/styles/formulario.module.css'
@@ -21,6 +22,7 @@ type ComercioInicial = {
   marca_id: number | null
   categoria_id: number | null
   logo_url: string | null
+  indexable: boolean
   /** Correo real de Auth, o cadena vacía si no tiene cuenta. */
   correo: string
 }
@@ -102,6 +104,13 @@ export function EditarComercioForm({
               placeholder="https://…"
             />
           </Field>
+
+          <Switch
+            name="indexable"
+            defaultChecked={comercio.indexable}
+            label="Aparecer en buscadores"
+            description="Google y Bing podrán mostrar la ficha pública de este comercio. Apágalo mientras sean datos de prueba."
+          />
         </Stack>
 
         <div className={styles.acciones}>

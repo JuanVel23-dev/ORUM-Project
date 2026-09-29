@@ -9,6 +9,7 @@ import { FormularioAliado } from './_components/formulario-aliado'
 import estilos from './aliados.module.css'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/aliados' },
   title: 'Alía tu negocio · ORUM',
   description:
     'Suma tu negocio al club ORUM y llega a socios que buscan dónde gastar. Cuéntanos de ti y te contactamos.',

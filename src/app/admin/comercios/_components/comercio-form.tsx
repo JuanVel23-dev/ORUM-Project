@@ -8,6 +8,7 @@ import { Copiar } from '@/components/ui/copiar'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { Switch } from '@/components/ui/toggle'
 import { useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { crearComercio, type CrearComercioState } from '../actions'
 import styles from '@/styles/formulario.module.css'
@@ -95,6 +96,13 @@ function FormularioComercio({
           <Field label="URL del logo" optional>
             <Input name="logo_url" type="url" placeholder="https://…" />
           </Field>
+
+          <Switch
+            name="indexable"
+            defaultChecked
+            label="Aparecer en buscadores"
+            description="Google y Bing podrán mostrar la ficha pública de este comercio. Apágalo mientras sean datos de prueba."
+          />
 
           <p className={styles.nota}>
             Al guardar se envía un correo con un enlace de un solo uso para activar

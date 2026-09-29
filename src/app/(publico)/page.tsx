@@ -6,6 +6,7 @@ import {
   obtenerVitrinaPublica,
   obtenerWhatsappSoporte,
 } from '@/lib/publico/datos-publicos'
+import { INDEXAR_CATALOGO, NOMBRE_SITIO, URL_SITIO } from '@/lib/publico/sitio'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
 import { AnuncioBanner } from '@/components/anuncios/anuncio-banner'
@@ -24,7 +25,21 @@ import { ValoresOrum } from './_components/valores-orum'
 import escaparate from './escaparate.module.css'
 import estilos from './landing.module.css'
 
+/** Datos estructurados de la organización (nombre, dirección web, logotipo). */
+const ORGANIZACION_JSONLD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: NOMBRE_SITIO,
+  url: URL_SITIO,
+  logo: `${URL_SITIO}/icon.svg`,
+  description:
+    'Club de beneficios por membresía. Una red de valor que conecta personas con los mejores comercios y experiencias locales.',
+}).replace(/</g, '\\u003c')
+
 export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+  // Catálogo con datos de prueba: ver `INDEXAR_CATALOGO` en `lib/publico/sitio.ts`.
+  robots: INDEXAR_CATALOGO ? { index: true, follow: true } : { index: false, follow: false },
   title: 'ORUM · Descubre lo mejor de tu ciudad',
   description:
     'Club de beneficios por membresía. Una red de valor que conecta personas con los mejores comercios y experiencias locales.',
@@ -83,6 +98,10 @@ export default async function LandingPublica() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: ORGANIZACION_JSONLD }}
+      />
       <HeroPublico esSocio={perfil?.rolCodigo === 'miembro'} />
 
       <ComoFunciona />

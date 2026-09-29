@@ -131,6 +131,8 @@ export type Database = {
           logo_url: string | null
           /** Foto de portada 16/9. Alimenta el carrusel público. Migración 20260913120000. */
           portada_url: string | null
+          /** Si la ficha pública sale en buscadores (sitemap, sin noindex). Migración comercios_indexable. */
+          indexable: boolean
           activo: boolean
           created_at: Timestamp
           updated_at: Timestamp
@@ -145,6 +147,7 @@ export type Database = {
           descripcion?: string | null
           logo_url?: string | null
           portada_url?: string | null
+          indexable?: boolean
           activo?: boolean
           created_at?: Timestamp
           updated_at?: Timestamp

@@ -26,12 +26,15 @@ function leerCamposComercio(formData: FormData) {
   const marcaRaw = String(formData.get('marca_id') ?? '').trim()
   const categoriaRaw = String(formData.get('categoria_id') ?? '').trim()
   const logo_url = String(formData.get('logo_url') ?? '').trim() || null
+  // Un interruptor apagado no envía nada: la ausencia ES el `false`.
+  const indexable = formData.get('indexable') === 'on'
   return {
     nombre,
     descripcion,
     marca_id: marcaRaw ? Number(marcaRaw) : null,
     categoria_id: categoriaRaw ? Number(categoriaRaw) : null,
     logo_url,
+    indexable,
   }
 }
 
@@ -90,6 +93,7 @@ export async function crearComercio(
     marca_id: campos.marca_id,
     categoria_id: campos.categoria_id,
     logo_url: campos.logo_url,
+    indexable: campos.indexable,
     activo: true,
   })
   if (errComercio) {
@@ -138,6 +142,7 @@ export async function editarComercio(
       marca_id: campos.marca_id,
       categoria_id: campos.categoria_id,
       logo_url: campos.logo_url,
+      indexable: campos.indexable,
     })
     .eq('id', id)
   if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
@@ -160,6 +165,7 @@ export async function editarComercio(
 
   revalidatePath('/admin/comercios')
   revalidatePath(`/admin/comercios/${id}`)
+  revalidatePath('/sitemap.xml')
   return { ok: true }
 }
 

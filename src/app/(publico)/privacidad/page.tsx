@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { PaginaLegal } from '../_components/pagina-legal'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/privacidad' },
   title: 'Política de privacidad · ORUM',
   description:
     'Cómo ORUM recolecta, usa y protege los datos personales de socios, comercios y visitantes.',

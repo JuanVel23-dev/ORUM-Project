@@ -294,6 +294,8 @@ export type FichaPublica = {
   /** Beneficios vigentes, ya formateados. La ficha los enseña desenfocados. */
   beneficios: string[]
   fotos: FotoPublica[]
+  /** `false` = la ficha lleva `noindex` y no entra en el sitemap. */
+  indexable: boolean
 }
 
 /**
@@ -319,7 +321,7 @@ export const obtenerFichaPublica = cache(async (id: number): Promise<FichaPublic
   ] = await Promise.all([
     supabase
       .from('comercios')
-      .select('id, nombre, descripcion, logo_url, portada_url, categoria_id, marca_id')
+      .select('id, nombre, descripcion, logo_url, portada_url, categoria_id, marca_id, indexable')
       .eq('id', id)
       .eq('activo', true)
       .is('deleted_at', null)
@@ -401,8 +403,26 @@ export const obtenerFichaPublica = cache(async (id: number): Promise<FichaPublic
     sedes,
     beneficios,
     fotos,
+    indexable: comercio.indexable,
   }
 })
+
+/**
+ * Los comercios cuya ficha puede salir en buscadores, para el sitemap.
+ * Solo `id` y la fecha de última edición: nada más se publica ahí.
+ */
+export async function obtenerComerciosIndexables(): Promise<{ id: number; actualizado: string }[]> {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('comercios')
+    .select('id, updated_at')
+    .eq('activo', true)
+    .eq('indexable', true)
+    .is('deleted_at', null)
+    .order('id')
+    .limit(TOPE_DIRECTORIO)
+  return (data ?? []).map((c) => ({ id: c.id, actualizado: c.updated_at }))
+}
 
 /* ==========================================================================
    LOS PLANES

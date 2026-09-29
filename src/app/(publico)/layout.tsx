@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { Metadata } from 'next'
 import { obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
 import { EncabezadoPublico } from './_components/encabezado-publico'
 import { PiePublico } from './_components/pie-publico'
@@ -24,6 +25,17 @@ import estilos from './publico.module.css'
   tienen que verse al momento, sin redesplegar. Dentro de una misma petición,
   `cache()` evita que layout y página consulten dos veces.
 */
+/*
+  LA FACHADA SÍ SE INDEXA. El layout raíz pone `noindex` a todo por defecto;
+  este es el único sitio que lo levanta. Cada página pública puede volver a
+  cerrarlo por su cuenta (la ficha de un comercio excluido lo hace).
+*/
+export const metadata: Metadata = {
+  robots: { index: true, follow: true },
+  openGraph: { siteName: 'ORUM', locale: 'es_CO', type: 'website' },
+  twitter: { card: 'summary_large_image' },
+}
+
 /*
   LA RANURA `@modal` vive AQUÍ y solo aquí: la ficha pública de un comercio
   (`@modal/(.)explorar/[id]`) se abre encima tanto desde el directorio como

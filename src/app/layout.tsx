@@ -3,6 +3,7 @@ import { Montserrat, Playfair_Display } from 'next/font/google'
 import { ThemeScript } from '@/components/theme/theme-script'
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { RegistrarSW } from '@/components/pwa/registrar-sw'
+import { URL_SITIO } from '@/lib/publico/sitio'
 import './globals.css'
 
 /**
@@ -54,8 +55,16 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: 'ORUM · Portal de Administración',
+  metadataBase: new URL(URL_SITIO),
+  title: { default: 'ORUM · Club de beneficios', template: '%s' },
   description: 'Plataforma del club de beneficios ORUM.',
+
+  /*
+    NOINDEX POR DEFECTO. Los tres portales con sesión, los accesos y cualquier
+    ruta nueva quedan fuera de los buscadores sin que nadie tenga que
+    acordarse. Solo `(publico)/layout.tsx` lo levanta.
+  */
+  robots: { index: false, follow: false },
 
   // Nombre corto que iOS usa bajo el icono en la pantalla de inicio.
   applicationName: 'ORUM',

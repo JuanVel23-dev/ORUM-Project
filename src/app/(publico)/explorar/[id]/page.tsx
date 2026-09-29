@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import { obtenerFichaPublica, obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
+import { URL_SITIO } from '@/lib/publico/sitio'
 import estilos from './ficha-publica.module.css'
 
 /*
@@ -36,10 +37,52 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const ficha = numero ? await obtenerFichaPublica(numero) : null
   /* El mismo título para los tres casos fatales: no se filtra por la pestaña
      lo que la página calla. */
-  return {
-    title: ficha ? `${ficha.nombre} · Comercio aliado de ORUM` : 'Comercio no disponible · ORUM',
-    description: ficha?.descripcion ?? undefined,
+  if (!ficha) {
+    return { title: 'Comercio no disponible · ORUM', robots: { index: false, follow: false } }
   }
+  const titulo = `${ficha.nombre} · Comercio aliado de ORUM`
+  const descripcion = ficha.descripcion ?? undefined
+  const imagen = ficha.portadaUrl ?? ficha.logoUrl ?? undefined
+  return {
+    title: titulo,
+    description: descripcion,
+    /* Un comercio excluido sigue visible en el sitio: solo se le pide a los
+       buscadores que no lo guarden. */
+    robots: ficha.indexable ? { index: true, follow: true } : { index: false, follow: false },
+    alternates: { canonical: `/explorar/${ficha.id}` },
+    openGraph: {
+      title: titulo,
+      description: descripcion,
+      url: `/explorar/${ficha.id}`,
+      ...(imagen ? { images: [{ url: imagen }] } : {}),
+    },
+    twitter: { title: titulo, description: descripcion, ...(imagen ? { images: [imagen] } : {}) },
+  }
+}
+
+/** JSON-LD del comercio. `<` se escapa para que ningún texto cierre el `<script>`. */
+function datosEstructurados(ficha: NonNullable<Awaited<ReturnType<typeof obtenerFichaPublica>>>) {
+  const json = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: ficha.nombre,
+    url: `${URL_SITIO}/explorar/${ficha.id}`,
+    ...(ficha.descripcion ? { description: ficha.descripcion } : {}),
+    ...((ficha.portadaUrl ?? ficha.logoUrl) ? { image: ficha.portadaUrl ?? ficha.logoUrl } : {}),
+    ...(ficha.sedes.some((s) => s.direccion)
+      ? {
+          address: ficha.sedes
+            .filter((s) => s.direccion)
+            .map((s) => ({
+              '@type': 'PostalAddress',
+              streetAddress: s.direccion,
+              ...(s.ciudadNombre ? { addressLocality: s.ciudadNombre } : {}),
+              addressCountry: 'CO',
+            })),
+        }
+      : {}),
+  }
+  return JSON.stringify(json).replace(/</g, '\\u003c')
 }
 
 export const dynamic = 'force-dynamic'
@@ -69,6 +112,12 @@ export default async function FichaPublicaPage({
 
   return (
     <article className={[estilos.ficha, enOverlay && estilos.enOverlay].filter(Boolean).join(' ')}>
+      {ficha.indexable && !enOverlay && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: datosEstructurados(ficha) }}
+        />
+      )}
       {!enOverlay && (
         <Link href="/explorar" className={estilos.volver}>
           <ChevronLeft size={16} aria-hidden="true" />

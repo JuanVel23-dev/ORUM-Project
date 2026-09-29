@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/ui/layout'
 import estilos from './novedades.module.css'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/novedades' },
   title: 'Novedades · ORUM',
   description: 'Beneficios nuevos y actualizaciones del club.',
 }

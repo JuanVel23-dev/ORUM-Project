@@ -16,7 +16,7 @@ export default async function EditarComercioPage({ params }: { params: Promise<{
   const [{ data: comercio }, { data: marcas }, { data: categorias }] = await Promise.all([
     admin
       .from('comercios')
-      .select('id, perfil_id, nombre, descripcion, marca_id, categoria_id, logo_url')
+      .select('id, perfil_id, nombre, descripcion, marca_id, categoria_id, logo_url, indexable')
       .eq('id', comercioId)
       .is('deleted_at', null)
       .maybeSingle(),

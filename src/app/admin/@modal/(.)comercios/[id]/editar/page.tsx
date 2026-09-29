@@ -16,7 +16,7 @@ export default async function EditarComercioInterceptado({
   const [{ data: comercio }, { data: marcas }, { data: categorias }] = await Promise.all([
     admin
       .from('comercios')
-      .select('id, perfil_id, nombre, descripcion, marca_id, categoria_id, logo_url')
+      .select('id, perfil_id, nombre, descripcion, marca_id, categoria_id, logo_url, indexable')
       .eq('id', Number(id))
       .is('deleted_at', null)
       .maybeSingle(),
