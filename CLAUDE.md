@@ -1199,10 +1199,10 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    `manifest.ts` fija su color a propósito al del TEMA OSCURO (es lo que se ve
    en la pantalla de arranque antes de resolver la preferencia real), que no
    cambió con la v6, así que no necesitó tocarse. Los iconos ya no son
-   copias de la paleta: desde el 29/09/2026 son PNG del monograma plata del
-   cliente sobre negro (`src/app/icon.png`, `favicon.ico`, `apple-icon.png`,
+   copias de la paleta: desde el 29/09/2026 son PNG del monograma DORADO del
+   cliente, sin fondo (`src/app/icon.png`, `favicon.ico`, `apple-icon.png`,
    `public/icons/orum-*.png`), generados desde
-   `src/components/ui/marca/monograma-plata.png`. Si cambia el monograma, se
+   `src/components/ui/marca/monograma.png`. Si cambia el monograma, se
    regeneran desde ahí. Si la paleta vuelve
    a cambiar, revisar los tres a mano — ninguno puede leer una variable CSS.
 9. ~~`--cacao-bg` en tema claro mapeaba a un marfil claro en vez de negro,

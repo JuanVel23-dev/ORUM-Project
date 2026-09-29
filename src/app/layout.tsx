@@ -97,8 +97,8 @@ export const viewport: Viewport = {
   //   · `src/app/manifest.ts` ..... background_color y theme_color → --w-0
   //   · Los iconos (`src/app/icon.png`, `favicon.ico`, `apple-icon.png` y
   //     `public/icons/orum-*.png`) son desde el 29/09/2026 el monograma
-  //     plata del cliente sobre `#0A0A0C` (--cacao-900), generados como
-  //     imagen: no llevan colores de la paleta que haya que mover a mano.
+  //     DORADO del cliente sin fondo, generados como imagen: no llevan
+  //     colores de la paleta que haya que mover a mano.
   // Ninguno puede leer una variable CSS: el manifiesto y los iconos los
   // resuelve el sistema operativo antes de que exista una hoja de estilos.
   themeColor: [

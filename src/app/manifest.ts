@@ -55,10 +55,12 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['business', 'productivity'],
 
     /*
-      EL MONOGRAMA DE ORUM EN PLATA SOBRE NEGRO (29/09/2026, encargo del
-      propietario: «el icono de ORUM para todas las páginas»). PNG generados
-      desde `src/components/ui/marca/monograma-plata.png`: la «O» con la
-      estrella del cliente, no un dibujo aproximado. La variante `maskable`
+      EL MONOGRAMA DE ORUM EN DORADO Y SIN FONDO (29/09/2026, encargo del
+      propietario: «el icono de ORUM para todas las páginas», «dorado y sin
+      fondo»). PNG transparentes generados desde
+      `src/components/ui/marca/monograma.png`: la «O» con la estrella del
+      cliente, no un dibujo aproximado. iOS pinta de negro lo transparente
+      del icono de inicio; Android usa `background_color`. La variante `maskable`
       deja el monograma dentro del 80 % central, que es lo que Android no
       recorta al aplicar su forma.
     */
