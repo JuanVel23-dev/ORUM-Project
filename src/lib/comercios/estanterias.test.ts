@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   seleccionarNovedades,
+  seleccionarMasRecientes,
   seleccionarBeneficiosDelMomento,
   seleccionarDestacados,
   apoyoDestacados,
@@ -251,5 +252,23 @@ describe('apoyoDestacados — el copy dice la verdad del criterio', () => {
   it('variante C: sin beneficios y queda más catálogo debajo', () => {
     const destacados = [{ promociones: [] }, { promociones: [] }]
     expect(apoyoDestacados(destacados, 10)).toBe('Aliados para conocer, y el resto está abajo')
+  })
+})
+
+describe('seleccionarMasRecientes', () => {
+  const c = (id: number, createdAt: string | null) => ({ id, createdAt })
+
+  it('ordena del más nuevo al más antiguo sin exigir antigüedad', () => {
+    const lista = [c(1, '2024-01-01T00:00:00Z'), c(2, '2025-06-01T00:00:00Z'), c(3, '2023-03-01T00:00:00Z')]
+    expect(seleccionarMasRecientes(lista).map((x) => x.id)).toEqual([2, 1, 3])
+  })
+
+  it('no pinta nada con menos de dos comercios', () => {
+    expect(seleccionarMasRecientes([c(1, '2025-01-01T00:00:00Z')])).toEqual([])
+  })
+
+  it('respeta el tope', () => {
+    const lista = Array.from({ length: 12 }, (_, i) => c(i, `2025-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`))
+    expect(seleccionarMasRecientes(lista, 3).map((x) => x.id)).toEqual([11, 10, 9])
   })
 })

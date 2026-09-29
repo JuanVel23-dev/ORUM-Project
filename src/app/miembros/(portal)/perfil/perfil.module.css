@@ -1,35 +1,21 @@
 /* ==========================================================================
-   EL CARNET  ·  Z2 — TARJETA BLANCA, HORIZONTAL, A TODO EL ANCHO
+   EL CARNET  ·  Z3 — la maqueta aprobada, al pie de la letra (29/09/2026)
    --------------------------------------------------------------------------
-   26/09/2026 · REDISEÑO TOTAL, por encargo del propietario en la ronda de
-   comentarios del boceto: «quítale el fondo, está feo. Que sea una card en
-   fondo blanco» y, antes, «el carnet debe ocupar toda la página, y si es PC
-   que sea horizontal y el texto debajo». Reemplaza formalmente a la tarjeta
-   de chocolate de la Z1 (15/09/2026): lo que cambia es el MATERIAL —negro con
-   oro → papel con tinta—, no el objeto. Sigue siendo un carnet: una sola
-   superficie, el mismo eje que ya tenía, ahora tumbado.
+   `MiembrosCarnet.dc.html` del artifact «ORUM — Rediseño Portal Inicial».
+   Hereda de la Z2 (26/09) el material —papel, no chocolate: «que sea una card
+   en fondo blanco»— y la orientación horizontal a todo el ancho. Lo que la Z3
+   cambia es la COMPOSICIÓN de la fila:
 
-   POR QUÉ YA NO HACE FALTA UN ÁMBITO DE TEMA. La Z1 remapeaba una veintena de
-   semánticos porque dentro del carnet caían componentes —`StatusBadge`,
-   `Copiar`, `QrCode`— que resuelven sus propios tokens contra el tema activo,
-   y sobre chocolate esos tokens de tema claro habrían salido ilegibles. Sobre
-   PAPEL no hace falta remapear nada: el carnet ya vive en el tema que sus
-   hijos esperan. Es la simplificación que trae el material nuevo, no un
-   descuido: la Z1 tenía ~25 líneas de reasignación de semánticos: aquí, cero.
+     [logo + foto] | [tipo · nombre · plan · estado] | [número · vigencia] | [QR] [Ampliar / Cambiar foto]
 
-   POR QUÉ EL LOGOTIPO VUELVE A DORADO. CLAUDE.md: «sobre negro, plata; sobre
-   blanco, oro». La Z1 lo llevaba en plata porque el carnet era negro en los
-   dos temas; con el material nuevo el fondo es blanco en los dos temas, así
-   que el logotipo cambia con él.
+   - El emisor (logo pequeño) va ENCIMA del retrato, no en una cabecera
+     propia: la fila es una sola línea, sin franja de título.
+   - Las acciones viven DENTRO de la tarjeta, como su última columna: «nada de
+     un hueco vacío debajo de la credencial».
+   - Sin filo dorado alrededor: solo la barra dorada de arriba y la sombra.
 
-   POR QUÉ EL EJE SIGUE SIENDO UNO, SOLO QUE AHORA HORIZONTAL. El encargo del
-   15/09 pedía «todo centrado como un carnet de verdad» para acabar con una
-   ficha de datos que corría desde la izquierda. Ese principio no cambió: lo
-   que cambió es que ahora hay ancho de sobra —la tarjeta ocupa el contenido
-   entero, no 420px— así que el eje único se tumba en vez de apilarse. Por
-   debajo de `--carnet-quiebre` (860px de contenedor) sigue apilado y
-   centrado: es el mismo carnet, la orientación es lo único que cambia con el
-   ancho disponible.
+   Por debajo del quiebre (760px de tarjeta) todo se apila y centra, como un
+   carnet de pie: es el mismo objeto, solo cambia la orientación.
    ========================================================================== */
 
 .pantalla {
@@ -42,16 +28,14 @@
   gap: var(--space-1);
 }
 
-/*
-  El `h1` de la pantalla se queda en SANS. El serif de display es un acento y
-  en esta pantalla ya lo lleva el nombre del socio dentro del carnet. El
-  héroe aquí es el objeto, no su encabezado.
-*/
+/* El `h1` de la pantalla, en SANS y compacto: el serif ya lo lleva el
+   nombre del socio. El héroe aquí es el objeto, no su encabezado. */
 .titulo {
-  font-size: var(--t-display-2-size);
-  line-height: var(--t-display-2-leading);
-  letter-spacing: var(--t-display-2-tracking);
-  font-weight: var(--t-display-2-weight);
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  letter-spacing: var(--t-title-1-tracking);
+  font-weight: 800;
+  color: var(--text);
 }
 
 .lede {
@@ -63,32 +47,19 @@
 /* ==========================================================================
    LA ENTRADA  ·  rápida, porque se ve muchas veces al día
    --------------------------------------------------------------------------
-   Criterio de Emil Kowalski: la FRECUENCIA decide. El carnet se abre en cada
-   caja, varias veces al día — lo que se ve cientos de veces no se celebra.
-
-   OJO: esto es de `.carnetCaja`, que SOLO envuelve a la copia de la página. La
-   copia ampliada cuelga del `<Overlay>` y no pasa por aquí a propósito: sumar
-   esta entrada a la del diálogo serían dos animaciones encadenadas en la
-   acción más repetida del producto.
-
-   Solo `transform` y `opacity`.
+   Solo envuelve a la copia de la página: la ampliada cuelga del `<Overlay>`
+   y no pasa por aquí (dos animaciones encadenadas en la acción más repetida
+   del producto se sentirían lentas). Solo `transform` y `opacity`.
    ========================================================================== */
 
 .carnetCaja {
   min-width: 0;
-
-  /* La tarjeta y sus acciones entran como una sola pieza. */
-  display: grid;
-  gap: var(--space-4);
-
   animation: entraCarnet var(--dur-carnet) var(--ease-out) both;
 }
 
 @keyframes entraCarnet {
   from {
     opacity: 0;
-    /* Nada entra desde `scale(0)`. Y a esta velocidad el desplazamiento
-       tiene que ser corto o se lee como un tirón. */
     transform: scale(0.985) translateY(6px);
   }
   to {
@@ -106,30 +77,33 @@
 /* ==========================================================================
    LA TARJETA
    --------------------------------------------------------------------------
-   `Card variant="brand"` ya aporta el filo dorado tenue (`--brand-edge` al
-   45 %) y el hairline superior de su `::before` (`--gold-hairline`) — el
-   mismo recurso que usa la tarjeta de acceso. Aquí solo se sube un escalón
-   más de sombra: el carnet es lo único que flota en esta pantalla, así que
-   le toca el peldaño más alto (`--shadow-overlay`), no el de una tarjeta
-   cualquiera.
+   Lo único que flota en esta pantalla: peldaño más alto de sombra. Sin filo
+   alrededor (la maqueta no lo tiene): `Card variant="brand"` trae uno dorado
+   tenue y aquí se devuelve a `--border-superficie`, que es transparente en
+   reposo y vuelve con `prefers-contrast: more`.
 
-   Especificidad 0,2,0 a propósito: estos valores corrigen a `card.module.css`
-   y el orden entre dos módulos CSS en el bundle no está garantizado.
+   Especificidad 0,2,0 a propósito: corrige a `card.module.css` y el orden
+   entre dos módulos CSS en el bundle no está garantizado.
    ========================================================================== */
 
 .carnet.carnet {
   width: 100%;
+  border-color: var(--border-superficie);
   border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: var(--shadow-overlay), var(--edge);
 }
 
-/*
-  LA VARIANTE AMPLIADA. Es el MISMO objeto más cerca, no otro diseño. Dentro
-  del overlay el diálogo ya acota el ancho (460px de `CarnetAmpliable`), así
-  que aquí basta con aflojar el relleno y crecer QR y foto — no hay quiebre de
-  contenedor que perseguir: a esa anchura siempre cae en la rama apilada.
-*/
+/* La barra dorada de arriba: un degradado de relleno, no un trazo. Sustituye
+   al hairline de 1px de `variant="brand"`. */
+.carnet.carnet::before {
+  height: 3px;
+  border-radius: 0;
+  background: linear-gradient(90deg, var(--gold-600), var(--gold-300), var(--gold-600));
+}
+
+/* LA VARIANTE AMPLIADA: el mismo objeto más cerca. Dentro del overlay (460px)
+   siempre cae en la rama apilada. */
 .carnet.ampliado .carnetInterior {
   padding: var(--space-7) var(--space-6);
 }
@@ -142,11 +116,8 @@
   --qr-max: 260px;
 }
 
-/* --- El interior ------------------------------------------------------------
-   Contenedor de consulta propio: el quiebre horizontal depende del ancho de
-   ESTA tarjeta, no del viewport ni del contenedor `contenido` del portal —a
-   900px de columna la tarjeta con su relleno tiene ~850px útiles, que es
-   donde de verdad cabe la fila sin apretarse. */
+/* Contenedor de consulta propio: el quiebre depende del ancho de ESTA
+   tarjeta, no del viewport. */
 .carnetInterior {
   position: relative;
   z-index: 1;
@@ -154,56 +125,17 @@
   container-type: inline-size;
   container-name: carnet;
 
-  display: grid;
-  gap: var(--space-6);
-  padding: var(--space-6) var(--space-7);
+  padding: var(--space-7) var(--space-6);
 }
 
 @container contenido (min-width: 640px) {
   .carnetInterior {
-    padding: var(--space-7) var(--space-8);
+    padding: var(--space-8) var(--space-9);
   }
 }
 
-/* --- Emisor: logotipo y tipo de documento ----------------------------------
-   Ya no centrado en su propia columna: es una fila corta, alineada donde
-   empieza el resto del contenido. */
-.emisor {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-}
+/* --- La fila: apilada y centrada de pie, horizontal a partir del quiebre ---- */
 
-.wordmark {
-  height: 0.8125rem;
-}
-
-.puntoEmisor {
-  flex-shrink: 0;
-  width: 3px;
-  height: 3px;
-  border-radius: var(--radius-full);
-  background: var(--brand);
-}
-
-/*
-  «Carnet de socio». Una credencial que no dice qué es no parece una
-  credencial. Versalitas y el tracking más abierto del objeto.
-*/
-.tipo {
-  font-size: var(--t-overline-size);
-  line-height: var(--t-overline-leading);
-  letter-spacing: var(--t-overline-tracking);
-  font-weight: var(--t-overline-weight);
-  text-transform: uppercase;
-  color: var(--text-2);
-}
-
-/* --- La fila principal: foto, identidad, datos, QR -------------------------
-   Apilada y centrada por defecto —el mismo eje único de siempre—; a partir
-   del quiebre se tumba en horizontal, con un hairline vertical entre cada
-   bloque en vez de una tarjeta dentro de la tarjeta. */
 .fila {
   display: flex;
   flex-direction: column;
@@ -212,52 +144,60 @@
   gap: var(--space-5);
 }
 
-@container carnet (min-width: 640px) {
+@container carnet (min-width: 760px) {
   .fila {
     flex-direction: row;
     align-items: center;
     text-align: left;
-    gap: var(--space-7);
+    gap: var(--space-8);
   }
 }
 
-/*
-  El hairline entre bloques: solo tiene sentido en la fila horizontal — de
-  pie, apilado, sería una línea suelta sin nada que separar a los lados.
-*/
+/* El hairline entre bloques: solo en la fila horizontal. */
 .divisor {
   display: none;
   flex-shrink: 0;
 }
 
-@container carnet (min-width: 640px) {
+@container carnet (min-width: 760px) {
   .divisor {
     display: block;
     width: 1px;
     align-self: stretch;
-    background: var(--border);
+    background: var(--border-subtle);
   }
 }
 
-/* --- La foto: el retrato manda -----------------------------------------------
-   Circular, en el eje. El aro dorado y el paspartú difuso son el mismo
-   recurso de siempre; solo cambia el tamaño, algo más contenido ahora que
-   convive con el resto de la fila en vez de sostener la tarjeta ella sola.
-*/
+/* --- Emisor + foto ------------------------------------------------------------ */
+
+.columnaFoto {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.wordmark {
+  height: 0.8125rem;
+}
+
 .foto {
   flex-shrink: 0;
   display: grid;
   place-items: center;
   overflow: hidden;
 
-  --foto-lado: clamp(88px, 22vw, 108px);
+  --foto-lado: clamp(96px, 24vw, 120px);
   width: var(--foto-lado);
   aspect-ratio: 1 / 1;
   border-radius: var(--radius-full);
 
   background: var(--surface-alt);
-  border: 1px solid var(--brand-edge);
-  box-shadow: 0 0 0 var(--space-1) color-mix(in srgb, var(--gold-600) 10%, transparent);
+  border: 1px solid var(--gold-600);
+  box-shadow:
+    0 0 0 var(--space-1) color-mix(in srgb, var(--gold-600) 10%, transparent),
+    var(--shadow-card);
 }
 
 .fotoImagen {
@@ -266,19 +206,18 @@
   object-fit: cover;
 }
 
-/*
-  Sin foto, las iniciales — nunca un hueco ni un icono genérico de persona.
-*/
+/* Sin foto, las iniciales — nunca un hueco ni un icono genérico de persona. */
 .fotoIniciales {
   font-family: var(--font-display);
-  font-size: var(--t-title-1-size);
+  font-size: var(--t-hero-cifra-size);
   line-height: 1;
   letter-spacing: -0.01em;
   font-weight: 600;
   color: var(--brand);
+  -webkit-font-smoothing: auto;
 }
 
-/* --- Identidad: nombre, plan y estado --------------------------------------- */
+/* --- Identidad: tipo, nombre, plan y estado ---------------------------------- */
 
 .identidad {
   min-width: 0;
@@ -288,22 +227,30 @@
   gap: var(--space-2);
 }
 
-@container carnet (min-width: 640px) {
+@container carnet (min-width: 760px) {
   .identidad {
     flex: 1;
     align-items: flex-start;
   }
 }
 
+/* «Carnet de socio»: versalitas en oro de texto (`--gold-700`, 4,87:1). */
+.tipo {
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
 .nombre {
   font-family: var(--font-display);
   font-size: var(--t-display-2-size);
-  line-height: var(--t-display-2-leading);
+  line-height: 1.1;
   letter-spacing: var(--t-display-2-tracking);
-  font-weight: var(--t-display-2-weight);
+  font-weight: 600;
   font-feature-settings: 'liga' 1, 'calt' 1;
-  /* Una serif de contraste alto con `antialiased` pierde las astas finas en
-     Chrome sobre macOS: aquí conviene el suavizado del sistema. */
   -webkit-font-smoothing: auto;
 
   color: var(--text);
@@ -314,7 +261,6 @@
 .plan {
   font-size: var(--t-callout-size);
   line-height: var(--t-callout-leading);
-  font-weight: var(--t-callout-weight);
   color: var(--text-2);
   text-wrap: balance;
 }
@@ -324,17 +270,17 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-2) var(--space-4);
   margin-top: var(--space-1);
 }
 
-@container carnet (min-width: 640px) {
+@container carnet (min-width: 760px) {
   .estadoFila {
     justify-content: flex-start;
   }
 }
 
-/* --- Los datos: número y vigencia ------------------------------------------- */
+/* --- Los datos: número y vigencia, uno encima de otro ----------------------- */
 
 .datos {
   flex-shrink: 0;
@@ -344,11 +290,9 @@
   gap: var(--space-4);
 }
 
-@container carnet (min-width: 640px) {
+@container carnet (min-width: 760px) {
   .datos {
-    flex-direction: row;
     align-items: flex-start;
-    gap: var(--space-6);
   }
 }
 
@@ -359,32 +303,26 @@
   min-width: 0;
 }
 
-@container carnet (min-width: 640px) {
+@container carnet (min-width: 760px) {
   .bloque {
     justify-items: start;
   }
 }
 
-/* Versalitas en oro: el mismo tono que ya usan las etiquetas del sistema. */
+/* Etiquetas en tinta terciaria: el oro lo lleva «Carnet de socio». */
 .etiqueta {
   font-size: var(--t-overline-size);
   line-height: var(--t-overline-leading);
-  letter-spacing: var(--t-overline-tracking);
-  font-weight: var(--t-overline-weight);
+  letter-spacing: 0.09em;
+  font-weight: 700;
   text-transform: uppercase;
-  color: var(--brand);
+  color: var(--text-3);
 }
 
 /*
-  EL NÚMERO ES UN CÓDIGO: se lee dígito a dígito, se dicta en voz alta y se
-  teclea cuando el lector falla. Por eso cifras TABULARES, tracking POSITIVO
-  y monoespaciada del sistema — distingue 0/O y 1/l, que es exactamente el
-  error que ocurre al leerlo en voz alta en una caja.
-
-  En tinta, no en oro: sobre papel el oro de texto (`--gold-700`) rinde menos
-  que la tinta a este tamaño, y el número es el dato que más se dicta —el que
-  más se beneficia del contraste máximo. El oro se queda en la etiqueta, que
-  es quien tiene que llamar la atención primero.
+  EL NÚMERO ES UN CÓDIGO: se dicta en voz alta y se teclea cuando el lector
+  falla. Cifras tabulares, tracking positivo y monoespaciada (distingue 0/O y
+  1/l). En tinta: es el dato que más se beneficia del contraste máximo.
 */
 .numero {
   display: flex;
@@ -402,7 +340,7 @@
   color: var(--text);
 }
 
-@container carnet (min-width: 640px) {
+@container carnet (min-width: 760px) {
   .numero {
     justify-content: flex-start;
   }
@@ -411,19 +349,13 @@
 .vigencia {
   font-size: var(--t-callout-size);
   line-height: var(--t-callout-leading);
-  font-weight: var(--t-callout-weight);
   color: var(--text);
 }
 
-/* --- El QR ------------------------------------------------------------------
-   Sigue negro sobre blanco pase lo que pase — invertirlo rompe el escaneo en
-   algunos lectores— pero ya no necesita una placa propia que lo separe del
-   fondo: el fondo YA es blanco. Lo que queda es el filo dorado (el mismo
-   `--gold-600` de siempre) para que el módulo se distinga como una pieza
-   propia, y una sombra corta en vez de la flotante: sobre papel, al lado de
-   texto y sin el contraste que regalaba el chocolate, una sombra grande se
-   leía pesada.
-*/
+/* --- El QR --------------------------------------------------------------------
+   Negro sobre blanco pase lo que pase —invertirlo rompe el escaneo en algunos
+   lectores—, en una placa blanca con un hairline de tinta: la tarjeta es
+   crema y el blanco del código tiene que leerse como pieza propia. */
 .qr {
   flex-shrink: 0;
   display: grid;
@@ -434,10 +366,10 @@
 
 .qr .qrMarco {
   width: 100%;
-  padding: 14.3%;
-  border-color: var(--gold-600);
+  padding: 12%;
+  border-color: var(--border-subtle);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
 }
 
 .qr .qrMarco svg {
@@ -445,37 +377,111 @@
   height: auto;
 }
 
-/* --- Acciones bajo el carnet -------------------------------------------------
-   AMPLIAR y CAMBIAR FOTO van FUERA de la tarjeta: lo que se enseña en una
-   caja no lleva botones impresos encima. En fila, no en columna — la tarjeta
-   ya ocupa el ancho del contenido, así que apilarlas verticalmente dejaría
-   dos botones angostos perdidos bajo un carnet ancho.
-*/
+/* --- Las acciones: la última columna de la fila ---------------------------- */
+
 .acciones {
+  flex-shrink: 0;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+  width: min(100%, 12rem);
 }
 
-/* --- Cómo usarlo --------------------------------------------------------------
-   A todo el ancho, debajo del carnet — ya no en una columna lateral: con la
-   tarjeta ocupando el contenido entero no queda un lateral que llenar. Reusa
-   el mismo círculo numerado que «Así es como te unes» en el Portal Público:
-   crema, anillo dorado, número en serif — el mismo lenguaje, otro lugar.
+/*
+  «AMPLIAR». Píldora de oro claro con texto en tinta, como la maqueta. El
+  relleno pálido no marca un límite de 3:1 contra el crema, así que lleva el
+  filo `--gold-600` (3,27:1): es lo que sostiene WCAG 1.4.11 en un control.
+  Es la acción más frecuente de la pantalla: sube con el apuntado y se hunde
+  al pulsar.
 */
+.botonAmpliar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-5);
+
+  border: 1px solid var(--gold-600);
+  border-radius: var(--radius-full);
+  background: var(--gold-300);
+  box-shadow: var(--shadow-raised);
+
+  font-family: var(--font-sans);
+  font-size: var(--t-footnote-size);
+  font-weight: 700;
+  color: var(--tinta-1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .botonAmpliar:hover {
+    translate: 0 -2px;
+    scale: 1;
+    box-shadow: var(--filo-activo), var(--shadow-flotante);
+  }
+}
+
+.botonAmpliar:active {
+  translate: 0 2px;
+  scale: 1;
+  box-shadow: var(--shadow-press);
+  transition-duration: var(--dur-press);
+}
+
+.botonAmpliar:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* «Cambiar foto»: mantenimiento, se hace una vez. Un enlace discreto. */
+.cambiarFoto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  border-radius: var(--radius-full);
+
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  color: var(--text-2);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .cambiarFoto:hover {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+.cambiarFoto:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botonAmpliar:hover,
+  .botonAmpliar:active {
+    translate: none;
+  }
+}
+
+/* --- Cómo usarlo ----------------------------------------------------------------
+   A todo el ancho, debajo del carnet: tres pasos con el mismo círculo
+   numerado que «Así es como te unes» del Portal Público. */
 .como {
   display: grid;
-  gap: var(--space-5);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--border-subtle);
-}
-
-.comoTitulo {
-  font-size: var(--t-title-3-size);
-  line-height: var(--t-title-3-leading);
-  letter-spacing: var(--t-title-3-tracking);
-  font-weight: var(--t-title-3-weight);
+  gap: var(--space-7);
+  padding-top: var(--space-4);
 }
 
 .pasos {
@@ -490,6 +496,7 @@
 @container contenido (min-width: 720px) {
   .pasos {
     grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-7);
   }
 }
 
@@ -499,8 +506,6 @@
   gap: var(--space-4);
 }
 
-/* El mismo círculo numerado que ya usa el héroe público: crema, anillo
-   dorado de 1px hacia dentro (nunca un borde dibujado), número en serif. */
 .numeroPaso {
   flex-shrink: 0;
   width: 44px;
@@ -512,16 +517,17 @@
   box-shadow: inset 0 0 0 1px var(--gold-600), var(--shadow-card);
 
   font-family: var(--font-display);
-  font-size: var(--t-title-1-size);
+  font-size: var(--t-title-3-size);
   line-height: 1;
   font-weight: 700;
   color: var(--brand);
+  -webkit-font-smoothing: auto;
 }
 
 .pasoTexto {
-  margin: 6px 0 0;
+  margin: var(--space-2) 0 0;
   font-size: var(--t-body-size);
-  line-height: var(--t-body-leading);
+  line-height: 1.6;
   color: var(--text-2);
 }
 
@@ -534,8 +540,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding-top: var(--space-5);
+  gap: var(--space-4) var(--space-7);
+  padding-top: var(--space-7);
   border-top: 1px solid var(--border-subtle);
 }
 
@@ -543,17 +549,20 @@
   margin: 0;
   max-width: 46ch;
   font-size: var(--t-footnote-size);
-  line-height: var(--t-footnote-leading);
+  line-height: 1.6;
   color: var(--text-3);
 }
 
+/* El botón de WhatsApp: píldora crema con filo dorado y sombra, como la
+   maqueta. `--gold-600` da 3,27:1 sobre crema (WCAG 1.4.11). */
+.soporte .botonSoporte {
+  border-color: var(--gold-600);
+  background: var(--surface);
+  box-shadow: var(--shadow-raised);
+}
+
 /* ==========================================================================
-   IMPRESIÓN
-   --------------------------------------------------------------------------
-   Ya no hay chocolate que revertir a papel: el carnet ES papel en pantalla.
-   Lo único que sigue haciendo falta es apagar lo que no pertenece a un
-   documento impreso —el encabezado de la pantalla, los pasos, las acciones—
-   y el propio halo/sombra, que una impresora no reproduce como luz.
+   IMPRESIÓN — solo el documento: fuera encabezado, pasos y acciones.
    ========================================================================== */
 
 @media print {

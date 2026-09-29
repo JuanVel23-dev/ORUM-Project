@@ -136,3 +136,57 @@ export function duracionMarquesinaSegundos(
   if (cantidad <= 0 || anchoItemPx <= 0 || velocidadPxPorSegundo <= 0) return 0
   return (cantidad * anchoItemPx) / velocidadPxPorSegundo
 }
+
+/** Lo que `topPorDescuento` necesita de cada comercio del catálogo. */
+export type ComercioConPromociones = {
+  id: number
+  nombre: string
+  logoUrl: string | null
+  promociones: readonly {
+    id: number
+    titulo: string
+    tipoCodigo: TipoBeneficioCodigo
+    valor: number | null
+  }[]
+}
+
+/**
+ * EL TOP DE RESPALDO: los mayores descuentos del club, cuando todavía no hay
+ * usos que contar (la función `top_descuentos` no está aplicada o nadie ha
+ * usado aún tres beneficios).
+ *
+ * Solo compara PORCENTAJES entre sí: un 30 % frente a un 2x1 o un regalo no
+ * son la misma magnitud y ordenarlos juntos sería inventar un criterio. Un
+ * puesto por comercio (su mayor porcentaje), de mayor a menor; a igualdad,
+ * por nombre, para que el orden no baile entre recargas.
+ */
+export function topPorDescuento(
+  comercios: readonly ComercioConPromociones[],
+  tope: number = 5,
+): TopDescuento[] {
+  const mejores: Omit<TopDescuento, 'puesto'>[] = []
+
+  for (const c of comercios) {
+    let mejor: ComercioConPromociones['promociones'][number] | null = null
+    for (const p of c.promociones) {
+      if (p.tipoCodigo !== 'porcentaje' || p.valor === null || !(p.valor > 0)) continue
+      if (!mejor || p.valor > (mejor.valor ?? 0)) mejor = p
+    }
+    if (!mejor) continue
+    mejores.push({
+      promocionId: mejor.id,
+      titulo: mejor.titulo,
+      valor: mejor.valor,
+      tipoCodigo: mejor.tipoCodigo,
+      comercioId: c.id,
+      comercioNombre: c.nombre,
+      logoUrl: c.logoUrl,
+      usos: 0,
+    })
+  }
+
+  return mejores
+    .sort((a, b) => (b.valor ?? 0) - (a.valor ?? 0) || a.comercioNombre.localeCompare(b.comercioNombre, 'es'))
+    .slice(0, tope)
+    .map((t, i) => ({ ...t, puesto: i + 1 }))
+}

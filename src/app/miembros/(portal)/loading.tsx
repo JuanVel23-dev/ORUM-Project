@@ -20,39 +20,21 @@ import tarjeta from './_components/comercio-card.module.css'
   `prefers-reduced-motion`: un esqueleto congelado parece contenido roto.
 */
 
-/** La misma silueta que `ComercioCard`: logo + títulos, texto y el bloque inferior. */
+/** La misma silueta que `ComercioCard`: foto 4:3 arriba y, debajo, placa + textos. */
 function TarjetaComercio() {
   return (
-    <Card>
+    <Card padding="none" className={tarjeta.superficie}>
+      <div className={tarjeta.cubierta}>
+        <Skeleton width="100%" height="100%" radius="0" />
+      </div>
       <div className={tarjeta.tarjeta}>
-        <div className={tarjeta.cabecera}>
-          {/* La placa REAL, y desde el 14/09/2026 es un CÍRCULO: mismo
-              diámetro y mismo radio que `ComercioLogo`. Antes decía
-              `* 2 / 3` —la proporción rectangular de entonces— y al volverse
-              circular el esqueleto prometía una forma que ya no llegaba: el
-              relevo saltaba justo donde el ojo está mirando. */}
-          <Skeleton
-            width="var(--placa-logo-w)"
-            height="var(--placa-logo-w)"
-            radius="var(--radius-full)"
-          />
-          <Stack gap={1}>
-            <Skeleton width="140px" height="20px" />
-            <Skeleton width="88px" height="14px" />
-          </Stack>
-        </div>
-
+        {/* La placa REAL es un círculo de 72px: el mismo diámetro aquí. */}
+        <Skeleton width="72px" height="72px" radius="var(--radius-full)" />
         <Stack gap={1}>
-          <Skeleton height="15px" />
-          <Skeleton width="72%" height="15px" />
+          <Skeleton width="140px" height="18px" />
+          <Skeleton width="110px" height="12px" />
+          <Skeleton width="96px" height="12px" />
         </Stack>
-
-        {/* `.sinBeneficio` aporta el `margin-top: auto` y la divisoria: es lo
-            que mantiene el bloque a la misma altura en todas las tarjetas, y
-            hoy es además el estado más frecuente del catálogo. */}
-        <div className={tarjeta.sinBeneficio}>
-          <Skeleton width="96px" height="14px" />
-        </div>
       </div>
     </Card>
   )

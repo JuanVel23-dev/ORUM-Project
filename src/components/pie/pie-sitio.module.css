@@ -262,3 +262,28 @@
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+
+/* --- Pie compacto: logotipo y derechos, una fila --------------------------- */
+
+.pie.pieCompacto {
+  gap: 0;
+  /* Solo el de arriba: el de abajo lo sigue decidiendo `.pie` (y, en el
+     Portal de Miembros, la reserva de la barra inferior en móvil). */
+  padding-top: var(--space-8);
+}
+
+.filaCompacta {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-6);
+}
+
+.logoCompacto {
+  height: 1.125rem;
+}

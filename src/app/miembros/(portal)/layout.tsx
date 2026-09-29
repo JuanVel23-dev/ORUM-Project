@@ -10,6 +10,7 @@ import { cerrarSesionMiembro } from '../login/actions'
 import { PortalNav, PortalTabBar } from './_components/portal-nav'
 import { CabeceraPortal } from './_components/cabecera-portal'
 import { PieSitio } from '@/components/pie/pie-sitio'
+import { PiePortal } from './_components/pie-portal'
 import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import styles from './portal.module.css'
 
@@ -162,11 +163,15 @@ export default async function MiembrosLayout({
 
       {/*
         EL MISMO PIE QUE EL PORTAL PÚBLICO (encargo del 27/09/2026: «un footer
-        como los otros»). Fuera de `<main>`, a todo el ancho: es cromo, no
+        como los otros»), completo en Inicio y compacto en el resto (maqueta
+        del carnet). Fuera de `<main>`, a todo el ancho: es cromo, no
         contenido. `.pie` solo le reserva en móvil el alto de la barra
         inferior, que es fija y lo taparía.
       */}
-      <PieSitio soporte={soporte} mensajeSoporte={MENSAJE_SOPORTE} className={styles.pie} />
+      <PiePortal
+        completo={<PieSitio soporte={soporte} mensajeSoporte={MENSAJE_SOPORTE} className={styles.pie} />}
+        compacto={<PieSitio soporte={soporte} compacto className={styles.pie} />}
+      />
 
       {modal}
 

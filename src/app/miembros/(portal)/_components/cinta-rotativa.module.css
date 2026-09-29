@@ -64,7 +64,8 @@
 }
 
 .celda {
-  width: 280px;
+  /* El ancho de la tarjeta de estantería de la maqueta (222px). */
+  width: 14rem;
   flex-shrink: 0;
 }
 

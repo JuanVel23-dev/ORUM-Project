@@ -1,12 +1,12 @@
+import Link from 'next/link'
 import { Camera } from 'lucide-react'
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { derivarEstadoMembresia } from '@/lib/miembros/membresias'
 import { hoyISO } from '@/lib/shared/fecha'
-import { Button } from '@/components/ui/button'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import { Carnet } from './_components/carnet'
-import { CarnetAmpliable } from './_components/carnet-ampliable'
+import { BotonAmpliarCarnet, CarnetAmpliable } from './_components/carnet-ampliable'
 import styles from './perfil.module.css'
 
 export const metadata = { title: 'Mi carnet · ORUM' }
@@ -67,7 +67,7 @@ function fechaLegible(iso: string): string {
 */
 const PASOS = [
   { titulo: 'Busca el comercio', frase: 'en el catálogo y mira qué beneficio tiene.' },
-  { titulo: 'Toca «Ampliar carnet»', frase: 'y muestra el código en la caja, antes de pagar.' },
+  { titulo: 'Toca «Ampliar»', frase: 'y muestra el código en la caja, antes de pagar.' },
   { titulo: 'El comercio lo escanea', frase: 'y aplica tu beneficio al momento.' },
 ]
 
@@ -144,29 +144,29 @@ export default async function PerfilMiembroPage() {
         Las dos copias del carnet se crean AQUÍ, en el servidor, y viajan
         como props al componente de cliente. Así el QR y el retrato siguen
         siendo marcado de servidor: lo único que se hidrata es el booleano
-        de «abierto».
+        de «abierto» y el botón que lo enciende.
 
-        «Cambiar foto» va FUERA de la tarjeta. Es mantenimiento —se hace una
-        vez— y dentro competía con el nombre y con el QR: lo que se enseña
-        en una caja no lleva botones de administración impresos encima.
+        «Ampliar» y «Cambiar foto» van DENTRO de la fila del carnet, como su
+        última columna (maqueta del 29/09/2026: «nada de un hueco vacío
+        debajo de la credencial»). Solo en la copia de la página: la
+        ampliada es la que se enseña en la caja, y esa no lleva botones.
 
         Un formulario no navega: `/miembros/perfil/foto` está interceptada
         por la ranura `@modal` del portal y se abre encima del carnet.
       */}
-      <CarnetAmpliable
-        ampliado={<Carnet {...datos} variante="ampliado" />}
-        acciones={
-          <Button
-            href="/miembros/perfil/foto"
-            variant="ghost"
-            size="sm"
-            icon={<Camera size={15} aria-hidden="true" />}
-          >
-            {fotoUrl ? 'Cambiar foto' : 'Añadir mi foto'}
-          </Button>
-        }
-      >
-        <Carnet {...datos} />
+      <CarnetAmpliable ampliado={<Carnet {...datos} variante="ampliado" />}>
+        <Carnet
+          {...datos}
+          acciones={
+            <>
+              <BotonAmpliarCarnet />
+              <Link href="/miembros/perfil/foto" className={styles.cambiarFoto}>
+                <Camera size={13} aria-hidden="true" />
+                {fotoUrl ? 'Cambiar foto' : 'Añadir mi foto'}
+              </Link>
+            </>
+          }
+        />
       </CarnetAmpliable>
 
       {/*
@@ -176,7 +176,9 @@ export default async function PerfilMiembroPage() {
         la convertiría en «una caja más».
       */}
       <section className={styles.como}>
-        <h2 className={styles.comoTitulo}>Cómo usarlo</h2>
+        {/* El título no se ve en la maqueta, pero la sección lo necesita
+            para el lector de pantalla: es un destino de salto. */}
+        <h2 className="sr-only">Cómo usarlo</h2>
 
         <ol className={styles.pasos}>
           {PASOS.map((paso, indice) => (
@@ -197,7 +199,12 @@ export default async function PerfilMiembroPage() {
             <p className={styles.soporteTexto}>
               ¿Algo no cuadra? El carnet es donde se nota primero: escríbenos y lo revisamos.
             </p>
-            <WhatsAppButton telefono={soporte} mensaje={MENSAJE_SOPORTE}>
+            <WhatsAppButton
+              telefono={soporte}
+              mensaje={MENSAJE_SOPORTE}
+              pildora
+              className={styles.botonSoporte}
+            >
               Escríbenos por WhatsApp
             </WhatsAppButton>
           </div>

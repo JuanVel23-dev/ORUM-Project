@@ -54,12 +54,10 @@
   box-shadow: var(--shadow-flotante), var(--edge);
 }
 
-/* Apaisado a partir de un contenido ancho, pero no tan plano como el 21/6 de
-   la maqueta: los anuncios reales son carteles, y a 21/6 su texto quedaba
-   diminuto. */
+/* Apaisado a 21/6 a partir de un contenido ancho, como la maqueta. */
 @container contenido (min-width: 900px) {
   .carrusel {
-    aspect-ratio: 21 / 8;
+    aspect-ratio: 21 / 6;
   }
 }
 

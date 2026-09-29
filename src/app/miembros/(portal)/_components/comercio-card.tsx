@@ -1,9 +1,8 @@
 import Link from 'next/link'
-import { MapPin, TicketPercent } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { TicketPercent } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
-import { formatearBeneficio, formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
+import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
 import { transicionComercio } from '@/lib/comercios/transiciones'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 import { BotonFavorito } from './boton-favorito'
@@ -30,13 +29,6 @@ export type ComercioListado = {
   promociones: PromocionListada[]
 }
 
-/**
- * Cuántas promociones se listan antes de resumir el resto.
- *
- * Dos. Mantiene comparables las alturas —que es el propósito de la divisoria—
- * y le da a la ficha del comercio una razón de existir ya desde el catálogo.
- */
-const TOPE_PROMOCIONES = 2
 
 /*
   LA TARJETA ENTERA ES EL ENLACE, y el `h3` NO va envuelto en un segundo
@@ -69,72 +61,66 @@ export function hrefFicha(id: number, volver: string | null): string {
   return volver ? `${base}?volver=${encodeURIComponent(volver)}` : base
 }
 
+/**
+ * «Categoría · Ciudad», la línea de contexto bajo el nombre (maqueta del
+ * 29/09/2026). Con varias ciudades se nombran todas; sin datos, nada.
+ */
+function lineaContexto(comercio: ComercioListado, conCiudades: boolean): string {
+  const partes = [comercio.categoriaNombre, conCiudades ? comercio.ciudades.join(' · ') : null]
+  return partes.filter(Boolean).join(' · ')
+}
+
+/*
+  EL BENEFICIO QUE SE ANUNCIA EN LA TARJETA es el primero de la lista, que
+  llega ordenada por título. No hay ningún dato con el que rankearlos: ninguna
+  tabla tiene columna de prioridad. Inventar un criterio —el porcentaje más
+  alto, por ejemplo— compararía un 30 % con un 2x1 y con un regalo, que no son
+  la misma magnitud. El resto está a un toque, en la ficha.
+*/
+
+/**
+ * LA TARJETA DE LA REJILLA  ·  maqueta del 29/09/2026 (`Miembros.dc.html`)
+ *
+ * Foto 4:3 arriba, a todo el ancho; debajo, la placa del logo a la izquierda y
+ * a su derecha el nombre en serif, «Categoría · Ciudad» y el beneficio en oro.
+ * El corazón, sobre la foto. Nada de descripción ni lista de promociones: la
+ * tarjeta se compara de un vistazo y el detalle vive en la ficha.
+ */
 export function ComercioCard({
   comercio,
   mostrarCiudades = true,
   volver = null,
 }: {
   comercio: ComercioListado
-  /**
-   * Repetir "Bogotá" en las cuatro tarjetas no informa de nada. Lo decide la
-   * página, que es la única que sabe cuántas ciudades distintas hay en el
-   * catálogo entero.
-   */
   mostrarCiudades?: boolean
-  /**
-   * El catálogo tal y como el socio lo dejó. Viaja en el `href` para que el
-   * botón de vuelta de la ficha lo devuelva a sus filtros aunque haya llegado
-   * por enlace directo. `null` cuando no hay nada que conservar.
-   */
   volver?: string | null
 }) {
-  const visibles = comercio.promociones.slice(0, TOPE_PROMOCIONES)
-  const restantes = comercio.promociones.length - visibles.length
-  const conCiudades = mostrarCiudades && comercio.ciudades.length > 0
+  const destacado = comercio.promociones[0]
+  const contexto = lineaContexto(comercio, mostrarCiudades && comercio.ciudades.length > 0)
 
   /*
     LOS DOS NOMBRES DE TRANSICIÓN VIVEN AQUÍ Y EN NINGUNA OTRA TARJETA (M5).
-
-    Esta es la tarjeta de la REJILLA, la única lista del catálogo donde cada
-    comercio aparece exactamente una vez. El carrusel de portada y
-    `ComercioCardCompacta` enlazan al mismo destino y NO los llevan: un comercio
-    puede salir a la vez en la portada, en una estantería y aquí, y dos
-    elementos con el mismo `view-transition-name` vivos en el mismo documento
-    rompen la transición ENTERA sin avisar.
-
-    Si algún día la rejilla deja de ser la lista exhaustiva —paginación,
-    secciones que repitan comercios—, esto hay que revisarlo antes que nada.
+    Esta es la única lista del catálogo donde cada comercio aparece
+    exactamente una vez: dos elementos con el mismo `view-transition-name`
+    vivos en el mismo documento rompen la transición ENTERA sin avisar.
   */
   const transicion = transicionComercio(comercio.id)
 
   return (
     /*
-      EL MARCO EXISTE PARA EL CORAZÓN, y no es una envoltura gratuita.
-
-      La tarjeta entera es un enlace, y un `<button>` dentro de un `<a>` es
-      marcado inválido: el navegador reparenta el DOM y el lector de pantalla
-      anuncia un híbrido. La solución no es parchear el evento con
-      `preventDefault` —que falla mientras el JavaScript no ha hidratado, y
-      entonces el toque NAVEGA—, sino sacar el botón del enlace: aquí el corazón
-      es HERMANO del `<Link>`, colocado encima por posición absoluta. Pulsarlo no
-      navega porque el evento nunca llega al enlace.
-
-      El marco es el hijo de la rejilla, así que se lleva el `height: 100%` que
-      antes tenía el enlace; si no, la divisoria inferior de la tarjeta dejaría
-      de alinearse entre tarjetas, que es para lo que existe.
+      EL MARCO EXISTE PARA EL CORAZÓN: un `<button>` dentro de un `<a>` es
+      marcado inválido, así que el corazón es HERMANO del enlace, colocado
+      encima por posición absoluta. Pulsarlo no navega porque el evento nunca
+      llega al enlace.
     */
     <div className={`${styles.marco} revelar-vista`}>
       <Link href={hrefFicha(comercio.id, volver)} className={styles.enlace}>
         <Card interactive padding="none" className={styles.superficie}>
-          {/*
-            LA FOTO ES LA PROTAGONISTA. Encargo: «resalta las imágenes, que no
-            se oculten, que sean el centro de atención». La portada del local
-            abre la tarjeta a todo el ancho; sin portada, un fondo champán con la
-            marca en grande, para que la tarjeta no se vea incompleta.
-          */}
+          {/* LA FOTO ES LA PROTAGONISTA. Sin portada, el degradado negro de la
+              casa, para que la tarjeta no se vea a medias. */}
           <div className={styles.cubierta}>
             {comercio.portadaUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria
+              // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
               <img
                 src={comercio.portadaUrl}
                 alt=""
@@ -148,194 +134,92 @@ export function ComercioCard({
           </div>
 
           <div className={styles.tarjeta}>
-            <div className={styles.cabecera}>
-              {/* La placa es el mismo objeto que el hero de la ficha: misma
-                  imagen, mismo comercio, misma posición relativa (a la izquierda
-                  del nombre). Solo cambia de tamaño, que es justo lo que una
-                  transición de elemento compartido sabe hacer bien. */}
-              <ComercioLogo
-                logoUrl={comercio.logoUrl}
-                nombre={comercio.nombre}
-                nombreTransicion={transicion.placa}
-                className={styles.logoGrande}
-              />
+            {/* La placa es el mismo objeto que el hero de la ficha: misma
+                imagen, misma posición relativa (a la izquierda del nombre). */}
+            <ComercioLogo
+              logoUrl={comercio.logoUrl}
+              nombre={comercio.nombre}
+              nombreTransicion={transicion.placa}
+              className={styles.logoGrande}
+            />
 
-              {/* Nombre + marca, el mismo par y en el mismo orden que el hero.
-                  Se nombra el BLOQUE y no el `h3`: en la ficha el nodo es un
-                  `h1`, y emparejar dos elementos de nivel distinto obliga a
-                  repetir el nombre en dos sitios que no se parecen. El bloque sí
-                  es el mismo objeto en las dos pantallas. */}
-              <div className={styles.titulos} style={{ viewTransitionName: transicion.titulos }}>
-                  {/*
-                    `h3`, y antes era `h2`.
+            {/* Se nombra el BLOQUE y no el `h3`: en la ficha el nodo es un
+                `h1`, y el bloque sí es el mismo objeto en las dos pantallas. */}
+            <div className={styles.titulos} style={{ viewTransitionName: transicion.titulos }}>
+              {/* `h3`: la rejilla lleva su propio `h2` («Todos los comercios»). */}
+              <h3 className={styles.nombre}>{comercio.nombre}</h3>
+              {contexto && <p className={styles.contexto}>{contexto}</p>}
 
-                    El comentario que había aquí decía: "el único consumidor de
-                    esta tarjeta es el catálogo, cuyo `PageHeader` pone el `h1` y
-                    no intercala ningún `h2`; con `h3` el documento saltaba de
-                    nivel". Era CIERTO con el layout viejo y por eso no se borra:
-                    es lo que evita que alguien lo revierta creyendo que arregla
-                    un salto.
-
-                    La premisa dejó de serlo: ahora la rejilla lleva su propio
-                    `h2` visible ("Todos los comercios") y cada estantería el
-                    suyo, así que `h3` es el nivel correcto y no hay salto por
-                    ninguna rama.
-                  */}
-                  <h3 className={styles.nombre}>{comercio.nombre}</h3>
-                {comercio.marcaNombre && <p className={styles.marca}>{comercio.marcaNombre}</p>}
-              </div>
+              {destacado ? (
+                <p className={styles.beneficioLinea}>
+                  <TicketPercent size={13} aria-hidden="true" />
+                  {formatearBeneficio(destacado.tipoCodigo, destacado.valor)}
+                </p>
+              ) : (
+                /* El caso frecuente, no la excepción. Dice lo que ocurre y
+                   nada más: la caja RECHAZA una promoción no vigente, así que
+                   no se promete «pregunta en el local». */
+                <p className={styles.sinBeneficio}>Sin beneficio vigente hoy</p>
+              )}
             </div>
-
-            {comercio.descripcion && <p className={styles.descripcion}>{comercio.descripcion}</p>}
-
-            {conCiudades && (
-              <p className={styles.ciudades}>
-                {/* El texto que sigue ya dice las ciudades. */}
-                <MapPin size={13} aria-hidden />
-                <span className={styles.ciudadesTexto}>{comercio.ciudades.join(' · ')}</span>
-              </p>
-            )}
-
-            {visibles.length === 0 ? (
-              /*
-                El caso FRECUENTE, no la excepción: con las promociones caducadas
-                ya filtradas, la mayoría de las tarjetas está aquí. Tiene que verse
-                terminada.
-
-                Cómo se distingue de un beneficio, para que nadie lo confunda: un
-                beneficio es una píldora dorada a la derecha con una cifra dentro;
-                esto es texto plano, sin píldora, sin oro, en --text-3 y a
-                --t-caption. Cuatro diferencias a la vez: forma, color, peso y
-                tamaño.
-
-                El copy dice lo que ocurre y nada más. NO dice "pregunta en el
-                local": la caja del comercio RECHAZA una promoción no vigente, y
-                prometer lo que el sistema deniega delante del cliente es
-                exactamente el defecto que se acaba de cerrar.
-              */
-              <p className={styles.sinBeneficio}>
-                {comercio.categoriaNombre && (
-                  <span className={styles.categoria}>{comercio.categoriaNombre}</span>
-                )}
-                <span>Sin beneficio vigente hoy</span>
-              </p>
-            ) : (
-              <ul className={styles.promociones}>
-                {visibles.map((p) => (
-                  <li key={p.id} className={styles.promocion}>
-                    {/* La cifra primero y en grande: es lo que el socio vino a buscar. */}
-                    <span className={styles.promocionCifra}>
-                      <TicketPercent size={16} aria-hidden="true" />
-                      {formatearBeneficio(p.tipoCodigo, p.valor)}
-                    </span>
-                    <span className={styles.promocionTitulo}>{p.titulo}</span>
-                  </li>
-                ))}
-
-                {restantes > 0 && (
-                  <li className={styles.masBeneficios}>
-                    +{restantes} beneficio{restantes === 1 ? '' : 's'} más
-                  </li>
-                )}
-              </ul>
-            )}
           </div>
         </Card>
       </Link>
 
-      {/*
-        EL CORAZÓN, FUERA DEL ENLACE Y ENCIMA DE ÉL.
-
-        Su sitio —esquina superior derecha— lo pone `.corazon` en el módulo de
-        esta tarjeta, no el propio botón: la superficie la pone quien la usa.
-      */}
-      <BotonFavorito
-        comercioId={comercio.id}
-        nombre={comercio.nombre}
-        className={styles.corazon}
-      />
+      <BotonFavorito comercioId={comercio.id} nombre={comercio.nombre} className={styles.corazon} />
     </div>
   )
 }
 
 /**
- * La tarjeta de una estantería: placa, nombre y el beneficio destacado.
+ * LA TARJETA DE ESTANTERÍA  ·  «Tus favoritos» y «Más recientes»
  *
- * Sin descripción y sin ciudades — eso es justo lo que la comprime. Su ancho lo
- * fija `--carril-tarjeta-w` desde la pista, no ella.
+ * Maqueta del 29/09/2026: pequeña, vertical y centrada — placa del logo,
+ * nombre en serif y, debajo, el beneficio en píldora dorada (favoritos) o
+ * «Categoría · Ciudad» con la insignia «Nuevo» en la esquina (recientes).
  *
- * SIN `view-transition-name`, y es deliberado (M5). Las estanterías —«Nuevos en
- * el club», «Beneficios del momento»— se surten de la MISMA lista que la
- * rejilla, así que un comercio nuevo con beneficio vigente sale hasta tres
- * veces en la misma pantalla contando la portada. Dos elementos con el mismo
- * nombre vivos a la vez no degradan la transición: la anulan entera, en
- * silencio, también para el resto de tarjetas. El nombre lo lleva solo
- * `ComercioCard`, la de la rejilla. Es la misma restricción que ya estaba
- * escrita en `carrusel-destacados.tsx`.
- *
- * Lo que el socio pierde al tocar aquí es el morfo de la placa, no el feedback:
- * `.enlace:active` sigue dando su respuesta de opacidad, y la ficha sigue
- * entrando con el fundido de página.
+ * Sin corazón: el sitio para marcar y desmarcar es la rejilla, y aquí la
+ * esquina la ocupa «Nuevo». NINGÚN `view-transition-name`: un comercio puede
+ * salir a la vez aquí y en la rejilla.
  */
 export function ComercioCardCompacta({
   comercio,
   volver = null,
+  modo = 'favorito',
 }: {
   comercio: ComercioListado
   volver?: string | null
+  /** `nuevo` pone la insignia «Nuevo» y la línea de contexto en vez del beneficio. */
+  modo?: 'favorito' | 'nuevo'
 }) {
-  /*
-    "El mejor beneficio" es, literalmente, el primero de la lista, que llega
-    ordenada por título. No hay ningún dato con el que rankearlos: ninguna
-    tabla tiene columna de prioridad, orden ni destacado. Inventar un criterio
-    —el porcentaje más alto, por ejemplo— compararía un 30 % con un 2x1 y con
-    un regalo, que no son la misma magnitud.
-  */
   const destacado = comercio.promociones[0]
+  const contexto = lineaContexto(comercio, comercio.ciudades.length > 0)
 
   return (
-    /* Mismo marco y por la misma razón que en la tarjeta de la rejilla: el
-       corazón no puede vivir dentro del enlace. Ver la nota de `ComercioCard`.
+    <Link href={hrefFicha(comercio.id, volver)} className={`${styles.enlace} ${styles.enlaceCompacta}`}>
+      <Card padding="none" interactive className={styles.superficie}>
+        <div className={styles.compacta}>
+          {modo === 'nuevo' && <span className={styles.nuevo}>Nuevo</span>}
 
-       `marcoCompacta` añade el contenedor de consulta: cuando la estantería
-       tiene pocas tarjetas y cada una se ensancha, ESTA tarjeta se entera y
-       cambia de forma. La clase es solo de la compacta —la de la rejilla no la
-       lleva— para no meter contención donde vive el `view-transition-name`. */
-    <div className={`${styles.marco} ${styles.marcoCompacta}`}>
-      <Link href={hrefFicha(comercio.id, volver)} className={styles.enlace}>
-        {/* `sm`: 24px de relleno sobre una tarjeta de 200px dejarían 152 de
-            contenido, y el nombre empezaría a truncarse antes de tiempo. */}
-        <Card padding="sm" interactive className={styles.superficie}>
-          <div className={styles.compacta}>
-            <ComercioLogo
-              logoUrl={comercio.logoUrl}
-              nombre={comercio.nombre}
-              className={styles.logoCompacta}
-            />
+          <ComercioLogo
+            logoUrl={comercio.logoUrl}
+            nombre={comercio.nombre}
+            className={styles.logoCompacta}
+          />
 
-            <h3 className={styles.nombre}>{comercio.nombre}</h3>
+          <h3 className={styles.nombreCompacta}>{comercio.nombre}</h3>
 
-            {destacado ? (
-              <Badge
-                      tone="gold"
-                      size="sm"
-                      className={styles.beneficio}
-                      icon={<TicketPercent size={12} aria-hidden="true" />}
-                    >
-                {formatearBeneficioCorto(destacado.tipoCodigo, destacado.valor)}
-              </Badge>
-            ) : (
-              <span className={styles.sinBeneficioCompacta}>Sin beneficio vigente hoy</span>
-            )}
-          </div>
-        </Card>
-      </Link>
-
-      <BotonFavorito
-        comercioId={comercio.id}
-        nombre={comercio.nombre}
-        className={styles.corazon}
-      />
-    </div>
+          {modo === 'nuevo' ? (
+            contexto && <p className={styles.contexto}>{contexto}</p>
+          ) : destacado ? (
+            <span className={styles.pildora}>
+              {formatearBeneficio(destacado.tipoCodigo, destacado.valor)}
+            </span>
+          ) : (
+            <span className={styles.sinBeneficio}>Sin beneficio vigente hoy</span>
+          )}
+        </div>
+      </Card>
+    </Link>
   )
 }

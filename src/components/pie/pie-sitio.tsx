@@ -46,13 +46,33 @@ export function PieSitio({
   soporte,
   mensajeSoporte = MENSAJE_SOPORTE,
   className,
+  compacto = false,
 }: {
   soporte: string | null
   /** Lo que llega escrito en WhatsApp. Cada portal pregunta lo suyo. */
   mensajeSoporte?: string
   /** Solo para que el portal que lo monta reserve el hueco de su propio cromo. */
   className?: string
+  /**
+   * Solo logotipo y derechos, en una fila (maqueta del carnet, 29/09/2026).
+   * Lo usan las pantallas interiores del Portal de Miembros: las tres puertas
+   * y el soporte ya están en el pie del Inicio y en el menú de la cuenta.
+   */
+  compacto?: boolean
 }) {
+  if (compacto) {
+    return (
+      <footer className={[estilos.pie, estilos.pieCompacto, className].filter(Boolean).join(' ')}>
+        <div className={estilos.filaCompacta}>
+          <LogoOrum variante="plata" className={estilos.logoCompacto} />
+          <p className={estilos.derechos}>
+            © {new Date().getFullYear()} ORUM · Apoya lo local, te da más.
+          </p>
+        </div>
+      </footer>
+    )
+  }
+
   return (
     <footer className={[estilos.pie, className].filter(Boolean).join(' ')}>
       <div className={estilos.contenido}>

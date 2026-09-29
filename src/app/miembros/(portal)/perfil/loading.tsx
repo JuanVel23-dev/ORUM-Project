@@ -40,15 +40,13 @@ export default function Loading() {
 
       <Card padding="none" variant="brand" principal className={styles.carnet}>
         <div className={styles.carnetInterior}>
-          <div className={styles.emisor}>
-            <Skeleton width="72px" height="13px" />
-            <Skeleton width="104px" height="11px" />
-          </div>
-
           <div className={styles.fila}>
-            {/* La foto: mismo cuadro que `--foto-lado` reserva en la página
-                real, así el esqueleto no salta al llegar el retrato. */}
-            <Skeleton width="96px" height="96px" radius="var(--radius-full)" />
+            {/* Logo + foto: mismo cuadro que `--foto-lado` reserva en la
+                página real, así el esqueleto no salta al llegar el retrato. */}
+            <div className={styles.columnaFoto}>
+              <Skeleton width="56px" height="13px" />
+              <Skeleton width="120px" height="120px" radius="var(--radius-full)" />
+            </div>
 
             <div className={styles.identidad}>
               <Skeleton width="min(280px, 90%)" height="34px" radius="var(--radius-sm)" />
@@ -73,12 +71,16 @@ export default function Loading() {
               cuando el QR aparece.
             */}
             <Skeleton width="148px" height="148px" radius="var(--radius-lg)" />
+
+            <div className={styles.acciones}>
+              <Skeleton width="100%" height="44px" radius="var(--radius-full)" />
+              <Skeleton width="100px" height="14px" />
+            </div>
           </div>
         </div>
       </Card>
 
       <div className={styles.como}>
-        <Skeleton width="128px" height="20px" />
         <Stack gap={5}>
           <Skeleton width="100%" height="15px" />
           <Skeleton width="92%" height="15px" />

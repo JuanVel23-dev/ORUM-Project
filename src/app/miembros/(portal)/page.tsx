@@ -5,9 +5,11 @@ import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
-import { seleccionarNovedades } from '@/lib/comercios/estanterias'
+import { seleccionarMasRecientes } from '@/lib/comercios/estanterias'
 import {
+  mereceMarquesina,
   prepararTopDescuentos,
+  topPorDescuento,
   TOPE_TOP_DESCUENTOS,
   type FilaTopDescuento,
 } from '@/lib/comercios/top-descuentos'
@@ -481,7 +483,7 @@ export default async function MiembrosHomePage({
      cerraba una búsqueda. */
   const hayFiltros = !sinFiltrar
 
-  const novedades = hayFiltros ? [] : seleccionarNovedades(comerciosListado, new Date())
+  const novedades = hayFiltros ? [] : seleccionarMasRecientes(comerciosListado)
 
   /* Solo se ofrecen como chips las categorías que tienen algún comercio. */
   const categoriasConComercios = (todasCategorias ?? []).filter((cat) =>
@@ -507,7 +509,12 @@ export default async function MiembrosHomePage({
     pinta. Sin `try`, sin bandera y sin mensaje: el catálogo no tiene por qué
     contarle al socio qué scripts corrió el propietario.
   */
-  const topDelClub = prepararTopDescuentos(filasTop, codigoTipo)
+  const topPorUso = prepararTopDescuentos(filasTop, codigoTipo)
+  /* Sin usos suficientes que contar, el respaldo: los mayores descuentos del
+     club. La sección es fija en el Inicio del rediseño y no puede depender de
+     que el club ya tenga historial. */
+  const topEsPorUso = mereceMarquesina(topPorUso)
+  const topDelClub = topEsPorUso ? topPorUso : topPorDescuento(comerciosListado)
 
   /* LOS DOS EJES, Y CADA UNO CONSERVA LO DEL OTRO. */
 
@@ -648,9 +655,8 @@ export default async function MiembrosHomePage({
           <div className={`${estilos.franja} ${estilos.franjaHonda}`}>
             <CintaRotativa
               titulo="Más recientes"
-              apoyo="Los últimos aliados que se sumaron al club"
               items={novedades.map((c) => (
-                <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
+                <ComercioCardCompacta key={c.id} comercio={c} volver={volver} modo="nuevo" />
               ))}
             />
           </div>
@@ -664,7 +670,15 @@ export default async function MiembrosHomePage({
         */}
         {sinFiltrar && topDelClub.length > 0 && (
           <div className={`${estilos.franja} ${estilos.franjaCacao}`}>
-            <TopDescuentos items={topDelClub} volver={volver} />
+            <TopDescuentos
+              items={topDelClub}
+              volver={volver}
+              apoyo={
+                topEsPorUso
+                  ? 'Los descuentos que más usan los socios'
+                  : 'Los mayores descuentos del club'
+              }
+            />
           </div>
         )}
 
@@ -680,7 +694,7 @@ export default async function MiembrosHomePage({
             cambiar de filtro sin dar marcha atrás.
           */}
           <div className={estilos.panelFiltros} role="group" aria-label="Filtros del catálogo">
-            {categoriasConComercios.length >= 2 && (
+            {categoriasConComercios.length >= 1 && (
               <CategoriasDirectorio
                 total={comerciosVisibles.length}
                 opciones={[

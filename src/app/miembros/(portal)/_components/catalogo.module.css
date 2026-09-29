@@ -193,7 +193,10 @@
   última fila incompleta es normal en cualquier catálogo; una tarjeta distinta
   a las demás, no.
 */
-.rejilla > div {
+/* Solo la rejilla de tarjetas: el panel de filtros y la cabecera también son
+   `div` hijos de `.rejilla`, y con un `.rejilla > div` a secas se volvían
+   rejilla de columnas de 290px (el filtro salía ancho y a la izquierda). */
+.rejilla > div:not(.panelFiltros):not(.cabeceraRejilla) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(var(--min, 290px), 100%), 1fr));
 }

@@ -3,16 +3,13 @@
   flex-direction: column;
   min-height: 100dvh;
 
-  /* La textura del club bajo todo el papel del portal. Las franjas tonales
-     pintan su propio fondo encima, así que solo asoma en las zonas blancas. */
   /* El portal fija `data-theme="light"`, pero `body` sigue pintándose con el
      tema del documento: sin fondo y color propios, en un teléfono en modo
      oscuro se veía el negro del `body` a través del patrón. */
   background-color: var(--bg);
   color: var(--text);
   color-scheme: light;
-  background-image: var(--patron-club);
-  background-size: 240px 240px;
+  /* Sin el patrón de iconos: la maqueta aprobada (29/09/2026) es crema liso. */
 
   /*
     LA COLUMNA DEL PORTAL, y por qué no es la del panel.

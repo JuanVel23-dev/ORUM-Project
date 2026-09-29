@@ -39,9 +39,12 @@ const TOPE_VISIBLE = 5
 export function TopDescuentos({
   items,
   volver = null,
+  apoyo = 'Los descuentos que más usan los socios',
 }: {
   items: TopDescuento[]
   volver?: string | null
+  /** El criterio del ranking, en palabras: por uso o, de respaldo, por descuento. */
+  apoyo?: string
 }) {
   /*
     LA PUERTA. Con menos de tres, la sección NO SE PINTA: ni encabezado ni
@@ -61,7 +64,7 @@ export function TopDescuentos({
           <Flame size={19} aria-hidden="true" className={estilos.llama} />
           Top {visibles.length} del club
         </h2>
-        <p className={estilos.apoyo}>Los descuentos que más usan los socios</p>
+        <p className={estilos.apoyo}>{apoyo}</p>
       </div>
 
       {/* `<ol>`: es un ranking, el orden ES el dato. */}

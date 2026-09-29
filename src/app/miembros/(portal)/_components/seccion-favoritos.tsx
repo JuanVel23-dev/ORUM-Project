@@ -61,7 +61,6 @@ export function SeccionFavoritos({
   return (
     <CintaRotativa
               titulo="Tus favoritos"
-              apoyo="Los comercios que marcaste con el corazón"
               items={favoritos.map((c) => (
                 <ComercioCardCompacta key={c.id} comercio={c} volver={volver} />
               ))}
