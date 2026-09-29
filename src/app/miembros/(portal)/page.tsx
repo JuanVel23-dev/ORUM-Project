@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { ChevronDown, Heart, MapPin, Repeat2, Search, SearchX, Store, Tag } from 'lucide-react'
+import { ArrowUpDown, ChevronDown, Heart, MapPin, Repeat2, Search, SearchX, Store, Tag } from 'lucide-react'
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
 import { seleccionarMasRecientes } from '@/lib/comercios/estanterias'
+import { ordenarCategorias } from '@/lib/publico/directorio'
 import {
   mereceMarquesina,
   prepararTopDescuentos,
@@ -119,9 +120,12 @@ function urlDelCatalogo(
   ciudadId: number | null,
   categoriaId: number | null,
   vista: Vista,
+  orden: Orden,
 ): string | null {
   const params = new URLSearchParams()
   if (busqueda) params.set('q', busqueda)
+  /* A-Z es el orden por defecto: no se escribe. */
+  if (orden !== 'az') params.set('orden', orden)
   /* La vista por defecto NO se escribe: `?ver=todo` es ruido en una URL que el
      socio puede pasar por WhatsApp, y el catálogo ya cae ahí por defecto. */
   if (vista !== VISTA_POR_DEFECTO) params.set('ver', vista)
@@ -136,6 +140,11 @@ function urlDelCatalogo(
   return consulta ? `/miembros?${consulta}` : null
 }
 
+/** El orden de «Todos los comercios», el mismo par que el directorio público. */
+type Orden = 'az' | 'za'
+
+const ETIQUETAS_ORDEN: Record<Orden, string> = { az: 'A-Z', za: 'Z-A' }
+
 export default async function MiembrosHomePage({
   searchParams,
 }: {
@@ -146,6 +155,8 @@ export default async function MiembrosHomePage({
     categoria_id?: string | string[]
     /** La vista: `recientes`, `usados`, `favoritos`. Ausente = todo el club. */
     ver?: string | string[]
+    /** `za` invierte el orden alfabético de la rejilla. Ausente = A-Z. */
+    orden?: string | string[]
   }>
 }) {
   /* El `miembro_id` de la sesión. NUNCA llega del cliente: lo necesitan la
@@ -166,6 +177,8 @@ export default async function MiembrosHomePage({
   /* Entrada no confiable: un `?ver=` desconocido cae a la vista por defecto en
      silencio, igual que un `?categoria_id=abc`. */
   const vista = normalizarVista(primero(paramsCrudos.ver))
+  /* Entrada no confiable: cualquier cosa que no sea `za` es A-Z. */
+  const orden: Orden = primero(paramsCrudos.orden) === 'za' ? 'za' : 'az'
   const busqueda = (q ?? '').trim()
   const busquedaLike = escaparLike(busqueda)
   const marcaIdFiltro = marca_id ? Number(marca_id) : null
@@ -178,7 +191,7 @@ export default async function MiembrosHomePage({
 
   /* Viaja en el `href` de cada tarjeta. Es lo que hace que el botón
      «‹ Comercios» de la ficha devuelva al catálogo filtrado y no al completo. */
-  const volver = urlDelCatalogo(busqueda, marcaIdFiltro, ciudadIdFiltro, categoriaIdFiltro, vista)
+  const volver = urlDelCatalogo(busqueda, marcaIdFiltro, ciudadIdFiltro, categoriaIdFiltro, vista, orden)
 
   const supabase = await createClient()
   // Fecha civil 'YYYY-MM-DD'. `fecha_inicio`/`fecha_fin` de promociones son fechas civiles,
@@ -203,7 +216,6 @@ export default async function MiembrosHomePage({
   })
 
   const [
-    { data: comerciosDelClub },
     { data: todasMarcas },
     { data: todasCiudades },
     { data: todasCategorias },
@@ -213,19 +225,6 @@ export default async function MiembrosHomePage({
     { data: filasTop },
     anuncios,
   ] = await Promise.all([
-    /*
-      Esta consulta poblaba el desplegable "Comercio", que ya no existe. En vez
-      de borrarla y añadir otra, cambia de `select`: ahora dice qué categorías
-      tienen al menos un comercio activo, que es lo que decide qué chips se
-      pintan. Una categoría sin comercios sería un filtro que solo puede dar
-      cero. Coste neto de la fila de chips: cero consultas.
-    */
-    supabase
-      .from('comercios')
-      .select('id, categoria_id')
-      .eq('activo', true)
-      .is('deleted_at', null)
-      .limit(100),
     // `logo_url` alimenta el respaldo del logo: un comercio sin logo propio hereda el de su marca.
     supabase.from('marcas').select('id, nombre, logo_url').order('nombre').limit(100),
     supabase.from('ciudades').select('id, nombre').order('nombre').limit(100),
@@ -471,12 +470,26 @@ export default async function MiembrosHomePage({
     Cero consultas nuevas: `idsFavoritos` y `masUsados` ya están en memoria y
     sirven a la vez a la vista, a las estanterías y a los corazones.
   */
-  const comerciosVisibles = aplicarVista(
+  const comerciosEnVista = aplicarVista(
     comerciosListado,
     vista,
     idsFavoritos,
     masUsados.filter((f) => f.usos > 0).map((f) => f.comercio_id),
   )
+
+  /*
+    «ORDENAR A-Z» (encargo del 29/09/2026). Solo reordena la vista de todo el
+    club: «Más recientes», «Los que más usas» y «Favoritos» ya traen su propio
+    orden, que ES su contenido, y ponerlos en alfabético lo borraría.
+  */
+  const comerciosVisibles =
+    vista === VISTA_POR_DEFECTO
+      ? [...comerciosEnVista].sort((a, b) =>
+          orden === 'za'
+            ? b.nombre.localeCompare(a.nombre, 'es')
+            : a.nombre.localeCompare(b.nombre, 'es'),
+        )
+      : comerciosEnVista
 
   /* La puerta de las estanterías y de la portada. `sinFiltrar` ya incluye la
      vista, así que `?ver=favoritos` cierra el contenido curado igual que lo
@@ -485,10 +498,15 @@ export default async function MiembrosHomePage({
 
   const novedades = hayFiltros ? [] : seleccionarMasRecientes(comerciosListado)
 
-  /* Solo se ofrecen como chips las categorías que tienen algún comercio. */
-  const categoriasConComercios = (todasCategorias ?? []).filter((cat) =>
-    (comerciosDelClub ?? []).some((c) => c.categoria_id === cat.id),
-  )
+  /*
+    TODAS LAS CATEGORÍAS DEL CLUB, no solo las que ya tienen comercio (encargo
+    del 29/09/2026: «falta categorías»). Antes se ofrecían solo las que tenían
+    algún comercio asignado, y como hoy ningún comercio tiene categoría el
+    filtro entero desaparecía. Es lo mismo que hace el directorio público: una
+    categoría todavía vacía responde con su propio vacío («Nada en X, por
+    ahora»), no con un error. «Otros» al final, como en el público.
+  */
+  const categoriasFiltro = ordenarCategorias(todasCategorias ?? [])
 
   /*
     LAS DOS ESTANTERÍAS PERSONALES.
@@ -526,6 +544,7 @@ export default async function MiembrosHomePage({
   if (marca_id) paramsBase.marca_id = marca_id
   if (ciudad_id) paramsBase.ciudad_id = ciudad_id
   if (vista !== VISTA_POR_DEFECTO) paramsBase.ver = vista
+  if (orden !== 'az') paramsBase.orden = orden
 
   /* Todo lo que el catálogo está mostrando ahora mismo. Lo usan los
      desplegables de Marca y Ciudad, que cambian solo su propia clave. */
@@ -619,6 +638,7 @@ export default async function MiembrosHomePage({
                 <input type="hidden" name="categoria_id" value={categoriaIdFiltro} />
               )}
               {vista !== VISTA_POR_DEFECTO && <input type="hidden" name="ver" value={vista} />}
+              {orden !== 'az' && <input type="hidden" name="orden" value={orden} />}
               <button type="submit" className={estilos.botonBuscar} aria-label="Buscar">
                 <Search size={18} aria-hidden="true" />
               </button>
@@ -695,7 +715,7 @@ export default async function MiembrosHomePage({
             cambiar de filtro sin dar marcha atrás.
           */}
           <div className={estilos.panelFiltros} role="group" aria-label="Filtros del catálogo">
-            {categoriasConComercios.length >= 1 && (
+            {categoriasFiltro.length > 0 && (
               <CategoriasDirectorio
                 total={comerciosVisibles.length}
                 opciones={[
@@ -705,7 +725,7 @@ export default async function MiembrosHomePage({
                     href: hrefCon(paramsBase),
                     activa: categoriaIdFiltro === null,
                   },
-                  ...categoriasConComercios.map((c) => {
+                  ...categoriasFiltro.map((c) => {
                     const activa = c.id === categoriaIdFiltro
                     return {
                       id: c.id,
@@ -775,6 +795,26 @@ export default async function MiembrosHomePage({
                 ))}
               </DropdownMenu>
             )}
+
+            <DropdownMenu
+              align="end"
+              trigger={
+                <button type="button" className={estilos.disparador}>
+                  <span className={estilos.disparadorIcono} aria-hidden="true">
+                    <ArrowUpDown size={13} />
+                  </span>
+                  Ordenar: {ETIQUETAS_ORDEN[orden]}
+                  <ChevronDown size={14} aria-hidden="true" className={estilos.chevron} />
+                </button>
+              }
+            >
+              <MenuItem href={hrefCambiando(paramsTodos, { orden: null })} selected={orden === 'az'}>
+                Nombre, de la A a la Z
+              </MenuItem>
+              <MenuItem href={hrefCambiando(paramsTodos, { orden: 'za' })} selected={orden === 'za'}>
+                Nombre, de la Z a la A
+              </MenuItem>
+            </DropdownMenu>
           </div>
 
           {/*
