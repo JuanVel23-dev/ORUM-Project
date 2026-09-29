@@ -95,11 +95,10 @@ export const viewport: Viewport = {
   // colores de una dirección de arte retirada — que ya pasó una vez, al
   // cambiar a la v5, y hubo que corregir después:
   //   · `src/app/manifest.ts` ..... background_color y theme_color → --w-0
-  //   · `src/app/apple-icon.tsx` .. fondo → --n-1000, anillo → --gold-500
-  //   · `src/app/icon.svg` ........ fondo → --n-1000 y las cuatro paradas del
-  //     barrido → --gold-300 / 500 / 600 / 400
-  // Los dos últimos NO cambian en la v6: su fondo ya era negro y su oro ya
-  // era `--gold-500`/`--gold-300`/etc, y ninguno de esos tokens se tocó.
+  //   · Los iconos (`src/app/icon.png`, `favicon.ico`, `apple-icon.png` y
+  //     `public/icons/orum-*.png`) son desde el 29/09/2026 el monograma
+  //     plata del cliente sobre `#0A0A0C` (--cacao-900), generados como
+  //     imagen: no llevan colores de la paleta que haya que mover a mano.
   // Ninguno puede leer una variable CSS: el manifiesto y los iconos los
   // resuelve el sistema operativo antes de que exista una hoja de estilos.
   themeColor: [
