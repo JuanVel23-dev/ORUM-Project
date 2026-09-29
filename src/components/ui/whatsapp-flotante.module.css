@@ -154,7 +154,13 @@
 
 .etiqueta {
   position: absolute;
-  top: 50%;
+  /* CENTRADA POR LAYOUT, no con `translate: 0 -50%`: una regla global
+     reponía `translate` y la etiqueta caía media altura por debajo del
+     círculo. `inset-block: 0` + `margin-block: auto` + alto a su contenido
+     la centra sin tocar ninguna transformación. */
+  inset-block: 0;
+  margin-block: auto;
+  height: max-content;
   right: calc(100% + var(--space-3));
   z-index: 2;
 
@@ -170,7 +176,6 @@
   white-space: nowrap;
 
   opacity: 0;
-  translate: 0 -50%;
   transform: translateX(8px) scale(0.96);
   transform-origin: right center;
   pointer-events: none;
@@ -195,9 +200,11 @@
     animation: saludo 560ms var(--ease-out);
   }
 
+  /* Sube lo mismo que el círculo (-3px): si no, al apuntar quedaría 3px
+     por debajo de su centro. */
   .boton:hover .etiqueta {
     opacity: 1;
-    transform: none;
+    transform: translateY(-3px);
   }
 }
 
