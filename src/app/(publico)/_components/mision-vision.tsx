@@ -38,6 +38,7 @@ const PILARES = [
 export function MisionVision() {
   return (
     <section
+      id="proposito"
       className={[escaparate.franja, escaparate.tonoPapel, estilos.seccion].join(' ')}
       aria-labelledby="titulo-proposito"
     >

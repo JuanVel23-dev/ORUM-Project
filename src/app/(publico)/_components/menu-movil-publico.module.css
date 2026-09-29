@@ -1,11 +1,11 @@
 /* El botón desaparece donde las mismas entradas ya son texto en la cabecera:
-   el mismo umbral de 900px que `encabezado-publico.module.css`, y `@media`
+   el mismo umbral de 1200px que `encabezado-publico.module.css`, y `@media`
    porque la cabecera vive fuera del contenedor `contenido`. */
 .soloMovil {
   display: inline-flex;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1200px) {
   .soloMovil {
     display: none;
   }

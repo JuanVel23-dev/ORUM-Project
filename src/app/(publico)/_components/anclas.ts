@@ -21,19 +21,29 @@
  *
  * ── Los ids que apuntan ─────────────────────────────────────────────────
  *
- * Son los de la guía de marca, y cada uno existe en `page.tsx`: `inicio` (el
- * héroe), `nosotros` («Qué es ORUM»), `comercios` («Comercios destacados») y
- * `membresias` («Elige tu membresía»). Cambiar uno sin el otro deja un enlace
- * que no lleva a ninguna parte, sin error.
+ * Cada uno existe en la portada: `inicio` (el héroe), `como-funciona` («Así
+ * es como te unes»), `nosotros` («Qué es ORUM»), `membresias` («Elige tu
+ * membresía») y `proposito` (misión y visión). Cambiar uno sin el otro deja
+ * un enlace que no lleva a ninguna parte, sin error.
  */
+/*
+  29/09/2026 · ACTUALIZADA A LAS SECCIONES DE HOY (encargo del propietario:
+  «la barra de opciones está desactualizada, mira cada sección del portal»).
+  En el orden en que aparecen en la portada, más las dos páginas propias de
+  la fachada: el directorio completo de comercios y la puerta de aliados.
+  «Novedades» sigue fuera: no es una sección de la portada y se llega desde
+  el banner de anuncios.
+*/
 export const ANCLAS = [
   { href: '/#inicio', texto: 'Inicio' },
+  { href: '/#como-funciona', texto: 'Cómo funciona' },
   { href: '/#nosotros', texto: 'Nosotros' },
-  { href: '/#comercios', texto: 'Comercios' },
+  /* El directorio COMPLETO, no la selección de destacados de la portada:
+     quien pulsa «Comercios» quiere ver todos los aliados y filtrarlos. */
+  { href: '/explorar', texto: 'Comercios' },
   { href: '/#membresias', texto: 'Membresías' },
-  /* «Novedades» se retiró de la cabecera por encargo del propietario: no es
-     una sección de la portada. La página `/novedades` sigue existiendo y se
-     llega a ella desde el banner de anuncios («Ver más»). */
+  { href: '/#proposito', texto: 'Propósito' },
+  { href: '/aliados', texto: 'Aliados' },
 ] as const
 
 /** Destino de «Únete»: los planes, que es donde se decide y se adquiere. */

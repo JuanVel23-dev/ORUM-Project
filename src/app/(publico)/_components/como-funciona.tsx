@@ -46,6 +46,7 @@ const PASOS = [
 export function ComoFunciona() {
   return (
     <section
+      id="como-funciona"
       className={[escaparate.franja, escaparate.tonoPapel, estilos.seccion].join(' ')}
       aria-labelledby="titulo-como-te-unes"
     >

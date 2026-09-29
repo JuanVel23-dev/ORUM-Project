@@ -107,7 +107,7 @@
   gap: var(--space-2);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1200px) {
   .nav {
     display: flex;
   }
@@ -157,8 +157,9 @@
 /*
   «Iniciar sesión» + «Únete» y el menú de hamburguesa son las MISMAS puertas
   con dos formas, así que nunca se ven a la vez. El umbral es el de la
-  navegación (900px): por debajo, las cuatro anclas y las dos acciones no
-  caben en una fila sin apretarse, y se van juntas a la hoja.
+  navegación (1200px desde el 29/09/2026, con siete destinos): por debajo,
+  los destinos y las dos acciones no caben en una fila sin apretarse, y se
+  van juntos a la hoja.
 
   Es `@media` y no `@container` a propósito: la cabecera está FUERA del
   contenedor `contenido` —lo declara el `<main>`— y un `@container` sin
@@ -168,7 +169,7 @@
   display: none;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1200px) {
   .soloEscritorio {
     display: inline-flex;
     align-items: center;
