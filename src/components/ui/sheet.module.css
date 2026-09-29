@@ -184,6 +184,57 @@
   flex: 1;
 }
 
+/*
+  «HAY MÁS ABAJO» (29/09/2026, encargo del propietario: «una sombra o
+  difuminado negro para que los usuarios intuyan que pueden bajar»).
+
+  Un degradado oscuro pegado al borde inferior del cuerpo mientras queda
+  contenido por debajo. Tres reglas lo hacen honesto:
+
+    · Solo existe si el cuerpo DESPLAZA: con una línea de tiempo de scroll
+      inactiva (nada que desplazar) se queda en su `opacity: 0` de base.
+    · Se DESVANECE al llegar al final (del 85 % al 100 % del recorrido): así
+      nunca tapa el último contenido, que es el que se busca al bajar.
+    · Sin JavaScript: `animation-timeline: scroll()`. Donde el navegador no
+      lo soporta (`@supports`), no se pinta nada — mejor sin pista que una
+      pista que se queda fija encima del final.
+
+  `position: sticky` + `bottom: 0` lo clava al filo visible; el margen
+  negativo lo saca del flujo (no añade hueco) y lo estira hasta los bordes
+  del cuerpo, por encima de su relleno lateral.
+*/
+@supports (animation-timeline: scroll()) {
+  .cuerpo::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    display: block;
+    height: 72px;
+    margin: -72px calc(-1 * var(--space-6)) 0;
+    pointer-events: none;
+
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--tinta-1) 0%, transparent),
+      color-mix(in srgb, var(--tinta-1) 34%, transparent)
+    );
+
+    opacity: 0;
+    animation: pistaHayMas linear both;
+    animation-timeline: scroll(nearest block);
+  }
+
+  @keyframes pistaHayMas {
+    0%,
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
 /* Mientras se arrastra, el scroll interno se congela: si no, el contenido se
    desliza bajo el dedo y el gesto pierde el anclaje. */
 .panel[data-arrastrando='true'] .cuerpo {
