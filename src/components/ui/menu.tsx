@@ -14,6 +14,31 @@ import styles from './menu.module.css'
   teclado.
 */
 
+/**
+ * ¿Se ve el disparador? No basta con mirar la ventana: dentro de un
+ * formulario que desplaza en su propio diálogo (el de aliados), el botón
+ * sale por arriba del diálogo pero sigue «dentro de la pantalla», y el menú
+ * lo seguía hasta quedar flotando sobre otra cosa. Se intersecta su caja con
+ * la de cada ancestro que recorta (`overflow` distinto de `visible`).
+ */
+function disparadorVisible(el: HTMLElement): boolean {
+  const r = el.getBoundingClientRect()
+  let arriba = 0
+  let abajo = window.innerHeight
+  let izquierda = 0
+  let derecha = window.innerWidth
+  for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+    const { overflowX, overflowY } = getComputedStyle(p)
+    if (overflowX === 'visible' && overflowY === 'visible') continue
+    const c = p.getBoundingClientRect()
+    arriba = Math.max(arriba, c.top)
+    abajo = Math.min(abajo, c.bottom)
+    izquierda = Math.max(izquierda, c.left)
+    derecha = Math.min(derecha, c.right)
+  }
+  return r.bottom > arriba && r.top < abajo && r.right > izquierda && r.left < derecha
+}
+
 const MARGEN = 6 // separación entre disparador y menú, en px
 const BORDE = 8 // margen mínimo respecto al borde de la ventana
 
@@ -80,8 +105,9 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
     quedaba quieto mientras el botón se iba. Ahora, mientras está abierto, se
     recoloca en cada desplazamiento —de la página o de cualquier contenedor,
     por eso en fase de captura— y en cada cambio de tamaño, como mucho una
-    vez por fotograma. Si el botón sale de la pantalla, el menú se cierra:
-    pegado al borde, sin su botón, no se sabría de qué es.
+    vez por fotograma. Si el botón deja de VERSE —fuera de la pantalla o
+    tapado por el borde del contenedor que desplaza—, el menú se cierra:
+    flotando sin su botón, no se sabría de qué es.
   */
   const dejarDeSeguir = useRef<(() => void) | null>(null)
 
@@ -93,8 +119,7 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
         marco = 0
         const ancla = disparadorRef.current?.firstElementChild as HTMLElement | undefined
         if (!ancla) return
-        const r = ancla.getBoundingClientRect()
-        if (r.bottom < 0 || r.top > window.innerHeight) {
+        if (!disparadorVisible(ancla)) {
           menuRef.current?.hidePopover()
           return
         }
