@@ -51,7 +51,7 @@ export function OverlayFicha({ children }: { children: ReactNode }) {
         X al título.
       */
       ariaLabel="Ficha del comercio"
-      width="720px"
+      width="640px"
       detent="large"
     >
       {children}

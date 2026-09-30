@@ -1,0 +1,180 @@
+/* ==========================================================================
+   VISOR DE IMÁGENES  ·  negro, la imagen entera y nada más
+   ========================================================================== */
+
+/* El botón que rodea cada imagen: sin forma propia, la pone la imagen. Al
+   apuntar, la imagen se acerca un poco (la respuesta es movimiento, nunca un
+   tinte) y el cursor promete la lupa. */
+.ampliable {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  border-radius: inherit;
+  background: none;
+  cursor: zoom-in;
+  overflow: hidden;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+.ampliable img {
+  transition: scale var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .ampliable:hover img {
+    scale: 1.04;
+  }
+}
+
+.ampliable:active {
+  scale: 0.98;
+}
+
+.ampliable:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --- El diálogo ------------------------------------------------------------ */
+
+/* Un velo casi negro: aquí la foto es lo único que importa. */
+.dialogo::backdrop {
+  background: color-mix(in srgb, var(--cacao-900) 90%, transparent);
+}
+
+.visor {
+  position: relative;
+  display: grid;
+  place-items: center;
+  color: var(--cacao-fg);
+  touch-action: pan-y;
+}
+
+.figura {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  animation: entrarImagen var(--dur-base) var(--ease-out);
+}
+
+@keyframes entrarImagen {
+  from {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes entrarImagen {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+.marco {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-overlay);
+}
+
+/* El logotipo, sobre su placa blanca (mismos tokens que la placa del
+   catálogo: la imagen no es nuestra y se calibró contra fondo claro). */
+.marcoLogo {
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+  background: var(--placa-logo-bg);
+}
+
+.imagen {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100dvh - var(--space-12));
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+}
+
+.marcoLogo .imagen {
+  width: min(60vw, 360px);
+  max-height: min(60dvh, 360px);
+}
+
+.contador {
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cacao-fg-2);
+}
+
+/* --- Controles: la X y las flechas, discos oscuros sobre la imagen -------- */
+
+.cerrar,
+.flecha {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--cacao-900) 72%, transparent);
+  color: var(--cacao-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--n-50) 18%, transparent);
+  cursor: pointer;
+  transition:
+    rotate var(--dur-base) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
+}
+
+.cerrar {
+  top: var(--space-3);
+  right: var(--space-3);
+}
+
+.flecha {
+  top: 50%;
+  margin-top: calc(-1 * var(--tap-min) / 2);
+}
+
+.anterior {
+  left: var(--space-3);
+}
+
+.siguiente {
+  right: var(--space-3);
+}
+
+@media (hover: hover) {
+  .cerrar:hover {
+    rotate: 90deg;
+  }
+
+  .anterior:hover {
+    translate: -2px 0;
+  }
+
+  .siguiente:hover {
+    translate: 2px 0;
+  }
+}
+
+.cerrar:active,
+.flecha:active {
+  scale: 0.92;
+}
+
+.cerrar:focus-visible,
+.flecha:focus-visible {
+  outline: 2px solid var(--n-200);
+  outline-offset: 2px;
+}

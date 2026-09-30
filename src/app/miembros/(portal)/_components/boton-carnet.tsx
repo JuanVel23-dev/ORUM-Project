@@ -99,6 +99,31 @@ export function BotonCarnet() {
   )
 }
 
+/**
+ * «Mostrar mi carnet» dentro de la ficha de un comercio: abre el carnet
+ * encima, sin salir de la ficha (el `<dialog>` del carnet se apila sobre el
+ * de la ficha). Relleno dorado pálido, como «Preguntar por WhatsApp» en la
+ * ficha pública, que es su gemela.
+ */
+export function BotonMostrarCarnet({ className }: { className?: string }) {
+  const { abrir } = useCarnet()
+
+  return (
+    <Button
+      variant="brand"
+      size="lg"
+      pildora
+      fullWidth
+      className={className}
+      icon={<IdCard size={18} aria-hidden="true" />}
+      onClick={abrir}
+      aria-haspopup="dialog"
+    >
+      Mostrar mi carnet
+    </Button>
+  )
+}
+
 export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
   const { abierto, soloQr, cerrar, verQr } = useCarnet()
   const { nombre, plan, numeroMembresia, vigencia, fotoUrl } = datos

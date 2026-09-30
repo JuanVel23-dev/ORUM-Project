@@ -1,5 +1,9 @@
 /* ==========================================================================
-   FICHA PÚBLICA DE COMERCIO  ·  página completa u overlay
+   FICHA DE COMERCIO  ·  la MISMA en el Portal Público y en el de Miembros
+   --------------------------------------------------------------------------
+   Nació como la ficha pública del rediseño aprobado; el 30/09/2026 el
+   propietario pidió que la del socio fuera igual, así que vive aquí y la usan
+   las dos (`FichaComercio`). Página completa u overlay.
    ========================================================================== */
 
 /*
@@ -88,6 +92,16 @@
   object-fit: cover;
 }
 
+/* La portada es un botón que la amplía: llena la caja de la portada. */
+.portadaBoton {
+  position: absolute;
+  inset: 0;
+}
+
+.enOverlay .portadaBoton {
+  border-radius: var(--radius-md);
+}
+
 .portadaVacia {
   background: var(--fondo-franja-oscura), var(--cacao-surface);
 }
@@ -101,6 +115,8 @@
   translate: 0 50%;
   display: inline-flex;
   border-radius: var(--radius-full);
+  /* El botón que amplía el logo hereda el círculo. */
+  --placa-logo-w: 88px;
   box-shadow:
     0 0 0 var(--space-1) var(--surface),
     var(--shadow-flotante);
@@ -160,6 +176,23 @@
   color: var(--text-3);
 }
 
+.sedeTelefono {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-2);
+  color: var(--brand);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sedeTelefono:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
 .descripcion {
   margin: 0;
   font-size: var(--t-body-size);
@@ -179,10 +212,25 @@
 }
 
 .galeriaCelda {
+  position: relative;
   aspect-ratio: 1;
   overflow: hidden;
   border-radius: var(--radius-sm);
   background: var(--surface-hueco);
+}
+
+/* «+N» sobre la última celda cuando hay más fotos de las que caben: el visor
+   las enseña todas. */
+.galeriaMas {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--cacao-900) 55%, transparent);
+  font-size: var(--t-title-3-size);
+  font-weight: 700;
+  color: var(--blanco);
+  pointer-events: none;
 }
 
 .galeriaFoto {
@@ -224,8 +272,28 @@
   font-size: var(--t-title-3-size);
   font-weight: 700;
   color: var(--brand);
+}
+
+/* Público: se ve que existe y no se lee sin ser socio. */
+.desenfocado {
   filter: blur(5px);
   user-select: none;
+}
+
+/* Socio: la lista de beneficios vigentes, legible. */
+.beneficioLista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.beneficioTitulo {
+  margin: var(--space-1) 0 0;
+  font-size: var(--t-callout-size);
+  line-height: 1.45;
+  color: var(--text-2);
 }
 
 .beneficioPronto {

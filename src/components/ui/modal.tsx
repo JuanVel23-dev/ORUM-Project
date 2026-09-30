@@ -41,6 +41,8 @@ type Props = {
    * `<dialog>` nativo, el velo, Escape, el clic fuera y las animaciones.
    */
   desnudo?: boolean
+  /** Clase extra del `<dialog>` (p. ej. un `::backdrop` propio del visor de fotos). */
+  className?: string
   children?: ReactNode
 }
 
@@ -54,6 +56,7 @@ export function Modal({
   ariaLabel,
   hideClose = false,
   desnudo = false,
+  className,
   children,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -147,7 +150,7 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className={[styles.dialog, desnudo && styles.desnudo].filter(Boolean).join(' ')}
+      className={[styles.dialog, desnudo && styles.desnudo, className].filter(Boolean).join(' ')}
       style={{ '--ancho': width } as CSSProperties}
       onCancel={alCancelar}
       onClick={alPulsar}
