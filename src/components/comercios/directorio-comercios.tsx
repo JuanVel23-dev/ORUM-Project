@@ -1,3 +1,4 @@
+import Form from 'next/form'
 import Image from 'next/image'
 import { ArrowUpDown, ChevronDown, LayoutGrid, MapPin, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -113,12 +114,17 @@ export function DirectorioComercios({
             La búsqueda es un GET a esta misma ruta. Los demás filtros viajan
             en campos ocultos: buscar no puede borrar la categoría o la ciudad
             que el visitante ya había elegido.
+
+            `Form` de Next y no `<form>` (30/09/2026, «cuando ponga un filtro
+            no me envíe al principio de la página»): navega en el cliente sin
+            recargar y, con `scroll={false}`, deja la página donde estaba.
+            Sin JavaScript sigue siendo un GET normal.
           */}
-          <form
+          <Form
             className={[estilos.buscador, ENTRADA].join(' ')}
             style={retardoEntrada(3)}
-            method="get"
             action={base}
+            scroll={false}
             role="search"
           >
             <label htmlFor="busqueda-directorio" className="sr-only">
@@ -144,7 +150,7 @@ export function DirectorioComercios({
             <button type="submit" className={estilos.botonBuscar} aria-label="Buscar">
               <Search size={18} aria-hidden="true" />
             </button>
-          </form>
+          </Form>
         </div>
       </section>
 
@@ -204,6 +210,7 @@ export function DirectorioComercios({
               >
                 <MenuItem
                   href={hrefDirectorio(filtros, { ciudadId: null }, base)}
+                  scroll={false}
                   selected={!ciudadActual}
                 >
                   Todas
@@ -212,6 +219,7 @@ export function DirectorioComercios({
                   <MenuItem
                     key={c.id}
                     href={hrefDirectorio(filtros, { ciudadId: c.id }, base)}
+                    scroll={false}
                     selected={c.id === ciudadActual?.id}
                   >
                     {c.nombre}
@@ -236,6 +244,7 @@ export function DirectorioComercios({
                 <MenuItem
                   key={orden}
                   href={hrefDirectorio(filtros, { orden }, base)}
+                  scroll={false}
                   selected={orden === filtros.orden}
                 >
                   {orden === 'az' ? 'Nombre, de la A a la Z' : 'Nombre, de la Z a la A'}
@@ -263,7 +272,8 @@ export function DirectorioComercios({
             description="Prueba con otra categoría, otra ciudad u otra búsqueda."
             icon={<Search aria-hidden="true" />}
             actions={
-              <Button href={base} variant="secondary" pildora>
+              /* Al panel de filtros, no al principio de la página. */
+              <Button href={`${base}#comercios`} variant="secondary" pildora>
                 Ver todos los comercios
               </Button>
             }

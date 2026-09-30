@@ -262,12 +262,18 @@ type MenuItemProps = {
   /** Rojo. Reserva `true` para acciones que borran o revocan. */
   destructive?: boolean
   disabled?: boolean
+  /**
+   * Con `href`: `false` navega sin subir al principio de la página (los
+   * filtros del directorio: cambiar de ciudad no puede mandarte arriba).
+   */
+  scroll?: boolean
   children: ReactNode
 }
 
 export function MenuItem({
   onSelect,
   href,
+  scroll,
   submit = false,
   icon,
   selected,
@@ -309,6 +315,7 @@ export function MenuItem({
     return (
       <Link
         href={href}
+        scroll={scroll}
         role={excluyente ? 'menuitemradio' : 'menuitem'}
         aria-checked={excluyente ? selected : undefined}
         className={clase}
