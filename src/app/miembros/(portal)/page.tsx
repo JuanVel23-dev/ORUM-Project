@@ -41,7 +41,7 @@ import { EstrellaOrum } from '@/components/ui/marca/marca'
 import fotoHero from '@/components/ui/marca/foto-hero.webp'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
-import { CarruselNovedades } from './_components/carrusel-novedades'
+import { SeccionNovedades } from './_components/seccion-novedades'
 import {
   ComercioCard,
   ComercioCardCompacta,
@@ -670,7 +670,7 @@ export default async function MiembrosHomePage({
           sin filtros: con una búsqueda activa el resultado es el contenido, y
           un carrusel encima lo empujaría fuera de la pantalla.
         */}
-        {sinFiltrar && anuncios.length > 0 && <CarruselNovedades anuncios={anuncios} />}
+        {sinFiltrar && <SeccionNovedades anuncios={anuncios} />}
 
         {/*
           LO DEL SOCIO ANTES QUE LO DEL CLUB: primero lo que él eligió a mano

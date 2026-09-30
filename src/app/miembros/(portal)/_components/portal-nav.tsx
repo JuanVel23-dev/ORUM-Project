@@ -14,7 +14,9 @@ import styles from '../portal.module.css'
 */
 const DESTINOS = [
   { href: '/miembros', etiqueta: 'Inicio', Icono: Home },
-  { href: '/miembros/novedades', etiqueta: 'Novedades', Icono: Megaphone },
+  /* Baja a la sección del Inicio: la página `/miembros/novedades` se
+     retiró el 29/09/2026 y las novedades viven solo ahí. */
+  { href: '/miembros#novedades', etiqueta: 'Novedades', Icono: Megaphone },
   { href: '/miembros#comercios', etiqueta: 'Comercios', Icono: Store },
 ] as const
 

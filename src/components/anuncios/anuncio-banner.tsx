@@ -28,7 +28,7 @@ export function AnuncioBanner({
   hrefHistorial,
 }: {
   anuncio: AnuncioResumen | null
-  /** `/novedades` en el Portal Público, `/miembros/novedades` en el de Miembros. */
+  /** `/novedades` en el Portal Público. */
   hrefHistorial: string
 }) {
   const [cerrado, cerrar] = usePreferenciaLocal(
