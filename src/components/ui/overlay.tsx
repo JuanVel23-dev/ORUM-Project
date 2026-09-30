@@ -42,6 +42,12 @@ type Props = {
    * útil a pantalla completa.
    */
   detent?: Detent
+  /**
+   * El contenido ES la superficie (ver `Modal desnudo`). Siempre diálogo
+   * centrado, también en móvil: una tarjeta que pinta su propio fondo y su
+   * propia X no cabe en la gramática de la hoja inferior.
+   */
+  desnudo?: boolean
   children?: ReactNode
 }
 
@@ -54,9 +60,18 @@ export function Overlay({
   footer,
   width,
   detent = 'large',
+  desnudo = false,
   children,
 }: Props) {
   const enEscritorio = useMediaQuery(ESCRITORIO)
+
+  if (desnudo) {
+    return (
+      <Modal open={open} onClose={onClose} ariaLabel={ariaLabel} width={width} desnudo>
+        {children}
+      </Modal>
+    )
+  }
 
   if (enEscritorio) {
     return (

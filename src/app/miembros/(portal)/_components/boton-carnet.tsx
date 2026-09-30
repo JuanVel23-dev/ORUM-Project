@@ -151,17 +151,21 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
                 onClick={cerrar}
                 aria-label="Cambiar foto"
               >
-                {fotoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
-                  <img src={fotoUrl} alt="" className={estilos.fotoImagen} decoding="async" />
-                ) : (
-                  <span className={estilos.iniciales} aria-hidden="true">
-                    {iniciales(nombre)}
+                {/* Foto y velo en el MISMO círculo recortado: al acercarse
+                    la foto bajo el velo, no se sale por el borde. */}
+                <span className={estilos.recorte}>
+                  {fotoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+                    <img src={fotoUrl} alt="" className={estilos.fotoImagen} decoding="async" />
+                  ) : (
+                    <span className={estilos.iniciales} aria-hidden="true">
+                      {iniciales(nombre)}
+                    </span>
+                  )}
+                  <span className={estilos.velo} aria-hidden="true">
+                    <Camera size={16} />
+                    <span>Cambiar foto</span>
                   </span>
-                )}
-                <span className={estilos.velo} aria-hidden="true">
-                  <Camera size={16} />
-                  <span>Cambiar foto</span>
                 </span>
                 <span className={estilos.pista} aria-hidden="true">
                   <Camera size={12} />

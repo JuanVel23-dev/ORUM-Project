@@ -502,7 +502,15 @@
   }
 }
 
-/* En la foto el velo deja ver el aro de plata. */
-.foto .velo {
-  inset: 2px;
+/* El recorte de la foto: la imagen y el velo comparten este círculo, con
+   `overflow: hidden`, así el velo la cubre ENTERA aunque la foto se acerque
+   por debajo (antes la foto crecía fuera del velo y asomaba por el borde). */
+.recorte {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-full);
 }
