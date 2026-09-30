@@ -133,6 +133,21 @@
   margin-right: calc(-1 * var(--space-3));
 }
 
+/* En el carnet, la X en la esquina y fuera del flujo: la vista ocupa toda
+   la tarjeta y la columna derecha lee X · logo · QR. */
+.cerrarEsquina {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 1;
+  margin: 0;
+}
+
+/* Sin barra (vista del carnet), la única fila es la vista y se estira. */
+.carnet:not(:has(> .barra)) {
+  grid-template-rows: 1fr;
+}
+
 .volver {
   margin-left: calc(-1 * var(--space-2));
   padding-inline: var(--space-2);
@@ -186,9 +201,32 @@
 
 .identidad {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-4);
   min-width: 0;
+}
+
+/* El logotipo, envuelto: el `flex-basis` va en el envoltorio para no
+   estirar la imagen. En teléfono, su propia línea arriba (a la izquierda,
+   lejos de la X); desde 640 px, a la derecha del nombre. */
+.marca {
+  order: -1;
+  flex-basis: 100%;
+  display: flex;
+}
+
+@media (min-width: 640px) {
+  .identidad {
+    flex-wrap: nowrap;
+  }
+
+  .marca {
+    order: 0;
+    flex-basis: auto;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
 }
 
 /* La foto es un enlace a cambiarla. El aro es plata bruñida: un degradado
@@ -235,6 +273,9 @@
 }
 
 .quien {
+  /* Base 0: con `flex-wrap`, el nombre se ajusta junto a la foto en vez de
+     saltar a su propia línea cuando es largo. */
+  flex: 1 1 0;
   min-width: 0;
   display: grid;
   gap: var(--space-1);

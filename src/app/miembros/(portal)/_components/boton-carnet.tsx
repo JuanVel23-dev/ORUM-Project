@@ -116,19 +116,28 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
         {/* La firma de la marca, a sangre y casi transparente. */}
         <MarcaAgua />
 
-        <div className={estilos.barra}>
-          {soloQr ? (
+        {/* En el carnet la X va en la esquina, fuera del flujo; en el QR
+            ampliado comparte barra con «volver». */}
+        {soloQr ? (
+          <div className={estilos.barra}>
             <button type="button" className={estilos.volver} onClick={() => verQr(false)}>
               <ArrowLeft size={16} aria-hidden="true" />
               Carnet
             </button>
-          ) : (
-            <LogoOrum variante="plata" className={estilos.logo} />
-          )}
-          <button type="button" className={estilos.cerrar} onClick={cerrar} aria-label="Cerrar">
+            <button type="button" className={estilos.cerrar} onClick={cerrar} aria-label="Cerrar">
+              <X size={20} aria-hidden="true" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={`${estilos.cerrar} ${estilos.cerrarEsquina}`}
+            onClick={cerrar}
+            aria-label="Cerrar"
+          >
             <X size={20} aria-hidden="true" />
           </button>
-        </div>
+        )}
 
         {/* `key`: cada vista entra con su propio fundido al intercambiarse. */}
         {soloQr ? (
@@ -183,6 +192,14 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
                 <p className={estilos.nombre}>{nombre}</p>
                 <p className={estilos.plan}>{plan}</p>
               </div>
+
+              {/* El logotipo a la DERECHA, a la altura del nombre (retro de
+                  diseño, 30/09/2026: «hay mucho peso en la izquierda»). La
+                  columna derecha queda X · logo · QR frente a foto · nombre ·
+                  datos. En teléfono no cabe junto al nombre: sube a su línea. */}
+              <span className={estilos.marca}>
+                <LogoOrum variante="plata" className={estilos.logo} />
+              </span>
             </div>
 
             <div className={estilos.pie}>
