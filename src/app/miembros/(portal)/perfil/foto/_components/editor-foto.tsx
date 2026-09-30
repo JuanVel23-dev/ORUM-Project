@@ -335,7 +335,7 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
 
       <p className={estilos.bajada}>
         {fuente
-          ? 'Arrastra para encuadrar tu cara en el círculo y acerca con la barra.'
+          ? 'Arrastra para encuadrar y acerca con la barra.'
           : 'La que aparece en tu carnet. Que se te vea bien la cara: en la caja la comparan contigo.'}
       </p>
 
@@ -430,36 +430,34 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
             >
               <RotateCw size={18} aria-hidden="true" />
             </button>
-          </div>
-
-          <div className={estilos.secundarias}>
-            <button type="button" className={estilos.enlace} onClick={elegir}>
-              <ImagePlus size={16} aria-hidden="true" />
-              Elegir otra
-            </button>
             <button
               type="button"
-              className={estilos.enlace}
+              className={estilos.icono}
               onClick={() => {
                 setSuave(true)
                 setEncuadre(ENCUADRE_INICIAL)
               }}
+              aria-label="Restablecer el encuadre"
             >
-              <RotateCcw size={16} aria-hidden="true" />
-              Restablecer
+              <RotateCcw size={18} aria-hidden="true" />
             </button>
           </div>
 
-          <Button
-            variant="primary"
-            pildora
-            fullWidth
-            loading={ocupado}
-            icon={<Check size={16} aria-hidden="true" />}
-            onClick={guardar}
-          >
-            Guardar foto
-          </Button>
+          <div className={estilos.acciones}>
+            <button type="button" className={estilos.enlace} onClick={elegir}>
+              <ImagePlus size={16} aria-hidden="true" />
+              Elegir otra
+            </button>
+            <Button
+              variant="primary"
+              pildora
+              loading={ocupado}
+              icon={<Check size={16} aria-hidden="true" />}
+              onClick={guardar}
+            >
+              Guardar foto
+            </Button>
+          </div>
         </div>
       ) : (
         <div key="reposo" className={`${estilos.vista} ${estilos.reposo}`}>
@@ -476,8 +474,14 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
                 </span>
               )}
               <span className={estilos.velo} aria-hidden="true">
-                <Camera size={20} />
-                <span>Elegir foto</span>
+                {mostrada && (
+                  // eslint-disable-next-line @next/next/no-img-element -- la misma URL, desenfocada
+                  <img src={mostrada} alt="" className={estilos.veloFoto} decoding="async" />
+                )}
+                <span className={estilos.veloTexto}>
+                  <Camera size={20} />
+                  Elegir foto
+                </span>
               </span>
             </span>
           </label>

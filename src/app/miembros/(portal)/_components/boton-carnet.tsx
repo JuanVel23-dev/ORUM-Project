@@ -162,7 +162,14 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
                       {iniciales(nombre)}
                     </span>
                   )}
-                  <span className={estilos.velo} aria-hidden="true">
+                  {/* El velo de la foto no usa `backdrop-filter` (desenfocaba
+                      también el aro de plata y dejaba un halo claro en el
+                      borde): lleva una copia de la foto ya desenfocada. */}
+                  <span className={`${estilos.velo} ${estilos.veloConFoto}`} aria-hidden="true">
+                    {fotoUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element -- la misma URL, desenfocada
+                      <img src={fotoUrl} alt="" className={estilos.veloCopia} decoding="async" />
+                    )}
                     <Camera size={16} />
                     <span>Cambiar foto</span>
                   </span>

@@ -514,3 +514,40 @@
   overflow: hidden;
   border-radius: var(--radius-full);
 }
+
+/*
+  EL VELO DE LA FOTO, sin `backdrop-filter`. Ese filtro desenfoca lo que hay
+  detrás del velo —también el aro de plata del borde— y dejaba un halo claro
+  por dentro del círculo. Aquí va una copia de la misma foto desenfocada de
+  forma estática (ampliada, para que sus bordes deshilachados queden fuera
+  del recorte) y un negro translúcido encima. Solo se anima la opacidad.
+*/
+.veloConFoto {
+  background: var(--cacao-900);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.velo > .veloCopia {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(var(--blur-sm));
+  scale: 1.25;
+  translate: none;
+}
+
+.veloConFoto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--cacao-900) 58%, transparent);
+}
+
+/* El icono y el texto, por encima de la copia y del negro. */
+.veloConFoto > :not(.veloCopia) {
+  position: relative;
+  z-index: 1;
+}
