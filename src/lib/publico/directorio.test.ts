@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   alternarCategoria,
+  filtrarFavoritos,
   compararNombres,
   filtrarDirectorio,
   hayFiltros,
@@ -11,7 +12,13 @@ import {
   type FiltrosDirectorio,
 } from './directorio'
 
-const SIN_FILTROS: FiltrosDirectorio = { q: '', categoriaIds: [], ciudadId: null, orden: 'az' }
+const SIN_FILTROS: FiltrosDirectorio = {
+  q: '',
+  categoriaIds: [],
+  ciudadId: null,
+  orden: 'az',
+  soloFavoritos: false,
+}
 
 function comercio(
   nombre: string,
@@ -35,7 +42,7 @@ describe('leerFiltrosDirectorio', () => {
   it('lee los cuatro filtros', () => {
     expect(
       leerFiltrosDirectorio({ q: '  café ', categoria_id: '3', ciudad_id: '7', orden: 'za' }),
-    ).toEqual({ q: 'café', categoriaIds: [3], ciudadId: 7, orden: 'za' })
+    ).toEqual({ q: 'café', categoriaIds: [3], ciudadId: 7, orden: 'za', soloFavoritos: false })
   })
 
   it('lee varias categorías: con comas, repetidas, sin duplicados y ordenadas', () => {
@@ -203,5 +210,25 @@ describe('alternarCategoria', () => {
     const ids = [3]
     alternarCategoria(ids, 5)
     expect(ids).toEqual([3])
+  })
+})
+
+describe('favoritos', () => {
+  it('lee ?favoritos=1 y lo escribe de vuelta', () => {
+    expect(leerFiltrosDirectorio({ favoritos: '1' }).soloFavoritos).toBe(true)
+    expect(leerFiltrosDirectorio({ favoritos: 'si' }).soloFavoritos).toBe(false)
+    expect(hrefDirectorio(SIN_FILTROS, { soloFavoritos: true }, '/miembros')).toBe(
+      '/miembros?favoritos=1',
+    )
+  })
+
+  it('cuenta como filtro para el estado vacío', () => {
+    expect(hayFiltros({ ...SIN_FILTROS, soloFavoritos: true })).toBe(true)
+  })
+
+  it('deja solo los favoritos, en el orden de la lista', () => {
+    const lista = [{ id: 3 }, { id: 1 }, { id: 2 }]
+    expect(filtrarFavoritos(lista, [2, 3, 9])).toEqual([{ id: 3 }, { id: 2 }])
+    expect(filtrarFavoritos(lista, [])).toEqual([])
   })
 })

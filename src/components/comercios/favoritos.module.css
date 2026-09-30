@@ -1,0 +1,196 @@
+/* ==========================================================================
+   EL CORAZÓN DE FAVORITO  ·  sobre la foto de la tarjeta
+   --------------------------------------------------------------------------
+   La posición la pone quien lo usa (`.corazon` en el directorio): este
+   módulo solo describe el control.
+   ========================================================================== */
+
+.marco {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Un disco blanco pequeño: el corazón vive encima de una FOTO, y sin su
+   disco se perdería sobre una imagen clara u oscura. Se ve de 36 px; se toca
+   de 44 (`::after`). */
+.boton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--blanco) 94%, transparent);
+  box-shadow: var(--shadow-card);
+  color: var(--text-2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
+}
+
+.boton::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+}
+
+@media (hover: hover) {
+  /* Apuntar: el corazón crece un poco (movimiento, no tinte). */
+  .boton:hover .dibujo {
+    scale: 1.12;
+  }
+
+  .boton:not([data-marcado]):hover {
+    color: var(--danger);
+  }
+}
+
+/* Presionar hunde el disco. */
+.boton:active {
+  scale: 0.9;
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Marcado: ROJO y RELLENO. Aquí el color SÍ es dato («tuyo»), el único sitio
+   del sistema donde lo es; y aun así la forma (contorno → sólido) lo dice
+   también. */
+.boton[data-marcado] {
+  color: var(--danger);
+}
+
+/* En curso: nada de spinner — el estado visible ya es el bueno. */
+.boton[data-en-curso] {
+  opacity: 0.85;
+}
+
+.dibujo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+.icono {
+  width: 18px;
+  height: 18px;
+}
+
+/* --- El latido al marcar ----------------------------------------------------
+   Se encoge, salta más allá de su tamaño y se asienta: un resorte corto que
+   se lee como «¡guardado!». Solo `scale`, que es de composición. Una vez por
+   toque (el `key` del TSX lo reinicia), nunca en bucle. */
+.dibujo[data-latiendo] .icono {
+  animation: latido 560ms var(--ease-out) both;
+}
+
+@keyframes latido {
+  0% {
+    scale: 1;
+  }
+  15% {
+    scale: 0.7;
+  }
+  45% {
+    scale: 1.35;
+  }
+  70% {
+    scale: 0.94;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* El anillo: una onda roja que sale del corazón y se apaga. */
+.anillo {
+  position: absolute;
+  inset: -6px;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 2px var(--danger);
+  opacity: 0;
+  pointer-events: none;
+  animation: anillo 520ms var(--ease-out) 60ms both;
+}
+
+@keyframes anillo {
+  from {
+    opacity: 0.9;
+    scale: 0.5;
+  }
+  to {
+    opacity: 0;
+    scale: 1.5;
+  }
+}
+
+/* Las chispas: seis puntos, rojo y oro alternos, que salen disparados en
+   círculo y se desvanecen. Cada uno gira a su ángulo y viaja por su eje. */
+.chispa {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: var(--radius-full);
+  background: var(--danger);
+  opacity: 0;
+  pointer-events: none;
+  animation: chispa 560ms var(--ease-out) 80ms both;
+}
+
+.chispa[data-oro] {
+  background: var(--gold-500);
+}
+
+@keyframes chispa {
+  from {
+    opacity: 1;
+    transform: rotate(var(--angulo)) translateY(-6px) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(var(--angulo)) translateY(-24px) scale(0.4);
+  }
+}
+
+/* --- El fallo ---------------------------------------------------------------
+   Absoluto: aparecer no mueve la tarjeta. Se despliega hacia la izquierda,
+   que es donde hay sitio (el corazón vive en la esquina derecha). */
+.fallo {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  z-index: 1;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--danger);
+  color: var(--blanco);
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-flotante);
+}
+
+/* Movimiento reducido: sin latido, anillo ni chispas. El corazón cambia de
+   forma y de color igual: el feedback sigue ocurriendo. */
+@media (prefers-reduced-motion: reduce) {
+  .dibujo[data-latiendo] .icono {
+    animation: none;
+  }
+
+  .anillo,
+  .chispa {
+    display: none;
+  }
+}

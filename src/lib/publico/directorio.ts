@@ -42,6 +42,11 @@ export type FiltrosDirectorio = {
   categoriaIds: number[]
   ciudadId: number | null
   orden: OrdenDirectorio
+  /**
+   * Solo los favoritos del socio (`?favoritos=1`). En el directorio público
+   * no hay favoritos y el parámetro no tiene efecto.
+   */
+  soloFavoritos: boolean
 }
 
 /** Lo mínimo que el filtro necesita saber de un comercio. */
@@ -106,6 +111,7 @@ export function leerFiltrosDirectorio(params: ParametrosCrudos): FiltrosDirector
     categoriaIds: leerCategorias(params.categoria_id),
     ciudadId: idOnulo(primero(params.ciudad_id)),
     orden: orden === 'za' ? 'za' : ORDEN_POR_DEFECTO,
+    soloFavoritos: primero(params.favoritos) === '1',
   }
 }
 
@@ -119,6 +125,7 @@ export function parametrosDirectorio(filtros: FiltrosDirectorio): Record<string,
   if (filtros.categoriaIds.length > 0) params.categoria_id = filtros.categoriaIds.join(',')
   if (filtros.ciudadId !== null) params.ciudad_id = String(filtros.ciudadId)
   if (filtros.orden !== ORDEN_POR_DEFECTO) params.orden = filtros.orden
+  if (filtros.soloFavoritos) params.favoritos = '1'
   return params
 }
 
@@ -201,5 +208,23 @@ export function filtrarDirectorio<T extends ComercioFiltrable>(
 
 /** ¿Hay algún filtro puesto? Decide el texto del estado vacío. */
 export function hayFiltros(filtros: FiltrosDirectorio): boolean {
-  return Boolean(filtros.q) || filtros.categoriaIds.length > 0 || filtros.ciudadId !== null
+  return (
+    Boolean(filtros.q) ||
+    filtros.categoriaIds.length > 0 ||
+    filtros.ciudadId !== null ||
+    filtros.soloFavoritos
+  )
+}
+
+/**
+ * Solo los comercios que el socio marcó con el corazón, conservando el orden
+ * de la lista (el que ya decidió «Ordenar»). Se aplica DESPUÉS de
+ * `filtrarDirectorio`: los favoritos se combinan con Y con los demás filtros.
+ */
+export function filtrarFavoritos<T extends { id: number }>(
+  comercios: readonly T[],
+  idsFavoritos: readonly number[],
+): T[] {
+  const favoritos = new Set(idsFavoritos)
+  return comercios.filter((c) => favoritos.has(c.id))
 }

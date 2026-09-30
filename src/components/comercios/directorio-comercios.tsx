@@ -1,6 +1,7 @@
 import Form from 'next/form'
+import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowUpDown, ChevronDown, LayoutGrid, MapPin, Search } from 'lucide-react'
+import { ArrowUpDown, ChevronDown, Heart, LayoutGrid, MapPin, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { EmptyState } from '@/components/ui/feedback'
@@ -8,6 +9,7 @@ import fotoMarca from '@/components/ui/marca/foto-hero.webp'
 import type { CatalogoPublico } from '@/lib/publico/datos-publicos'
 import {
   alternarCategoria,
+  filtrarFavoritos,
   ETIQUETAS_ORDEN,
   filtrarDirectorio,
   hayFiltros,
@@ -18,6 +20,7 @@ import {
 import { ENTRADA, REVELAR, retardoEntrada, revelarEscalonado } from '@/lib/shared/revelado'
 import escaparate from '@/app/(publico)/escaparate.module.css'
 import { CategoriasDirectorio } from './categorias-directorio'
+import { BotonFavorito, ProveedorFavoritos } from './favoritos'
 import { TarjetaDirectorio } from './tarjeta-directorio'
 import estilos from './directorio-comercios.module.css'
 
@@ -60,6 +63,12 @@ type Props = {
   bajada: string
   /** Portal de Miembros: beneficio legible y ficha del socio. */
   socio?: boolean
+  /**
+   * Los favoritos del socio (ids de comercio), leídos en el servidor. Con
+   * ellos aparecen el corazón de cada tarjeta y el filtro «Favoritos». Sin
+   * ellos (la fachada pública), ni lo uno ni lo otro.
+   */
+  favoritos?: number[]
 }
 
 export function DirectorioComercios({
@@ -69,15 +78,21 @@ export function DirectorioComercios({
   titulo = 'Comercios',
   bajada,
   socio = false,
+  favoritos,
 }: Props) {
   const filtros = leerFiltrosDirectorio(crudos)
-  const comercios = filtrarDirectorio(directorio.comercios, filtros)
+  const conFavoritos = favoritos !== undefined
+  /* Los favoritos se combinan con Y con los demás filtros; en la fachada
+     (sin favoritos) `?favoritos=1` no tiene efecto. */
+  const soloFavoritos = conFavoritos && filtros.soloFavoritos
+  const filtrados = filtrarDirectorio(directorio.comercios, filtros)
+  const comercios = soloFavoritos ? filtrarFavoritos(filtrados, favoritos) : filtrados
 
   /* La ciudad elegida puede no existir ya (un enlace viejo): se muestra
      «Todas» en vez de un id suelto, y el filtro no casa con nada. */
   const ciudadActual = directorio.ciudades.find((c) => c.id === filtros.ciudadId)
 
-  return (
+  const contenido = (
     <>
       {/* ── EL BANNER ───────────────────────────────────────────────────── */}
       <section
@@ -147,6 +162,7 @@ export function DirectorioComercios({
               <input type="hidden" name="ciudad_id" value={filtros.ciudadId} />
             )}
             {filtros.orden !== 'az' && <input type="hidden" name="orden" value={filtros.orden} />}
+            {soloFavoritos && <input type="hidden" name="favoritos" value="1" />}
             <button type="submit" className={estilos.botonBuscar} aria-label="Buscar">
               <Search size={18} aria-hidden="true" />
             </button>
@@ -166,6 +182,23 @@ export function DirectorioComercios({
           </p>
 
           <div className={estilos.menus}>
+            {/* «Favoritos»: un interruptor, no un menú. Enciende y apaga
+                el filtro con el mismo toque; lleva el corazón relleno y rojo
+                cuando está puesto. Solo el socio tiene favoritos. */}
+            {conFavoritos && (
+              <Link
+                href={hrefDirectorio(filtros, { soloFavoritos: !soloFavoritos }, base)}
+                scroll={false}
+                className={[estilos.disparador, estilos.favoritos].join(' ')}
+                data-activo={soloFavoritos || undefined}
+              >
+                <span className={estilos.disparadorIcono} aria-hidden="true">
+                  <Heart size={13} fill={soloFavoritos ? 'currentColor' : 'none'} />
+                </span>
+                Favoritos
+                {soloFavoritos && <span className="sr-only"> (filtro activo)</span>}
+              </Link>
+            )}
             {directorio.categorias.length > 0 && (
               <CategoriasDirectorio
                 total={comercios.length}
@@ -261,11 +294,30 @@ export function DirectorioComercios({
           <ul className={estilos.rejilla}>
             {comercios.map((c, i) => (
               /* En la celda y no en la tarjeta: la tarjeta se levanta al apuntarla. */
-              <li key={c.id} className={revelarEscalonado(i)}>
+              <li key={c.id} className={[estilos.celda, revelarEscalonado(i)].join(' ')}>
                 <TarjetaDirectorio comercio={c} socio={socio} />
+                {/* Hermano del enlace, no hijo: ver `favoritos.tsx`. */}
+                {conFavoritos && (
+                  <BotonFavorito comercioId={c.id} nombre={c.nombre} className={estilos.corazon} />
+                )}
               </li>
             ))}
           </ul>
+        ) : soloFavoritos && favoritos.length === 0 ? (
+          <EmptyState
+            title="Aún no tienes favoritos"
+            description="Toca el corazón de un comercio para guardarlo aquí y encontrarlo de un vistazo."
+            icon={<Heart aria-hidden="true" />}
+            actions={
+              <Button
+                href={hrefDirectorio(filtros, { soloFavoritos: false }, base)}
+                variant="secondary"
+                pildora
+              >
+                Ver todos los comercios
+              </Button>
+            }
+          />
         ) : hayFiltros(filtros) ? (
           <EmptyState
             title="Ningún comercio coincide"
@@ -287,5 +339,13 @@ export function DirectorioComercios({
         )}
       </section>
     </>
+  )
+
+  /* El estado del corazón es UNO para toda la pantalla. El proveedor recibe
+     el árbol por `children`: todo sigue renderizándose en el servidor. */
+  return conFavoritos ? (
+    <ProveedorFavoritos inicial={favoritos}>{contenido}</ProveedorFavoritos>
+  ) : (
+    contenido
   )
 }
