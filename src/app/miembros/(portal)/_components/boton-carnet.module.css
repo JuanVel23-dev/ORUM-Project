@@ -32,6 +32,16 @@
     var(--shadow-overlay);
   color: var(--cacao-fg);
   color-scheme: dark;
+
+  /* La plata bruñida: un degradado metálico de relleno que comparten el aro
+     de la foto, el del QR y el monograma. */
+  --plata-brunida: linear-gradient(
+    140deg,
+    var(--n-50),
+    var(--n-400) 40%,
+    var(--n-100) 65%,
+    var(--n-450)
+  );
 }
 
 @media (min-width: 640px) {
@@ -42,17 +52,35 @@
   }
 }
 
-/* El monograma plata, a sangre por la derecha y casi transparente: firma
-   sin competir. Se dimensiona por ALTO, como todas las piezas de la marca
-   (`.imagen` fija `width: auto` y un ancho aquí perdía contra ella). */
+/* El monograma, a sangre por la derecha y casi transparente: firma sin
+   competir. Es un SVG (ver `MarcaAgua`), así que se ve nítido a cualquier
+   tamaño; se dimensiona por alto y el `viewBox` pone el ancho. */
 .marcaAgua {
   position: absolute;
   top: -8%;
   right: -22%;
   z-index: -1;
   height: 116%;
-  opacity: 0.08;
+  width: auto;
+  aspect-ratio: 1;
+  opacity: 0.09;
   pointer-events: none;
+}
+
+.plata1 {
+  stop-color: var(--n-50);
+}
+
+.plata2 {
+  stop-color: var(--n-400);
+}
+
+.plata3 {
+  stop-color: var(--n-100);
+}
+
+.plata4 {
+  stop-color: var(--n-450);
 }
 
 /* Los focos, en plata: el oro no vive en esta tarjeta. */
@@ -75,7 +103,7 @@
 }
 
 .logo {
-  height: 1.375rem;
+  height: 1.5rem;
 }
 
 .cerrar,
@@ -110,7 +138,6 @@
   padding-inline: var(--space-2);
   font-size: var(--t-callout-size);
   font-weight: 600;
-  letter-spacing: 0.02em;
 }
 
 @media (hover: hover) {
@@ -171,24 +198,18 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 76px;
+  width: 80px;
   aspect-ratio: 1;
   padding: 2px;
   border-radius: var(--radius-full);
-  background: linear-gradient(
-    140deg,
-    var(--n-50),
-    var(--n-400) 40%,
-    var(--n-100) 65%,
-    var(--n-450)
-  );
+  background: var(--plata-brunida);
   text-decoration: none;
   transition: scale var(--dur-fast) var(--ease-out);
 }
 
 @media (min-width: 640px) {
   .foto {
-    width: 88px;
+    width: 96px;
   }
 }
 
@@ -210,7 +231,6 @@
   background: var(--cacao-800);
   font-size: var(--t-title-2-size);
   font-weight: 600;
-  letter-spacing: 0.04em;
   color: var(--cacao-fg);
 }
 
@@ -238,10 +258,8 @@
 
 .plan {
   margin: 0;
-  font-size: var(--t-overline-size);
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: var(--t-callout-size);
+  font-weight: 500;
   color: var(--cacao-fg-2);
 }
 
@@ -266,11 +284,14 @@
   gap: 2px;
 }
 
+/*
+  UN SOLO TRATAMIENTO (30/09/2026): Montserrat en caja normal, sin
+  versalitas espaciadas ni tracking abierto en el número —se leían como
+  otras letras—. La etiqueta se distingue del dato por peso y tono.
+*/
 .etiqueta {
-  font-size: var(--t-overline-size);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: var(--t-footnote-size);
+  font-weight: 500;
   color: var(--cacao-fg-3);
 }
 
@@ -282,44 +303,48 @@
   color: var(--cacao-fg);
 }
 
-/* Un código que se dicta: cifras tabulares y tracking abierto, en la misma
-   familia que todo lo demás. */
+/* Cifras tabulares: al dictarlo, cada dígito ocupa lo mismo. */
 .numero {
-  font-size: var(--t-title-3-size);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.12em;
 }
 
-/* El QR pequeño: un botón que lo amplía. */
+/* El QR pequeño: un botón que lo amplía. Va engastado en un aro de plata
+   bruñida, como la foto, y con las esquinas redondas de una tarjeta: así
+   pertenece al carnet en vez de parecer una etiqueta pegada encima. */
 .qr {
   position: relative;
   flex-shrink: 0;
-  width: 96px;
-  padding: 0;
+  width: 104px;
+  padding: 2px;
   border: none;
-  border-radius: var(--radius-sm);
-  background: none;
+  border-radius: var(--radius-md);
+  background: var(--plata-brunida);
   cursor: zoom-in;
   transition: scale var(--dur-fast) var(--ease-out);
 }
 
 @media (min-width: 640px) {
   .qr {
-    width: 108px;
+    width: 116px;
   }
 }
 
 .qr .qrMarco {
   width: 100%;
-  padding: 8%;
+  padding: 10%;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: calc(var(--radius-md) - 2px);
   box-shadow: none;
 }
 
 .qr .qrMarco svg {
   width: 100%;
   height: auto;
+}
+
+.qr .velo {
+  inset: 2px;
+  border-radius: calc(var(--radius-md) - 2px);
 }
 
 /* --- El velo: negro translúcido y muy difuminado ---------------------------
@@ -342,10 +367,10 @@
   -webkit-backdrop-filter: blur(var(--blur-md)) saturate(1.2);
   backdrop-filter: blur(var(--blur-md)) saturate(1.2);
 
-  font-size: var(--t-overline-size);
+  font-size: var(--t-caption-size);
   font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.06em;
+  white-space: nowrap;
   text-align: center;
   color: var(--blanco);
 
@@ -436,11 +461,18 @@
   text-align: center;
 }
 
+.aroQrGrande {
+  width: min(100%, 304px);
+  padding: 2px;
+  border-radius: var(--radius-xl);
+  background: var(--plata-brunida);
+}
+
 .vistaQr .qrGrande {
-  width: min(100%, 300px);
-  padding: 7%;
+  width: 100%;
+  padding: 9%;
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: calc(var(--radius-xl) - 2px);
   box-shadow: none;
 }
 
@@ -454,7 +486,6 @@
   font-size: var(--t-title-2-size);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.14em;
   color: var(--cacao-fg);
 }
 

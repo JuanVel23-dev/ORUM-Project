@@ -1,11 +1,11 @@
 'use client'
 
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useId, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Camera, IdCard, Maximize2, X } from 'lucide-react'
 import { iniciales } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { LogoOrum, MonogramaOrum } from '@/components/ui/marca/marca'
+import { LogoOrum } from '@/components/ui/marca/marca'
 import { Modal } from '@/components/ui/modal'
 import { QrCode } from '@/components/ui/qr-code'
 import type { DatosCarnet } from '@/lib/miembros/datos-carnet'
@@ -23,9 +23,10 @@ import estilos from './boton-carnet.module.css'
 
     · Plata y no oro: el logotipo plata solo se lee sobre negro («sobre
       negro, plata»), y por eso la tarjeta es negra.
-    · Una sola familia, Montserrat: el nombre ya no va en Playfair ni el
-      número en monoespaciada (cifras tabulares y tracking abierto bastan
-      para dictarlo).
+    · Una sola familia, Montserrat, y UN solo tratamiento (encargo del
+      30/09: «la tipografía sigue sin ser la misma»): sin versalitas
+      espaciadas ni número abierto, que se leían como otras letras. Las
+      etiquetas se distinguen por peso y tono, no por forma.
     · Sin estado ni «Vence en»: el carnet solo existe con membresía vigente
       (`obtenerDatosCarnet` devuelve `null` si no), y queda la fecha.
     · Tocar el QR lo amplía; tocar la foto lleva a cambiarla. Con ratón, al
@@ -113,7 +114,7 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
     >
       <article className={estilos.carnet}>
         {/* La firma de la marca, a sangre y casi transparente. */}
-        <MonogramaOrum tono="plata" className={estilos.marcaAgua} />
+        <MarcaAgua />
 
         <div className={estilos.barra}>
           {soloQr ? (
@@ -132,7 +133,9 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
         {/* `key`: cada vista entra con su propio fundido al intercambiarse. */}
         {soloQr ? (
           <div key="qr" className={`${estilos.vista} ${estilos.vistaQr}`} data-motion-esencial>
-            <QrCode value={numeroMembresia} size={512} className={estilos.qrGrande} label={etiquetaQr} />
+            <div className={estilos.aroQrGrande}>
+              <QrCode value={numeroMembresia} size={512} className={estilos.qrGrande} label={etiquetaQr} />
+            </div>
             <p className={estilos.numeroGrande}>{numeroMembresia}</p>
             <p className={estilos.nombreQr}>{nombre}</p>
           </div>
@@ -204,5 +207,37 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
         )}
       </article>
     </Modal>
+  )
+}
+
+/*
+  EL MONOGRAMA, DIBUJADO Y NO RASTERIZADO. El PNG del cliente mide 240 px y
+  aquí se ve a más de 400: salía borroso («no se ve con tanta calidad»). Es
+  la misma figura —el aro más grueso a la izquierda, como trazado a pluma, y
+  la estrella de cuatro puntas— en vectores, con el degradado de plata
+  bruñida de la foto y el QR. Decorativo.
+*/
+function MarcaAgua() {
+  const id = useId()
+  return (
+    <svg className={estilos.marcaAgua} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" className={estilos.plata1} />
+          <stop offset="0.45" className={estilos.plata2} />
+          <stop offset="0.7" className={estilos.plata3} />
+          <stop offset="1" className={estilos.plata4} />
+        </linearGradient>
+      </defs>
+      <path
+        fill={`url(#${id})`}
+        fillRule="evenodd"
+        d="M3 50a47 47 0 1 0 94 0a47 47 0 1 0 -94 0ZM8.5 50a43.5 43.5 0 1 0 87 0a43.5 43.5 0 1 0 -87 0Z"
+      />
+      <path
+        fill={`url(#${id})`}
+        d="M50 30C51.5 45 55 48.5 66 50C55 51.5 51.5 55 50 70C48.5 55 45 51.5 34 50C45 48.5 48.5 45 50 30Z"
+      />
+    </svg>
   )
 }
