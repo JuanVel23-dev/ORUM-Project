@@ -176,6 +176,43 @@
   color: var(--text-3);
 }
 
+/* La dirección es un enlace a Maps: se lee como texto de la ficha, con un
+   subrayado fino que lo delata y la flecha de «sale del sitio». Al apuntar,
+   el subrayado toma el oro de la marca (movimiento de color, sin tinte de
+   fondo). */
+.sedeMapa {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--dur-fast) var(--ease-out);
+}
+
+.sedeMapaIcono {
+  display: inline-block;
+  margin-left: var(--space-1);
+  vertical-align: -1px;
+  color: var(--text-3);
+  transition: translate var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .sedeMapa:hover {
+    text-decoration-color: var(--brand);
+  }
+
+  .sedeMapa:hover .sedeMapaIcono {
+    translate: 1px -1px;
+  }
+}
+
+.sedeMapa:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
 .sedeTelefono {
   display: inline-flex;
   align-items: center;

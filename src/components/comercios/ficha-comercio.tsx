@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, MapPin, Phone } from 'lucide-react'
+import { ChevronLeft, ExternalLink, MapPin, Phone } from 'lucide-react'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { Ampliable, VisorImagenes, type ImagenVisor } from '@/components/ui/visor-imagenes'
+import { enlaceMapa } from '@/lib/comercios/enlace-mapa'
 import estilos from './ficha-comercio.module.css'
 
 /*
@@ -133,8 +134,19 @@ export function FichaComercio({
                 <li key={s.id} className={estilos.sede}>
                   <MapPin size={15} aria-hidden="true" className={estilos.sedeIcono} />
                   <span>
-                    {s.direccion}
-                    {s.ciudadNombre && `, ${s.ciudadNombre}`}
+                    {/* La dirección abre Google Maps (en el teléfono, la
+                        app). Pestaña nueva: la ficha se queda donde estaba. */}
+                    <a
+                      href={enlaceMapa(s.direccion ?? '', s.ciudadNombre)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={estilos.sedeMapa}
+                    >
+                      {s.direccion}
+                      {s.ciudadNombre && `, ${s.ciudadNombre}`}
+                      <ExternalLink size={12} aria-hidden="true" className={estilos.sedeMapaIcono} />
+                      <span className="sr-only"> (abre Google Maps)</span>
+                    </a>
                     {/* El nombre de la sede solo si hay varias: con una sola,
                         «Sede principal» no le dice nada a nadie. */}
                     {sedesConDireccion.length > 1 && s.nombre && (
