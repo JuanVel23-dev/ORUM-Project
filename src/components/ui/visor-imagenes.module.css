@@ -39,8 +39,10 @@
 
 /* --- El diálogo ------------------------------------------------------------ */
 
-/* Un velo casi negro: aquí la foto es lo único que importa. */
-.dialogo::backdrop {
+/* Un velo casi negro: aquí la foto es lo único que importa. Clase doble
+   para ganarle al `::backdrop` genérico de `modal.module.css` sin depender
+   del orden en que se cargan los módulos. */
+.dialogo.dialogo::backdrop {
   background: color-mix(in srgb, var(--cacao-900) 90%, transparent);
 }
 
@@ -83,12 +85,13 @@
   box-shadow: var(--shadow-overlay);
 }
 
-/* El logotipo, sobre su placa blanca (mismos tokens que la placa del
-   catálogo: la imagen no es nuestra y se calibró contra fondo claro). */
+/* El logotipo, sobre una placa BLANCA: casi todos los logos traen su
+   propio fondo blanco, y una placa de otro tono los encerraba en una doble
+   caja. */
 .marcoLogo {
   padding: var(--space-8);
   border-radius: var(--radius-xl);
-  background: var(--placa-logo-bg);
+  background: var(--blanco);
 }
 
 .imagen {
