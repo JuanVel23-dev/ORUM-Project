@@ -59,6 +59,21 @@
   --border-subtle: color-mix(in srgb, var(--tinta-1) 12%, transparent);
 }
 
+/*
+  SIN BARRAS DE DESPLAZAMIENTO INTERNAS, como la fachada: la ventana del
+  carnet, las fichas y las hojas desplazan su cuerpo y la barra gris del
+  sistema se veía dentro de la tarjeta. El desplazamiento sigue igual; la
+  barra de la página (del `<html>`) no se toca.
+*/
+.portal,
+.portal :global(*) {
+  scrollbar-width: none;
+}
+
+.portal :global(*)::-webkit-scrollbar {
+  display: none;
+}
+
 /* ==========================================================================
    CABECERA  ·  negra arriba, fundida a transparente, montada encima
    ========================================================================== */

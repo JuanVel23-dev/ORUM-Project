@@ -13,7 +13,7 @@ import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import escaparate from '@/app/(publico)/escaparate.module.css'
 import { cerrarSesionMiembro } from '../login/actions'
 import { Carnet } from './perfil/_components/carnet'
-import { BotonCarnet } from './_components/boton-carnet'
+import { BotonCarnet, ProveedorCarnet, VentanaCarnet } from './_components/boton-carnet'
 import { PortalNav } from './_components/portal-nav'
 import carnetEstilos from './_components/boton-carnet.module.css'
 import styles from './portal.module.css'
@@ -64,6 +64,7 @@ export default async function MiembrosLayout({
       `data-theme="light"`: el portal siempre en claro, como la fachada. La
       cabecera fija su propio `data-theme="dark"`.
     */
+    <ProveedorCarnet>
     <div className={styles.portal} data-theme="light">
       <header className={styles.cabecera} data-theme="dark">
         <Link href="/miembros" className={styles.marca} aria-label="ORUM, ir al inicio del portal">
@@ -76,23 +77,7 @@ export default async function MiembrosLayout({
         {/* `sobreFoto`: el mismo ámbito que usa la cabecera pública para que
             las píldoras de contorno se lean sobre negro. */}
         <div className={[styles.acciones, escaparate.sobreFoto].join(' ')}>
-          {carnet && (
-            <BotonCarnet
-              carnet={<Carnet {...carnet} variante="ampliado" />}
-              qr={
-                <div className={carnetEstilos.qrGrande} data-motion-esencial>
-                  <QrCode
-                    value={carnet.numeroMembresia}
-                    size={512}
-                    className={carnetEstilos.qrMarco}
-                    label={`Código de la membresía ${carnet.numeroMembresia} de ${carnet.nombre}`}
-                  />
-                  <p className={carnetEstilos.qrNumero}>{carnet.numeroMembresia}</p>
-                  <p className={carnetEstilos.qrNombre}>{carnet.nombre}</p>
-                </div>
-              }
-            />
-          )}
+          {carnet && <BotonCarnet />}
 
           <form action={cerrarSesionMiembro}>
             <Button
@@ -122,6 +107,30 @@ export default async function MiembrosLayout({
       {modal}
 
       <WhatsAppFlotante telefono={soporte} mensaje={MENSAJE_SOPORTE} />
+
+      {/*
+        LA VENTANA DEL CARNET, FUERA DE LA CABECERA: un `<dialog>` hereda las
+        propiedades de sus ancestros del DOM, y dentro de la cabecera negra
+        salía oscura. Aquí hereda el claro del portal.
+      */}
+      {carnet && (
+        <VentanaCarnet
+          carnet={<Carnet {...carnet} variante="ampliado" />}
+          qr={
+            <div className={carnetEstilos.qrGrande} data-motion-esencial>
+              <QrCode
+                value={carnet.numeroMembresia}
+                size={512}
+                className={carnetEstilos.qrMarco}
+                label={`Código de la membresía ${carnet.numeroMembresia} de ${carnet.nombre}`}
+              />
+              <p className={carnetEstilos.qrNumero}>{carnet.numeroMembresia}</p>
+              <p className={carnetEstilos.qrNombre}>{carnet.nombre}</p>
+            </div>
+          }
+        />
+      )}
     </div>
+    </ProveedorCarnet>
   )
 }
