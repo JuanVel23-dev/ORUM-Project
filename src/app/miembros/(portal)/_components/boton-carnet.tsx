@@ -98,7 +98,7 @@ export function VentanaCarnet({ carnet, qr }: VentanaProps) {
       onClose={cerrar}
       ariaLabel={soloQr ? 'Código QR del carnet' : 'Carnet de socio'}
       detent="large"
-      width="460px"
+      width="520px"
     >
       <div className={estilos.contenido}>
         {soloQr ? qr : carnet}
@@ -109,19 +109,24 @@ export function VentanaCarnet({ carnet, qr }: VentanaProps) {
               variant="secondary"
               pildora
               fullWidth
-              icon={<ArrowLeft size={16} aria-hidden="true" />}
+              icon={<ArrowLeft size={16} aria-hidden="true" className={estilos.iconoOro} />}
               onClick={() => verQr(false)}
+              className={estilos.botonBlanco}
             >
               Ver el carnet
             </Button>
           ) : (
             <>
+              {/* Píldora BLANCA con sombra (30/09/2026, encargo del
+                  propietario: «fondo blanco o transparente y con efecto de
+                  sombra»), no el relleno dorado: la tarjeta ya lleva el oro. */}
               <Button
-                variant="brand"
+                variant="secondary"
                 pildora
                 fullWidth
-                icon={<Maximize2 size={16} aria-hidden="true" />}
+                icon={<Maximize2 size={16} aria-hidden="true" className={estilos.iconoOro} />}
                 onClick={() => verQr(true)}
+                className={estilos.botonBlanco}
               >
                 Ampliar
               </Button>

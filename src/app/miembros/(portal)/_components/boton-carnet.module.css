@@ -11,6 +11,27 @@
   justify-items: center;
 }
 
+/* La píldora blanca con sombra de «Ampliar» / «Ver el carnet»: como «Quiero
+   ser aliado» de la fachada. Sin filo: el texto la nombra, y la sombra la
+   despega del blanco de la ventana. Clase duplicada para ganarle a
+   `.secondary` sin depender del orden de los módulos. */
+.botonBlanco.botonBlanco {
+  border-color: transparent;
+  background: var(--blanco);
+  box-shadow: var(--shadow-raised);
+  color: var(--tinta-1);
+}
+
+@media (hover: hover) {
+  .botonBlanco.botonBlanco:hover {
+    box-shadow: var(--shadow-flotante);
+  }
+}
+
+.iconoOro {
+  color: var(--gold-650);
+}
+
 .cambiarFoto {
   display: inline-flex;
   align-items: center;

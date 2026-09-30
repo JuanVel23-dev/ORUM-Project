@@ -12,7 +12,7 @@ import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import escaparate from '@/app/(publico)/escaparate.module.css'
 import { cerrarSesionMiembro } from '../login/actions'
-import { Carnet } from './perfil/_components/carnet'
+import { CarnetTarjeta } from './_components/carnet-tarjeta'
 import { BotonCarnet, ProveedorCarnet, VentanaCarnet } from './_components/boton-carnet'
 import { PortalNav } from './_components/portal-nav'
 import carnetEstilos from './_components/boton-carnet.module.css'
@@ -115,7 +115,7 @@ export default async function MiembrosLayout({
       */}
       {carnet && (
         <VentanaCarnet
-          carnet={<Carnet {...carnet} variante="ampliado" />}
+          carnet={<CarnetTarjeta {...carnet} />}
           qr={
             <div className={carnetEstilos.qrGrande} data-motion-esencial>
               <QrCode
