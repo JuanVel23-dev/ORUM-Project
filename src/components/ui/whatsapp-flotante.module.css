@@ -6,8 +6,8 @@
    `--z-overlay`): cuando algo se abre encima, no compite con ello.
 
    CAPAS, de atrás adelante: dos ONDAS (pulsos al aparecer), el HALO (se
-   enciende al apuntar), el CÍRCULO (el botón visible) y la ETIQUETA que
-   asoma a la izquierda. Todo el movimiento es `transform`/`translate`/
+   enciende al apuntar), el CÍRCULO (el botón visible, plano) y la ETIQUETA
+   que asoma a la izquierda. Todo el movimiento es `transform`/`translate`/
    `scale` y `opacity` — nada que recalcule layout.
 
    WCAG 2.2.2: lo que se mueve SOLO más de cinco segundos necesita pausa. Las
@@ -65,7 +65,7 @@
   scale: 1;
 }
 
-/* --- El círculo: volumen, brillo y sombra ---------------------------------- */
+/* --- El círculo: plano, con una sola sombra suave -------------------------- */
 
 .circulo {
   position: relative;
@@ -76,20 +76,13 @@
   height: 100%;
   border-radius: var(--radius-full);
 
-  /* Luz arriba a la izquierda, sombra abajo: se lee como una pieza con
-     volumen, no como un disco plano. El centro —donde vive el glifo— queda
-     en `--whatsapp` puro para conservar su 3,48:1. */
-  background: radial-gradient(
-    circle at 30% 22%,
-    color-mix(in srgb, var(--whatsapp) 82%, var(--blanco)) 0%,
-    var(--whatsapp) 48%,
-    color-mix(in srgb, var(--whatsapp) 78%, var(--tinta-1)) 100%
-  );
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--blanco) 40%, transparent),
-    inset 0 -3px 8px color-mix(in srgb, var(--tinta-1) 22%, transparent),
-    0 10px 24px color-mix(in srgb, var(--whatsapp) 38%, transparent),
-    var(--shadow-flotante);
+  /* PLANO (30/09/2026, encargo del propietario: «más simple, sin tantas
+     sombras o 3D»). Fuera el degradado de luz, las sombras interiores y el
+     resplandor verde: un disco en `--whatsapp` (3,48:1 con el glifo) y una
+     sola sombra corta, la justa para que no se pierda sobre una foto. Las
+     animaciones no cambian. */
+  background: var(--whatsapp);
+  box-shadow: var(--shadow-card);
 
   transition: transform var(--dur-base) var(--ease-out);
 }
@@ -98,8 +91,6 @@
   width: 55%;
   height: 55%;
   fill: currentColor;
-  /* Una sombra corta bajo el glifo lo despega del relleno. */
-  filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--tinta-1) 30%, transparent));
 }
 
 /* --- Las ondas: dos pulsos al aparecer -------------------------------------- */
