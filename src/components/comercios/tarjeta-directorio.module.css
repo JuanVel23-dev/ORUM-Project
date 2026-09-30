@@ -134,6 +134,14 @@
   copiar; no es seguridad —el texto está en el HTML—, es el gesto del
   encargo: se ve que hay algo y no se lee sin ser socio.
 */
+/* El beneficio legible del socio: el mismo tamaño y oro que el
+   desenfocado, sin el desenfoque. */
+.legible {
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  color: var(--brand);
+}
+
 .borroso {
   font-size: var(--t-caption-size);
   font-weight: 600;

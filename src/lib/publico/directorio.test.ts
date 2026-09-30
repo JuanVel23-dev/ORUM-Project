@@ -74,6 +74,13 @@ describe('hrefDirectorio', () => {
     expect(hrefDirectorio(actuales, { categoriaId: null })).toBe('/explorar')
   })
 
+  it('la misma URL sobre otra base (el directorio del socio en /miembros)', () => {
+    expect(hrefDirectorio(SIN_FILTROS, {}, '/miembros')).toBe('/miembros')
+    expect(hrefDirectorio({ ...SIN_FILTROS, q: 'pan' }, { ciudadId: 2 }, '/miembros')).toBe(
+      '/miembros?q=pan&ciudad_id=2',
+    )
+  })
+
   it('el orden por defecto no ensucia la URL', () => {
     expect(hrefDirectorio({ ...SIN_FILTROS, orden: 'za' }, { orden: 'az' })).toBe('/explorar')
     expect(hrefDirectorio(SIN_FILTROS, { orden: 'za' })).toBe('/explorar?orden=za')

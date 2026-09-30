@@ -98,11 +98,13 @@ export function parametrosDirectorio(filtros: FiltrosDirectorio): Record<string,
 export function hrefDirectorio(
   filtros: FiltrosDirectorio,
   cambios: Partial<FiltrosDirectorio> = {},
+  /** Dónde vive el directorio: `/explorar` (público) o `/miembros` (socio). */
+  base: string = '/explorar',
 ): string {
   const consulta = new URLSearchParams(
     parametrosDirectorio({ ...filtros, ...cambios }),
   ).toString()
-  return consulta ? `/explorar?${consulta}` : '/explorar'
+  return consulta ? `${base}?${consulta}` : base
 }
 
 /**
