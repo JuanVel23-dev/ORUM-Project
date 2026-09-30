@@ -18,7 +18,7 @@ import {
   type OrdenDirectorio,
 } from '@/lib/publico/directorio'
 import { AliadosOverlayTrigger } from '../_components/aliados-overlay-trigger'
-import fotoMarca from '../_components/hero-orum.webp'
+import fotoMarca from '@/components/ui/marca/foto-hero.webp'
 import {
   ENTRADA,
   REVELAR,
