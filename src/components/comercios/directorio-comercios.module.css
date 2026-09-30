@@ -341,8 +341,10 @@
 }
 
 /* El corazón en la esquina superior derecha, sobre la foto. Por encima del
-   enlace de la tarjeta para recibir el toque. */
-.corazon {
+   enlace de la tarjeta para recibir el toque. Selector con la celda
+   (0,2,0) para ganarle al `position: relative` del propio componente sin
+   depender del orden en que se cargan los módulos. */
+.celda > .corazon {
   position: absolute;
   top: var(--space-3);
   right: var(--space-3);
