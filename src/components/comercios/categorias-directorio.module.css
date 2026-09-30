@@ -45,6 +45,8 @@
   objeto que se toca: por eso sí lleva sombra.
 */
 .icono {
+  /* Ancla de la marca de verificación. */
+  position: relative;
   display: grid;
   place-items: center;
   width: 52px;
@@ -74,6 +76,42 @@
   box-shadow: var(--filo-activo-inset), var(--shadow-press), var(--edge);
 }
 
+/* La marca de verificación de una categoría elegida: un disco pequeño en
+   tinta, montado en el canto del círculo. */
+.marca {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: var(--text);
+  color: var(--surface);
+  box-shadow: 0 0 0 2px var(--surface);
+  animation: entrarMarca var(--dur-base) var(--ease-spring);
+}
+
+@keyframes entrarMarca {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marca {
+    animation-name: fundirMarca;
+  }
+
+  @keyframes fundirMarca {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
 .nombre {
   font-size: var(--t-caption-size);
   line-height: 1.3;
@@ -96,14 +134,14 @@
   de superficie.
 
   Portadores que no dependen del color: el tamaño, el grosor del anillo, el
-  nombre en negrita y `aria-current` para el lector. Sin subrayado, por
+  nombre en negrita y «(elegida)» dicho al lector. Sin subrayado, por
   encargo del propietario: con el anillo y el tamaño ya se distingue.
 */
-.opcion[aria-current='true'] {
+.opcion[data-activa] {
   color: var(--text);
 }
 
-.opcion[aria-current='true'] .icono {
+.opcion[data-activa] .icono {
   scale: 1.08;
   /* `--text`, no `--tinta-1`: el fondo del círculo sigue siendo `--surface`
      en los dos temas, y lo que hace falta aquí es el mismo contraste fuerte
@@ -118,7 +156,7 @@
     var(--edge);
 }
 
-.opcion[aria-current='true'] .nombre {
+.opcion[data-activa] .nombre {
   font-weight: 700;
 }
 

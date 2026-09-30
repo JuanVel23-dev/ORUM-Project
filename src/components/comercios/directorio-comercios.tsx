@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/ui/feedback'
 import fotoMarca from '@/components/ui/marca/foto-hero.webp'
 import type { CatalogoPublico } from '@/lib/publico/datos-publicos'
 import {
+  alternarCategoria,
   ETIQUETAS_ORDEN,
   filtrarDirectorio,
   hayFiltros,
@@ -133,8 +134,8 @@ export function DirectorioComercios({
               autoComplete="off"
               enterKeyHint="search"
             />
-            {filtros.categoriaId !== null && (
-              <input type="hidden" name="categoria_id" value={filtros.categoriaId} />
+            {filtros.categoriaIds.length > 0 && (
+              <input type="hidden" name="categoria_id" value={filtros.categoriaIds.join(',')} />
             )}
             {filtros.ciudadId !== null && (
               <input type="hidden" name="ciudad_id" value={filtros.ciudadId} />
@@ -166,20 +167,22 @@ export function DirectorioComercios({
                   {
                     id: null,
                     nombre: 'Todas',
-                    href: hrefDirectorio(filtros, { categoriaId: null }, base),
-                    activa: filtros.categoriaId === null,
+                    href: hrefDirectorio(filtros, { categoriaIds: [] }, base),
+                    activa: filtros.categoriaIds.length === 0,
                   },
-                  ...directorio.categorias.map((c) => {
-                    const activa = c.id === filtros.categoriaId
-                    return {
-                      id: c.id,
-                      nombre: c.nombre,
-                      /* Tocar la categoría activa la apaga: encender y apagar con
-                         el mismo dedo, en el mismo sitio. */
-                      href: hrefDirectorio(filtros, { categoriaId: activa ? null : c.id }, base),
-                      activa,
-                    }
-                  }),
+                  ...directorio.categorias.map((c) => ({
+                    id: c.id,
+                    nombre: c.nombre,
+                    /* VARIAS a la vez (30/09/2026): cada una se enciende y se
+                       apaga sola, con el mismo dedo y en el mismo sitio, sin
+                       tocar las demás. «Todas» limpia la selección. */
+                    href: hrefDirectorio(
+                      filtros,
+                      { categoriaIds: alternarCategoria(filtros.categoriaIds, c.id) },
+                      base,
+                    ),
+                    activa: filtros.categoriaIds.includes(c.id),
+                  })),
                 ]}
               />
             )}
