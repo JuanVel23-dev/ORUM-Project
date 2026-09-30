@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { LogOut, MessageCircle } from 'lucide-react'
+import { IdCard, LogOut, MessageCircle } from 'lucide-react'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar } from '@/components/ui/avatar'
@@ -10,7 +10,6 @@ import { cerrarSesionMiembro } from '../login/actions'
 import { PortalNav, PortalTabBar } from './_components/portal-nav'
 import { CabeceraPortal } from './_components/cabecera-portal'
 import { PieSitio } from '@/components/pie/pie-sitio'
-import { PiePortal } from './_components/pie-portal'
 import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import styles from './portal.module.css'
@@ -136,6 +135,12 @@ export default async function MiembrosLayout({
               {/* Sin selector de tema: el portal va siempre en claro. */}
               <MenuSeparator />
 
+              {/* El carnet salió de la barra de escritorio (29/09/2026): su
+                  puerta ahí es este menú. En móvil sigue siendo pestaña. */}
+              <MenuItem href="/miembros/perfil" icon={<IdCard size={16} />}>
+                Mi carnet
+              </MenuItem>
+
               {soporte && (
                 <MenuItem
                   href={`https://wa.me/${soporte.replace(/\D/g, '')}?text=${encodeURIComponent(MENSAJE_SOPORTE)}`}
@@ -163,16 +168,13 @@ export default async function MiembrosLayout({
       <main className={styles.main}>{children}</main>
 
       {/*
-        EL MISMO PIE QUE EL PORTAL PÚBLICO (encargo del 27/09/2026: «un footer
-        como los otros»), completo en Inicio y compacto en el resto (maqueta
-        del carnet). Fuera de `<main>`, a todo el ancho: es cromo, no
+        EL MISMO PIE QUE EL PORTAL PÚBLICO, completo y en todas las páginas
+        del portal (encargo del 29/09/2026: «el footer también igual al
+        portal inicial»). Fuera de `<main>`, a todo el ancho: es cromo, no
         contenido. `.pie` solo le reserva en móvil el alto de la barra
         inferior, que es fija y lo taparía.
       */}
-      <PiePortal
-        completo={<PieSitio soporte={soporte} mensajeSoporte={MENSAJE_SOPORTE} className={styles.pie} />}
-        compacto={<PieSitio soporte={soporte} compacto className={styles.pie} />}
-      />
+      <PieSitio soporte={soporte} mensajeSoporte={MENSAJE_SOPORTE} className={styles.pie} />
 
       {modal}
 

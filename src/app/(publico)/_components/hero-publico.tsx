@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { HREF_UNETE } from './anclas'
 import { EstrellaOrum } from '@/components/ui/marca/marca'
 import { ENTRADA, retardoEntrada } from '@/lib/shared/revelado'
-import fotoHero from './hero-orum.webp'
+import fotoHero from '@/components/ui/marca/foto-hero.webp'
 import escaparate from '../escaparate.module.css'
 import estilos from './hero-publico.module.css'
 

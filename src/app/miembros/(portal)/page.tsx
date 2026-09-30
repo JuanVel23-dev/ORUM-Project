@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpDown, ChevronDown, Heart, MapPin, Repeat2, Search, SearchX, Store, Tag } from 'lucide-react'
 import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
@@ -36,7 +37,8 @@ import { FavoritosProvider } from './_components/favoritos-contexto'
 import { SeccionFavoritos } from './_components/seccion-favoritos'
 import { TopDescuentos } from './_components/top-descuentos'
 import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
-import { AdornoEstrella } from '@/components/ui/marca/marca'
+import { AdornoEstrella, EstrellaOrum } from '@/components/ui/marca/marca'
+import fotoHero from '@/components/ui/marca/foto-hero.webp'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { CarruselNovedades } from './_components/carrusel-novedades'
 import {
@@ -593,12 +595,13 @@ export default async function MiembrosHomePage({
     <FavoritosProvider inicial={idsFavoritos}>
       <div className={estilos.pagina}>
         {/*
-          EL HÉROE NEGRO  ·  rediseño del 27/09/2026 (`Miembros.dc.html`)
+          EL HÉROE  ·  el del Portal Público, adaptado (29/09/2026)
 
-          Continúa la cabecera, que en Inicio va en negro (`CabeceraPortal`):
-          juntas se leen como una sola pieza, el mismo lenguaje que la vitrina
-          de comercios del Portal Público. Sangra a todo el ancho y sube hasta
-          pegarse a la cabecera (ver `.heroInicio`).
+          Encargo del propietario: «que se vea igual al portal inicial pero
+          adaptado al contenido que tiene». La misma fotografía de marca a
+          sangre, el mismo velo y la cabecera montada encima (fija y fundida a
+          transparente en Inicio, ver `CabeceraPortal`); dentro, lo del socio:
+          insignia, titular y buscador.
 
           El buscador vive AQUÍ, arriba del todo: el socio recurrente abre la
           aplicación para buscar «pizza», y no puede tener que desplazarse para
@@ -606,9 +609,24 @@ export default async function MiembrosHomePage({
           JavaScript y conserva la categoría, la marca y la ciudad elegidas.
         */}
         <section className={estilos.heroInicio} data-theme="dark" aria-labelledby="titulo-catalogo">
+          {/* `alt=""`: ambiente, no información —el titular dice lo que hay
+              que saber—. `preload`: es la imagen más grande de la primera
+              pantalla. */}
+          <Image
+            className={estilos.heroFoto}
+            src={fotoHero}
+            alt=""
+            fill
+            sizes="100vw"
+            quality={80}
+            placeholder="blur"
+            preload
+          />
+          <div className={estilos.heroVelo} aria-hidden="true" />
+
           <div className={estilos.heroContenido}>
-            <p className={estilos.heroOverline}>
-              <span className={estilos.heroPunto} aria-hidden="true" />
+            <p className={estilos.heroInsignia}>
+              <EstrellaOrum tono="plata" className={estilos.heroEstrella} />
               Tu membresía
             </p>
             <h1 id="titulo-catalogo" className={estilos.heroTitulo}>
@@ -703,7 +721,8 @@ export default async function MiembrosHomePage({
           </div>
         )}
 
-        <section className={estilos.rejilla} aria-labelledby="titulo-rejilla">
+        {/* `id="comercios"`: el destino de «Comercios» en la cabecera. */}
+        <section id="comercios" className={estilos.rejilla} aria-labelledby="titulo-rejilla">
           {/*
             LOS FILTROS, PEGADOS A LA ÚNICA SECCIÓN QUE FILTRAN (encargo:
             «que estén encima y afecten al apartado de Todos los comercios»).

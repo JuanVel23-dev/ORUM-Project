@@ -229,9 +229,28 @@
 */
 .cabeceraInicio,
 .cabeceraInicio.cabeceraInicio {
-  background: var(--cacao-bg);
+  /* COMO LA CABECERA DEL PORTAL PÚBLICO (29/09/2026): fija y montada sobre
+     la foto del héroe, negra arriba y fundida a transparente hacia abajo.
+     La banda donde vive el texto es casi opaca (97 % → 82 %), así que al
+     bajar por las franjas crema la navegación sigue legible. El héroe sube
+     por debajo y reserva `--cabecera-alto` para su texto. */
+  position: fixed;
+  inset: 0 0 auto 0;
+  padding-bottom: var(--space-5);
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--cacao-bg) 97%, transparent) 0%,
+    color-mix(in srgb, var(--cacao-bg) 82%, transparent) 55%,
+    color-mix(in srgb, var(--cacao-bg) 0%, transparent) 100%
+  );
   backdrop-filter: none;
   border-bottom-color: transparent;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .cabeceraInicio.cabeceraInicio {
+    background: var(--cacao-bg);
+  }
 }
 
 /*
@@ -283,6 +302,8 @@
 .nav {
   display: none;
   flex: 1;
+  /* Centrada entre el logo y el avatar, como la del Portal Público. */
+  justify-content: center;
   /* El mismo aire que la navegación del Portal Público: tres destinos
      sueltos, sin caja, separados por el vacío y no por un trazo. */
   gap: var(--space-5);
@@ -296,8 +317,12 @@
 
 .enlace {
   position: relative;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
 
   font-size: var(--t-callout-size);
   font-weight: 500;

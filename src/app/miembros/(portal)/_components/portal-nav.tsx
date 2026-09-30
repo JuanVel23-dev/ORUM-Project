@@ -2,14 +2,30 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Megaphone, User } from 'lucide-react'
+import { Home, IdCard, Megaphone, Store } from 'lucide-react'
 import { esDestinoActivo } from '@/lib/miembros/navegacion-portal'
 import styles from '../portal.module.css'
 
+/*
+  LA BARRA DE ESCRITORIO (29/09/2026, encargo del propietario): Inicio,
+  Novedades y Comercios, como la del Portal Público. «Comercios» baja a
+  «Todos los comercios» del Inicio. El carnet sale de la barra y vive en el
+  menú del avatar («Mi carnet»).
+*/
 const DESTINOS = [
   { href: '/miembros', etiqueta: 'Inicio', Icono: Home },
   { href: '/miembros/novedades', etiqueta: 'Novedades', Icono: Megaphone },
-  { href: '/miembros/perfil', etiqueta: 'Mi perfil', Icono: User },
+  { href: '/miembros#comercios', etiqueta: 'Comercios', Icono: Store },
+] as const
+
+/*
+  LA BARRA INFERIOR DE MÓVIL conserva el carnet como pestaña: en el
+  teléfono no hay menú de avatar a mano en la caja, y el carnet es lo que se
+  enseña para pagar. Los otros tres destinos son los mismos que arriba.
+*/
+const DESTINOS_MOVIL = [
+  ...DESTINOS,
+  { href: '/miembros/perfil', etiqueta: 'Mi carnet', Icono: IdCard },
 ] as const
 
 /** Navegación de escritorio, en la cabecera. */
@@ -41,7 +57,7 @@ export function PortalTabBar() {
 
   return (
     <nav className={styles.tabbar} aria-label="Secciones del portal">
-      {DESTINOS.map(({ href, etiqueta, Icono }) => {
+      {DESTINOS_MOVIL.map(({ href, etiqueta, Icono }) => {
         const activo = esDestinoActivo(pathname, href)
         return (
           <Link
