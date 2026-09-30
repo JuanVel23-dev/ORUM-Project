@@ -61,6 +61,9 @@ export function TarjetaDirectorio({
             (socio ? (
               <span className={estilos.beneficio}>
                 <TicketPercent size={13} aria-hidden="true" className={estilos.candado} />
+                {/* La cifra va sola («10%»): el icono y el sitio ya dicen que
+                    es un descuento. El lector de pantalla no ve el icono. */}
+                <span className="sr-only">Beneficio: </span>
                 <span className={estilos.legible}>{comercio.beneficioDestacado}</span>
               </span>
             ) : (
