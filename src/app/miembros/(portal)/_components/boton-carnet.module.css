@@ -248,8 +248,8 @@
 /*
   TRES FILAS Y DOS COLUMNAS (30/09/2026, «mucho espacio sin nada»):
 
-      ·           logo
-      identidad   qr      ← la identidad, CENTRADA en el alto que sobra
+      identidad   logo
+      identidad   qr      ← la identidad, CENTRADA en todo el alto libre
       datos       qr      ← el QR baja hasta la base de los datos
 
   El logotipo arriba a la derecha, solo; el QR ocupa la columna derecha de
@@ -271,7 +271,7 @@
 @media (min-width: 640px) {
   .vistaCarnet {
     grid-template-areas:
-      'marca marca'
+      'identidad marca'
       'identidad qr'
       'datos qr';
   }
