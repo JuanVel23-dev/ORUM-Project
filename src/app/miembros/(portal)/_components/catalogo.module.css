@@ -476,6 +476,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  /* `width: 100%`: el contenido del héroe es una columna flexible alineada
+     al inicio, y sin esto la píldora se encogía a su texto. */
+  width: 100%;
   max-width: 480px;
   margin-top: var(--space-2);
   padding: var(--space-1) var(--space-1) var(--space-1) var(--space-5);
