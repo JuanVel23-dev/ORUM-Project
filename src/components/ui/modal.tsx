@@ -34,6 +34,13 @@ type Props = {
   width?: string
   /** Oculta la X. Úsalo solo si el pie ya ofrece una salida clara. */
   hideClose?: boolean
+  /**
+   * El contenido ES la superficie: sin panel, sin cabecera, sin X ni relleno.
+   * Quien lo usa pinta su propio fondo y su propia salida (el carnet del
+   * socio, que es la ventana entera y lleva la X dentro). Se conservan el
+   * `<dialog>` nativo, el velo, Escape, el clic fuera y las animaciones.
+   */
+  desnudo?: boolean
   children?: ReactNode
 }
 
@@ -46,6 +53,7 @@ export function Modal({
   width = '480px',
   ariaLabel,
   hideClose = false,
+  desnudo = false,
   children,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -139,50 +147,54 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className={styles.dialog}
+      className={[styles.dialog, desnudo && styles.desnudo].filter(Boolean).join(' ')}
       style={{ '--ancho': width } as CSSProperties}
       onCancel={alCancelar}
       onClick={alPulsar}
       aria-labelledby={title ? 'modal-titulo' : undefined}
       aria-label={!title && ariaLabel ? ariaLabel : undefined}
     >
-      <div className={styles.contenido}>
-        {tieneCabecera && (
-          <div className={styles.cabecera}>
-            <div className={styles.textos}>
-              {title && (
-                <h2 className={styles.titulo} id="modal-titulo">
-                  {title}
-                </h2>
+      {desnudo ? (
+        children
+      ) : (
+        <div className={styles.contenido}>
+          {tieneCabecera && (
+            <div className={styles.cabecera}>
+              <div className={styles.textos}>
+                {title && (
+                  <h2 className={styles.titulo} id="modal-titulo">
+                    {title}
+                  </h2>
+                )}
+                {description && <p className={styles.descripcion}>{description}</p>}
+              </div>
+
+              {!hideClose && (
+                <button
+                  type="button"
+                  className={styles.cerrar}
+                  onClick={onClose}
+                  aria-label="Cerrar"
+                >
+                  <X className={styles.cerrarIcono} aria-hidden="true" />
+                </button>
               )}
-              {description && <p className={styles.descripcion}>{description}</p>}
             </div>
+          )}
 
-            {!hideClose && (
-              <button
-                type="button"
-                className={styles.cerrar}
-                onClick={onClose}
-                aria-label="Cerrar"
-              >
-                <X className={styles.cerrarIcono} aria-hidden="true" />
-              </button>
-            )}
-          </div>
-        )}
+          {children && (
+            <div
+              className={[styles.cuerpo, !tieneCabecera && styles.cuerpoSinCabecera]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              {children}
+            </div>
+          )}
 
-        {children && (
-          <div
-            className={[styles.cuerpo, !tieneCabecera && styles.cuerpoSinCabecera]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            {children}
-          </div>
-        )}
-
-        {footer && <div className={styles.pie}>{footer}</div>}
-      </div>
+          {footer && <div className={styles.pie}>{footer}</div>}
+        </div>
+      )}
     </dialog>
   )
 }

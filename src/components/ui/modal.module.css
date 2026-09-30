@@ -279,3 +279,13 @@
     align-items: stretch;
   }
 }
+
+/* `desnudo`: el contenido pone la superficie entera (fondo, radio, sombra y
+   su propia X). El diálogo queda como caja transparente que centra y anima. */
+.desnudo {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  max-height: none;
+}

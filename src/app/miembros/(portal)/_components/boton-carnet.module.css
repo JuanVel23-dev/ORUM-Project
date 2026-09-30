@@ -1,102 +1,476 @@
-/* La ventana del carnet: el carnet (o el QR) y debajo sus acciones. */
+/* ==========================================================================
+   EL CARNET  ·  la ventana entera: negro, plata y una sola familia
+   ========================================================================== */
 
-.contenido {
+.carnet {
+  position: relative;
+  isolation: isolate;
+  /* `clip` y no `hidden`: recorta la marca de agua sin volverse contenedor
+     de scroll, así que la proporción de abajo sigue siendo la PREFERIDA y la
+     tarjeta crece antes que cortar un dato. */
+  overflow: clip;
+
   display: grid;
+  grid-template-rows: auto 1fr;
   gap: var(--space-5);
+  padding: var(--space-5);
+
+  border-radius: var(--radius-xl);
+  /* Metal oscuro: un brillo plata frío arriba a la derecha sobre el negro de
+     la franja. Relleno, no trazo. */
+  background:
+    radial-gradient(
+      110% 80% at 100% 0%,
+      color-mix(in srgb, var(--n-200) 16%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(150deg, var(--cacao-800), var(--cacao-900) 65%);
+  /* El chaflán de luz de arriba es lo que lo lee como metal y no como
+     plástico; lo demás, la sombra del escalón de overlay. */
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--n-50) 14%, transparent),
+    var(--shadow-overlay);
+  color: var(--cacao-fg);
+  color-scheme: dark;
 }
 
-.acciones {
-  display: grid;
-  gap: var(--space-2);
-  justify-items: center;
-}
-
-/* La píldora blanca con sombra de «Ampliar» / «Ver el carnet»: como «Quiero
-   ser aliado» de la fachada. Sin filo: el texto la nombra, y la sombra la
-   despega del blanco de la ventana. Clase duplicada para ganarle a
-   `.secondary` sin depender del orden de los módulos. */
-.botonBlanco.botonBlanco {
-  border-color: transparent;
-  background: var(--blanco);
-  box-shadow: var(--shadow-raised);
-  color: var(--tinta-1);
-}
-
-@media (hover: hover) {
-  .botonBlanco.botonBlanco:hover {
-    box-shadow: var(--shadow-flotante);
+@media (min-width: 640px) {
+  .carnet {
+    /* La proporción de una tarjeta de verdad (ID-1, 85,6 × 54 mm). */
+    aspect-ratio: 1.586;
+    padding: var(--space-6);
   }
 }
 
-.iconoOro {
-  color: var(--gold-650);
+/* El monograma plata, a sangre y casi transparente: firma sin competir. */
+.marcaAgua {
+  position: absolute;
+  top: -18%;
+  right: -10%;
+  z-index: -1;
+  width: 58%;
+  height: auto;
+  opacity: 0.07;
+  pointer-events: none;
 }
 
-.cambiarFoto {
+/* Los focos, en plata: el oro no vive en esta tarjeta. */
+.cerrar:focus-visible,
+.volver:focus-visible,
+.foto:focus-visible,
+.qr:focus-visible {
+  outline: 2px solid var(--n-200);
+  outline-offset: 3px;
+}
+
+/* --- La barra: logotipo (o «volver») y la X ------------------------------- */
+
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+}
+
+.logo {
+  height: 1.375rem;
+}
+
+.cerrar,
+.volver {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
+  min-width: var(--tap-min);
   min-height: var(--tap-min);
-  padding-inline: var(--space-3);
+  padding: 0;
+  border: none;
   border-radius: var(--radius-full);
+  background: none;
+  color: var(--cacao-fg-2);
+  cursor: pointer;
 
-  font-size: var(--t-footnote-size);
-  font-weight: 600;
-  color: var(--text-2);
-  text-decoration: none;
   transition:
     color var(--dur-fast) var(--ease-out),
+    rotate var(--dur-base) var(--ease-out),
     translate var(--dur-fast) var(--ease-out);
 }
 
+/* La X se come el relleno de la esquina: su centro óptico cae en la esquina
+   del texto, no 12px dentro. */
+.cerrar {
+  margin-right: calc(-1 * var(--space-3));
+}
+
+.volver {
+  margin-left: calc(-1 * var(--space-2));
+  padding-inline: var(--space-2);
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 @media (hover: hover) {
-  .cambiarFoto:hover {
-    color: var(--text);
-    translate: 0 -1px;
+  /* Sin relleno: la X gira un cuarto de vuelta; «volver» se desliza. */
+  .cerrar:hover {
+    color: var(--cacao-fg);
+    rotate: 90deg;
+  }
+
+  .volver:hover {
+    color: var(--cacao-fg);
+    translate: -2px 0;
   }
 }
 
-.cambiarFoto:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+/* --- Las dos vistas -------------------------------------------------------- */
+
+/* React intercambia una vista por otra: no hay valor de partida que
+   transicionar, así que aquí el keyframe es lo correcto. */
+.vista {
+  animation: entrarVista var(--dur-base) var(--ease-out);
 }
 
-/* --- Solo el QR ------------------------------------------------------------
-   Lo que se escanea en la caja: grande, negro sobre blanco en los dos temas
-   (invertirlo rompe el escaneo en algunos lectores), con el número debajo
-   para dictarlo si el lector falla. */
-.qrGrande {
+@keyframes entrarVista {
+  from {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes entrarVista {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+.vistaCarnet {
   display: grid;
-  justify-items: center;
-  gap: var(--space-3);
-  padding-top: var(--space-2);
-  text-align: center;
+  grid-template-rows: 1fr auto;
+  gap: var(--space-5);
 }
 
-.qrGrande .qrMarco {
-  width: min(100%, 340px);
+/* --- Quién ----------------------------------------------------------------- */
+
+.identidad {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* La foto es un enlace a cambiarla. El aro es plata bruñida: un degradado
+   metálico de relleno, visible por el `padding` de 2px. */
+.foto {
+  position: relative;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 76px;
+  aspect-ratio: 1;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    140deg,
+    var(--n-50),
+    var(--n-400) 40%,
+    var(--n-100) 65%,
+    var(--n-450)
+  );
+  text-decoration: none;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+@media (min-width: 640px) {
+  .foto {
+    width: 88px;
+  }
+}
+
+.fotoImagen,
+.iniciales {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+}
+
+.fotoImagen {
+  object-fit: cover;
+  transition: scale var(--dur-base) var(--ease-out);
+}
+
+.iniciales {
+  display: grid;
+  place-items: center;
+  background: var(--cacao-800);
+  font-size: var(--t-title-2-size);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--cacao-fg);
+}
+
+.quien {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.nombre {
+  margin: 0;
+  font-size: var(--t-title-2-size);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--cacao-fg);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 640px) {
+  .nombre {
+    font-size: var(--t-title-1-size);
+  }
+}
+
+.plan {
+  margin: 0;
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cacao-fg-2);
+}
+
+/* --- Pie: los datos que se dictan y el QR ----------------------------------- */
+
+.pie {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.datos {
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.dato {
+  display: grid;
+  gap: 2px;
+}
+
+.etiqueta {
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cacao-fg-3);
+}
+
+.numero,
+.valor {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  color: var(--cacao-fg);
+}
+
+/* Un código que se dicta: cifras tabulares y tracking abierto, en la misma
+   familia que todo lo demás. */
+.numero {
+  font-size: var(--t-title-3-size);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+}
+
+/* El QR pequeño: un botón que lo amplía. */
+.qr {
+  position: relative;
+  flex-shrink: 0;
+  width: 96px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: zoom-in;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+@media (min-width: 640px) {
+  .qr {
+    width: 108px;
+  }
+}
+
+.qr .qrMarco {
+  width: 100%;
   padding: 8%;
-  border-color: var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border: none;
+  border-radius: var(--radius-sm);
   box-shadow: none;
 }
 
-.qrGrande .qrMarco svg {
+.qr .qrMarco svg {
   width: 100%;
   height: auto;
 }
 
-.qrNumero {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--t-title-2-size);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.12em;
-  color: var(--text);
+/* --- El velo: negro translúcido y muy difuminado ---------------------------
+   El «frosted glass» de iOS y macOS: lo que hay debajo se desenfoca por
+   `backdrop-filter` y un negro al 55 % lo apaga lo justo para que el texto
+   blanco se lea sobre cualquier foto. Solo se anima su OPACIDAD (el
+   desenfoque está siempre puesto, en una sola capa, y no se interpola), y
+   el contenido sube 4px al llegar. */
+.velo {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: inherit;
+
+  background: color-mix(in srgb, var(--cacao-900) 55%, transparent);
+  -webkit-backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+  backdrop-filter: blur(var(--blur-md)) saturate(1.2);
+
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: var(--blanco);
+
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+  pointer-events: none;
 }
 
-.qrNombre {
+.velo > * {
+  translate: 0 4px;
+  transition: translate var(--dur-base) var(--ease-out);
+}
+
+/* Sin transparencias: el velo llega opaco, sin desenfoque. */
+@media (prefers-reduced-transparency: reduce) {
+  .velo {
+    background: color-mix(in srgb, var(--cacao-900) 88%, transparent);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (hover: hover) {
+  .foto:hover .velo,
+  .qr:hover .velo {
+    opacity: 1;
+  }
+
+  .foto:hover .velo > *,
+  .qr:hover .velo > * {
+    translate: 0 0;
+  }
+
+  /* La foto se acerca un poco bajo el velo. */
+  .foto:hover .fotoImagen {
+    scale: 1.06;
+  }
+}
+
+/* Con teclado, el foco enseña lo mismo que el ratón. */
+.foto:focus-visible .velo,
+.qr:focus-visible .velo {
+  opacity: 1;
+}
+
+.foto:focus-visible .velo > *,
+.qr:focus-visible .velo > * {
+  translate: 0 0;
+}
+
+/* Presionar hunde. */
+.foto:active,
+.qr:active {
+  scale: 0.97;
+}
+
+/* En táctil no hay «encima»: una pastilla plata en la esquina dice que se
+   puede tocar. Con ratón sobra — el velo ya lo dice. */
+.pista {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: none;
+  place-items: center;
+  width: 24px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: var(--n-100);
+  color: var(--cacao-900);
+  box-shadow: 0 0 0 2px var(--cacao-900);
+}
+
+@media (hover: none) {
+  .pista {
+    display: grid;
+  }
+}
+
+/* --- Solo el QR ------------------------------------------------------------
+   Lo que se escanea en la caja: grande, negro sobre blanco, con el número
+   debajo para dictarlo si el lector falla. */
+.vistaQr {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  text-align: center;
+}
+
+.vistaQr .qrGrande {
+  width: min(100%, 300px);
+  padding: 7%;
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+}
+
+.vistaQr .qrGrande svg {
+  width: 100%;
+  height: auto;
+}
+
+.numeroGrande {
+  margin: var(--space-2) 0 0;
+  font-size: var(--t-title-2-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.14em;
+  color: var(--cacao-fg);
+}
+
+.nombreQr {
   margin: 0;
   font-size: var(--t-footnote-size);
-  color: var(--text-2);
+  color: var(--cacao-fg-2);
+}
+
+/* En la vista del QR la proporción de tarjeta no aplica: manda el código. */
+@media (min-width: 640px) {
+  .carnet:has(.vistaQr) {
+    aspect-ratio: auto;
+  }
+}
+
+/* En la foto el velo deja ver el aro de plata. */
+.foto .velo {
+  inset: 2px;
 }

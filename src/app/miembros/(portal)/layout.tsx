@@ -6,16 +6,13 @@ import { obtenerDatosCarnet } from '@/lib/miembros/datos-carnet'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { LogoOrum } from '@/components/ui/marca/marca'
-import { QrCode } from '@/components/ui/qr-code'
 import { PieSitio } from '@/components/pie/pie-sitio'
 import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import escaparate from '@/app/(publico)/escaparate.module.css'
 import { cerrarSesionMiembro } from '../login/actions'
-import { CarnetTarjeta } from './_components/carnet-tarjeta'
 import { BotonCarnet, ProveedorCarnet, VentanaCarnet } from './_components/boton-carnet'
 import { PortalNav } from './_components/portal-nav'
-import carnetEstilos from './_components/boton-carnet.module.css'
 import styles from './portal.module.css'
 
 export const metadata = { title: 'Portal de Miembros · ORUM' }
@@ -30,7 +27,7 @@ const MENSAJE_SOPORTE = 'Hola, necesito ayuda con mi membresía ORUM.'
   sobre la foto del banner— con lo del socio:
 
     · Navegación: Inicio y Comercios.
-    · «Carnet»: abre el carnet encima de la página; «Ampliar» deja solo el QR
+    · «Carnet»: abre el carnet encima de la página; tocar el QR lo amplía
       (`BotonCarnet`). La foto del socio ya NO está en la cabecera: aparece
       únicamente dentro del carnet.
     · «Cerrar sesión»: un submit real, funciona sin JavaScript.
@@ -111,25 +108,9 @@ export default async function MiembrosLayout({
       {/*
         LA VENTANA DEL CARNET, FUERA DE LA CABECERA: un `<dialog>` hereda las
         propiedades de sus ancestros del DOM, y dentro de la cabecera negra
-        salía oscura. Aquí hereda el claro del portal.
+        salía oscura. Aquí hereda el claro del portal (el carnet pinta su negro).
       */}
-      {carnet && (
-        <VentanaCarnet
-          carnet={<CarnetTarjeta {...carnet} />}
-          qr={
-            <div className={carnetEstilos.qrGrande} data-motion-esencial>
-              <QrCode
-                value={carnet.numeroMembresia}
-                size={512}
-                className={carnetEstilos.qrMarco}
-                label={`Código de la membresía ${carnet.numeroMembresia} de ${carnet.nombre}`}
-              />
-              <p className={carnetEstilos.qrNumero}>{carnet.numeroMembresia}</p>
-              <p className={carnetEstilos.qrNombre}>{carnet.nombre}</p>
-            </div>
-          }
-        />
-      )}
+      {carnet && <VentanaCarnet datos={carnet} />}
     </div>
     </ProveedorCarnet>
   )
