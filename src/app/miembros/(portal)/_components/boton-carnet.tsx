@@ -112,128 +112,124 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
       width="560px"
       desnudo
     >
-      <article className={estilos.carnet}>
-        {/* La firma de la marca, a sangre y casi transparente. */}
-        <MarcaAgua />
+      <div className={estilos.marco}>
+        {/* La X, una insignia montada sobre la esquina del carnet: unida a él,
+            pero sin quitarle la esquina al logotipo. Primera en el DOM para
+            que el foco de teclado empiece por la salida. */}
+        <button type="button" className={estilos.cerrarInsignia} onClick={cerrar} aria-label="Cerrar">
+          <X size={18} aria-hidden="true" />
+        </button>
 
-        {/* En el carnet la X va en la esquina, fuera del flujo; en el QR
-            ampliado comparte barra con «volver». */}
-        {soloQr ? (
-          <div className={estilos.barra}>
-            <button type="button" className={estilos.volver} onClick={() => verQr(false)}>
-              <ArrowLeft size={16} aria-hidden="true" />
-              Carnet
-            </button>
-            <button type="button" className={estilos.cerrar} onClick={cerrar} aria-label="Cerrar">
-              <X size={20} aria-hidden="true" />
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            className={`${estilos.cerrar} ${estilos.cerrarEsquina}`}
-            onClick={cerrar}
-            aria-label="Cerrar"
-          >
-            <X size={20} aria-hidden="true" />
-          </button>
-        )}
+        <article className={estilos.carnet}>
+          {/* La firma de la marca, a sangre y casi transparente. */}
+          <MarcaAgua />
 
-        {/* `key`: cada vista entra con su propio fundido al intercambiarse. */}
-        {soloQr ? (
-          <div key="qr" className={`${estilos.vista} ${estilos.vistaQr}`} data-motion-esencial>
-            <div className={estilos.aroQrGrande}>
-              <QrCode value={numeroMembresia} size={512} className={estilos.qrGrande} label={etiquetaQr} />
-            </div>
-            <p className={estilos.numeroGrande}>{numeroMembresia}</p>
-            <p className={estilos.nombreQr}>{nombre}</p>
-          </div>
-        ) : (
-          <div key="carnet" className={`${estilos.vista} ${estilos.vistaCarnet}`}>
-            <div className={estilos.identidad}>
-              {/* Un formulario no navega: `/miembros/perfil/foto` se abre
-                  encima por la ranura `@modal`. El carnet se cierra antes,
-                  para no apilar dos ventanas. */}
-              <Link
-                href="/miembros/perfil/foto"
-                className={estilos.foto}
-                onClick={cerrar}
-                aria-label="Cambiar foto"
-              >
-                {/* Foto y velo en el MISMO círculo recortado: al acercarse
-                    la foto bajo el velo, no se sale por el borde. */}
-                <span className={estilos.recorte}>
-                  {fotoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
-                    <img src={fotoUrl} alt="" className={estilos.fotoImagen} decoding="async" />
-                  ) : (
-                    <span className={estilos.iniciales} aria-hidden="true">
-                      {iniciales(nombre)}
-                    </span>
-                  )}
-                  {/* El velo de la foto no usa `backdrop-filter` (desenfocaba
-                      también el aro de plata y dejaba un halo claro en el
-                      borde): lleva una copia de la foto ya desenfocada. */}
-                  <span className={`${estilos.velo} ${estilos.veloConFoto}`} aria-hidden="true">
-                    {fotoUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element -- la misma URL, desenfocada
-                      <img src={fotoUrl} alt="" className={estilos.veloCopia} decoding="async" />
-                    )}
-                    <Camera size={16} />
-                    <span>Cambiar foto</span>
-                  </span>
-                </span>
-                <span className={estilos.pista} aria-hidden="true">
-                  <Camera size={12} />
-                </span>
-              </Link>
-
-              <div className={estilos.quien}>
-                <p className={estilos.nombre}>{nombre}</p>
-                <p className={estilos.plan}>{plan}</p>
-              </div>
-
-              {/* El logotipo a la DERECHA, a la altura del nombre (retro de
-                  diseño, 30/09/2026: «hay mucho peso en la izquierda»). La
-                  columna derecha queda X · logo · QR frente a foto · nombre ·
-                  datos. En teléfono no cabe junto al nombre: sube a su línea. */}
-              <span className={estilos.marca}>
-                <LogoOrum variante="plata" className={estilos.logo} />
-              </span>
-            </div>
-
-            <div className={estilos.pie}>
-              <dl className={estilos.datos}>
-                <div className={estilos.dato}>
-                  <dt className={estilos.etiqueta}>Número</dt>
-                  <dd className={estilos.numero}>{numeroMembresia}</dd>
-                </div>
-                <div className={estilos.dato}>
-                  <dt className={estilos.etiqueta}>Vigente hasta</dt>
-                  <dd className={estilos.valor}>{vigencia}</dd>
-                </div>
-              </dl>
-
-              <button
-                type="button"
-                className={estilos.qr}
-                onClick={() => verQr(true)}
-                aria-label="Ampliar el código QR"
-                data-motion-esencial
-              >
-                <QrCode value={numeroMembresia} size={256} className={estilos.qrMarco} label={etiquetaQr} />
-                <span className={estilos.velo} aria-hidden="true">
-                  <Maximize2 size={16} />
-                  <span>Ampliar</span>
-                </span>
-                <span className={estilos.pista} aria-hidden="true">
-                  <Maximize2 size={12} />
-                </span>
+          {soloQr && (
+            <div className={estilos.barra}>
+              <button type="button" className={estilos.volver} onClick={() => verQr(false)}>
+                <ArrowLeft size={16} aria-hidden="true" />
+                Carnet
               </button>
             </div>
-          </div>
-        )}
-      </article>
+          )}
+
+          {/* `key`: cada vista entra con su propio fundido al intercambiarse. */}
+          {soloQr ? (
+            <div key="qr" className={`${estilos.vista} ${estilos.vistaQr}`} data-motion-esencial>
+              <div className={estilos.aroQrGrande}>
+                <QrCode value={numeroMembresia} size={512} className={estilos.qrGrande} label={etiquetaQr} />
+              </div>
+              <p className={estilos.numeroGrande}>{numeroMembresia}</p>
+              <p className={estilos.nombreQr}>{nombre}</p>
+            </div>
+          ) : (
+            <div key="carnet" className={`${estilos.vista} ${estilos.vistaCarnet}`}>
+              <div className={estilos.identidad}>
+                {/* Un formulario no navega: `/miembros/perfil/foto` se abre
+                    encima por la ranura `@modal`. El carnet se cierra antes,
+                    para no apilar dos ventanas. */}
+                <Link
+                  href="/miembros/perfil/foto"
+                  className={estilos.foto}
+                  onClick={cerrar}
+                  aria-label="Cambiar foto"
+                >
+                  {/* Foto y velo en el MISMO círculo recortado: al acercarse
+                      la foto bajo el velo, no se sale por el borde. */}
+                  <span className={estilos.recorte}>
+                    {fotoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+                      <img src={fotoUrl} alt="" className={estilos.fotoImagen} decoding="async" />
+                    ) : (
+                      <span className={estilos.iniciales} aria-hidden="true">
+                        {iniciales(nombre)}
+                      </span>
+                    )}
+                    {/* El velo de la foto no usa `backdrop-filter` (desenfocaba
+                        también el aro de plata y dejaba un halo claro en el
+                        borde): lleva una copia de la foto ya desenfocada. */}
+                    <span className={`${estilos.velo} ${estilos.veloConFoto}`} aria-hidden="true">
+                      {fotoUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element -- la misma URL, desenfocada
+                        <img src={fotoUrl} alt="" className={estilos.veloCopia} decoding="async" />
+                      )}
+                      <Camera size={16} />
+                      <span>Cambiar foto</span>
+                    </span>
+                  </span>
+                  <span className={estilos.pista} aria-hidden="true">
+                    <Camera size={12} />
+                  </span>
+                </Link>
+
+                <div className={estilos.quien}>
+                  <p className={estilos.nombre}>{nombre}</p>
+                  <p className={estilos.plan}>{plan}</p>
+                </div>
+
+                {/* El logotipo a la DERECHA, arriba, alineado con el borde
+                    superior de la foto (retro de diseño, 30/09/2026: «hay
+                    mucho peso en la izquierda»): la esquina de la marca de una
+                    tarjeta. En teléfono no cabe junto al nombre: sube a su
+                    propia línea, también a la derecha. */}
+                <span className={estilos.marca}>
+                  <LogoOrum variante="plata" className={estilos.logo} />
+                </span>
+              </div>
+
+              <div className={estilos.pie}>
+                <dl className={estilos.datos}>
+                  <div className={estilos.dato}>
+                    <dt className={estilos.etiqueta}>Número</dt>
+                    <dd className={estilos.numero}>{numeroMembresia}</dd>
+                  </div>
+                  <div className={estilos.dato}>
+                    <dt className={estilos.etiqueta}>Vigente hasta</dt>
+                    <dd className={estilos.valor}>{vigencia}</dd>
+                  </div>
+                </dl>
+
+                <button
+                  type="button"
+                  className={estilos.qr}
+                  onClick={() => verQr(true)}
+                  aria-label="Ampliar el código QR"
+                  data-motion-esencial
+                >
+                  <QrCode value={numeroMembresia} size={256} className={estilos.qrMarco} label={etiquetaQr} />
+                  <span className={estilos.velo} aria-hidden="true">
+                    <Maximize2 size={16} />
+                    <span>Ampliar</span>
+                  </span>
+                  <span className={estilos.pista} aria-hidden="true">
+                    <Maximize2 size={12} />
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
+        </article>
+      </div>
     </Modal>
   )
 }

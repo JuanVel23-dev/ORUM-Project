@@ -57,13 +57,15 @@
    tamaño; se dimensiona por alto y el `viewBox` pone el ancho. */
 .marcaAgua {
   position: absolute;
-  top: -8%;
-  right: -22%;
+  /* Abajo a la izquierda, a sangre: lejos del logotipo, que se perdía sobre
+     ella cuando compartían la esquina derecha. */
+  bottom: -46%;
+  left: -16%;
   z-index: -1;
-  height: 116%;
+  height: 112%;
   width: auto;
   aspect-ratio: 1;
-  opacity: 0.09;
+  opacity: 0.07;
   pointer-events: none;
 }
 
@@ -103,7 +105,7 @@
 }
 
 .logo {
-  height: 1.5rem;
+  height: 1.75rem;
 }
 
 .cerrar,
@@ -133,14 +135,60 @@
   margin-right: calc(-1 * var(--space-3));
 }
 
-/* En el carnet, la X en la esquina y fuera del flujo: la vista ocupa toda
-   la tarjeta y la columna derecha lee X · logo · QR. */
-.cerrarEsquina {
+/* --- La X: insignia sobre la esquina ---------------------------------------
+   Montada sobre la esquina superior derecha, medio fuera: sigue siendo del
+   carnet, pero le deja la esquina al logotipo. El `<dialog>` es
+   `overflow: visible`, así que puede asomar. Se ve de 36 px; el área que se
+   toca es de 44 (`::after`). */
+.marco {
+  position: relative;
+}
+
+.cerrarInsignia {
   position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
+  top: calc(-1 * var(--space-3));
+  right: calc(-1 * var(--space-3));
   z-index: 1;
-  margin: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--cacao-800);
+  color: var(--cacao-fg-2);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--n-50) 22%, transparent),
+    var(--shadow-flotante);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    rotate var(--dur-base) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
+}
+
+.cerrarInsignia::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+}
+
+@media (hover: hover) {
+  .cerrarInsignia:hover {
+    color: var(--cacao-fg);
+    rotate: 90deg;
+  }
+}
+
+.cerrarInsignia:active {
+  scale: 0.92;
+}
+
+.cerrarInsignia:focus-visible {
+  outline: 2px solid var(--n-200);
+  outline-offset: 3px;
 }
 
 /* Sin barra (vista del carnet), la única fila es la vista y se estira. */
@@ -191,9 +239,13 @@
   }
 }
 
+/* Identidad arriba, datos abajo y el aire EN MEDIO, repartido a propósito:
+   antes la fila de la identidad se comía todo el alto y la foto flotaba
+   centrada en él, sin alinearse con nada. */
 .vistaCarnet {
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto auto;
+  align-content: space-between;
   gap: var(--space-5);
 }
 
@@ -214,6 +266,7 @@
   order: -1;
   flex-basis: 100%;
   display: flex;
+  justify-content: flex-end;
 }
 
 @media (min-width: 640px) {
@@ -226,6 +279,8 @@
     flex-basis: auto;
     flex-shrink: 0;
     margin-left: auto;
+    /* Arriba, al ras del borde superior de la foto. */
+    align-self: flex-start;
   }
 }
 
@@ -323,6 +378,15 @@
 .dato {
   display: grid;
   gap: 2px;
+}
+
+/* En escritorio, número y vigencia lado a lado, alineados a la base con el
+   QR: la franja de abajo se lee como una sola línea de datos. */
+@media (min-width: 640px) {
+  .datos {
+    grid-auto-flow: column;
+    gap: var(--space-8);
+  }
 }
 
 /*
