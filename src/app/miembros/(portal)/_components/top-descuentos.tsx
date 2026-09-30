@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { Flame, TicketPercent } from 'lucide-react'
+import { TicketPercent } from 'lucide-react'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
+import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { LogoOrum } from '@/components/ui/marca/marca'
 import { formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import { mereceMarquesina, type TopDescuento } from '@/lib/comercios/top-descuentos'
@@ -63,10 +64,7 @@ export function TopDescuentos({
       <div className={estilos.cabecera}>
         {/* `h2`, el mismo nivel que las estanterías y que "Todos los
             comercios". Sin saltos. */}
-        <h2 id="titulo-top" className={estilos.titulo}>
-          <Flame size={19} aria-hidden="true" className={estilos.llama} />
-          Top {visibles.length} del club
-        </h2>
+        <TituloSeccion id="titulo-top" texto={`Top ${visibles.length} del club`} adorno="plata" />
         <p className={estilos.apoyo}>{apoyo}</p>
       </div>
 

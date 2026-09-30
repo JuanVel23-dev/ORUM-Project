@@ -37,9 +37,10 @@ import { FavoritosProvider } from './_components/favoritos-contexto'
 import { SeccionFavoritos } from './_components/seccion-favoritos'
 import { TopDescuentos } from './_components/top-descuentos'
 import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
-import { AdornoEstrella, EstrellaOrum } from '@/components/ui/marca/marca'
+import { EstrellaOrum } from '@/components/ui/marca/marca'
 import fotoHero from '@/components/ui/marca/foto-hero.webp'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
+import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { CarruselNovedades } from './_components/carrusel-novedades'
 import {
   ComercioCard,
@@ -842,10 +843,7 @@ export default async function MiembrosHomePage({
             vistas siguen vivas por URL, `?ver=`, aunque ya no tengan pestañas).
           */}
           <div className={estilos.cabeceraRejilla}>
-            <h2 id="titulo-rejilla" className={estilos.tituloRejilla}>
-              <AdornoEstrella />
-              {tituloRejilla}
-            </h2>
+            <TituloSeccion id="titulo-rejilla" texto={tituloRejilla} />
             {hayFiltros && (
               <Link href="/miembros" className={estilos.limpiar}>
                 Quitar filtros

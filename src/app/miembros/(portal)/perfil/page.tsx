@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { derivarEstadoMembresia } from '@/lib/miembros/membresias'
 import { hoyISO } from '@/lib/shared/fecha'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
+import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { Carnet } from './_components/carnet'
 import { BotonAmpliarCarnet, CarnetAmpliable } from './_components/carnet-ampliable'
 import styles from './perfil.module.css'
@@ -136,7 +137,7 @@ export default async function PerfilMiembroPage() {
   return (
     <div className={styles.pantalla}>
       <header className={styles.encabezado}>
-        <h1 className={styles.titulo}>Mi carnet</h1>
+        <TituloSeccion como="h1" texto="Mi carnet" />
         <p className={styles.lede}>Muestra este código en la caja.</p>
       </header>
 

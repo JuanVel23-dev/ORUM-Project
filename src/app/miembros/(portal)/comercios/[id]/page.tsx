@@ -1,4 +1,5 @@
 import { cache } from 'react'
+import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ChevronLeft, ImageOff, MapPin, Phone, Store } from 'lucide-react'
@@ -498,7 +499,7 @@ export default async function FichaComercioPage({
         ahí se saldría del overlay por los dos lados.
       */}
       <Section tono="crema" className={estilos.zonaBeneficios}>
-        <h2 className={estilos.tituloSeccion}>Tus beneficios</h2>
+        <TituloSeccion texto="Tus beneficios" />
 
         {beneficios.length > 0 ? (
           /*
@@ -667,9 +668,7 @@ export default async function FichaComercioPage({
           lector de pantalla los cuenta solo.
         */}
         <div className={estilos.cabeceraSeccion}>
-          <h2 id="titulo-fotos" className={estilos.tituloSeccion}>
-            Fotos
-          </h2>
+          <TituloSeccion id="titulo-fotos" texto="Fotos del comercio" />
           {galeria.length > 0 && (
             <span className={estilos.conteo} aria-hidden>
               {galeria.length}
@@ -719,9 +718,7 @@ export default async function FichaComercioPage({
         className={`${estilos.seccion} ${estilos.zonaSedes}`}
         aria-labelledby="titulo-sedes"
       >
-        <h2 id="titulo-sedes" className={estilos.tituloSeccion}>
-          Dónde usarlo
-        </h2>
+        <TituloSeccion id="titulo-sedes" texto="Dónde usarlo" />
 
         {sedes.length > 0 ? (
           <ul className={estilos.listaSedes}>

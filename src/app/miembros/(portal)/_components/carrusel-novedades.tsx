@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Pause, Play } from 'lucide-react'
-import { AdornoEstrella } from '@/components/ui/marca/marca'
 import { useMediaQuery } from '@/components/use-media-query'
+import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import type { AnuncioResumen } from '@/lib/anuncios/tipos'
 import estilos from './carrusel-novedades.module.css'
 
@@ -59,10 +59,7 @@ export function CarruselNovedades({ anuncios }: { anuncios: AnuncioResumen[] }) 
   return (
     <section className={estilos.seccion} aria-labelledby="titulo-novedades">
       <div className={estilos.cabecera}>
-        <h2 id="titulo-novedades" className={estilos.titulo}>
-          <AdornoEstrella />
-          Novedades
-        </h2>
+        <TituloSeccion id="titulo-novedades" texto="Novedades del club" />
         <p className={estilos.apoyo}>Lo último que se sumó al club.</p>
       </div>
 

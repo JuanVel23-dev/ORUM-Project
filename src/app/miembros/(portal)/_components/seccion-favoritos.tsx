@@ -1,5 +1,5 @@
-import { Heart } from 'lucide-react'
 import { CintaRotativa } from './cinta-rotativa'
+import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { ComercioCardCompacta, type ComercioListado } from './comercio-card'
 import estilos from './seccion-favoritos.module.css'
 
@@ -40,10 +40,7 @@ export function SeccionFavoritos({
           `h2`: el mismo nivel que las estanterías y que "Todos los comercios".
           La jerarquía del documento no cambia porque la sección esté vacía.
         */}
-        <h2 id="favoritos-vacio" className={estilos.titulo}>
-          <Heart size={16} aria-hidden="true" className={estilos.corazon} />
-          Tus favoritos
-        </h2>
+        <TituloSeccion id="favoritos-vacio" texto="Tus favoritos" />
 
         {/*
           El copy nombra el GESTO y el SITIO —el corazón, la esquina de la

@@ -1,0 +1,36 @@
+/* El título de sección del Portal Público (`escaparate.module.css`,
+   `.tituloSeccion`), para usarlo fuera de la fachada. Mismos valores: si se
+   toca uno, se toca el otro. */
+
+.titulo {
+  margin: 0;
+
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  font-weight: var(--t-hero-2-weight);
+  color: var(--text);
+
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  -webkit-font-smoothing: auto;
+  text-wrap: balance;
+
+  /* Tracking interpolado con el tamaño (32px en 640px de ventana, 48px en
+     960px): el mismo cálculo que el título público. */
+  --tracking-32: -0.45px;
+  --tracking-48: -1.25px;
+  letter-spacing: clamp(
+    var(--tracking-48),
+    calc(var(--tracking-32) - (100vw - 640px) * 0.0025),
+    var(--tracking-32)
+  );
+}
+
+/* La cursiva real de Playfair, un escalón más ligera que el romano que la
+   rodea, en el oro de texto (`--brand`: `--gold-700` sobre claro, oro claro
+   dentro de la franja negra). */
+.acento {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--brand);
+}
