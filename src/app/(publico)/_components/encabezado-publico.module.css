@@ -34,13 +34,75 @@
   padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
   padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
+  /* El material (negro con curva + desenfoque progresivo) lo pintan
+     `::before` y `::after`, más abajo. `isolation` los deja detrás del
+     contenido de la cabecera y delante de la página. */
+  isolation: isolate;
+  color: var(--cacao-fg);
+}
+
+/*
+  EL MATERIAL DE LA CABECERA  ·  degradado con curva y desenfoque progresivo
+  ---------------------------------------------------------------------------
+  Encargo del 30/09/2026: «mejora este difuminado, para que sea más
+  realista». Tenía dos defectos:
+
+    1. El negro bajaba en LÍNEA RECTA de 82 % a 0 %: el ojo ve el punto
+       donde la pendiente cambia como un borde (bandas de Mach) — una franja
+       gris con canto, no una sombra que se disuelve.
+    2. El desvanecido cabía en los ~34 px que le quedaban a la caja.
+
+  Ahora el material vive en dos capas que SE SALEN 48 px por debajo de la
+  caja (sin moverla: su alto es `--cabecera-alto` y lo reservan el `<main>` y
+  las anclas; y sin tapar clics, `pointer-events: none`):
+
+    · `::before` — desenfoque de lo que pasa por debajo, como el cromo de
+      iOS, con una máscara que lo disuelve hacia abajo: nítido al final, sin
+      corte. `backdrop-filter` en cromo fijo, que es donde se permite.
+    · `::after`  — el negro con una curva de salida (once paradas en vez de
+      tres): se sostiene arriba, donde vive el texto, y se va apagando cada
+      vez más despacio hasta cero.
+*/
+.cabecera::before,
+.cabecera::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 -48px 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.cabecera::before {
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
+  /* La máscara solo usa el alfa: el color del token no importa. */
+  -webkit-mask-image: linear-gradient(to bottom, var(--cacao-bg) 40%, transparent 100%);
+  mask-image: linear-gradient(to bottom, var(--cacao-bg) 40%, transparent 100%);
+}
+
+.cabecera::after {
   background: linear-gradient(
     to bottom,
     color-mix(in srgb, var(--cacao-bg) 97%, transparent) 0%,
-    color-mix(in srgb, var(--cacao-bg) 82%, transparent) 55%,
+    color-mix(in srgb, var(--cacao-bg) 94%, transparent) 36%,
+    color-mix(in srgb, var(--cacao-bg) 88%, transparent) 46%,
+    color-mix(in srgb, var(--cacao-bg) 79%, transparent) 54%,
+    color-mix(in srgb, var(--cacao-bg) 67%, transparent) 61%,
+    color-mix(in srgb, var(--cacao-bg) 54%, transparent) 68%,
+    color-mix(in srgb, var(--cacao-bg) 40%, transparent) 75%,
+    color-mix(in srgb, var(--cacao-bg) 27%, transparent) 82%,
+    color-mix(in srgb, var(--cacao-bg) 16%, transparent) 88%,
+    color-mix(in srgb, var(--cacao-bg) 7%, transparent) 94%,
     color-mix(in srgb, var(--cacao-bg) 0%, transparent) 100%
   );
-  color: var(--cacao-fg);
+}
+
+/* Quien pide menos transparencia: banda sólida, sin desenfoque ni fundido. */
+@media (prefers-reduced-transparency: reduce) {
+  .cabecera::before,
+  .cabecera::after {
+    display: none;
+  }
 }
 
 /*
