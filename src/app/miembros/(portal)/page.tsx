@@ -34,7 +34,10 @@ export default async function MiembrosHomePage({
       base="/miembros"
       crudos={crudos}
       directorio={directorio}
-      bajada="Descubre todos los comercios aliados de ORUM y disfruta tus beneficios con tu carnet."
+      /* El texto le habla a quien YA es socio (29/09/2026): no «descubre
+         el club», sino dónde usar lo que ya tiene. */
+      titulo="Tus beneficios"
+      bajada="Elige dónde usar tu membresía: muestra tu carnet en la caja y el descuento es tuyo al momento."
       socio
     />
   )

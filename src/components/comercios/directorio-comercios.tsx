@@ -52,13 +52,22 @@ type Props = {
   /** Los `searchParams` de la página, tal cual. */
   crudos: Record<string, string | string[] | undefined>
   directorio: CatalogoPublico
-  /** La frase bajo «Comercios». */
+  /** El titular del banner. «Comercios» en la fachada. */
+  titulo?: string
+  /** La frase bajo el titular. */
   bajada: string
   /** Portal de Miembros: beneficio legible y ficha del socio. */
   socio?: boolean
 }
 
-export function DirectorioComercios({ base, crudos, directorio, bajada, socio = false }: Props) {
+export function DirectorioComercios({
+  base,
+  crudos,
+  directorio,
+  titulo = 'Comercios',
+  bajada,
+  socio = false,
+}: Props) {
   const filtros = leerFiltrosDirectorio(crudos)
   const comercios = filtrarDirectorio(directorio.comercios, filtros)
 
@@ -93,7 +102,7 @@ export function DirectorioComercios({ base, crudos, directorio, bajada, socio = 
             className={[estilos.titulo, ENTRADA].join(' ')}
             style={retardoEntrada(1)}
           >
-            Comercios
+            {titulo}
           </h1>
           <p className={[estilos.bajada, ENTRADA].join(' ')} style={retardoEntrada(2)}>
             {bajada}
