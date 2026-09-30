@@ -243,6 +243,12 @@
     color-mix(in srgb, var(--cacao-bg) 82%, transparent) 55%,
     color-mix(in srgb, var(--cacao-bg) 0%, transparent) 100%
   );
+  /* El degradado cubre también el borde inferior (1px transparente). Sin
+     esto se calculaba sobre la caja de relleno y se REPETÍA en la franja del
+     borde con su primera fila, casi negra: una línea oscura bajo la cabecera
+     sobre el crema. */
+  background-origin: border-box;
+  background-repeat: no-repeat;
   backdrop-filter: none;
   border-bottom-color: transparent;
 }
