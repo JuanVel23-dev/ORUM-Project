@@ -42,32 +42,37 @@
 }
 
 /*
-  EL MATERIAL DE LA CABECERA  ·  degradado con curva y desenfoque progresivo
+  EL MATERIAL DE LA CABECERA  ·  negro sólido y un fundido largo con curva
   ---------------------------------------------------------------------------
-  Encargo del 30/09/2026: «mejora este difuminado, para que sea más
-  realista». Tenía dos defectos:
+  Encargos del 30/09/2026: «mejora este difuminado, para que sea más
+  realista» y, después, «se ve una línea… pon el negro más abajo para que
+  se vea bien el logo y de ahí degrada hasta que no se vea esa línea».
 
-    1. El negro bajaba en LÍNEA RECTA de 82 % a 0 %: el ojo ve el punto
-       donde la pendiente cambia como un borde (bandas de Mach) — una franja
-       gris con canto, no una sombra que se disuelve.
-    2. El desvanecido cabía en los ~34 px que le quedaban a la caja.
+  Por qué se veía una línea: el negro empezaba a aclararse a media altura
+  del logo y se apagaba en un tramo corto con una pendiente que cambiaba de
+  golpe. El ojo lee cada cambio brusco de pendiente como un borde (bandas de
+  Mach), y sobre el blanco de la página ese borde era una raya gris.
 
-  Ahora el material vive en dos capas que SE SALEN 48 px por debajo de la
-  caja (sin moverla: su alto es `--cabecera-alto` y lo reservan el `<main>` y
-  las anclas; y sin tapar clics, `pointer-events: none`):
+  Ahora:
+    · NEGRO SÓLIDO (97 %) hasta el pie de la fila del logo y los botones
+      (`--solido`: el alto de la cabecera menos su relleno inferior).
+    · Desde ahí, un FUNDIDO LARGO (`--fundido`, 112 px) con curva COSENO:
+      arranca plano y termina plano, así que no hay ningún punto donde la
+      pendiente salte — ni al dejar el sólido ni al llegar a cero.
+    · Un desenfoque de lo que pasa por debajo (cromo de iOS) que se apaga
+      ANTES que el negro, para que su canto quede escondido en la sombra.
 
-    · `::before` — desenfoque de lo que pasa por debajo, como el cromo de
-      iOS, con una máscara que lo disuelve hacia abajo: nítido al final, sin
-      corte. `backdrop-filter` en cromo fijo, que es donde se permite.
-    · `::after`  — el negro con una curva de salida (once paradas en vez de
-      tres): se sostiene arriba, donde vive el texto, y se va apagando cada
-      vez más despacio hasta cero.
+  Las dos capas se SALEN por debajo de la caja: la caja no crece (su alto,
+  `--cabecera-alto`, lo reservan el `<main>` y las anclas) y no tapan clics.
 */
 .cabecera::before,
 .cabecera::after {
+  --solido: calc(var(--cabecera-alto) - var(--space-5));
+  --fundido: 112px;
+
   content: '';
   position: absolute;
-  inset: 0 0 -48px 0;
+  inset: 0 0 calc(var(--space-5) - var(--fundido)) 0;
   z-index: -1;
   pointer-events: none;
 }
@@ -76,24 +81,33 @@
   -webkit-backdrop-filter: blur(var(--blur-md));
   backdrop-filter: blur(var(--blur-md));
   /* La máscara solo usa el alfa: el color del token no importa. */
-  -webkit-mask-image: linear-gradient(to bottom, var(--cacao-bg) 40%, transparent 100%);
-  mask-image: linear-gradient(to bottom, var(--cacao-bg) 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    var(--cacao-bg) var(--solido),
+    transparent calc(var(--solido) + var(--fundido) * 0.6)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    var(--cacao-bg) var(--solido),
+    transparent calc(var(--solido) + var(--fundido) * 0.6)
+  );
 }
 
 .cabecera::after {
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--cacao-bg) 97%, transparent) 0%,
-    color-mix(in srgb, var(--cacao-bg) 94%, transparent) 36%,
-    color-mix(in srgb, var(--cacao-bg) 88%, transparent) 46%,
-    color-mix(in srgb, var(--cacao-bg) 79%, transparent) 54%,
-    color-mix(in srgb, var(--cacao-bg) 67%, transparent) 61%,
-    color-mix(in srgb, var(--cacao-bg) 54%, transparent) 68%,
-    color-mix(in srgb, var(--cacao-bg) 40%, transparent) 75%,
-    color-mix(in srgb, var(--cacao-bg) 27%, transparent) 82%,
-    color-mix(in srgb, var(--cacao-bg) 16%, transparent) 88%,
-    color-mix(in srgb, var(--cacao-bg) 7%, transparent) 94%,
-    color-mix(in srgb, var(--cacao-bg) 0%, transparent) 100%
+    color-mix(in srgb, var(--cacao-bg) 97%, transparent) 0,
+    color-mix(in srgb, var(--cacao-bg) 97%, transparent) var(--solido),
+    color-mix(in srgb, var(--cacao-bg) 94.6%, transparent) calc(var(--solido) + var(--fundido) * 0.1),
+    color-mix(in srgb, var(--cacao-bg) 87.7%, transparent) calc(var(--solido) + var(--fundido) * 0.2),
+    color-mix(in srgb, var(--cacao-bg) 77%, transparent) calc(var(--solido) + var(--fundido) * 0.3),
+    color-mix(in srgb, var(--cacao-bg) 63.5%, transparent) calc(var(--solido) + var(--fundido) * 0.4),
+    color-mix(in srgb, var(--cacao-bg) 48.5%, transparent) calc(var(--solido) + var(--fundido) * 0.5),
+    color-mix(in srgb, var(--cacao-bg) 33.5%, transparent) calc(var(--solido) + var(--fundido) * 0.6),
+    color-mix(in srgb, var(--cacao-bg) 20%, transparent) calc(var(--solido) + var(--fundido) * 0.7),
+    color-mix(in srgb, var(--cacao-bg) 9.3%, transparent) calc(var(--solido) + var(--fundido) * 0.8),
+    color-mix(in srgb, var(--cacao-bg) 2.4%, transparent) calc(var(--solido) + var(--fundido) * 0.9),
+    color-mix(in srgb, var(--cacao-bg) 0%, transparent) calc(var(--solido) + var(--fundido))
   );
 }
 
