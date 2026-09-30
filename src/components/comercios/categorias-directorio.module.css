@@ -76,8 +76,10 @@
   box-shadow: var(--filo-activo-inset), var(--shadow-press), var(--edge);
 }
 
-/* La marca de verificación de una categoría elegida: un disco pequeño en
-   tinta, montado en el canto del círculo. */
+/* La marca de verificación de una categoría elegida: un disco de ORO
+   bruñido (600 → 700) con el check en blanco, montado en el canto del
+   círculo. El blanco sobre el oro más claro del disco da 3,3:1, por encima
+   del 3:1 que pide un icono. */
 .marca {
   position: absolute;
   top: -2px;
@@ -87,8 +89,8 @@
   width: 18px;
   height: 18px;
   border-radius: var(--radius-full);
-  background: var(--text);
-  color: var(--surface);
+  background: linear-gradient(140deg, var(--gold-600), var(--gold-700));
+  color: var(--blanco);
   box-shadow: 0 0 0 2px var(--surface);
   animation: entrarMarca var(--dur-base) var(--ease-spring);
 }
@@ -138,17 +140,18 @@
   encargo del propietario: con el anillo y el tamaño ya se distingue.
 */
 .opcion[data-activa] {
-  color: var(--text);
+  /* SIN NEGRO (30/09/2026, «no me gusta que tenga negro, juguemos con las
+     tonalidades»): lo elegido se dice en oro. `--brand` es el oro de texto
+     del ámbito (fachada y portal: `--gold-650`, 4,93:1 sobre blanco), así
+     que el nombre sigue legible. */
+  color: var(--brand);
 }
 
 .opcion[data-activa] .icono {
   scale: 1.08;
-  /* `--text`, no `--tinta-1`: el fondo del círculo sigue siendo `--surface`
-     en los dos temas, y lo que hace falta aquí es el mismo contraste fuerte
-     que ya tiene cualquier texto sobre esa superficie — `--tinta-1` es un
-     primitivo oscuro fijo que en tema oscuro pintaría el glifo negro sobre
-     negro. */
-  color: var(--text);
+  /* El glifo en oro, como en reposo: lo que cambia es el anillo, el tamaño
+     y la marca. (Antes iba en `--text`, negro.) */
+  color: var(--brand);
   box-shadow:
     inset 0 0 0 2.5px var(--gold-600),
     0 0 0 var(--space-1) color-mix(in srgb, var(--gold-600) 14%, transparent),
