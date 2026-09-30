@@ -137,7 +137,7 @@ export default async function PerfilMiembroPage() {
   return (
     <div className={styles.pantalla}>
       <header className={styles.encabezado}>
-        <TituloSeccion como="h1" texto="Mi carnet" />
+        <TituloSeccion como="h1" texto="Mi carnet" tamano="bloque" />
         <p className={styles.lede}>Muestra este código en la caja.</p>
       </header>
 

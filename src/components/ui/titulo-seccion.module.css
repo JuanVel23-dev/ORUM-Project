@@ -1,7 +1,8 @@
-/* El título de sección del Portal Público (`escaparate.module.css`,
-   `.tituloSeccion`), para usarlo fuera de la fachada. Mismos valores: si se
-   toca uno, se toca el otro. */
+/* Los títulos del Portal Público, fuera de la fachada. Mismos valores que
+   `.tituloSeccion` (escaparate), `.titulo` de «Así es como te unes» y
+   `.titulo` de «Comercios destacados»: si se toca uno, se tocan los otros. */
 
+/* --- `seccion`: 32→48px, las narrativas -------------------------------- */
 .titulo {
   margin: 0;
 
@@ -26,9 +27,24 @@
   );
 }
 
-/* La cursiva real de Playfair, un escalón más ligera que el romano que la
-   rodea, en el oro de texto (`--brand`: `--gold-700` sobre claro, oro claro
-   dentro de la franja negra). */
+/* --- `bloque`: 26px, los bloques de uso («Así es como te unes») -------- */
+.titulo.bloque {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  font-weight: 700;
+  letter-spacing: normal;
+}
+
+/* --- `sobreNegro`: el de «Comercios destacados» ------------------------- */
+.titulo.sobreNegro {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* La cursiva real de Playfair, un escalón más ligera, en el oro de texto
+   del portal (`--brand`: `--gold-650` en la fachada y en el Portal de
+   Miembros). */
 .acento {
   font-style: italic;
   font-weight: 500;

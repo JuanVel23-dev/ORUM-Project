@@ -40,7 +40,7 @@ export function SeccionFavoritos({
           `h2`: el mismo nivel que las estanterías y que "Todos los comercios".
           La jerarquía del documento no cambia porque la sección esté vacía.
         */}
-        <TituloSeccion id="favoritos-vacio" texto="Tus favoritos" />
+        <TituloSeccion id="favoritos-vacio" texto="Tus favoritos" tamano="bloque" />
 
         {/*
           El copy nombra el GESTO y el SITIO —el corazón, la esquina de la

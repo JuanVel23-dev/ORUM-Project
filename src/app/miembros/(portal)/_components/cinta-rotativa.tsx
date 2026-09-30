@@ -39,7 +39,7 @@ export function CintaRotativa({
   return (
     <section className={`${estilos.seccion} revelar-vista`} aria-label={titulo}>
       <div className={estilos.cabecera}>
-        <TituloSeccion texto={titulo} />
+        <TituloSeccion texto={titulo} tamano="bloque" />
         {apoyo && <p className={estilos.apoyo}>{apoyo}</p>}
       </div>
 

@@ -64,7 +64,7 @@ export function TopDescuentos({
       <div className={estilos.cabecera}>
         {/* `h2`, el mismo nivel que las estanterías y que "Todos los
             comercios". Sin saltos. */}
-        <TituloSeccion id="titulo-top" texto={`Top ${visibles.length} del club`} adorno="plata" />
+        <TituloSeccion id="titulo-top" texto={`Top ${visibles.length} del club`} variante="sobreNegro" />
         <p className={estilos.apoyo}>{apoyo}</p>
       </div>
 

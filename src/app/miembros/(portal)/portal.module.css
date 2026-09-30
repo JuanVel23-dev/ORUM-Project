@@ -88,6 +88,22 @@
   );
 }
 
+/*
+  LOS OROS DEL PORTAL PÚBLICO, y solo esos (29/09/2026, encargo del
+  propietario: «se está usando un dorado que no utiliza el portal inicial»).
+  Los mismos dos remapeos que `.fachada[data-theme='light']`:
+    · `--brand` → `--gold-650` (#8E6B13), el oro de texto de la fachada.
+      4,56:1 sobre el crema del portal; sobre las franjas (4,29–4,38) queda
+      para títulos grandes e iconos, que es donde aparece.
+    · `--gold-bg` → el fondo de insignia al 12 %, el de la fachada.
+  Doble selector (0,2,0) para ganarle al bloque `[data-theme='light']` de
+  `globals.css` sin depender del orden de carga.
+*/
+.portal[data-theme='light'] {
+  --brand: var(--gold-650);
+  --gold-bg: color-mix(in srgb, var(--gold-700) 12%, transparent);
+}
+
 @media (min-width: 768px) {
   .portal {
     --cabecera-contenido: 38px;

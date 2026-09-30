@@ -499,7 +499,7 @@ export default async function FichaComercioPage({
         ahí se saldría del overlay por los dos lados.
       */}
       <Section tono="crema" className={estilos.zonaBeneficios}>
-        <TituloSeccion texto="Tus beneficios" />
+        <TituloSeccion texto="Tus beneficios" tamano="bloque" />
 
         {beneficios.length > 0 ? (
           /*
@@ -668,7 +668,7 @@ export default async function FichaComercioPage({
           lector de pantalla los cuenta solo.
         */}
         <div className={estilos.cabeceraSeccion}>
-          <TituloSeccion id="titulo-fotos" texto="Fotos del comercio" />
+          <TituloSeccion id="titulo-fotos" texto="Fotos del comercio" tamano="bloque" />
           {galeria.length > 0 && (
             <span className={estilos.conteo} aria-hidden>
               {galeria.length}
@@ -718,7 +718,7 @@ export default async function FichaComercioPage({
         className={`${estilos.seccion} ${estilos.zonaSedes}`}
         aria-labelledby="titulo-sedes"
       >
-        <TituloSeccion id="titulo-sedes" texto="Dónde usarlo" />
+        <TituloSeccion id="titulo-sedes" texto="Dónde usarlo" tamano="bloque" />
 
         {sedes.length > 0 ? (
           <ul className={estilos.listaSedes}>
