@@ -108,6 +108,12 @@
   height: 1.75rem;
 }
 
+@media (min-width: 640px) {
+  .logo {
+    height: 2.25rem;
+  }
+}
+
 .cerrar,
 .volver {
   display: inline-flex;
@@ -239,48 +245,58 @@
   }
 }
 
-/* Identidad arriba, datos abajo y el aire EN MEDIO, repartido a propósito:
-   antes la fila de la identidad se comía todo el alto y la foto flotaba
-   centrada en él, sin alinearse con nada. */
+/*
+  TRES FILAS Y DOS COLUMNAS (30/09/2026, «mucho espacio sin nada»):
+
+      ·           logo
+      identidad   qr      ← la identidad, CENTRADA en el alto que sobra
+      datos       qr      ← el QR baja hasta la base de los datos
+
+  El logotipo arriba a la derecha, solo; el QR ocupa la columna derecha de
+  las dos filas de abajo, así puede crecer sin quitarle alto a la foto. En
+  teléfono no hay ancho para identidad y QR lado a lado: la identidad toma
+  la fila entera y el QR baja junto a los datos.
+*/
 .vistaCarnet {
   display: grid;
-  grid-template-rows: auto auto;
-  align-content: space-between;
-  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'marca marca'
+    'identidad identidad'
+    'datos qr';
+  gap: var(--space-4) var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .vistaCarnet {
+    grid-template-areas:
+      'marca marca'
+      'identidad qr'
+      'datos qr';
+  }
+}
+
+.marca {
+  grid-area: marca;
+  justify-self: end;
+  display: flex;
 }
 
 /* --- Quién ----------------------------------------------------------------- */
 
 .identidad {
+  grid-area: identidad;
+  align-self: center;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-4);
   min-width: 0;
 }
 
-/* El logotipo, envuelto: el `flex-basis` va en el envoltorio para no
-   estirar la imagen. En teléfono, su propia línea arriba (a la izquierda,
-   lejos de la X); desde 640 px, a la derecha del nombre. */
-.marca {
-  order: -1;
-  flex-basis: 100%;
-  display: flex;
-  justify-content: flex-end;
-}
-
 @media (min-width: 640px) {
   .identidad {
-    flex-wrap: nowrap;
-  }
-
-  .marca {
-    order: 0;
-    flex-basis: auto;
-    flex-shrink: 0;
-    margin-left: auto;
-    /* Arriba, al ras del borde superior de la foto. */
-    align-self: flex-start;
+    gap: var(--space-5);
   }
 }
 
@@ -302,7 +318,7 @@
 
 @media (min-width: 640px) {
   .foto {
-    width: 96px;
+    width: 104px;
   }
 }
 
@@ -361,14 +377,10 @@
 
 /* --- Pie: los datos que se dictan y el QR ----------------------------------- */
 
-.pie {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
 
 .datos {
+  grid-area: datos;
+  align-self: end;
   margin: 0;
   display: grid;
   gap: var(--space-3);
@@ -417,9 +429,10 @@
    bruñida, como la foto, y con las esquinas redondas de una tarjeta: así
    pertenece al carnet en vez de parecer una etiqueta pegada encima. */
 .qr {
+  grid-area: qr;
+  align-self: end;
   position: relative;
-  flex-shrink: 0;
-  width: 104px;
+  width: 108px;
   padding: 2px;
   border: none;
   border-radius: var(--radius-md);
@@ -430,7 +443,7 @@
 
 @media (min-width: 640px) {
   .qr {
-    width: 116px;
+    width: 136px;
   }
 }
 

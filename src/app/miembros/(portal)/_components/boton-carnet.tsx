@@ -144,6 +144,15 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
             </div>
           ) : (
             <div key="carnet" className={`${estilos.vista} ${estilos.vistaCarnet}`}>
+              {/* Tres filas (encargo del 30/09/2026, «mucho espacio sin
+                  nada»): el logotipo solo arriba a la derecha; la identidad
+                  CENTRADA en el alto que sobra; los datos abajo. El QR ocupa
+                  la columna derecha desde el centro hasta abajo, así crece
+                  sin robarle alto a la foto. */}
+              <span className={estilos.marca}>
+                <LogoOrum variante="plata" className={estilos.logo} />
+              </span>
+
               <div className={estilos.identidad}>
                 {/* Un formulario no navega: `/miembros/perfil/foto` se abre
                     encima por la ranura `@modal`. El carnet se cierra antes,
@@ -186,46 +195,35 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
                   <p className={estilos.nombre}>{nombre}</p>
                   <p className={estilos.plan}>{plan}</p>
                 </div>
+              </div>
 
-                {/* El logotipo a la DERECHA, arriba, alineado con el borde
-                    superior de la foto (retro de diseño, 30/09/2026: «hay
-                    mucho peso en la izquierda»): la esquina de la marca de una
-                    tarjeta. En teléfono no cabe junto al nombre: sube a su
-                    propia línea, también a la derecha. */}
-                <span className={estilos.marca}>
-                  <LogoOrum variante="plata" className={estilos.logo} />
+              <dl className={estilos.datos}>
+                <div className={estilos.dato}>
+                  <dt className={estilos.etiqueta}>Número</dt>
+                  <dd className={estilos.numero}>{numeroMembresia}</dd>
+                </div>
+                <div className={estilos.dato}>
+                  <dt className={estilos.etiqueta}>Vigente hasta</dt>
+                  <dd className={estilos.valor}>{vigencia}</dd>
+                </div>
+              </dl>
+
+              <button
+                type="button"
+                className={estilos.qr}
+                onClick={() => verQr(true)}
+                aria-label="Ampliar el código QR"
+                data-motion-esencial
+              >
+                <QrCode value={numeroMembresia} size={256} className={estilos.qrMarco} label={etiquetaQr} />
+                <span className={estilos.velo} aria-hidden="true">
+                  <Maximize2 size={16} />
+                  <span>Ampliar</span>
                 </span>
-              </div>
-
-              <div className={estilos.pie}>
-                <dl className={estilos.datos}>
-                  <div className={estilos.dato}>
-                    <dt className={estilos.etiqueta}>Número</dt>
-                    <dd className={estilos.numero}>{numeroMembresia}</dd>
-                  </div>
-                  <div className={estilos.dato}>
-                    <dt className={estilos.etiqueta}>Vigente hasta</dt>
-                    <dd className={estilos.valor}>{vigencia}</dd>
-                  </div>
-                </dl>
-
-                <button
-                  type="button"
-                  className={estilos.qr}
-                  onClick={() => verQr(true)}
-                  aria-label="Ampliar el código QR"
-                  data-motion-esencial
-                >
-                  <QrCode value={numeroMembresia} size={256} className={estilos.qrMarco} label={etiquetaQr} />
-                  <span className={estilos.velo} aria-hidden="true">
-                    <Maximize2 size={16} />
-                    <span>Ampliar</span>
-                  </span>
-                  <span className={estilos.pista} aria-hidden="true">
-                    <Maximize2 size={12} />
-                  </span>
-                </button>
-              </div>
+                <span className={estilos.pista} aria-hidden="true">
+                  <Maximize2 size={12} />
+                </span>
+              </button>
             </div>
           )}
         </article>
