@@ -1,9 +1,10 @@
 # Pendientes — cierre de sesión del 30/09 al 01/10/2026
 
-Estado: **todo commiteado en `main` (6 commits locales por delante de
-`origin/main`, aún SIN `git push`)**. El merge de `explorar` está cerrado
-(`d97243c`): estructura nueva de GitHub + el SEO local repuesto. `tsc` y
-`eslint .` limpios, 386/386 pruebas y `next build` completo en verde.
+Estado: **todo commiteado y publicado en `origin/main`** (push del 01/10/2026,
+hasta `5608485`). El merge de `explorar` se cerró con la estructura nueva de GitHub
++ el SEO local repuesto, y después se integraron los 3 commits de favoritos de
+`DanielBullaUsaquen`. `tsc` y `eslint .` limpios, 389/389 pruebas y `next build`
+completo en verde sobre el código ya combinado.
 
 Fuera de los commits, a propósito: `docs/superpowers/specs/2026-09-23-anuncios-novedades-design.md`
 (ya venía modificado antes de esta sesión, no es de esta tanda), `graphify-out/`
@@ -37,10 +38,9 @@ Especificación: `docs/superpowers/specs/2026-09-30-derechos-imagenes-design.md`
 ## 1. Tuyos
 
 ### Urgente
-- [ ] **Hacer `git push` de `main`** (6 commits por delante de `origin/main`). No lo
-  hice yo: publicar a un repositorio compartido lo decides tú. Si `DanielBullaUsaquen`
-  es otra persona, conviene avisarle antes del refactor de `explorar` reconciliado con el SEO.
-- [ ] **Desplegar** cuando hagas el push (las migraciones ya están en producción; el
+- [ ] **Avisar a `DanielBullaUsaquen`** (si es otra persona) de que el refactor de
+  `explorar` quedó reconciliado con el SEO, y de que `main` ya incluye todo esto.
+- [ ] **Desplegar** ahora que está publicado (las migraciones ya están en producción; el
   código nuevo no).
 
 ### Antes de probar
