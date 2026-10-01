@@ -320,6 +320,37 @@
 
 /* --- La rejilla ----------------------------------------------------------- */
 
+/* «Favoritos» encendido: el corazón relleno en rojo dentro de su anillo,
+   que también pasa a rojo, y el texto en negrita. Sin fondo. */
+.favoritos[data-activo] {
+  font-weight: 700;
+}
+
+.favoritos[data-activo] .disparadorIcono {
+  color: var(--danger);
+  box-shadow: inset 0 0 0 1.5px var(--danger);
+}
+
+.favoritos {
+  text-decoration: none;
+}
+
+/* La celda de la rejilla ancla el corazón, que va encima de la tarjeta. */
+.celda {
+  position: relative;
+}
+
+/* El corazón en la esquina superior derecha, sobre la foto. Por encima del
+   enlace de la tarjeta para recibir el toque. Selector con la celda
+   (0,2,0) para ganarle al `position: relative` del propio componente sin
+   depender del orden en que se cargan los módulos. */
+.celda > .corazon {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 2;
+}
+
 .resultados {
   margin-top: var(--space-6);
 }
