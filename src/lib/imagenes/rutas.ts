@@ -13,7 +13,7 @@
     imagenes-comercios/comercios/{id}/galeria/{clave}.{ext}
     imagenes-comercios/marcas/{id}/logo.{ext}
     avatares/perfiles/{auth.uid()}/avatar.{ext}
-    avatares/miembros/{id}/foto.{ext}
+    avatares/miembros/{id}/{clave}/foto.{ext}   ← clave aleatoria POR SUBIDA (1/10/2026)
 
   Nombre de archivo FIJO por destino (`logo`, `portada`, `avatar`, `foto`).
   Con `upsert: true` eso significa que subir dos veces SUSTITUYE en vez de
@@ -50,8 +50,44 @@ export function rutaAvatarPerfil(perfilId: string, extension: string): string {
   return `perfiles/${perfilId}/avatar.${extension}`
 }
 
-export function rutaFotoMiembro(miembroId: number, extension: string): string {
-  return `miembros/${miembroId}/foto.${extension}`
+/**
+ * Una clave aleatoria de 32 hexadecimales (128 bits), la misma que un UUID sin
+ * guiones. Es lo que hace que la ruta de una foto NO se pueda adivinar.
+ */
+const FORMA_CLAVE_FOTO = /^[0-9a-f]{32}$/
+
+export function claveFotoValida(clave: string): boolean {
+  return FORMA_CLAVE_FOTO.test(clave)
+}
+
+/** Una clave nueva, de un solo uso: cada foto subida lleva la suya. */
+export function nuevaClaveFoto(): string {
+  return crypto.randomUUID().replace(/-/g, '')
+}
+
+/**
+ * `avatares/miembros/{id}/{clave}/foto.{ext}`
+ *
+ * 1/10/2026 · auditoría de seguridad. La ruta era `miembros/{id}/foto.{ext}`
+ * y el `id` es consecutivo: cualquiera podía bajar la foto de otro socio
+ * probando números, sin sesión. Ahora lleva una clave aleatoria POR SUBIDA.
+ *
+ * La clave se valida y NO se concatena sin mirar: una `clave` con `..` o `/`
+ * alteraría la ruta, y el valor llega de quien llama.
+ *
+ * Como cada foto nueva trae clave nueva, la anterior ya no se SUSTITUYE al
+ * subir: quien sube debe borrarla por su dirección guardada
+ * (`rutaDesdeUrlPublica`). A cambio, cada foto tiene una URL distinta y no
+ * hay copia vieja en la caché de la CDN.
+ *
+ * El `id` se conserva en la ruta: la política de Storage compara la carpeta
+ * contra el dueño, y deja la ruta legible al diagnosticar.
+ */
+export function rutaFotoMiembro(miembroId: number, extension: string, clave: string): string {
+  if (!claveFotoValida(clave)) {
+    throw new Error('Clave de foto inválida: deben ser 32 caracteres hexadecimales en minúscula.')
+  }
+  return `miembros/${miembroId}/${clave}/foto.${extension}`
 }
 
 /**

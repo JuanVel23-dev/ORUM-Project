@@ -30,6 +30,8 @@ export function FotoMiembro({
       limite={LIMITE_AVATARES}
       forma="circulo"
       etiquetaAccion="Guardar foto"
+      declaracion="Confirmo que el socio me entregó esta foto y tiene derecho a usarla."
+      verificarCara
     />
   )
 }

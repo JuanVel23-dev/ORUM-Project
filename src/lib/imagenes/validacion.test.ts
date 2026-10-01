@@ -213,7 +213,11 @@ describe('rutas — el id va en la carpeta, que es lo que audita la política RL
   it('marca, perfil y miembro', () => {
     expect(rutaLogoMarca(7, 'png')).toBe('marcas/7/logo.png')
     expect(rutaAvatarPerfil('6f1c-uuid', 'jpg')).toBe('perfiles/6f1c-uuid/avatar.jpg')
-    expect(rutaFotoMiembro(9, 'webp')).toBe('miembros/9/foto.webp')
+    // La foto del socio lleva una clave aleatoria por subida (1/10/2026): ver
+    // `rutas.test.ts`. Aquí solo se fija la forma.
+    expect(rutaFotoMiembro(9, 'webp', 'a1b2c3d4e5f60718293a4b5c6d7e8f90')).toBe(
+      'miembros/9/a1b2c3d4e5f60718293a4b5c6d7e8f90/foto.webp',
+    )
   })
 
   it('el nombre del archivo es fijo, para que upsert sustituya y no acumule', () => {

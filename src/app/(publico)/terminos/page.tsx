@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { PaginaLegal } from '../_components/pagina-legal'
 
 export const metadata: Metadata = {
@@ -13,10 +14,13 @@ export const metadata: Metadata = {
   Donde el texto necesita un dato real de la empresa (razón social, NIT,
   domicilio) queda un marcador entre corchetes. No se inventa un NIT ni una
   dirección: un dato legal falso es peor que un hueco visible.
+
+  Sección 9 «Contenido que subes» (30/09/2026): borrador, pendiente de la
+  revisión del abogado del propietario.
 */
 export default function TerminosPage() {
   return (
-    <PaginaLegal titulo="Términos y condiciones" actualizado="26 de septiembre de 2026">
+    <PaginaLegal titulo="Términos y condiciones" actualizado="30 de septiembre de 2026">
       <section>
         <h2>1. Quiénes somos</h2>
         <p>
@@ -107,7 +111,19 @@ export default function TerminosPage() {
       </section>
 
       <section>
-        <h2>9. Limitación de responsabilidad</h2>
+        <h2>9. Contenido que subes</h2>
+        <p>
+          Al subir una foto a tu perfil declaras que eres quien aparece en ella y que tienes
+          derecho a usarla, y nos autorizas a mostrarla en tu carnet. ORUM puede retirar un
+          contenido ante un reclamo de derechos de autor o si incumple estos Términos, y puede
+          suspender las cuentas con infracciones repetidas. Para reportar un contenido, consulta
+          la página de{' '}
+          <Link href="/derechos-de-autor">reclamos por derechos de autor</Link>.
+        </p>
+      </section>
+
+      <section>
+        <h2>10. Limitación de responsabilidad</h2>
         <p>
           ORUM no garantiza que el Sitio funcione de forma ininterrumpida ni libre
           de errores. En la medida permitida por la ley, ORUM no responde por
@@ -117,7 +133,7 @@ export default function TerminosPage() {
       </section>
 
       <section>
-        <h2>10. Terminación</h2>
+        <h2>11. Terminación</h2>
         <p>
           ORUM puede suspender o cancelar una cuenta que incumpla estos términos.
           El socio puede solicitar la cancelación de su membresía en cualquier
@@ -127,7 +143,7 @@ export default function TerminosPage() {
       </section>
 
       <section>
-        <h2>11. Modificaciones</h2>
+        <h2>12. Modificaciones</h2>
         <p>
           ORUM puede actualizar estos términos para reflejar cambios en el
           servicio o en la normativa aplicable. La fecha de «Última actualización»
@@ -136,7 +152,7 @@ export default function TerminosPage() {
       </section>
 
       <section>
-        <h2>12. Ley aplicable</h2>
+        <h2>13. Ley aplicable</h2>
         <p>
           Estos términos se rigen por las leyes de la República de Colombia.
           Cualquier controversia se someterá a los jueces competentes de{' '}
@@ -145,7 +161,7 @@ export default function TerminosPage() {
       </section>
 
       <section>
-        <h2>13. Contacto</h2>
+        <h2>14. Contacto</h2>
         <p>
           Para preguntas sobre estos términos escríbenos a{' '}
           <strong>[correo de contacto]</strong> o por el WhatsApp de soporte que

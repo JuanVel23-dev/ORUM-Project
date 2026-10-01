@@ -1,10 +1,13 @@
 'use client'
 
-import { useActionState, useEffect, useState, type ReactNode } from 'react'
+import { useActionState, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Upload } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field, useField } from '@/components/ui/field'
+import { DeclaracionFoto } from '@/components/imagenes/declaracion-foto'
+import { contarCaras } from '@/lib/imagenes/detectar-caras'
+import { mensajeDeCaras, permiteContinuar, veredictoDeCaras } from '@/lib/imagenes/derechos'
 import {
   TIPOS_IMAGEN,
   pesoLegible,
@@ -69,6 +72,13 @@ type Props = {
    * después, que es como se acumulan imágenes sin texto alternativo.
    */
   children?: ReactNode
+  /**
+   * Texto de la casilla de declaración de derechos. Si se pasa, la casilla es
+   * OBLIGATORIA (el servidor también la exige). Solo para fotos de personas.
+   */
+  declaracion?: string
+  /** Exige una sola cara antes de aceptar el archivo (comprobación en el navegador). */
+  verificarCara?: boolean
 }
 
 const ACEPTA = TIPOS_IMAGEN.join(',')
@@ -85,6 +95,8 @@ export function SubidaImagen({
   acento = 'tinta',
   etiquetaAccion = 'Subir imagen',
   children,
+  declaracion,
+  verificarCara = false,
 }: Props) {
   const [state, formAction, pending] = useActionState(accion, ESTADO_SUBIDA_INICIAL)
 
@@ -92,6 +104,10 @@ export function SubidaImagen({
      estado externo: `useSyncExternalStore` no aplica aquí. */
   const [previa, setPrevia] = useState<string | null>(null)
   const [errorLocal, setErrorLocal] = useState<string | null>(null)
+  const [declarada, setDeclarada] = useState(false)
+  /** Mientras se comprueba la cara no se puede enviar: el archivo ya está en el campo. */
+  const [comprobando, setComprobando] = useState(false)
+  const peticion = useRef(0)
 
   // Un object URL retiene el archivo en memoria hasta que se revoca.
   useEffect(() => {
@@ -104,7 +120,13 @@ export function SubidaImagen({
   const error = errorLocal ?? state.error ?? null
 
   function alElegir(evento: React.ChangeEvent<HTMLInputElement>) {
-    const archivo = evento.target.files?.[0] ?? null
+    const campo = evento.target
+    const archivo = campo.files?.[0] ?? null
+    // Cada archivo nuevo invalida la comprobación en vuelo de uno anterior, y la
+    // declaración se refiere a ESTE archivo: hay que volver a marcarla.
+    const esta = ++peticion.current
+    setComprobando(false)
+    setDeclarada(false)
     setPrevia(null)
     setErrorLocal(null)
     if (!archivo) return
@@ -112,9 +134,37 @@ export function SubidaImagen({
     const veredicto = validarImagen({ tipo: archivo.type, tamano: archivo.size }, limite)
     if (!veredicto.ok) {
       setErrorLocal(veredicto.error)
-      evento.target.value = ''
+      campo.value = ''
       return
     }
+
+    if (verificarCara) {
+      const url = URL.createObjectURL(archivo)
+      const imagen = new Image()
+      setComprobando(true)
+      imagen.onload = async () => {
+        const veredicto = veredictoDeCaras(await contarCaras(imagen))
+        URL.revokeObjectURL(url)
+        if (esta !== peticion.current) return // se eligió otro archivo mientras tanto
+        setComprobando(false)
+        if (!permiteContinuar(veredicto)) {
+          setErrorLocal(mensajeDeCaras(veredicto))
+          campo.value = ''
+          return
+        }
+        setPrevia(URL.createObjectURL(archivo))
+      }
+      imagen.onerror = () => {
+        // No se pudo abrir para comprobarla: que decida el servidor.
+        URL.revokeObjectURL(url)
+        if (esta !== peticion.current) return
+        setComprobando(false)
+        setPrevia(URL.createObjectURL(archivo))
+      }
+      imagen.src = url
+      return
+    }
+
     setPrevia(URL.createObjectURL(archivo))
   }
 
@@ -159,9 +209,14 @@ export function SubidaImagen({
 
           {children}
 
+          {declaracion && (
+            <DeclaracionFoto texto={declaracion} marcada={declarada} onChange={setDeclarada} />
+          )}
+
           <Button
             type="submit"
             size="sm"
+            disabled={(Boolean(declaracion) && !declarada) || comprobando}
             variant={acento === 'marca' ? 'brand' : 'primary'}
             loading={pending}
             icon={<Upload size={15} />}

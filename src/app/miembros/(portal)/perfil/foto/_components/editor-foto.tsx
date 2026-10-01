@@ -16,6 +16,15 @@ import { Camera, Check, ImagePlus, RotateCcw, RotateCw, X, ZoomIn, ZoomOut } fro
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
+import { DeclaracionFoto } from '@/components/imagenes/declaracion-foto'
+import { contarCaras } from '@/lib/imagenes/detectar-caras'
+import {
+  CAMPO_DECLARACION,
+  VALOR_DECLARACION,
+  mensajeDeCaras,
+  permiteContinuar,
+  veredictoDeCaras,
+} from '@/lib/imagenes/derechos'
 import { guardarMiFoto } from '@/app/miembros/(portal)/perfil/imagenes-actions'
 import { ESTADO_SUBIDA_INICIAL } from '@/lib/imagenes/estado'
 import { LIMITE_AVATARES } from '@/lib/imagenes/validacion'
@@ -84,14 +93,26 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
   const [preparando, setPreparando] = useState(false)
   const [errorLocal, setErrorLocal] = useState<string | null>(null)
   const [soltando, setSoltando] = useState(false)
+  const [declarada, setDeclarada] = useState(false)
 
   const idArchivo = useId()
   const idTitulo = useId()
   const entrada = useRef<HTMLInputElement>(null)
+  /** URL de la foto que se está comprobando; se suelta al desmontar. */
+  const pendiente = useRef<string | null>(null)
   const escenario = useRef<HTMLDivElement>(null)
   const circulo = useRef<HTMLDivElement>(null)
   const punteros = useRef(new Map<number, { x: number; y: number }>())
   const pellizco = useRef<{ distancia: number; zoom: number } | null>(null)
+
+  // Si se cierra el editor mientras se comprueba una foto, su URL aún no es
+  // `fuente` y el efecto de abajo no la cubre: se suelta aquí.
+  useEffect(() => {
+    return () => {
+      if (pendiente.current) URL.revokeObjectURL(pendiente.current)
+      pendiente.current = null
+    }
+  }, [])
 
   // Un object URL retiene el archivo en memoria hasta que se revoca: el
   // anterior se suelta al cambiar de fuente y el último al desmontar.
@@ -123,6 +144,9 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
   const ocupado = preparando || enviando
 
   function cargar(archivo: File | undefined) {
+    // Mientras se comprueba una foto no se acepta otra: dos `onload` en vuelo
+    // competirían y ganaría la que termine última, no la última elegida.
+    if (preparando) return
     setErrorLocal(null)
     if (!archivo) return
     if (!archivo.type.startsWith('image/')) {
@@ -135,14 +159,33 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
     }
 
     const url = URL.createObjectURL(archivo)
+    pendiente.current = url
     const imagen = new Image()
     imagen.decoding = 'async'
-    imagen.onload = () => {
+    setPreparando(true)
+    imagen.onload = async () => {
+      // Una sola cara, comprobada en el navegador: la foto no sale del dispositivo.
+      // Si la detección no puede ejecutarse, continúa (`no_disponible`).
+      const veredicto = veredictoDeCaras(await contarCaras(imagen))
+      // Si el componente se desmontó mientras tanto, el efecto de limpieza ya
+      // soltó el URL: no hay nada más que hacer.
+      if (pendiente.current !== url) return
+      pendiente.current = null
+      setPreparando(false)
+      if (!permiteContinuar(veredicto)) {
+        URL.revokeObjectURL(url)
+        setErrorLocal(mensajeDeCaras(veredicto))
+        return
+      }
+      // La declaración se refiere a ESTA foto: cada foto nueva la pide de nuevo.
+      setDeclarada(false)
       setFuente({ url, ancho: imagen.naturalWidth, alto: imagen.naturalHeight, imagen })
       setEncuadre(ENCUADRE_INICIAL)
       setSuave(false)
     }
     imagen.onerror = () => {
+      pendiente.current = null
+      setPreparando(false)
       URL.revokeObjectURL(url)
       setErrorLocal('No pudimos abrir esa imagen. Prueba con una foto JPG o PNG.')
     }
@@ -253,13 +296,14 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
   }
 
   async function guardar() {
-    if (!fuente || ocupado) return
+    if (!fuente || ocupado || !declarada) return
     setErrorLocal(null)
     setPreparando(true)
     try {
       const blob = await exportar(fuente, encuadre)
       const datos = new FormData()
       datos.set('archivo', new File([blob], 'foto.jpg', { type: 'image/jpeg' }))
+      datos.set(CAMPO_DECLARACION, VALOR_DECLARACION)
       startTransition(() => accion(datos))
     } catch {
       setErrorLocal('No pudimos preparar la foto. Inténtalo de nuevo.')
@@ -443,6 +487,12 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
             </button>
           </div>
 
+          <DeclaracionFoto
+            texto="Confirmo que soy yo quien aparece en esta foto y que tengo derecho a usarla."
+            marcada={declarada}
+            onChange={setDeclarada}
+          />
+
           <div className={estilos.acciones}>
             <button type="button" className={estilos.enlace} onClick={elegir}>
               <ImagePlus size={16} aria-hidden="true" />
@@ -452,6 +502,7 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
               variant="primary"
               pildora
               loading={ocupado}
+              disabled={!declarada}
               icon={<Check size={16} aria-hidden="true" />}
               onClick={guardar}
             >
@@ -489,6 +540,7 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
           <Button
             variant="primary"
             pildora
+            loading={preparando}
             icon={<ImagePlus size={16} aria-hidden="true" />}
             onClick={elegir}
           >

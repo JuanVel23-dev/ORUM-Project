@@ -151,6 +151,23 @@ export async function borrarObjeto(
 }
 
 /**
+ * Borra el objeto al que apunta una URL pública NUESTRA. Si la URL es externa
+ * (o está vacía) no hay nada que borrar y no hace nada.
+ *
+ * La usan las fotos de socio, cuya ruta lleva una clave distinta en cada
+ * subida: la foto anterior ya no se sustituye sola y hay que borrarla por la
+ * dirección que quedó guardada. Best-effort, como `borrarObjeto`.
+ */
+export async function borrarPorUrlPublica(
+  admin: Admin,
+  bucket: string,
+  url: string | null,
+): Promise<void> {
+  const ruta = rutaDesdeUrlPublica(url, bucket)
+  if (ruta) await borrarObjeto(admin, bucket, ruta)
+}
+
+/**
  * Ruta interna a partir de una URL pública nuestra, o `null` si la URL es
  * externa (un comercio que aloja su logo en su propia web).
  *

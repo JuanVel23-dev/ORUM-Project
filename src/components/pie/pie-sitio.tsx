@@ -131,6 +131,9 @@ export function PieSitio({
           <Link href="/privacidad" className={estilos.enlaceLegal}>
             Política de privacidad
           </Link>
+          <Link href="/derechos-de-autor" className={estilos.enlaceLegal}>
+            Derechos de autor
+          </Link>
         </nav>
       </div>
     </footer>

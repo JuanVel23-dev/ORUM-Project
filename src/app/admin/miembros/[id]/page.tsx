@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { Camera, CreditCard, Pencil } from 'lucide-react'
+import { Camera, CreditCard, Pencil, Trash2 } from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { derivarEstadoMembresia, type EstadoMembresia } from '@/lib/miembros/membresias'
@@ -98,7 +98,7 @@ export default async function FichaMiembroPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  await requireRol('super_admin', 'empleado')
+  const actor = await requireRol('super_admin', 'empleado')
   const { id } = await params
   const miembroId = Number(id)
 
@@ -106,7 +106,7 @@ export default async function FichaMiembroPage({
   const { data: miembro } = await admin
     .from('miembros')
     .select(
-      'id, numero_membresia, nombres, apellidos, cedula, telefono, direccion, ciudad_id, perfil_id',
+      'id, numero_membresia, nombres, apellidos, cedula, telefono, direccion, ciudad_id, perfil_id, foto_url',
     )
     .eq('id', miembroId)
     .is('deleted_at', null)
@@ -212,6 +212,17 @@ export default async function FichaMiembroPage({
             >
               Cambiar foto
             </Button>
+            {/* Retirar es solo del administrador (la acción lo exige igual) y
+                solo tiene sentido si hay foto. */}
+            {actor.rolCodigo === 'super_admin' && miembro.foto_url && (
+              <Button
+                href={`/admin/miembros/${miembro.id}/foto/retirar`}
+                variant="secondary"
+                icon={<Trash2 size={16} />}
+              >
+                Retirar foto
+              </Button>
+            )}
             {/*
               Renovar es la acción que mueve dinero: va primaria y arriba.
               Antes era un formulario desplegado al final de la ficha, así que

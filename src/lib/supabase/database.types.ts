@@ -235,6 +235,8 @@ export type Database = {
           direccion: string | null
           /** Foto del socio. Vive aquí y no en `perfiles` porque `perfil_id` es nullable. */
           foto_url: string | null
+          /** Cuándo se declaró tener derecho sobre la foto. `null` = sin declaración. */
+          foto_declaracion_at: Timestamp | null
           ciudad_id: number | null
           registrado_por: number | null
           fecha_registro: Timestamp
@@ -253,6 +255,7 @@ export type Database = {
           telefono?: string | null
           direccion?: string | null
           foto_url?: string | null
+          foto_declaracion_at?: Timestamp | null
           ciudad_id?: number | null
           registrado_por?: number | null
           fecha_registro?: Timestamp

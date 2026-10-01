@@ -17,6 +17,10 @@ const eslintConfig = defineConfig([
     // tumbaban `eslint .` desde que entraron en main.
     ".agents/**",
     ".claude/**",
+    // Archivos estáticos servidos tal cual. Incluye el WASM y el JS minificado
+    // de MediaPipe (`public/mediapipe/`), generado por Google: no es código
+    // nuestro y daba 10 errores y ~490 avisos en `eslint .`.
+    "public/**",
   ]),
 ]);
 
