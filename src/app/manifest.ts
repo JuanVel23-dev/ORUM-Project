@@ -54,20 +54,29 @@ export default function manifest(): MetadataRoute.Manifest {
     dir: 'ltr',
     categories: ['business', 'productivity'],
 
+    /*
+      EL MONOGRAMA DE ORUM EN DORADO Y SIN FONDO (29/09/2026, encargo del
+      propietario: «el icono de ORUM para todas las páginas», «dorado y sin
+      fondo»). PNG transparentes generados desde
+      `src/components/ui/marca/monograma.png`: la «O» con la estrella del
+      cliente, no un dibujo aproximado. iOS pinta de negro lo transparente
+      del icono de inicio; Android usa `background_color`. La variante `maskable`
+      deja el monograma dentro del 80 % central, que es lo que Android no
+      recorta al aplicar su forma.
+    */
     icons: [
+      { src: '/icons/orum-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/icons/orum-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
       {
-        src: '/icons/orum.svg',
-        // `any` porque un SVG escala a cualquier tamaño sin perder nitidez.
-        sizes: 'any',
-        type: 'image/svg+xml',
-        purpose: 'any',
+        src: '/icons/orum-maskable-192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'maskable',
       },
       {
-        // Sin esta variante Android recorta el icono normal con la forma del
-        // sistema y se ve un cuadrado dentro del círculo.
-        src: '/icons/orum-maskable.svg',
-        sizes: 'any',
-        type: 'image/svg+xml',
+        src: '/icons/orum-maskable-512.png',
+        sizes: '512x512',
+        type: 'image/png',
         purpose: 'maskable',
       },
     ],

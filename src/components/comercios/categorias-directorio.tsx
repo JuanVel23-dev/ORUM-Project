@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ChevronDown, LayoutGrid } from 'lucide-react'
+import { Check, ChevronDown, LayoutGrid } from 'lucide-react'
 import { Agitar } from '@/components/ui/agitar'
 import { Button } from '@/components/ui/button'
 import { IconoCategoria } from '@/components/ui/icono-categoria'
@@ -42,6 +42,12 @@ import estilos from './categorias-directorio.module.css'
   visitante ve el temblor y la selección, y cierra con «Ver comercios», que
   ya dice cuántos hay.
 
+  VARIAS A LA VEZ (30/09/2026, encargo del propietario). Cada categoría se
+  enciende y se apaga sola, con una marca de verificación en su círculo;
+  «Todas» limpia la selección. Para que el toque responda al instante y no
+  cuando vuelve el servidor, la selección se refleja de forma OPTIMISTA en
+  `optimista`, que se descarta en cuanto llegan las opciones nuevas.
+
   Los `href` llegan calculados del servidor (`hrefDirectorio`), así que este
   componente no conoce la forma de la URL.
 */
@@ -62,36 +68,72 @@ type Props = {
 
 export function CategoriasDirectorio({ opciones, total }: Props) {
   const [abierta, setAbierta] = useState(false)
-  const [pendiente, setPendiente] = useState<number | null | undefined>(undefined)
+  /* La selección optimista, atada a las opciones sobre las que se calculó:
+     cuando el servidor devuelve opciones nuevas, deja de valer sola. */
+  const [optimista, setOptimista] = useState<{
+    base: OpcionCategoria[]
+    ids: Set<number | null>
+  } | null>(null)
 
-  const activa = opciones.find((o) => o.activa)
+  const vigente = optimista?.base === opciones ? optimista.ids : null
+  const estaActiva = (o: OpcionCategoria) => (vigente ? vigente.has(o.id) : o.activa)
+
+  function alTocar(o: OpcionCategoria) {
+    const actuales = new Set(opciones.filter(estaActiva).map((x) => x.id))
+    let ids: Set<number | null>
+    if (o.id === null) {
+      ids = new Set([null])
+    } else {
+      actuales.delete(null)
+      if (actuales.has(o.id)) actuales.delete(o.id)
+      else actuales.add(o.id)
+      ids = actuales.size > 0 ? actuales : new Set([null])
+    }
+    setOptimista({ base: opciones, ids })
+  }
+
+  const elegidas = opciones.filter((o) => o.id !== null && estaActiva(o))
+  const resumen =
+    elegidas.length === 0 ? 'Todas' : elegidas.length === 1 ? elegidas[0].nombre : `${elegidas.length}`
 
   const lista = (
     <ul className={estilos.rejilla}>
-      {opciones.map((o) => (
-        <li key={o.id ?? 'todas'}>
-          <Link
-            href={o.href}
-            scroll={false}
-            className={estilos.opcion}
-            aria-current={o.activa ? 'true' : undefined}
-            onClick={() => setPendiente(o.id)}
-          >
-            {/* El temblor va en el GLIFO, dentro del círculo, y no en el
-                círculo: `Agitar` se aplica al icono, nunca a la superficie. */}
-            <span className={estilos.icono} aria-hidden="true">
-              <Agitar activo={o.activa || pendiente === o.id}>
-                {o.id === null ? (
-                  <LayoutGrid size={20} aria-hidden="true" />
-                ) : (
-                  <IconoCategoria nombre={o.nombre} size={20} />
+      {opciones.map((o) => {
+        const activa = estaActiva(o)
+        return (
+          <li key={o.id ?? 'todas'}>
+            <Link
+              href={o.href}
+              scroll={false}
+              className={estilos.opcion}
+              data-activa={activa || undefined}
+              onClick={() => alTocar(o)}
+            >
+              {/* El temblor va en el GLIFO, dentro del círculo, y no en el
+                  círculo: `Agitar` se aplica al icono, nunca a la superficie. */}
+              <span className={estilos.icono} aria-hidden="true">
+                <Agitar activo={activa}>
+                  {o.id === null ? (
+                    <LayoutGrid size={20} aria-hidden="true" />
+                  ) : (
+                    <IconoCategoria nombre={o.nombre} size={20} />
+                  )}
+                </Agitar>
+                {/* La marca de «elegida»: con varias a la vez, el anillo solo
+                    no basta para contarlas de un vistazo. */}
+                {activa && o.id !== null && (
+                  <span className={estilos.marca}>
+                    <Check size={11} strokeWidth={3} aria-hidden="true" />
+                  </span>
                 )}
-              </Agitar>
-            </span>
-            <span className={estilos.nombre}>{o.nombre}</span>
-          </Link>
-        </li>
-      ))}
+              </span>
+              <span className={estilos.nombre}>{o.nombre}</span>
+              {/* El estado, dicho con palabras al lector de pantalla. */}
+              {activa && <span className="sr-only"> (elegida)</span>}
+            </Link>
+          </li>
+        )
+      })}
     </ul>
   )
 
@@ -108,7 +150,7 @@ export function CategoriasDirectorio({ opciones, total }: Props) {
           <LayoutGrid size={13} />
         </span>
         <span className={estilos.disparadorTexto}>
-          Categorías: {activa?.nombre ?? 'Todas'}
+          Categorías: {resumen}
         </span>
         <ChevronDown size={14} aria-hidden="true" className={estilos.chevron} />
       </button>
@@ -117,7 +159,7 @@ export function CategoriasDirectorio({ opciones, total }: Props) {
         open={abierta}
         onClose={() => setAbierta(false)}
         title="Categorías"
-        description="Toca una para ver solo esos comercios."
+        description="Toca una o varias para ver esos comercios."
         detent="large"
         width="640px"
         footer={

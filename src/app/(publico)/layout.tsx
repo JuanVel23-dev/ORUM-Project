@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
+import { MENSAJE_WHATSAPP_PUBLICO } from '@/lib/publico/whatsapp'
 import { EncabezadoPublico } from './_components/encabezado-publico'
-import { PiePublico } from './_components/pie-publico'
+import { PieSitio } from '@/components/pie/pie-sitio'
+import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import estilos from './publico.module.css'
 
 /*
@@ -76,7 +78,13 @@ export default async function PublicoLayout({
 
       {modal}
 
-      <PiePublico soporte={soporte} />
+      <PieSitio soporte={soporte} mensajeSoporte={MENSAJE_WHATSAPP_PUBLICO} />
+
+      {/* El atajo a WhatsApp, fijo en la esquina (encargo del 29/09/2026). */}
+      <WhatsAppFlotante
+        telefono={soporte}
+        mensaje={MENSAJE_WHATSAPP_PUBLICO}
+      />
     </div>
   )
 }

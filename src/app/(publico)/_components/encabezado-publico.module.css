@@ -34,13 +34,89 @@
   padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
   padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
+  /* El material (negro con curva + desenfoque progresivo) lo pintan
+     `::before` y `::after`, más abajo. `isolation` los deja detrás del
+     contenido de la cabecera y delante de la página. */
+  isolation: isolate;
+  color: var(--cacao-fg);
+}
+
+/*
+  EL MATERIAL DE LA CABECERA  ·  negro sólido y un fundido largo con curva
+  ---------------------------------------------------------------------------
+  Encargos del 30/09/2026: «mejora este difuminado, para que sea más
+  realista» y, después, «se ve una línea… pon el negro más abajo para que
+  se vea bien el logo y de ahí degrada hasta que no se vea esa línea».
+
+  Por qué se veía una línea: el negro empezaba a aclararse a media altura
+  del logo y se apagaba en un tramo corto con una pendiente que cambiaba de
+  golpe. El ojo lee cada cambio brusco de pendiente como un borde (bandas de
+  Mach), y sobre el blanco de la página ese borde era una raya gris.
+
+  Ahora:
+    · NEGRO SÓLIDO (97 %) hasta el pie de la fila del logo y los botones
+      (`--solido`: el alto de la cabecera menos su relleno inferior).
+    · Desde ahí, un FUNDIDO LARGO (`--fundido`, 112 px) con curva COSENO:
+      arranca plano y termina plano, así que no hay ningún punto donde la
+      pendiente salte — ni al dejar el sólido ni al llegar a cero.
+    · Un desenfoque de lo que pasa por debajo (cromo de iOS) que se apaga
+      ANTES que el negro, para que su canto quede escondido en la sombra.
+
+  Las dos capas se SALEN por debajo de la caja: la caja no crece (su alto,
+  `--cabecera-alto`, lo reservan el `<main>` y las anclas) y no tapan clics.
+*/
+.cabecera::before,
+.cabecera::after {
+  --solido: calc(var(--cabecera-alto) - var(--space-5));
+  --fundido: 112px;
+
+  content: '';
+  position: absolute;
+  inset: 0 0 calc(var(--space-5) - var(--fundido)) 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.cabecera::before {
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: blur(var(--blur-md));
+  /* La máscara solo usa el alfa: el color del token no importa. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    var(--cacao-bg) var(--solido),
+    transparent calc(var(--solido) + var(--fundido) * 0.6)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    var(--cacao-bg) var(--solido),
+    transparent calc(var(--solido) + var(--fundido) * 0.6)
+  );
+}
+
+.cabecera::after {
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--cacao-bg) 97%, transparent) 0%,
-    color-mix(in srgb, var(--cacao-bg) 82%, transparent) 55%,
-    color-mix(in srgb, var(--cacao-bg) 0%, transparent) 100%
+    color-mix(in srgb, var(--cacao-bg) 97%, transparent) 0,
+    color-mix(in srgb, var(--cacao-bg) 97%, transparent) var(--solido),
+    color-mix(in srgb, var(--cacao-bg) 94.6%, transparent) calc(var(--solido) + var(--fundido) * 0.1),
+    color-mix(in srgb, var(--cacao-bg) 87.7%, transparent) calc(var(--solido) + var(--fundido) * 0.2),
+    color-mix(in srgb, var(--cacao-bg) 77%, transparent) calc(var(--solido) + var(--fundido) * 0.3),
+    color-mix(in srgb, var(--cacao-bg) 63.5%, transparent) calc(var(--solido) + var(--fundido) * 0.4),
+    color-mix(in srgb, var(--cacao-bg) 48.5%, transparent) calc(var(--solido) + var(--fundido) * 0.5),
+    color-mix(in srgb, var(--cacao-bg) 33.5%, transparent) calc(var(--solido) + var(--fundido) * 0.6),
+    color-mix(in srgb, var(--cacao-bg) 20%, transparent) calc(var(--solido) + var(--fundido) * 0.7),
+    color-mix(in srgb, var(--cacao-bg) 9.3%, transparent) calc(var(--solido) + var(--fundido) * 0.8),
+    color-mix(in srgb, var(--cacao-bg) 2.4%, transparent) calc(var(--solido) + var(--fundido) * 0.9),
+    color-mix(in srgb, var(--cacao-bg) 0%, transparent) calc(var(--solido) + var(--fundido))
   );
-  color: var(--cacao-fg);
+}
+
+/* Quien pide menos transparencia: banda sólida, sin desenfoque ni fundido. */
+@media (prefers-reduced-transparency: reduce) {
+  .cabecera::before,
+  .cabecera::after {
+    display: none;
+  }
 }
 
 /*
@@ -117,8 +193,10 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
-  padding: 0 var(--space-3);
+  /* Nunca en dos líneas: un destino partido se lee como dos. */
+  padding: 0 var(--space-2);
   border-radius: var(--radius-full);
+  white-space: nowrap;
 
   font-size: var(--t-callout-size);
   font-weight: 500;
@@ -128,7 +206,7 @@
 
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    translate var(--dur-fast) var(--ease-out);
 }
 
 /* En táctil el `:hover` se queda pegado tras el toque. El `:focus-visible`
@@ -136,7 +214,7 @@
 @media (hover: hover) {
   .enlace:hover {
     color: var(--text);
-    background: var(--surface-hover);
+    translate: 0 -2px;
   }
 }
 
@@ -157,8 +235,8 @@
 /*
   «Iniciar sesión» + «Únete» y el menú de hamburguesa son las MISMAS puertas
   con dos formas, así que nunca se ven a la vez. El umbral es el de la
-  navegación (900px): por debajo, las cuatro anclas y las dos acciones no
-  caben en una fila sin apretarse, y se van juntas a la hoja.
+  navegación (900px, con cinco destinos): por debajo, los destinos y las dos
+  acciones no caben en una fila sin apretarse, y se van juntos a la hoja.
 
   Es `@media` y no `@container` a propósito: la cabecera está FUERA del
   contenedor `contenido` —lo declara el `<main>`— y un `@container` sin

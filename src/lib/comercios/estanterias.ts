@@ -279,3 +279,26 @@ function nivelDePresentacion(comercio: Presentable): number {
 function tieneLogo(logoUrl: string | null): boolean {
   return (logoUrl ?? '').trim() !== ''
 }
+
+/** Cuántos comercios enseña «Más recientes». */
+export const TOPE_MAS_RECIENTES = 8
+
+/**
+ * «MÁS RECIENTES» (rediseño del 29/09/2026): los últimos aliados que se
+ * sumaron, del más nuevo al más antiguo.
+ *
+ * A diferencia de `seleccionarNovedades` NO exige que sean de los últimos
+ * `DIAS_NOVEDAD` días ni un catálogo mínimo: el propietario la pidió como
+ * sección fija del Inicio, así que dice «los más recientes que hay», no «lo
+ * nuevo de este trimestre». Con menos de dos comercios no hay orden que
+ * enseñar y la sección no se pinta.
+ */
+export function seleccionarMasRecientes<T extends ConFecha>(
+  comercios: T[],
+  tope: number = TOPE_MAS_RECIENTES,
+): T[] {
+  if (comercios.length < 2) return []
+  return [...comercios]
+    .sort((a, b) => marcaDeTiempo(b.createdAt) - marcaDeTiempo(a.createdAt))
+    .slice(0, tope)
+}

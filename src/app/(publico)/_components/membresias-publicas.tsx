@@ -1,11 +1,12 @@
 import { ArrowRight } from 'lucide-react'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
+import { MENSAJE_WHATSAPP_PUBLICO } from '@/lib/publico/whatsapp'
 import { formatearPesos, type PlanPublico } from '@/lib/publico/planes'
 import escaparate from '../escaparate.module.css'
 import { CtaSocio } from './cta-socio'
 import { AdornoEstrella, EstrellaOrum } from '@/components/ui/marca/marca'
 import { Revelar } from './revelar'
-import { REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from './revelado'
+import { REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from '@/lib/shared/revelado'
 import estilos from './membresias-publicas.module.css'
 
 /*
@@ -17,9 +18,9 @@ import estilos from './membresias-publicas.module.css'
   boceto decía «ahorra 2 meses» junto a unos precios con los que se
   ahorraban más de tres y medio.
 
-  «Adquirir» abre WhatsApp con el plan ya escrito en el mensaje: la venta
-  hoy la cierra una persona, y el mensaje le ahorra al socio explicar qué
-  quiere y a quien atiende preguntar cuál de los dos.
+  «Adquirir» abre WhatsApp con el mensaje ÚNICO de la fachada
+  (`MENSAJE_WHATSAPP_PUBLICO`, 29/09/2026): la pregunta es cómo adquirir la
+  membresía, y el plan se concreta en la conversación.
 
   Las tarjetas son superficies levantadas: sombra, sin trazo. La del plan
   destacado sube un escalón (`--shadow-raised`) y lleva la etiqueta de su
@@ -29,15 +30,15 @@ import estilos from './membresias-publicas.module.css'
 type Props = {
   planes: PlanPublico[]
   soporte: string | null
-  totalComercios: number
 }
 
-export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
+export function MembresiasPublicas({ planes, soporte }: Props) {
   const ventajas = [
     'Beneficio activo desde el primer día',
-    totalComercios > 0
-      ? `Válido en ${totalComercios === 1 ? 'el comercio aliado' : `los ${totalComercios.toLocaleString('es-CO')} comercios aliados`}`
-      : 'Válido en todos los comercios aliados',
+    /* Sin la cifra (encargo del 29/09/2026): «los 6 comercios aliados»
+       dejaba contado el club, y un número pequeño juega en contra de quien
+       todavía está decidiendo si hacerse socio. */
+    'Válido en todos los comercios aliados',
     'Sin cobros automáticos: pagas por WhatsApp y renuevas solo si quieres',
     'Incluye tarjeta física de la membresía',
   ]
@@ -98,7 +99,7 @@ export function MembresiasPublicas({ planes, soporte, totalComercios }: Props) {
                     <span className={estilos.accion}>
                       <WhatsAppButton
                         telefono={soporte}
-                        mensaje={`Hola, quiero adquirir el plan ${plan.nombre} de ORUM (${formatearPesos(plan.precio)} / ${plan.periodo}).`}
+                        mensaje={MENSAJE_WHATSAPP_PUBLICO}
                         variant="secondary"
                         size="lg"
                         pildora

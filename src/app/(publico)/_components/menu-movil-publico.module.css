@@ -36,7 +36,7 @@
   color: var(--text);
   text-decoration: none;
 
-  transition: background-color var(--dur-fast) var(--ease-out);
+  transition: translate var(--dur-fast) var(--ease-out);
 }
 
 /* Separador entre filas: una lista de cuatro destinos distintos necesita que
@@ -51,7 +51,7 @@
 
 @media (hover: hover) {
   .fila:hover {
-    background: var(--surface-hover);
+    translate: 4px 0;
   }
 }
 

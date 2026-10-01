@@ -17,12 +17,12 @@
   respuesta de Supabase.
 */
 
-const VERSION = 'orum-v1'
+const VERSION = 'orum-v2'
 const CACHE_ESTATICO = `${VERSION}-estatico`
 const CACHE_ASSETS = `${VERSION}-assets`
 
 /** Lo mínimo para poder mostrar algo sin conexión. */
-const PRECARGA = ['/offline', '/icons/orum.svg']
+const PRECARGA = ['/offline', '/icons/orum-192.png']
 
 self.addEventListener('install', (evento) => {
   evento.waitUntil(

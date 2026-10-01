@@ -1,12 +1,12 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ChevronLeft, Lock, MapPin } from 'lucide-react'
+import { Lock } from 'lucide-react'
+import { FichaComercio } from '@/components/comercios/ficha-comercio'
+import estilos from '@/components/comercios/ficha-comercio.module.css'
 import { Button } from '@/components/ui/button'
-import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import { obtenerFichaPublica, obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
 import { URL_SITIO } from '@/lib/publico/sitio'
-import estilos from './ficha-publica.module.css'
+import { MENSAJE_WHATSAPP_PUBLICO } from '@/lib/publico/whatsapp'
 
 /*
   LA FICHA PÚBLICA DE UN COMERCIO — el MISMO componente en dos superficies
@@ -87,9 +87,6 @@ function datosEstructurados(ficha: NonNullable<Awaited<ReturnType<typeof obtener
 
 export const dynamic = 'force-dynamic'
 
-/** Cuántas fotos de la galería entran en la ficha. */
-const TOPE_GALERIA = 6
-
 export default async function FichaPublicaPage({
   params,
   enOverlay = false,
@@ -108,112 +105,67 @@ export default async function FichaPublicaPage({
   if (!ficha) notFound()
 
   const detalle = [ficha.categoriaNombre, ficha.ciudades.join(', ')].filter(Boolean).join(' · ')
-  const sedesConDireccion = ficha.sedes.filter((s) => s.direccion)
 
   return (
-    <article className={[estilos.ficha, enOverlay && estilos.enOverlay].filter(Boolean).join(' ')}>
+    <>
       {ficha.indexable && !enOverlay && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: datosEstructurados(ficha) }}
         />
       )}
-      {!enOverlay && (
-        <Link href="/explorar" className={estilos.volver}>
-          <ChevronLeft size={16} aria-hidden="true" />
-          Ver todos los comercios
-        </Link>
-      )}
-
-      <div className={estilos.portada}>
-        {ficha.portadaUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
-          <img src={ficha.portadaUrl} alt="" className={estilos.portadaFoto} />
-        ) : (
-          <span className={estilos.portadaVacia} aria-hidden="true" />
-        )}
-        <span className={estilos.logo}>
-          <ComercioLogo logoUrl={ficha.logoUrl} nombre={ficha.nombre} />
-        </span>
-      </div>
-
-      <div className={estilos.cuerpo}>
-        <header>
-          <h1 className={estilos.nombre}>{ficha.nombre}</h1>
-          {detalle && <p className={estilos.detalle}>{detalle}</p>}
-        </header>
-
-        {sedesConDireccion.length > 0 && (
-          <ul className={estilos.sedes} aria-label="Direcciones">
-            {sedesConDireccion.map((s) => (
-              <li key={s.id} className={estilos.sede}>
-                <MapPin size={15} aria-hidden="true" className={estilos.sedeIcono} />
-                <span>
-                  {s.direccion}
-                  {s.ciudadNombre && `, ${s.ciudadNombre}`}
-                  {/* El nombre de la sede solo si hay varias: con una sola,
-                      «Sede principal» no le dice nada a nadie. */}
-                  {sedesConDireccion.length > 1 && s.nombre && (
-                    <span className={estilos.sedeNombre}> · {s.nombre}</span>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {ficha.descripcion && <p className={estilos.descripcion}>{ficha.descripcion}</p>}
-
-        {ficha.fotos.length > 0 && (
-          <ul className={estilos.galeria} aria-label="Fotos del comercio">
-            {ficha.fotos.slice(0, TOPE_GALERIA).map((foto) => (
-              <li key={foto.url} className={estilos.galeriaCelda}>
-                {/* eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local */}
-                <img src={foto.url} alt={foto.alt} className={estilos.galeriaFoto} loading="lazy" />
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/*
-          EL BENEFICIO, DESENFOCADO. Se ve que existe y no se lee sin ser
-          socio: encargo del cliente. El lector de pantalla recibe la misma
-          información que el vidente —«exclusivo para socios»—, no el texto
-          que el vidente tampoco puede leer.
-        */}
-        <div className={estilos.beneficio}>
-          <div className={estilos.beneficioTextos}>
-            <p className={estilos.beneficioEtiqueta}>Tu beneficio ORUM</p>
-            {ficha.beneficios.length > 0 ? (
-              <>
-                <p className={estilos.beneficioValor} aria-hidden="true">
-                  {ficha.beneficios.join(' · ')}
-                </p>
-                <p className="sr-only">Beneficio exclusivo para socios.</p>
-              </>
-            ) : (
-              <p className={estilos.beneficioPronto}>Pronto con beneficio para socios.</p>
-            )}
-          </div>
-          <Button href="/miembros/login" variant="ghost" size="sm" icon={<Lock size={14} />}>
-            Inicia sesión para verlo
-          </Button>
-        </div>
-
-        {soporte && (
-          <WhatsAppButton
-            telefono={soporte}
-            mensaje={`Hola, quiero saber más de ${ficha.nombre} en ORUM.`}
-            variant="brand"
-            size="lg"
-            pildora
-            fullWidth
-            className={estilos.botonOro}
-          >
-            Preguntar por WhatsApp
-          </WhatsAppButton>
-        )}
-      </div>
-    </article>
+      <FichaComercio
+        nombre={ficha.nombre}
+        detalle={detalle}
+        logoUrl={ficha.logoUrl}
+        portadaUrl={ficha.portadaUrl}
+        sedes={ficha.sedes}
+        descripcion={ficha.descripcion}
+        fotos={ficha.fotos}
+        volver={{ href: '/explorar', texto: 'Ver todos los comercios' }}
+        enOverlay={enOverlay}
+        beneficio={
+          /*
+            EL BENEFICIO, DESENFOCADO. Se ve que existe y no se lee sin ser
+            socio: encargo del cliente. El lector de pantalla recibe la misma
+            información que el vidente —«exclusivo para socios»—, no el texto
+            que el vidente tampoco puede leer.
+          */
+          <>
+            <div className={estilos.beneficioTextos}>
+              <p className={estilos.beneficioEtiqueta}>Tu beneficio ORUM</p>
+              {ficha.beneficios.length > 0 ? (
+                <>
+                  <p className={`${estilos.beneficioValor} ${estilos.desenfocado}`} aria-hidden="true">
+                    {ficha.beneficios.join(' · ')}
+                  </p>
+                  <p className="sr-only">Beneficio exclusivo para socios.</p>
+                </>
+              ) : (
+                <p className={estilos.beneficioPronto}>Pronto con beneficio para socios.</p>
+              )}
+            </div>
+            <Button href="/miembros/login" variant="ghost" size="sm" icon={<Lock size={14} />}>
+              Inicia sesión para verlo
+            </Button>
+          </>
+        }
+        accion={
+          soporte && (
+            <WhatsAppButton
+              telefono={soporte}
+              mensaje={MENSAJE_WHATSAPP_PUBLICO}
+              variant="brand"
+              size="lg"
+              pildora
+              fullWidth
+              className={estilos.botonOro}
+            >
+              Preguntar por WhatsApp
+            </WhatsAppButton>
+          )
+        }
+      />
+    </>
   )
 }

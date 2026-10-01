@@ -21,19 +21,25 @@
  *
  * ── Los ids que apuntan ─────────────────────────────────────────────────
  *
- * Son los de la guía de marca, y cada uno existe en `page.tsx`: `inicio` (el
- * héroe), `nosotros` («Qué es ORUM»), `comercios` («Comercios destacados») y
- * `membresias` («Elige tu membresía»). Cambiar uno sin el otro deja un enlace
- * que no lleva a ninguna parte, sin error.
+ * Cada uno existe en la portada: `inicio` (el héroe), `nosotros` («Qué es
+ * ORUM»), `comercios` («Comercios destacados»), `membresias` («Elige tu
+ * membresía») y `proposito` (misión y visión). Cambiar uno sin el otro deja
+ * un enlace que no lleva a ninguna parte, sin error.
  */
+/*
+  29/09/2026 · LOS CINCO DESTINOS DEL PROPIETARIO, y solo esos: Inicio,
+  Nosotros, Comercios, Membresías y Propósito, todos secciones de la
+  portada. «Comercios» baja a los destacados de la portada, NO al
+  directorio (`/explorar`): es lo que pidió. «Cómo funciona» y «Aliados» se
+  probaron y se retiraron. «Novedades» sigue fuera: se llega desde el banner
+  de anuncios.
+*/
 export const ANCLAS = [
   { href: '/#inicio', texto: 'Inicio' },
   { href: '/#nosotros', texto: 'Nosotros' },
   { href: '/#comercios', texto: 'Comercios' },
   { href: '/#membresias', texto: 'Membresías' },
-  /* «Novedades» se retiró de la cabecera por encargo del propietario: no es
-     una sección de la portada. La página `/novedades` sigue existiendo y se
-     llega a ella desde el banner de anuncios («Ver más»). */
+  { href: '/#proposito', texto: 'Propósito' },
 ] as const
 
 /** Destino de «Únete»: los planes, que es donde se decide y se adquiere. */

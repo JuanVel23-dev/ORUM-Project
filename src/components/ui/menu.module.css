@@ -209,7 +209,7 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 
-  transition: background-color var(--dur-fast) var(--ease-out),
+  transition: translate var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
     opacity var(--dur-press) var(--ease-out),
     scale var(--dur-rebote) var(--ease-rebote);
@@ -252,9 +252,10 @@
   del 4,5:1.
 */
 @media (hover: hover) {
+  /* Sin relleno ni filo al apuntar (29/09/2026): la fila se desliza un
+     poco hacia dentro. El filo dorado queda para el foco de teclado. */
   .item:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--brand) 12%, transparent);
-    box-shadow: var(--filo-activo-inset);
+    translate: 3px 0;
   }
 
   /* El icono se desplaza un pelo en la dirección de la acción al apuntar. */
@@ -295,15 +296,8 @@
   color: var(--danger);
 }
 
-.destructivo:focus-visible {
-  background: var(--danger-bg);
-}
-
-@media (hover: hover) {
-  .destructivo:hover:not(:disabled) {
-    background: var(--danger-bg);
-  }
-}
+/* Sin relleno rojo (29/09/2026): el texto rojo ya lo dice, y la fila se
+   desliza como las demás (`.item:hover`). */
 
 .itemIcono {
   flex-shrink: 0;

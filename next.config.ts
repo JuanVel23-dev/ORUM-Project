@@ -65,6 +65,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: cabecerasSeguridad }]
   },
+
+  /*
+    `/miembros/novedades` se retiró el 29/09/2026: las novedades viven solo
+    en su sección del Inicio. Un enlace guardado o compartido cae ahí en vez
+    de en un 404.
+  */
+  async redirects() {
+    return [{ source: '/miembros/novedades', destination: '/miembros#novedades', permanent: false }]
+  },
 }
 
 export default nextConfig

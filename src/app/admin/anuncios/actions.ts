@@ -23,7 +23,6 @@ function refrescar(): void {
   revalidatePath('/')
   revalidatePath('/novedades')
   revalidatePath('/miembros')
-  revalidatePath('/miembros/novedades')
 }
 
 /** Lee y valida los campos comunes de un anuncio desde el formulario. */

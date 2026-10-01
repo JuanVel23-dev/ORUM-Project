@@ -251,7 +251,7 @@
 
 @media (hover: hover) {
   .secondary:hover:not(:disabled) {
-    background: var(--surface-hover);
+    translate: 0 -2px;
     border-color: var(--brand-edge);
     box-shadow: var(--shadow-card);
   }
@@ -272,7 +272,7 @@
 
 @media (hover: hover) {
   .ghost:hover:not(:disabled) {
-    background: var(--surface-hover);
+    translate: 0 -1px;
     border-color: var(--border-subtle);
     color: var(--text);
   }

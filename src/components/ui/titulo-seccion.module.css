@@ -1,0 +1,52 @@
+/* Los títulos del Portal Público, fuera de la fachada. Mismos valores que
+   `.tituloSeccion` (escaparate), `.titulo` de «Así es como te unes» y
+   `.titulo` de «Comercios destacados»: si se toca uno, se tocan los otros. */
+
+/* --- `seccion`: 32→48px, las narrativas -------------------------------- */
+.titulo {
+  margin: 0;
+
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: var(--t-hero-2-leading);
+  font-weight: var(--t-hero-2-weight);
+  color: var(--text);
+
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  -webkit-font-smoothing: auto;
+  text-wrap: balance;
+
+  /* Tracking interpolado con el tamaño (32px en 640px de ventana, 48px en
+     960px): el mismo cálculo que el título público. */
+  --tracking-32: -0.45px;
+  --tracking-48: -1.25px;
+  letter-spacing: clamp(
+    var(--tracking-48),
+    calc(var(--tracking-32) - (100vw - 640px) * 0.0025),
+    var(--tracking-32)
+  );
+}
+
+/* --- `bloque`: 26px, los bloques de uso («Así es como te unes») -------- */
+.titulo.bloque {
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  font-weight: 700;
+  letter-spacing: normal;
+}
+
+/* --- `sobreNegro`: el de «Comercios destacados» ------------------------- */
+.titulo.sobreNegro {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* La cursiva real de Playfair, un escalón más ligera, en el oro de texto
+   del portal (`--brand`: `--gold-650` en la fachada y en el Portal de
+   Miembros). */
+.acento {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--brand);
+}

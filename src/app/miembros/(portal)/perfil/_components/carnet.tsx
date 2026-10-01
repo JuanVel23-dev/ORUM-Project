@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { iniciales } from '@/components/ui/avatar'
 import { StatusBadge, VenceEn } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -48,6 +49,12 @@ type Props = {
    * es el mismo carnet más cerca.
    */
   variante?: VarianteCarnet
+  /**
+   * La última columna de la fila: «Ampliar» y «Cambiar foto». Solo la copia
+   * de la página la lleva — la ampliada es lo que se enseña en la caja, y
+   * ahí no va ningún botón.
+   */
+  acciones?: ReactNode
 }
 
 export function Carnet({
@@ -58,6 +65,7 @@ export function Carnet({
   vigencia,
   fotoUrl,
   variante = 'pagina',
+  acciones,
 }: Props) {
   const esAmpliado = variante === 'ampliado'
 
@@ -77,46 +85,43 @@ export function Carnet({
       className={[estilos.carnet, esAmpliado && estilos.ampliado].filter(Boolean).join(' ')}
     >
       <div className={estilos.carnetInterior}>
-        <header className={estilos.emisor}>
-          {/* Una credencial sin el nombre de quien la emite no parece una
-              credencial. El carnet es blanco en los dos temas, así que el
-              logotipo es siempre la variante dorada (CLAUDE.md → «sobre
-              blanco, oro»), la imagen del cliente y no un wordmark de texto. */}
-          <LogoOrum variante="dorado" className={estilos.wordmark} />
-          <span className={estilos.puntoEmisor} aria-hidden="true" />
-          <p className={estilos.tipo}>Carnet de socio</p>
-        </header>
-
         <div className={estilos.fila}>
           {/*
-            LA FOTO. `aria-hidden` porque el nombre está justo al lado: sin
-            esto el lector anuncia «Daniel Bulla» dos veces, que es el mismo
-            motivo por el que `Avatar` tiene `decorativo`.
-
-            `<img>` y no `next/image`: `next.config.ts` no declara `images` y
-            la URL es externa —Storage o el servidor de quien la subiera—.
-            `alt` vacío a propósito: una URL muerta con `alt` con texto puede
-            arrastrar el glifo de imagen rota de Chrome, y eso no se enseña
-            en una caja.
+            EMISOR + FOTO, en una sola columna (maqueta del 29/09/2026): el
+            logotipo pequeño encima del retrato, como el sello de quien emite
+            la credencial. Dorado: el carnet es papel en los dos temas
+            (CLAUDE.md → «sobre blanco, oro»).
           */}
-          <span className={estilos.foto} aria-hidden="true">
-            {fotoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
-              <img
-                src={fotoUrl}
-                alt=""
-                className={estilos.fotoImagen}
-                loading="lazy"
-                decoding="async"
-              />
-            ) : (
-              <span className={estilos.fotoIniciales}>{iniciales(nombre)}</span>
-            )}
-          </span>
+          <div className={estilos.columnaFoto}>
+            <LogoOrum variante="dorado" className={estilos.wordmark} />
+
+            {/*
+              LA FOTO. `aria-hidden` porque el nombre está justo al lado: sin
+              esto el lector anuncia el nombre dos veces. `<img>` y no
+              `next/image`: la URL es externa. `alt` vacío a propósito: una URL
+              muerta con texto puede arrastrar el glifo de imagen rota.
+            */}
+            <span className={estilos.foto} aria-hidden="true">
+              {fotoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+                <img
+                  src={fotoUrl}
+                  alt=""
+                  className={estilos.fotoImagen}
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <span className={estilos.fotoIniciales}>{iniciales(nombre)}</span>
+              )}
+            </span>
+          </div>
 
           <span className={estilos.divisor} aria-hidden="true" />
 
           <div className={estilos.identidad}>
+            {/* Una credencial que no dice qué es no parece una credencial. */}
+            <p className={estilos.tipo}>Carnet de socio</p>
             <p className={estilos.nombre}>{nombre}</p>
             {/* `planes_membresia` sostiene varios planes: mostrar el nombre es
                 correcto. Sin plan, un respaldo genérico — un hueco ahí
@@ -178,6 +183,8 @@ export function Carnet({
               label={`Código de la membresía ${numeroMembresia} de ${nombre}`}
             />
           </div>
+
+          {acciones && <div className={estilos.acciones}>{acciones}</div>}
         </div>
       </div>
     </Card>

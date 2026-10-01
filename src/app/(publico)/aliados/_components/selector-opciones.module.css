@@ -1,0 +1,70 @@
+/* El desplegable del formulario de aliados. El aspecto del CAMPO lo pone
+   `.control` de `input.module.css`; aquí solo la disposición interior y el
+   estado elegido de la lista. */
+
+.selector {
+  position: relative;
+}
+
+.disparador.disparador {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* El mismo filo rojo que `.control[aria-invalid]` da a los demás campos. */
+.disparador.invalido {
+  border-color: var(--danger);
+}
+
+.valor,
+.invitacion {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.valor {
+  color: var(--text);
+}
+
+/* Como un placeholder: se lee, pero no parece un dato ya escrito. */
+.invitacion {
+  color: var(--text-3);
+}
+
+.flecha {
+  flex-shrink: 0;
+  color: var(--text-3);
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+
+/* Abierto: la flecha gira. `:has()` lee el estado del popover hermano. */
+.selector:has(:popover-open) .flecha {
+  rotate: 180deg;
+}
+
+/* La opción elegida: fondo de insignia y texto dorado enfático (6,58:1), con
+   el check del menú como segundo portador. El menú se pinta en la capa
+   superior pero sigue siendo descendiente de `.selector` en el DOM. */
+.selector :global([role='menuitemradio'][aria-checked='true']) {
+  /* Sin fondo (29/09/2026): la dicen el texto dorado, el peso y el check. */
+  color: var(--gold-800);
+  font-weight: 700;
+}
+
+/* Un poco más ancho que el mínimo del menú: las categorías largas
+   («Servicios profesionales») caben en una línea. */
+.selector :global([role='menu']) {
+  min-width: 240px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flecha {
+    transition: none;
+  }
+}

@@ -2,17 +2,25 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Megaphone, User } from 'lucide-react'
 import { esDestinoActivo } from '@/lib/miembros/navegacion-portal'
 import styles from '../portal.module.css'
 
+/*
+  LA NAVEGACIÓN DEL PORTAL  ·  29/09/2026
+  ---------------------------------------------------------------------------
+  Encargo del propietario: «Inicio y Comercios por el momento». El Inicio ES
+  el directorio de comercios (igual que `/explorar`): «Inicio» lleva arriba
+  del todo y «Comercios» baja a la rejilla (`#comercios`).
+
+  La ruta activa no se pinta (encargo: «que no se resalten ni se subrayen»);
+  la dice `aria-current`. Solo en escritorio: en móvil el logo lleva al
+  inicio y la rejilla está justo debajo del buscador.
+*/
 const DESTINOS = [
-  { href: '/miembros', etiqueta: 'Inicio', Icono: Home },
-  { href: '/miembros/novedades', etiqueta: 'Novedades', Icono: Megaphone },
-  { href: '/miembros/perfil', etiqueta: 'Mi perfil', Icono: User },
+  { href: '/miembros', etiqueta: 'Inicio' },
+  { href: '/miembros#comercios', etiqueta: 'Comercios' },
 ] as const
 
-/** Navegación de escritorio, en la cabecera. */
 export function PortalNav() {
   const pathname = usePathname()
 
@@ -24,34 +32,9 @@ export function PortalNav() {
           <Link
             key={href}
             href={href}
-            className={[styles.enlace, activo && styles.enlaceActivo].filter(Boolean).join(' ')}
+            className={styles.enlace}
             aria-current={activo ? 'page' : undefined}
           >
-            {etiqueta}
-          </Link>
-        )
-      })}
-    </nav>
-  )
-}
-
-/** Barra inferior de móvil. Mismos destinos, alcance del pulgar. */
-export function PortalTabBar() {
-  const pathname = usePathname()
-
-  return (
-    <nav className={styles.tabbar} aria-label="Secciones del portal">
-      {DESTINOS.map(({ href, etiqueta, Icono }) => {
-        const activo = esDestinoActivo(pathname, href)
-        return (
-          <Link
-            key={href}
-            href={href}
-            className={[styles.tab, activo && styles.tabActivo].filter(Boolean).join(' ')}
-            aria-current={activo ? 'page' : undefined}
-          >
-            {/* El texto de al lado ya nombra el destino. */}
-            <Icono size={22} strokeWidth={activo ? 2.2 : 1.8} aria-hidden />
             {etiqueta}
           </Link>
         )

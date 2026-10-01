@@ -4,7 +4,7 @@ import { ANCLAS, HREF_UNETE } from './anclas'
 import { LogoOrum } from '@/components/ui/marca/marca'
 import { MenuMovilPublico } from './menu-movil-publico'
 import escaparate from '../escaparate.module.css'
-import { ENTRADA, retardoEntrada } from './revelado'
+import { ENTRADA, retardoEntrada } from '@/lib/shared/revelado'
 import estilos from './encabezado-publico.module.css'
 
 /*

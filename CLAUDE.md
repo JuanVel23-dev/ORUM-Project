@@ -145,7 +145,21 @@ desaparece.** Cuando algo «se pierde» sobre el fondo no es un fallo del token:
 es que a esa superficie le falta su escalón. **La respuesta es subir de sombra,
 nunca devolverle un borde.**
 
-La única excepción que conserva tinte es `--surface-hover`. **Es deliberadamente
+⚠️ **DESDE EL 29/09/2026, NINGÚN TINTE AL APUNTAR NI AL ELEGIR** (encargo del
+propietario: «prefiero que quede sin fondo y simplemente haga alguna
+animación», para todos los componentes). `--surface-hover` vale
+`transparent` en todos los temas y ámbitos, y las opciones elegidas de los
+menús ya no llevan `--gold-bg`. La respuesta al apuntar es **movimiento**:
+los textos y enlaces suben 1–2px (`translate`), las filas de menú se deslizan
+3px, las X de cerrar giran 90°, los iconos de campo crecen, los anillos de
+«Así funciona» suben y crecen. Las filas de `DataList` no se mueven (regla de
+listas largas): solo cursor y acuse de pulsación por opacidad. Lo elegido se
+dice con filo dorado, check, peso y `aria-*` — nunca con un relleno. **No
+reintroducir un fondo de hover en un componente nuevo.** El párrafo que sigue
+describe el tinte que había y por qué necesitaba segundo canal; el segundo
+canal sigue siendo obligatorio, ahora como único canal visible.
+
+La única excepción que conservaba tinte era `--surface-hover`. **Es deliberadamente
 tenue: 1,07:1 sobre crema** (v6; era 1,13:1 sobre blanco puro en la v5 — la
 mezcla de tinta bajó de 6 % a 3,5 % porque al 6 % el filo dorado de
 `Button variant="brand"` caía bajo el 3:1 de 1.4.11 contra este hover; ver
@@ -278,8 +292,16 @@ propietario, 25/09/2026). La fachada la ve gente en todo tipo de
 dispositivos, y con el modo oscuro puesto las franjas crema salían negras.
 `(publico)/layout.tsx` fija `data-theme="light"` en su envoltorio —la
 contraparte del `data-theme="dark"` de `PantallaAuth`—, así que ahí no
-aplican ni la preferencia del sistema ni el tema elegido. Los otros tres
-portales siguen con los dos temas. Y su fondo es **blanco puro**
+aplican ni la preferencia del sistema ni el tema elegido.
+
+⚠️ **Y el Portal de Miembros también, desde el 29/09/2026** (mismo encargo,
+mismo motivo: con el teléfono en modo oscuro las franjas crema del rediseño
+salían negras). `miembros/(portal)/layout.tsx` fija `data-theme="light"` en
+`.portal`, que además pinta su propio `background-color`/`color` —el `body`
+sigue con el tema del documento—, y el menú de la cuenta ya no ofrece
+selector de tema. La cabecera de Inicio es la única pieza oscura, con su
+propio `data-theme="dark"`. Administración y Comercios siguen con los dos
+temas. Y su fondo es **blanco puro**
 (`--blanco`, no el crema `--w-0`): `publico.module.css` remapea `--w-0` en
 la fachada; las franjas tintadas siguen en crema.
 
@@ -903,6 +925,10 @@ miembros: nació en `(publico)/explorar` y se movió aquí cuando el catálogo d
 miembros dejó de tener su propia fila de chips para usar el mismo botón + ventana).
 Si algo bajo la `_components/` de una ruta empieza a importarlo una segunda ruta,
 esa es la señal de moverlo aquí — nunca duplicarlo.
+`pie/` (`PieSitio`) es el pie de las puertas de socio y comercio (la de administración se retiró el 29/09/2026: el pie es público y no anuncia el panel): lo montan el Portal Público y,
+desde el rediseño del 27/09/2026, el Portal de Miembros. Las clases de revelado al
+desplazar (`REVELAR`, `revelarEscalonado`…) viven en `src/lib/shared/revelado.ts`
+por la misma razón.
 
 `Button` `Spinner` · `Field` `Input` `Select` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·
@@ -986,7 +1012,9 @@ encima); siempre decorativa (`aria-hidden`). La imagen para compartir en
 redes es `(publico)/opengraph-image.jpg` (logo dorado sobre negro, el JPG con
 fondo incrustado: solo ahí).
 
-**`LogoOrumTema`** es la excepción a «una variante por superficie fija»: monta
+**`LogoOrumTema`** (hoy sin consumidores: la cabecera de miembros pasó a dos
+variantes fijas, oro y plata, elegidas por `.cabeceraInicio` al fijarse el
+portal en claro) es la excepción a «una variante por superficie fija»: monta
 plata y oro superpuestos y CSS elige por `data-theme`, con el mismo selector
 de tres ramas que `globals.css` usa para todo lo que sigue al tema (explícito
 por atributo, o la preferencia del sistema mientras el script anti-flash no lo
@@ -995,6 +1023,14 @@ diferencia de una franja fija— cambia de fondo con el tema del propio portal:
 ahí ninguna variante única sirve a los dos casos. No la copies a una
 superficie que no cambie de fondo con el tema — ahí una variante fija basta y
 sobra.
+
+**En Inicio (`/miembros`) la cabecera del portal va en NEGRO** (rediseño del
+27/09/2026, `Miembros.dc.html`): `CabeceraPortal` le pone `data-theme="dark"`
+solo en esa ruta, para que continúe el héroe negro del catálogo; en el resto del
+portal sigue siendo el material claro. El logo es `LogoOrum` dorado + plata y
+CSS enseña uno u otro según `.cabeceraInicio`. La navegación de escritorio ya **no marca
+la ruta activa** (encargo: «que no se resalten ni se subrayen»); la dice
+`aria-current`, y la barra inferior de móvil la sigue marcando.
 
 **`QrCode` va en negro sobre blanco en los dos temas.** No es estética: invertirlo en
 oscuro rompe el escaneo en algunos lectores, y el fallo ocurre en la caja del comercio
@@ -1162,9 +1198,12 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    **Cerrado desde la v5, y verificado que sigue cerrado en la v6**:
    `manifest.ts` fija su color a propósito al del TEMA OSCURO (es lo que se ve
    en la pantalla de arranque antes de resolver la preferencia real), que no
-   cambió con la v6, así que no necesitó tocarse. `apple-icon.tsx` e
-   `icon.svg` tampoco: su fondo (`--n-1000`) y su oro (`--gold-300/400/500/600`)
-   son exactamente los mismos tokens, sin cambio de valor. Si la paleta vuelve
+   cambió con la v6, así que no necesitó tocarse. Los iconos ya no son
+   copias de la paleta: desde el 29/09/2026 son PNG del monograma DORADO del
+   cliente, sin fondo (`src/app/icon.png`, `favicon.ico`, `apple-icon.png`,
+   `public/icons/orum-*.png`), generados desde
+   `src/components/ui/marca/monograma.png`. Si cambia el monograma, se
+   regeneran desde ahí. Si la paleta vuelve
    a cambiar, revisar los tres a mano — ninguno puede leer una variable CSS.
 9. ~~`--cacao-bg` en tema claro mapeaba a un marfil claro en vez de negro,
    contradiciendo `CLAUDE.md`.~~ **Cerrado en la v6**: era un bloque de

@@ -1,15 +1,18 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { LogOut, MessageCircle } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
+import { obtenerDatosCarnet } from '@/lib/miembros/datos-carnet'
 import { createClient } from '@/lib/supabase/server'
-import { Avatar } from '@/components/ui/avatar'
-import { LogoOrumTema } from '@/components/ui/marca/marca'
-import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
-import { cerrarSesionMiembro } from '../login/actions'
-import { MenuTema } from './_components/menu-tema'
-import { PortalNav, PortalTabBar } from './_components/portal-nav'
+import { Button } from '@/components/ui/button'
+import { LogoOrum } from '@/components/ui/marca/marca'
+import { PieSitio } from '@/components/pie/pie-sitio'
+import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
+import escaparate from '@/app/(publico)/escaparate.module.css'
+import { cerrarSesionMiembro } from '../login/actions'
+import { BotonCarnet, ProveedorCarnet, VentanaCarnet } from './_components/boton-carnet'
+import { PortalNav } from './_components/portal-nav'
 import styles from './portal.module.css'
 
 export const metadata = { title: 'Portal de Miembros · ORUM' }
@@ -17,13 +20,22 @@ export const metadata = { title: 'Portal de Miembros · ORUM' }
 const MENSAJE_SOPORTE = 'Hola, necesito ayuda con mi membresía ORUM.'
 
 /*
-  La ranura `@modal` vive AQUÍ y solo aquí.
+  EL CROMO DEL PORTAL DE MIEMBROS  ·  el del Portal Público (29/09/2026)
+  ---------------------------------------------------------------------------
+  Encargo del propietario: el portal tiene que ser igual que `/explorar`. La
+  cabecera es la de la fachada —fija, negra fundida a transparente, montada
+  sobre la foto del banner— con lo del socio:
 
-  Una ruta interceptada solo intercepta si el layout que declara su ranura ya
-  está montado. En el panel de administración se aprendió por las malas: con una
-  ranura por sección, el mismo destino se abría encima o navegaba entero según de
-  dónde vinieras. Una sola ranura, en el layout del portal, y todos los overlays
-  cuelgan de ella.
+    · Navegación: Inicio y Comercios.
+    · «Carnet»: abre el carnet encima de la página; tocar el QR lo amplía
+      (`BotonCarnet`). La foto del socio ya NO está en la cabecera: aparece
+      únicamente dentro del carnet.
+    · «Cerrar sesión»: un submit real, funciona sin JavaScript.
+
+  Sin barra inferior en móvil: la cabecera ya lleva el carnet a la vista.
+
+  La ranura `@modal` vive AQUÍ y solo aquí: una ruta interceptada solo
+  intercepta si el layout que declara su ranura ya está montado.
 */
 export default async function MiembrosLayout({
   children,
@@ -33,131 +45,73 @@ export default async function MiembrosLayout({
   modal: ReactNode
 }) {
   const perfil = await requireRolMiembro()
-
   const supabase = await createClient()
 
-  /*
-    LA FOTO DEL SOCIO EN EL CROMO, que faltaba.
-
-    El socio subía su foto y solo la veía en el carnet: aquí el avatar se
-    montaba sin `src`, así que la cabecera seguía enseñando sus iniciales para
-    siempre. Es el sitio donde más veces la va a ver, porque está en todas las
-    pantallas del portal.
-
-    Va en SU PROPIA consulta y no dentro de la de configuración, por la lección
-    que ya costó un 404 en la ficha de comercio: meter una columna nueva en la
-    consulta que decide si algo EXISTE convierte «falta una columna» en «esto no
-    existe». Aquí lo peor que puede pasar es quedarse sin foto, que es el estado
-    que el avatar ya sabe pintar.
-
-    Las dos van en paralelo: son independientes y encadenarlas sumaría sus
-    latencias en el cromo, que se renderiza en cada pantalla del portal.
-  */
-  const [{ data: config }, { data: ficha }] = await Promise.all([
-    supabase
-      .from('configuracion')
-      .select('valor')
-      .eq('clave', 'whatsapp_soporte')
-      .maybeSingle(),
-    supabase
-      .from('miembros')
-      .select('foto_url')
-      .eq('perfil_id', perfil.userId)
-      .is('deleted_at', null)
-      .maybeSingle(),
+  /* En paralelo: son independientes, y el cromo se renderiza en cada
+     pantalla del portal. Sin membresía vigente `carnet` es `null` y no hay
+     botón (el layout también envuelve `/miembros/inactiva`). */
+  const [{ data: config }, carnet] = await Promise.all([
+    supabase.from('configuracion').select('valor').eq('clave', 'whatsapp_soporte').maybeSingle(),
+    obtenerDatosCarnet(perfil.userId),
   ])
-
   const soporte = config?.valor ?? null
-  /* Una cadena vacía no es una foto: sería un `<img src="">`, que el navegador
-     resuelve pidiendo otra vez la propia página. */
-  const fotoUrl = (ficha?.foto_url ?? '').trim() || null
-  /* Supabase puede devolver una cuenta sin correo (acceso solo por teléfono);
-     el avatar necesita algo de lo que sacar una inicial en ese caso. */
-  const correo = perfil.email ?? 'Mi cuenta'
 
   return (
-    <div className={styles.portal}>
-      <header className={styles.cabecera}>
+    /*
+      `data-theme="light"`: el portal siempre en claro, como la fachada. La
+      cabecera fija su propio `data-theme="dark"`.
+    */
+    <ProveedorCarnet>
+    <div className={styles.portal} data-theme="light">
+      <header className={styles.cabecera} data-theme="dark">
         <Link href="/miembros" className={styles.marca} aria-label="ORUM, ir al inicio del portal">
-          <LogoOrumTema className={styles.logo} preload />
+          {/* Sobre la cabecera negra, plata (CLAUDE.md → «sobre negro, plata»). */}
+          <LogoOrum variante="plata" className={styles.logo} preload />
         </Link>
 
         <PortalNav />
 
-        {/*
-          La cabecera se queda con el wordmark, la navegación de escritorio y
-          UNA sola puerta: el avatar.
+        {/* `sobreFoto`: el mismo ámbito que usa la cabecera pública para que
+            las píldoras de contorno se lean sobre negro. */}
+        <div className={[styles.acciones, escaparate.sobreFoto].join(' ')}>
+          {carnet && <BotonCarnet />}
 
-          Salieron dos cosas. El botón de WhatsApp, porque la misma acción ya
-          estaba dentro del menú y `CLAUDE.md` condena listarla dos veces en la
-          misma pantalla. Y el conmutador de tema, que competía con las dos
-          únicas pestañas que importan; baja al menú, donde Apple lo entierra.
-          El corolario de la norma —"al sacar algo, comprueba el móvil"— está
-          cubierto: la cabecera y el avatar se renderizan a todos los anchos,
-          así que el destino no desaparece del teléfono.
-        */}
-        <div className={styles.acciones}>
-          {/*
-            El formulario envuelve el menú, no al revés: así el elemento
-            "Cerrar sesión" es un submit real dentro de él y la server action
-            se dispara aunque no haya JavaScript.
-          */}
           <form action={cerrarSesionMiembro}>
-            <DropdownMenu
-              trigger={
-                <button
-                  type="button"
-                  className={styles.botonCuenta}
-                  aria-label="Mi cuenta"
-                >
-                  {/* `md` (36px) y no `sm` (28px): es la única puerta a la cuenta en móvil,
-                      y a 28px se leía como un adorno en vez de como un control. */}
-                  <Avatar nombre={correo} src={fotoUrl} size="md" decorativo />
-                </button>
-              }
+            <Button
+              type="submit"
+              variant="secondary"
+              size="sm"
+              pildora
+              icon={<LogOut size={15} aria-hidden="true" />}
+              aria-label="Cerrar sesión"
             >
-              <p className={styles.correoMenu}>{correo}</p>
-
-              <MenuSeparator />
-
-              {/*
-                El único componente de cliente del cromo. No es un
-                `SegmentedControl`: sus radios, dentro de este `<form>`, hacían
-                que Enter cerrase la sesión. El porqué completo, en el archivo.
-              */}
-              <MenuTema />
-
-              <MenuSeparator />
-
-              {soporte && (
-                <MenuItem
-                  href={`https://wa.me/${soporte.replace(/\D/g, '')}?text=${encodeURIComponent(MENSAJE_SOPORTE)}`}
-                  icon={<MessageCircle size={16} />}
-                >
-                  Soporte por WhatsApp
-                </MenuItem>
-              )}
-
-              <MenuItem submit icon={<LogOut size={16} />}>
-                Cerrar sesión
-              </MenuItem>
-            </DropdownMenu>
+              {/* En un teléfono estrecho queda solo el icono: el nombre
+                  accesible lo sigue diciendo `aria-label`. */}
+              <span className={styles.textoCerrar}>Cerrar sesión</span>
+            </Button>
           </form>
         </div>
       </header>
 
-      {/*
-        Uno por portal, con un único escuchador delegado. Es quien llama a
-        `document.startViewTransition`: escribir el `view-transition-name` no
-        anima nada por sí solo, y en Next 16.2.11 nadie más lo dispara.
-      */}
+      {/* Uno por portal: es quien llama a `document.startViewTransition`. */}
       <TransicionesDeRuta />
 
       <main className={styles.main}>{children}</main>
 
+      {/* El pie del Portal Público, completo, en todas las páginas. */}
+      <PieSitio soporte={soporte} mensajeSoporte={MENSAJE_SOPORTE} className={styles.pie} />
+
       {modal}
 
-      <PortalTabBar />
+      <WhatsAppFlotante telefono={soporte} mensaje={MENSAJE_SOPORTE} />
+
+      {/*
+        LA VENTANA DEL CARNET, FUERA DE LA CABECERA: un `<dialog>` hereda las
+        propiedades de sus ancestros del DOM, y dentro de la cabecera negra
+        salía oscura. Aquí hereda el claro del portal (el carnet pinta su negro).
+      */}
+      {carnet && <VentanaCarnet datos={carnet} />}
     </div>
+    </ProveedorCarnet>
   )
 }

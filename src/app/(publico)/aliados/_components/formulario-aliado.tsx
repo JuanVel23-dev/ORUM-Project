@@ -6,7 +6,7 @@ import { CheckCircle2, Send } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input, Select, Textarea } from '@/components/ui/input'
+import { Input, Textarea } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
 import { Checkbox } from '@/components/ui/toggle'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
@@ -19,6 +19,7 @@ import {
   type SolicitudAliadoState,
 } from '@/lib/aliados/solicitud-aliado'
 import { enviarSolicitudAliado } from '../actions'
+import { SelectorOpciones } from './selector-opciones'
 import estilos from './formulario-aliado.module.css'
 
 const ESTADO_INICIAL: SolicitudAliadoState = {}
@@ -140,7 +141,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
             type="text"
             defaultValue={previos?.nombreComercio}
             autoComplete="organization"
-            placeholder="Panadería La Espiga"
             required
           />
         </Field>
@@ -162,7 +162,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
               type="text"
               defaultValue={previos?.cargo}
               autoComplete="organization-title"
-              placeholder="Propietario"
             />
           </Field>
         </div>
@@ -178,7 +177,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
                  el `+` y los ceros a la izquierda. */
               inputMode="tel"
               autoComplete="tel"
-              placeholder="3001234567"
               required
             />
           </Field>
@@ -189,7 +187,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
               type="email"
               defaultValue={previos?.correo}
               autoComplete="email"
-              placeholder="contacto@minegocio.com"
               required
             />
           </Field>
@@ -197,29 +194,28 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
 
         <div className={estilos.pareja}>
           <Field label="Ciudad" error={errores.ciudad}>
-            <Select name="ciudad" defaultValue={previos?.ciudad ?? ''} required>
-              <option value="" disabled>
-                Selecciona una ciudad
-              </option>
-              {CIUDADES_ALIADO.map((ciudad) => (
-                <option key={ciudad} value={ciudad}>
-                  {ciudad}
-                </option>
-              ))}
-            </Select>
+            {/*
+              El campo se ve como los demás; la lista que abre es el menú del
+              sistema (ver `selector-opciones.tsx`): la del `<select>` nativo
+              no admite diseño.
+            */}
+            <SelectorOpciones
+              name="ciudad"
+              etiqueta="Ciudad"
+              opciones={CIUDADES_ALIADO}
+              invitacion="Elige una ciudad"
+              defaultValue={previos?.ciudad}
+            />
           </Field>
 
           <Field label="Categoría" error={errores.categoria}>
-            <Select name="categoria" defaultValue={previos?.categoria ?? ''} required>
-              <option value="" disabled>
-                Selecciona una categoría
-              </option>
-              {CATEGORIAS_ALIADO.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                  {categoria}
-                </option>
-              ))}
-            </Select>
+            <SelectorOpciones
+              name="categoria"
+              etiqueta="Categoría"
+              opciones={CATEGORIAS_ALIADO}
+              invitacion="Elige una categoría"
+              defaultValue={previos?.categoria}
+            />
           </Field>
         </div>
 
@@ -229,7 +225,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
             type="text"
             defaultValue={previos?.direccion}
             autoComplete="street-address"
-            placeholder="Calle 10 # 4-32"
           />
         </Field>
 
@@ -259,7 +254,6 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
             defaultValue={previos?.enlace}
             inputMode="url"
             autoComplete="url"
-            placeholder="instagram.com/minegocio"
           />
         </Field>
       </Stack>

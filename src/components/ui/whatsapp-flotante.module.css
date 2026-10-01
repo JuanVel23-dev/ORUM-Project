@@ -1,0 +1,295 @@
+/* ==========================================================================
+   WHATSAPP FLOTANTE
+   --------------------------------------------------------------------------
+   Fijo en la esquina inferior derecha de la VENTANA, respetando las zonas
+   seguras. Por debajo de los diálogos y las hojas (`--z-sticky` <
+   `--z-overlay`): cuando algo se abre encima, no compite con ello.
+
+   CAPAS, de atrás adelante: dos ONDAS (pulsos al aparecer), el HALO (se
+   enciende al apuntar), el CÍRCULO (el botón visible, plano) y la ETIQUETA
+   que asoma a la izquierda. Todo el movimiento es `transform`/`translate`/
+   `scale` y `opacity` — nada que recalcule layout.
+
+   WCAG 2.2.2: lo que se mueve SOLO más de cinco segundos necesita pausa. Las
+   ondas son dos pulsos de 2,2 s que arrancan a la vez desfasados: terminan
+   antes de los cinco segundos y no vuelven. Lo demás solo se mueve cuando
+   la persona apunta o pulsa.
+   ========================================================================== */
+
+.boton {
+  --lado: 56px;
+
+  position: fixed;
+  right: max(var(--space-5), calc(env(safe-area-inset-right, 0px) + var(--space-4)));
+  bottom: max(var(--space-5), calc(env(safe-area-inset-bottom, 0px) + var(--space-4)));
+  z-index: var(--z-sticky);
+
+  display: grid;
+  place-items: center;
+  width: var(--lado);
+  height: var(--lado);
+  border-radius: var(--radius-full);
+
+  color: var(--blanco);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+
+  /* Entra una vez, con un pequeño rebote: es una aparición, que es de lo
+     poco donde el rebote está permitido. Nace desde 0,6 y sin opacidad,
+     nunca desde `scale(0)`. */
+  animation: aparecer var(--dur-page) var(--ease-spring) 600ms both;
+}
+
+@media (min-width: 768px) {
+  .boton {
+    --lado: 60px;
+    right: max(var(--space-7), calc(env(safe-area-inset-right, 0px) + var(--space-4)));
+    bottom: max(var(--space-7), calc(env(safe-area-inset-bottom, 0px) + var(--space-4)));
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* El acuse global de `a[href]:active` (`globals.css` §4b) encogería también
+   la etiqueta: el hundido lo hace el círculo, abajo. */
+.boton:active {
+  scale: 1;
+}
+
+/* --- El círculo: plano, con una sola sombra suave -------------------------- */
+
+.circulo {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+
+  /* PLANO (30/09/2026, encargo del propietario: «más simple, sin tantas
+     sombras o 3D»). Fuera el degradado de luz, las sombras interiores y el
+     resplandor verde: un disco en `--whatsapp` (3,48:1 con el glifo) y una
+     sola sombra corta, la justa para que no se pierda sobre una foto. Las
+     animaciones no cambian. */
+  background: var(--whatsapp);
+  box-shadow: var(--shadow-card);
+
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.glifo {
+  width: 55%;
+  height: 55%;
+  fill: currentColor;
+}
+
+/* --- Las ondas: dos pulsos al aparecer -------------------------------------- */
+
+.onda {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--radius-full);
+  background: var(--whatsapp);
+  opacity: 0;
+  pointer-events: none;
+  animation: onda 2.2s var(--ease-out) 1.1s 1 both;
+}
+
+.ondaSegunda {
+  animation-delay: 1.9s;
+}
+
+@keyframes onda {
+  from {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+/* --- El halo: se enciende al apuntar ------------------------------------------ */
+
+.halo {
+  position: absolute;
+  inset: -14px;
+  z-index: 1;
+  border-radius: var(--radius-full);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--whatsapp) 45%, transparent) 0%,
+    color-mix(in srgb, var(--whatsapp) 0%, transparent) 70%
+  );
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+/* --- La etiqueta que asoma a la izquierda ------------------------------------- */
+
+.etiqueta {
+  position: absolute;
+  /* CENTRADA POR LAYOUT, no con `translate: 0 -50%`: una regla global
+     reponía `translate` y la etiqueta caía media altura por debajo del
+     círculo. `inset-block: 0` + `margin-block: auto` + alto a su contenido
+     la centra sin tocar ninguna transformación. */
+  inset-block: 0;
+  margin-block: auto;
+  height: max-content;
+  right: calc(100% + var(--space-3));
+  z-index: 2;
+
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--blanco);
+  box-shadow: var(--shadow-flotante);
+
+  font-family: var(--font-sans);
+  font-size: var(--t-footnote-size);
+  font-weight: 700;
+  color: var(--tinta-1);
+  white-space: nowrap;
+
+  opacity: 0;
+  transform: translateX(8px) scale(0.96);
+  transform-origin: right center;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+/* --- Apuntar: se levanta, se enciende el halo, saluda y asoma la etiqueta ---- */
+
+@media (hover: hover) {
+  .boton:hover .circulo {
+    transform: translateY(-3px) scale(1.06);
+  }
+
+  .boton:hover .halo {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .boton:hover .glifo {
+    animation: saludo 560ms var(--ease-out);
+  }
+
+  /* Sube lo mismo que el círculo (-3px): si no, al apuntar quedaría 3px
+     por debajo de su centro. */
+  .boton:hover .etiqueta {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* Con teclado, lo mismo que al apuntar: el foco también «señala». */
+.boton:focus-visible .etiqueta {
+  opacity: 1;
+  transform: none;
+}
+
+.boton:focus-visible .halo {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* El saludo: el teléfono se sacude una vez, como una llamada entrante. */
+@keyframes saludo {
+  0% {
+    rotate: 0deg;
+  }
+  20% {
+    rotate: -14deg;
+  }
+  40% {
+    rotate: 11deg;
+  }
+  60% {
+    rotate: -7deg;
+  }
+  80% {
+    rotate: 3deg;
+  }
+  100% {
+    rotate: 0deg;
+  }
+}
+
+/* --- Pulsar: se hunde ------------------------------------------------------- */
+
+.boton:active .circulo {
+  transform: translateY(1px) scale(0.9);
+  transition-duration: var(--dur-press);
+}
+
+.boton:active .halo {
+  opacity: 1;
+  transform: scale(1.1);
+  transition-duration: var(--dur-press);
+}
+
+/* --- Foco ------------------------------------------------------------------- */
+
+.boton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+
+/* --- Movimiento reducido ------------------------------------------------------
+   Equivalente no vestibular: aparece con un fundido, sin ondas, sin rebote,
+   sin saludo y sin desplazamientos. El halo y la etiqueta siguen
+   respondiendo, porque son opacidad. */
+@media (prefers-reduced-motion: reduce) {
+  .boton {
+    animation: fundido var(--dur-fast) linear both;
+  }
+
+  .onda {
+    display: none;
+  }
+
+  .boton:hover .glifo {
+    animation: none;
+  }
+
+  .boton:hover .circulo,
+  .boton:active .circulo,
+  .boton:hover .halo,
+  .boton:focus-visible .halo,
+  .boton:hover .etiqueta,
+  .boton:focus-visible .etiqueta,
+  .etiqueta,
+  .halo {
+    transform: none;
+  }
+}
+
+@keyframes fundido {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Un atajo de pantalla no pertenece a una hoja impresa. */
+@media print {
+  .boton {
+    display: none;
+  }
+}

@@ -2,7 +2,7 @@ import { Sparkles, Target } from 'lucide-react'
 import escaparate from '../escaparate.module.css'
 import { AdornoEstrella } from '@/components/ui/marca/marca'
 import { Revelar } from './revelar'
-import { REVELAR, revelarEscalonado } from './revelado'
+import { REVELAR, revelarEscalonado } from '@/lib/shared/revelado'
 import estilos from './mision-vision.module.css'
 
 /*
@@ -38,6 +38,7 @@ const PILARES = [
 export function MisionVision() {
   return (
     <section
+      id="proposito"
       className={[escaparate.franja, escaparate.tonoPapel, estilos.seccion].join(' ')}
       aria-labelledby="titulo-proposito"
     >

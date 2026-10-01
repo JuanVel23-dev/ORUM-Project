@@ -73,6 +73,8 @@ export function OverlayRuta({
   footer,
   width,
   detent,
+  ariaLabel,
+  desnudo,
   children,
 }: {
   title?: string
@@ -80,6 +82,10 @@ export function OverlayRuta({
   footer?: ReactNode
   width?: string
   detent?: Detent
+  /** Nombre del diálogo cuando no hay `title` (p. ej. con `desnudo`). */
+  ariaLabel?: string
+  /** El contenido pinta la superficie y su propia X (`useCerrarOverlay`). */
+  desnudo?: boolean
   children?: ReactNode
 }) {
   const router = useRouter()
@@ -95,6 +101,8 @@ export function OverlayRuta({
         footer={footer}
         width={width}
         detent={detent}
+        ariaLabel={ariaLabel}
+        desnudo={desnudo}
       >
         {children}
       </Overlay>

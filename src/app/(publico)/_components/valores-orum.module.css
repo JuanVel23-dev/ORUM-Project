@@ -95,12 +95,13 @@
 .anillo {
   transition:
     scale var(--dur-base) var(--ease-out),
-    background-color var(--dur-base) var(--ease-out);
+    translate var(--dur-base) var(--ease-out);
 }
 
 @media (hover: hover) {
   .valor:hover .anillo {
+    /* Sin relleno: el anillo sube y crece. */
     scale: 1.08;
-    background: var(--gold-bg);
+    translate: 0 -4px;
   }
 }

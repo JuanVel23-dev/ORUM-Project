@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
+  alternarCategoria,
   compararNombres,
   filtrarDirectorio,
   hayFiltros,
@@ -10,7 +11,7 @@ import {
   type FiltrosDirectorio,
 } from './directorio'
 
-const SIN_FILTROS: FiltrosDirectorio = { q: '', categoriaId: null, ciudadId: null, orden: 'az' }
+const SIN_FILTROS: FiltrosDirectorio = { q: '', categoriaIds: [], ciudadId: null, orden: 'az' }
 
 function comercio(
   nombre: string,
@@ -34,14 +35,19 @@ describe('leerFiltrosDirectorio', () => {
   it('lee los cuatro filtros', () => {
     expect(
       leerFiltrosDirectorio({ q: '  café ', categoria_id: '3', ciudad_id: '7', orden: 'za' }),
-    ).toEqual({ q: 'café', categoriaId: 3, ciudadId: 7, orden: 'za' })
+    ).toEqual({ q: 'café', categoriaIds: [3], ciudadId: 7, orden: 'za' })
+  })
+
+  it('lee varias categorías: con comas, repetidas, sin duplicados y ordenadas', () => {
+    expect(leerFiltrosDirectorio({ categoria_id: '7,3,7' }).categoriaIds).toEqual([3, 7])
+    expect(leerFiltrosDirectorio({ categoria_id: ['9', '2,x'] }).categoriaIds).toEqual([2, 9])
   })
 
   it('descarta ids que no son enteros positivos', () => {
     const f = leerFiltrosDirectorio({ categoria_id: 'abc', ciudad_id: '-2' })
-    expect(f.categoriaId).toBeNull()
+    expect(f.categoriaIds).toEqual([])
     expect(f.ciudadId).toBeNull()
-    expect(leerFiltrosDirectorio({ categoria_id: '1.5' }).categoriaId).toBeNull()
+    expect(leerFiltrosDirectorio({ categoria_id: '1.5' }).categoriaIds).toEqual([])
   })
 
   it('un orden desconocido cae al de por defecto', () => {
@@ -64,14 +70,27 @@ describe('hrefDirectorio', () => {
 
   it('cambia un filtro y conserva los demás', () => {
     const actuales = { ...SIN_FILTROS, q: 'pan', ciudadId: 2 }
-    expect(hrefDirectorio(actuales, { categoriaId: 5 })).toBe(
+    expect(hrefDirectorio(actuales, { categoriaIds: [5] })).toBe(
       '/explorar?q=pan&categoria_id=5&ciudad_id=2',
     )
   })
 
+  it('varias categorías van en una lista legible con comas', () => {
+    expect(hrefDirectorio(SIN_FILTROS, { categoriaIds: [3, 7] })).toBe(
+      '/explorar?categoria_id=3,7',
+    )
+  })
+
   it('quitar un filtro lo saca de la URL', () => {
-    const actuales = { ...SIN_FILTROS, categoriaId: 5 }
-    expect(hrefDirectorio(actuales, { categoriaId: null })).toBe('/explorar')
+    const actuales = { ...SIN_FILTROS, categoriaIds: [5] }
+    expect(hrefDirectorio(actuales, { categoriaIds: [] })).toBe('/explorar')
+  })
+
+  it('la misma URL sobre otra base (el directorio del socio en /miembros)', () => {
+    expect(hrefDirectorio(SIN_FILTROS, {}, '/miembros')).toBe('/miembros')
+    expect(hrefDirectorio({ ...SIN_FILTROS, q: 'pan' }, { ciudadId: 2 }, '/miembros')).toBe(
+      '/miembros?q=pan&ciudad_id=2',
+    )
   })
 
   it('el orden por defecto no ensucia la URL', () => {
@@ -121,8 +140,13 @@ describe('filtrarDirectorio', () => {
   })
 
   it('filtra por categoría y por ciudad a la vez', () => {
-    const f = { ...SIN_FILTROS, categoriaId: 1, ciudadId: 1 }
+    const f = { ...SIN_FILTROS, categoriaIds: [1], ciudadId: 1 }
     expect(nombres(filtrarDirectorio(lista, f))).toEqual(['Café 2'])
+  })
+
+  it('con varias categorías enseña los comercios de cualquiera de ellas', () => {
+    const f = { ...SIN_FILTROS, categoriaIds: [2, 3] }
+    expect(nombres(filtrarDirectorio(lista, f))).toEqual(['Ámbar Spa', 'Zapatería Luna'])
   })
 
   it('la búsqueda casa con el nombre, sin tildes ni mayúsculas', () => {
@@ -163,5 +187,21 @@ describe('hayFiltros', () => {
     expect(hayFiltros({ ...SIN_FILTROS, orden: 'za' })).toBe(false)
     expect(hayFiltros({ ...SIN_FILTROS, q: 'x' })).toBe(true)
     expect(hayFiltros({ ...SIN_FILTROS, ciudadId: 1 })).toBe(true)
+  })
+})
+
+describe('alternarCategoria', () => {
+  it('enciende la que falta y la deja ordenada', () => {
+    expect(alternarCategoria([7], 3)).toEqual([3, 7])
+  })
+
+  it('apaga la que ya estaba', () => {
+    expect(alternarCategoria([3, 7], 7)).toEqual([3])
+  })
+
+  it('no toca la lista de entrada', () => {
+    const ids = [3]
+    alternarCategoria(ids, 5)
+    expect(ids).toEqual([3])
   })
 })

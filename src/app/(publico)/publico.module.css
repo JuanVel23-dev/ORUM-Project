@@ -2,6 +2,27 @@
    CROMO PÚBLICO  ·  cabecera fija montada encima, contenido y pie
    ========================================================================== */
 
+/*
+  SIN BARRAS DE DESPLAZAMIENTO INTERNAS (29/09/2026, encargo del
+  propietario). La ficha de un comercio, la ventana de categorías, el
+  formulario de aliados y el menú de móvil desplazan su cuerpo, y la barra
+  gris del sistema se veía dentro de la tarjeta, junto a la X. Se ocultan en
+  toda la fachada —el diálogo y la hoja son descendientes de `.fachada` en el
+  DOM aunque se pinten en la capa superior—; el desplazamiento sigue igual
+  con la rueda, el dedo, el trackpad y el teclado.
+
+  La barra de la PÁGINA no se toca: es del `<html>`, que queda fuera de este
+  ámbito, y es la que dice cuánto queda por leer.
+*/
+.fachada,
+.fachada :global(*) {
+  scrollbar-width: none;
+}
+
+.fachada :global(*)::-webkit-scrollbar {
+  display: none;
+}
+
 .fachada {
   display: flex;
   flex-direction: column;

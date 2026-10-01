@@ -20,7 +20,7 @@ import { MembresiasPublicas } from './_components/membresias-publicas'
 import { MisionVision } from './_components/mision-vision'
 import { QueEsOrum } from './_components/que-es-orum'
 import { Revelar } from './_components/revelar'
-import { REVELAR, REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from './_components/revelado'
+import { REVELAR, REVELAR_DER, REVELAR_IZQ, revelarEscalonado } from '@/lib/shared/revelado'
 import { ValoresOrum } from './_components/valores-orum'
 import escaparate from './escaparate.module.css'
 import estilos from './landing.module.css'
@@ -119,11 +119,7 @@ export default async function LandingPublica() {
 
       <ComerciosDestacados comercios={vitrina.destacados} />
 
-      <MembresiasPublicas
-        planes={planes}
-        soporte={soporte}
-        totalComercios={vitrina.totalComercios}
-      />
+      <MembresiasPublicas planes={planes} soporte={soporte} />
 
       {/*
         EL CIERRE. Repite la invitación a propósito: quien llega hasta aquí

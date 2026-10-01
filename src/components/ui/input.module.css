@@ -62,7 +62,6 @@
 @media (hover: hover) {
   .control:hover:not(:disabled):not(:focus-visible) {
     border-color: var(--brand-edge);
-    background: var(--surface-hover);
   }
 }
 
@@ -249,7 +248,7 @@
 @media (hover: hover) {
   .botonAdorno:hover {
     color: var(--text);
-    background: var(--surface-hover);
+    scale: 1.12;
   }
 }
 

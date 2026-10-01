@@ -1,0 +1,495 @@
+/* ==========================================================================
+   MI FOTO  ·  el mismo material que el carnet: negro, plata, la X dentro
+   ========================================================================== */
+
+.tarjeta {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  max-height: calc(100dvh - var(--space-6));
+  overflow-y: auto;
+
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(
+      110% 70% at 100% 0%,
+      color-mix(in srgb, var(--n-200) 14%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(150deg, var(--cacao-800), var(--cacao-900) 65%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--n-50) 14%, transparent),
+    var(--shadow-overlay);
+  color: var(--cacao-fg);
+  color-scheme: dark;
+
+  --plata-brunida: linear-gradient(
+    140deg,
+    var(--n-50),
+    var(--n-400) 40%,
+    var(--n-100) 65%,
+    var(--n-450)
+  );
+
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+@media (min-width: 640px) {
+  .tarjeta {
+    padding: var(--space-6);
+  }
+}
+
+/* Soltar un archivo encima: la tarjeta se acerca un poco y aparece el filo
+   de plata — la respuesta al toque, sin relleno. */
+.tarjeta[data-soltando] {
+  scale: 1.01;
+  box-shadow:
+    inset 0 0 0 1px var(--n-300),
+    var(--shadow-overlay);
+}
+
+/* --- Barra: título y X ------------------------------------------------------ */
+
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+}
+
+.titulo {
+  margin: 0;
+  font-size: var(--t-title-2-size);
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--cacao-fg);
+}
+
+.cerrar {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  margin-right: calc(-1 * var(--space-3));
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--cacao-fg-2);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    rotate var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .cerrar:hover {
+    color: var(--cacao-fg);
+    rotate: 90deg;
+  }
+}
+
+.bajada {
+  margin: calc(-1 * var(--space-2)) 0 0;
+  font-size: var(--t-callout-size);
+  line-height: 1.5;
+  color: var(--cacao-fg-2);
+}
+
+/* Los focos, en plata, como en el carnet. */
+.cerrar:focus-visible,
+.escenario:focus-visible,
+.icono:focus-visible,
+.enlace:focus-visible,
+.deslizador:focus-visible {
+  outline: 2px solid var(--n-200);
+  outline-offset: 3px;
+}
+
+/* --- Las dos vistas --------------------------------------------------------- */
+
+/* Se intercambian (React desmonta una y monta otra): keyframe, no transición. */
+.vista {
+  display: grid;
+  gap: var(--space-4);
+  animation: entrarVista var(--dur-base) var(--ease-out);
+}
+
+@keyframes entrarVista {
+  from {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes entrarVista {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+/* --- Reposo: la foto actual y «Elegir una foto» ----------------------------- */
+
+.reposo {
+  justify-items: center;
+  padding-block: var(--space-2);
+  text-align: center;
+}
+
+.actual {
+  display: block;
+  width: 152px;
+  aspect-ratio: 1;
+  padding: 3px;
+  border-radius: var(--radius-full);
+  background: var(--plata-brunida);
+  cursor: pointer;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+.actual:active {
+  scale: 0.97;
+}
+
+/* El recorte: foto y velo dentro del MISMO círculo, así el velo la cubre
+   entera aunque la foto se acerque por debajo. */
+.recorte {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--cacao-800);
+}
+
+.actualImagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale var(--dur-base) var(--ease-out);
+}
+
+.inicial {
+  font-size: var(--t-display-2-size);
+  font-weight: 600;
+  color: var(--cacao-fg);
+}
+
+/*
+  El velo: la MISMA foto desenfocada debajo de un negro translúcido, con el
+  texto encima. No es `backdrop-filter`: ese desenfoca también el aro de
+  plata del borde y dejaba un halo claro por dentro del círculo. Aquí el
+  desenfoque es estático (`filter` en una copia, ampliada para que sus bordes
+  deshilachados queden fuera del recorte) y solo se anima la opacidad.
+*/
+.velo {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-1);
+  background: var(--cacao-900);
+
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--blanco);
+
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.veloFoto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(var(--blur-sm));
+  scale: 1.25;
+}
+
+.velo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--cacao-900) 58%, transparent);
+}
+
+.veloTexto {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  translate: 0 4px;
+  transition: translate var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .actual:hover .velo {
+    opacity: 1;
+  }
+
+  .actual:hover .veloTexto {
+    translate: 0 0;
+  }
+
+  .actual:hover .actualImagen {
+    scale: 1.06;
+  }
+}
+
+.ayuda {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  color: var(--cacao-fg-3);
+}
+
+/* «O arrástrala hasta aquí» solo tiene sentido con ratón. */
+@media (hover: none) {
+  .soloRaton {
+    display: none;
+  }
+}
+
+/* --- Ajuste: el escenario con el círculo ----------------------------------- */
+
+.escenario {
+  position: relative;
+  /* Contenido y a la medida de la ventana: también se encoge con la ALTURA,
+     para que «Guardar» siga a la vista sin desplazar. */
+  width: min(100%, 280px, max(200px, 100dvh - 300px));
+  aspect-ratio: 1;
+  justify-self: center;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--cacao-900);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.escenario:active {
+  cursor: grabbing;
+}
+
+/* El círculo de recorte: la unidad de la geometría (diámetro = 1). La imagen
+   se sale de él a propósito —se ve atenuada alrededor— y el escenario la
+   recorta. */
+.circulo {
+  position: absolute;
+  inset: 5%;
+  border-radius: var(--radius-full);
+}
+
+.imagen {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--w) * 100%);
+  height: calc(var(--h) * 100%);
+  max-width: none;
+  transform: translate(-50%, -50%) translate(calc(var(--tx) * 100%), calc(var(--ty) * 100%))
+    rotate(var(--giro)) scale(var(--zoom));
+  pointer-events: none;
+}
+
+/* Girar, restablecer y los botones ± saltan: ahí sí se suaviza. Arrastrar y
+   pellizcar siguen al dedo 1:1, sin transición que lo retrase. */
+.suave {
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+/*
+  Lo de fuera del círculo, atenuado: un degradado radial sobre TODO el
+  escenario. `closest-side` es medio lado; el círculo ocupa el 90 % del lado,
+  así que su radio es el 90 % de ese medio lado. (La sombra de 100vmax que
+  se probó primero no llegaba a pintarse.)
+*/
+.mascara {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle closest-side,
+    transparent 90%,
+    color-mix(in srgb, var(--cacao-900) 72%, transparent) calc(90% + 1px)
+  );
+  pointer-events: none;
+}
+
+/* El filo de plata del círculo. */
+.mascara::after {
+  content: '';
+  position: absolute;
+  inset: 5%;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--n-50) 75%, transparent);
+}
+
+/* --- Controles -------------------------------------------------------------- */
+
+.controles {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: min(100%, 320px);
+  justify-self: center;
+}
+
+.icono {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--cacao-fg-2);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out),
+    rotate var(--dur-base) var(--ease-out);
+}
+
+.icono:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .icono:not(:disabled):hover {
+    color: var(--cacao-fg);
+    scale: 1.1;
+  }
+
+  .girar:hover {
+    rotate: 30deg;
+  }
+}
+
+.icono:not(:disabled):active {
+  scale: 0.92;
+}
+
+.separador {
+  width: 1px;
+  height: var(--space-5);
+  background: color-mix(in srgb, var(--n-50) 18%, transparent);
+}
+
+/* La barra de zoom: carril fino de plata que se llena hasta el pulgar. */
+.deslizador {
+  flex: 1;
+  min-width: 0;
+  height: var(--tap-min);
+  margin: 0;
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.deslizador::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    var(--n-100) var(--progreso),
+    color-mix(in srgb, var(--n-50) 18%, transparent) var(--progreso)
+  );
+}
+
+.deslizador::-moz-range-track {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    var(--n-100) var(--progreso),
+    color-mix(in srgb, var(--n-50) 18%, transparent) var(--progreso)
+  );
+}
+
+.deslizador::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--blanco);
+  box-shadow: var(--shadow-press);
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+.deslizador::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--blanco);
+  box-shadow: var(--shadow-press);
+}
+
+.deslizador:active::-webkit-slider-thumb {
+  scale: 1.15;
+}
+
+/* Elegir otra + Guardar, en una fila: la principal se lleva el ancho. */
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.acciones > :last-child {
+  flex: 1;
+}
+
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--cacao-fg-2);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .enlace:hover {
+    color: var(--cacao-fg);
+    translate: 0 -1px;
+  }
+}
+
+/* --- A pantalla completa (enlace directo) ----------------------------------- */
+
+.pagina {
+  display: grid;
+  place-items: center;
+  min-height: 60dvh;
+}
+
+.pagina .tarjeta {
+  width: min(100%, 460px);
+}

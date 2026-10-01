@@ -46,6 +46,9 @@
 .logoTemaOro,
 .logoTemaPlata {
   grid-area: 1 / 1;
+  /* El alto lo fija quien lo usa en el contenedor (`.logoTema`); sin esto las
+     imágenes salían a su tamaño natural, cientos de píxeles. */
+  height: 100%;
 }
 
 .logoTemaPlata {

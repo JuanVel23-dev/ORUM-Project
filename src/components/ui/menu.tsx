@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Check } from 'lucide-react'
-import { useCallback, useId, useRef, type ReactElement, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useRef, type ReactElement, type ReactNode } from 'react'
 import styles from './menu.module.css'
 
 /*
@@ -13,6 +13,31 @@ import styles from './menu.module.css'
   Lo único que queda por hacer a mano es colocar el menú y navegarlo con el
   teclado.
 */
+
+/**
+ * ¿Se ve el disparador? No basta con mirar la ventana: dentro de un
+ * formulario que desplaza en su propio diálogo (el de aliados), el botón
+ * sale por arriba del diálogo pero sigue «dentro de la pantalla», y el menú
+ * lo seguía hasta quedar flotando sobre otra cosa. Se intersecta su caja con
+ * la de cada ancestro que recorta (`overflow` distinto de `visible`).
+ */
+function disparadorVisible(el: HTMLElement): boolean {
+  const r = el.getBoundingClientRect()
+  let arriba = 0
+  let abajo = window.innerHeight
+  let izquierda = 0
+  let derecha = window.innerWidth
+  for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+    const { overflowX, overflowY } = getComputedStyle(p)
+    if (overflowX === 'visible' && overflowY === 'visible') continue
+    const c = p.getBoundingClientRect()
+    arriba = Math.max(arriba, c.top)
+    abajo = Math.min(abajo, c.bottom)
+    izquierda = Math.max(izquierda, c.left)
+    derecha = Math.min(derecha, c.right)
+  }
+  return r.bottom > arriba && r.top < abajo && r.right > izquierda && r.left < derecha
+}
 
 const MARGEN = 6 // separación entre disparador y menú, en px
 const BORDE = 8 // margen mínimo respecto al borde de la ventana
@@ -71,11 +96,56 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
     menu.style.setProperty('--desplazamiento-entrada', arriba ? '4px' : '-4px')
   }, [align])
 
+  /*
+    EL MENÚ SIGUE A SU BOTÓN (bug del 30/09/2026: «cuando las activo y me
+    muevo se separan y se mueven por toda la página»).
+
+    El menú es `position: fixed` en la capa superior, así que no se desplaza
+    con la página: antes se colocaba UNA vez al abrir y, al hacer scroll, se
+    quedaba quieto mientras el botón se iba. Ahora, mientras está abierto, se
+    recoloca en cada desplazamiento —de la página o de cualquier contenedor,
+    por eso en fase de captura— y en cada cambio de tamaño, como mucho una
+    vez por fotograma. Si el botón deja de VERSE —fuera de la pantalla o
+    tapado por el borde del contenedor que desplaza—, el menú se cierra:
+    flotando sin su botón, no se sabría de qué es.
+  */
+  const dejarDeSeguir = useRef<(() => void) | null>(null)
+
+  const seguirAlDisparador = useCallback(() => {
+    let marco = 0
+    const alMoverse = () => {
+      if (marco) return
+      marco = requestAnimationFrame(() => {
+        marco = 0
+        const ancla = disparadorRef.current?.firstElementChild as HTMLElement | undefined
+        if (!ancla) return
+        if (!disparadorVisible(ancla)) {
+          menuRef.current?.hidePopover()
+          return
+        }
+        colocar()
+      })
+    }
+    window.addEventListener('scroll', alMoverse, { capture: true, passive: true })
+    window.addEventListener('resize', alMoverse, { passive: true })
+    return () => {
+      cancelAnimationFrame(marco)
+      window.removeEventListener('scroll', alMoverse, { capture: true })
+      window.removeEventListener('resize', alMoverse)
+    }
+  }, [colocar])
+
+  // Si el menú se desmonta abierto (navegación), se sueltan los escuchadores.
+  useEffect(() => () => dejarDeSeguir.current?.(), [])
+
   const alAlternar = (e: React.SyntheticEvent<HTMLDivElement>) => {
     const evento = e.nativeEvent as ToggleEvent
+    dejarDeSeguir.current?.()
+    dejarDeSeguir.current = null
     if (evento.newState !== 'open') return
 
     colocar()
+    dejarDeSeguir.current = seguirAlDisparador()
     // Enfocar el primer elemento deja el menú listo para el teclado.
     menuRef.current?.querySelector<HTMLElement>(SELECTOR_OPCIONES)?.focus()
   }

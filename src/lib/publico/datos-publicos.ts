@@ -4,7 +4,7 @@ import { cache } from 'react'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
-import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
+import { formatearBeneficio, formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import { hoyISO } from '@/lib/shared/fecha'
 import { compararNombres, ordenarCategorias } from './directorio'
 import { prepararPlanes, type PlanPublico } from './planes'
@@ -205,7 +205,10 @@ const cargarCatalogoPublico = cache(async (): Promise<CatalogoPublico> => {
     if (beneficioPorComercio.has(p.comercio_id)) continue
     const tipoCodigo = codigoTipo.get(p.tipo_beneficio_id)
     if (!tipoCodigo) continue
-    beneficioPorComercio.set(p.comercio_id, formatearBeneficio(tipoCodigo, p.valor))
+    // La forma CORTA («10%», «2x1»): en la tarjeta del directorio la frase
+    // entera partía en dos líneas y el propietario la quería breve. La ficha
+    // sigue diciendo «10% de descuento».
+    beneficioPorComercio.set(p.comercio_id, formatearBeneficioCorto(tipoCodigo, p.valor))
   }
 
   const lista: ComercioVitrina[] = comercios.map((c) => {

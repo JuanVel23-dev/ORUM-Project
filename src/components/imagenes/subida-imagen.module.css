@@ -160,7 +160,6 @@
 
 @media (hover: hover) {
   .archivo:hover::file-selector-button {
-    background: var(--surface-hover);
     /* §2.3: al señalar aparece el filo dorado. Aquí es borde, no sombra,
        porque un pseudoelemento de control no admite elevación fiable. */
     border-color: var(--brand-edge);
@@ -169,5 +168,5 @@
 
 /* El acuse de pulsación va en `pointerdown`, que en CSS es `:active`. */
 .archivo:active::file-selector-button {
-  background: var(--surface-hover);
+  opacity: 0.72;
 }

@@ -29,7 +29,6 @@ function refrescar(anuncioId: number): void {
   revalidatePath('/')
   revalidatePath('/novedades')
   revalidatePath('/miembros')
-  revalidatePath('/miembros/novedades')
 }
 
 /**
