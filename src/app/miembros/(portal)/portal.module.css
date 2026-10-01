@@ -278,6 +278,13 @@
   }
 }
 
+/* «Mis movimientos» solo con icono, y solo donde no hay barra de navegación. */
+@media (min-width: 768px) {
+  .soloMovil {
+    display: none;
+  }
+}
+
 /* En un teléfono estrecho «Cerrar sesión» queda solo con su icono: el
    nombre lo sigue diciendo `aria-label`. */
 .textoCerrar {

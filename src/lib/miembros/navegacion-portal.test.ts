@@ -2,6 +2,13 @@ import { describe, it, expect } from 'vitest'
 import { esDestinoActivo } from './navegacion-portal'
 
 describe('esDestinoActivo', () => {
+  describe('href = /miembros/movimientos', () => {
+    it('activo en la bitácora y NO marca Inicio', () => {
+      expect(esDestinoActivo('/miembros/movimientos', '/miembros/movimientos')).toBe(true)
+      expect(esDestinoActivo('/miembros/movimientos', '/miembros')).toBe(false)
+    })
+  })
+
   describe('href = /miembros (Inicio)', () => {
     it('activo en la propia raíz', () => {
       expect(esDestinoActivo('/miembros', '/miembros')).toBe(true)

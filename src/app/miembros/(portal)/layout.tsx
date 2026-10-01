@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { LogOut } from 'lucide-react'
+import { LogOut, Receipt } from 'lucide-react'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
 import { obtenerDatosCarnet } from '@/lib/miembros/datos-carnet'
 import { createClient } from '@/lib/supabase/server'
@@ -75,6 +75,18 @@ export default async function MiembrosLayout({
             las píldoras de contorno se lean sobre negro. */}
         <div className={[styles.acciones, escaparate.sobreFoto].join(' ')}>
           {carnet && <BotonCarnet />}
+
+          {/* Solo en móvil: desde 768px la navegación ya trae «Movimientos».
+              Solo icono; el nombre accesible lo dice `aria-label`. */}
+          <Button
+            href="/miembros/movimientos"
+            variant="secondary"
+            size="sm"
+            pildora
+            className={styles.soloMovil}
+            icon={<Receipt size={15} aria-hidden="true" />}
+            aria-label="Mis movimientos"
+          />
 
           <form action={cerrarSesionMiembro}>
             <Button

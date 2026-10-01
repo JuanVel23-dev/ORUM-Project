@@ -8,7 +8,9 @@ import styles from '../portal.module.css'
 /*
   LA NAVEGACIÓN DEL PORTAL  ·  29/09/2026
   ---------------------------------------------------------------------------
-  Encargo del propietario: «Inicio y Comercios por el momento». El Inicio ES
+  Encargo del propietario: «Inicio y Comercios por el momento». Desde el
+  30/09/2026 se suma «Movimientos», la bitácora del socio (en móvil, donde
+  esta barra no existe, la puerta es el icono de la cabecera). El Inicio ES
   el directorio de comercios (igual que `/explorar`): «Inicio» lleva arriba
   del todo y «Comercios» baja a la rejilla (`#comercios`).
 
@@ -19,6 +21,7 @@ import styles from '../portal.module.css'
 const DESTINOS = [
   { href: '/miembros', etiqueta: 'Inicio' },
   { href: '/miembros#comercios', etiqueta: 'Comercios' },
+  { href: '/miembros/movimientos', etiqueta: 'Movimientos' },
 ] as const
 
 export function PortalNav() {

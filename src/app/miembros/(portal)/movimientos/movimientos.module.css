@@ -1,0 +1,56 @@
+/* ==========================================================================
+   MIS MOVIMIENTOS
+   --------------------------------------------------------------------------
+   Todo sale de tokens. La tabla es `DataList` (tarjetas bajo 768px), así que
+   aquí solo se viste lo propio: encabezado, resumen y la celda del comercio.
+   Sin sombra en las filas de lista (CLAUDE.md): flota lo que el dedo levanta.
+   ========================================================================== */
+
+.pantalla {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.encabezado {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.lede {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+/* La tarjeta del total ahorrado: la única superficie levantada de la pantalla. */
+.resumen {
+  max-width: 28rem;
+}
+
+.comercio {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.comercioNombre {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.secundario {
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+}
+
+.verMas {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+}
+
+.cargando {
+  display: grid;
+  gap: var(--space-4);
+}
