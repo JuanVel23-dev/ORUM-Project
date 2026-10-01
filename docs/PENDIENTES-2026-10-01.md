@@ -1,16 +1,13 @@
 # Pendientes — cierre de sesión del 30/09 al 01/10/2026
 
-Estado: **nada de esto está commiteado**. Los 2 conflictos del merge de
-`explorar` (`page.tsx` y `[id]/page.tsx`) ya están **resueltos en el árbol de
-trabajo** —estructura nueva de GitHub + el SEO local repuesto—, pero **no
-marcados con `git add` ni cerrados con commit**. `tsc` y `eslint .` limpios,
-386/386 pruebas y `next build` completo en verde.
+Estado: **todo commiteado en `main` (6 commits locales por delante de
+`origin/main`, aún SIN `git push`)**. El merge de `explorar` está cerrado
+(`d97243c`): estructura nueva de GitHub + el SEO local repuesto. `tsc` y
+`eslint .` limpios, 386/386 pruebas y `next build` completo en verde.
 
-Respaldo de seguridad del trabajo sin commit (parche + archivos nuevos), fuera del
-repo: carpeta `respaldo-2026-10-01` en el scratchpad de la sesión.
-
-Marca cada casilla al completarla. Quién lo hace: **Tú** = requiere tu acción o
-decisión; **Yo** = lo hago cuando me lo pidas.
+Fuera de los commits, a propósito: `docs/superpowers/specs/2026-09-23-anuncios-novedades-design.md`
+(ya venía modificado antes de esta sesión, no es de esta tanda), `graphify-out/`
+y `repomix-output.xml` (generados).
 
 ---
 
@@ -40,11 +37,11 @@ Especificación: `docs/superpowers/specs/2026-09-30-derechos-imagenes-design.md`
 ## 1. Tuyos
 
 ### Urgente
-- [ ] **Cerrar el merge y guardar el trabajo.** Los conflictos ya están resueltos
-  (ver arriba). Falta, con tu autorización: `git add` de los 2 archivos, el commit
-  del merge, y después commitear por separado lo mío (sin los cambios de
-  `graphify-out/` ni `repomix-output.xml`). No ejecutes `git merge --abort`,
-  `git reset --hard` ni `git checkout .` antes: descartarían cambios sin commit.
+- [ ] **Hacer `git push` de `main`** (6 commits por delante de `origin/main`). No lo
+  hice yo: publicar a un repositorio compartido lo decides tú. Si `DanielBullaUsaquen`
+  es otra persona, conviene avisarle antes del refactor de `explorar` reconciliado con el SEO.
+- [ ] **Desplegar** cuando hagas el push (las migraciones ya están en producción; el
+  código nuevo no).
 
 ### Antes de probar
 - [ ] **Reiniciar el servidor de desarrollo.** Se añadieron rutas bajo `@modal`;
