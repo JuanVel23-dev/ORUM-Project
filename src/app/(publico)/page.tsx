@@ -1,14 +1,13 @@
 import type { Metadata } from 'next'
 import { getPerfilActual } from '@/lib/auth/auth'
 import {
+  obtenerAnunciosPublicos,
   obtenerInstanteServidor,
   obtenerPlanesPublicos,
   obtenerVitrinaPublica,
   obtenerWhatsappSoporte,
 } from '@/lib/publico/datos-publicos'
 import { INDEXAR_CATALOGO, NOMBRE_SITIO, URL_SITIO } from '@/lib/publico/sitio'
-import { createAdminClient } from '@/lib/supabase/admin'
-import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
 import { AnuncioBanner } from '@/components/anuncios/anuncio-banner'
 import { AliadosOverlayTrigger } from './_components/aliados-overlay-trigger'
 import { ComerciosDestacados } from './_components/comercios-destacados'
@@ -93,7 +92,7 @@ export default async function LandingPublica() {
     obtenerWhatsappSoporte(),
     getPerfilActual(),
     obtenerInstanteServidor(),
-    obtenerAnunciosVisibles(createAdminClient(), 'publico'),
+    obtenerAnunciosPublicos(),
   ])
 
   return (

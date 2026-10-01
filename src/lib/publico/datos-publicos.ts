@@ -1,13 +1,43 @@
 import 'server-only'
 
 import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { formatearBeneficio, formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import { hoyISO } from '@/lib/shared/fecha'
 import { compararNombres, ordenarCategorias } from './directorio'
 import { prepararPlanes, type PlanPublico } from './planes'
+
+/* ==========================================================================
+   CACHÉ DE DATOS PÚBLICOS  ·  60 s  (1/10/2026, auditoría de carga)
+   --------------------------------------------------------------------------
+   Antes, CADA visita a la portada, a `/explorar` o a una ficha leía la base
+   (comercios, promociones, sucursales, planes, WhatsApp, anuncios). `cache()`
+   de React solo deduplica DENTRO de una petición; entre visitantes no
+   compartía nada, así que la carga sobre la base crecía con las visitas.
+
+   Ahora las lecturas pasan por `unstable_cache`: mil visitas en un minuto son
+   una sola lectura. Se cachea la CAPA DE DATOS y no la página, porque la
+   portada mira la sesión de quien entra (el botón cambia si ya eres socio).
+
+   DECISIÓN DEL PROPIETARIO: un cambio del administrador puede tardar HASTA
+   60 SEGUNDOS en verse en la fachada. No hay invalidación por etiqueta desde
+   las acciones del admin a propósito (son ~10 y olvidar una dejaría datos
+   viejos sin avisar); si algún día «al instante» importa más, la etiqueta
+   `publico` ya está puesta: basta `revalidateTag('publico')` en esas acciones.
+
+   Dos límites a conocer:
+     · `unstable_cache` serializa a JSON: lo que devuelven estas funciones es
+       JSON puro (los `Map` son internos). Un `Date`, `Map` o `undefined` en el
+       resultado se rompería en silencio.
+     · Un fallo transitorio de la base que devuelva vacío quedaría cacheado
+       hasta 60 s en vez de afectar a una sola petición.
+   ========================================================================== */
+
+const OPCIONES_CACHE: { revalidate: number; tags: string[] } = { revalidate: 60, tags: ['publico'] }
 
 /* ==========================================================================
    LOS DATOS DE LA FACHADA  ·  y por qué salen del cliente de servicio
@@ -136,7 +166,7 @@ export type CatalogoPublico = {
  * destacado de la portada que no aparece en el directorio), y `cache()` hace
  * que, si las dos lo piden en la misma petición, se consulte una sola vez.
  */
-const cargarCatalogoPublico = cache(async (): Promise<CatalogoPublico> => {
+async function leerCatalogoPublico(): Promise<CatalogoPublico> {
   const supabase = createAdminClient()
   // Fecha civil 'YYYY-MM-DD' en America/Bogotá: `fecha_inicio` y `fecha_fin` de
   // promociones son fechas civiles, no `timestamptz`. Se comparan como cadenas.
@@ -239,7 +269,10 @@ const cargarCatalogoPublico = cache(async (): Promise<CatalogoPublico> => {
       .map((id) => ({ id, nombre: nombreCiudad.get(id) ?? '' }))
       .sort((a, b) => compararNombres(a.nombre, b.nombre)),
   }
-})
+}
+
+const catalogoEnCache = unstable_cache(leerCatalogoPublico, ['publico-catalogo'], OPCIONES_CACHE)
+const cargarCatalogoPublico = cache(() => catalogoEnCache())
 
 /**
  * Lo que pinta la landing: cinco destacados, las fotos del carrusel y el
@@ -308,7 +341,7 @@ export type FichaPublica = {
  * sin distinguirlos, igual que la ficha del portal de miembros: distinguirlos
  * permitiría enumerar comercios dados de baja probando ids.
  */
-export const obtenerFichaPublica = cache(async (id: number): Promise<FichaPublica | null> => {
+async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
   const supabase = createAdminClient()
   const hoy = hoyISO()
 
@@ -408,7 +441,11 @@ export const obtenerFichaPublica = cache(async (id: number): Promise<FichaPublic
     fotos,
     indexable: comercio.indexable,
   }
-})
+}
+
+// El `id` entra en la clave de caché automáticamente (argumentos de la función).
+const fichaEnCache = unstable_cache(leerFichaPublica, ['publico-ficha'], OPCIONES_CACHE)
+export const obtenerFichaPublica = cache((id: number) => fichaEnCache(id))
 
 /**
  * Los comercios cuya ficha puede salir en buscadores, para el sitemap.
@@ -436,7 +473,7 @@ export async function obtenerComerciosIndexables(): Promise<{ id: number; actual
  *
  * Solo planes activos y no borrados: uno retirado no se anuncia en la puerta.
  */
-export const obtenerPlanesPublicos = cache(async (): Promise<PlanPublico[]> => {
+async function leerPlanesPublicos(): Promise<PlanPublico[]> {
   const supabase = createAdminClient()
   const { data } = await supabase
     .from('planes_membresia')
@@ -448,7 +485,10 @@ export const obtenerPlanesPublicos = cache(async (): Promise<PlanPublico[]> => {
   /* `numeric` puede llegar como cadena según la versión de PostgREST: se
      normaliza aquí para que la función pura trabaje siempre con números. */
   return prepararPlanes((data ?? []).map((p) => ({ ...p, precio: Number(p.precio) })))
-})
+}
+
+const planesEnCache = unstable_cache(leerPlanesPublicos, ['publico-planes'], OPCIONES_CACHE)
+export const obtenerPlanesPublicos = cache(() => planesEnCache())
 
 /**
  * El WhatsApp de soporte, de `configuracion.whatsapp_soporte`.
@@ -458,7 +498,7 @@ export const obtenerPlanesPublicos = cache(async (): Promise<PlanPublico[]> => {
  * un clon recién hecho no lo tiene y la fachada tiene que seguir siendo
  * navegable. Quien llama decide qué ocultar (SPEC §5.2).
  */
-export const obtenerWhatsappSoporte = cache(async (): Promise<string | null> => {
+async function leerWhatsappSoporte(): Promise<string | null> {
   const supabase = createAdminClient()
 
   const { data } = await supabase
@@ -469,7 +509,26 @@ export const obtenerWhatsappSoporte = cache(async (): Promise<string | null> => 
 
   const valor = (data?.valor ?? '').trim()
   return valor === '' ? null : valor
-})
+}
+
+const whatsappEnCache = unstable_cache(leerWhatsappSoporte, ['publico-whatsapp'], OPCIONES_CACHE)
+export const obtenerWhatsappSoporte = cache(() => whatsappEnCache())
+
+/* ==========================================================================
+   LAS NOVEDADES PÚBLICAS
+   ========================================================================== */
+
+/**
+ * Las novedades de la fachada. La consulta es la misma que usa el portal de
+ * socios (`obtenerAnunciosVisibles`), pero aquí va con el cliente de servicio
+ * y detrás del mismo caché de 60 s que el resto de la fachada.
+ */
+const anunciosEnCache = unstable_cache(
+  () => obtenerAnunciosVisibles(createAdminClient(), 'publico'),
+  ['publico-anuncios'],
+  OPCIONES_CACHE,
+)
+export const obtenerAnunciosPublicos = cache(() => anunciosEnCache())
 
 /**
  * El instante actual, según el reloj del SERVIDOR.

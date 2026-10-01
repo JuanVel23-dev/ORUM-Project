@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import { createAdminClient } from '@/lib/supabase/admin'
-import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
+import { obtenerAnunciosPublicos } from '@/lib/publico/datos-publicos'
 import { ListaAnuncios } from '@/components/anuncios/lista-anuncios'
 import { PageHeader } from '@/components/ui/layout'
 import estilos from './novedades.module.css'
@@ -14,7 +13,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function NovedadesPublicas() {
-  const anuncios = await obtenerAnunciosVisibles(createAdminClient(), 'publico')
+  const anuncios = await obtenerAnunciosPublicos()
 
   return (
     <div className={estilos.pagina}>
