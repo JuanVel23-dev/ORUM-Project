@@ -15,23 +15,49 @@
 .fotos {
   position: absolute;
   inset: 0;
+  overflow: hidden;
+}
+
+/* Con más de una foto, se arrastra: en táctil el gesto VERTICAL sigue
+   siendo de la página (`pan-y`); el horizontal lo toma el carril. */
+.fotos[data-arrastrable] {
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.fotos[data-arrastrable]:active {
+  cursor: grabbing;
+}
+
+/*
+  EL CARRIL. Las fotos en fila, cada una del ancho del carrusel, y el carril
+  entero se desplaza: `--indice` fotos a la izquierda más lo que el dedo
+  lleve arrastrado (`--desplazamiento`). Solo `transform`.
+*/
+.pista {
+  display: flex;
+  height: 100%;
+  transform: translate3d(
+    calc(var(--indice, 0) * -100% + var(--desplazamiento, 0px)),
+    0,
+    0
+  );
+  transition: transform var(--dur-page) var(--ease-out);
+}
+
+/* Mientras el dedo está abajo, 1:1: ninguna transición que lo retrase. */
+.pista[data-arrastrando] {
+  transition: none;
 }
 
 .foto {
-  position: absolute;
-  inset: 0;
+  flex: 0 0 100%;
   width: 100%;
   height: 100%;
   object-fit: cover;
-
-  opacity: 0;
-  /* Un relevo de ambiente, no una respuesta: el doble de una transición de
-     página, para que se lea como luz que cambia y no como un corte. */
-  transition: opacity calc(var(--dur-page) * 2) var(--ease-in-out);
-}
-
-.foto[data-activa='true'] {
-  opacity: 1;
+  pointer-events: none;
 }
 
 /* --- Controles: pausa y puntos, sobre un velo para leerse en cualquier foto */
@@ -127,8 +153,10 @@
   border-radius: var(--radius-full);
 }
 
+/* Movimiento reducido: el cambio de foto no se desliza, se sustituye. El
+   arrastre, que lo hace la persona, sigue al dedo igual. */
 @media (prefers-reduced-motion: reduce) {
-  .foto {
-    transition-duration: var(--dur-fast);
+  .pista {
+    transition: none;
   }
 }
