@@ -119,8 +119,11 @@ export function CarruselFotos({ fotos, etiqueta, className }: Props) {
       setArrastrando(true)
     }
 
-    // Velocidad suavizada (px/ms) para proyectar al soltar.
-    const dt = Math.max(1, e.timeStamp - g.t)
+    // Velocidad suavizada (px/ms) para proyectar al soltar. El intervalo
+    // tiene un mínimo de 8 ms (medio fotograma): dos eventos casi
+    // simultáneos darían una velocidad disparatada y un gesto corto lento
+    // pasaría de foto sin querer.
+    const dt = Math.max(8, e.timeStamp - g.t)
     g.velocidad = 0.8 * ((e.clientX - g.x) / dt) + 0.2 * g.velocidad
     g.x = e.clientX
     g.t = e.timeStamp
