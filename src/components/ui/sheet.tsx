@@ -217,10 +217,13 @@ export function Sheet({
 
     const vista = window.visualViewport
     const ajustar = () => {
+      // Por si un navegador sin `overflow: clip` llegó a desplazar el diálogo.
+      dialogo.scrollTop = 0
       if (!vista) return
       dialogo.style.top = `${vista.offsetTop}px`
       dialogo.style.height = `${vista.height}px`
     }
+    dialogo.addEventListener('scroll', ajustar)
     ajustar()
     vista?.addEventListener('resize', ajustar)
     vista?.addEventListener('scroll', ajustar)
@@ -229,6 +232,7 @@ export function Sheet({
       raiz.style.overflow = overflowPrevio
       vista?.removeEventListener('resize', ajustar)
       vista?.removeEventListener('scroll', ajustar)
+      dialogo.removeEventListener('scroll', ajustar)
       dialogo.style.top = ''
       dialogo.style.height = ''
     }

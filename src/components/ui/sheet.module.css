@@ -24,6 +24,15 @@
   border: none;
   background: transparent;
   overflow: hidden;
+  /*
+    `clip` y no solo `hidden` (bug del 02/10/2026): `hidden` oculta pero SÍ
+    deja que el navegador desplace la caja. Al enfocar un campo —o la X al
+    abrir— el navegador desplazaba el propio diálogo para mostrarlo; el panel
+    y el velo subían con él, la hoja quedaba cortada a media pantalla y
+    debajo asomaba la página sin velo. `clip` recorta igual y no admite
+    desplazamiento de ningún tipo. `hidden` queda de respaldo.
+  */
+  overflow: clip;
 }
 
 .dialog::backdrop {
