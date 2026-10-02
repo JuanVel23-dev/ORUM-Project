@@ -191,6 +191,49 @@ export function Sheet({
     }
   }, [open, detent, detents, colocar, cerrarConAnimacion])
 
+  /*
+    EL TECLADO DEL MÓVIL (bug del 02/10/2026, formulario de aliados en iOS y
+    Android): al tocar un campo, el navegador desplaza la vista para que el
+    campo quede a la vista del teclado. El `<dialog>` es `position: fixed` y
+    está anclado a la ventana ORIGINAL, así que la vista se iba más abajo que
+    él: la hoja quedaba cortada a media pantalla y debajo asomaba la página,
+    sin velo.
+
+    Dos remedios, solo mientras la hoja está abierta:
+      · El diálogo SIGUE AL ÁREA VISIBLE (`visualViewport`): su `top` y su
+        alto son los de lo que de verdad se ve, así que con teclado la hoja
+        termina justo encima de él y nada asoma por debajo.
+      · La página de detrás NO DESPLAZA (`overflow: hidden` en `<html>`): el
+        navegador no tiene adónde mover la vista, y un gesto que se pasa del
+        final del formulario no arrastra la landing.
+  */
+  useEffect(() => {
+    const dialogo = dialogRef.current
+    if (!open || !dialogo) return
+
+    const raiz = document.documentElement
+    const overflowPrevio = raiz.style.overflow
+    raiz.style.overflow = 'hidden'
+
+    const vista = window.visualViewport
+    const ajustar = () => {
+      if (!vista) return
+      dialogo.style.top = `${vista.offsetTop}px`
+      dialogo.style.height = `${vista.height}px`
+    }
+    ajustar()
+    vista?.addEventListener('resize', ajustar)
+    vista?.addEventListener('scroll', ajustar)
+
+    return () => {
+      raiz.style.overflow = overflowPrevio
+      vista?.removeEventListener('resize', ajustar)
+      vista?.removeEventListener('scroll', ajustar)
+      dialogo.style.top = ''
+      dialogo.style.height = ''
+    }
+  }, [open])
+
   /* --- Gesto ------------------------------------------------------------- */
 
   const alBajar = (e: React.PointerEvent<HTMLDivElement>) => {

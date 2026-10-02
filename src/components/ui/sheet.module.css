@@ -48,6 +48,10 @@
 
   /* Altura fija = detent grande. Los detents menores son desplazamiento. */
   height: var(--alto-hoja, min(92dvh, 920px));
+  /* Nunca más alta que el área visible: con el teclado abierto el diálogo
+     mide solo lo que se ve (ver `Sheet`), y una hoja más alta escondería su
+     título por arriba. El cuerpo desplaza lo que no quepa. */
+  max-height: 100%;
 
   background: var(--surface);
   /*
