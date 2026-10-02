@@ -56,7 +56,9 @@
   Ahora:
     · NEGRO SÓLIDO (97 %) hasta el pie de la fila del logo y los botones
       (`--solido`: el alto de la cabecera menos su relleno inferior).
-    · Desde ahí, un FUNDIDO LARGO (`--fundido`, 112 px) con curva COSENO:
+    · Desde ahí, un FUNDIDO CORTO (`--fundido`: 40 px en el teléfono, 56
+      en escritorio; fue de 112 hasta el 02/10/2026, «más corto, en el
+      celular no se ve bien y tapa mucho la imagen») con curva COSENO:
       arranca plano y termina plano, así que no hay ningún punto donde la
       pendiente salte — ni al dejar el sólido ni al llegar a cero.
     · Un desenfoque de lo que pasa por debajo (cromo de iOS) que se apaga
@@ -68,7 +70,7 @@
 .cabecera::before,
 .cabecera::after {
   --solido: calc(var(--cabecera-alto) - var(--space-5));
-  --fundido: 112px;
+  --fundido: 40px;
 
   content: '';
   position: absolute;
@@ -109,6 +111,13 @@
     color-mix(in srgb, var(--cacao-bg) 2.4%, transparent) calc(var(--solido) + var(--fundido) * 0.9),
     color-mix(in srgb, var(--cacao-bg) 0%, transparent) calc(var(--solido) + var(--fundido))
   );
+}
+
+@media (min-width: 768px) {
+  .cabecera::before,
+  .cabecera::after {
+    --fundido: 56px;
+  }
 }
 
 /* Quien pide menos transparencia: banda sólida, sin desenfoque ni fundido. */
