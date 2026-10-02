@@ -39,6 +39,44 @@ import { prepararPlanes, type PlanPublico } from './planes'
 
 const OPCIONES_CACHE: { revalidate: number; tags: string[] } = { revalidate: 60, tags: ['publico'] }
 
+/*
+  UN FALLO DE LA BASE NO ES «NO HAY DATOS» (02/10/2026).
+
+  Las lecturas solo miraban `data`: si una consulta fallaba —un corte
+  momentáneo, un tiempo de espera—, `data` llegaba en `null` y la función
+  devolvía un catálogo vacío como si el club no tuviera comercios. Con la
+  caché de 60 s ese vacío se GUARDABA y se servía a todo el mundo durante un
+  minuto: la portada sin carrusel ni destacados, el directorio con «0
+  comercios», una ficha como «no disponible».
+
+  Ahora una consulta fallida LANZA (`exigir`). `unstable_cache` no guarda una
+  excepción, así que la caché nunca queda envenenada; fuera de ella,
+  `conRespaldo` reintenta una vez y, solo si vuelve a fallar, sirve el vacío
+  de esa única petición, sin cachearlo y sin romper la página.
+*/
+function exigir<T>(
+  resultado: { data: T | null; error: { message: string } | null },
+  que: string,
+): T | null {
+  if (resultado.error) {
+    throw new Error(`[publico] No se pudo leer ${que}: ${resultado.error.message}`)
+  }
+  return resultado.data
+}
+
+async function conRespaldo<T>(leer: () => Promise<T>, respaldo: T, que: string): Promise<T> {
+  try {
+    return await leer()
+  } catch {
+    try {
+      return await leer()
+    } catch (e) {
+      console.error(`[publico] ${que}: falló dos veces, se sirve vacío sin cachear`, e)
+      return respaldo
+    }
+  }
+}
+
 /* ==========================================================================
    LOS DATOS DE LA FACHADA  ·  y por qué salen del cliente de servicio
    --------------------------------------------------------------------------
@@ -172,7 +210,7 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
   // promociones son fechas civiles, no `timestamptz`. Se comparan como cadenas.
   const hoy = hoyISO()
 
-  const [{ data: comercios }, { data: marcas }, { data: categorias }] = await Promise.all([
+  const [rComercios, rMarcas, rCategorias] = await Promise.all([
     supabase
       .from('comercios')
       .select('id, nombre, descripcion, logo_url, portada_url, categoria_id, marca_id')
@@ -183,6 +221,9 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
     supabase.from('marcas').select('id, logo_url').limit(200),
     supabase.from('categorias').select('id, nombre').limit(100),
   ])
+  const comercios = exigir(rComercios, 'los comercios')
+  const marcas = exigir(rMarcas, 'las marcas')
+  const categorias = exigir(rCategorias, 'las categorías')
 
   const categoriasOrdenadas = ordenarCategorias(categorias ?? [])
 
@@ -192,7 +233,7 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
 
   const ids = comercios.map((c) => c.id)
 
-  const [{ data: promociones }, { data: tipos }, { data: sucursales }, { data: ciudades }] =
+  const [rPromociones, rTipos, rSucursales, rCiudades] =
     await Promise.all([
       supabase
         .from('promociones')
@@ -211,6 +252,10 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
         .limit(TOPE_DIRECTORIO * 2),
       supabase.from('ciudades').select('id, nombre').limit(200),
     ])
+  const promociones = exigir(rPromociones, 'las promociones')
+  const tipos = exigir(rTipos, 'los tipos de beneficio')
+  const sucursales = exigir(rSucursales, 'las sucursales')
+  const ciudades = exigir(rCiudades, 'las ciudades')
 
   const logoDeMarca = new Map((marcas ?? []).map((m) => [m.id, m.logo_url]))
   const nombreCategoria = new Map((categorias ?? []).map((c) => [c.id, c.nombre]))
@@ -272,7 +317,13 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
 }
 
 const catalogoEnCache = unstable_cache(leerCatalogoPublico, ['publico-catalogo'], OPCIONES_CACHE)
-const cargarCatalogoPublico = cache(() => catalogoEnCache())
+const cargarCatalogoPublico = cache(() =>
+  conRespaldo(
+    () => catalogoEnCache(),
+    { comercios: [], categorias: [], ciudades: [] } as CatalogoPublico,
+    'el catálogo',
+  ),
+)
 
 /**
  * Lo que pinta la landing: cinco destacados, las fotos del carrusel y el
@@ -346,13 +397,13 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
   const hoy = hoyISO()
 
   const [
-    { data: comercio },
-    { data: marcas },
-    { data: categorias },
-    { data: promociones },
-    { data: tipos },
-    { data: sucursales },
-    { data: ciudades },
+    rComercio,
+    rMarcas,
+    rCategorias,
+    rPromociones,
+    rTipos,
+    rSucursales,
+    rCiudades,
     { data: imagenes },
   ] = await Promise.all([
     supabase
@@ -390,6 +441,14 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
       .order('orden')
       .limit(12),
   ])
+  // La galería sigue tolerante (ver arriba); lo demás, si falla, lanza.
+  const comercio = exigir(rComercio, 'el comercio')
+  const marcas = exigir(rMarcas, 'las marcas')
+  const categorias = exigir(rCategorias, 'las categorías')
+  const promociones = exigir(rPromociones, 'las promociones')
+  const tipos = exigir(rTipos, 'los tipos de beneficio')
+  const sucursales = exigir(rSucursales, 'las sucursales')
+  const ciudades = exigir(rCiudades, 'las ciudades')
 
   if (!comercio) return null
 
@@ -445,7 +504,9 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
 
 // El `id` entra en la clave de caché automáticamente (argumentos de la función).
 const fichaEnCache = unstable_cache(leerFichaPublica, ['publico-ficha'], OPCIONES_CACHE)
-export const obtenerFichaPublica = cache((id: number) => fichaEnCache(id))
+export const obtenerFichaPublica = cache((id: number) =>
+  conRespaldo(() => fichaEnCache(id), null, `la ficha ${id}`),
+)
 
 /**
  * Los comercios cuya ficha puede salir en buscadores, para el sitemap.
@@ -475,12 +536,15 @@ export async function obtenerComerciosIndexables(): Promise<{ id: number; actual
  */
 async function leerPlanesPublicos(): Promise<PlanPublico[]> {
   const supabase = createAdminClient()
-  const { data } = await supabase
-    .from('planes_membresia')
-    .select('id, nombre, descripcion, precio, duracion_meses')
-    .eq('activo', true)
-    .is('deleted_at', null)
-    .limit(20)
+  const data = exigir(
+    await supabase
+      .from('planes_membresia')
+      .select('id, nombre, descripcion, precio, duracion_meses')
+      .eq('activo', true)
+      .is('deleted_at', null)
+      .limit(20),
+    'los planes',
+  )
 
   /* `numeric` puede llegar como cadena según la versión de PostgREST: se
      normaliza aquí para que la función pura trabaje siempre con números. */
@@ -488,7 +552,9 @@ async function leerPlanesPublicos(): Promise<PlanPublico[]> {
 }
 
 const planesEnCache = unstable_cache(leerPlanesPublicos, ['publico-planes'], OPCIONES_CACHE)
-export const obtenerPlanesPublicos = cache(() => planesEnCache())
+export const obtenerPlanesPublicos = cache(() =>
+  conRespaldo(() => planesEnCache(), [] as PlanPublico[], 'los planes'),
+)
 
 /**
  * El WhatsApp de soporte, de `configuracion.whatsapp_soporte`.
@@ -501,18 +567,21 @@ export const obtenerPlanesPublicos = cache(() => planesEnCache())
 async function leerWhatsappSoporte(): Promise<string | null> {
   const supabase = createAdminClient()
 
-  const { data } = await supabase
+  const resultado = await supabase
     .from('configuracion')
     .select('valor')
     .eq('clave', 'whatsapp_soporte')
     .maybeSingle()
+  const data = exigir(resultado, 'el WhatsApp de soporte')
 
   const valor = (data?.valor ?? '').trim()
   return valor === '' ? null : valor
 }
 
 const whatsappEnCache = unstable_cache(leerWhatsappSoporte, ['publico-whatsapp'], OPCIONES_CACHE)
-export const obtenerWhatsappSoporte = cache(() => whatsappEnCache())
+export const obtenerWhatsappSoporte = cache(() =>
+  conRespaldo(() => whatsappEnCache(), null as string | null, 'el WhatsApp de soporte'),
+)
 
 /* ==========================================================================
    LAS NOVEDADES PÚBLICAS
