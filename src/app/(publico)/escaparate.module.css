@@ -67,8 +67,16 @@
 
   `:first-child` y no una clase: así ninguna página tiene que acordarse de
   pedirlo, y una página que empiece con otra cosa conserva el hueco.
+
+  PERO SIN CONTAR LO QUE NO SE PINTA (02/10/2026). La landing empezó a
+  llevar su JSON-LD (`<script type="application/ld+json">`) delante del
+  héroe; con `:first-child` a secas el héroe pasó a ser el segundo hijo,
+  dejó de subir y quedó una franja blanca bajo la cabecera, con el fundido
+  pintado sobre el blanco en vez de sobre la foto. `nth-child(1 of …)`
+  cuenta solo los hijos que se ven.
 */
-.franja:first-child {
+.franja:first-child,
+.franja:nth-child(1 of :not(script, style, link, template, noscript)) {
   margin-top: calc((var(--cabecera-alto, 0px) + var(--pad-contenido-top, 0px)) * -1);
 }
 
