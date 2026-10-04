@@ -1108,6 +1108,28 @@ venta a una sede que nadie eligió— y se comprueba al enviar, y el total
 con el botón de cobrar van en un pie pegado abajo, siempre a la vista. El
 monto del acuse lo dice el servidor (`valorFinal`), no lo tecleado.
 
+**El comercio cambia su logotipo y sus fotos** («Mi negocio», 04/10/2026,
+`_components/mi-negocio.tsx`). Un botón en la cabecera abre una ventana
+encima —no una página— con el logotipo y las fotos del negocio, y cada
+imagen se AJUSTA antes de subirla, como la foto del socio:
+
+- **Ocho fotos como máximo, contando la portada** (`portada_url` + filas de
+  `comercio_imagenes`). La primera es la portada. El tope vive en
+  `lib/comercios/fotos-negocio.ts` y lo comprueban la interfaz y el servidor.
+- **El editor es `EditorEncuadre`** (`components/imagenes/`): arrastrar,
+  acercar (barra, rueda, pellizco), girar y restablecer, para cualquier marco.
+  Su geometría es `lib/imagenes/marco.ts` (probada aparte); el editor del
+  socio y su `encuadre.ts` NO se tocaron. Las fotos van a 16:9 (la portada de
+  la ficha); el logotipo, a un círculo en el que puede verse ENTERO —cabe su
+  diagonal, no solo el cuadrado— sobre blanco, que es como lo pinta la placa.
+- **Las acciones** (`comercios/(portal)/imagenes-actions.ts`) toman el
+  comercio de la SESIÓN, nunca del formulario, y buscan cada foto con
+  `comercio_id = el mío`: usan la `service_role`, así que esa comprobación es
+  la política. Al guardar sueltan la caché pública con `updateTag('publico')`
+  para que la ficha enseñe la imagen nueva al momento.
+- Las imágenes de un comercio quedan fuera de la declaración de derechos del
+  socio (spec de derechos de imagen, §3): no se pide aquí.
+
 **El comercio también instala su portal** (04/10/2026). El layout monta
 `WhatsAppFlotante` y `AvisoInstalar`, y el pie lleva el icono de instalar,
 igual que el Portal de Miembros. Lo que cambia es QUÉ se instala: hay **dos
@@ -1303,6 +1325,9 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    en una vista previa local con datos de ejemplo (1366, 820 y 390 px), no con
    una sesión de comercio real. Falta verlo en producción y en la caja: el
    escaneo con cámara, una venta de punta a punta y un comercio con logotipo.
+   Tampoco se ha guardado de verdad una imagen desde «Mi negocio»: la vista
+   previa probó la rejilla, el editor y que al guardar se exporta y se llama
+   a la acción, pero sin sesión de comercio la acción redirige al acceso.
    Y **instalar la app del comercio en un teléfono real** (Android e iPhone):
    se comprobó que `/comercios` enlaza su manifiesto y que este se sirve bien,
    no que el sistema la instale y abra en `/comercios`.

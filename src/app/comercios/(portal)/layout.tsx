@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LogOut } from 'lucide-react'
-import { obtenerMiComercio } from '@/lib/comercios/comercio-sesion'
+import { obtenerMiComercio, obtenerMiGaleria } from '@/lib/comercios/comercio-sesion'
 import { obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
 import { ENTRADA, retardoEntrada } from '@/lib/shared/revelado'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import escaparate from '@/app/(publico)/escaparate.module.css'
 import cromo from '@/app/miembros/(portal)/portal.module.css'
 import { cerrarSesionComercio } from '../login/actions'
+import { BotonNegocio, ProveedorNegocio, VentanaNegocio } from './_components/mi-negocio'
 import styles from './portal.module.css'
 
 export const metadata = { title: 'Portal de Comercios · ORUM' }
@@ -58,9 +59,14 @@ const MENSAJE_SOPORTE = 'Hola, necesito ayuda con la herramienta de comercios de
 */
 export default async function ComerciosLayout({ children }: { children: ReactNode }) {
   /* En paralelo: son independientes. `obtenerMiComercio` exige el rol. */
-  const [comercio, soporte] = await Promise.all([obtenerMiComercio(), obtenerWhatsappSoporte()])
+  const [comercio, galeria, soporte] = await Promise.all([
+    obtenerMiComercio(),
+    obtenerMiGaleria(),
+    obtenerWhatsappSoporte(),
+  ])
 
   return (
+    <ProveedorNegocio>
     <div className={[cromo.portal, styles.portal].join(' ')} data-theme="light">
       <header className={cromo.cabecera} data-theme="dark">
         <Link href="/comercios" className={cromo.marca} aria-label="ORUM, ir al inicio de la herramienta">
@@ -71,6 +77,9 @@ export default async function ComerciosLayout({ children }: { children: ReactNod
         {/* `sobreFoto`: el ámbito con el que la píldora de contorno se lee
             sobre negro, el mismo de las cabeceras pública y de miembros. */}
         <div className={[cromo.acciones, escaparate.sobreFoto].join(' ')}>
+          {/* «Mi negocio»: abre encima la ventana del logotipo y las fotos. */}
+          {comercio && <BotonNegocio claseTexto={cromo.textoCerrar} />}
+
           <form action={cerrarSesionComercio}>
             <Button
               type="submit"
@@ -143,6 +152,21 @@ export default async function ComerciosLayout({ children }: { children: ReactNod
       {/* La invitación a instalar la app, encima del de WhatsApp: solo en
           celulares, y solo mientras no esté ya instalada. */}
       <AvisoInstalar />
+
+      {/* LA VENTANA DE «MI NEGOCIO», FUERA DE LA CABECERA: un `<dialog>` hereda
+          las propiedades de sus ancestros del DOM, y dentro de la cabecera
+          negra saldría oscura. Aquí hereda el claro del portal. */}
+      {comercio && (
+        <VentanaNegocio
+          datos={{
+            nombre: comercio.nombre,
+            logoUrl: comercio.logoUrl,
+            portadaUrl: comercio.portadaUrl,
+            galeria,
+          }}
+        />
+      )}
     </div>
+    </ProveedorNegocio>
   )
 }
