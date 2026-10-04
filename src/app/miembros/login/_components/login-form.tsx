@@ -75,6 +75,7 @@ export function LoginMiembroForm({ mensajeInicial }: { mensajeInicial?: string }
         type="submit"
         variant="brand"
         size="lg"
+        pildora
         fullWidth
         loading={pending}
         icon={<LogIn size={17} />}

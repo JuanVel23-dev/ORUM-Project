@@ -1,0 +1,261 @@
+/* ==========================================================================
+   LA PUERTA DEL SOCIO  ·  foto de marca + formulario sobre blanco
+   --------------------------------------------------------------------------
+   El lenguaje del Portal Público: blanco, la foto del héroe, Playfair con
+   acento en cursiva dorada y el oro en los acentos. Siempre en claro.
+
+   Se adapta con `@media`: esta pantalla no vive dentro del `<main>` de
+   ningún portal, así que no hay contenedor `contenido` que consultar; su
+   ancho útil ES el de la ventana.
+   ========================================================================== */
+
+.pantalla {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+
+  /* `body` sigue el tema del documento: fondo y color propios, o con el
+     teléfono en modo oscuro la pantalla saldría negra. */
+  background-color: var(--bg);
+  color: var(--text);
+  color-scheme: light;
+
+  /* Blanco y no crema, como la fachada. */
+  --w-0: var(--blanco);
+}
+
+/* Los colores de la fachada (mismos remapeos que `.fachada[data-theme]`).
+   Doble selector para ganarle al bloque `[data-theme='light']` global. */
+.pantalla[data-theme='light'] {
+  --brand: var(--gold-650);
+  --gold-bg: color-mix(in srgb, var(--gold-700) 12%, transparent);
+  --shadow-card: var(--sombra-fachada-1);
+  --shadow-raised: var(--sombra-fachada-2);
+  --shadow-flotante: var(--sombra-fachada-3);
+  --border-subtle: color-mix(in srgb, var(--tinta-1) 12%, transparent);
+}
+
+@media (min-width: 900px) {
+  .pantalla {
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+}
+
+/* --- La foto de marca -------------------------------------------------------- */
+
+.foto {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* Rejilla: el contenido se estira al alto de la foto (logo arriba,
+     mensaje abajo) aunque ese alto venga de `min-height`. */
+  display: grid;
+  min-height: clamp(260px, 42dvh, 380px);
+  background: var(--cacao-bg);
+  color: var(--cacao-fg);
+}
+
+@media (min-width: 900px) {
+  .foto {
+    min-height: 100dvh;
+  }
+}
+
+.fotoImagen {
+  object-fit: cover;
+  /* El encuadre del héroe: la persona queda a la derecha. */
+  object-position: 70% center;
+  z-index: -2;
+}
+
+/* El velo: negro arriba (donde vive el logo) y abajo (donde vive el texto),
+   más ligero en medio, para que la foto respire sin perder contraste. */
+.velo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--cacao-bg) 78%, transparent) 0%,
+    color-mix(in srgb, var(--cacao-bg) 38%, transparent) 38%,
+    color-mix(in srgb, var(--cacao-bg) 88%, transparent) 100%
+  );
+}
+
+.fotoContenido {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: max(var(--space-4), env(safe-area-inset-top, 0px)) var(--space-4)
+    calc(var(--space-6) + var(--space-5));
+}
+
+@media (min-width: 900px) {
+  .fotoContenido {
+    padding: var(--space-8) var(--space-9) var(--space-9);
+  }
+}
+
+.marca {
+  align-self: flex-start;
+  display: inline-flex;
+  border-radius: var(--radius-xs);
+}
+
+.marca:focus-visible {
+  outline: 2px solid var(--cacao-brand);
+  outline-offset: 4px;
+}
+
+.logo {
+  height: clamp(1.625rem, 0.9rem + 1.9vw, 2.5rem);
+}
+
+.mensaje {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 30rem;
+}
+
+/* La insignia del héroe: una píldora translúcida con la estrella. */
+.insignia {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--blanco) 12%, transparent);
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cacao-fg);
+}
+
+/* La frase de la marca: el serif de display, como el titular del héroe. */
+.frase {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.2rem + 2.6vw, 2.75rem);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--cacao-fg);
+  text-wrap: balance;
+  -webkit-font-smoothing: auto;
+}
+
+/* El acento en cursiva dorada: sobre la foto oscura, el oro pálido (14:1). */
+.acento {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--gold-300);
+}
+
+.bajada {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  line-height: 1.55;
+  color: var(--cacao-fg-2);
+  text-wrap: pretty;
+}
+
+/* En el teléfono la bajada sobra: el formulario tiene que verse sin bajar. */
+@media (max-width: 899px) {
+  .bajada {
+    display: none;
+  }
+}
+
+/* --- El formulario ------------------------------------------------------------ */
+
+.panel {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding: var(--space-7) var(--space-4)
+    max(var(--space-8), calc(env(safe-area-inset-bottom, 0px) + var(--space-6)));
+  background: var(--surface);
+
+  /* En el teléfono el panel MONTA sobre la foto, con las esquinas redondas:
+     como «Así es como te unes» sobre el héroe de la portada. */
+  margin-top: calc(-1 * var(--space-6));
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+@media (min-width: 900px) {
+  .panel {
+    align-items: center;
+    margin-top: 0;
+    border-radius: 0;
+    padding: var(--space-9) var(--space-8);
+  }
+}
+
+.columna {
+  width: 100%;
+  max-width: 25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.cabecera {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.apoyo {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+/* La nota de ayuda: fuera del formulario, sobre el mismo blanco. */
+.pie {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  line-height: 1.55;
+  color: var(--text-3);
+  text-wrap: pretty;
+}
+
+.volver {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.volverFlecha {
+  transition: translate var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .volver:hover {
+    color: var(--text);
+  }
+
+  /* La respuesta es movimiento: la flecha se asoma hacia donde lleva. */
+  .volver:hover .volverFlecha {
+    translate: -3px 0;
+  }
+}
+
+.volver:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}

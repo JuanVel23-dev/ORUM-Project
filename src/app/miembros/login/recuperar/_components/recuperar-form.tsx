@@ -55,7 +55,17 @@ export function RecuperarMiembroForm() {
 
       <Turnstile />
 
-      <Button type="submit" size="lg" fullWidth loading={pending} icon={<Mail size={17} />}>
+      {/* Dorado y en píldora, como el de iniciar sesión: las dos pantallas
+          del socio comparten puerta (`PantallaAccesoSocio`). */}
+      <Button
+        type="submit"
+        variant="brand"
+        size="lg"
+        pildora
+        fullWidth
+        loading={pending}
+        icon={<Mail size={17} />}
+      >
         Enviar enlace
       </Button>
 
