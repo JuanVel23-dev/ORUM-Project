@@ -39,7 +39,11 @@
   border: none;
   border-radius: var(--radius-full);
   background: var(--cacao-900);
-  box-shadow: var(--shadow-card);
+  /* El filo claro interior es para el pie y la cabecera, que son negros:
+     sin él, el círculo se fundía con ellos y quedaba el icono suelto. */
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--n-50) 22%, transparent),
+    var(--shadow-card);
   color: var(--blanco);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
