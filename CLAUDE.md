@@ -311,7 +311,15 @@ fija `data-theme="light"` y **no copia el cromo: importa el del Portal de
 Miembros** (`miembros/(portal)/portal.module.css`), así que la cabecera
 negra fundida, el fondo blanco y la paleta de la fachada son los mismos por
 construcción. El selector de tema que vivía en el menú del avatar se retiró
-con el menú. **Solo Administración sigue con los dos temas.**
+con el menú.
+
+⚠️ **Y el Panel de Administración, desde el mismo 04/10/2026** (encargo:
+«un rediseño total, con el mismo estilo que el portal inicial, comercios y
+miembros, pero muy administrativo»). `AppShell` fija `data-theme="light"` e
+importa el mismo cromo de miembros para la paleta y el fondo blanco; el
+selector de tema se retiró con la barra lateral. **Ya ningún portal ofrece
+el tema oscuro**: sus tokens siguen en `globals.css` (el `QrCode`, la franja
+negra y `/dev/ui` los usan), pero ninguna pantalla de producción lo pinta.
 
 ### La paleta de la fachada pública es la del rediseño aprobado
 
@@ -364,7 +372,13 @@ contraste de esta sección. Donde no se cumplan, sigue siendo tinta.
 **Jamás codifica datos.**
 
 - **Panel de Administración**: botón primario = **tinta**, negro sobre
-  claro, blanco sobre oscuro. No cambia.
+  claro. No cambia: es la herramienta de trabajo, y el negro es el de su
+  propio cromo. Desde el rediseño del 04/10/2026 todos sus botones van en
+  **píldora** (`--boton-radio`, el gancho de `button.module.css` que pone el
+  shell) y su acción ceremonial —«Registrar miembro», en la cabecera y en la
+  portada— es `variant="brand"` en `--gold-500` con texto en tinta, como en
+  comercios. `--action` NO se pasó al oro: también pinta la casilla marcada,
+  y su filo daría 1,9:1 contra el blanco.
 - **Herramienta de Comercios** (desde el 04/10/2026): la acción principal va
   en píldora con relleno `--gold-500` y texto en tinta (8,5:1), el mismo par
   que las puertas de acceso. Antes era tinta; el rediseño la pasó al oro de
@@ -537,12 +551,15 @@ que sea un corte auténtico, no una oblicua sintética. Pesos 500–800.
 | Token | Valor | Dónde |
 |---|---|---|
 | `--font-sans` | Montserrat | Todo lo que NO es titular ceremonial |
-| `--font-display` | Playfair Display | Solo donde ya vivía antes: héroe, «así funciona», `Cifra`, la ficha de comercio, el carnet del socio |
+| `--font-display` | Playfair Display | Héroe, «así funciona», `Cifra`, la ficha de comercio, el carnet del socio, `TituloSeccion` y —desde el rediseño del panel, 04/10/2026— el `h1` de `PageHeader` |
 
 `--font-display` sigue siendo la ÚNICA puerta por la que un serif puede
-entrar a una pantalla: la lista de consumidores no creció con la v6, solo
-cambió qué familia hay detrás de la puerta. Nada que no pidiera
-`--font-display` antes lo hace ahora.
+entrar a una pantalla. La lista de consumidores creció UNA vez, y por
+encargo: `PageHeader` con un `title` de texto pinta el titular de la
+fachada (`TituloSeccion tamano="pagina"`, 28–36px, estrella y última
+palabra en cursiva dorada). Lo usan el Panel de Administración entero y
+`/novedades`. Un titular en serif nuevo entra por ahí, no con su propio
+`font-family`.
 
 **Lo que sigue DEROGADO de la v4** (no vuelve con la v6): «nunca en
 Administración», «nunca por debajo de 28px», «un acento por pantalla». Lo que
@@ -877,10 +894,10 @@ ocupaba un grupo entero, con encabezado, para algo que se hace una vez cada
 muchos meses — y encima ya estaba en el menú del avatar: la misma acción listada
 dos veces en la misma pantalla.
 
-Al sacar algo de la barra lateral, **comprueba el móvil**: allí no hay menú del
-avatar (vive en el pie de la barra, que está oculta), así que la hoja "Más" es la
-única puerta. Si el destino salía de `navegacionPara`, hay que listarlo a mano en
-esa hoja o desaparece del teléfono.
+Al sacar algo de la barra de opciones, **comprueba el móvil**: allí no hay menú
+de la cuenta (en el teléfono no se pinta), así que la hoja "Más" es la única
+puerta. Si el destino salía de `navegacionPara`, hay que listarlo a mano en esa
+hoja o desaparece del teléfono.
 
 Los dos modos:
 
@@ -1037,6 +1054,36 @@ La antigua **`PantallaAuth`** (tarjeta oscura con halo) se retiró ese día. De 
 módulo queda `estilosAuth` (`pantalla-auth.tsx`), de donde los formularios siguen
 tomando sus clases — la sacudida al fallar usa `:has(.alerta)` y ambas clases
 deben salir del mismo módulo CSS.
+
+**El Panel de Administración** (`AppShell`, `src/components/shell/`,
+rediseño del 04/10/2026) es la cuarta cara de la fachada, **sin su foto**
+(«no quiero la imagen inicial, quiero una barra de opciones»):
+
+- **La cabecera negra** de los otros portales: logotipo en plata con el
+  rótulo «Panel», el buscador (el disparador de la paleta, con su tecla a
+  la vista), «Registrar miembro» en oro y el menú de la cuenta. Va en el
+  flujo: se va al desplazar.
+- **La barra de opciones**, negra, debajo: todas las secciones a la vista,
+  en sus grupos (`navegacionPara`), separados por un filo. ESA es pegajosa.
+  La activa la dicen un filo dorado que se desliza (`layoutId`), el oro
+  pálido del texto, el peso y `aria-current` — nunca un relleno. Entre 768 y
+  1099 px van sin icono; por debajo de 768, la barra inferior (también
+  negra) y la hoja «Más».
+- ⚠️ **La cabecera NO lleva `data-theme="dark"`**: el menú de la cuenta es
+  un popover que se pinta dentro de ella y heredaría el oscuro. El negro lo
+  ponen los tokens `--cacao-*`, y solo el botón dorado va en el ámbito
+  `sobreFoto` de la fachada (la misma solución que la cabecera pública).
+- **Los atajos**: ⌘K / Ctrl+K desde cualquier sitio, `/` cuando no se está
+  escribiendo, y `abrirPaleta()` (un evento) para abrirla desde una página
+  de servidor —lo usa `BotonPaleta`—. La tecla se enseña (`TeclaPaleta`)
+  salvo en pantallas táctiles. La paleta lista también métricas, bitácora,
+  novedades y los «nuevo …».
+- **La portada** (`admin/_components/inicio-panel.tsx`, pintada por
+  `page.tsx`, que solo consulta): la tarjeta principal (registrar y buscar),
+  cuatro cifras —con «por vencer en 30 días»— y atajos a lo que se crea. No
+  repite la navegación, y no anima nada: es la pantalla que más se abre.
+- `/dev/shell` la enseña con datos falsos: rol, sección simulada
+  (`AppShell rutaSimulada`) y la portada.
 
 **La Herramienta de Comercios** (`src/app/comercios/(portal)/`, rediseño del
 04/10/2026) es la tercera cara de la fachada. El layout pone la cabecera del
@@ -1345,6 +1392,10 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    Tampoco se ha guardado de verdad una imagen desde «Mi negocio»: la vista
    previa probó la rejilla, el editor y que al guardar se exporta y se llama
    a la acción, pero sin sesión de comercio la acción redirige al acceso.
+   El **Panel de Administración** rediseñado (04/10/2026) tampoco se ha visto
+   con sesión: se miró en `/dev/shell` (1366, 1024, 820, 768 y 390 px) con
+   datos falsos. Las pantallas de cada sección heredan el cromo, los tokens y
+   el titular nuevo, pero no se han recorrido una a una.
    Y **instalar la app del comercio en un teléfono real** (Android e iPhone):
    se comprobó que `/comercios` enlaza su manifiesto y que este se sirve bien,
    no que el sistema la instale y abra en `/comercios`.

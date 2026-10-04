@@ -1,417 +1,328 @@
-.shell {
-  display: flex;
-  flex-direction: column;
-  min-height: 100dvh;
-  background: var(--bg);
-}
-
 /* ==========================================================================
-   BARRA LATERAL  ·  ≥768px
+   EL PANEL DE ADMINISTRACIÓN  ·  rediseño del 04/10/2026
+   --------------------------------------------------------------------------
+   La paleta de la fachada, el fondo blanco y el `<html>` siempre en claro NO
+   están aquí: salen de `cromo.portal` (`miembros/(portal)/portal.module.css`),
+   que el shell importa tal cual, como la Herramienta de Comercios. Aquí vive
+   lo que es del panel: la cabecera negra SIN foto, la barra de opciones
+   pegada arriba, la barra inferior del teléfono y la hoja «Más».
+
+   El negro sale de los tokens de la franja (`--cacao-*`), que son negros en
+   los dos temas. La cabecera NO lleva `data-theme="dark"`: ver la nota de
+   `app-shell.tsx` sobre el menú de la cuenta.
    ========================================================================== */
 
 /*
-  El ancho vive en UNA variable heredada, que consumen a la vez la barra y el
-  padding de la columna: es imposible que se desincronicen.
+  LOS BOTONES DEL PANEL, EN PÍLDORA, como los de la fachada. `--boton-radio`
+  es el gancho de `button.module.css` (por defecto, `--radius-sm`).
 
-  SOBRE ANIMAR `width`
-  --------------------
-  La regla general del proyecto es animar solo `transform` y `opacity`, porque
-  todo lo demás recalcula layout en cada fotograma. Aquí se hace una excepción
-  DELIBERADA y acotada: es un único elemento, la dispara el usuario a mano y
-  dura 260ms. El coste es despreciable y la alternativa —un salto seco del
-  layout— se percibe peor.
+  El oro de la acción ceremonial (`Button variant="brand"`), en `--gold-500`
+  con texto en tinta (8,5:1), el par de comercios y de las puertas de acceso.
+  El primario de trabajo (`variant="primary"`: Guardar, Crear) SIGUE EN
+  TINTA: es una herramienta de trabajo, y el negro es el del propio cromo.
+  `--action` no se toca a propósito — también pinta la casilla marcada, y en
+  oro su filo daría 1,9:1 contra el blanco (WCAG 1.4.11 pide 3:1).
 
-  No es un descuido: es la excepción, y está justificada aquí para que nadie
-  la copie a una lista o a un gesto, donde sí destrozaría el rendimiento.
+  Doble selector (0,2,0) para ganarle al `[data-theme='light']` de
+  `globals.css`, que se evalúa en este mismo elemento.
 */
+.panel[data-theme='light'] {
+  --boton-radio: var(--radius-full);
+  --action-gold: var(--gold-500);
+  --action-gold-fg: var(--tinta-1);
+}
 
-.sidebar {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: var(--z-drawer);
+/* El margen lateral del cromo: el de la columna del contenido, para que el
+   logo caiga sobre el borde del titular y las acciones sobre el de la
+   rejilla. Lo comparten la cabecera y la barra de opciones. */
+.cabecera,
+.opciones {
+  --margen-columna: max(var(--space-4), env(safe-area-inset-left, 0px));
 
-  display: none;
-  flex-direction: column;
-  width: var(--ancho-lateral);
-
-  /*
-    Contenedor de consulta. El contenido de la barra reacciona a SU ancho
-    real, no al del viewport. Antes había dos juegos de reglas paralelos —uno
-    para "rail por breakpoint" y otro para "rail por preferencia"— que podían
-    desincronizarse; ahora hay uno solo y no puede.
-  */
-  container-type: inline-size;
-  container-name: lateral;
-
-  /* Capa de material: el contenido pasa por debajo, no queda amputado por
-     una franja opaca. */
-  background: var(--material);
-  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
-  /*
-    Cromo fijo sobre papel blanco. El material translúcido ya no se recorta
-    contra un fondo gris —fondo y barra son el mismo blanco—, así que el filo
-    es LO ÚNICO que dice dónde acaba la barra y empieza el contenido. Sube de
-    `--border-subtle` (1,67:1) a `--border` (4,42:1).
-  */
-  border-right: 1px solid var(--border);
-
-  /*
-    EL PLEGADO ES INSTANTÁNEO, y dejó de animarse a propósito.
-
-    Animaba `width` aquí y `padding-left` en `.columna`, que es la prohibición
-    dura de recalcular la maquetación en cada fotograma: 220 ms moviendo el
-    ancho útil de TODO el panel —tablas incluidas— con reflujo y repintado en
-    cada uno. En un equipo de gama media eso va a tirones, y una animación a
-    tirones se ve peor que ninguna.
-
-    Y no compraba suavidad ni siquiera cuando iba fina: las etiquetas de la
-    barra desaparecen con `display: none` desde su consulta de contenedor (ver
-    §«rail»), que es un salto discreto. O sea que el usuario ya veía un corte a
-    mitad del recorrido.
-
-    `scale` se conserva: es el acuse de presión, va en el compositor y no toca
-    la maquetación.
-  */
-  transition: scale var(--dur-rebote) var(--ease-rebote);
+  padding-left: var(--margen-columna);
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 }
 
 @media (min-width: 768px) {
-  .sidebar {
+  .cabecera,
+  .opciones {
+    --margen-columna: max(
+      var(--space-6),
+      calc((100% - var(--content-max)) / 2 + var(--space-6))
+    );
+
+    padding-left: max(var(--margen-columna), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--margen-columna), env(safe-area-inset-right, 0px));
+  }
+}
+
+/* ==========================================================================
+   LA CABECERA  ·  negra, en el flujo: se va al desplazar
+   ========================================================================== */
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  min-height: calc(var(--tap-min) + var(--space-3) * 2);
+  padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
+  padding-bottom: var(--space-3);
+
+  background: var(--cacao-bg);
+  color: var(--cacao-fg);
+}
+
+@media (min-width: 768px) {
+  .cabecera {
+    gap: var(--space-6);
+    padding-top: max(var(--space-4), env(safe-area-inset-top, 0px));
+    padding-bottom: var(--space-2);
+  }
+}
+
+/* --- La marca: el logotipo y «Panel» ------------------------------------- */
+
+.marca {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-radius: var(--radius-xs);
+  color: inherit;
+  text-decoration: none;
+}
+
+.logo {
+  height: clamp(1.5rem, 1.1rem + 1vw, 2rem);
+}
+
+/* «Panel», en versalitas de rótulo, separado por un filo: dice en qué puerta
+   del club se está sin repetir el nombre. */
+.marcaPanel {
+  padding-left: var(--space-3);
+  border-left: 1px solid color-mix(in srgb, var(--cacao-fg) 24%, transparent);
+  font-size: var(--t-overline-size);
+  line-height: 1.6;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cacao-fg-2);
+}
+
+.marca:focus-visible {
+  outline: 2px solid var(--cacao-brand);
+  outline-offset: 4px;
+}
+
+/* --- El buscador: el disparador de la paleta ------------------------------ */
+
+/*
+  Se lee como el buscador de la fachada: una píldora con la lupa y el texto
+  en tono de marcador. Su filo es crema al 40 % sobre el negro (~3,6:1, por
+  encima del 3:1 de WCAG 1.4.11); al apuntarlo se enciende en oro, que es la
+  respuesta al toque. En el teléfono no está: «Buscar» vive en la barra
+  inferior, en la zona del pulgar.
+*/
+.buscar {
+  display: none;
+  flex: 1;
+  /* Encoge por debajo del ancho de su texto (que se corta con «…»): sin
+     esto, en una tableta empujaba la cuenta fuera de la cabecera. */
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 520px;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2) 0 var(--space-4);
+
+  border: 1px solid color-mix(in srgb, var(--cacao-fg) 40%, transparent);
+  border-radius: var(--radius-full);
+  background: none;
+
+  font-family: inherit;
+  font-size: var(--t-callout-size);
+  color: var(--cacao-fg-2);
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out);
+}
+
+@media (min-width: 768px) {
+  .buscar {
     display: flex;
   }
 }
 
-/*
-  Entre 768 y 1023 el rail es obligatorio: no hay ancho que regalar. Esto pisa
-  la preferencia del usuario a propósito, de ahí el `!important` — es la única
-  forma de que una regla de hoja de estilos gane a la variable en línea.
-*/
-@media (max-width: 1023px) {
-  .shell {
-    --ancho-lateral: var(--sidebar-w-rail) !important;
-  }
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .sidebar {
-    background: var(--surface);
-    backdrop-filter: none;
-  }
-}
-
-/* --- Marca ---------------------------------------------------------------- */
-
-.marca {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-
-  height: var(--topbar-h);
-  padding: 0 var(--space-4);
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.wordmark {
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  white-space: nowrap;
-
-  /* El oro como material. Es la única superficie dorada del cromo. */
-  background: var(--gold-sheen);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-/* --- Navegación ----------------------------------------------------------- */
-
-.nav {
-  flex: 1;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: var(--space-2) var(--space-3) var(--space-4);
-
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.grupo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.grupoTitulo {
-  padding: 0 var(--space-3) var(--space-2);
-  font-size: var(--t-overline-size);
-  line-height: var(--t-overline-leading);
-  letter-spacing: var(--t-overline-tracking);
-  font-weight: var(--t-overline-weight);
-  text-transform: uppercase;
-  color: var(--text-3);
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-
-  min-height: 40px;
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-sm);
-
-  font-size: var(--t-callout-size);
-  line-height: var(--t-callout-leading);
-  font-weight: 500;
-  color: var(--text-2);
-  white-space: nowrap;
-
-  transition: color var(--dur-fast) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
-}
-
-/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
-   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
-   FUERA a propósito — un teclado existe en cualquier dispositivo. */
-
 @media (hover: hover) {
-  .item:hover {
-    color: var(--text);
-  }
-}
-
-.item[data-activo='true'] {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.item:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: -2px;
-}
-
-.itemIcono {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-}
-
-.itemTexto {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Fondo del ítem activo. Es un elemento compartido: se DESLIZA de un destino
-   a otro en vez de parpadear, para no perder de dónde venía la selección. */
-.indicador {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-
-  border-radius: var(--radius-sm);
-  /*
-    Indicador de ruta activa. Su relleno (`--surface-hover`) da 1,02:1 sobre
-    papel: como única señal no existiría. Lo dicen tres cosas a la vez — el
-    trazo, el filo dorado de la izquierda y el peso 600 del texto—, que es
-    justo lo que exige "el color nunca como único portador".
-  */
-  background: var(--surface-hover);
-  /* Destino ACTIVO: filo dorado + relleno de `--surface-hover` — el par exacto
-     de §2.3. El relleno solo da 1,02:1 y nunca puede ir solo. */
-  border: 1px solid var(--brand-edge);
-}
-
-/* Filo dorado a la izquierda del destino activo: la única marca de marca
-   dentro de la navegación. */
-.indicador::before {
-  content: '';
-  position: absolute;
-  left: -1px;
-  top: 20%;
-  bottom: 20%;
-  width: 2px;
-  border-radius: var(--radius-full);
-  background: var(--brand-edge);
-}
-
-/* --- Pie de la barra lateral ----------------------------------------------
-   Antes había cuatro controles en fila (avatar, perfil, cerrar sesión y
-   colapsar). En rail eso son ~144px metidos en una caja de 72: los botones se
-   salían de la barra. Ahora el avatar ES el disparador de un menú que
-   contiene correo, rol, contraseña y cerrar sesión — un control en vez de
-   tres, y encima menos cosas compitiendo por la atención.               */
-
-.piesidebar {
-  flex-shrink: 0;
-  padding: var(--space-3);
-  border-top: 1px solid var(--border);
-
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.perfilBoton {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex: 1;
-  min-width: 0;
-
-  padding: var(--space-2);
-  border: none;
-  border-radius: var(--radius-sm);
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  text-align: left;
-
-  transition: translate var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
-}
-
-/* El relleno del hover no se ve sobre papel (1,02:1): el trazo lo acompaña.
-   Va en `inset`, no en `border`, para no mover ni un píxel el avatar. */
-
-/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
-   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
-   FUERA a propósito — un teclado existe en cualquier dispositivo. */
-
-@media (hover: hover) {
-  .perfilBoton:hover {
+  .buscar:hover {
+    border-color: var(--cacao-brand);
+    color: var(--cacao-fg);
     translate: 0 -1px;
   }
 }
 
-.perfilBoton:focus-visible {
-  outline: 2px solid var(--focus);
+.buscar:active {
+  translate: 0 1px;
+}
+
+.buscar:focus-visible {
+  outline: 2px solid var(--cacao-brand);
   outline-offset: 2px;
 }
 
-.piePerfil {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
+.buscarIcono {
+  flex-shrink: 0;
 }
 
-.pieNombre {
+.buscarTexto {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* El atajo, como una tecla: el mismo gris del texto, en su propia píldora.
+   En una pantalla táctil no hay teclado al que enseñárselo. */
+@media (pointer: coarse) {
+  .atajo {
+    display: none;
+  }
+}
+
+.atajo {
+  flex-shrink: 0;
+  padding: 2px var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--cacao-fg) 28%, transparent);
+  border-radius: var(--radius-full);
+  font-family: inherit;
   font-size: var(--t-caption-size);
   font-weight: 600;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  letter-spacing: 0.04em;
+  color: var(--cacao-fg-2);
 }
 
-.pieRol {
-  font-size: var(--t-overline-size);
-  letter-spacing: var(--t-overline-tracking);
-  text-transform: uppercase;
-  color: var(--text-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* --- Las acciones: registrar y la cuenta ---------------------------------- */
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
 }
 
-.colapsar {
-  display: grid;
-  place-items: center;
+/* «Registrar miembro» queda solo con su icono en un teléfono estrecho y en
+   una tableta, donde el buscador necesita el sitio. */
+.registrarTexto {
+  display: none;
+}
 
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
+@media (min-width: 480px) and (max-width: 767px), (min-width: 1024px) {
+  .registrarTexto {
+    display: inline;
+  }
+}
+
+/* La cuenta, solo en escritorio: en el teléfono vive en la hoja «Más». */
+.cuenta {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .cuenta {
+    display: block;
+  }
+}
+
+.cuentaBoton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
+
   border: none;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-full);
   background: none;
-  color: var(--text-3);
+  font-family: inherit;
+  color: var(--cacao-fg);
+  text-align: left;
   cursor: pointer;
 
   transition:
-    color var(--dur-fast) var(--ease-out),
     translate var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
+    color var(--dur-fast) var(--ease-out);
 }
 
-/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
-   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
-   FUERA a propósito — un teclado existe en cualquier dispositivo. */
-
 @media (hover: hover) {
-  .colapsar:hover {
-    color: var(--text);
+  .cuentaBoton:hover {
     translate: 0 -1px;
+  }
+
+  .cuentaBoton:hover .cuentaFlecha {
+    color: var(--cacao-brand);
+    translate: 0 1px;
   }
 }
 
-.colapsar:focus-visible {
-  outline: 2px solid var(--focus);
+.cuentaBoton:focus-visible {
+  outline: 2px solid var(--cacao-brand);
   outline-offset: 2px;
 }
 
-/* ==========================================================================
-   MODO RAIL  ·  el contenido reacciona al ancho REAL de la barra
-   --------------------------------------------------------------------------
-   Una sola definición, sea el rail por preferencia del usuario o impuesto por
-   el breakpoint. Es imposible que los dos casos se desincronicen porque no
-   hay dos casos.
-   ========================================================================== */
+.cuentaTextos {
+  display: none;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 220px;
+}
 
-@container lateral (max-width: 140px) {
-  .marcaTexto,
-  .grupoTitulo,
-  .itemTexto,
-  .piePerfil {
-    display: none;
-  }
-
-  .item,
-  .marca {
-    justify-content: center;
-    padding: 0;
-  }
-
-  /* En vertical caben los dos controles sin desbordar los 72px. */
-  .piesidebar {
-    flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-2);
-  }
-
-  .perfilBoton {
-    flex: none;
-    justify-content: center;
-    padding: var(--space-2);
+@media (min-width: 1100px) {
+  .cuentaTextos {
+    display: flex;
   }
 }
 
-/* Por debajo de 1024 el rail es forzado: ofrecer el botón de colapsar sería
-   ofrecer un control que no puede hacer nada. */
-@media (max-width: 1023px) {
-  .colapsar {
-    display: none;
-  }
+.cuentaNombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--t-caption-size);
+  font-weight: 600;
 }
 
-/* --- Menú del perfil ------------------------------------------------------- */
+.cuentaRol {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--t-overline-size);
+  letter-spacing: var(--t-overline-tracking);
+  text-transform: uppercase;
+  color: var(--cacao-fg-2);
+}
+
+.cuentaFlecha {
+  flex-shrink: 0;
+  color: var(--cacao-fg-2);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out);
+}
+
+/* --- Menú de la cuenta (un popover CLARO: hereda del panel) ------------- */
 
 .menuCabecera {
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding: var(--space-2) var(--space-3) var(--space-3);
-  /* Separador dentro de una superficie ya definida (§2.2). */
-  border-bottom: 1px solid var(--border);
+  /* Separador dentro de una superficie ya definida. */
+  border-bottom: 1px solid var(--border-subtle);
   margin-bottom: var(--space-2);
   min-width: 0;
 }
@@ -427,117 +338,192 @@
   font-size: var(--t-overline-size);
   letter-spacing: var(--t-overline-tracking);
   text-transform: uppercase;
-  color: var(--text-3);
+  color: var(--text-2);
 }
 
 /* ==========================================================================
-   COLUMNA PRINCIPAL
+   LA BARRA DE OPCIONES  ·  negra, pegada arriba, ≥768px
+   --------------------------------------------------------------------------
+   Va donde los otros portales ponen la foto. Todas las secciones a la vista,
+   en sus grupos (separados por un filo dentro de la misma superficie). Si no
+   caben —una tableta en vertical—, desplaza en horizontal, sin barra.
    ========================================================================== */
 
-.columna {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-  /* Sin transición de `padding-left`: ver la nota del plegado en `.sidebar`.
-     Esta era la cara cara de las dos — mueve el ancho útil de todo el panel. */
-  transition: scale var(--dur-rebote) var(--ease-rebote);
-}
-
-/* La columna consume la MISMA variable que la barra: no pueden desincronizarse. */
-@media (min-width: 768px) {
-  .columna {
-    padding-left: var(--ancho-lateral);
-  }
-}
-
-/* --- Barra superior ------------------------------------------------------- */
-
-.topbar {
+.opciones {
   position: sticky;
   top: 0;
   z-index: var(--z-header);
 
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+  display: none;
+  padding-top: env(safe-area-inset-top, 0px);
 
-  min-height: var(--topbar-h);
-  padding: var(--space-2) var(--space-4);
-  padding-top: max(var(--space-2), env(safe-area-inset-top, 0px));
-
-  background: var(--material);
-  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-
-  /*
-    El filo vuelve. El efecto de borde por desvanecido (abajo) bastaba cuando
-    el fondo era gris y el material blanco se recortaba contra él; con papel
-    blanco a los dos lados, cromo y contenido son el mismo color y la barra
-    dejaba de tener límite. Los dos conviven: la línea dice DÓNDE acaba, el
-    desvanecido evita que el texto se corte en seco al pasar por debajo.
-  */
-  border-bottom: 1px solid var(--border);
-}
-
-/*
-  Efecto de borde de scroll, ahora POR DEBAJO de la línea: el contenido se
-  desvanece justo donde se cruza con el cromo flotante, para que no aparezca
-  cortado en seco.
-*/
-.topbar::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -16px;
-  height: 16px;
-  pointer-events: none;
-
-  background: linear-gradient(to bottom, var(--bg), transparent);
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .topbar {
-    background: var(--surface);
-    backdrop-filter: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-.marcaMovil {
-  display: flex;
-  align-items: center;
+  background: var(--cacao-bg);
+  color: var(--cacao-fg-2);
 }
 
 @media (min-width: 768px) {
-  .marcaMovil {
-    display: none;
-  }
-}
-
-.buscador {
-  flex: 1;
-  max-width: 460px;
-}
-
-.topbarAcciones {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-left: auto;
-}
-
-.themeToggleEscritorio {
-  display: none;
-}
-
-@media (min-width: 900px) {
-  .themeToggleEscritorio {
+  .opciones {
     display: block;
   }
 }
 
-/* --- Contenido ------------------------------------------------------------ */
+/*
+  EL FUNDIDO, como el de la cabecera de los otros portales: el negro no
+  acaba en un canto, se apaga hacia abajo. Corto (24 px) y con curva suave
+  —arranca plano y termina plano—, para que no se lea una raya gris sobre el
+  blanco. Se sale por debajo de la caja: ni la agranda ni tapa clics.
+*/
+.opciones::after {
+  --fundido: var(--space-6);
+
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: var(--fundido);
+  pointer-events: none;
+
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--cacao-bg) 22%, transparent) 0,
+    color-mix(in srgb, var(--cacao-bg) 16%, transparent) 20%,
+    color-mix(in srgb, var(--cacao-bg) 8%, transparent) 45%,
+    color-mix(in srgb, var(--cacao-bg) 2.5%, transparent) 75%,
+    color-mix(in srgb, var(--cacao-bg) 0%, transparent) 100%
+  );
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .opciones::after {
+    display: none;
+  }
+}
+
+.opcionesFila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0 var(--space-3);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.grupo {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Entre grupos, un filo de 1px: una división dentro de la superficie. */
+.grupo + .grupo {
+  padding-left: var(--space-3);
+  border-left: 1px solid color-mix(in srgb, var(--cacao-fg) 16%, transparent);
+}
+
+.opcion {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+
+  font-size: var(--t-callout-size);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: var(--cacao-fg-2);
+  text-decoration: none;
+
+  /* Sin relleno al apuntar (CLAUDE.md, 29/09/2026): la opción sube un
+     píxel y se aclara. */
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out);
+}
+
+@media (pointer: coarse) {
+  .opcion {
+    min-height: var(--tap-min);
+  }
+}
+
+@media (hover: hover) {
+  .opcion:hover {
+    color: var(--cacao-fg);
+    translate: 0 -1px;
+  }
+}
+
+.opcion:active {
+  translate: 0 1px;
+}
+
+/*
+  LA SECCIÓN ACTIVA: el filo dorado (que se desliza), el oro pálido del texto
+  (`--gold-300`, 13,95:1 sobre negro), el peso y `aria-current`. Nunca un
+  relleno: lo elegido se dice con filo, peso y `aria-*`.
+*/
+.opcion[data-activo='true'] {
+  color: var(--gold-300);
+  font-weight: 600;
+}
+
+.opcionFilo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1px var(--cacao-brand);
+  pointer-events: none;
+}
+
+.opcion:focus-visible {
+  outline: 2px solid var(--cacao-brand);
+  outline-offset: 2px;
+}
+
+.opcionIcono {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+}
+
+/*
+  ENTRE 768 Y 1099 PX (una tableta, un portátil pequeño) las ocho secciones
+  no caben con icono: van solo con su nombre y más juntas. Si aun así no
+  caben, la fila desplaza en horizontal.
+*/
+@media (max-width: 1099px) {
+  .opcionesFila {
+    gap: var(--space-2);
+  }
+
+  .grupo + .grupo {
+    padding-left: var(--space-2);
+  }
+
+  .opcion {
+    padding: 0 var(--space-3);
+  }
+
+  .opcionIcono {
+    display: none;
+  }
+}
+
+@media (max-width: 819px) {
+  .opcion {
+    padding: 0 var(--space-2);
+  }
+}
+
+/* ==========================================================================
+   EL CONTENIDO
+   ========================================================================== */
 
 .main {
   flex: 1;
@@ -545,14 +531,12 @@
   max-width: var(--content-max);
   margin: 0 auto;
   padding: var(--space-6) var(--space-4) var(--space-10);
+  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
   /*
-    Contenedor de consulta para TODAS las páginas. El ancho útil del contenido
-    no es el del viewport: depende de si la barra lateral está abierta o en
-    rail. Una página que se adapte con `@media` se equivoca en ~200px justo en
-    el rango donde importa (portátiles), así que el sitio correcto para
-    preguntar es aquí. Nombrado para que una página pueda dirigirse a él
-    aunque introduzca contenedores propios más adentro.
+    Contenedor de consulta para TODAS las páginas: el sitio correcto para
+    preguntar por el ancho útil es aquí, no el viewport.
   */
   container-type: inline-size;
   container-name: contenido;
@@ -560,21 +544,22 @@
 
 @media (min-width: 768px) {
   .main {
-    padding: var(--space-7) var(--space-6) var(--space-11);
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-11);
+    padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
   }
 }
 
-/* Deja hueco a la tab bar para que no tape el final del contenido. */
+/* Deja hueco a la barra inferior para que no tape el final del contenido. */
 @media (max-width: 767px) {
   .main {
-    padding-bottom: calc(
-      var(--tabbar-h) + var(--space-8) + env(safe-area-inset-bottom, 0px)
-    );
+    padding-bottom: calc(var(--tabbar-h) + var(--space-8) + env(safe-area-inset-bottom, 0px));
   }
 }
 
 /* ==========================================================================
-   BARRA INFERIOR  ·  <768px
+   LA BARRA INFERIOR  ·  <768px, negra como el resto del cromo
    ========================================================================== */
 
 .tabbar {
@@ -588,15 +573,12 @@
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
 
-  /* `env(safe-area-inset-bottom)` mantiene los destinos por encima de la
-     barra de gestos del iPhone. Requiere `viewport-fit=cover`. */
+  /* Por encima de la barra de gestos del iPhone (`viewport-fit=cover`). */
   padding-bottom: env(safe-area-inset-bottom, 0px);
 
-  background: var(--material);
-  backdrop-filter: blur(var(--blur-lg)) saturate(180%);
-  /* Mismo motivo que la barra superior: sobre papel blanco el filo es lo
-     único que separa el cromo fijo del contenido que pasa por debajo. */
-  border-top: 1px solid var(--border);
+  background: var(--cacao-bg);
+  color: var(--cacao-fg-2);
+  box-shadow: var(--shadow-flotante);
 }
 
 @media (min-width: 768px) {
@@ -605,15 +587,9 @@
   }
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  .tabbar {
-    background: var(--surface);
-    backdrop-filter: none;
-  }
-}
-
 .tab {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -630,20 +606,27 @@
   line-height: 1.2;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: var(--text-3);
+  color: var(--cacao-fg-2);
+  text-decoration: none;
 
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: color var(--dur-fast) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-press) var(--ease-out);
 }
 
 .tab[data-activo='true'] {
-  color: var(--text);
+  color: var(--gold-300);
 }
 
 .tab:active {
-  color: var(--text-2);
+  opacity: 0.62;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--cacao-brand);
+  outline-offset: -4px;
 }
 
 .tabIcono {
@@ -651,18 +634,23 @@
   height: 21px;
 }
 
-/* Barra dorada superior que se desliza entre pestañas. */
+/* El filo dorado alrededor del icono de la pestaña activa: el mismo
+   lenguaje que la barra de opciones, y también se desliza. */
 .tabIndicador {
   position: absolute;
-  top: 0;
-  left: 22%;
-  right: 22%;
-  height: 2px;
-  border-radius: 0 0 var(--radius-full) var(--radius-full);
-  background: var(--gold-sheen);
+  top: calc(var(--space-2) - 5px);
+  left: 50%;
+  z-index: -1;
+  width: 52px;
+  height: 31px;
+  translate: -50% 0;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1px var(--cacao-brand);
 }
 
-/* --- Hoja "Más" ----------------------------------------------------------- */
+/* ==========================================================================
+   LA HOJA «MÁS»  ·  una lista: sin relleno al apuntar ni al elegir
+   ========================================================================== */
 
 .masLista {
   display: flex;
@@ -675,32 +663,41 @@
   align-items: center;
   gap: var(--space-3);
 
+  width: 100%;
   min-height: var(--tap-min);
   padding: 0 var(--space-3);
+  border: none;
   border-radius: var(--radius-sm);
+  background: none;
 
+  font-family: inherit;
   font-size: var(--t-body-size);
   font-weight: 500;
   color: var(--text);
-
-  transition: background-color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out),
-    opacity var(--dur-press) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
-
-  /*
-    La lista mezcla enlaces y botones —instalar la app es una acción, no un
-    destino— y ambos tienen que ser indistinguibles. Sin este reseteo el
-    <button> traería el borde, el fondo y la fuente del navegador, y se leería
-    como un cuerpo extraño entre las demás filas.
-  */
-  width: 100%;
-  border: none;
-  background: none;
-  font-family: inherit;
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+
+  /*
+    La lista mezcla enlaces y botones —instalar la app es una acción, no un
+    destino— y ambos tienen que ser indistinguibles: de ahí el reseteo.
+    Sin tinte (29/09/2026): al apuntar, la fila se desliza; al tocar, baja la
+    opacidad.
+  */
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    opacity var(--dur-press) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .masItem:hover {
+    translate: 3px 0;
+  }
+}
+
+.masItem:active {
+  opacity: 0.62;
 }
 
 .masItem:focus-visible {
@@ -708,52 +705,31 @@
   outline-offset: -2px;
 }
 
-/*
-  Retroalimentación en el toque, no al soltar. La hoja «Más» es una LISTA, así
-  que el acuse es opacidad, no sombra ni desplazamiento (§4.3): es una pantalla
-  de móvil y puede ser de gama media.
-*/
-.masItem:active {
-  background: var(--surface-hover);
-  opacity: 0.62;
-}
-
-/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
-   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
-   FUERA a propósito — un teclado existe en cualquier dispositivo. */
-
-@media (hover: hover) {
-  .masItem:hover {
-    background: var(--surface-hover);
-    box-shadow: inset 0 0 0 1px var(--border-subtle);
-  }
-}
-
-/*
-  El destino en el que ya estás. El relleno no basta (1,02:1 sobre papel): lo
-  dicen el trazo Y el `aria-current` que pone el TSX, que es lo que oye un
-  lector de pantalla. El color nunca va solo.
-*/
+/* El destino en el que ya estás: el filo dorado, el peso y `aria-current`. */
 .masItem[data-activo='true'] {
-  background: var(--surface-hover);
-  /* Mismo par de §2.3 que el indicador de la barra lateral, en la hoja "Más". */
+  font-weight: 600;
   box-shadow: var(--filo-activo-inset);
 }
 
 .masItemIcono {
   width: 19px;
   height: 19px;
-  color: var(--text-3);
+  color: var(--text-2);
   flex-shrink: 0;
 }
 
-/*
-  Disparador de la paleta de comandos. Es un botón, pero tiene que leerse como
-  un campo de búsqueda: por eso el texto va alineado a la izquierda y en el
-  tono de un marcador de posición, no en el de una etiqueta de botón.
-*/
-.disparadorBusqueda {
-  justify-content: flex-start;
-  color: var(--text-3);
-  font-weight: 400;
+.masSalir {
+  margin-top: var(--space-5);
+}
+
+/* ==========================================================================
+   IMPRESIÓN  ·  el cromo no se imprime
+   ========================================================================== */
+
+@media print {
+  .cabecera,
+  .opciones,
+  .tabbar {
+    display: none;
+  }
 }

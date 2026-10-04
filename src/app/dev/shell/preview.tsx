@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
+import { InicioPanel } from '@/app/admin/_components/inicio-panel'
 import { AppShell } from '@/components/shell/app-shell'
 import { Badge, StatusBadge, VenceEn } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -65,6 +66,7 @@ async function buscarFalso(termino: string): Promise<MiembroEncontrado[]> {
 
 export function ShellPreview() {
   const [rol, setRol] = useState<RolCodigo>('super_admin')
+  const [ruta, setRuta] = useState('/admin')
 
   return (
     <AppShell
@@ -79,15 +81,11 @@ export function ShellPreview() {
       }}
       cerrarSesion={() => {}}
       buscar={buscarFalso}
+      rutaSimulada={ruta}
     >
-      <PageHeader
-        title="Vista previa del shell"
-        description="Datos falsos. Cambia el rol para ver cómo se adaptan la barra lateral y la barra inferior, y pulsa Ctrl+K para la paleta de comandos."
-        actions={<Button icon={<Plus size={16} />}>Registrar miembro</Button>}
-      />
-
+      {/* Los controles de la vista previa, arriba en todas las secciones. */}
       <Stack gap={7}>
-        <Section title="Rol simulado">
+        <Stack direction="row" gap={6} wrap>
           <SegmentedControl
             options={[
               { value: 'super_admin', label: 'Super administrador' },
@@ -96,10 +94,37 @@ export function ShellPreview() {
             value={rol}
             onChange={setRol}
             ariaLabel="Rol simulado"
-            size="md"
+            size="sm"
           />
-        </Section>
+          <SegmentedControl
+            options={[
+              { value: '/admin', label: 'Inicio' },
+              { value: '/admin/miembros', label: 'Miembros' },
+              { value: '/admin/metricas', label: 'Métricas' },
+              { value: '/admin/anuncios', label: 'Novedades' },
+            ]}
+            value={ruta}
+            onChange={setRuta}
+            ariaLabel="Sección simulada"
+            size="sm"
+          />
+        </Stack>
 
+      {ruta === '/admin' ? (
+        <InicioPanel
+          esSuperAdmin={rol === 'super_admin'}
+          cifras={{ miembros: 1284, vigentes: 1032, porVencer: 87, comercios: 46 }}
+          bajada={`Buenas tardes. Hoy es sábado, 4 de octubre; tu sesión es de ${rol === 'super_admin' ? 'super administrador' : 'empleado'}.`}
+        />
+      ) : (
+      <>
+      <PageHeader
+        title="Vista previa del shell"
+        description="Datos falsos. Cambia el rol o la sección para ver cómo se adaptan la barra de opciones y la barra inferior, y pulsa Ctrl+K o «/» para la paleta de comandos."
+        actions={<Button icon={<Plus size={16} />}>Registrar miembro</Button>}
+      />
+
+      <Stack gap={7}>
         <Section title="Qué revisar aquí">
           <Grid min="260px">
             <Card>
@@ -108,8 +133,8 @@ export function ShellPreview() {
                   Navegación
                 </Badge>
                 <p className="muted">
-                  Estrecha la ventana por debajo de 1024px para ver el rail de iconos, y
-                  por debajo de 768px para la barra inferior en la zona del pulgar.
+                  Por debajo de 768px la barra de opciones deja paso a la barra inferior,
+                  en la zona del pulgar, y la cuenta pasa a la hoja «Más».
                 </p>
               </Stack>
             </Card>
@@ -120,8 +145,8 @@ export function ShellPreview() {
                   Indicador activo
                 </Badge>
                 <p className="muted">
-                  Navega entre secciones: el fondo del destino activo se desliza de uno a
-                  otro en vez de parpadear.
+                  Cambia la sección simulada: el filo dorado de la activa se desliza de una
+                  opción a otra en vez de parpadear.
                 </p>
               </Stack>
             </Card>
@@ -158,6 +183,9 @@ export function ShellPreview() {
             ))}
           </Grid>
         </Section>
+      </Stack>
+      </>
+      )}
       </Stack>
     </AppShell>
   )

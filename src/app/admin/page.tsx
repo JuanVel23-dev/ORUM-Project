@@ -1,23 +1,16 @@
-import Link from 'next/link'
-import {
-  ChevronRight,
-  CreditCard,
-  KeyRound,
-  Store,
-  UserCog,
-  UserPlus,
-  Users,
-} from 'lucide-react'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { hoyISO } from '@/lib/shared/fecha'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Cifra } from '@/components/ui/cifra'
-import { Grid, PageHeader, Section, Stack } from '@/components/ui/layout'
-import styles from './inicio.module.css'
+import { horaBogota, hoyISO, saludoPorHora, sumarDiasISO } from '@/lib/shared/fecha'
+import { DIAS_POR_VENCER, InicioPanel } from './_components/inicio-panel'
 
 export const metadata = { title: 'Inicio · ORUM' }
+
+/*
+  LA PORTADA DEL PANEL  ·  rediseño del 04/10/2026
+  ---------------------------------------------------------------------------
+  Aquí solo los DATOS; lo que se pinta es `InicioPanel`, que no consulta nada
+  (así `/dev/shell` puede enseñarla con cifras falsas, sin sesión).
+*/
 
 /**
  * Cifras del panel.
@@ -27,13 +20,15 @@ export const metadata = { title: 'Inicio · ORUM' }
  *
  * "Membresías vigentes" filtra por `estado = 'activa'` **y** `fecha_fin >= hoy`,
  * la misma regla que aplica `derivarEstadoMembresia`. Contar solo por `estado`
- * daría un número inflado, porque esa columna no se actualiza al vencer.
+ * daría un número inflado, porque esa columna no se actualiza al vencer. Las
+ * «por vencer» son las vigentes cuyo `fecha_fin` cae en los próximos 30 días.
  */
 async function obtenerCifras() {
   const admin = createAdminClient()
   const hoy = hoyISO()
+  const limite = sumarDiasISO(hoy, DIAS_POR_VENCER)
 
-  const [miembros, vigentes, comercios] = await Promise.all([
+  const [miembros, vigentes, porVencer, comercios] = await Promise.all([
     admin
       .from('miembros')
       .select('id', { count: 'exact', head: true })
@@ -44,6 +39,12 @@ async function obtenerCifras() {
       .eq('estado', 'activa')
       .gte('fecha_fin', hoy),
     admin
+      .from('membresias')
+      .select('id', { count: 'exact', head: true })
+      .eq('estado', 'activa')
+      .gte('fecha_fin', hoy)
+      .lte('fecha_fin', limite),
+    admin
       .from('comercios')
       .select('id', { count: 'exact', head: true })
       .eq('activo', true)
@@ -53,134 +54,31 @@ async function obtenerCifras() {
   return {
     miembros: miembros.count ?? 0,
     vigentes: vigentes.count ?? 0,
+    porVencer: porVencer.count ?? 0,
     comercios: comercios.count ?? 0,
   }
 }
 
-export default async function AdminInicioPage() {
-  const perfil = await requireRol('super_admin', 'empleado')
-  const esSuperAdmin = perfil.rolCodigo === 'super_admin'
-
-  const cifras = await obtenerCifras()
-
-  return (
-    <>
-      <PageHeader
-        title="Panel de ORUM"
-        description={`Sesión iniciada como ${perfil.rolNombre.toLowerCase()}.`}
-      />
-
-      <Stack gap={7}>
-        {/*
-          El flujo estrella, siempre a un clic. Para un empleado es lo que hace
-          todo el día; para el administrador, la acción más frecuente.
-        */}
-        <Card variant="brand" padding="lg" className={styles.destacado}>
-          <div className={styles.destacadoCuerpo}>
-            <div className={styles.destacadoTextos}>
-              <h2 className={styles.destacadoTitulo}>Registrar cliente y vender membresía</h2>
-              <p className={styles.destacadoDescripcion}>
-                Crea el cliente, su cuenta de acceso y su primera membresía en un solo
-                flujo. Se le envía un correo para que active su acceso.
-              </p>
-            </div>
-
-            <Button href="/admin/miembros/nuevo" size="lg" icon={<UserPlus size={17} />}>
-              Empezar
-            </Button>
-          </div>
-        </Card>
-
-        <Section title="Estado del club">
-          <Grid min="200px">
-            <Card>
-              <Cifra
-                etiqueta="Miembros registrados"
-                valor={cifras.miembros.toLocaleString('es-CO')}
-              />
-            </Card>
-
-            <Card>
-              <Cifra
-                etiqueta="Membresías vigentes"
-                valor={cifras.vigentes.toLocaleString('es-CO')}
-                nota="Al día de hoy"
-              />
-            </Card>
-
-            <Card>
-              <Cifra
-                etiqueta="Comercios activos"
-                valor={cifras.comercios.toLocaleString('es-CO')}
-              />
-            </Card>
-          </Grid>
-        </Section>
-
-        <Section title="Accesos">
-          <Grid min="280px">
-            <Acceso
-              href="/admin/miembros"
-              icon={<Users />}
-              titulo="Miembros"
-              descripcion="Buscar, consultar estado y renovar"
-            />
-
-            {esSuperAdmin && (
-              <>
-                <Acceso
-                  href="/admin/comercios"
-                  icon={<Store />}
-                  titulo="Comercios aliados"
-                  descripcion="Sucursales y promociones"
-                />
-                <Acceso
-                  href="/admin/planes"
-                  icon={<CreditCard />}
-                  titulo="Planes de membresía"
-                  descripcion="Precios y vigencias"
-                />
-                <Acceso
-                  href="/admin/usuarios"
-                  icon={<UserCog />}
-                  titulo="Usuarios"
-                  descripcion="Empleados y administradores"
-                />
-              </>
-            )}
-
-            <Acceso
-              href="/admin/cuenta/password"
-              icon={<KeyRound />}
-              titulo="Mi contraseña"
-              descripcion="Cambiar la clave de acceso"
-            />
-          </Grid>
-        </Section>
-      </Stack>
-    </>
-  )
+/** «sábado 4 de octubre», en la zona del negocio. */
+function fechaLarga(instante: Date): string {
+  return new Intl.DateTimeFormat('es-CO', {
+    timeZone: 'America/Bogota',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(instante)
 }
 
-function Acceso({
-  href,
-  icon,
-  titulo,
-  descripcion,
-}: {
-  href: string
-  icon: React.ReactNode
-  titulo: string
-  descripcion: string
-}) {
+export default async function AdminInicioPage() {
+  const perfil = await requireRol('super_admin', 'empleado')
+  const cifras = await obtenerCifras()
+  const ahora = new Date()
+
   return (
-    <Link href={href} className={styles.acceso}>
-      <span className={styles.accesoIcono}>{icon}</span>
-      <span className={styles.accesoTextos}>
-        <span className={styles.accesoTitulo}>{titulo}</span>
-        <span className={styles.accesoDescripcion}>{descripcion}</span>
-      </span>
-      <ChevronRight size={17} className={styles.flecha} />
-    </Link>
+    <InicioPanel
+      esSuperAdmin={perfil.rolCodigo === 'super_admin'}
+      cifras={cifras}
+      bajada={`${saludoPorHora(horaBogota(ahora))}. Hoy es ${fechaLarga(ahora)}; tu sesión es de ${perfil.rolNombre.toLowerCase()}.`}
+    />
   )
 }

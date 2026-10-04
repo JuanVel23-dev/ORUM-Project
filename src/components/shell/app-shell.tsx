@@ -2,24 +2,25 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useRef, useState, type ComponentProps, type CSSProperties, type ReactNode } from 'react'
+import { useCallback, useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import { motion } from 'motion/react'
-import { KeyRound, LogOut, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react'
-import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { ChevronDown, KeyRound, LogOut, Search, UserPlus } from 'lucide-react'
 import {
   BotonInstalar,
   EntradaInstalar,
   GuiaInstalacionIOS,
-  InstalarApp,
 } from '@/components/pwa/instalar-app'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { LogoOrum } from '@/components/ui/marca/marca'
 import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
 import { Sheet } from '@/components/ui/sheet'
 import { ToastProvider } from '@/components/ui/toast'
 import { SPRING_MOVE, prefiereMovimientoReducido } from '@/lib/shared/motion'
 import type { RolCodigo } from '@/lib/supabase/database.types'
-import { usePreferenciaLocal } from '@/components/use-preferencia-local'
+import escaparate from '@/app/(publico)/escaparate.module.css'
+import cromo from '@/app/miembros/(portal)/portal.module.css'
+import { TeclaPaleta } from './atajos'
 import { CommandPalette, useAtajoPaleta } from './command-palette'
 import {
   esRutaActiva,
@@ -29,6 +30,40 @@ import {
   type NavItem,
 } from './nav-config'
 import styles from './app-shell.module.css'
+
+/*
+  EL PANEL DE ADMINISTRACIÓN  ·  rediseño del 04/10/2026
+  ---------------------------------------------------------------------------
+  Encargo del propietario: «un rediseño total, con el mismo estilo que el
+  portal inicial, comercios y miembros, pero muy administrativo, conservando
+  la comodidad para trabajar y los atajos. No quiero la imagen inicial:
+  quiero una barra de opciones».
+
+  Así que el panel es la cuarta cara de la fachada, sin su foto:
+
+    · LA CABECERA NEGRA de los otros portales —logotipo en plata, el
+      buscador (la paleta de comandos), «Registrar miembro» en oro y la
+      cuenta—. No es fija: se va al desplazar, y deja sitio al trabajo.
+    · LA BARRA DE OPCIONES, negra, justo debajo: donde los otros portales
+      ponen la foto, aquí van todas las secciones a la vista, en sus grupos.
+      ESA sí se queda pegada arriba: la navegación siempre a un clic. La
+      sección activa la dicen el filo dorado, el peso y `aria-current`.
+    · EL CONTENIDO, sobre blanco y con la paleta de la fachada (importada del
+      cromo de miembros, como hace comercios: es el mismo por construcción).
+    · EN EL TELÉFONO, la barra inferior en la zona del pulgar —ahora negra,
+      como el resto del cromo— y la hoja «Más».
+
+  SIEMPRE EN CLARO (`data-theme="light"`), como los otros tres portales. El
+  selector de tema se retiró con la barra lateral.
+
+  POR QUÉ LA CABECERA NO LLEVA `data-theme="dark"`: el menú de la cuenta es
+  un popover que se pinta DENTRO de ella, y un popover hereda las propiedades
+  de sus ancestros del DOM. Con la cabecera en oscuro, el menú salía negro.
+  Así que la cabecera se pinta de negro con los tokens de la franja
+  (`--cacao-*`) y solo los controles del sistema que viven en ella van en el
+  ámbito `sobreFoto` de la fachada — la misma solución que la cabecera
+  pública.
+*/
 
 export type ShellUser = {
   nombre: string
@@ -43,17 +78,24 @@ type Props = {
   cerrarSesion: () => void | Promise<void>
   /** Fuente de resultados de la paleta. Solo se sustituye en `/dev/shell`. */
   buscar?: ComponentProps<typeof CommandPalette>['buscar']
+  /**
+   * La sección que se da por activa. Solo en `/dev/shell`: allí no hay ruta
+   * de `/admin` (exige sesión) y sin esto no se vería el filo de la activa.
+   */
+  rutaSimulada?: string
   children: ReactNode
 }
 
-export function AppShell({ user, cerrarSesion, buscar, children }: Props) {
-  const pathname = usePathname()
-  const [colapsada, setColapsada] = usePreferenciaLocal('orum-sidebar-colapsada', false)
+export function AppShell({ user, cerrarSesion, buscar, rutaSimulada, children }: Props) {
+  const rutaReal = usePathname()
+  const pathname = rutaSimulada ?? rutaReal
   const [paleta, setPaleta] = useState(false)
   const [mas, setMas] = useState(false)
   const [guiaIOS, setGuiaIOS] = useState(false)
+  const formCerrarSesion = useRef<HTMLFormElement>(null)
 
-  useAtajoPaleta(() => setPaleta(true))
+  const abrirPaleta = useCallback(() => setPaleta(true), [])
+  useAtajoPaleta(abrirPaleta)
 
   const grupos = navegacionPara(user.rolCodigo)
   const tabs = tabsPara(user.rolCodigo)
@@ -70,142 +112,164 @@ export function AppShell({ user, cerrarSesion, buscar, children }: Props) {
     // El provider envuelve todo el panel: cualquier pantalla puede confirmar
     // una acción con un toast sin montar su propio contenedor.
     <ToastProvider>
-      <div
-        className={styles.shell}
-        /*
-          El ancho va como variable EN LÍNEA, heredada por la barra y por el
-          padding de la columna. La versión anterior lo intentaba con
-          `.shell[data-colapsada='true'] .sidebar { width }` y esa regla nunca
-          llegaba a aplicarse, por más que el atributo y el selector fueran
-          correctos. Con la variable no hay selector que pueda fallar.
-        */
-        style={
-          {
-            '--ancho-lateral': colapsada
-              ? 'var(--sidebar-w-rail)'
-              : 'var(--sidebar-w)',
-          } as CSSProperties
-        }
-      >
-      <Sidebar
-        grupos={grupos}
-        pathname={pathname}
-        user={user}
-        colapsada={colapsada}
-        onColapsar={() => setColapsada(!colapsada)}
-        cerrarSesion={cerrarSesion}
-        onPedirGuiaIOS={() => setGuiaIOS(true)}
-      />
-
-      <div className={styles.columna}>
-        <header className={styles.topbar}>
-          <Link href="/admin" className={styles.marcaMovil}>
-            <span className={styles.wordmark}>ORUM</span>
+      <div className={[cromo.portal, styles.panel].join(' ')} data-theme="light">
+        {/* ── LA CABECERA ─────────────────────────────────────────────── */}
+        <header className={styles.cabecera}>
+          <Link href="/admin" className={styles.marca} aria-label="ORUM, ir al inicio del panel">
+            {/* Sobre negro, plata (CLAUDE.md → «sobre negro, plata»). */}
+            <LogoOrum variante="plata" className={styles.logo} preload />
+            <span className={styles.marcaPanel} aria-hidden="true">
+              Panel
+            </span>
           </Link>
 
-          <div className={styles.buscador}>
-            <BotonBuscar onClick={() => setPaleta(true)} />
-          </div>
+          <BotonBuscar onClick={abrirPaleta} />
 
-          <div className={styles.topbarAcciones}>
-            <div className={styles.themeToggleEscritorio}>
-              <ThemeToggle />
+          <div className={styles.acciones}>
+            {/* El flujo estrella, a un clic desde cualquier pantalla. En el
+                teléfono queda solo el icono; el nombre lo dice `aria-label`. */}
+            <div className={escaparate.sobreFoto}>
+              <Button
+                href="/admin/miembros/nuevo"
+                variant="brand"
+                size="sm"
+                pildora
+                icon={<UserPlus size={15} aria-hidden="true" />}
+                aria-label="Registrar miembro y vender membresía"
+                className={styles.registrar}
+              >
+                <span className={styles.registrarTexto}>Registrar miembro</span>
+              </Button>
             </div>
-            <Avatar nombre={user.nombre} size="sm" brand />
+
+            {/* La cuenta. En el teléfono vive en la hoja «Más»: aquí sería
+                la misma acción listada dos veces en la misma pantalla. */}
+            <div className={styles.cuenta}>
+              <DropdownMenu
+                align="end"
+                trigger={
+                  <button type="button" className={styles.cuentaBoton} aria-label="Cuenta y sesión">
+                    <Avatar nombre={user.nombre} size="sm" brand decorativo />
+                    <span className={styles.cuentaTextos}>
+                      <span className={styles.cuentaNombre}>{user.email ?? user.nombre}</span>
+                      <span className={styles.cuentaRol}>{user.rolNombre}</span>
+                    </span>
+                    <ChevronDown size={15} aria-hidden="true" className={styles.cuentaFlecha} />
+                  </button>
+                }
+              >
+                <div className={styles.menuCabecera}>
+                  <span className={styles.menuCorreo}>{user.email ?? user.nombre}</span>
+                  <span className={styles.menuRol}>{user.rolNombre}</span>
+                </div>
+
+                <MenuItem href="/admin/cuenta/password" icon={<KeyRound size={16} />}>
+                  Mi contraseña
+                </MenuItem>
+
+                {/* Acceso PERMANENTE a la instalación de la app. */}
+                <BotonInstalar onPedirGuiaIOS={() => setGuiaIOS(true)} />
+
+                <MenuSeparator />
+
+                <MenuItem
+                  destructive
+                  icon={<LogOut size={16} />}
+                  onSelect={() => {
+                    // La server action se dispara desde un formulario oculto:
+                    // un `MenuItem` es un botón y no puede enviar otro formulario.
+                    formCerrarSesion.current?.requestSubmit()
+                  }}
+                >
+                  Cerrar sesión
+                </MenuItem>
+              </DropdownMenu>
+              <form ref={formCerrarSesion} action={cerrarSesion} hidden />
+            </div>
           </div>
         </header>
 
-        <main className={styles.main}>
-          <InstalarApp />
-          {children}
-        </main>
-      </div>
+        {/* ── LA BARRA DE OPCIONES ────────────────────────────────────── */}
+        <BarraOpciones grupos={grupos} pathname={pathname} />
 
-      <TabBar
-        tabs={tabs}
-        pathname={pathname}
-        onBuscar={() => setPaleta(true)}
-        onMas={() => setMas(true)}
-      />
+        <main className={styles.main}>{children}</main>
 
-      <Sheet open={mas} onClose={() => setMas(false)} title="Más opciones">
-        <nav className={styles.masLista}>
-          {extras.map((item) => (
+        <TabBar
+          tabs={tabs}
+          pathname={pathname}
+          onBuscar={abrirPaleta}
+          onMas={() => setMas(true)}
+        />
+
+        <Sheet open={mas} onClose={() => setMas(false)} title="Más opciones">
+          <nav className={styles.masLista} aria-label="Más secciones">
+            {extras.map((item) => {
+              const activo = esRutaActiva(item, pathname)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={styles.masItem}
+                  data-activo={activo}
+                  /* Esta hoja es la ÚNICA puerta a estos destinos en el
+                     teléfono: el destino actual lo dicen el filo y
+                     `aria-current`, nunca un relleno solo. */
+                  aria-current={activo ? 'page' : undefined}
+                  onClick={() => setMas(false)}
+                >
+                  <item.icon className={styles.masItemIcono} aria-hidden="true" />
+                  {item.label}
+                </Link>
+              )
+            })}
+
+            {/*
+              En el teléfono el menú de la cuenta no se pinta, así que esta
+              hoja es la ÚNICA puerta a la cuenta. Se lista aquí a mano, no a
+              través de `navegacionPara`.
+            */}
             <Link
-              key={item.href}
-              href={item.href}
+              href="/admin/cuenta/password"
               className={styles.masItem}
-              data-activo={esRutaActiva(item, pathname)}
-              /* El destino actual no puede decirse solo con el relleno: la
-                 barra lateral ya marcaba el suyo con `aria-current` y esta
-                 hoja es la ÚNICA puerta a estos destinos en móvil. */
-              aria-current={esRutaActiva(item, pathname) ? 'page' : undefined}
+              data-activo={pathname.startsWith('/admin/cuenta/password')}
               onClick={() => setMas(false)}
             >
-              <item.icon className={styles.masItemIcono} aria-hidden="true" />
-              {item.label}
+              <KeyRound className={styles.masItemIcono} aria-hidden="true" />
+              Mi contraseña
             </Link>
-          ))}
 
-          {/*
-            En móvil no hay menú del avatar —ese vive en el pie de la barra
-            lateral, que está oculta—, así que esta hoja es la ÚNICA puerta a
-            la cuenta. Se lista aquí explícitamente y no a través de
-            `navegacionPara`, para que salir de la barra lateral no la deje
-            inalcanzable en el teléfono.
-          */}
-          <Link
-            href="/admin/cuenta/password"
-            className={styles.masItem}
-            data-activo={pathname.startsWith('/admin/cuenta/password')}
-            onClick={() => setMas(false)}
-          >
-            <KeyRound className={styles.masItemIcono} aria-hidden="true" />
-            Mi contraseña
-          </Link>
+            <EntradaInstalar
+              className={styles.masItem}
+              iconClassName={styles.masItemIcono}
+              onInstalar={() => setMas(false)}
+              onPedirGuiaIOS={() => {
+                // Una hoja se va, la otra llega: no se apilan.
+                setMas(false)
+                setGuiaIOS(true)
+              }}
+            />
+          </nav>
 
-          {/*
-            Instalar la app. En el teléfono esta hoja es la única entrada
-            permanente: el menú del avatar no existe aquí y el banner es
-            descartable. Se oculta sola si el navegador no permite instalar
-            o si ya se está ejecutando instalada.
-          */}
-          <EntradaInstalar
-            className={styles.masItem}
-            iconClassName={styles.masItemIcono}
-            onInstalar={() => setMas(false)}
-            onPedirGuiaIOS={() => {
-              // Una hoja se va, la otra llega: no se apilan.
-              setMas(false)
-              setGuiaIOS(true)
-            }}
-          />
-        </nav>
+          <form action={cerrarSesion} className={styles.masSalir}>
+            <Button type="submit" variant="secondary" pildora fullWidth icon={<LogOut size={16} />}>
+              Cerrar sesión
+            </Button>
+          </form>
+        </Sheet>
 
-        <div style={{ marginTop: 'var(--space-5)' }}>
-          <ThemeToggle compactOnMobile={false} />
-        </div>
+        {/*
+          HERMANA de la hoja "Más", no hija. Un `<dialog>` cerrado es
+          `display: none` y arrastra a sus descendientes: si la guía viviera
+          dentro, cerrar "Más" para mostrarla la ocultaría con ella.
+        */}
+        <GuiaInstalacionIOS abierta={guiaIOS} onCerrar={() => setGuiaIOS(false)} />
 
-        <form action={cerrarSesion} style={{ marginTop: 'var(--space-4)' }}>
-          <Button type="submit" variant="secondary" fullWidth icon={<LogOut size={16} />}>
-            Cerrar sesión
-          </Button>
-        </form>
-      </Sheet>
-
-      {/*
-        HERMANA de la hoja "Más", no hija. Un `<dialog>` cerrado es
-        `display: none` y arrastra a sus descendientes: si la guía viviera
-        dentro, cerrar "Más" para mostrarla la ocultaría con ella.
-      */}
-      <GuiaInstalacionIOS abierta={guiaIOS} onCerrar={() => setGuiaIOS(false)} />
-
-      <CommandPalette
-        open={paleta}
-        onClose={() => setPaleta(false)}
-        rol={user.rolCodigo}
-        buscar={buscar}
-      />
+        <CommandPalette
+          open={paleta}
+          onClose={() => setPaleta(false)}
+          rol={user.rolCodigo}
+          buscar={buscar}
+        />
       </div>
     </ToastProvider>
   )
@@ -213,157 +277,67 @@ export function AppShell({ user, cerrarSesion, buscar, children }: Props) {
 
 /* ========================================================================== */
 
+/**
+ * El disparador de la paleta. Es un botón, pero se lee como el buscador de
+ * la fachada: una píldora con la lupa, el texto en tono de marcador y el
+ * atajo a la derecha.
+ */
 function BotonBuscar({ onClick }: { onClick: () => void }) {
   return (
-    <Button
-      variant="secondary"
-      size="sm"
-      fullWidth
-      onClick={onClick}
-      icon={<Search size={16} />}
-      /* El disparador de la paleta se disfraza de campo de búsqueda: texto a
-         la izquierda y en tono de marcador de posición. Va en el módulo CSS,
-         no en línea — maquetar con `style` está prohibido en este proyecto. */
-      className={styles.disparadorBusqueda}
-    >
-      Buscar miembro, comercio o acción…
-    </Button>
+    <button type="button" className={styles.buscar} onClick={onClick} aria-keyshortcuts="Control+K Meta+K /">
+      <Search size={17} aria-hidden="true" className={styles.buscarIcono} />
+      <span className={styles.buscarTexto}>Buscar un miembro o una acción…</span>
+      <TeclaPaleta className={styles.atajo} />
+    </button>
   )
 }
 
 /* ========================================================================== */
 
-function Sidebar({
-  grupos,
-  pathname,
-  user,
-  colapsada,
-  onColapsar,
-  cerrarSesion,
-  onPedirGuiaIOS,
-}: {
-  grupos: NavGroup[]
-  pathname: string
-  user: ShellUser
-  colapsada: boolean
-  onColapsar: () => void
-  cerrarSesion: () => void | Promise<void>
-  onPedirGuiaIOS: () => void
-}) {
-  const formCerrarSesion = useRef<HTMLFormElement>(null)
+/**
+ * La barra de opciones: todas las secciones a la vista, en sus grupos. El
+ * destino activo lleva un filo dorado que SE DESLIZA de uno a otro (`layoutId`
+ * compartido), para no perder de dónde venía la selección.
+ */
+function BarraOpciones({ grupos, pathname }: { grupos: NavGroup[]; pathname: string }) {
+  const transicion = prefiereMovimientoReducido() ? { duration: 0 } : SPRING_MOVE
 
   return (
-    <aside className={styles.sidebar}>
-      <Link href="/admin" className={styles.marca}>
-        <span className={`${styles.wordmark} ${styles.marcaTexto}`}>ORUM</span>
-        {colapsada && <span className={styles.wordmark}>O</span>}
-      </Link>
-
-      <nav className={styles.nav} aria-label="Navegación principal">
+    <nav className={styles.opciones} aria-label="Secciones del panel">
+      <div className={styles.opcionesFila}>
         {grupos.map((grupo, i) => (
-          <div key={grupo.label ?? i} className={styles.grupo}>
-            {grupo.label && <span className={styles.grupoTitulo}>{grupo.label}</span>}
-
+          <div
+            key={grupo.label ?? i}
+            className={styles.grupo}
+            role="group"
+            aria-label={grupo.label ?? 'Principal'}
+          >
             {grupo.items.map((item) => {
               const activo = esRutaActiva(item, pathname)
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={styles.item}
+                  className={styles.opcion}
                   data-activo={activo}
                   aria-current={activo ? 'page' : undefined}
-                  title={colapsada ? item.label : undefined}
                 >
                   {activo && (
-                    // `layoutId` compartido: al cambiar de ruta, motion
-                    // interpola el indicador desde su posición anterior en
-                    // lugar de hacerlo desaparecer y reaparecer.
                     <motion.span
-                      layoutId="nav-indicador"
-                      className={styles.indicador}
-                      transition={
-                        prefiereMovimientoReducido()
-                          ? { duration: 0 }
-                          : SPRING_MOVE
-                      }
+                      layoutId="opcion-activa"
+                      className={styles.opcionFilo}
+                      transition={transicion}
                     />
                   )}
-                  <item.icon className={styles.itemIcono} aria-hidden="true" />
-                  <span className={styles.itemTexto}>{item.label}</span>
+                  <item.icon className={styles.opcionIcono} aria-hidden="true" />
+                  {item.label}
                 </Link>
               )
             })}
           </div>
         ))}
-      </nav>
-
-      <div className={styles.piesidebar}>
-        {/*
-          Un solo control en lugar de tres. El avatar abre el menú con el
-          correo, el rol y las acciones de sesión: así el pie cabe en los 72px
-          del rail sin desbordarse, y deja de haber botones compitiendo.
-        */}
-        <DropdownMenu
-          align="start"
-          trigger={
-            <button
-              type="button"
-              className={styles.perfilBoton}
-              aria-label="Cuenta y sesión"
-            >
-              <Avatar nombre={user.nombre} size="sm" brand decorativo />
-              <span className={styles.piePerfil}>
-                <span className={styles.pieNombre}>{user.email ?? user.nombre}</span>
-                <span className={styles.pieRol}>{user.rolNombre}</span>
-              </span>
-            </button>
-          }
-        >
-          <div className={styles.menuCabecera}>
-            <span className={styles.menuCorreo}>{user.email ?? user.nombre}</span>
-            <span className={styles.menuRol}>{user.rolNombre}</span>
-          </div>
-
-          <MenuItem href="/admin/cuenta/password" icon={<KeyRound size={16} />}>
-            Mi contraseña
-          </MenuItem>
-
-          {/*
-            Acceso PERMANENTE a la instalación. El banner de la parte superior
-            se puede descartar, y una vez descartado no había forma de volver
-            a encontrarla. Aquí siempre está.
-          */}
-          <BotonInstalar onPedirGuiaIOS={onPedirGuiaIOS} />
-
-          <MenuSeparator />
-
-          <MenuItem
-            destructive
-            icon={<LogOut size={16} />}
-            onSelect={() => {
-              // La server action se dispara desde un formulario oculto: un
-              // `MenuItem` es un botón y no puede enviar otro formulario.
-              formCerrarSesion.current?.requestSubmit()
-            }}
-          >
-            Cerrar sesión
-          </MenuItem>
-        </DropdownMenu>
-
-        <form ref={formCerrarSesion} action={cerrarSesion} hidden />
-
-        <button
-          type="button"
-          className={styles.colapsar}
-          onClick={onColapsar}
-          aria-label={colapsada ? 'Expandir menú' : 'Contraer menú'}
-          title={colapsada ? 'Expandir menú' : 'Contraer menú'}
-        >
-          {colapsada ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
-        </button>
       </div>
-    </aside>
+    </nav>
   )
 }
 
