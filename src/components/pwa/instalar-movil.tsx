@@ -79,12 +79,14 @@ export function AvisoInstalar() {
         <aside className={estilos.aviso} aria-label="Instalar la aplicación de ORUM">
           <span className={estilos.textos}>
             <span className={estilos.titulo}>Instala ORUM</span>
-            <span className={estilos.detalle}>Como una app en tu celular</span>
+            <span className={estilos.detalle}>Como una app</span>
           </span>
 
           <button type="button" className={estilos.instalar} onClick={instalar}>
             <Download size={14} aria-hidden="true" />
-            {modo === 'prompt' ? 'Instalar' : 'Cómo'}
+            {/* «Instalar» siempre: donde no hay diálogo nativo abre la guía,
+                que es el camino para instalarla igual. */}
+            Instalar
           </button>
 
           <button
