@@ -1026,14 +1026,38 @@ con el logotipo y el nombre del comercio, que es el `h1`: dice quién opera la
 caja— y el pie del sitio. El banner vive en el layout y no en la página
 porque el portal tiene UN destino: así el esqueleto de carga y la frontera de
 error se pintan debajo de él y nada salta. La página monta sus tarjetas
-SOBRE el canto del banner (`--monta`): a la izquierda la herramienta
-(verificar → veredicto → venta) y a la derecha las promociones vigentes y la
+SOBRE el canto del banner (`--monta`): a la izquierda la tarjeta de buscar
+(escanear o teclear el número) y a la derecha las promociones vigentes y la
 ayuda por WhatsApp; en el teléfono, una sola columna. Sus superficies son
 `.tarjeta` de `verificar.module.css` (radio `--radius-lg`, como los paneles
-de la fachada), no `Card`. Lo que el rediseño NO tocó, porque es función: el
-veredicto sigue siendo una franja de color sólido con punto lleno / hueco, y
-el recorrido es el mismo. `obtenerMiComercio` (`lib/comercios/comercio-sesion.ts`)
+de la fachada), no `Card`. `obtenerMiComercio` (`lib/comercios/comercio-sesion.ts`)
 es el comercio de la sesión, con `cache`: lo piden el layout y la página.
+
+**El resultado de buscar llega en una VENTANA encima, no debajo** (encargo del
+04/10/2026: «quiero que sea una ventana encima; no quiero que vaya debajo»).
+`VentanaVeredicto` es un `Modal desnudo` —la ventana ES la tarjeta, como el
+carnet—: su cabeza es la franja del veredicto (color sólido, punto lleno /
+hueco, pegada arriba al desplazar), debajo el socio, y si la membresía vale,
+el formulario de venta; al registrar, la ventana entera pasa a ser el acuse.
+Tres cosas que no son obvias:
+
+- **El estado de la búsqueda vive en `VerificacionTool`, no en la tarjeta de
+  buscar.** La tarjeta se remonta al cerrar la ventana (para volver al
+  reposo) y la ventana tiene que seguir pintando al socio mientras se anima
+  su salida. Cerrar no borra el resultado: lo marca como descartado por su
+  `consultaId`, que el servidor renueva en cada búsqueda.
+- **No se cierra al pulsar fuera** (`Modal cerrarAlPulsarFuera={false}`): hay
+  un importe a medio teclear. La cierran su X, Escape y «Verificar otro socio».
+- **El foco inicial va a la X por el atributo `autofocus`**, puesto con un
+  `ref`. La ventana desplaza por dentro, Chrome hace enfocables los
+  contenedores con desplazamiento, y `showModal()` le daba el foco a la
+  tarjeta entera. La prop `autoFocus` de React no sirve aquí: enfoca al
+  montar, con el diálogo todavía cerrado.
+
+El formulario de venta: la promoción se elige de un toque (un grupo de radios
+con la cifra de cada una; con más de seis vuelve al desplegable), y el total
+con el botón de cobrar van en un pie pegado abajo, siempre a la vista. El
+monto del acuse lo dice el servidor (`valorFinal`), no lo tecleado.
 
 **El comercio también instala su portal** (04/10/2026). El layout monta
 `WhatsAppFlotante` y `AvisoInstalar`, y el pie lleva el icono de instalar,

@@ -76,6 +76,12 @@ type Props = {
   desnudo?: boolean
   /** Clase extra del `<dialog>` (p. ej. un `::backdrop` propio del visor de fotos). */
   className?: string
+  /**
+   * `false` para una ventana con un formulario a medio llenar que no debe
+   * perderse por un toque en el velo (la venta en la caja): solo la cierran
+   * su propia X y Escape. Por defecto, pulsar fuera cierra.
+   */
+  cerrarAlPulsarFuera?: boolean
   children?: ReactNode
 }
 
@@ -90,6 +96,7 @@ export function Modal({
   hideClose = false,
   desnudo = false,
   className,
+  cerrarAlPulsarFuera = true,
   children,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -222,7 +229,7 @@ export function Modal({
   const alPulsar = (e: React.MouseEvent<HTMLDialogElement>) => {
     const enFondo = pulsacionEnFondo.current
     pulsacionEnFondo.current = false
-    if (e.target === ref.current && enFondo) onClose()
+    if (cerrarAlPulsarFuera && e.target === ref.current && enFondo) onClose()
   }
 
   const tieneCabecera = Boolean(title || description || !hideClose)

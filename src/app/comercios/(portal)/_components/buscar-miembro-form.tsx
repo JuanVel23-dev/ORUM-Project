@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Camera, Search, X } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
@@ -9,20 +9,9 @@ import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
-import { error as vibrarError, toque } from '@/lib/shared/haptica'
-import { buscarMiembro, type BuscarMiembroState } from '../actions'
-import { ResultadoMiembro } from './resultado-miembro'
-import { ConfirmarVentaForm } from './confirmar-venta-form'
-import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
+import { toque } from '@/lib/shared/haptica'
+import type { BuscarMiembroState } from '../actions'
 import styles from './verificar.module.css'
-
-type Sucursal = { id: number; nombre: string | null }
-type Promocion = {
-  id: number
-  titulo: string
-  tipoCodigo: TipoBeneficioCodigo
-  valor: number | null
-}
 
 /*
   El escáner pesa medio mega: trae su propio detector de códigos de barras
@@ -42,8 +31,6 @@ const EscanerQr = dynamic(() => import('./escaner-qr').then((m) => m.EscanerQr),
   ),
 })
 
-const estadoInicial: BuscarMiembroState = {}
-
 /** Los dígitos del carnet. Ocho, sin separadores y con los ceros de delante. */
 const LARGO_NUMERO = 8
 
@@ -58,16 +45,24 @@ const soloDigitos = (valor: string) => valor.replace(/\D+/g, '')
  */
 type Vista = 'reposo' | 'numero' | 'camara'
 
+/**
+ * La tarjeta de buscar: escanear o teclear el número.
+ *
+ * Solo BUSCA. El estado de la búsqueda (`useActionState`) vive en
+ * `VerificacionTool`, que es quien abre la ventana del veredicto con el
+ * resultado: esta tarjeta se remonta al cerrar la ventana para volver al
+ * reposo, y si el estado viviera aquí se perdería con ella a mitad de la
+ * animación de salida.
+ */
 export function BuscarMiembroForm({
-  sucursales,
-  promociones,
-  onNuevaVerificacion,
+  state,
+  formAction,
+  pending,
 }: {
-  sucursales: Sucursal[]
-  promociones: Promocion[]
-  onNuevaVerificacion: () => void
+  state: BuscarMiembroState
+  formAction: (datos: FormData) => void
+  pending: boolean
 }) {
-  const [state, formAction, pending] = useActionState(buscarMiembro, estadoInicial)
   const [vista, setVista] = useState<Vista>('reposo')
   const [numero, setNumero] = useState('')
   const [metodo, setMetodo] = useState<'qr' | 'numero'>('numero')
@@ -99,21 +94,6 @@ export function BuscarMiembroForm({
     formRef.current?.requestSubmit()
   }, [peticionEnvio])
 
-  /*
-    Háptica de «no» (`haptica.ts`, regla de causalidad: en el evento que la
-    causa). Se dispara en dos veredictos distintos y suena igual a propósito:
-    para el cajero, «no encontrado» y «no vigente» significan lo mismo —no se
-    aplica el beneficio—. El «sí» no vibra: esa señal se reserva entera para la
-    venta registrada, que es el final feliz de verdad.
-  */
-  useEffect(() => {
-    if (state.error) vibrarError()
-  }, [state.error])
-
-  useEffect(() => {
-    if (state.miembro && !state.miembro.vigente) vibrarError()
-  }, [state.miembro])
-
   function escribirNumero() {
     setFalloCamara(null)
     setEnfocarCampo(true)
@@ -127,8 +107,7 @@ export function BuscarMiembroForm({
   }
 
   return (
-    <div className={styles.pila}>
-      {/* La tarjeta PRINCIPAL de la pantalla: por aquí empieza todo. */}
+    /* La tarjeta PRINCIPAL de la pantalla: por aquí empieza todo. */
       <section className={`${styles.tarjeta} ${styles.principal}`} aria-labelledby={idTitulo}>
         <header className={styles.cabeceraTarjeta}>
           <TituloSeccion id={idTitulo} como="h2" tamano="bloque" texto="Verificar membresía" />
@@ -306,34 +285,5 @@ export function BuscarMiembroForm({
           )}
         </form>
       </section>
-
-      {/*
-        El veredicto es un MENSAJE DE ESTADO (WCAG 4.1.3): aparece sin que el
-        foco se mueva, así que sin región en vivo un cajero con lector de
-        pantalla no se entera de si la membresía vale — tendría que ir a
-        buscarlo. La región se monta VACÍA desde el primer render: si naciera
-        junto con el resultado, el lector no la habría registrado todavía y no
-        anunciaría nada. `aria-atomic` hace que se lea el veredicto entero
-        —nombre, número y estado—, no solo el trozo que cambió.
-      */}
-      <div aria-live="polite" aria-atomic="true">
-        {state.miembro && <ResultadoMiembro miembro={state.miembro} />}
-      </div>
-
-      {/* La venta solo se ofrece si hay derecho a beneficio. Queda FUERA de la
-          región en vivo: anunciar el formulario entero al abrirse sepultaría
-          el veredicto, que es lo único que hay que oír. */}
-      {state.miembro?.vigente && (
-        <ConfirmarVentaForm
-          miembroId={state.miembro.id}
-          membresiaId={state.miembro.membresiaId}
-          numeroMembresia={state.miembro.numeroMembresia}
-          metodo={state.metodo ?? 'numero'}
-          sucursales={sucursales}
-          promociones={promociones}
-          onExito={onNuevaVerificacion}
-        />
-      )}
-    </div>
   )
 }

@@ -20,6 +20,13 @@ export type BuscarMiembroState = {
   error?: string
   miembro?: MiembroEncontrado
   metodo?: MetodoRegistroVenta
+  /**
+   * Identifica ESTA consulta. La ventana del veredicto lo usa para dos cosas:
+   * saber cuál se cerró (y no reabrirla) y arrancar el formulario de venta en
+   * limpio con cada socio. Dos búsquedas seguidas del mismo carnet son dos
+   * consultas distintas, y por eso no sirve el id del miembro.
+   */
+  consultaId?: number
 }
 
 /** Busca un miembro por número de membresía vía la función segura `buscar_miembro_comercio` (RF-21/RF-22). */
@@ -50,6 +57,7 @@ export async function buscarMiembro(
 
   return {
     metodo,
+    consultaId: Date.now(),
     miembro: {
       id: data.miembro_id,
       nombreCompleto: `${data.nombres} ${data.apellidos}`.trim(),
@@ -76,6 +84,12 @@ export type RegistrarVentaState = {
    * Devolviéndola aquí, el dato llega con el acuse y no hay nada que sincronizar.
    */
   hora?: string
+  /**
+   * Lo que se cobró, tal como quedó GUARDADO. El acuse lo enseña desde aquí y
+   * no desde lo que había tecleado el cajero: el descuento lo recalcula el
+   * servidor, y es su cifra la que vale.
+   */
+  valorFinal?: number
 }
 
 /* Zona del negocio, no la del servidor: en UTC un acuse de las 7pm en Colombia
@@ -194,5 +208,5 @@ export async function registrarVenta(
   })
   if (errVenta) return { error: `No se pudo registrar la venta: ${errVenta.message}` }
 
-  return { ok: true, hora: HORA_BOGOTA.format(new Date()) }
+  return { ok: true, hora: HORA_BOGOTA.format(new Date()), valorFinal }
 }

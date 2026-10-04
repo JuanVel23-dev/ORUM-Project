@@ -12,6 +12,8 @@
     · Títulos de bloque con la estrella y la última palabra en cursiva dorada
       (`TituloSeccion`), y el serif de display en la cifra que se dice en voz
       alta —el total—, como el ahorro de «Mis movimientos».
+    · El resultado de buscar llega en una VENTANA encima de la página (el
+      veredicto, el socio y la venta), no debajo de la tarjeta.
     · La acción principal en píldora dorada; la segunda vía, en el oro de
       texto del portal.
 
@@ -19,7 +21,8 @@
   una franja de color sólido con punto lleno / punto hueco, y los objetivos
   táctiles siguen en `--tap-min`.
 
-  Se adapta con `@container contenido` —el `<main>` del portal—.
+  Se adapta con `@container contenido` —el `<main>` del portal— y, dentro de
+  la ventana, con `@container ventana`.
 */
 
 /* ==========================================================================
@@ -65,13 +68,6 @@
     position: sticky;
     top: calc(var(--cabecera-alto) + var(--space-4));
   }
-}
-
-/* La columna de la herramienta: buscar → veredicto → venta. */
-.pila {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
 }
 
 /* ==========================================================================
@@ -127,24 +123,6 @@
   font-size: var(--t-callout-size);
   line-height: 1.5;
   color: var(--text-2);
-}
-
-/*
-  LO QUE LLEGA DESPUÉS DE BUSCAR entra con un fundido corto y 8 px de viaje:
-  el veredicto y la tarjeta de venta. Keyframe y no transición porque el
-  elemento se MONTA —no hay valor de partida que transicionar—. Corto a
-  propósito: esto pasa decenas de veces al día (regla cero de frecuencia).
-  Con movimiento reducido, el recorte global lo deja en un instante.
-*/
-.aparece {
-  animation: aparecer var(--dur-base) var(--ease-out) both;
-}
-
-@keyframes aparecer {
-  from {
-    opacity: 0;
-    translate: 0 8px;
-  }
 }
 
 /* ==========================================================================
@@ -328,8 +306,50 @@
 }
 
 /* ==========================================================================
-   VEREDICTO
+   LA VENTANA DEL VEREDICTO  ·  encima de la página (04/10/2026)
+   --------------------------------------------------------------------------
+   El resultado de buscar ya no va debajo de la tarjeta: llega en una ventana
+   (`Modal desnudo`). La ventana ES la tarjeta, como el carnet del socio: su
+   cabeza es el veredicto, y debajo van el socio y —si la membresía vale— el
+   formulario de venta.
+
+   Es su propio contenedor (`ventana`): lo de dentro se adapta al ancho de la
+   ventana, no al del `<main>` de la página que queda detrás.
    ========================================================================== */
+
+.ventana {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  /* Si no cabe —un teléfono bajo, el formulario entero—, desplaza por dentro
+     y la página de detrás se queda quieta. */
+  max-height: calc(100dvh - var(--space-6));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-overlay), var(--edge);
+  color: var(--text);
+
+  container-type: inline-size;
+  container-name: ventana;
+
+  /* El relleno lateral de la ventana, publicado una vez: lo usan el socio, el
+     formulario y el pie pegado, que se sangra exactamente esa medida. */
+  --pad-ventana: var(--space-5);
+}
+
+@container ventana (min-width: 460px) {
+  .dictamen,
+  .socio,
+  .formularioVenta,
+  .cuerpoVentana {
+    --pad-ventana: var(--space-7);
+  }
+}
 
 /*
   EL MOMENTO DE LA VERDAD, Y LO ÚNICO DE ESTE PORTAL CON COLOR DE ESTADO.
@@ -337,11 +357,10 @@
   Se lee a un metro, de pie, con el pulgar tapando media pantalla y a veces con
   sol encima. Antes el dictamen era un `Badge`: la pieza que decide si se cobra
   o no era la MÁS PEQUEÑA de la tarjeta (`AUDIT-a11y` #9). Es una franja de
-  color sólido con el veredicto dentro en mayúsculas.
+  color sólido, a sangre, con el veredicto dentro en mayúsculas.
 
-  Desde el rediseño la franja va A SANGRE: es la cabeza de la tarjeta, de
-  borde a borde, y la tarjeta la recorta con su propio radio. Así pesa más
-  que cuando era una píldora dentro del relleno, sin crecer un píxel de alto.
+  PEGADA ARRIBA (`sticky`): al desplazar el formulario dentro de la ventana,
+  el veredicto sigue a la vista mientras se teclea el importe.
 
   Contraste medido, texto `--surface` sobre relleno de estado. El portal va
   siempre en claro y su `--surface` es blanco puro:
@@ -351,30 +370,17 @@
   Los dos pasan AA de texto, y el filo de la franja contra la tarjeta va muy
   por encima del 3:1 de 1.4.11 con esos mismos números.
 */
-.tarjetaVeredicto {
-  gap: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
 .dictamen {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-
-  margin: 0;
-  padding: var(--space-4) var(--space-5);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--pad-ventana);
 
   color: var(--surface);
-
-  font-size: var(--t-title-1-size);
-  line-height: var(--t-title-1-leading);
-  font-weight: 700;
-  text-transform: uppercase;
-  /* Tracking POSITIVO: la escala lo trae negativo para titulares en caja baja,
-     y unas versales apretadas se leen como un bloque a un metro de distancia. */
-  letter-spacing: 0.02em;
-  text-wrap: balance;
 }
 
 .dictamenActiva {
@@ -385,11 +391,29 @@
   background: var(--danger);
 }
 
+.dictamenTexto {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+
+  /* Crece con la ventana: en un teléfono de 360 px «MEMBRESÍA INACTIVA» cabe
+     en una línea; en escritorio llega al tamaño de titular. */
+  font-size: clamp(1.125rem, 5.4cqi, var(--t-title-1-size));
+  line-height: 1.2;
+  font-weight: 700;
+  text-transform: uppercase;
+  /* Tracking POSITIVO: la escala lo trae negativo para titulares en caja baja,
+     y unas versales apretadas se leen como un bloque a un metro de distancia. */
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+
 /*
   Disco LLENO contra anillo HUECO. La diferencia es de forma, no de color: es
   lo que sostiene el veredicto cuando el color no llega —daltonismo, sol sobre
   la pantalla— y lo que ya hace `StatusBadge` en el resto del producto. El
-  tamaño va en `em` para que siga al titular si algún día cambia la escala.
+  tamaño va en `em` para que siga al titular.
 */
 .punto {
   flex-shrink: 0;
@@ -404,21 +428,72 @@
   box-shadow: inset 0 0 0 0.16em currentColor;
 }
 
-.datos {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-5);
+/* La X de la ventana: primera en el DOM (el foco empieza por la salida),
+   última a la vista. Blanca sobre la franja; su área es `--tap-min`. */
+.cerrarVentana,
+.cerrarAcuse {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  transition: rotate var(--dur-base) var(--ease-out);
 }
 
-@container contenido (min-width: 600px) {
-  .dictamen {
-    padding: var(--space-5) var(--space-7);
-  }
+.cerrarVentana {
+  order: 1;
+  margin-left: auto;
+}
 
-  .datos {
-    padding: var(--space-6) var(--space-7) var(--space-7);
+@media (hover: hover) {
+  /* Sin relleno: la X gira un cuarto de vuelta, como todas las del sistema. */
+  .cerrarVentana:hover,
+  .cerrarAcuse:hover {
+    rotate: 90deg;
   }
+}
+
+.cerrarVentana:focus-visible,
+.cerrarAcuse:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+}
+
+/* --- El socio ------------------------------------------------------------- */
+
+.socio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--pad-ventana) 0;
+}
+
+/* Las iniciales, en un disco con el tinte dorado de las insignias de la
+   fachada. Decorativas: el nombre va al lado, en tinta. */
+.socioIniciales {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: var(--gold-bg);
+  font-size: var(--t-body-size);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.socioDatos {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 
 /*
@@ -429,57 +504,61 @@
 */
 .nombre {
   margin: 0;
-  font-size: var(--t-title-1-size);
-  line-height: var(--t-title-1-leading);
-  letter-spacing: var(--t-title-1-tracking);
+  font-size: clamp(1.25rem, 5.2cqi, var(--t-title-1-size));
+  line-height: 1.2;
   font-weight: var(--t-title-1-weight);
   text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.socioMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3);
+  margin: 0;
+  font-size: var(--t-footnote-size);
 }
 
 /* El plan, en el oro de texto del portal: es la membresía que se muestra. */
 .plan {
-  margin: 0;
-  font-size: var(--t-footnote-size);
   font-weight: 600;
   color: var(--brand);
 }
 
 .numero {
-  margin: 0;
-  font-size: var(--t-footnote-size);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em;
   color: var(--text-3);
 }
 
+/* --- Lo que va bajo el socio ------------------------------------------------ */
+
+/* El formulario de venta y el cuerpo de una inactiva comparten caja: un
+   hairline los separa del socio (una división DENTRO de la superficie). */
+.formularioVenta,
+.cuerpoVentana {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+  padding: var(--space-5) var(--pad-ventana);
+  border-top: 1px solid var(--border-subtle);
+}
+
 /* Qué hacer, no solo qué pasa: un veredicto negativo sin instrucción deja al
    cajero decidiendo a solas delante del cliente. */
 .instruccion {
-  margin: var(--space-2) 0 0;
-  font-size: var(--t-callout-size);
-  line-height: var(--t-callout-leading);
+  margin: 0;
+  font-size: var(--t-body-size);
+  line-height: 1.55;
   color: var(--text-2);
+  text-wrap: pretty;
 }
 
 /* ==========================================================================
    VENTA
    ========================================================================== */
-
-.campos {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-}
-
-@container contenido (max-width: 420px) {
-  .campos {
-    grid-template-columns: 1fr;
-  }
-}
-
-.anchoCompleto {
-  grid-column: 1 / -1;
-}
 
 /*
   EL VALOR DE LA COMPRA SE VE MÁS GRANDE QUE CUALQUIER OTRO CAMPO.
@@ -510,20 +589,32 @@
 }
 
 /*
-  Dato mostrado con forma de campo.
+  LA PROMOCIÓN, DE UN TOQUE.
 
-  El descuento calculado por la promoción NO es un campo: si fuera un `input`
-  readOnly seguiría siendo enfocable y en el móvil abriría el teclado para nada,
-  tapando el total. Se copia la métrica de `Field` —etiqueta, control, ayuda—
-  para que en la rejilla quede a la misma altura que "Valor de la compra".
+  Cada promoción vigente es una opción a la vista —su cifra en grande y su
+  título— en vez de un renglón escondido en un desplegable. Es un grupo de
+  radios nativo (`sr-only`), así que se recorre con las flechas y viaja en el
+  envío sin JavaScript de por medio.
+
+  Lo elegido se dice con el FILO DORADO y con el punto del radio —forma, no
+  solo color—, nunca con un relleno (regla del 29/09/2026). En reposo el filo
+  es el hairline interno de la fachada: a la opción la identifica su texto; lo
+  que marca el 3:1 es el anillo del radio (`--border-control`).
 */
-.campoLeido {
-  display: flex;
-  flex-direction: column;
+.opciones {
+  display: grid;
   gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
-.campoLeidoEtiqueta {
+/* La misma métrica que la etiqueta de `Field`, para que no parezca otro
+   formulario. */
+.leyenda {
+  margin-bottom: var(--space-2);
+  padding: 0;
   font-size: var(--t-callout-size);
   line-height: var(--t-callout-leading);
   letter-spacing: var(--t-callout-tracking);
@@ -531,64 +622,172 @@
   color: var(--text);
 }
 
-.campoLeidoValor {
-  display: flex;
+.opcion {
+  /* Contiene al radio oculto: sin esto, enfocarlo desplazaría la ventana
+     hacia donde el navegador cree que está. */
+  position: relative;
+
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
   align-items: center;
-  min-height: var(--tap-min);
-  padding: var(--space-3);
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
 
-  border: 1px dashed var(--border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  background: var(--surface-hueco);
-  color: var(--text);
-
-  /* Filo discontinuo y fondo hundido: la forma dice "esto no se escribe"
-     antes de que nadie intente escribirlo. */
-  font-size: var(--t-control-size);
-  line-height: var(--t-body-leading);
-  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-instant) var(--ease-out);
 }
 
-.campoLeidoAyuda {
-  font-size: var(--t-footnote-size);
-  line-height: var(--t-footnote-leading);
-  letter-spacing: var(--t-footnote-tracking);
-  color: var(--text-2);
+/* «Sin promoción» no lleva cifra: el título ocupa también su columna. */
+.opcionSin {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.opcion:has(input:checked) {
+  border-color: var(--brand-edge);
+}
+
+.opcion:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Fila de lista: el acuse de la pulsación es OPACIDAD, sin sombra ni viaje. */
+.opcion:active {
+  opacity: 0.6;
+}
+
+/* La cifra, en el serif y en el oro de texto del portal: texto grande, así
+   que el 4,93:1 de `--gold-650` sobre blanco sobra. */
+.opcionValor {
+  font-family: var(--font-display);
+  font-size: var(--t-title-3-size);
+  line-height: 1.2;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--brand);
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: auto;
+}
+
+.opcionTitulo {
+  font-size: var(--t-callout-size);
+  line-height: 1.4;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+/* El radio que se VE: anillo en reposo, punto dorado al elegir. */
+.opcionRadio {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  aspect-ratio: 1;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-full);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.opcionRadio::after {
+  content: '';
+  width: 10px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: var(--brand);
+  opacity: 0;
+  scale: 0.6;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
+}
+
+.opcion:has(input:checked) .opcionRadio {
+  border-color: var(--brand);
+}
+
+.opcion:has(input:checked) .opcionRadio::after {
+  opacity: 1;
+  scale: 1;
 }
 
 /*
-  EL TOTAL ES EL PIE DEL RECIBO, NO UNA CAJA DENTRO DE OTRA CAJA.
+  EL RECIBO: una regla horizontal y la cifra grande debajo. `--border-subtle`
+  es el hairline interno de la fachada (el mismo que separa las cifras del
+  resumen de «Mis movimientos»): una división DENTRO de la superficie.
 
-  Lo que hace un recibo de caja de verdad: una regla horizontal y la cifra
-  grande debajo. `--border-subtle` es el hairline interno de la fachada (el
-  mismo que separa las cifras del resumen de «Mis movimientos»): una división
-  DENTRO de la superficie, no un filo de la tarjeta.
-
-  La cifra va en el serif de display, como el ahorro de «Mis movimientos»:
-  es el número que se dice en voz alta, y el tamaño hace el trabajo que antes
-  hacía un marco.
+  Antes el descuento calculado se pintaba con forma de campo punteado que no se
+  podía tocar. Lo que calcula la promoción no es un control: es un RENGLÓN.
 */
-.total {
+/*
+  EL PIE DE LA VENTA, PEGADO ABAJO (`sticky`): el total y el botón de cobrar
+  siempre a la vista. Los campos desplazan por detrás, entre el veredicto y
+  esto. Se sangra el relleno de la ventana para llegar de borde a borde, y su
+  fondo es el de la tarjeta: lo que pasa por debajo no se transparenta.
+*/
+.pieVenta {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+
+  display: grid;
+  gap: var(--space-4);
+  margin: 0 calc(-1 * var(--pad-ventana)) calc(-1 * var(--space-5));
+  padding: var(--space-4) var(--pad-ventana) var(--space-5);
+
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface);
+}
+
+.resumen {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.resumenFila,
+.resumenTotal {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-3);
-
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border-subtle);
 }
 
-.totalEtiqueta {
+.resumenFila {
+  font-size: var(--t-callout-size);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.resumen dd {
   margin: 0;
+  white-space: nowrap;
+}
+
+/* Lo que se ahorra el socio, en el oro de texto del portal. No es un estado
+   —no dice «bien» ni «mal»—, así que no va en verde. El signo menos es el
+   segundo canal. */
+.resumenDescuento {
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.resumenTotal dt {
   font-size: var(--t-footnote-size);
   font-weight: 600;
   /* `--text-2` y no `--text-3`: se lee de pie, a un brazo de distancia. */
   color: var(--text-2);
 }
 
-.totalValor {
+/* La cifra, en el serif de display, como el ahorro de «Mis movimientos»: es
+   el número que se dice en voz alta. */
+.resumenTotal dd {
   font-family: var(--font-display);
-  font-size: clamp(1.875rem, 1.5rem + 1.6vw, 2.375rem);
+  font-size: clamp(1.875rem, 8cqi, 2.375rem);
   line-height: 1.1;
   font-weight: 600;
   font-variant-numeric: tabular-nums lining-nums;
@@ -596,36 +795,42 @@
   -webkit-font-smoothing: auto;
 }
 
-/* Lo que se ahorra el socio, en el oro de texto del portal y en cursiva del
-   serif: el mismo acento que los titulares. No es un estado —no dice «bien»
-   ni «mal»—, así que no va en verde. */
-.ahorro {
-  margin: var(--space-1) 0 0;
-  font-family: var(--font-display);
-  font-size: var(--t-callout-size);
-  font-style: italic;
-  color: var(--brand);
-  -webkit-font-smoothing: auto;
+/* ==========================================================================
+   ÉXITO  ·  la ventana entera pasa a ser el acuse
+   ========================================================================== */
+
+.ventanaAcuse {
+  padding: var(--space-5);
 }
 
-/* ==========================================================================
-   ÉXITO
-   ========================================================================== */
+@container ventana (min-width: 460px) {
+  .exito {
+    padding: var(--space-4) var(--space-4) var(--space-2);
+  }
+}
+
+/* La X del acuse: en la esquina, en tinta (aquí no hay franja de color). */
+.cerrarAcuse {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  color: var(--text-2);
+}
 
 .exito {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-5);
   text-align: center;
-  padding: var(--space-2) 0;
+  padding-top: var(--space-4);
 }
 
 .exitoIcono {
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: var(--radius-full);
   color: var(--success);
   background: var(--success-bg);
@@ -665,6 +870,7 @@
   font-size: var(--t-callout-size);
   line-height: var(--t-callout-leading);
   color: var(--text-2);
+  text-wrap: balance;
 }
 
 /*
