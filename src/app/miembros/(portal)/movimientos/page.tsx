@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { EmptyState, ErrorState } from '@/components/ui/feedback'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
+import { ENTRADA, REVELAR, retardoEntrada } from '@/lib/shared/revelado'
+import { CifraAnimada } from './_components/cifra-animada'
 import styles from './movimientos.module.css'
 
 export const metadata = { title: 'Mis movimientos · ORUM' }
@@ -54,7 +56,19 @@ export const metadata = { title: 'Mis movimientos · ORUM' }
       junto al precio original tachado. Sin encabezados de columna ni
       etiquetas repetidas.
     · Cada fila lleva a la ficha del comercio.
+
+  MOVIMIENTO (03/10/2026), con las clases del portal (`revelado.ts`):
+    · Al cargar, entran escalonados el título, el resumen y las filas del
+      primer mes (`ENTRADA`, con tope en el retardo: la fila 20 no llega un
+      segundo tarde). La cifra del ahorro cuenta de cero al total.
+    · Los meses siguientes se revelan al desplazar (`REVELAR`), como las
+      secciones de la portada.
+    · Las clases van en ENVOLTORIOS (`<li>`, `<section>`), nunca en la fila
+      enlazada: una animación con `fill: both` le ganaría a su acuse.
 */
+
+/** Tope del escalonado de filas: a partir de aquí entran todas a la vez. */
+const TOPE_ESCALONADO = 6
 
 /* Zona del negocio, no la del servidor: una compra de las 7 p. m. en Colombia
    es ya el día siguiente en UTC. `timestamptz` → Bogotá (CLAUDE.md, «Fechas»).
@@ -149,7 +163,7 @@ export default async function MovimientosPage({
 
   return (
     <div className={styles.pantalla}>
-      <header className={styles.encabezado}>
+      <header className={[styles.encabezado, ENTRADA].join(' ')}>
         <TituloSeccion como="h1" texto="Mis movimientos" tamano="bloque" />
         <p className={styles.lede}>Dónde has usado tu membresía y cuánto has ahorrado.</p>
       </header>
@@ -173,7 +187,11 @@ export default async function MovimientosPage({
       ) : (
         <div className={styles.cuerpo}>
           {/* ── EL RESUMEN ────────────────────────────────────────────── */}
-          <aside className={styles.resumen} aria-label="Resumen de tu ahorro">
+          <aside
+            className={[styles.resumen, ENTRADA].join(' ')}
+            style={retardoEntrada(1)}
+            aria-label="Resumen de tu ahorro"
+          >
             {/* Sin icono (03/10/2026: ni la alcancía ni la estrella
                 convencieron): la jerarquía la pone la tipografía. El signo
                 de pesos va pequeño y en oro, para que mande el número. */}
@@ -183,7 +201,7 @@ export default async function MovimientosPage({
                 $
               </span>
               <span className="sr-only">{PESOS.format(bitacora.ahorroTotal)}</span>
-              <span aria-hidden="true">{bitacora.ahorroTotal.toLocaleString('es-CO')}</span>
+              <CifraAnimada valor={bitacora.ahorroTotal} />
             </p>
             <p className={styles.resumenNota}>con tu membresía ORUM</p>
 
@@ -201,9 +219,18 @@ export default async function MovimientosPage({
 
           {/* ── LA LISTA, POR MESES ───────────────────────────────────── */}
           <div className={styles.lista}>
-            {meses.map((mes) => (
-              <section key={mes.clave} aria-labelledby={`mes-${mes.clave}`}>
-                <div className={styles.mesCabecera}>
+            {meses.map((mes, n) => (
+              /* El primer mes ya está a la vista: entra al cargar. Los
+                 siguientes, al llegar a ellos. */
+              <section
+                key={mes.clave}
+                aria-labelledby={`mes-${mes.clave}`}
+                className={n === 0 ? undefined : REVELAR}
+              >
+                <div
+                  className={[styles.mesCabecera, n === 0 && ENTRADA].filter(Boolean).join(' ')}
+                  style={n === 0 ? retardoEntrada(2) : undefined}
+                >
                   <h2 id={`mes-${mes.clave}`} className={styles.mes}>
                     {mes.titulo}
                   </h2>
@@ -213,9 +240,19 @@ export default async function MovimientosPage({
                   </p>
                 </div>
 
-                <ul className={styles.filas}>
-                  {mes.movimientos.map((m) => (
-                    <li key={m.id}>
+                {/* La tarjeta del primer mes entra con su cabecera; sus filas,
+                    escalonadas después. Sin esto la tarjeta blanca aparecía
+                    de golpe y las filas llegaban dentro. */}
+                <ul
+                  className={[styles.filas, n === 0 && ENTRADA].filter(Boolean).join(' ')}
+                  style={n === 0 ? retardoEntrada(2) : undefined}
+                >
+                  {mes.movimientos.map((m, i) => (
+                    <li
+                      key={m.id}
+                      className={n === 0 ? ENTRADA : undefined}
+                      style={n === 0 ? retardoEntrada(3 + Math.min(i, TOPE_ESCALONADO)) : undefined}
+                    >
                       <FilaMovimiento m={m} />
                     </li>
                   ))}
@@ -224,7 +261,7 @@ export default async function MovimientosPage({
             ))}
 
             {bitacora.total > bitacora.movimientos.length && (
-              <div className={styles.verMas}>
+              <div className={[styles.verMas, REVELAR].join(' ')}>
                 <Button
                   href={`/miembros/movimientos?mostrar=${limite + PASO_VER_MAS}`}
                   variant="secondary"
