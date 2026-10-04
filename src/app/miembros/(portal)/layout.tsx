@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { LogoOrum } from '@/components/ui/marca/marca'
 import { PieSitio } from '@/components/pie/pie-sitio'
+import { AvisoInstalar } from '@/components/pwa/instalar-movil'
 import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import { TransicionesDeRuta } from '@/components/ui/transiciones-ruta'
 import escaparate from '@/app/(publico)/escaparate.module.css'
@@ -116,6 +117,9 @@ export default async function MiembrosLayout({
       {modal}
 
       <WhatsAppFlotante telefono={soporte} mensaje={MENSAJE_SOPORTE} />
+
+      {/* La invitación a instalar la app, solo en celulares (03/10/2026). */}
+      <AvisoInstalar />
 
       {/*
         LA VENTANA DEL CARNET, FUERA DE LA CABECERA: un `<dialog>` hereda las

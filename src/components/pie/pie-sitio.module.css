@@ -151,6 +151,24 @@
 
 /* --- Soporte -------------------------------------------------------------- */
 
+/* Soporte e «Instalar la app», uno debajo del otro: las dos salidas de
+   ayuda del pie. En fila (escritorio) rematan en el filo derecho. */
+.ayuda {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+@media (min-width: 768px) {
+  .ayuda {
+    align-items: flex-end;
+  }
+
+  .ayuda > .soporte {
+    align-self: flex-end;
+  }
+}
+
 .soporte {
   display: inline-flex;
   align-items: center;

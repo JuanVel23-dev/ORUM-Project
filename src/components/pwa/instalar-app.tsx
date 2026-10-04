@@ -1,19 +1,19 @@
 'use client'
 
 import { useState, useSyncExternalStore } from 'react'
-import { Download, Plus, Share, Smartphone, X } from 'lucide-react'
+import { Download, EllipsisVertical, Plus, Share, Smartphone, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { MenuItem } from '@/components/ui/menu'
 import { Sheet } from '@/components/ui/sheet'
 import { useHidratado } from '@/components/use-hidratado'
 import { usePreferenciaLocal } from '@/components/use-preferencia-local'
 import {
-  esSafariEnIOS,
-  esStandalone,
   lanzarInstalacion,
   leerInstalable,
   leerInstalableEnServidor,
+  modoInstalacion,
   suscribirInstalable,
+  type ModoInstalacion,
 } from './instalable'
 import styles from './instalar-app.module.css'
 
@@ -38,7 +38,11 @@ import styles from './instalar-app.module.css'
  * la hidratación, del navegador y de si la app ya corre instalada. Duplicarla
  * es garantizar que las dos se desincronicen.
  */
-function useInstalacion() {
+export function useInstalacion(): {
+  disponible: boolean
+  enIOS: boolean
+  modo: ModoInstalacion
+} {
   const hidratado = useHidratado()
 
   const promptDisponible = useSyncExternalStore(
@@ -47,14 +51,15 @@ function useInstalacion() {
     leerInstalableEnServidor,
   )
 
-  // Antes de hidratar no se sabe nada del dispositivo: `esStandalone` y
-  // `esSafariEnIOS` leen de `window` y en servidor devuelven `false`.
-  if (!hidratado || esStandalone()) return { disponible: false, enIOS: false }
+  // Antes de hidratar no se sabe nada del dispositivo: las detecciones leen
+  // de `window` y en servidor devuelven `false`.
+  if (!hidratado) return { disponible: false, enIOS: false, modo: null }
 
-  const enIOS = esSafariEnIOS()
+  const modo = modoInstalacion(promptDisponible !== null)
 
-  // Sin prompt y fuera de iOS, el navegador sencillamente no permite instalar.
-  return { disponible: promptDisponible !== null || enIOS, enIOS }
+  // `disponible` y `enIOS` son lo que ya consumía el panel: diálogo nativo o
+  // guía de iPhone. `modo` añade la guía de Android (`instalar-movil.tsx`).
+  return { disponible: modo === 'prompt' || modo === 'ios', enIOS: modo === 'ios', modo }
 }
 
 /**
@@ -238,7 +243,7 @@ function GuiaIOS({ abierta, onCerrar }: { abierta: boolean; onCerrar: () => void
         onClose={onCerrar}
         detent="medium"
         title="Añadir ORUM a tu iPhone"
-        description="Safari no permite instalar con un botón, así que hay que hacerlo desde el menú de compartir."
+        description="En iPhone no se instala con un botón: se hace desde el menú de compartir del navegador."
         footer={
           <Button onClick={onCerrar} fullWidth>
             Entendido
@@ -252,7 +257,7 @@ function GuiaIOS({ abierta, onCerrar }: { abierta: boolean; onCerrar: () => void
               <span className={styles.pasoIcono}>
                 <Share size={17} aria-hidden="true" />
               </span>
-              en la barra inferior de Safari.
+              de tu navegador (en Safari, en la barra de abajo).
             </span>
           </li>
 
@@ -276,5 +281,64 @@ function GuiaIOS({ abierta, onCerrar }: { abierta: boolean; onCerrar: () => void
         </ol>
       </Sheet>
     </>
+  )
+}
+
+/**
+ * Los tres pasos para instalar en Android cuando el navegador no ofrece su
+ * diálogo (Firefox, o Chrome después de que la persona lo descartara: lo
+ * calla durante meses). La instalación sigue estando en el menú del
+ * navegador; solo hay que decir dónde.
+ */
+export function GuiaInstalacionAndroid({
+  abierta,
+  onCerrar,
+}: {
+  abierta: boolean
+  onCerrar: () => void
+}) {
+  return (
+    <Sheet
+      open={abierta}
+      onClose={onCerrar}
+      detent="medium"
+      title="Instalar ORUM en tu celular"
+      description="Tu navegador la instala desde su menú. Son tres toques."
+      footer={
+        <Button onClick={onCerrar} fullWidth>
+          Entendido
+        </Button>
+      }
+    >
+      <ol className={styles.pasos}>
+        <li className={styles.paso}>
+          <span className={styles.pasoTexto}>
+            Abre el menú
+            <span className={styles.pasoIcono}>
+              <EllipsisVertical size={17} aria-hidden="true" />
+            </span>
+            de tu navegador, arriba a la derecha.
+          </span>
+        </li>
+
+        <li className={styles.paso}>
+          <span className={styles.pasoTexto}>
+            Elige <strong>Instalar aplicación</strong> o{' '}
+            <strong>Añadir a pantalla de inicio</strong>
+            <span className={styles.pasoIcono}>
+              <Plus size={17} aria-hidden="true" />
+            </span>
+            .
+          </span>
+        </li>
+
+        <li className={styles.paso}>
+          <span className={styles.pasoTexto}>
+            Confirma con <strong>Instalar</strong>. El icono de ORUM aparecerá junto a tus
+            demás aplicaciones.
+          </span>
+        </li>
+      </ol>
+    </Sheet>
   )
 }

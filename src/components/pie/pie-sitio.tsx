@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
+import { EnlaceInstalar } from '@/components/pwa/instalar-movil'
 import { EstrellaOrum, LogoOrum } from '@/components/ui/marca/marca'
 import { REVELAR, revelarEscalonado } from '@/lib/shared/revelado'
 import estilos from './pie-sitio.module.css'
@@ -104,17 +105,23 @@ export function PieSitio({
           usa `WhatsAppButton` aquí a propósito — ese componente es un `Button`,
           y en este pie todo es enlace de texto por la razón de arriba.
         */}
-        {soporte && (
-          <a
-            className={estilos.soporte}
-            href={`https://wa.me/${limpiarTelefono(soporte)}?text=${encodeURIComponent(mensajeSoporte)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <MessageCircle size={16} aria-hidden="true" />
-            Soporte por WhatsApp
-          </a>
-        )}
+        <div className={estilos.ayuda}>
+          {soporte && (
+            <a
+              className={estilos.soporte}
+              href={`https://wa.me/${limpiarTelefono(soporte)}?text=${encodeURIComponent(mensajeSoporte)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <MessageCircle size={16} aria-hidden="true" />
+              Soporte por WhatsApp
+            </a>
+          )}
+          {/* La entrada PERMANENTE a instalar la app (03/10/2026): el aviso
+              flotante del celular se puede cerrar, y esto es lo que queda. Solo
+              se pinta donde instalar es posible y la app no corre ya instalada. */}
+          <EnlaceInstalar className={estilos.soporte} />
+        </div>
       </div>
 
       <div className={estilos.base}>

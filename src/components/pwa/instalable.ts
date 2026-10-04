@@ -101,3 +101,47 @@ export function esSafariEnIOS(): boolean {
 
   return iOS && !otroNavegador
 }
+
+/**
+ * ¿Es un iPhone o un iPad, con CUALQUIER navegador?
+ *
+ * Desde iOS 16.4 también Chrome, Edge y Firefox para iOS ofrecen «Añadir a
+ * pantalla de inicio» en su menú de compartir, así que la guía sirve en
+ * todos. Ninguno dispara `beforeinstallprompt`.
+ */
+export function esIOS(): boolean {
+  if (typeof window === 'undefined') return false
+
+  const ua = window.navigator.userAgent
+  return (
+    /iphone|ipad|ipod/i.test(ua) ||
+    // iPadOS 13+ se identifica como Mac; se distingue por el táctil.
+    (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1)
+  )
+}
+
+/** ¿Es un teléfono o tableta Android? */
+export function esAndroid(): boolean {
+  if (typeof window === 'undefined') return false
+  return /android/i.test(window.navigator.userAgent)
+}
+
+/**
+ * Cómo se instala la app AQUÍ. Decide qué hace el botón:
+ *
+ *   · `prompt` — hay diálogo nativo (Chrome, Edge, Samsung…): se lanza.
+ *   · `ios`    — iPhone/iPad: no hay API; se enseña el gesto de compartir.
+ *   · `guia`   — Android sin diálogo disponible (Firefox, o Chrome tras
+ *                descartarlo, que lo calla unos meses): se enseña el menú ⋮.
+ *   · `null`   — ya corre instalada, o es un escritorio sin diálogo: no se
+ *                ofrece nada.
+ */
+export type ModoInstalacion = 'prompt' | 'ios' | 'guia' | null
+
+export function modoInstalacion(hayPrompt: boolean): ModoInstalacion {
+  if (esStandalone()) return null
+  if (hayPrompt) return 'prompt'
+  if (esIOS()) return 'ios'
+  if (esAndroid()) return 'guia'
+  return null
+}
