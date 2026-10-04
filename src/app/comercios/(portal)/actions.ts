@@ -90,6 +90,9 @@ export type RegistrarVentaState = {
    * servidor, y es su cifra la que vale.
    */
   valorFinal?: number
+  /** La compra y el descuento guardados: los renglones del recibo. */
+  valorCompra?: number
+  valorDescuento?: number
 }
 
 /* Zona del negocio, no la del servidor: en UTC un acuse de las 7pm en Colombia
@@ -208,5 +211,11 @@ export async function registrarVenta(
   })
   if (errVenta) return { error: `No se pudo registrar la venta: ${errVenta.message}` }
 
-  return { ok: true, hora: HORA_BOGOTA.format(new Date()), valorFinal }
+  return {
+    ok: true,
+    hora: HORA_BOGOTA.format(new Date()),
+    valorFinal,
+    valorCompra,
+    valorDescuento,
+  }
 }

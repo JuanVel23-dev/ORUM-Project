@@ -3,9 +3,7 @@
 import type { CSSProperties } from 'react'
 import { Check, RotateCcw, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { CifraAnimada } from '@/components/ui/cifra-animada'
 import { LogoOrum } from '@/components/ui/marca/marca'
-import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import styles from './acuse-venta.module.css'
 
 const PESOS = new Intl.NumberFormat('es-CO', {
@@ -14,103 +12,104 @@ const PESOS = new Intl.NumberFormat('es-CO', {
   maximumFractionDigits: 0,
 })
 
+/** Miles con punto, sin símbolo: lo que rueda en el monto. */
+const MILES = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 })
+
 /*
-  EL ACUSE DE LA VENTA  ·  la animación de pagar (04/10/2026)
+  EL ACUSE DE LA VENTA  ·  el recibo (04/10/2026, tercera versión)
   ---------------------------------------------------------------------------
-  Encargo del propietario: «una animación de pagar, cuando se registre una
-  venta. Algo muy impresionante».
+  Encargo del propietario, tras ver las dos primeras (negro y oro con
+  estrellas; luego la misma sobre blanco): «no me gusta el diseño ni la
+  animación; busca referencias de animaciones de pago de 2026 e impleméntalo.
+  Debe ser elegante».
 
-  SOBRE BLANCO, CON EL LOGOTIPO DE ORUM. La primera versión volvía la ventana
-  negra y oro; el propietario la vio y pidió otra cosa: «no me gusta que sea
-  de color negro; podríamos añadir el logo de ORUM y animarlo junto con la
-  animación que ya está, y quitar el fondo negro». El acuse es ahora la misma
-  tarjeta blanca del formulario, con el logotipo dorado a la cabeza. En orden,
-  y en algo más de segundo y medio:
+  LO QUE DICEN LAS REFERENCIAS, y de dónde sale cada decisión:
 
-    1. LA OLA DE LUZ. Un círculo de luz dorada nace donde estaba el botón de
-       cobrar —abajo, en el centro—, barre la ventana y se apaga: lo que
-       llega sale de lo que se tocó (regla 4 de «Movimiento»).
-    2. EL LOGOTIPO de ORUM, en oro, baja a su sitio; cuando el sello ya ha
-       caído, un brillo lo cruza de lado a lado.
-    3. EL SELLO. Un disco de oro cae con el rebote de lo que se gana, y la ✓
-       se dibuja dentro de izquierda a derecha.
-    4. LAS ONDAS Y LAS ESTRELLAS. Dos anillos se abren desde el sello y un
-       puñado de estrellas de cuatro puntas —la de ORUM— sale disparado y se
-       apaga. Oro y plata.
-    5. EL MONTO sube de cero a lo cobrado, en el serif de display.
+    · CONTENCIÓN ANTES QUE ADORNO. Las guías de pantallas de pago coinciden:
+      una marca de verificación ligera, el monto grande y claro, a quién y la
+      referencia, y nada de animaciones pesadas ni largas — «el alma de una
+      pantalla de éxito es la confianza». Fuera el estallido de estrellas, el
+      disco de oro macizo, la ola de color y el halo.
+    · LA ✓ DE TRAZO FINO que se dibuja dentro de un anillo que se cierra: la
+      firma de Apple Pay, y lo que hoy se lee como «pago hecho» sin leer.
+    · EL MONTO QUE RUEDA, dígito a dígito, como un odómetro (el patrón de
+      NumberFlow, que es hoy el estándar para un número que cambia). Antes
+      «contaba» de cero al total: cuarenta cifras por segundo que el ojo no
+      lee. Aquí cada columna gira y se asienta, de izquierda a derecha.
+    · EL RECIBO. Los datos van en renglones —socio, membresía, hora, y la
+      compra y el descuento cuando lo hay— bajo una línea de corte, como un
+      tiquete: es lo que el cajero necesita para reclamar, puesto en su sitio.
 
-  POR QUÉ ESTO SÍ, cuando la regla cero dice que lo frecuente no se anima:
-  es un encargo expreso, y es el único momento de la caja que es un final
-  feliz. Y se cuidó lo que la regla protege:
+  EL DISEÑO: una tarjeta blanca en dos partes. Arriba, el logotipo de ORUM en
+  oro, la marca y el monto en el serif de display. Abajo, el talón en crema
+  con los renglones. Un solo oro, de línea; nada relleno salvo el botón.
+
+  LO QUE NO CAMBIA de las versiones anteriores, porque es lo que protege a la
+  caja:
 
     · NO HACE ESPERAR. «Verificar otro socio» está montado, enfocado y
       pulsable desde el primer fotograma: con teclado, un Enter sigue la cola
       aunque la animación vaya por la mitad.
-    · Todo es `transform` y `opacity` (la ✓ se «dibuja» con dos traslaciones
-      opuestas, no animando el trazo): corre en el compositor, también en el
-      teléfono de gama media de una caja.
-    · Con movimiento reducido no viaja nada: el recorte global deja cada pieza
-      en su estado final —el logotipo y el sello puestos, la cifra escrita— y
-      las estrellas no llegan a verse.
-
-  Las estrellas van en una TABLA FIJA y no con `Math.random()`: un render no
-  puede ser impuro, y un estallido que cae siempre igual de bien es mejor que
-  uno que a veces sale cojo.
+    · Todo es `transform` y `opacity`. El anillo se cierra con dos medias
+      lunas que giran y la ✓ se dibuja con dos traslaciones opuestas: nada
+      anima el trazo de un SVG.
+    · Con movimiento reducido no viaja nada: cada pieza queda en su estado
+      final —el anillo cerrado, la ✓ puesta, el monto escrito—.
 */
 
-type Estrella = {
-  /** Hacia dónde sale, en grados (0 = derecha, −90 = arriba). */
-  angulo: number
-  /** Hasta dónde llega, en px. */
-  distancia: number
-  /** Lado, en px. */
-  talla: number
-  /** Cuánto espera tras el estallido, en ms. */
-  retardo: number
-  tono: 'oro' | 'oroClaro' | 'oroHondo' | 'plata'
-}
+/** Los diez dígitos, dos veces: cada columna da una vuelta entera y se para. */
+const TIRA = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-const ESTRELLAS: Estrella[] = [
-  { angulo: -90, distancia: 124, talla: 14, retardo: 0, tono: 'oro' },
-  { angulo: -62, distancia: 152, talla: 10, retardo: 40, tono: 'oroClaro' },
-  { angulo: -32, distancia: 132, talla: 16, retardo: 20, tono: 'oroHondo' },
-  { angulo: 0, distancia: 164, talla: 9, retardo: 60, tono: 'oro' },
-  { angulo: 28, distancia: 122, talla: 12, retardo: 30, tono: 'plata' },
-  { angulo: 62, distancia: 104, talla: 8, retardo: 80, tono: 'oroClaro' },
-  { angulo: 118, distancia: 104, talla: 10, retardo: 50, tono: 'oroHondo' },
-  { angulo: 152, distancia: 126, talla: 14, retardo: 10, tono: 'oro' },
-  { angulo: 180, distancia: 166, talla: 9, retardo: 70, tono: 'plata' },
-  { angulo: -150, distancia: 136, talla: 16, retardo: 25, tono: 'oroClaro' },
-  { angulo: -120, distancia: 156, talla: 10, retardo: 55, tono: 'oroHondo' },
-  { angulo: -105, distancia: 92, talla: 7, retardo: 90, tono: 'plata' },
-  { angulo: -75, distancia: 96, talla: 8, retardo: 100, tono: 'oro' },
-  { angulo: -15, distancia: 100, talla: 7, retardo: 110, tono: 'plata' },
-  /* El rescoldo: tres destellos cortos junto al sello, cuando las demás ya
-     se están apagando. */
-  { angulo: -40, distancia: 60, talla: 10, retardo: 360, tono: 'oroClaro' },
-  { angulo: 200, distancia: 56, talla: 8, retardo: 460, tono: 'plata' },
-  { angulo: 80, distancia: 54, talla: 7, retardo: 540, tono: 'oro' },
-]
-
-/** El destino de cada estrella, como variables: es lo único que admite `style`. */
-function destino(e: Estrella): CSSProperties {
-  const rad = (e.angulo * Math.PI) / 180
-  return {
-    '--dx': `${Math.round(Math.cos(rad) * e.distancia)}px`,
-    '--dy': `${Math.round(Math.sin(rad) * e.distancia)}px`,
-    '--talla': `${e.talla}px`,
-    '--retardo': `${e.retardo}ms`,
-    /* Alternan el sentido del giro: todas girando igual se lee como un
-       ventilador, no como un estallido. */
-    '--giro': `${e.angulo % 2 === 0 ? 160 : -140}deg`,
-  } as CSSProperties
-}
-
-/** El retardo de entrada de cada línea de texto, como variable. */
+/** El retardo de entrada de una pieza, como variable: lo único que admite `style`. */
 const tras = (ms: number) => ({ '--retardo': `${ms}ms` }) as CSSProperties
+
+/**
+ * EL MONTO QUE RUEDA. Cada dígito es una columna de un carácter de alto con
+ * la tira de los diez dígitos dentro; la tira se desplaza hasta el suyo. Los
+ * puntos de millar no ruedan. Decorativo: el valor lo dice el texto de estado.
+ */
+function MontoRodante({ valor }: { valor: number }) {
+  const caracteres = [...MILES.format(valor)]
+  /* El orden de cada dígito entre los dígitos (sin contar los puntos): es lo
+     que escalona las columnas de izquierda a derecha. */
+  const ordenes = caracteres.map(
+    (c, i) => caracteres.slice(0, i).filter((x) => x >= '0' && x <= '9').length,
+  )
+
+  return (
+    <>
+      {caracteres.map((c, i) =>
+        c >= '0' && c <= '9' ? (
+          <span key={i} className={styles.columna}>
+            {/* La medida: el dígito final, invisible y en el flujo. Es lo que
+                da el ancho a la columna, para que el monto quede con el
+                espaciado natural de la tipografía y no con el de una tabla. */}
+            <span className={styles.medida}>{c}</span>
+            <span
+              className={styles.tira}
+              style={{ '--digito': Number(c), '--orden': ordenes[i] } as CSSProperties}
+            >
+              {TIRA.map((d, j) => (
+                <span key={j} className={styles.digito}>
+                  {d}
+                </span>
+              ))}
+            </span>
+          </span>
+        ) : (
+          <span key={i} className={styles.separador}>
+            {c}
+          </span>
+        ),
+      )}
+    </>
+  )
+}
 
 export function AcuseVenta({
   valorFinal,
+  valorCompra,
+  valorDescuento,
   nombre,
   numeroMembresia,
   hora,
@@ -118,56 +117,40 @@ export function AcuseVenta({
 }: {
   /** Lo que quedó GUARDADO: lo dice el servidor, no lo tecleado. */
   valorFinal: number
+  valorCompra: number
+  valorDescuento: number
   nombre: string
   numeroMembresia: string
   /** La hora del recibo, ya formateada en Bogotá por el servidor. */
   hora: string | null
   onCerrar: () => void
 }) {
+  const hayDescuento = valorDescuento > 0
+
+  /* Los renglones del talón, en el orden de un recibo. La compra y el
+     descuento solo aparecen si hubo descuento: sin él repetirían el total. */
+  const renglones: { etiqueta: string; valor: string; acento?: boolean }[] = [
+    { etiqueta: 'Socio', valor: nombre },
+    { etiqueta: 'Membresía', valor: `N.º ${numeroMembresia}` },
+    ...(hayDescuento
+      ? [
+          { etiqueta: 'Compra', valor: PESOS.format(valorCompra) },
+          { etiqueta: 'Descuento', valor: `−${PESOS.format(valorDescuento)}`, acento: true },
+        ]
+      : []),
+    ...(hora ? [{ etiqueta: 'Hora', valor: hora }] : []),
+  ]
+
   return (
     <article className={styles.acuse}>
-      {/* La ola de luz dorada que sale de donde estaba el botón de cobrar. */}
-      <span className={styles.telon} aria-hidden="true" />
-
       <button type="button" className={styles.cerrar} onClick={onCerrar} aria-label="Cerrar">
         <X size={20} aria-hidden="true" />
       </button>
 
-      {/* ── EL LOGOTIPO: la cabeza del recibo. En oro, que es el que va sobre
-             blanco. Dice de quién es el acuse; su `alt` ya es «ORUM». ── */}
-      <span className={styles.logo}>
-        <LogoOrum variante="dorado" className={styles.logoImagen} />
-      </span>
-
-      {/* ── LA ESCENA: halo, ondas, sello y estrellas. Toda decorativa. ── */}
-      <div className={styles.escena} aria-hidden="true">
-        <span className={styles.halo} />
-        <span className={styles.onda} />
-        <span className={`${styles.onda} ${styles.ondaSegunda}`} />
-
-        {ESTRELLAS.map((e, i) => (
-          <span key={i} className={`${styles.estrella} ${styles[e.tono]}`} style={destino(e)} />
-        ))}
-
-        <span className={styles.sello}>
-          {/* La ✓ se «dibuja» con dos traslaciones opuestas: la cortina entra
-              desde la izquierda y el trazo, dentro, viaja al revés. El trazo
-              no se mueve en pantalla; lo que avanza es la ventana por la que
-              se ve. Solo `translate`: nada de animar el trazo del SVG. */}
-          <span className={styles.marca}>
-            <span className={styles.cortina}>
-              <Check className={styles.trazo} size={44} strokeWidth={2.75} />
-            </span>
-          </span>
-        </span>
-      </div>
-
       {/*
         LO QUE OYE UN LECTOR DE PANTALLA: una frase, entera y quieta, con los
-        tres datos para reclamar —monto, socio y hora—. Lo que se ve debajo es
-        lo mismo repartido en líneas y con la cifra contando, así que va
-        `aria-hidden`: una cifra que cambia cuarenta veces por segundo no se
-        anuncia.
+        datos para reclamar —monto, socio y hora—. Lo que se ve es lo mismo
+        repartido en la tarjeta y con el monto rodando, que no se anuncia.
       */}
       <p className="sr-only" role="status">
         Venta registrada. Se cobraron {PESOS.format(valorFinal)} a {nombre}, número de membresía{' '}
@@ -175,28 +158,62 @@ export function AcuseVenta({
         {hora && `, a las ${hora}`}.
       </p>
 
-      <div className={styles.textos}>
-        <div className={styles.entra} style={tras(440)}>
-          <TituloSeccion como="h2" tamano="bloque" texto="Venta registrada" />
-        </div>
+      {/* ── LA CABEZA: de quién es el recibo, que salió bien y cuánto. ── */}
+      <div className={styles.cabeza}>
+        {/* En oro, que es el que va sobre blanco. Su `alt` ya es «ORUM». */}
+        <span className={styles.logo}>
+          <LogoOrum variante="dorado" className={styles.logoImagen} />
+        </span>
 
-        <p className={`${styles.monto} ${styles.entra}`} style={tras(540)} aria-hidden="true">
-          <span className={styles.moneda}>$</span>
-          <CifraAnimada valor={valorFinal} duracion={0.9} retardo={0.58} />
-        </p>
-
-        {/*
-          LOS TRES DATOS PARA RECLAMAR: monto, socio y hora. Un cajero que
-          sospecha un error necesita con qué llamar al administrador: «me
-          equivoqué en una venta de esta tarde» no localiza ninguna fila.
-        */}
-        <p className={`${styles.nota} ${styles.entra}`} style={tras(660)} aria-hidden="true">
-          {nombre}
-          <span className={styles.notaMeta}>
-            N.º {numeroMembresia}
-            {hora && ` · ${hora}`}
+        {/* La marca: un anillo de trazo fino que se cierra y la ✓ que se
+            dibuja dentro. Decorativa. */}
+        <span className={styles.marca} aria-hidden="true">
+          <span className={styles.eco} />
+          <span className={`${styles.mitad} ${styles.mitadDerecha}`}>
+            <span className={`${styles.arco} ${styles.arcoDerecho}`} />
           </span>
+          <span className={`${styles.mitad} ${styles.mitadIzquierda}`}>
+            <span className={`${styles.arco} ${styles.arcoIzquierdo}`} />
+          </span>
+          <span className={styles.visto}>
+            <span className={styles.cortina}>
+              <Check className={styles.trazo} size={30} strokeWidth={1.75} />
+            </span>
+          </span>
+        </span>
+
+        <h2 className={`${styles.etiqueta} ${styles.entra}`} style={tras(320)}>
+          Venta registrada
+        </h2>
+
+        <p className={styles.monto} aria-hidden="true">
+          <span className={`${styles.moneda} ${styles.entra}`} style={tras(380)}>
+            $
+          </span>
+          <MontoRodante valor={valorFinal} />
         </p>
+      </div>
+
+      {/* ── EL TALÓN: los renglones del recibo, bajo la línea de corte. ── */}
+      <div className={styles.talon}>
+        {/*
+          LOS DATOS PARA RECLAMAR. Un cajero que sospecha un error necesita
+          con qué llamar al administrador: «me equivoqué en una venta de esta
+          tarde» no localiza ninguna fila. `aria-hidden`: ya van en la frase
+          de estado.
+        */}
+        <dl className={styles.renglones} aria-hidden="true">
+          {renglones.map((r, i) => (
+            <div
+              key={r.etiqueta}
+              className={`${styles.renglon} ${styles.entra}`}
+              style={tras(620 + i * 60)}
+            >
+              <dt>{r.etiqueta}</dt>
+              <dd className={r.acento ? styles.acento : undefined}>{r.valor}</dd>
+            </div>
+          ))}
+        </dl>
 
         {/*
           HONESTIDAD EN LUGAR DE UN BOTÓN QUE NO EXISTE. El contrato de datos
@@ -204,16 +221,14 @@ export function AcuseVenta({
           no se ofrece un «Deshacer» de mentira: se dice a quién acudir y con
           qué datos, que es lo único cierto que se puede dar.
         */}
-        <p className={`${styles.aviso} ${styles.entra}`} style={tras(760)}>
-          ¿Te equivocaste? Esta venta no se puede anular desde aquí: escribe al administrador
-          con la hora y el número del socio.
+        <p className={`${styles.aviso} ${styles.entra}`} style={tras(620 + renglones.length * 60)}>
+          ¿Te equivocaste? Esta venta no se puede anular desde aquí: escribe al administrador con la
+          hora y el número del socio.
         </p>
-      </div>
 
-      {/* La cola sigue: el camino de vuelta es un solo toque, y con teclado un
-          solo Enter — el foco cae aquí al llegar el acuse, sin esperar a la
-          animación. */}
-      <div className={`${styles.accion} ${styles.entra}`} style={tras(120)}>
+        {/* La cola sigue: el camino de vuelta es un solo toque, y con teclado
+            un solo Enter — el foco cae aquí al llegar el acuse, sin esperar a
+            la animación. */}
         <Button
           onClick={onCerrar}
           variant="brand"

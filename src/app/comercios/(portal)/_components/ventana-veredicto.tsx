@@ -60,8 +60,8 @@ const enfocarAlAbrir = (nodo: HTMLButtonElement | null) => {
     · EL SOCIO, justo debajo: iniciales, nombre, plan y número. El nombre es
       lo que confirma que el carnet es de quien lo entrega.
     · Si está ACTIVA, el formulario de venta. Si NO, qué hacer y la vuelta.
-    · Al registrar, la ventana entera pasa a ser el ACUSE (`AcuseVenta`), con
-      el logotipo de ORUM y la animación de pagar.
+    · Al registrar, la ventana entera pasa a ser el ACUSE (`AcuseVenta`): el
+      recibo, con el logotipo de ORUM y la animación de pagar.
 
   NO SE CIERRA AL PULSAR FUERA (`cerrarAlPulsarFuera={false}`): hay un
   importe a medio teclear y un toque en el velo lo perdería. La cierran su X,
@@ -163,6 +163,8 @@ function Contenido({
     return (
       <AcuseVenta
         valorFinal={venta.valorFinal ?? 0}
+        valorCompra={venta.valorCompra ?? 0}
+        valorDescuento={venta.valorDescuento ?? 0}
         nombre={miembro.nombreCompleto}
         numeroMembresia={miembro.numeroMembresia}
         hora={venta.hora ?? null}

@@ -1065,25 +1065,32 @@ Tres cosas que no son obvias:
   tarjeta entera. La prop `autoFocus` de React no sirve aquí: enfoca al
   montar, con el diálogo todavía cerrado.
 
-**La animación de pagar** (`acuse-venta.tsx`, 04/10/2026, encargo expreso del
-propietario: «una animación de pagar cuando se registre una venta; algo muy
-impresionante»). El acuse va SOBRE BLANCO y con el logotipo de ORUM: la
-primera versión volvía la ventana negra y oro y no gustó («no me gusta que
-sea de color negro; añade el logo de ORUM y anímalo con la animación que ya
-está»). Al registrarse: una ola de luz dorada nace donde estaba el botón de
-cobrar y barre la ventana, el logotipo dorado baja a su sitio y lo cruza un
-brillo, cae un sello de oro con la ✓ que se dibuja, se abren dos ondas, sale
-un estallido de estrellas de cuatro puntas (la de ORUM) y el monto sube de
-cero a lo cobrado (`CifraAnimada`). Dura algo más de segundo y medio. Sobre
-blanco el oro brillante es solo RELLENO de esas piezas; el monto va en tinta.
-**No lo vuelvas a poner sobre negro.** Es una
-excepción consciente a la regla cero —una venta ocurre decenas de veces al
-día—, y por eso se cuidó lo que esa regla protege: **no hace esperar**
-(«Verificar otro socio» está enfocado y pulsable desde el primer fotograma),
-es **solo `transform` y `opacity`** (la ✓ se «dibuja» con dos traslaciones
-opuestas, no animando el trazo) y con **movimiento reducido** cada pieza
-queda en su estado final. En su CSS el estado BASE es el final y los
-`@keyframes` solo dicen de dónde viene cada pieza: no la copies al revés.
+**El acuse de la venta es un RECIBO** (`acuse-venta.tsx`, 04/10/2026). Es la
+tercera versión, y las dos primeras están descartadas por el propietario: el
+acuse negro y oro con estallido de estrellas («no me gusta que sea de color
+negro») y el mismo sobre blanco («no me gusta el diseño ni la animación;
+busca referencias de 2026; debe ser elegante»). **No vuelvas a ninguna de las
+dos**: ni fondo negro, ni disco de oro macizo, ni estrellas, ni olas de color.
+Lo que hay, y viene de las referencias de pantallas de pago (contención antes
+que adorno; marca ligera, monto grande, a quién y cuándo):
+
+- Una tarjeta blanca en dos partes. Arriba, el logotipo de ORUM en oro
+  (pequeño, como membrete), la marca y el monto. Abajo, el talón en crema con
+  los renglones —socio, membresía, compra y descuento si lo hubo, hora— bajo
+  una línea de corte discontinua.
+- **La marca es de LÍNEA**: un anillo fino que se cierra y la ✓ que se dibuja
+  dentro. Un solo oro (`--brand` / `--brand-edge`), nada relleno salvo el botón.
+- **El monto RUEDA** dígito a dígito, como un odómetro, en el serif de display
+  y en tinta. No cuenta de cero al total.
+- Dura algo más de un segundo. Es **solo `transform` y `opacity`** (el anillo
+  son dos medias lunas que giran; la ✓, dos traslaciones opuestas), **no hace
+  esperar** («Verificar otro socio» está enfocado y pulsable desde el primer
+  fotograma) y con **movimiento reducido** cada pieza queda en su estado
+  final. En su CSS el estado BASE es el final y los `@keyframes` solo dicen de
+  dónde viene cada pieza; las duraciones salen de los tokens.
+
+El monto, la compra y el descuento del recibo los dice el servidor
+(`RegistrarVentaState`), no lo que había tecleado el cajero.
 
 El formulario de venta: la promoción se elige de un toque (un grupo de radios
 con la cifra de cada una; con más de seis pasa a un `SelectMenu`), la sucursal
