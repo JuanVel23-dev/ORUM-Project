@@ -25,7 +25,6 @@ function leerCamposComercio(formData: FormData) {
   const descripcion = String(formData.get('descripcion') ?? '').trim() || null
   const marcaRaw = String(formData.get('marca_id') ?? '').trim()
   const categoriaRaw = String(formData.get('categoria_id') ?? '').trim()
-  const logo_url = String(formData.get('logo_url') ?? '').trim() || null
   // Un interruptor apagado no envía nada: la ausencia ES el `false`.
   const indexable = formData.get('indexable') === 'on'
   return {
@@ -33,7 +32,6 @@ function leerCamposComercio(formData: FormData) {
     descripcion,
     marca_id: marcaRaw ? Number(marcaRaw) : null,
     categoria_id: categoriaRaw ? Number(categoriaRaw) : null,
-    logo_url,
     indexable,
   }
 }
@@ -92,7 +90,6 @@ export async function crearComercio(
     descripcion: campos.descripcion,
     marca_id: campos.marca_id,
     categoria_id: campos.categoria_id,
-    logo_url: campos.logo_url,
     indexable: campos.indexable,
     activo: true,
   })
@@ -118,7 +115,10 @@ export async function crearComercio(
 
 export type EditarComercioState = { error?: string; ok?: boolean }
 
-/** Edita nombre, descripción, marca, categoría, logo_url y (si cambió) el correo. */
+/**
+ * Edita nombre, descripción, marca, categoría, indexable y (si cambió) el correo.
+ * El logo ya no se toca aquí: se sube como archivo desde la pestaña de imágenes.
+ */
 export async function editarComercio(
   _prev: EditarComercioState,
   formData: FormData,
@@ -141,7 +141,6 @@ export async function editarComercio(
       descripcion: campos.descripcion,
       marca_id: campos.marca_id,
       categoria_id: campos.categoria_id,
-      logo_url: campos.logo_url,
       indexable: campos.indexable,
     })
     .eq('id', id)

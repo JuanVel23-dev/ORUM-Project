@@ -93,10 +93,6 @@ function FormularioComercio({
             </Field>
           </div>
 
-          <Field label="URL del logo" optional>
-            <Input name="logo_url" type="url" placeholder="https://…" />
-          </Field>
-
           <Switch
             name="indexable"
             defaultChecked
