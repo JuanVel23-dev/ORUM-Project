@@ -166,6 +166,13 @@
   color: var(--cacao-fg);
 }
 
+/* La estrella de la insignia, a 20 px, como en el banner del comercio (el
+   `AdornoEstrella` de los títulos se quedaba en 7 px sobre este texto). */
+.estrellaInsignia {
+  flex-shrink: 0;
+  height: 1.25rem;
+}
+
 /* La frase de la marca: el serif de display, como el titular del héroe. */
 .frase {
   margin: 0;

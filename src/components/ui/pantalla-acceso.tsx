@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import fotoMarca from '@/components/ui/marca/foto-hero.webp'
-import { AdornoEstrella, LogoOrum } from '@/components/ui/marca/marca'
+import { EstrellaOrum, LogoOrum } from '@/components/ui/marca/marca'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { ENTRADA, retardoEntrada } from '@/lib/shared/revelado'
 import styles from './pantalla-acceso.module.css'
@@ -129,7 +129,7 @@ export function PantallaAcceso({ puerta, titular, apoyo, pie, children }: Props)
 
           <div className={styles.mensaje}>
             <p className={[styles.insignia, ENTRADA].join(' ')} style={retardoEntrada(1)}>
-              <AdornoEstrella tono="plata" />
+              <EstrellaOrum tono="plata" className={styles.estrellaInsignia} />
               {mensaje.insignia}
             </p>
             {/* No es un encabezado: el `h1` de la pantalla es el del

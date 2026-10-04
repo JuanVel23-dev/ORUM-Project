@@ -8,7 +8,7 @@ import { ENTRADA, retardoEntrada } from '@/lib/shared/revelado'
 import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import fotoMarca from '@/components/ui/marca/foto-hero.webp'
-import { AdornoEstrella, LogoOrum } from '@/components/ui/marca/marca'
+import { EstrellaOrum, LogoOrum } from '@/components/ui/marca/marca'
 import { PieSitio } from '@/components/pie/pie-sitio'
 import { AvisoInstalar } from '@/components/pwa/instalar-movil'
 import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
@@ -124,7 +124,7 @@ export default async function ComerciosLayout({ children }: { children: ReactNod
 
           <div className={styles.bannerTextos}>
             <p className={[styles.insignia, ENTRADA].join(' ')} style={retardoEntrada(1)}>
-              <AdornoEstrella tono="plata" />
+              <EstrellaOrum tono="plata" className={styles.estrellaInsignia} />
               Comercio aliado
             </p>
             <h1

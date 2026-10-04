@@ -169,6 +169,15 @@
   color: var(--cacao-fg);
 }
 
+/* La estrella de la insignia, a 20 px: la del ornamento del héroe público.
+   No es el `AdornoEstrella` de los títulos: ese mide 0,6em, y sobre un
+   texto de 11 px se quedaba en un punto de 7 px. Es de cuatro puntas finas,
+   así que pesa menos de lo que mide: por debajo de ~20 px apenas se lee. */
+.estrellaInsignia {
+  flex-shrink: 0;
+  height: 1.25rem;
+}
+
 /* El nombre del comercio, en el serif de display, como el titular del
    directorio. Blanco: el oro pálido se reserva para un acento, y un nombre
    propio entero en dorado lo gastaría. */
