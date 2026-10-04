@@ -890,6 +890,14 @@ Los dos modos:
 
 Ambos salen del mismo componente: `<Overlay>`.
 
+⚠️ **En React, `cancel` y `close` BURBUJEAN** (en el DOM no). Llegan al
+`<dialog>` de fuera el `cancel` de un `<input type="file">` cuyo selector se
+cerró sin elegir (Chrome 113+) y el `cancel`/`close` de un diálogo anidado
+(la confirmación de «Quitar», el visor de fotos dentro de la ficha). Hasta el
+04/10/2026 eso cerraba la ventana entera. `Modal`, `Sheet` y la paleta solo
+atienden los suyos (`e.target === e.currentTarget`); **un `<dialog>` nuevo
+hace lo mismo**.
+
 Se montan como **rutas interceptadas** (`@modal/(.)ruta`). Eso da gratis: el botón
 atrás cierra, un enlace directo abre a pantalla completa, y la lista de detrás
 conserva scroll y estado.
@@ -1129,6 +1137,15 @@ imagen se AJUSTA antes de subirla, como la foto del socio:
   para que la ficha enseñe la imagen nueva al momento.
 - Las imágenes de un comercio quedan fuera de la declaración de derechos del
   socio (spec de derechos de imagen, §3): no se pide aquí.
+- **«Editar» abre la imagen que YA está**, no el selector de archivos
+  (`useImagenElegida().abrirActual`: la descarga como datos, porque pintarla
+  desde su URL contaminaría el `canvas`). Desde el editor, «Elegir otra» la
+  reemplaza. Una imagen ya publicada arranca **como se ve**
+  (`encuadreInicialEnMarco(…, comoSeVe)`): abrir y guardar sin tocar no la
+  encoge. Si no se puede descargar, el aviso ofrece elegir un archivo.
+- **El ajuste es un paso, no la ventana**: su X, «Cancelar» y Escape
+  (`Modal onAtras`) vuelven a la rejilla sin guardar. Lo mismo en «Mi foto»
+  del socio. Un editor de imagen nuevo sigue esta regla.
 
 **El comercio también instala su portal** (04/10/2026). El layout monta
 `WhatsAppFlotante` y `AvisoInstalar`, y el pie lleva el icono de instalar,

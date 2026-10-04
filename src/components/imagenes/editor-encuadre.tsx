@@ -61,12 +61,16 @@ import estilos from './editor-encuadre.module.css'
 const MAX_ORIGEN = 25 * 1024 * 1024
 /** Calidades que se prueban hasta caber en el límite de salida. */
 const CALIDADES = [0.88, 0.8, 0.72, 0.62, 0.5]
+const ERROR_ACTUAL =
+  'No pudimos abrir la imagen actual para editarla. Inténtalo de nuevo, o elige un archivo para reemplazarla.'
 
 export type ImagenElegida = {
   url: string
   ancho: number
   alto: number
   imagen: HTMLImageElement
+  /** Es la imagen ya publicada, abierta para retocarla (no un archivo nuevo). */
+  existente: boolean
 }
 
 export type OpcionesEncuadre = Marco & {
@@ -86,21 +90,27 @@ export type OpcionesEncuadre = Marco & {
    ========================================================================== */
 
 /**
- * Abre el archivo elegido. Devuelve la imagen lista para encuadrar, y cómo
- * soltarla. El `object URL` retiene el archivo en memoria hasta que se
- * revoca: se suelta al cambiar de imagen y al desmontar.
+ * Abre la imagen que se va a encuadrar: un archivo que elige la persona
+ * (`elegir`) o la que ya está publicada (`abrirActual`). Devuelve la imagen
+ * lista, y cómo soltarla. El `object URL` retiene la imagen en memoria hasta
+ * que se revoca: se suelta al cambiar de imagen y al desmontar.
+ *
+ * CADA APERTURA LLEVA SU TURNO. Abrir es asíncrono (decodificar; y para la
+ * actual, además, descargarla), y mientras tanto pueden pasar cosas: elegir
+ * otra, volver a la rejilla, cerrar la ventana. Una apertura que termina
+ * cuando ya no es la vigente se descarta. Sin el turno, una descarga lenta
+ * abría el editor DESPUÉS de haber cerrado la ventana, con la imagen de antes.
  */
 export function useImagenElegida() {
   const [imagen, setImagen] = useState<ImagenElegida | null>(null)
   const [abriendo, setAbriendo] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  /** La URL que se está abriendo; si se desmonta a medias, se suelta. */
-  const pendiente = useRef<string | null>(null)
+  const [fallo, setFallo] = useState<{ mensaje: string; deLaActual: boolean } | null>(null)
+  const turno = useRef(0)
 
+  // Al desmontar, lo que siga en vuelo ya no es de nadie.
   useEffect(() => {
     return () => {
-      if (pendiente.current) URL.revokeObjectURL(pendiente.current)
-      pendiente.current = null
+      turno.current += 1
     }
   }, [])
 
@@ -109,43 +119,102 @@ export function useImagenElegida() {
     return () => URL.revokeObjectURL(imagen.url)
   }, [imagen])
 
-  function elegir(archivo: File | undefined) {
-    // Mientras se abre una no se acepta otra: dos `onload` en vuelo
-    // competirían y ganaría la que termine última, no la última elegida.
-    if (abriendo) return
-    setError(null)
-    if (!archivo) return
-    if (!archivo.type.startsWith('image/')) {
-      setError('Ese archivo no es una imagen. Elige una foto JPG, PNG o WebP.')
-      return
-    }
-    if (archivo.size > MAX_ORIGEN) {
-      setError('Esa imagen pesa más de 25 MB. Elige una más liviana.')
-      return
-    }
-
-    const url = URL.createObjectURL(archivo)
-    pendiente.current = url
+  /** Decodifica una imagen ya en memoria y la deja lista, si sigue siendo su turno. */
+  function decodificar(fuente: Blob, miTurno: number, existente: boolean) {
+    const url = URL.createObjectURL(fuente)
     const nodo = new Image()
     nodo.decoding = 'async'
-    setAbriendo(true)
     nodo.onload = () => {
-      // Si se desmontó mientras tanto, el efecto de limpieza ya soltó la URL.
-      if (pendiente.current !== url) return
-      pendiente.current = null
+      if (turno.current !== miTurno) {
+        URL.revokeObjectURL(url)
+        return
+      }
       setAbriendo(false)
-      setImagen({ url, ancho: nodo.naturalWidth, alto: nodo.naturalHeight, imagen: nodo })
+      setImagen({
+        url,
+        ancho: nodo.naturalWidth,
+        alto: nodo.naturalHeight,
+        imagen: nodo,
+        existente,
+      })
     }
     nodo.onerror = () => {
-      pendiente.current = null
-      setAbriendo(false)
       URL.revokeObjectURL(url)
-      setError('No pudimos abrir esa imagen. Prueba con una foto JPG o PNG.')
+      if (turno.current !== miTurno) return
+      setAbriendo(false)
+      setFallo(
+        existente
+          ? { mensaje: ERROR_ACTUAL, deLaActual: true }
+          : {
+              mensaje: 'No pudimos abrir esa imagen. Prueba con una foto JPG o PNG.',
+              deLaActual: false,
+            },
+      )
     }
     nodo.src = url
   }
 
-  return { imagen, abriendo, error, elegir, soltar: () => setImagen(null) }
+  /** Un archivo que elige la persona. */
+  function elegir(archivo: File | undefined) {
+    setFallo(null)
+    if (!archivo) return
+    if (!archivo.type.startsWith('image/')) {
+      setFallo({
+        mensaje: 'Ese archivo no es una imagen. Elige una foto JPG, PNG o WebP.',
+        deLaActual: false,
+      })
+      return
+    }
+    if (archivo.size > MAX_ORIGEN) {
+      setFallo({ mensaje: 'Esa imagen pesa más de 25 MB. Elige una más liviana.', deLaActual: false })
+      return
+    }
+    const miTurno = ++turno.current
+    setAbriendo(true)
+    decodificar(archivo, miTurno, false)
+  }
+
+  /**
+   * La imagen YA PUBLICADA, para retocarla. Se descarga como datos y no se
+   * pinta desde su URL: una imagen de otro origen «contamina» el `canvas`, y
+   * entonces no se podría exportar el recorte. El bucket de Storage responde
+   * con `Access-Control-Allow-Origin: *`; una URL externa sin CORS fallaría,
+   * y para ese caso queda elegir un archivo.
+   */
+  async function abrirActual(direccion: string) {
+    setFallo(null)
+    const miTurno = ++turno.current
+    setAbriendo(true)
+    try {
+      const respuesta = await fetch(direccion)
+      if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`)
+      const datos = await respuesta.blob()
+      if (turno.current !== miTurno) return
+      decodificar(datos, miTurno, true)
+    } catch {
+      if (turno.current !== miTurno) return
+      setAbriendo(false)
+      setFallo({ mensaje: ERROR_ACTUAL, deLaActual: true })
+    }
+  }
+
+  /** Suelta la imagen y anula lo que estuviera abriéndose. */
+  function soltar() {
+    turno.current += 1
+    setAbriendo(false)
+    setImagen(null)
+  }
+
+  return {
+    imagen,
+    abriendo,
+    error: fallo?.mensaje ?? null,
+    /** El fallo fue al abrir la imagen publicada: se ofrece elegir un archivo. */
+    falloLaActual: fallo?.deLaActual ?? false,
+    elegir,
+    abrirActual,
+    soltar,
+  }
 }
 
 /* ==========================================================================
@@ -210,6 +279,8 @@ type Props = {
   onGuardar: (archivo: File) => void
   /** Abre el selector para cambiar de imagen sin salir del editor. */
   onElegirOtra: () => void
+  /** Sale del editor sin guardar nada. */
+  onCancelar: () => void
 }
 
 export function EditorEncuadre({
@@ -220,9 +291,10 @@ export function EditorEncuadre({
   error,
   onGuardar,
   onElegirOtra,
+  onCancelar,
 }: Props) {
   const [encuadre, setEncuadre] = useState<Encuadre>(() =>
-    encuadreInicialEnMarco(imagen.ancho, imagen.alto, opciones),
+    encuadreInicialEnMarco(imagen.ancho, imagen.alto, opciones, imagen.existente),
   )
   /** Transición suave solo para lo que salta (girar, restablecer, botones ±). */
   const [suave, setSuave] = useState(false)
@@ -452,7 +524,7 @@ export function EditorEncuadre({
           className={estilos.icono}
           onClick={() => {
             setSuave(true)
-            setEncuadre(encuadreInicialEnMarco(ancho, alto, opciones))
+            setEncuadre(encuadreInicialEnMarco(ancho, alto, opciones, imagen.existente))
           }}
           aria-label="Restablecer el encuadre"
         >
@@ -460,10 +532,15 @@ export function EditorEncuadre({
         </button>
       </div>
 
+      {/* Las dos secundarias, como enlaces; la principal se lleva el resto
+          de la fila y, en un teléfono, baja a la suya a todo lo ancho. */}
       <div className={estilos.acciones}>
         <button type="button" className={estilos.enlace} onClick={onElegirOtra} disabled={ocupado}>
           <ImagePlus size={16} aria-hidden="true" />
           Elegir otra
+        </button>
+        <button type="button" className={estilos.enlace} onClick={onCancelar} disabled={ocupado}>
+          Cancelar
         </button>
         <Button
           variant="brand"
@@ -472,6 +549,7 @@ export function EditorEncuadre({
           loading={ocupado}
           icon={<Check size={17} aria-hidden="true" />}
           onClick={guardar}
+          className={estilos.principal}
         >
           {textoGuardar}
         </Button>

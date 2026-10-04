@@ -79,6 +79,22 @@ describe('encuadreInicialEnMarco', () => {
       500 / Math.hypot(2000, 500),
     )
   })
+
+  it('un logotipo ya publicado se abre como se ve: el ajustado aquí, tal cual', () => {
+    // El que guarda este editor es cuadrado: abrirlo y guardarlo no lo encoge.
+    expect(encuadreInicialEnMarco(640, 640, LOGO_REDONDO, true)).toEqual({
+      x: 0,
+      y: 0,
+      zoom: 1,
+      giro: 0,
+    })
+    // Uno antiguo y apaisado, contenido en la caja cuadrada, como en la placa.
+    expect(encuadreInicialEnMarco(2000, 500, LOGO_REDONDO, true).zoom).toBeCloseTo(0.25)
+  })
+
+  it('una fotografía ya publicada arranca igual que una nueva: cubriendo', () => {
+    expect(encuadreInicialEnMarco(1600, 900, FOTO, true)).toEqual({ x: 0, y: 0, zoom: 1, giro: 0 })
+  })
 })
 
 describe('limitarEnMarco', () => {

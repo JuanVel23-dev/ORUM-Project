@@ -35,7 +35,7 @@
   }
 }
 
-/* --- La cabeza: volver, título y cerrar -------------------------------------- */
+/* --- La cabeza: título y cerrar ---------------------------------------------- */
 
 .cabeza {
   display: flex;
@@ -49,54 +49,39 @@
   min-width: 0;
 }
 
-.cerrar,
-.volver {
+.cerrar {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
   min-width: var(--tap-min);
   min-height: var(--tap-min);
   padding: 0;
   border: none;
   border-radius: var(--radius-full);
   background: none;
-  font-family: inherit;
-  font-size: var(--t-footnote-size);
-  font-weight: 600;
   color: var(--text-2);
   cursor: pointer;
   transition:
     color var(--dur-fast) var(--ease-out),
     rotate var(--dur-base) var(--ease-out),
-    translate var(--dur-fast) var(--ease-out);
+    opacity var(--dur-fast) var(--ease-out);
 }
 
-.volver {
-  padding-right: var(--space-2);
-}
-
-.volver:disabled {
-  opacity: 0.5;
+.cerrar:disabled {
+  opacity: 0.4;
   cursor: default;
 }
 
 @media (hover: hover) {
-  /* Sin relleno: la X gira un cuarto de vuelta y «Volver» se asoma hacia atrás. */
-  .cerrar:hover {
+  /* Sin relleno: la X gira un cuarto de vuelta. */
+  .cerrar:not(:disabled):hover {
     color: var(--text);
     rotate: 90deg;
-  }
-
-  .volver:not(:disabled):hover {
-    color: var(--text);
-    translate: -2px 0;
   }
 }
 
 .cerrar:focus-visible,
-.volver:focus-visible,
 .tejaBoton:focus-visible,
 .hueco:focus-visible {
   outline: 2px solid var(--focus);

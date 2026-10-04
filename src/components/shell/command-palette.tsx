@@ -228,6 +228,9 @@ export function CommandPalette({
       ref={dialogRef}
       className={styles.dialog}
       onCancel={(e) => {
+        // Solo el suyo: en React burbujea el `cancel` de lo que haya dentro
+        // (ver `modal.tsx`).
+        if (e.target !== e.currentTarget) return
         e.preventDefault()
         onClose()
       }}

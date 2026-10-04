@@ -8,11 +8,12 @@ import {
   useTransition,
   type ReactNode,
 } from 'react'
-import { ArrowLeft, ImagePlus, Pencil, Store, Trash2, X } from 'lucide-react'
+import { ImagePlus, Pencil, Store, Trash2, X } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { ConfirmDialog, Modal } from '@/components/ui/modal'
+import { Spinner } from '@/components/ui/spinner'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import {
   EditorEncuadre,
@@ -40,11 +41,20 @@ import styles from './mi-negocio.module.css'
   imagen y se cierra. La caja de detrás no se mueve («un formulario no
   navega»). Tiene dos vistas, que se intercambian dentro de la misma ventana:
 
-    · LA REJILLA: el logotipo y las fotos tal como están, con «cambiar» y
+    · LA REJILLA: el logotipo y las fotos tal como están, con «editar» y
       «quitar» en cada una, y el hueco para añadir mientras queden cupos.
-    · EL AJUSTE: al elegir una imagen se abre el editor (`EditorEncuadre`)
-      para encuadrarla antes de subirla. El logotipo, en un círculo en el que
-      puede verse entero; las fotos, en 16:9, que es como salen en la ficha.
+    · EL AJUSTE: el editor (`EditorEncuadre`), para encuadrar la imagen antes
+      de subirla. El logotipo, en un círculo en el que puede verse entero;
+      las fotos, en 16:9, que es como salen en la ficha.
+
+  «EDITAR» ABRE LA IMAGEN QUE YA ESTÁ, no el selector de archivos: se
+  retoca el encuadre de la publicada, y desde el editor «Elegir otra» la
+  reemplaza. Añadir (un hueco, un logotipo que falta) sí abre el selector.
+
+  EL AJUSTE ES UN PASO, NO LA VENTANA: su X, «Cancelar» y Escape vuelven a
+  la rejilla sin guardar; la ventana solo se cierra desde la rejilla. Antes
+  la X y Escape la cerraban entera, y también la cerraba cancelar el
+  selector de archivos (eso era `modal.tsx`: ver allí).
 
   LAS OCHO FOTOS: la primera es la PORTADA (la foto grande de la ficha y la
   del directorio) y las demás, la galería. El tope cuenta las dos
@@ -163,7 +173,15 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
   const { abierta, cerrar } = useNegocio()
   const { nombre, logoUrl, portadaUrl, galeria } = datos
 
-  const { imagen, abriendo, error: errorImagen, elegir, soltar } = useImagenElegida()
+  const {
+    imagen,
+    abriendo,
+    error: errorImagen,
+    falloLaActual,
+    elegir,
+    abrirActual,
+    soltar,
+  } = useImagenElegida()
   const [objetivo, setObjetivo] = useState<Objetivo | null>(null)
   const [porQuitar, setPorQuitar] = useState<Objetivo | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -175,24 +193,35 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
   const ajustando = imagen !== null && objetivo !== null
   const esLogo = objetivo?.tipo === 'logo'
 
-  /** Abre el selector de archivos para ESA imagen. */
+  /** AÑADIR: abre el selector de archivos para ese hueco. */
   function pedir(nuevo: Objetivo) {
     setError(null)
     setObjetivo(nuevo)
     entrada.current?.click()
   }
 
-  /** Vuelve a la rejilla sin guardar. */
+  /** EDITAR: abre en el editor la imagen que ya está publicada. */
+  function editar(nuevo: Objetivo, direccion: string) {
+    setError(null)
+    setObjetivo(nuevo)
+    void abrirActual(direccion)
+  }
+
+  /** Vuelve a la rejilla sin guardar (y anula lo que se estuviera abriendo). */
   function dejarDeAjustar() {
     soltar()
     setObjetivo(null)
     setError(null)
   }
 
+  /*
+    Cerrar la ventana entera. No se bloquea durante una subida: la X y el velo
+    ya están inhabilitados mientras tanto, y si quien cierra es el navegador
+    (el segundo Escape seguido), el `<dialog>` YA está cerrado — negarse
+    dejaría el estado en «abierta» y el botón de la cabecera no la reabriría.
+    La subida sigue y la rejilla se refresca igual al terminar.
+  */
   function cerrarVentana() {
-    // Con una subida en curso no se cierra: la respuesta llegaría a una
-    // ventana que ya no está, y no se sabría si la imagen quedó guardada.
-    if (ocupado) return
     dejarDeAjustar()
     cerrar()
   }
@@ -253,32 +282,26 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
     <Modal
       open={abierta}
       onClose={cerrarVentana}
+      /* Escape, mientras se ajusta, vuelve a la rejilla (y no hace nada
+         mientras se sube: la subida no se cancela a medias). */
+      onAtras={ajustando ? () => !ocupado && dejarDeAjustar() : undefined}
       ariaLabel={titulo}
       width="720px"
       desnudo
       /* Con una imagen a medio encuadrar, un toque en el velo no la pierde. */
-      cerrarAlPulsarFuera={!ajustando}
+      cerrarAlPulsarFuera={!ajustando && !ocupado}
     >
       <article className={styles.ventana}>
         <header className={styles.cabeza}>
-          {ajustando && (
-            <button
-              type="button"
-              className={styles.volver}
-              onClick={dejarDeAjustar}
-              disabled={ocupado}
-            >
-              <ArrowLeft size={16} aria-hidden="true" />
-              Volver
-            </button>
-          )}
           <TituloSeccion como="h2" tamano="bloque" texto={titulo} className={styles.titulo} />
+          {/* Mientras se ajusta, la X cancela el ajuste: vuelve a la rejilla. */}
           <button
             ref={enfocarAlAbrir}
             type="button"
             className={styles.cerrar}
-            onClick={cerrarVentana}
-            aria-label="Cerrar"
+            onClick={ajustando ? dejarDeAjustar : cerrarVentana}
+            disabled={ocupado}
+            aria-label={ajustando ? 'Cancelar y volver' : 'Cerrar'}
           >
             <X size={20} aria-hidden="true" />
           </button>
@@ -318,6 +341,7 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
               error={error ?? errorImagen}
               onGuardar={subir}
               onElegirOtra={() => entrada.current?.click()}
+              onCancelar={dejarDeAjustar}
             />
           </div>
         ) : (
@@ -329,7 +353,25 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
             </p>
 
             {(error ?? errorImagen) && (
-              <Alert key={error ?? errorImagen} tone="danger">
+              <Alert
+                key={error ?? errorImagen}
+                tone="danger"
+                /* Si no se pudo abrir la publicada (una URL externa sin CORS,
+                   o sin conexión), queda reemplazarla por un archivo. */
+                actions={
+                  falloLaActual &&
+                  objetivo && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      pildora
+                      onClick={() => entrada.current?.click()}
+                    >
+                      Elegir un archivo
+                    </Button>
+                  )
+                }
+              >
                 {error ?? errorImagen}
               </Alert>
             )}
@@ -349,11 +391,19 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
                     variant="secondary"
                     pildora
                     loading={abriendo && esLogo}
-                    disabled={ocupado}
-                    icon={<Pencil size={15} aria-hidden="true" />}
-                    onClick={() => pedir({ tipo: 'logo' })}
+                    disabled={ocupado || abriendo}
+                    icon={
+                      logoUrl ? (
+                        <Pencil size={15} aria-hidden="true" />
+                      ) : (
+                        <ImagePlus size={15} aria-hidden="true" />
+                      )
+                    }
+                    onClick={() =>
+                      logoUrl ? editar({ tipo: 'logo' }, logoUrl) : pedir({ tipo: 'logo' })
+                    }
                   >
-                    {logoUrl ? 'Cambiar logotipo' : 'Añadir logotipo'}
+                    {logoUrl ? 'Editar logotipo' : 'Añadir logotipo'}
                   </Button>
                 </div>
               </div>
@@ -379,14 +429,15 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
                       url={portadaUrl}
                       nombre="la portada"
                       insignia="Portada"
-                      bloqueada={ocupado}
-                      onCambiar={() => pedir({ tipo: 'portada' })}
+                      bloqueada={ocupado || abriendo}
+                      abriendo={abriendo && objetivo?.tipo === 'portada'}
+                      onEditar={() => editar({ tipo: 'portada' }, portadaUrl)}
                       onQuitar={() => setPorQuitar({ tipo: 'portada' })}
                     />
                   ) : (
                     <Hueco
                       texto="Añadir portada"
-                      deshabilitado={ocupado || cupos === 0}
+                      deshabilitado={ocupado || abriendo || cupos === 0}
                       onClick={() => pedir({ tipo: 'portada' })}
                     />
                   )}
@@ -397,8 +448,11 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
                     <Teja
                       url={foto.url}
                       nombre={`la foto ${i + 2}`}
-                      bloqueada={ocupado}
-                      onCambiar={() => pedir({ tipo: 'galeria', fotoId: foto.id })}
+                      bloqueada={ocupado || abriendo}
+                      abriendo={
+                        abriendo && objetivo?.tipo === 'galeria' && objetivo.fotoId === foto.id
+                      }
+                      onEditar={() => editar({ tipo: 'galeria', fotoId: foto.id }, foto.url)}
                       onQuitar={() => setPorQuitar({ tipo: 'galeria', fotoId: foto.id })}
                     />
                   </li>
@@ -410,7 +464,7 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
                   <li>
                     <Hueco
                       texto="Añadir foto"
-                      deshabilitado={ocupado}
+                      deshabilitado={ocupado || abriendo}
                       onClick={() => pedir({ tipo: 'galeria', fotoId: null })}
                     />
                   </li>
@@ -451,7 +505,8 @@ function Teja({
   nombre,
   insignia,
   bloqueada,
-  onCambiar,
+  abriendo,
+  onEditar,
   onQuitar,
 }: {
   url: string
@@ -459,7 +514,9 @@ function Teja({
   nombre: string
   insignia?: string
   bloqueada: boolean
-  onCambiar: () => void
+  /** Se está descargando para abrirla en el editor. */
+  abriendo: boolean
+  onEditar: () => void
   onQuitar: () => void
 }) {
   return (
@@ -473,11 +530,12 @@ function Teja({
         <button
           type="button"
           className={styles.tejaBoton}
-          onClick={onCambiar}
+          onClick={onEditar}
           disabled={bloqueada}
-          aria-label={`Cambiar ${nombre}`}
+          aria-label={`Editar ${nombre}`}
+          aria-busy={abriendo || undefined}
         >
-          <Pencil size={15} aria-hidden="true" />
+          {abriendo ? <Spinner size="sm" label={null} /> : <Pencil size={15} aria-hidden="true" />}
         </button>
         <button
           type="button"

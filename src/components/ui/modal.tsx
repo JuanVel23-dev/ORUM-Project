@@ -82,6 +82,12 @@ type Props = {
    * su propia X y Escape. Por defecto, pulsar fuera cierra.
    */
   cerrarAlPulsarFuera?: boolean
+  /**
+   * Escape (y el «atrás» de Android) en una ventana con PASOS: vuelve un paso
+   * en vez de cerrarla (el ajuste de una imagen en «Mi negocio» vuelve a la
+   * rejilla). Sin él, Escape llama a `onClose`.
+   */
+  onAtras?: () => void
   children?: ReactNode
 }
 
@@ -97,6 +103,7 @@ export function Modal({
   desnudo = false,
   className,
   cerrarAlPulsarFuera = true,
+  onAtras,
   children,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -199,20 +206,43 @@ export function Modal({
     return bloquearFondo()
   }, [open])
 
+  /*
+    SOLO LOS EVENTOS DE ESTE DIÁLOGO (04/10/2026). En el DOM, `cancel` y
+    `close` de un `<dialog>` no burbujean; en React SÍ: React los reparte por
+    todo el árbol de componentes, de hijo a padre. Y llegan dos que no son de
+    esta ventana:
+
+      · El `cancel` de un `<input type="file">` (Chrome 113+), que se dispara
+        al cerrar el selector de archivos sin elegir nada — y ese sí burbujea
+        también en el DOM. Cancelar el selector cerraba la ventana entera:
+        «Mi negocio», «Mi foto», la imagen de un comercio en administración.
+      · El `cancel` y el `close` de un diálogo ANIDADO: la confirmación de
+        «Quitar» dentro de «Mi negocio», el visor de fotos dentro de la ficha.
+        Cerrar el de arriba cerraba también el de abajo.
+
+    Por eso los dos manejadores miran que el evento sea del propio diálogo.
+  */
+  const esDeEsteDialogo = (e: React.SyntheticEvent<HTMLDialogElement>) =>
+    e.target === e.currentTarget
+
   // Escape dispara `cancel`. Se intercepta para que el cierre lo decida React
-  // (vía onClose) y no el navegador saltándose la animación.
+  // (vía onClose, u `onAtras` si la ventana tiene pasos) y no el navegador
+  // saltándose la animación.
   const alCancelar = (e: React.SyntheticEvent<HTMLDialogElement>) => {
+    if (!esDeEsteDialogo(e)) return
     e.preventDefault()
-    onClose()
+    ;(onAtras ?? onClose)()
   }
 
   /*
     El navegador puede cerrar el diálogo por su cuenta, sin pasar por `cancel`
     (Chrome lo hace al segundo Escape o al segundo «atrás» de Android seguidos).
     Si React sigue creyéndolo abierto, se le avisa: si no, la ventana quedaba
-    cerrada con el estado en «abierta» y no volvía a abrirse.
+    cerrada con el estado en «abierta» y no volvía a abrirse. Aquí va SIEMPRE
+    a `onClose`, nunca a `onAtras`: el diálogo ya está cerrado de verdad.
   */
-  const alCerrarNativo = () => {
+  const alCerrarNativo = (e: React.SyntheticEvent<HTMLDialogElement>) => {
+    if (!esDeEsteDialogo(e)) return
     if (quiereAbierto.current) onClose()
   }
 

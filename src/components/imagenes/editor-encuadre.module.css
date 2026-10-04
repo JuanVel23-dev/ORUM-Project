@@ -15,6 +15,10 @@
 
 .editor {
   display: grid;
+  /* La columna no crece con su contenido: lo que no quepa se reacomoda
+     dentro, nunca ensancha la ventana (en un teléfono salía desplazamiento
+     lateral). */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
   min-width: 0;
 }
@@ -284,17 +288,19 @@
   scale: 1.15;
 }
 
-/* --- Las acciones: «Elegir otra» y guardar ---------------------------------- */
+/* --- Las acciones: «Elegir otra», «Cancelar» y guardar --------------------- */
 
 .acciones {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
 }
 
-/* La principal se lleva el ancho. */
-.acciones > :last-child {
-  flex: 1 1 0;
+/* La principal se lleva el resto de la fila. Si le quedan menos de 220 px
+   (un teléfono), baja a la suya y la ocupa entera. */
+.principal {
+  flex: 1 1 220px;
   min-width: 0;
 }
 

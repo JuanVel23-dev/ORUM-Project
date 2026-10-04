@@ -93,10 +93,21 @@ export function zoomMinimo(ancho: number, alto: number, giro: Giro, marco: Marco
  * De dónde se parte al abrir una imagen. Una fotografía, cubriendo el marco.
  * Un logotipo, ENTERO: abrirlo recortado obligaría a alejarlo cada vez, y lo
  * primero que se quiere ver es que está todo.
+ *
+ * `comoSeVe`: la imagen YA está publicada y se abre para retocarla. Entonces
+ * arranca como se ve hoy, no «entera en el círculo»: la placa enseña el
+ * logotipo con `object-fit: contain` en su caja CUADRADA, así que uno que ya
+ * se ajustó aquí (cuadrado) se abre a zoom 1, tal cual. Arrancar por la
+ * diagonal lo encogería un poco cada vez que se abre y se guarda sin tocar.
  */
-export function encuadreInicialEnMarco(ancho: number, alto: number, marco: Marco): Encuadre {
+export function encuadreInicialEnMarco(
+  ancho: number,
+  alto: number,
+  marco: Marco,
+  comoSeVe = false,
+): Encuadre {
   const zoom = marco.permiteContener
-    ? zoomQueContiene(ancho, alto, 0, marco.proporcion, marco.circular)
+    ? zoomQueContiene(ancho, alto, 0, marco.proporcion, marco.circular && !comoSeVe)
     : 1
   return { x: 0, y: 0, zoom, giro: 0 }
 }
