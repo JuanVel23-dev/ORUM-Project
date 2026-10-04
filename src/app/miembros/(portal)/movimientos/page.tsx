@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ChevronRight, Receipt } from 'lucide-react'
+import { ChevronRight, PiggyBank, Receipt } from 'lucide-react'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { obtenerBitacora } from '@/lib/miembros/datos-movimientos'
@@ -43,10 +43,11 @@ export const metadata = { title: 'Mis movimientos · ORUM' }
   administración; en el móvil, tarjetas apiladas con seis etiquetas cada una.
   Ahora habla el idioma del portal:
 
-    · EL RESUMEN es una tarjeta negra, del material del carnet: lo ahorrado
-      en grande y en oro (sobre negro, el único sitio donde el oro de display
-      es legal), con los usos y el ahorro promedio. En escritorio se queda
-      fija a la izquierda mientras se recorre la lista; en el móvil va arriba.
+    · EL RESUMEN es una tarjeta clara, como las del portal inicial (la
+      primera versión, negra, no gustó): un icono en anillo de oro, lo
+      ahorrado en el serif de display y los usos y el ahorro promedio. En
+      escritorio se queda fija a la izquierda mientras se recorre la lista;
+      en el móvil va arriba.
     · LA LISTA va por MESES (`agruparPorMes`), y cada movimiento es una fila
       con el logotipo del comercio: a un lado dónde, qué beneficio y cuándo;
       al otro, lo que se ahorró —lo que el socio viene a ver— y lo que pagó
@@ -173,7 +174,12 @@ export default async function MovimientosPage({
         <div className={styles.cuerpo}>
           {/* ── EL RESUMEN ────────────────────────────────────────────── */}
           <aside className={styles.resumen} aria-label="Resumen de tu ahorro">
-            <p className={styles.resumenEtiqueta}>Has ahorrado</p>
+            <div className={styles.resumenCabecera}>
+              <span className={styles.resumenIcono} aria-hidden="true">
+                <PiggyBank size={20} />
+              </span>
+              <p className={styles.resumenEtiqueta}>Has ahorrado</p>
+            </div>
             <p className={styles.resumenTotal}>{PESOS.format(bitacora.ahorroTotal)}</p>
             <p className={styles.resumenNota}>con tu membresía ORUM</p>
 

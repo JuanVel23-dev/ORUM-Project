@@ -1,9 +1,9 @@
 /* ==========================================================================
-   MIS MOVIMIENTOS  ·  resumen en negro y oro + lista por meses
+   MIS MOVIMIENTOS  ·  resumen + lista por meses
    --------------------------------------------------------------------------
-   Todo sale de tokens. Dos piezas: el RESUMEN (la única superficie negra de
-   la pantalla, con el oro de display) y la LISTA, una tarjeta por mes con
-   filas separadas por hairlines. Las filas no llevan sombra ni se mueven
+   Todo sale de tokens. Dos piezas: el RESUMEN (una tarjeta clara, la
+   principal de la pantalla) y la LISTA, una tarjeta por mes con filas
+   separadas por hairlines. Las filas no llevan sombra ni se mueven
    (CLAUDE.md): flota la tarjeta del mes, no cada fila.
 
    Se adapta con `@container contenido` —el `<main>` del portal—, no con
@@ -47,50 +47,68 @@
   }
 }
 
-/* --- El resumen: el material del carnet ------------------------------------ */
+/* --- El resumen: una tarjeta clara, como las del portal inicial --------------
+   (03/10/2026: la tarjeta negra no gustó — «algo más alineado a lo que se
+   tiene en el portal inicial».) Blanca y sin trazo, despegada por su sombra;
+   el icono en un anillo de oro, como los pasos de «Así es como te unes»; la
+   cifra en el serif de display y en tinta; el oro, solo en los acentos. */
 
 .resumen {
   padding: var(--space-6);
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-xl);
-  /* Metal oscuro: el mismo brillo frío arriba a la derecha que el carnet. */
-  background:
-    radial-gradient(
-      110% 80% at 100% 0%,
-      color-mix(in srgb, var(--n-200) 14%, transparent),
-      transparent 60%
-    ),
-    linear-gradient(150deg, var(--cacao-800), var(--cacao-900) 65%);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--n-50) 14%, transparent),
-    var(--shadow-raised);
-  color: var(--cacao-fg);
+  background: var(--surface);
+  box-shadow: var(--shadow-raised), var(--edge);
+  color: var(--text);
+}
+
+.resumenCabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* El anillo de oro de la fachada: 1,5 px de filo, glifo en el oro de texto. */
+.resumenIcono {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1.5px var(--gold-600);
+  color: var(--brand);
 }
 
 .resumenEtiqueta {
   margin: 0;
-  font-size: var(--t-footnote-size);
+  font-size: var(--t-callout-size);
   font-weight: 600;
-  color: var(--cacao-fg-2);
+  color: var(--text-2);
 }
 
-/* La cifra, en el serif de display y en ORO: sobre negro es donde ese oro es
-   legal (12,27:1). Cifras tabulares para que no baile al cambiar. */
+/* La cifra, en el serif de display y en TINTA: sobre blanco el oro brillante
+   no es legible, y el protagonismo lo da el tamaño. Cifras tabulares. */
 .resumenTotal {
-  margin: var(--space-1) 0 0;
+  margin: var(--space-4) 0 0;
   font-family: var(--font-display);
   font-size: clamp(2.25rem, 1.6rem + 3vw, 3rem);
   line-height: 1.1;
   font-weight: 600;
   font-variant-numeric: tabular-nums lining-nums;
-  color: var(--gold-400);
+  color: var(--text);
   -webkit-font-smoothing: auto;
   overflow-wrap: anywhere;
 }
 
+/* El acento en cursiva dorada, como los titulares de la fachada. */
 .resumenNota {
   margin: var(--space-1) 0 0;
-  font-size: var(--t-footnote-size);
-  color: var(--cacao-fg-3);
+  font-family: var(--font-display);
+  font-size: var(--t-callout-size);
+  font-style: italic;
+  color: var(--brand);
+  -webkit-font-smoothing: auto;
 }
 
 /* Las dos cifras de apoyo, bajo un hairline (una división DENTRO de la
@@ -98,7 +116,7 @@
 .cifras {
   margin: var(--space-5) 0 0;
   padding-top: var(--space-5);
-  border-top: 1px solid color-mix(in srgb, var(--n-50) 14%, transparent);
+  border-top: 1px solid var(--border-subtle);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
@@ -111,15 +129,15 @@
 
 .cifra dt {
   font-size: var(--t-caption-size);
-  color: var(--cacao-fg-3);
+  color: var(--text-3);
 }
 
 .cifra dd {
   margin: 0;
   font-size: var(--t-title-3-size);
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--cacao-fg);
+  color: var(--text);
 }
 
 /* --- La lista, por meses ---------------------------------------------------- */
