@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import type { CatalogoPublico } from '@/lib/publico/datos-publicos'
 import { DirectorioInteractivo } from './directorio-interactivo'
 import { ProveedorFavoritos } from './favoritos'
@@ -23,7 +22,7 @@ import { ProveedorFavoritos } from './favoritos'
   `directorio-interactivo.tsx`.
 
   Este archivo es solo la costura de servidor: pone el estado de favoritos
-  (cuando hay socio) y la frontera de `Suspense` que `useSearchParams` pide.
+  cuando hay socio.
 */
 
 type Props = {
@@ -52,18 +51,22 @@ export function DirectorioComercios({
   socio = false,
   favoritos,
 }: Props) {
+  /*
+    SIN `<Suspense>` alrededor, a propósito. `useSearchParams` solo exige esa
+    frontera en páginas que se prerenderizan, y las dos que montan esto son
+    dinámicas (`/explorar` es `force-dynamic`, `/miembros` lee la sesión).
+    Con la frontera, React hidrataba el directorio con MENOR prioridad que el
+    resto de la página: durante ese rato un toque en una tarjeta navegaba a
+    la página completa de la ficha en vez de abrirla encima.
+  */
   const interactivo = (
-    /* `useSearchParams` pide esta frontera. Las dos páginas son dinámicas,
-       así que el servidor pinta el contenido entero, ya filtrado. */
-    <Suspense fallback={null}>
-      <DirectorioInteractivo
-        base={base}
-        directorio={directorio}
-        titulo={titulo}
-        bajada={bajada}
-        socio={socio}
-      />
-    </Suspense>
+    <DirectorioInteractivo
+      base={base}
+      directorio={directorio}
+      titulo={titulo}
+      bajada={bajada}
+      socio={socio}
+    />
   )
 
   /* El estado del corazón es UNO para toda la pantalla. */
