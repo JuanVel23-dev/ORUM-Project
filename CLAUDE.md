@@ -944,12 +944,23 @@ desde el rediseño del 27/09/2026, el Portal de Miembros. Las clases de revelado
 desplazar (`REVELAR`, `revelarEscalonado`…) viven en `src/lib/shared/revelado.ts`
 por la misma razón.
 
-`Button` `Spinner` · `Field` `Input` `Select` `Textarea` `Switch` `Checkbox` `Radio`
+`Button` `Spinner` · `Field` `Input` `Select` `SelectMenu` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·
 `Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` · `Alert` `Toast` · `Modal` `Sheet`
 `Overlay` `DropdownMenu` `MenuItem` · `Skeleton` `ProgressBar` `EmptyState` `ErrorState` ·
 `DataList` `AccionEstado` `Copiar` · `PantallaAuth` `ComercioLogo` `QrCode` `WhatsAppButton`
 · `Agitar`
+
+**`SelectMenu`** (04/10/2026) es un desplegable CON DISEÑO: el campo se ve
+como un `Input` y la lista que abre es el `DropdownMenu` del sitio, no la del
+sistema (en Windows, un recuadro gris que el CSS no puede vestir). Nació para
+la sucursal de la venta en la caja («ponle diseño a la lista desplegable»).
+Va dentro de un `Field` y el valor viaja en un campo oculto con su `name`.
+**No valida solo** —un campo oculto no admite `required`—: quien lo usa
+comprueba el valor al enviar y le pasa el error al `Field`. **No sustituye a
+`Select`** en los formularios largos de administración, donde la rueda nativa
+del teléfono sigue siendo más rápida. `DropdownMenu` ganó para esto la prop
+`igualarAncho` (la lista mide lo que su campo).
 
 **`Agitar`** envuelve un icono y lo agita **una vez** cuando su prop `activo`
 pasa de `false` a `true` — el acento de «seleccionado» en un filtro. Se le pasa
@@ -1055,7 +1066,9 @@ Tres cosas que no son obvias:
   montar, con el diálogo todavía cerrado.
 
 El formulario de venta: la promoción se elige de un toque (un grupo de radios
-con la cifra de cada una; con más de seis vuelve al desplegable), y el total
+con la cifra de cada una; con más de seis pasa a un `SelectMenu`), la sucursal
+es un `SelectMenu` que arranca vacío a propósito —preelegir una atribuiría la
+venta a una sede que nadie eligió— y se comprueba al enviar, y el total
 con el botón de cobrar van en un pie pegado abajo, siempre a la vista. El
 monto del acuse lo dice el servidor (`valorFinal`), no lo tecleado.
 

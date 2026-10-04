@@ -1,11 +1,12 @@
 'use client'
 
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Receipt } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input, Select } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
+import { SelectMenu } from '@/components/ui/select-menu'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { formatearBeneficio, formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import { calcularDescuento, calcularValorFinal } from '@/lib/comercios/ventas'
@@ -98,6 +99,15 @@ export function ConfirmarVentaForm({
   */
   const [valorCompra, setValorCompra] = useState('')
   const [descuentoManual, setDescuentoManual] = useState('')
+  /*
+    LA SUCURSAL ARRANCA VACÍA A PROPÓSITO: preelegir una atribuiría la venta a
+    una sede que nadie eligió. El desplegable es `SelectMenu` (la lista con el
+    diseño del sitio), y un campo oculto no admite `required`: que haya una
+    elegida se comprueba aquí, al enviar.
+  */
+  const [sucursalId, setSucursalId] = useState('')
+  const [faltaSucursal, setFaltaSucursal] = useState(false)
+  const campoSucursal = useRef<HTMLDivElement>(null)
 
   const promocionSeleccionada = promociones.find((p) => String(p.id) === promocionId) ?? null
 
@@ -126,8 +136,22 @@ export function ConfirmarVentaForm({
   const haySelectorSucursal = sucursales.length > 1
   const promocionesComoOpciones = promociones.length > 0 && promociones.length <= MAX_OPCIONES
 
+  /* Sin sucursal no se envía: se dice en el propio campo y se lleva el foco
+     hasta él —enfocarlo lo trae a la vista si quedó bajo el pie pegado—. */
+  const alEnviar = (e: FormEvent<HTMLFormElement>) => {
+    if (!haySelectorSucursal || sucursalId !== '') return
+    e.preventDefault()
+    setFaltaSucursal(true)
+    campoSucursal.current?.querySelector('button')?.focus()
+  }
+
   return (
-    <form action={formAction} className={styles.formularioVenta} aria-labelledby={idTitulo}>
+    <form
+      action={formAction}
+      onSubmit={alEnviar}
+      className={styles.formularioVenta}
+      aria-labelledby={idTitulo}
+    >
       <input type="hidden" name="miembro_id" value={miembroId} />
       <input type="hidden" name="membresia_id" value={membresiaId ?? ''} />
       <input type="hidden" name="numero_membresia" value={numeroMembresia} />
@@ -228,21 +252,22 @@ export function ConfirmarVentaForm({
           ))}
         </fieldset>
       ) : promociones.length > 0 ? (
-        /* Muchas promociones: el desplegable de siempre, que no empuja el
-           total fuera de la ventana. */
+        /* Muchas promociones: un desplegable, que no empuja el total fuera
+           de la ventana. El del sitio, no el del sistema. */
         <Field label="Promoción">
-          <Select
+          <SelectMenu
             name="promocion_id"
+            etiqueta="Promoción"
             value={promocionId}
-            onChange={(e) => setPromocionId(e.target.value)}
-          >
-            <option value="">Sin promoción</option>
-            {promociones.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.titulo} — {formatearBeneficio(p.tipoCodigo, p.valor)}
-              </option>
-            ))}
-          </Select>
+            onChange={setPromocionId}
+            opciones={[
+              { value: '', label: 'Sin promoción' },
+              ...promociones.map((p) => ({
+                value: String(p.id),
+                label: `${p.titulo} — ${formatearBeneficio(p.tipoCodigo, p.valor)}`,
+              })),
+            ]}
+          />
         </Field>
       ) : (
         /* Sin promociones vigentes no hay nada que elegir. */
@@ -267,18 +292,27 @@ export function ConfirmarVentaForm({
       )}
 
       {haySelectorSucursal && (
-        <Field label="Sucursal">
-          <Select name="sucursal_id" required defaultValue="">
-            <option value="" disabled>
-              Selecciona una sucursal
-            </option>
-            {sucursales.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.nombre ?? `Sucursal ${s.id}`}
-              </option>
-            ))}
-          </Select>
-        </Field>
+        <div ref={campoSucursal}>
+          <Field
+            label="Sucursal"
+            error={faltaSucursal ? 'Elige la sucursal donde se hace esta venta.' : null}
+          >
+            <SelectMenu
+              name="sucursal_id"
+              etiqueta="Sucursal"
+              placeholder="Selecciona una sucursal"
+              value={sucursalId}
+              onChange={(id) => {
+                setSucursalId(id)
+                setFaltaSucursal(false)
+              }}
+              opciones={sucursales.map((s) => ({
+                value: String(s.id),
+                label: s.nombre ?? `Sucursal ${s.id}`,
+              }))}
+            />
+          </Field>
+        </div>
       )}
 
       {/*
