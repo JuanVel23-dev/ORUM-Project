@@ -13,7 +13,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { EmptyState, ErrorState } from '@/components/ui/feedback'
-import { EstrellaOrum } from '@/components/ui/marca/marca'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import styles from './movimientos.module.css'
 
@@ -45,8 +44,8 @@ export const metadata = { title: 'Mis movimientos · ORUM' }
   Ahora habla el idioma del portal:
 
     · EL RESUMEN es una tarjeta clara, como las del portal inicial (la
-      primera versión, negra, no gustó): un icono en anillo de oro, lo
-      ahorrado en el serif de display y los usos y el ahorro promedio. En
+      primera versión, negra, no gustó), sin icono: lo ahorrado en el
+      serif de display, y los usos y el ahorro promedio. En
       escritorio se queda fija a la izquierda mientras se recorre la lista;
       en el móvil va arriba.
     · LA LISTA va por MESES (`agruparPorMes`), y cada movimiento es una fila
@@ -175,15 +174,17 @@ export default async function MovimientosPage({
         <div className={styles.cuerpo}>
           {/* ── EL RESUMEN ────────────────────────────────────────────── */}
           <aside className={styles.resumen} aria-label="Resumen de tu ahorro">
-            <div className={styles.resumenCabecera}>
-              <span className={styles.resumenIcono} aria-hidden="true">
-                {/* La estrella de la marca, no un icono genérico (la alcancía
-                    que hubo antes no gustó). */}
-                <EstrellaOrum className={styles.resumenEstrella} />
+            {/* Sin icono (03/10/2026: ni la alcancía ni la estrella
+                convencieron): la jerarquía la pone la tipografía. El signo
+                de pesos va pequeño y en oro, para que mande el número. */}
+            <p className={styles.resumenEtiqueta}>Has ahorrado</p>
+            <p className={styles.resumenTotal}>
+              <span className={styles.resumenMoneda} aria-hidden="true">
+                $
               </span>
-              <p className={styles.resumenEtiqueta}>Has ahorrado</p>
-            </div>
-            <p className={styles.resumenTotal}>{PESOS.format(bitacora.ahorroTotal)}</p>
+              <span className="sr-only">{PESOS.format(bitacora.ahorroTotal)}</span>
+              <span aria-hidden="true">{bitacora.ahorroTotal.toLocaleString('es-CO')}</span>
+            </p>
             <p className={styles.resumenNota}>con tu membresía ORUM</p>
 
             <dl className={styles.cifras}>
