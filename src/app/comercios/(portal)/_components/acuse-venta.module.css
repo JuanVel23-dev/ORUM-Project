@@ -1,13 +1,23 @@
 /* ==========================================================================
-   EL ACUSE DE LA VENTA  ·  el recibo (04/10/2026, tercera versión)
+   EL ACUSE DE LA VENTA  ·  el recibo (04/10/2026, cuarta pasada)
    --------------------------------------------------------------------------
    El guion y el porqué de cada pieza están en `acuse-venta.tsx`. Aquí, cómo
    se ve y cómo se mueve.
 
-   UNA TARJETA BLANCA EN DOS PARTES: la cabeza (logotipo, marca, monto) y el
-   talón en crema con los renglones, bajo una línea de corte. Un solo oro, y
-   de LÍNEA: `--brand` / `--brand-edge`, los oros que sí valen sobre claro.
-   Nada relleno salvo el botón.
+   UNA TARJETA BLANCA, ENTERA. Arriba la cabeza (logotipo, marca con sus
+   estrellas, monto); abajo los renglones del recibo, bajo una línea de corte.
+   El talón ya NO va en crema: el propietario no quiso ese color («no me gusta
+   el color de abajo»). Un solo oro, y de LÍNEA: `--brand` / `--brand-edge`,
+   los oros que sí valen sobre claro. Nada relleno salvo el botón.
+
+   CABE EN LA VENTANA, SIN DESPLAZAR («quiero que no me tenga que desplazar
+   para abajo, que se vea todo»). Con descuento el recibo lleva cinco
+   renglones y medía 680 px: en un portátil de 635 px de alto había que bajar
+   para ver el botón. Ahora cada medida vertical —rellenos, marca, monto,
+   renglones— es un `clamp()` contra el alto de la ventana (`dvh`): en una
+   pantalla alta el recibo respira, y en una baja se aprieta en vez de
+   desbordar. El desplazamiento interno queda solo como respaldo para un
+   teléfono en horizontal.
 
    TRES REGLAS QUE SOSTIENEN TODO EL ARCHIVO:
 
@@ -16,7 +26,8 @@
    2. EL ESTADO BASE ES EL FINAL. Cada pieza se escribe como queda al acabar,
       y su `@keyframes` solo dice DE DÓNDE viene (`from`). Así, donde la
       animación no corre —movimiento reducido, que el recorte global deja en
-      0,01 ms— lo que se ve es el recibo terminado. Las únicas que acaban
+      0,01 ms y en una sola vuelta— lo que se ve es el recibo terminado, con
+      las estrellas puestas y quietas. Las únicas piezas que acaban
       invisibles son las que solo existen mientras se mueven: el eco del
       anillo y el brillo del logotipo.
    3. LOS TIEMPOS SALEN DE LOS TOKENS DE DURACIÓN, y el compás de la escena,
@@ -30,13 +41,24 @@
   --t-visto: calc(var(--t-anillo) + var(--media-vuelta) * 2);
   --t-monto: var(--dur-page);
   --t-brillo: calc(var(--dur-page) * 2.4);
+  /* Lo que tarda cada estrella en salir del centro a su sitio. */
+  --vuelo: calc(var(--dur-page) * 1.6);
+
+  /* LAS MEDIDAS QUE SIGUEN AL ALTO DE LA VENTANA. Entre un mínimo y un máximo
+     de la escala de espaciado: nunca más apretado que lo uno ni más holgado
+     que lo otro. */
+  --aire-arriba: clamp(var(--space-4), 4dvh, var(--space-8));
+  --aire-abajo: clamp(var(--space-3), 3dvh, var(--space-7));
+  --aire-medio: clamp(var(--space-2), 2.2dvh, var(--space-6));
+  --lado-marca: clamp(46px, 9.5dvh, 72px);
+  --pad-lado: var(--space-5);
 
   position: relative;
   isolation: isolate;
   display: flex;
   flex-direction: column;
 
-  /* Si no cabe (un teléfono en horizontal), desplaza por dentro. */
+  /* El respaldo, para un teléfono en horizontal: desplaza por dentro. */
   max-height: calc(100dvh - var(--space-6));
   overflow-y: auto;
   overflow-x: hidden;
@@ -54,6 +76,13 @@
 
   /* El recibo se asienta: llega un punto más pequeño y aparece. Sin rebote. */
   animation: asentar var(--dur-page) var(--ease-out) both;
+}
+
+@container acuse (min-width: 460px) {
+  .cabeza,
+  .talon {
+    --pad-lado: var(--space-7);
+  }
 }
 
 @keyframes asentar {
@@ -123,13 +152,7 @@
 .cabeza {
   display: grid;
   justify-items: center;
-  padding: var(--space-7) var(--space-5) var(--space-6);
-}
-
-@container acuse (min-width: 460px) {
-  .cabeza {
-    padding: var(--space-8) var(--space-7) var(--space-7);
-  }
+  padding: var(--aire-arriba) var(--pad-lado) var(--aire-abajo);
 }
 
 /* --- El logotipo de ORUM ---------------------------------------------------
@@ -149,13 +172,7 @@
 
 /* El alto lo fija esta clase; el ancho lo deriva la imagen. */
 .logoImagen {
-  height: 22px;
-}
-
-@container acuse (min-width: 460px) {
-  .logoImagen {
-    height: 26px;
-  }
+  height: clamp(18px, 3.4dvh, 26px);
 }
 
 .logo::after {
@@ -204,9 +221,9 @@
    es un filo de interfaz. */
 .marca {
   position: relative;
-  width: 72px;
+  width: var(--lado-marca);
   aspect-ratio: 1;
-  margin-top: var(--space-6);
+  margin-top: var(--aire-medio);
 }
 
 .mitad {
@@ -255,14 +272,14 @@
 /* LA ✓. `.visto` es la ventana fija; `.cortina` entra desde la izquierda y
    `.trazo`, dentro, viaja lo mismo en sentido contrario. Las dos traslaciones
    se anulan: el trazo no se mueve en pantalla, y lo que avanza es el borde
-   por el que se ve. */
+   por el que se ve. Mide una proporción de la marca, que cambia con el alto
+   de la ventana. */
 .visto {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
+  top: 29%;
+  left: 29%;
+  width: 42%;
+  height: 42%;
   overflow: hidden;
   color: var(--brand);
 }
@@ -276,6 +293,8 @@
 
 .trazo {
   display: block;
+  width: 100%;
+  height: 100%;
   animation: trazo var(--dur-slow) var(--ease-out) var(--t-visto) both;
 }
 
@@ -314,12 +333,71 @@
   }
 }
 
+/* --- Las estrellas de ORUM -------------------------------------------------
+   La estrella de cuatro puntas del logotipo —la imagen del cliente, no un
+   dibujo aproximado—, repartida a los dos lados de la marca como una
+   constelación. Dos movimientos, y los dos son `transform` y `opacity`:
+
+     · SALEN. Cuando el anillo se cierra, cada una viaja del centro de la
+       marca a su sitio, girando un cuarto de vuelta, escalonadas. Salida
+       decelerada: disparan y frenan.
+     · TITILAN. Ya en su sitio se quedan respirando, cada una a su ritmo
+       (`--ritmo`), para que el recibo no quede inmóvil. Es lo que le da
+       vida mientras el cajero lee; con movimiento reducido se quedan quietas.
+
+   El viaje va en el envoltorio y el titilar en la imagen de dentro: dos
+   animaciones de `scale` sobre el mismo elemento se pisarían.
+
+   Solo a los lados de la marca, nunca encima del logotipo ni del monto. */
+.estrella {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--talla, 10px);
+  height: var(--talla, 10px);
+  margin: calc(var(--talla, 10px) / -2) 0 0 calc(var(--talla, 10px) / -2);
+  translate: var(--dx, 0) var(--dy, 0);
+  animation: salir var(--vuelo) var(--ease-out)
+    calc(var(--t-visto) + var(--orden, 0) * var(--escalonado)) both;
+}
+
+@keyframes salir {
+  from {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.4;
+    rotate: -90deg;
+  }
+}
+
+.destello {
+  display: block;
+  height: 100%;
+  animation: titilar calc(var(--dur-page) * (5 + var(--ritmo, 0))) var(--ease-in-out)
+    calc(var(--t-visto) + var(--vuelo) + var(--orden, 0) * var(--dur-fast)) infinite alternate;
+}
+
+/* Respira y gira un octavo de vuelta: una estrella de cuatro puntas que
+   rota 45° pasa por su propia silueta, y eso es lo que se lee como destello. */
+@keyframes titilar {
+  from {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+  to {
+    opacity: 0.4;
+    scale: 0.72;
+    rotate: 45deg;
+  }
+}
+
 /* --- Lo que dice ------------------------------------------------------------ */
 
 /* «Venta registrada», en versalitas espaciadas y en el oro de texto del
    portal: una etiqueta sobre el monto, no un titular que compita con él. */
 .etiqueta {
-  margin: var(--space-5) 0 0;
+  margin: var(--aire-medio) 0 0;
   font-size: var(--t-overline-size);
   line-height: 1.4;
   font-weight: 600;
@@ -328,14 +406,16 @@
   color: var(--brand);
 }
 
-/* EL MONTO: el serif de display, en tinta. El protagonismo lo da el tamaño. */
+/* EL MONTO: el serif de display, en tinta. El protagonismo lo da el tamaño,
+   que sigue al ancho de la tarjeta Y al alto de la ventana: el que mande
+   menos. */
 .monto {
   display: flex;
   align-items: flex-start;
   justify-content: center;
   margin: var(--space-1) 0 0;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 15cqi, 4.25rem);
+  font-size: clamp(2.25rem, min(15cqi, 9.5dvh), 4.25rem);
   line-height: 1.1;
   font-weight: 600;
   font-variant-numeric: lining-nums;
@@ -413,24 +493,18 @@
 /* ==========================================================================
    EL TALÓN  ·  los renglones del recibo, bajo la línea de corte
    --------------------------------------------------------------------------
-   En crema (`--surface-alt`): la otra mitad del tiquete. La línea de corte
-   es un trazo discontinuo de 1 px —una división DENTRO de la tarjeta, no un
-   filo suyo—.
+   Sobre el mismo blanco que la cabeza. Lo que lo separa es la línea de
+   corte: un trazo discontinuo de 1 px —una división DENTRO de la tarjeta, no
+   un filo suyo—, con el aire de un tiquete.
    ========================================================================== */
 
 .talon {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-5);
+  gap: clamp(var(--space-2), 1.8dvh, var(--space-4));
+  padding: clamp(var(--space-3), 2.4dvh, var(--space-5)) var(--pad-lado)
+    clamp(var(--space-4), 3dvh, var(--space-7));
   border-top: 1px dashed color-mix(in srgb, var(--tinta-1) 26%, transparent);
-  background: var(--surface-alt);
-}
-
-@container acuse (min-width: 460px) {
-  .talon {
-    padding: var(--space-6) var(--space-7) var(--space-7);
-  }
 }
 
 .renglones {
@@ -444,7 +518,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-4);
-  padding-block: var(--space-2);
+  padding-block: clamp(var(--space-1), 0.9dvh, var(--space-2));
 }
 
 .renglon + .renglon {
@@ -466,11 +540,10 @@
   overflow-wrap: anywhere;
 }
 
-/* El descuento, en oro. `--gold-700` y no `--brand`: sobre la crema del
-   talón es el oro de texto que cumple AA (4,67:1). El signo menos es el
-   segundo canal. */
+/* El descuento, en el oro de texto del portal (`--brand`: 4,93:1 sobre
+   blanco). El signo menos es el segundo canal. */
 .renglon dd.acento {
-  color: var(--gold-700);
+  color: var(--brand);
 }
 
 /*
@@ -482,7 +555,15 @@
   max-width: 46ch;
   margin: 0 auto;
   font-size: var(--t-footnote-size);
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--text-3);
   text-wrap: pretty;
+}
+
+/* En una ventana MUY baja la línea honesta se retira antes que obligar a
+   desplazar para llegar al botón: lo que dice ya lo sabe quien administra. */
+@media (max-height: 540px) {
+  .aviso {
+    display: none;
+  }
 }

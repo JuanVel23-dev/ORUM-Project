@@ -3,7 +3,7 @@
 import type { CSSProperties } from 'react'
 import { Check, RotateCcw, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { LogoOrum } from '@/components/ui/marca/marca'
+import { EstrellaOrum, LogoOrum } from '@/components/ui/marca/marca'
 import styles from './acuse-venta.module.css'
 
 const PESOS = new Intl.NumberFormat('es-CO', {
@@ -16,7 +16,7 @@ const PESOS = new Intl.NumberFormat('es-CO', {
 const MILES = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 })
 
 /*
-  EL ACUSE DE LA VENTA  ·  el recibo (04/10/2026, tercera versión)
+  EL ACUSE DE LA VENTA  ·  el recibo (04/10/2026, cuarta pasada)
   ---------------------------------------------------------------------------
   Encargo del propietario, tras ver las dos primeras (negro y oro con
   estrellas; luego la misma sobre blanco): «no me gusta el diseño ni la
@@ -40,9 +40,23 @@ const MILES = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 })
       compra y el descuento cuando lo hay— bajo una línea de corte, como un
       tiquete: es lo que el cajero necesita para reclamar, puesto en su sitio.
 
-  EL DISEÑO: una tarjeta blanca en dos partes. Arriba, el logotipo de ORUM en
-  oro, la marca y el monto en el serif de display. Abajo, el talón en crema
-  con los renglones. Un solo oro, de línea; nada relleno salvo el botón.
+  EL DISEÑO: una tarjeta blanca, entera. Arriba, el logotipo de ORUM en oro,
+  la marca y el monto en el serif de display. Abajo, los renglones bajo una
+  línea de corte. Un solo oro, de línea; nada relleno salvo el botón.
+
+  LO QUE CAMBIÓ CON LA CUARTA PASADA, a la vista de la tercera («quiero que
+  no me tenga que desplazar para abajo, que ocupe la pantalla y se vea todo;
+  no me gusta el color de abajo; añade las estrellas de ORUM y anímalas para
+  que tenga más dinamismo»):
+
+    · CABE EN LA VENTANA. Las medidas verticales siguen al alto de la ventana
+      (`dvh`, en el CSS): en un portátil bajo el recibo se aprieta en vez de
+      obligar a bajar hasta el botón.
+    · EL TALÓN YA NO ES CREMA: va sobre el mismo blanco.
+    · LAS ESTRELLAS DE ORUM vuelven, pero no como estallido: una constelación
+      a los lados de la marca. Salen del centro cuando el anillo se cierra y
+      se quedan titilando, cada una a su ritmo. Es la imagen de la estrella
+      del cliente (`EstrellaOrum`), la misma de la «O» del logotipo.
 
   LO QUE NO CAMBIA de las versiones anteriores, porque es lo que protege a la
   caja:
@@ -59,6 +73,26 @@ const MILES = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 })
 
 /** Los diez dígitos, dos veces: cada columna da una vuelta entera y se para. */
 const TIRA = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+/*
+  LA CONSTELACIÓN. Dónde queda cada estrella respecto al centro de la marca
+  (px), cuánto mide y a qué ritmo titila (0–3: de más vivo a más pausado).
+  Solo a los lados: ninguna sube al logotipo ni baja al monto. Tabla fija y
+  no `Math.random()`: un render no puede ser impuro, y una constelación que
+  cae siempre igual de bien es mejor que una que a veces sale coja.
+*/
+const ESTRELLAS = [
+  { dx: -60, dy: -20, talla: 18, ritmo: 0 },
+  { dx: 62, dy: -24, talla: 13, ritmo: 1 },
+  { dx: -96, dy: 8, talla: 11, ritmo: 2 },
+  { dx: 98, dy: -6, talla: 20, ritmo: 3 },
+  { dx: -128, dy: -16, talla: 15, ritmo: 1 },
+  { dx: 132, dy: 16, talla: 11, ritmo: 0 },
+  { dx: -84, dy: 28, talla: 9, ritmo: 3 },
+  { dx: 86, dy: 26, talla: 9, ritmo: 2 },
+  { dx: -154, dy: 12, talla: 9, ritmo: 2 },
+  { dx: 156, dy: -12, talla: 9, ritmo: 1 },
+]
 
 /** El retardo de entrada de una pieza, como variable: lo único que admite `style`. */
 const tras = (ms: number) => ({ '--retardo': `${ms}ms` }) as CSSProperties
@@ -168,6 +202,25 @@ export function AcuseVenta({
         {/* La marca: un anillo de trazo fino que se cierra y la ✓ que se
             dibuja dentro. Decorativa. */}
         <span className={styles.marca} aria-hidden="true">
+          {/* Las estrellas de ORUM: salen del centro y se quedan titilando. */}
+          {ESTRELLAS.map((e, i) => (
+            <span
+              key={i}
+              className={styles.estrella}
+              style={
+                {
+                  '--dx': `${e.dx}px`,
+                  '--dy': `${e.dy}px`,
+                  '--talla': `${e.talla}px`,
+                  '--ritmo': e.ritmo,
+                  '--orden': i,
+                } as CSSProperties
+              }
+            >
+              <EstrellaOrum className={styles.destello} />
+            </span>
+          ))}
+
           <span className={styles.eco} />
           <span className={`${styles.mitad} ${styles.mitadDerecha}`}>
             <span className={`${styles.arco} ${styles.arcoDerecho}`} />

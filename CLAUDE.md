@@ -1070,16 +1070,25 @@ tercera versión, y las dos primeras están descartadas por el propietario: el
 acuse negro y oro con estallido de estrellas («no me gusta que sea de color
 negro») y el mismo sobre blanco («no me gusta el diseño ni la animación;
 busca referencias de 2026; debe ser elegante»). **No vuelvas a ninguna de las
-dos**: ni fondo negro, ni disco de oro macizo, ni estrellas, ni olas de color.
+dos**: ni fondo negro, ni disco de oro macizo, ni estallido, ni olas de color.
 Lo que hay, y viene de las referencias de pantallas de pago (contención antes
 que adorno; marca ligera, monto grande, a quién y cuándo):
 
-- Una tarjeta blanca en dos partes. Arriba, el logotipo de ORUM en oro
-  (pequeño, como membrete), la marca y el monto. Abajo, el talón en crema con
-  los renglones —socio, membresía, compra y descuento si lo hubo, hora— bajo
-  una línea de corte discontinua.
+- Una tarjeta **blanca, entera**. Arriba, el logotipo de ORUM en oro (pequeño,
+  como membrete), la marca y el monto. Abajo, los renglones —socio, membresía,
+  compra y descuento si lo hubo, hora— bajo una línea de corte discontinua.
+  **El talón NO va en crema**: se probó y el propietario no quiso ese color.
+- **Cabe en la ventana, sin desplazar** («que no me tenga que desplazar para
+  abajo, que se vea todo»). Las medidas verticales son `clamp()` contra el
+  alto de la ventana (`dvh`): a 1366 × 635 con descuento mide 557 px. Si
+  añades un renglón o subes un relleno, vuelve a medirlo a esa altura.
 - **La marca es de LÍNEA**: un anillo fino que se cierra y la ✓ que se dibuja
   dentro. Un solo oro (`--brand` / `--brand-edge`), nada relleno salvo el botón.
+- **Las estrellas de ORUM** (`EstrellaOrum`, la imagen del cliente) van como
+  una constelación a los lados de la marca: salen del centro cuando el anillo
+  se cierra y se quedan titilando, cada una a su ritmo. Pedidas expresamente
+  («añade las estrellas de ORUM y anímalas para que tenga más dinamismo»). No
+  son el estallido descartado: son pocas, a los lados, y no tapan nada.
 - **El monto RUEDA** dígito a dígito, como un odómetro, en el serif de display
   y en tinta. No cuenta de cero al total.
 - Dura algo más de un segundo. Es **solo `transform` y `opacity`** (el anillo
