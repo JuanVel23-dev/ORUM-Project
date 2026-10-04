@@ -1,15 +1,14 @@
 'use client'
 
-import { useActionState, useEffect, useRef, useState } from 'react'
+import { useActionState, useEffect, useId, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Camera, Search, X } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Stack } from '@/components/ui/layout'
 import { Spinner } from '@/components/ui/spinner'
+import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { error as vibrarError, toque } from '@/lib/shared/haptica'
 import { buscarMiembro, type BuscarMiembroState } from '../actions'
 import { ResultadoMiembro } from './resultado-miembro'
@@ -93,6 +92,7 @@ export function BuscarMiembroForm({
   */
   const [peticionEnvio, setPeticionEnvio] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
+  const idTitulo = useId()
 
   useEffect(() => {
     if (peticionEnvio === 0) return
@@ -127,8 +127,17 @@ export function BuscarMiembroForm({
   }
 
   return (
-    <Stack gap={5}>
-      <Card padding="lg">
+    <div className={styles.pila}>
+      {/* La tarjeta PRINCIPAL de la pantalla: por aquí empieza todo. */}
+      <section className={`${styles.tarjeta} ${styles.principal}`} aria-labelledby={idTitulo}>
+        <header className={styles.cabeceraTarjeta}>
+          <TituloSeccion id={idTitulo} como="h2" tamano="bloque" texto="Verificar membresía" />
+          {/* Nombra las dos vías sin enseñar todavía ninguna: en reposo solo
+              se ve el botón de escanear, y saber que existe la alternativa
+              antes de necesitarla evita el «y si el carnet está rayado». */}
+          <p className={styles.lede}>Escanea el carnet del socio o escribe su número.</p>
+        </header>
+
         <form ref={formRef} action={formAction} className={styles.paso}>
           {/* `key` con el propio mensaje: si el cajero reintenta y falla con
               EXACTAMENTE el mismo error, React reutilizaría el nodo y el lector
@@ -144,7 +153,7 @@ export function BuscarMiembroForm({
               key={falloCamara}
               tone="warning"
               actions={
-                <Button variant="secondary" onClick={escribirNumero}>
+                <Button variant="secondary" pildora onClick={escribirNumero}>
                   Escribir el número
                 </Button>
               }
@@ -166,9 +175,12 @@ export function BuscarMiembroForm({
                 texto — dos botones grandes compitiendo obligan a elegir, y
                 elegir de pie con el cliente delante cuesta segundos.
               */}
+              {/* La acción del portal, en píldora dorada: el botón de la fachada. */}
               <Button
                 type="button"
+                variant="brand"
                 size="lg"
+                pildora
                 fullWidth
                 onClick={abrirCamara}
                 icon={<Camera size={19} />}
@@ -213,6 +225,7 @@ export function BuscarMiembroForm({
                 type="button"
                 variant="secondary"
                 size="lg"
+                pildora
                 fullWidth
                 onClick={() => setVista('reposo')}
                 icon={<X size={17} />}
@@ -266,6 +279,7 @@ export function BuscarMiembroForm({
                   type="button"
                   variant="secondary"
                   size="lg"
+                  pildora
                   onClick={abrirCamara}
                   icon={<Camera size={17} />}
                 >
@@ -279,9 +293,10 @@ export function BuscarMiembroForm({
                 */}
                 <Button
                   type="submit"
+                  variant="brand"
                   size="lg"
+                  pildora
                   loading={pending}
-                  fullWidth
                   icon={<Search size={17} />}
                 >
                   {pending ? 'Verificando…' : 'Buscar'}
@@ -290,7 +305,7 @@ export function BuscarMiembroForm({
             </>
           )}
         </form>
-      </Card>
+      </section>
 
       {/*
         El veredicto es un MENSAJE DE ESTADO (WCAG 4.1.3): aparece sin que el
@@ -319,6 +334,6 @@ export function BuscarMiembroForm({
           onExito={onNuevaVerificacion}
         />
       )}
-    </Stack>
+    </div>
   )
 }

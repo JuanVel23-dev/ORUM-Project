@@ -2,7 +2,154 @@
   Herramienta de caja. Se usa de pie, con una mano, con el cliente delante y
   cola detrás. Todo aquí está calibrado para eso: objetivos grandes, una
   decisión por pantalla y el veredicto legible a un brazo de distancia.
+
+  REDISEÑO DEL 04/10/2026, con el estilo del Portal Público y de Miembros
+  (encargo del propietario: «utiliza sus reglas, colores y estilo»). Lo que
+  cambió es el vestido, no el recorrido:
+
+    · Tarjetas blancas sin trazo, despegadas por su sombra, con el radio de
+      los paneles de la fachada. Montan sobre el canto del banner negro.
+    · Títulos de bloque con la estrella y la última palabra en cursiva dorada
+      (`TituloSeccion`), y el serif de display en la cifra que se dice en voz
+      alta —el total—, como el ahorro de «Mis movimientos».
+    · La acción principal en píldora dorada; la segunda vía, en el oro de
+      texto del portal.
+
+  Lo que NO cambió, porque es función y no estilo: el veredicto sigue siendo
+  una franja de color sólido con punto lleno / punto hueco, y los objetivos
+  táctiles siguen en `--tap-min`.
+
+  Se adapta con `@container contenido` —el `<main>` del portal—.
 */
+
+/* ==========================================================================
+   LA PÁGINA  ·  herramienta a la izquierda, promociones y ayuda a la derecha
+   ========================================================================== */
+
+.cuerpo {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* En una sola columna (teléfono, tableta) las dos piezas se quedan en el
+   ancho de una herramienta, centradas: a 800 px, una tarjeta de lado a lado
+   deja el botón de escanear convertido en una barra. */
+.herramienta,
+.lateral {
+  width: 100%;
+  min-width: 0;
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.lateral {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@container contenido (min-width: 900px) {
+  .cuerpo {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  .herramienta,
+  .lateral {
+    max-width: none;
+  }
+
+  /* Las promociones acompañan mientras la columna de la herramienta crece
+     (veredicto, venta): se quedan a la vista bajo la cabecera fija. */
+  .lateral {
+    position: sticky;
+    top: calc(var(--cabecera-alto) + var(--space-4));
+  }
+}
+
+/* La columna de la herramienta: buscar → veredicto → venta. */
+.pila {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ==========================================================================
+   LA TARJETA  ·  la superficie de la fachada
+   --------------------------------------------------------------------------
+   Blanca, sin trazo en reposo (`--border-superficie` vale `transparent` y
+   lo repone `prefers-contrast: more`) y despegada por su sombra, que aquí es
+   la de la fachada: el cromo compartido remapea `--shadow-card` y
+   `--shadow-raised`. No es `Card`: aquel lleva el radio de las tarjetas del
+   panel (`--radius-md`), y los paneles de la fachada son `--radius-lg`.
+   ========================================================================== */
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), var(--edge);
+  color: var(--text);
+}
+
+@container contenido (min-width: 600px) {
+  .tarjeta {
+    padding: var(--space-7);
+  }
+}
+
+/* UNA por pantalla: la de buscar, que es por donde empieza todo. Sube un
+   escalón de sombra, como `<Card principal>`. */
+.principal {
+  box-shadow: var(--shadow-raised), var(--edge);
+}
+
+/* Los avisos de la página (sin comercio, sin sucursales, error): una sola
+   tarjeta, en el ancho de la herramienta. */
+.aviso {
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.cabeceraTarjeta {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.lede {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+/*
+  LO QUE LLEGA DESPUÉS DE BUSCAR entra con un fundido corto y 8 px de viaje:
+  el veredicto y la tarjeta de venta. Keyframe y no transición porque el
+  elemento se MONTA —no hay valor de partida que transicionar—. Corto a
+  propósito: esto pasa decenas de veces al día (regla cero de frecuencia).
+  Con movimiento reducido, el recorte global lo deja en un instante.
+*/
+.aparece {
+  animation: aparecer var(--dur-base) var(--ease-out) both;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+/* ==========================================================================
+   BUSCAR
+   ========================================================================== */
 
 .paso {
   display: flex;
@@ -15,9 +162,22 @@
   gap: var(--space-3);
 }
 
+/* «Buscar» se lleva el ancho que deja «Escanear». Con `flex` y no con el
+   `width: 100%` de `fullWidth`: en una fila, ese 100 % es el de la fila
+   entera y el botón se salía de la tarjeta por la derecha. */
+.acciones > :last-child {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 @container contenido (max-width: 420px) {
   .acciones {
     flex-direction: column-reverse;
+  }
+
+  /* Apilados, los dos a todo el ancho. */
+  .acciones > :last-child {
+    flex: none;
   }
 }
 
@@ -29,10 +189,12 @@
   peso de un enlace: dos botones grandes lado a lado obligan a decidir cuál, y
   decidir de pie con el cliente delante cuesta más que el toque que ahorraría.
 
-  Va subrayado y en tinta, no en oro: aquí el oro sigue siendo marca, y este
-  portal se mantiene sobrio a propósito.
+  En el oro de texto del portal (`--brand`: `--gold-650`, 4,93:1 sobre
+  blanco), subrayado y con peso: es como se escriben los enlaces de la
+  fachada. El subrayado es el segundo canal; el color no va solo.
 */
 .salida {
+  margin: 0;
   text-align: center;
   font-size: var(--t-footnote-size);
   line-height: var(--t-footnote-leading);
@@ -45,7 +207,8 @@
   border: 0;
   background: none;
   font: inherit;
-  color: var(--text);
+  font-weight: 600;
+  color: var(--brand);
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
@@ -74,10 +237,18 @@
 
 /* --- Escáner --------------------------------------------------------------- */
 
+/*
+  El visor es cuadrado y NO crece con la tarjeta: en el monitor de una caja la
+  tarjeta mide más de 600 px y un visor de ese lado se comía la pantalla
+  entera, con «Cerrar cámara» fuera de la vista. Tope de 460 px y del 56 % del
+  alto de la ventana; en el teléfono sigue ocupando todo el ancho.
+*/
 .escaner {
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius-md);
+  width: min(100%, 460px, 56dvh);
+  margin-inline: auto;
+  border-radius: var(--radius-lg);
   background: var(--n-1000);
   aspect-ratio: 1;
 }
@@ -133,47 +304,66 @@
 }
 
 .escanerNota {
-  margin-top: var(--space-3);
+  margin: var(--space-3) 0 0;
   text-align: center;
   font-size: var(--t-caption-size);
   color: var(--text-3);
 }
 
-/* --- Veredicto ------------------------------------------------------------- */
-
-/*
-  EL MOMENTO DE LA VERDAD, Y LO ÚNICO DE ESTE PORTAL CON PRESENCIA.
-
-  Se lee a un metro, de pie, con el pulgar tapando media pantalla y a veces con
-  sol encima. Todo lo demás de la herramienta es sobrio; esto no puede serlo.
-
-  Antes el dictamen era un `Badge`: la pieza que decide si se cobra o no era la
-  MÁS PEQUEÑA de la tarjeta (`AUDIT-a11y` #9). Ahora es una franja de color
-  sólido a todo el ancho, con el veredicto dentro en mayúsculas.
-
-  Contraste medido, texto `--surface` sobre relleno de estado —los dos tokens
-  giran con el tema en sentidos opuestos, así que el par funciona en claro y en
-  oscuro sin una sola rama de tema:
-
-    activa   claro  #137a3b / #fdfcfa .... 5,29:1      inactiva claro  6,07:1
-    activa   oscuro #45d67c / #211a16 .... 9,12:1      inactiva oscuro 5,59:1
-
-  Los cuatro pasan AA de texto con holgura, y el filo de la franja contra la
-  tarjeta va muy por encima del 3:1 de 1.4.11 con esos mismos números.
-*/
-.veredicto {
+/* Mientras el escáner se descarga. Sin esto, pulsar "Escanear QR" con mala
+   cobertura no daría ninguna señal y el cajero volvería a pulsar. */
+.cargandoEscaner {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  min-height: 120px;
+  margin: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface-hueco);
+
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
 }
 
-.banner {
+/* ==========================================================================
+   VEREDICTO
+   ========================================================================== */
+
+/*
+  EL MOMENTO DE LA VERDAD, Y LO ÚNICO DE ESTE PORTAL CON COLOR DE ESTADO.
+
+  Se lee a un metro, de pie, con el pulgar tapando media pantalla y a veces con
+  sol encima. Antes el dictamen era un `Badge`: la pieza que decide si se cobra
+  o no era la MÁS PEQUEÑA de la tarjeta (`AUDIT-a11y` #9). Es una franja de
+  color sólido con el veredicto dentro en mayúsculas.
+
+  Desde el rediseño la franja va A SANGRE: es la cabeza de la tarjeta, de
+  borde a borde, y la tarjeta la recorta con su propio radio. Así pesa más
+  que cuando era una píldora dentro del relleno, sin crecer un píxel de alto.
+
+  Contraste medido, texto `--surface` sobre relleno de estado. El portal va
+  siempre en claro y su `--surface` es blanco puro:
+
+    activa    #137a3b / #ffffff .... 5,37:1      inactiva  #c1121f / #ffffff .... 6,16:1
+
+  Los dos pasan AA de texto, y el filo de la franja contra la tarjeta va muy
+  por encima del 3:1 de 1.4.11 con esos mismos números.
+*/
+.tarjetaVeredicto {
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.dictamen {
   display: flex;
   align-items: center;
   gap: var(--space-3);
 
+  margin: 0;
   padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-sm);
 
   color: var(--surface);
 
@@ -187,11 +377,11 @@
   text-wrap: balance;
 }
 
-.bannerActiva {
+.dictamenActiva {
   background: var(--success);
 }
 
-.bannerInactiva {
+.dictamenInactiva {
   background: var(--danger);
 }
 
@@ -218,13 +408,27 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  padding: var(--space-5);
+}
+
+@container contenido (min-width: 600px) {
+  .dictamen {
+    padding: var(--space-5) var(--space-7);
+  }
+
+  .datos {
+    padding: var(--space-6) var(--space-7) var(--space-7);
+  }
 }
 
 /*
   EL NOMBRE, LO SEGUNDO QUE LEE EL OJO. Confirma que el carnet es de quien lo
   está entregando; el número baja a dato de cotejo, que es su verdadera función.
+  En Montserrat y no en el serif: es un dato que se coteja a un metro, y el
+  propio carnet del socio lo escribe así.
 */
 .nombre {
+  margin: 0;
   font-size: var(--t-title-1-size);
   line-height: var(--t-title-1-leading);
   letter-spacing: var(--t-title-1-tracking);
@@ -232,29 +436,34 @@
   text-wrap: balance;
 }
 
+/* El plan, en el oro de texto del portal: es la membresía que se muestra. */
+.plan {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--brand);
+}
+
 .numero {
-  font-family: var(--font-mono);
+  margin: 0;
   font-size: var(--t-footnote-size);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em;
   color: var(--text-3);
 }
 
-.plan {
-  font-size: var(--t-footnote-size);
-  color: var(--text-2);
-}
-
 /* Qué hacer, no solo qué pasa: un veredicto negativo sin instrucción deja al
    cajero decidiendo a solas delante del cliente. */
 .instruccion {
-  margin-top: var(--space-2);
+  margin: var(--space-2) 0 0;
   font-size: var(--t-callout-size);
   line-height: var(--t-callout-leading);
   color: var(--text-2);
 }
 
-/* --- Venta ----------------------------------------------------------------- */
+/* ==========================================================================
+   VENTA
+   ========================================================================== */
 
 .campos {
   display: grid;
@@ -350,26 +559,14 @@
 /*
   EL TOTAL ES EL PIE DEL RECIBO, NO UNA CAJA DENTRO DE OTRA CAJA.
 
-  Antes era una franja con `border: 1px solid var(--border-strong)` y relleno
-  `--surface-sunk`. Las dos mitades de eso dejaron de existir con la v4:
+  Lo que hace un recibo de caja de verdad: una regla horizontal y la cifra
+  grande debajo. `--border-subtle` es el hairline interno de la fachada (el
+  mismo que separa las cifras del resumen de «Mis movimientos»): una división
+  DENTRO de la superficie, no un filo de la tarjeta.
 
-    · `--border-strong` es tinta plena (16,96:1). `CLAUDE.md` lo declara
-      literalmente «ya no se usa»: es el valor al que `prefers-contrast: more`
-      devuelve `--border-superficie`, no un trazo que se pida a mano. Un marco
-      de tinta plena dentro de una tarjeta es justo la cuadrícula de cajas que
-      hundió la v2.
-    · `--surface-sunk` es EL MISMO PAPEL que la tarjeta (v4: el blanco no tiene
-      escalones). Como relleno no separaba nada; el recuadro entero lo sostenía
-      el borde.
-
-  Lo que queda es lo que hace un recibo de caja de verdad: una regla horizontal
-  y la cifra grande debajo. `--border` es legal aquí y no por casualidad —es el
-  token de «divisiones DENTRO de una superficie: cabeceras, pies, Divider»— y
-  esto es exactamente el pie del formulario. Medido: 4,16:1 sobre papel.
-
-  El tamaño hace el resto del trabajo que hacía el marco: la cifra sube a
-  `--t-title-1`, que es el mismo peso que el nombre del socio en el veredicto.
-  Es el número que se dice en voz alta.
+  La cifra va en el serif de display, como el ahorro de «Mis movimientos»:
+  es el número que se dice en voz alta, y el tamaño hace el trabajo que antes
+  hacía un marco.
 */
 .total {
   display: flex;
@@ -377,36 +574,43 @@
   justify-content: space-between;
   gap: var(--space-3);
 
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .totalEtiqueta {
-  font-size: var(--t-overline-size);
-  letter-spacing: var(--t-overline-tracking);
-  font-weight: var(--t-overline-weight);
-  text-transform: uppercase;
-  /* `--text-2` (7,34:1) y no `--text-3` (4,71:1): una versalita de 11px es
-     texto pequeño, y el mínimo de la escala no deja margen para leerla de pie
-     a un brazo de distancia. */
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  /* `--text-2` y no `--text-3`: se lee de pie, a un brazo de distancia. */
   color: var(--text-2);
 }
 
 .totalValor {
-  font-size: var(--t-title-1-size);
-  line-height: var(--t-title-1-leading);
-  font-weight: var(--t-title-1-weight);
-  letter-spacing: var(--t-title-1-tracking);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 1.5rem + 1.6vw, 2.375rem);
+  line-height: 1.1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--text);
+  -webkit-font-smoothing: auto;
 }
 
+/* Lo que se ahorra el socio, en el oro de texto del portal y en cursiva del
+   serif: el mismo acento que los titulares. No es un estado —no dice «bien»
+   ni «mal»—, así que no va en verde. */
 .ahorro {
-  font-size: var(--t-caption-size);
-  color: var(--success);
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--t-callout-size);
+  font-style: italic;
+  color: var(--brand);
+  -webkit-font-smoothing: auto;
 }
 
-/* --- Éxito ----------------------------------------------------------------- */
+/* ==========================================================================
+   ÉXITO
+   ========================================================================== */
 
 .exito {
   display: flex;
@@ -414,23 +618,36 @@
   align-items: center;
   gap: var(--space-4);
   text-align: center;
-  padding: var(--space-4) 0;
+  padding: var(--space-2) 0;
 }
 
 .exitoIcono {
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: var(--radius-full);
   color: var(--success);
   background: var(--success-bg);
+  /* El ✓ llega con el rebote de lo que se gana: una confirmación, una vez. */
+  animation: sellar var(--dur-slow) var(--ease-spring) both;
 }
 
+@keyframes sellar {
+  from {
+    opacity: 0;
+    scale: 0.92;
+  }
+}
+
+/* El título del acuse, en el serif de display: es el final feliz. */
 .exitoTitulo {
-  font-size: var(--t-title-2-size);
-  font-weight: var(--t-title-2-weight);
-  letter-spacing: var(--t-title-2-tracking);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  font-weight: 700;
+  -webkit-font-smoothing: auto;
 }
 
 /* Los dos párrafos del acuse van juntos y separados del icono y del botón:
@@ -439,10 +656,12 @@
 .exitoTextos {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-2);
 }
 
 .exitoNota {
+  margin: 0;
   font-size: var(--t-callout-size);
   line-height: var(--t-callout-leading);
   color: var(--text-2);
@@ -455,31 +674,112 @@
   que estar —es lo único cierto que se le puede dar a un cajero que acaba de
   equivocarse— pero no puede competir con el ✓ ni con «Verificar otro socio»,
   que es lo que el 99 % de las veces se va a tocar a continuación.
-
-  `--text-3` sobre papel da 4,71:1, el mínimo de la escala y AA de cuerpo. No
-  baja más: el token ya está en su suelo (`tokens.css` §1) y aclararlo sería
-  reprobar.
 */
 .exitoAviso {
   max-width: 44ch;
+  margin: 0;
   font-size: var(--t-footnote-size);
   line-height: var(--t-footnote-leading);
   color: var(--text-3);
   text-wrap: pretty;
 }
 
-/* Mientras el escáner se descarga. Sin esto, pulsar "Escanear QR" con mala
-   cobertura no daría ninguna señal y el cajero volvería a pulsar. */
-.cargandoEscaner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+/* ==========================================================================
+   AL LADO  ·  las promociones vigentes y la ayuda
+   ========================================================================== */
 
-  min-height: 120px;
-  border-radius: var(--radius-md);
-  background: var(--surface-hueco);
+/* La tarjeta lateral es estrecha: un escalón menos de relleno que las de la
+   herramienta, o los títulos de las promociones se parten en dos líneas. */
+@container contenido (min-width: 600px) {
+  .lateral .tarjeta {
+    padding: var(--space-6);
+  }
+}
 
-  font-size: var(--t-footnote-size);
+.promociones {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Fila de lista: sin sombra ni movimiento. La cifra a la izquierda, en una
+   columna de ancho fijo para que los títulos caigan todos en la misma línea. */
+.promocion {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+}
+
+.promocion:first-child {
+  padding-top: 0;
+}
+
+.promocion:last-child {
+  padding-bottom: 0;
+}
+
+.promocion + .promocion {
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* La cifra, en el serif y en el oro de texto del portal. 22px y peso 600:
+   texto grande, así que el 4,93:1 de `--gold-650` sobre blanco sobra. */
+.promocionValor {
+  font-family: var(--font-display);
+  font-size: var(--t-title-2-size);
+  line-height: 1.2;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--brand);
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: auto;
+}
+
+.promocionTitulo {
+  font-size: var(--t-callout-size);
+  line-height: 1.45;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.sinPromociones {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  line-height: 1.5;
   color: var(--text-2);
+}
+
+/* La ayuda: una nota sobre el blanco de la página, fuera de las tarjetas. */
+.ayuda {
+  margin: 0;
+  padding-inline: var(--space-2);
+  font-size: var(--t-footnote-size);
+  line-height: 1.55;
+  color: var(--text-2);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.ayuda a {
+  font-weight: 600;
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ayuda a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* ==========================================================================
+   CARGA  ·  el esqueleto, con la misma geometría que lo que llega
+   ========================================================================== */
+
+.esqueletoLineas {
+  display: grid;
+  gap: var(--space-3);
 }

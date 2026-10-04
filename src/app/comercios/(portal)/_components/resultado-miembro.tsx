@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/card'
 import type { MiembroEncontrado } from '../actions'
 import styles from './verificar.module.css'
 
@@ -8,7 +7,8 @@ import styles from './verificar.module.css'
  * Es la única pantalla del producto que se lee **a un metro, de pie y con el
  * pulgar tapando media pantalla**, así que es la única que se permite
  * presencia: una franja de color sólido a todo el ancho, con el dictamen en
- * mayúsculas dentro.
+ * mayúsculas dentro. Desde el rediseño del 04/10/2026 la franja va A SANGRE:
+ * es la cabeza de la tarjeta, de borde a borde.
  *
  * POR QUÉ NO `StatusBadge` AQUÍ, Y POR QUÉ ESO NO CONTRADICE AL SISTEMA:
  * `StatusBadge` sigue siendo lo correcto en una lista —admin, carnet— y su
@@ -24,13 +24,12 @@ import styles from './verificar.module.css'
  * texto `--surface`, que es el token que gira con el tema justo al revés que
  * los de estado — por eso el par funciona en los dos sin ramas:
  *
- *   activa   claro  #137a3b con texto #fdfcfa .......... 5,29:1
- *   activa   oscuro #45d67c con texto #211a16 .......... 9,12:1
- *   inactiva claro  #c1121f con texto #fdfcfa .......... 6,07:1
- *   inactiva oscuro #ff5a52 con texto #211a16 .......... 5,59:1
+ *   activa    #137a3b con texto #ffffff .......... 5,37:1
+ *   inactiva  #c1121f con texto #ffffff .......... 6,16:1
  *
- * Los cuatro pasan AA de texto (4,5:1) con el tamaño de cuerpo, así que el
- * titular grande va sobrado. El filo de la franja contra la tarjeta usa esos
+ * (El portal va siempre en claro desde el rediseño, y su `--surface` es
+ * blanco puro.) Los dos pasan AA de texto (4,5:1) con el tamaño de cuerpo,
+ * así que el titular grande va sobrado. El filo de la franja contra la tarjeta usa esos
  * mismos ratios, muy por encima del 3:1 de 1.4.11.
  *
  * El motivo se omite a propósito: `buscar_miembro_comercio` solo devuelve
@@ -40,10 +39,12 @@ export function ResultadoMiembro({ miembro }: { miembro: MiembroEncontrado }) {
   const vigente = miembro.vigente
 
   return (
-    <Card padding="lg">
-      <div className={styles.veredicto}>
+    <section
+      className={`${styles.tarjeta} ${styles.tarjetaVeredicto} ${styles.aparece}`}
+      aria-label="Resultado de la verificación"
+    >
         <p
-          className={`${styles.banner} ${vigente ? styles.bannerActiva : styles.bannerInactiva}`}
+          className={`${styles.dictamen} ${vigente ? styles.dictamenActiva : styles.dictamenInactiva}`}
         >
           {/*
             Punto LLENO frente a anillo HUECO: la diferencia es de forma, no de
@@ -76,7 +77,6 @@ export function ResultadoMiembro({ miembro }: { miembro: MiembroEncontrado }) {
             </p>
           )}
         </div>
-      </div>
-    </Card>
+    </section>
   )
 }

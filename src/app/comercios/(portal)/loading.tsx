@@ -1,21 +1,20 @@
-import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/feedback'
-import { Stack } from '@/components/ui/layout'
-import { SkeletonPageHeader } from '@/components/ui/skeletons'
+import styles from './_components/verificar.module.css'
 
 /**
  * Esqueleto de la Herramienta de Comercios.
  *
- * NO existía. `page.tsx` es un Server Component que espera a tres consultas
- * (sucursales, promociones, tipos de beneficio) antes de pintar una sola letra,
- * así que en una conexión de caja —las del punto de venta suelen ser la peor
- * red del local— el cajero veía la pantalla anterior congelada sin ninguna
- * señal de que algo estaba pasando, y volvía a tocar.
+ * `page.tsx` es un Server Component que espera a varias consultas (sucursales,
+ * promociones, tipos de beneficio) antes de pintar una sola letra, así que en
+ * una conexión de caja —las del punto de venta suelen ser la peor red del
+ * local— el cajero veía la pantalla anterior congelada sin ninguna señal de
+ * que algo estaba pasando, y volvía a tocar.
  *
- * Replica el layout REAL de reposo: cabecera de página y una tarjeta con un
- * botón de ancho completo. Un esqueleto que no se parece a lo que llega
- * después desplaza el contenido al resolverse, y ese salto se percibe peor que
- * no haber puesto nada.
+ * El banner (foto, logotipo y nombre del comercio) lo pone el layout y ya
+ * está pintado: aquí solo van las DOS tarjetas que montan sobre su canto, con
+ * la misma rejilla y las mismas clases que la página real. Un esqueleto que
+ * no se parece a lo que llega después desplaza el contenido al resolverse, y
+ * ese salto se percibe peor que no haber puesto nada.
  *
  * Los rellenos usan `--surface-hueco`, que es uno de los dos únicos sitios del
  * sistema donde el relleno sigue siendo información: perfilar un esqueleto
@@ -26,17 +25,31 @@ import { SkeletonPageHeader } from '@/components/ui/skeletons'
  */
 export default function Loading() {
   return (
-    <>
-      <SkeletonPageHeader conAccion={false} />
-
-      <Card padding="lg">
-        <Stack gap={5} align="center">
-          {/* El botón único de reposo: «Escanear código QR». */}
-          <Skeleton width="100%" height="52px" radius="var(--radius-sm)" />
+    <div className={styles.cuerpo} aria-busy="true">
+      <div className={styles.herramienta}>
+        <div className={`${styles.tarjeta} ${styles.principal}`}>
+          <div className={styles.esqueletoLineas}>
+            {/* El título del bloque y su bajada. */}
+            <Skeleton width="min(240px, 70%)" height="28px" />
+            <Skeleton width="min(320px, 90%)" height="14px" />
+          </div>
+          {/* El botón único de reposo: «Escanear código QR», en píldora. */}
+          <Skeleton width="100%" height="52px" radius="var(--radius-full)" />
           {/* La salida en texto, centrada bajo él como en la pantalla real. */}
           <Skeleton width="min(220px, 70%)" height="14px" />
-        </Stack>
-      </Card>
-    </>
+        </div>
+      </div>
+
+      <div className={styles.lateral}>
+        <div className={styles.tarjeta}>
+          <Skeleton width="min(200px, 70%)" height="28px" />
+          <div className={styles.esqueletoLineas}>
+            <Skeleton width="100%" height="22px" />
+            <Skeleton width="85%" height="22px" />
+            <Skeleton width="92%" height="22px" />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

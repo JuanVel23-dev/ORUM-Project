@@ -4,9 +4,9 @@ import { useActionState, useEffect, useId, useMemo, useState } from 'react'
 import { Check, Receipt, RotateCcw } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Field } from '@/components/ui/field'
 import { Input, Select } from '@/components/ui/input'
+import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
 import { calcularDescuento, calcularValorFinal } from '@/lib/comercios/ventas'
 import { error as vibrarError, exito as vibrarExito } from '@/lib/shared/haptica'
@@ -65,6 +65,7 @@ export function ConfirmarVentaForm({
 }) {
   const [state, formAction, pending] = useActionState(registrarVenta, estadoInicial)
   const idDescuento = useId()
+  const idTitulo = useId()
   const [promocionId, setPromocionId] = useState('')
   /*
     Vacíos, no `'0'`. Un cero de partida obliga a borrarlo antes de teclear —y
@@ -128,7 +129,7 @@ export function ConfirmarVentaForm({
 
   if (state.ok) {
     return (
-      <Card padding="lg">
+      <section className={`${styles.tarjeta} ${styles.aparece}`} aria-label="Venta registrada">
         <div className={styles.exito} role="status">
           <span className={styles.exitoIcono} aria-hidden="true">
             <Check size={28} strokeWidth={2.5} />
@@ -162,16 +163,25 @@ export function ConfirmarVentaForm({
           </div>
 
           {/* La cola sigue: el camino de vuelta tiene que ser un solo toque. */}
-          <Button onClick={onExito} size="lg" fullWidth icon={<RotateCcw size={17} />}>
+          <Button
+            onClick={onExito}
+            variant="brand"
+            size="lg"
+            pildora
+            fullWidth
+            icon={<RotateCcw size={17} />}
+          >
             Verificar otro socio
           </Button>
         </div>
-      </Card>
+      </section>
     )
   }
 
   return (
-    <Card padding="lg">
+    <section className={`${styles.tarjeta} ${styles.aparece}`} aria-labelledby={idTitulo}>
+      <TituloSeccion id={idTitulo} como="h2" tamano="bloque" texto="Registrar venta" />
+
       <form action={formAction} className={styles.paso}>
         <input type="hidden" name="miembro_id" value={miembroId} />
         <input type="hidden" name="membresia_id" value={membresiaId ?? ''} />
@@ -329,10 +339,18 @@ export function ConfirmarVentaForm({
           el botón que va a tocar. Con el importe en cero se queda en «Registrar
           venta» — repetir «Cobrar $0» no informa de nada.
         */}
-        <Button type="submit" size="lg" fullWidth loading={pending} icon={<Receipt size={17} />}>
+        <Button
+          type="submit"
+          variant="brand"
+          size="lg"
+          pildora
+          fullWidth
+          loading={pending}
+          icon={<Receipt size={17} />}
+        >
           {hayImporte ? `Cobrar ${PESOS.format(valorFinal)}` : 'Registrar venta'}
         </Button>
       </form>
-    </Card>
+    </section>
   )
 }

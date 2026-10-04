@@ -300,10 +300,18 @@ salían negras). `miembros/(portal)/layout.tsx` fija `data-theme="light"` en
 `.portal`, que además pinta su propio `background-color`/`color` —el `body`
 sigue con el tema del documento—, y el menú de la cuenta ya no ofrece
 selector de tema. La cabecera de Inicio es la única pieza oscura, con su
-propio `data-theme="dark"`. Administración y Comercios siguen con los dos
-temas. Y su fondo es **blanco puro**
+propio `data-theme="dark"`. Y su fondo es **blanco puro**
 (`--blanco`, no el crema `--w-0`): `publico.module.css` remapea `--w-0` en
 la fachada; las franjas tintadas siguen en crema.
+
+⚠️ **Y la Herramienta de Comercios, desde el 04/10/2026** (encargo del
+propietario: «vamos a rediseñar comercios; utiliza el estilo del portal
+inicial y miembros, sus reglas, colores y estilo»). `comercios/(portal)/layout.tsx`
+fija `data-theme="light"` y **no copia el cromo: importa el del Portal de
+Miembros** (`miembros/(portal)/portal.module.css`), así que la cabecera
+negra fundida, el fondo blanco y la paleta de la fachada son los mismos por
+construcción. El selector de tema que vivía en el menú del avatar se retiró
+con el menú. **Solo Administración sigue con los dos temas.**
 
 ### La paleta de la fachada pública es la del rediseño aprobado
 
@@ -355,8 +363,14 @@ contraste de esta sección. Donde no se cumplan, sigue siendo tinta.
 
 **Jamás codifica datos.**
 
-- **Panel de Administración y Herramienta de Comercios**: botón primario =
-  **tinta**, negro sobre claro, blanco sobre oscuro. No cambia.
+- **Panel de Administración**: botón primario = **tinta**, negro sobre
+  claro, blanco sobre oscuro. No cambia.
+- **Herramienta de Comercios** (desde el 04/10/2026): la acción principal va
+  en píldora con relleno `--gold-500` y texto en tinta (8,5:1), el mismo par
+  que las puertas de acceso. Antes era tinta; el rediseño la pasó al oro de
+  la fachada. Como relleno no marca un filo de 3:1 contra el blanco: lo
+  identifica su texto (la misma relajación de la fachada). Sigue siendo
+  RELLENO: `--gold-500` como color de letra sobre claro continúa prohibido.
 - **Portal de Miembros y las seis pantallas de acceso**: el botón primario
   puede usar relleno dorado con texto en tinta, **condicionado** a que el par
   concreto cumpla a la vez:
@@ -1005,6 +1019,22 @@ módulo queda `estilosAuth` (`pantalla-auth.tsx`), de donde los formularios sigu
 tomando sus clases — la sacudida al fallar usa `:has(.alerta)` y ambas clases
 deben salir del mismo módulo CSS.
 
+**La Herramienta de Comercios** (`src/app/comercios/(portal)/`, rediseño del
+04/10/2026) es la tercera cara de la fachada. El layout pone la cabecera del
+Portal de Miembros (importada, no copiada), **el banner** —la foto de marca
+con el logotipo y el nombre del comercio, que es el `h1`: dice quién opera la
+caja— y el pie del sitio. El banner vive en el layout y no en la página
+porque el portal tiene UN destino: así el esqueleto de carga y la frontera de
+error se pintan debajo de él y nada salta. La página monta sus tarjetas
+SOBRE el canto del banner (`--monta`): a la izquierda la herramienta
+(verificar → veredicto → venta) y a la derecha las promociones vigentes y la
+ayuda por WhatsApp; en el teléfono, una sola columna. Sus superficies son
+`.tarjeta` de `verificar.module.css` (radio `--radius-lg`, como los paneles
+de la fachada), no `Card`. Lo que el rediseño NO tocó, porque es función: el
+veredicto sigue siendo una franja de color sólido con punto lleno / hueco, y
+el recorrido es el mismo. `obtenerMiComercio` (`lib/comercios/comercio-sesion.ts`)
+es el comercio de la sesión, con `cache`: lo piden el layout y la página.
+
 **La marca del cliente son imágenes, no texto.** Logotipo «ORUM» (plata,
 dorado, blanco, negro), monograma y estrella viven recortados en
 `src/components/ui/marca/` y se usan con `LogoOrum`, `MonogramaOrum`,
@@ -1183,6 +1213,10 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    pide al usuario una captura o usa un dispositivo real.
 4. El Portal de Miembros solo se ha visto en su pantalla de acceso: el resto exige un
    miembro con membresía vigente y esas credenciales no están disponibles aquí.
+   Lo mismo la **Herramienta de Comercios**: su rediseño del 04/10/2026 se miró
+   en una vista previa local con datos de ejemplo (1366, 820 y 390 px), no con
+   una sesión de comercio real. Falta verlo en producción y en la caja: el
+   escaneo con cámara, una venta de punta a punta y un comercio con logotipo.
 5. **La v6 solo se ha visto en el Portal Público** (landing y `/explorar`,
    24/09/2026, en el navegador del panel, a 1280px y emulando 390px). El resto
    de portales sigue sin mirarse: entraron por tokens, `tsc`, `eslint`, las

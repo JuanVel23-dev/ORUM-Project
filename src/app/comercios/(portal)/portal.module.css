@@ -1,195 +1,220 @@
-/*
-  Shell del Portal de Comercios.
+/* ==========================================================================
+   CROMO DE LA HERRAMIENTA DE COMERCIOS  ·  el del Portal Público (04/10/2026)
+   --------------------------------------------------------------------------
+   La cabecera, la paleta de la fachada y el fondo blanco NO están aquí: salen
+   de `miembros/(portal)/portal.module.css`, que el layout importa tal cual
+   (`cromo`). Son el mismo cromo por construcción, no por copia: si se toca
+   allí, cambia aquí.
 
-  NO reutiliza el del Portal de Miembros a propósito: aquel tiene navegación y
-  barra inferior porque tiene dos destinos. Este tiene UNO —verificar una
-  membresía— y se usa de pie, en la caja, con el cliente esperando. Añadirle
-  navegación sería inventar sitios a los que ir.
-*/
+   Aquí vive solo lo que es de este portal: el oro de sus botones, el banner
+   que dice quién opera la caja y el `<main>` que monta sus tarjetas sobre él.
+
+   Se adapta con `@media` en el banner (está fuera del `<main>`: no hay
+   contenedor `contenido` que consultar) y con `@container` dentro del `<main>`.
+   ========================================================================== */
 
 .portal {
-  display: flex;
-  flex-direction: column;
-  min-height: 100dvh;
-
-  /*
-    EL CAMPO DE COLOR  ·  v4, y es lo que mata el hueco de escritorio AQUÍ.
-
-    En un teléfono esta herramienta llena la pantalla y el fondo da igual. En
-    el monitor de una caja —que es lo habitual: un equipo de punto de venta con
-    el navegador abierto— el contenido es una columna estrecha y todo lo demás
-    era papel muerto, exactamente el «feo en PC» del encargo.
-
-    La respuesta de la v4 no es ensanchar la columna (no hay un segundo dato
-    que poner al lado: este portal tiene UN destino), es TEÑIR el campo. El
-    shell pasa a crema y las tarjetas se quedan en papel: 1,04:1 de diferencia,
-    que no se lee como «un gris» pero sí hace que la tarjeta se lea como un
-    objeto apoyado sobre algo, en vez de como un recorte invisible.
-
-    Contrastes medidos sobre crema (#faf7f0), que es donde caen el h1 y la
-    lede, fuera de toda tarjeta:
-      --text   16,25:1   ·   --text-2   7,04:1   ·   --text-3   4,52:1
-    Los tres pasan AA de cuerpo. En oscuro el par es --n-950 de fondo contra
-    --n-900 de tarjeta (1,06:1), que es la relación estándar del tema.
-
-    No lleva trazo ni sombra: una franja no es una tarjeta, está teñida, no
-    levantada.
-  */
-  background: var(--surface-alt);
+  /* Cuánto se montan las tarjetas sobre el canto del banner. Lo usan los dos:
+     el banner lo reserva abajo y el `<main>` sube esa misma medida. */
+  --monta: var(--space-9);
 }
 
-.cabecera {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
+/*
+  EL BOTÓN DE ACCIÓN, EN EL ORO DE MARCA (`--gold-500`) con texto en tinta:
+  8,5:1. El mismo par que las puertas de acceso (`pantalla-acceso.module.css`),
+  que es de donde llega el cajero. Hasta hoy el primario de esta herramienta
+  era tinta; el rediseño lo pasa al oro de la fachada.
 
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  Como relleno no marca un filo de 3:1 contra el blanco, y no lo necesita: el
+  texto nombra el botón y la sombra lo levanta (la misma relajación que la
+  fachada). Es RELLENO, nunca texto: sobre claro este oro sigue prohibido
+  como color de letra.
 
-  /*
-    Zonas seguras, igual que en el Portal de Miembros
-    (`miembros/(portal)/portal.module.css`). El manifiesto declara
-    `viewport-fit: cover` y `statusBarStyle: 'black-translucent'`, así que en
-    un iPhone la aplicación instalada se dibuja BAJO la barra de estado: sin
-    reservar el inset, la marca y el menú del comercio quedan debajo de la hora
-    y la batería, y esto se usa de pie en la caja con el cliente esperando.
-    Los laterales cubren el teléfono con muesca en horizontal.
-  */
-  padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
-  padding-bottom: var(--space-3);
+  Doble selector (0,2,0), como el bloque de la paleta en el cromo compartido,
+  para ganarle al `[data-theme='light']` de `globals.css`.
+*/
+.portal[data-theme='light'] {
+  --action-gold: var(--gold-500);
+  --action-gold-fg: var(--tinta-1);
+}
+
+/* ==========================================================================
+   EL BANNER  ·  la foto de marca a sangre, con el comercio encima
+   --------------------------------------------------------------------------
+   El del directorio (`directorio-comercios.module.css`), más BAJO: esto se
+   usa de pie en la caja, y el botón de escanear tiene que verse sin bajar en
+   un teléfono corriente. La cabecera fija va montada encima; por eso el
+   relleno superior suma su alto.
+   ========================================================================== */
+
+.banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  padding-top: calc(var(--cabecera-alto) + var(--space-4));
+  padding-bottom: calc(var(--monta) + var(--space-6));
   padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
   padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
-  background: var(--material);
-  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
-  /* `--border`, no `--border-subtle`: el filo del cromo fijo del shell es una
-     división dentro de la interfaz, no un hairline de fila. Es además lo que
-     usa el Portal de Miembros, y dos cabeceras del mismo producto no pueden
-     separarse con distinta fuerza. 4,11:1 sobre crema. */
-  border-bottom: 1px solid var(--border);
+  background: var(--fondo-franja-oscura), var(--cacao-bg);
+  color: var(--cacao-fg);
+  color-scheme: dark;
 }
 
 @media (min-width: 768px) {
-  .cabecera {
+  .banner {
+    padding-top: calc(var(--cabecera-alto) + var(--space-7));
+    padding-bottom: calc(var(--monta) + var(--space-8));
     padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
     padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
   }
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  .cabecera {
-    background: var(--surface);
-    backdrop-filter: none;
+.bannerFoto {
+  z-index: -2;
+  object-fit: cover;
+  /* La socia está a la derecha: en un teléfono la foto se ancla ahí. */
+  object-position: 72% center;
+  animation: foto-asienta calc(var(--dur-page) * 4) var(--ease-out) both;
+}
+
+@media (min-width: 768px) {
+  .bannerFoto {
+    object-position: center 35%;
   }
 }
 
-.marca {
-  flex-shrink: 0;
-  text-decoration: none;
-
-  font-size: var(--t-title-3-size);
-  font-weight: 680;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-
-  color: var(--brand);
-  background: var(--gold-sheen);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-@supports (-webkit-background-clip: text) or (background-clip: text) {
-  .marca {
-    -webkit-text-fill-color: transparent;
+/* La cámara que se asienta al cargar: una vez, solo `scale`. La misma de la
+   foto del héroe y del banner del directorio. */
+@keyframes foto-asienta {
+  from {
+    scale: 1.08;
+  }
+  to {
+    scale: 1;
   }
 }
 
-.marca:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 4px;
-  border-radius: var(--radius-xs);
+@media (prefers-reduced-motion: reduce) {
+  .bannerFoto {
+    animation: none;
+  }
 }
 
-/* Nombre del comercio: quién está operando. Importa cuando una cadena tiene
-   varias sedes y cada una entra con su cuenta. */
-.comercio {
-  min-width: 0;
-  font-size: var(--t-footnote-size);
-  color: var(--text-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Más denso que el del directorio: aquí el texto ocupa todo el alto, y las
+   tarjetas blancas montan justo debajo. */
+.bannerVelo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--cacao-bg) 90%, transparent) 0%,
+    color-mix(in srgb, var(--cacao-bg) 68%, transparent) 55%,
+    color-mix(in srgb, var(--cacao-bg) 46%, transparent) 100%
+  );
 }
 
-.acciones {
+/* Alineado con la columna del contenido, como la cabecera. */
+.bannerContenido {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin-left: auto;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: calc(var(--content-max) - 2 * var(--space-6));
+  margin-inline: auto;
 }
 
-/*
-  EL AVATAR SE VE DE 28px Y SE TOCA DE 44px.
+@media (min-width: 768px) {
+  .bannerContenido {
+    gap: var(--space-5);
+  }
+}
 
-  `DropdownMenu` monta su disparador con `display: contents`, así que el botón
-  que envuelve al `Avatar size="sm"` medía exactamente lo que el avatar: 28px.
-  Es el ÚNICO control de esta cabecera y es la única puerta a cerrar sesión, y
-  quien lo toca lo hace de pie, con una mano y con el cliente delante.
+/* El logotipo del comercio: la placa circular de siempre, a escala de banner. */
+/* `.banner .bannerLogo` (0,2,0): la sombra tiene que ganarle a la de
+   `.placa`, que vive en otro módulo y cuyo orden de carga no está garantizado. */
+.banner .bannerLogo {
+  --placa-logo-w: 60px;
+  box-shadow: var(--shadow-flotante);
+}
 
-  La clase va en el `<button>` del layout y NO en un selector de descendencia
-  (`.acciones form button` habría alcanzado también «Cerrar sesión» y las tres
-  opciones de tema, que viven dentro del mismo `<form>`).
+@media (min-width: 768px) {
+  .banner .bannerLogo {
+    --placa-logo-w: 84px;
+  }
+}
 
-  Se agranda el área, no el dibujo: el avatar sigue midiendo 28px. Sin
-  `@media (pointer: coarse)` a propósito —al contrario que en el panel, donde
-  la densidad es una virtud—: este portal es táctil por definición de quién lo
-  usa, y en el monitor de la caja 44px tampoco estorban.
-*/
-.botonCuenta {
+.bannerTextos {
   display: grid;
-  place-items: center;
-  min-width: var(--tap-min);
-  min-height: var(--tap-min);
-  border-radius: var(--radius-full);
+  gap: var(--space-2);
+  min-width: 0;
 }
 
-.correoMenu {
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--t-caption-size);
-  color: var(--text-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
+/* La insignia del héroe: una píldora translúcida con la estrella en plata. */
+.insignia {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--blanco) 12%, transparent);
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cacao-fg);
 }
+
+/* El nombre del comercio, en el serif de display, como el titular del
+   directorio. Blanco: el oro pálido se reserva para un acento, y un nombre
+   propio entero en dorado lo gastaría. */
+.titulo {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-hero-2-size);
+  line-height: 1.1;
+  font-weight: 500;
+  color: var(--cacao-fg);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: auto;
+}
+
+.bajada {
+  margin: 0;
+  max-width: 52ch;
+  font-size: var(--t-callout-size);
+  line-height: 1.55;
+  color: var(--cacao-fg-2);
+}
+
+/* En el teléfono la bajada sobra: la tarjeta de debajo ya dice qué hacer, y
+   aquí cada línea empuja el botón de escanear hacia abajo. */
+@media (max-width: 599px) {
+  .bajada {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   EL CONTENIDO  ·  tarjetas blancas montadas sobre el canto del banner
+   ========================================================================== */
 
 .main {
+  position: relative;
+  z-index: 1;
   flex: 1;
   width: 100%;
+  max-width: var(--content-max);
+  /* Sube `--monta` sobre el banner: como «Así es como te unes» sobre el
+     héroe de la portada. */
+  margin: calc(-1 * var(--monta)) auto 0;
 
-  /*
-    LA COLUMNA ES ESTRECHA A PROPÓSITO, y bajó de 720px.
-
-    A 720px el veredicto —«MEMBRESÍA ACTIVA», que es todo el producto de esta
-    pantalla— dejaba media franja de color sin una letra dentro, y el botón
-    único de reposo se leía como una barra. 560px es el ancho con el que la
-    herramienta parece una herramienta: sigue por encima de los 420px que
-    necesita la rejilla de dos columnas del formulario de venta (sucursal y
-    promoción lado a lado, `verificar.module.css`), así que no se pierde
-    ninguna fila.
-
-    Literal con nombre y no un token porque no hay token de ancho de columna en
-    el sistema salvo `--content-max` (1100px, el del catálogo), y este no es
-    ese caso. Mismo patrón que `--carril-ficha-w` en la ficha del comercio.
-  */
-  --ancho-caja: 560px;
-  max-width: var(--ancho-caja);
-  margin: 0 auto;
-
-  padding-top: var(--space-6);
   padding-bottom: var(--space-10);
-  /* Mismo motivo que en la cabecera: en horizontal con muesca, el formulario
-     se metía bajo el bisel. */
   padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
   padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
@@ -199,7 +224,6 @@
 
 @media (min-width: 768px) {
   .main {
-    padding-top: var(--space-7);
     padding-bottom: var(--space-11);
     padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
     padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
