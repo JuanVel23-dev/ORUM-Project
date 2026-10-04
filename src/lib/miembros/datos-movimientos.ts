@@ -41,7 +41,7 @@ export type Bitacora = {
 
 const SELECCION = `
   id, fecha_hora, valor_compra, valor_descuento, valor_final,
-  sucursales ( nombre, comercios ( id, nombre ) ),
+  sucursales ( nombre, comercios ( id, nombre, logo_url ) ),
   promociones ( titulo )
 `
 

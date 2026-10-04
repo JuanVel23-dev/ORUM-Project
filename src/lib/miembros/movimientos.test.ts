@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
+  agruparPorMes,
   normalizarMovimiento,
   sumarAhorro,
   limiteSolicitado,
@@ -29,6 +30,7 @@ describe('normalizarMovimiento', () => {
       fechaHora: '2026-09-28T23:30:00+00:00',
       comercioId: 3,
       comercio: 'Café Aurora',
+      logoUrl: null,
       sucursal: 'Sede Centro',
       promocion: '15 % en todo el menú',
       valorCompra: 100000,
@@ -109,5 +111,33 @@ describe('limiteSolicitado — viene de la URL, así que no es de fiar', () => {
 
   it('si llega un arreglo (?n=1&n=2) usa el límite inicial', () => {
     expect(limiteSolicitado(['100', '200'])).toBe(LIMITE_INICIAL)
+  })
+})
+
+describe('agruparPorMes', () => {
+  const mov = (id: number, fechaHora: string, ahorro: number) => ({
+    ...normalizarMovimiento({ ...base, id, fecha_hora: fechaHora, valor_descuento: ahorro }),
+  })
+
+  it('agrupa por mes conservando el orden de llegada', () => {
+    const meses = agruparPorMes([
+      mov(3, '2026-10-02T15:00:00+00:00', 1000),
+      mov(2, '2026-10-01T15:00:00+00:00', 2000),
+      mov(1, '2026-09-10T15:00:00+00:00', 500),
+    ])
+    expect(meses.map((m) => m.clave)).toEqual(['2026-10', '2026-09'])
+    expect(meses[0].movimientos.map((m) => m.id)).toEqual([3, 2])
+    expect(meses[0].ahorro).toBe(3000)
+    expect(meses[0].titulo).toBe('Octubre de 2026')
+  })
+
+  it('decide el mes en la hora de Colombia, no en UTC', () => {
+    // 1 de octubre a las 02:00 UTC = 30 de septiembre a las 9 p. m. en Bogotá.
+    const meses = agruparPorMes([mov(1, '2026-10-01T02:00:00+00:00', 100)])
+    expect(meses[0].clave).toBe('2026-09')
+  })
+
+  it('sin movimientos, sin meses', () => {
+    expect(agruparPorMes([])).toEqual([])
   })
 })
