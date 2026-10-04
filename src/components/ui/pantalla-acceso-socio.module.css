@@ -196,8 +196,9 @@
   position: relative;
   display: grid;
   justify-items: center;
+  /* Pie corto: en un teléfono corriente la pantalla entera cabe sin bajar. */
   padding: var(--space-6) var(--space-4)
-    max(var(--space-8), calc(env(safe-area-inset-bottom, 0px) + var(--space-6)));
+    max(var(--space-5), calc(env(safe-area-inset-bottom, 0px) + var(--space-4)));
   background: var(--surface);
 
   /* En el teléfono el panel MONTA sobre la foto, con las esquinas redondas:
@@ -221,13 +222,25 @@
     display: none;
   }
 
-  /* Más apretado que en el teléfono: aquí manda que quepa de una vez. */
-  .columna {
-    gap: var(--space-4);
+}
+
+/* Apretado en todos los anchos: aquí manda que quepa de una vez. */
+.columna form {
+  gap: var(--space-4);
+}
+
+/*
+  TELÉFONOS BAJOS: la foto se acorta y la nota de ayuda se retira, para que
+  el botón de entrar siga a la vista sin desplazar.
+*/
+@media (max-width: 899px) and (max-height: 740px) {
+  .foto {
+    min-height: 150px;
   }
 
-  .columna form {
-    gap: var(--space-4);
+  .insignia,
+  .pie {
+    display: none;
   }
 }
 
@@ -236,7 +249,7 @@
   max-width: 25rem;
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .cabecera {
