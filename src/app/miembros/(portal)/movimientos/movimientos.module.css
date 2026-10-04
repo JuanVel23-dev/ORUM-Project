@@ -80,6 +80,12 @@
   color: var(--brand);
 }
 
+/* La estrella de ORUM dentro del anillo. Las piezas de la marca se
+   dimensionan por ALTO. */
+.resumenEstrella {
+  height: 20px;
+}
+
 .resumenEtiqueta {
   margin: 0;
   font-size: var(--t-callout-size);

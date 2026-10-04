@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ChevronRight, PiggyBank, Receipt } from 'lucide-react'
+import { ChevronRight, Receipt } from 'lucide-react'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { obtenerBitacora } from '@/lib/miembros/datos-movimientos'
@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { EmptyState, ErrorState } from '@/components/ui/feedback'
+import { EstrellaOrum } from '@/components/ui/marca/marca'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import styles from './movimientos.module.css'
 
@@ -176,7 +177,9 @@ export default async function MovimientosPage({
           <aside className={styles.resumen} aria-label="Resumen de tu ahorro">
             <div className={styles.resumenCabecera}>
               <span className={styles.resumenIcono} aria-hidden="true">
-                <PiggyBank size={20} />
+                {/* La estrella de la marca, no un icono genérico (la alcancía
+                    que hubo antes no gustó). */}
+                <EstrellaOrum className={styles.resumenEstrella} />
               </span>
               <p className={styles.resumenEtiqueta}>Has ahorrado</p>
             </div>
