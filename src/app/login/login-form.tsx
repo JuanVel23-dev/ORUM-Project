@@ -62,7 +62,7 @@ export function LoginForm({ mensajeInicial }: { mensajeInicial?: string }) {
         />
       </Field>
 
-      <Turnstile />
+      <Turnstile reiniciarAl={state} />
 
       {/*
         `brand` es el relleno dorado PLANO. Nunca `gold`: ese es el barrido

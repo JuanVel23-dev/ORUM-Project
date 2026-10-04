@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { ERROR_TURNSTILE, verificarTurnstileDeFormulario } from '@/lib/auth/turnstile-request'
+import { cupoDeLogin, ERROR_LIMITE_LOGIN, reiniciarLogin } from '@/lib/auth/limitador'
 import { resolverCorreoPorNumeroMembresia } from '@/lib/miembros/auth-miembro'
 
 export type LoginMiembroState = { error?: string }
@@ -28,6 +29,12 @@ export async function iniciarSesionMiembro(
     return { error: ERROR_TURNSTILE }
   }
 
+  // La cuenta se identifica por el número tecleado, antes de resolverlo: así el
+  // tope cuenta igual exista o no, y no delata cuáles números son reales.
+  if (!(await cupoDeLogin(numeroMembresia))) {
+    return { error: ERROR_LIMITE_LOGIN }
+  }
+
   const correo = await resolverCorreoPorNumeroMembresia(numeroMembresia)
   if (!correo) {
     return { error: 'Número de membresía o contraseña incorrectos.' }
@@ -38,6 +45,7 @@ export async function iniciarSesionMiembro(
   if (error) {
     return { error: 'Número de membresía o contraseña incorrectos.' }
   }
+  await reiniciarLogin(numeroMembresia)
 
   const perfil = await getPerfilActual()
   if (!perfil || !perfil.activo) {

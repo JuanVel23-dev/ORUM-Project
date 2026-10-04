@@ -2,6 +2,7 @@
 
 import { after } from 'next/server'
 import { ERROR_TURNSTILE, verificarTurnstileDeFormulario } from '@/lib/auth/turnstile-request'
+import { cupoDeRecuperacion, ipDelCliente } from '@/lib/auth/limitador'
 import { enviarRecuperacion } from '@/lib/auth/recuperacion'
 import { resolverCuentaPorNumeroMembresia } from '@/lib/miembros/auth-miembro'
 
@@ -22,8 +23,13 @@ export async function solicitarRecuperacionMiembro(
   const captcha = await verificarTurnstileDeFormulario(formData)
   if (!captcha.valido) return { error: ERROR_TURNSTILE }
 
+  const ip = await ipDelCliente()
+
   after(async () => {
     try {
+      // Pasado el tope no se envía nada, y la respuesta ya salió igual: quien
+      // abusa no distingue «sin cupo» de «cuenta que no existe».
+      if (!(await cupoDeRecuperacion(numeroMembresia, ip))) return
       const cuenta = await resolverCuentaPorNumeroMembresia(numeroMembresia)
       if (cuenta) await enviarRecuperacion(cuenta.correo, 'miembro', cuenta.perfilId)
     } catch (err) {

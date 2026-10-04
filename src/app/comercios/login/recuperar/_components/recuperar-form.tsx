@@ -49,7 +49,7 @@ export function RecuperarComercioForm() {
         />
       </Field>
 
-      <Turnstile />
+      <Turnstile reiniciarAl={state} />
 
       <Button type="submit" size="lg" fullWidth loading={pending} icon={<Mail size={17} />}>
         Enviar enlace

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, Textarea } from '@/components/ui/input'
 import { Stack } from '@/components/ui/layout'
+import { Turnstile } from '@/components/ui/turnstile'
 import { Checkbox } from '@/components/ui/toggle'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import {
@@ -293,6 +294,9 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
           </>
         }
       />
+
+      {/* El Portal Público va siempre en claro: el widget no sigue al sistema. */}
+      <Turnstile tema="light" reiniciarAl={state} />
 
       {/*
         Tinta, no oro: `CLAUDE.md` retiró al Portal Público de la lista de
