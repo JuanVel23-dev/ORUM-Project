@@ -117,10 +117,9 @@ export function PieSitio({
               Soporte por WhatsApp
             </a>
           )}
-          {/* La entrada PERMANENTE a instalar la app (03/10/2026): el aviso
-              flotante del celular se puede cerrar, y esto es lo que queda. Solo
-              se pinta donde instalar es posible y la app no corre ya instalada. */}
-          <EnlaceInstalar className={estilos.soporte} />
+          {/* Instalar la app: solo el icono, al lado del soporte. Solo se
+              pinta donde instalar es posible y la app no corre ya instalada. */}
+          <EnlaceInstalar className={estilos.instalar} />
         </div>
       </div>
 

@@ -151,22 +151,38 @@
 
 /* --- Soporte -------------------------------------------------------------- */
 
-/* Soporte e «Instalar la app», uno debajo del otro: las dos salidas de
-   ayuda del pie. En fila (escritorio) rematan en el filo derecho. */
+/* Soporte y, a su lado, el icono de instalar la app: una sola fila. */
 .ayuda {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-@media (min-width: 768px) {
-  .ayuda {
-    align-items: flex-end;
-  }
+/* El icono de descarga: se ve pequeño, se toca de 44 px. Mismo tono y
+   misma respuesta que el enlace de soporte. */
+.instalar {
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out);
+}
 
-  .ayuda > .soporte {
-    align-self: flex-end;
+@media (hover: hover) {
+  .instalar:hover {
+    color: var(--text);
+    translate: 0 -2px;
   }
+}
+
+.instalar:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .soporte {

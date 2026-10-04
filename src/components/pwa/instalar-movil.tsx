@@ -90,7 +90,11 @@ export function AvisoInstalar() {
   )
 }
 
-/** La entrada permanente del pie, con el aspecto del enlace que le pasen. */
+/**
+ * La entrada del pie: SOLO EL ICONO de descarga, al lado de «Soporte por
+ * WhatsApp» (03/10/2026: la fila con texto «Instalar la app» no gustó). El
+ * nombre lo dice `aria-label`, y `title` lo enseña al apuntar con ratón.
+ */
 export function EnlaceInstalar({ className }: { className?: string }) {
   const { modo, instalar, guias } = useAccionInstalar()
 
@@ -98,9 +102,14 @@ export function EnlaceInstalar({ className }: { className?: string }) {
 
   return (
     <>
-      <button type="button" className={[estilos.enlace, className].filter(Boolean).join(' ')} onClick={instalar}>
-        <Download size={16} aria-hidden="true" />
-        Instalar la app
+      <button
+        type="button"
+        className={[estilos.enlace, className].filter(Boolean).join(' ')}
+        onClick={instalar}
+        aria-label="Instalar la app"
+        title="Instalar la app"
+      >
+        <Download size={18} aria-hidden="true" />
       </button>
       {guias}
     </>
