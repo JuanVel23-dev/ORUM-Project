@@ -15,7 +15,7 @@ import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { EmptyState, ErrorState } from '@/components/ui/feedback'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { ENTRADA, REVELAR, retardoEntrada } from '@/lib/shared/revelado'
-import { CifraAnimada } from './_components/cifra-animada'
+import { CifraAnimada } from '@/components/ui/cifra-animada'
 import styles from './movimientos.module.css'
 
 export const metadata = { title: 'Mis movimientos · ORUM' }

@@ -430,8 +430,7 @@
 
 /* La X de la ventana: primera en el DOM (el foco empieza por la salida),
    última a la vista. Blanca sobre la franja; su área es `--tap-min`. */
-.cerrarVentana,
-.cerrarAcuse {
+.cerrarVentana {
   flex-shrink: 0;
   display: grid;
   place-items: center;
@@ -453,14 +452,12 @@
 
 @media (hover: hover) {
   /* Sin relleno: la X gira un cuarto de vuelta, como todas las del sistema. */
-  .cerrarVentana:hover,
-  .cerrarAcuse:hover {
+  .cerrarVentana:hover {
     rotate: 90deg;
   }
 }
 
-.cerrarVentana:focus-visible,
-.cerrarAcuse:focus-visible {
+.cerrarVentana:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: -4px;
 }
@@ -793,101 +790,6 @@
   font-variant-numeric: tabular-nums lining-nums;
   color: var(--text);
   -webkit-font-smoothing: auto;
-}
-
-/* ==========================================================================
-   ÉXITO  ·  la ventana entera pasa a ser el acuse
-   ========================================================================== */
-
-.ventanaAcuse {
-  padding: var(--space-5);
-}
-
-@container ventana (min-width: 460px) {
-  .exito {
-    padding: var(--space-4) var(--space-4) var(--space-2);
-  }
-}
-
-/* La X del acuse: en la esquina, en tinta (aquí no hay franja de color). */
-.cerrarAcuse {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  color: var(--text-2);
-}
-
-.exito {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-5);
-  text-align: center;
-  padding-top: var(--space-4);
-}
-
-.exitoIcono {
-  display: grid;
-  place-items: center;
-  width: 68px;
-  height: 68px;
-  border-radius: var(--radius-full);
-  color: var(--success);
-  background: var(--success-bg);
-  /* El ✓ llega con el rebote de lo que se gana: una confirmación, una vez. */
-  animation: sellar var(--dur-slow) var(--ease-spring) both;
-}
-
-@keyframes sellar {
-  from {
-    opacity: 0;
-    scale: 0.92;
-  }
-}
-
-/* El título del acuse, en el serif de display: es el final feliz. */
-.exitoTitulo {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--t-title-1-size);
-  line-height: var(--t-title-1-leading);
-  font-weight: 700;
-  -webkit-font-smoothing: auto;
-}
-
-/* Los dos párrafos del acuse van juntos y separados del icono y del botón:
-   sin este agrupador, el `gap` de `.exito` repartía el mismo aire entre el ✓,
-   el título, la nota, el aviso y el CTA, y los cinco pesaban lo mismo. */
-.exitoTextos {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.exitoNota {
-  margin: 0;
-  font-size: var(--t-callout-size);
-  line-height: var(--t-callout-leading);
-  color: var(--text-2);
-  text-wrap: balance;
-}
-
-/*
-  LA LÍNEA HONESTA: «esto no se puede anular desde aquí».
-
-  Va en el tono más tenue de la tarjeta y con medida corta a propósito. Tiene
-  que estar —es lo único cierto que se le puede dar a un cajero que acaba de
-  equivocarse— pero no puede competir con el ✓ ni con «Verificar otro socio»,
-  que es lo que el 99 % de las veces se va a tocar a continuación.
-*/
-.exitoAviso {
-  max-width: 44ch;
-  margin: 0;
-  font-size: var(--t-footnote-size);
-  line-height: var(--t-footnote-leading);
-  color: var(--text-3);
-  text-wrap: pretty;
 }
 
 /* ==========================================================================

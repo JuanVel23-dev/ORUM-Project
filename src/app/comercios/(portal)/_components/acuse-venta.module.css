@@ -1,0 +1,473 @@
+/* ==========================================================================
+   EL ACUSE DE LA VENTA  ·  la animación de pagar (04/10/2026)
+   --------------------------------------------------------------------------
+   La ventana blanca del formulario se vuelve negro y oro. El guion está en
+   `acuse-venta.tsx`; aquí está cómo se mueve cada pieza.
+
+   TRES REGLAS QUE SOSTIENEN TODO EL ARCHIVO:
+
+   1. SOLO `opacity`, `translate`, `scale` y `rotate`. Nada de aquí recalcula
+      layout ni repinta: corre en el compositor.
+   2. EL ESTADO BASE ES EL FINAL. Cada pieza se escribe como queda al acabar,
+      y su `@keyframes` solo dice DE DÓNDE viene (`from`). Así, donde la
+      animación no corre —movimiento reducido, que el recorte global deja en
+      0,01 ms— lo que se ve es el acuse terminado, no una pieza a medio
+      camino. Las únicas que acaban invisibles son las que solo existen
+      mientras se mueven: el telón, las ondas y las estrellas.
+   3. LOS TIEMPOS SALEN DE UNA SOLA TABLA (`--t-*`, abajo): mover un golpe no
+      obliga a buscar su número por el archivo.
+   ========================================================================== */
+
+.acuse {
+  /* El compás de la escena. En ms desde que la venta queda registrada. */
+  --t-sello: 400ms;
+  --t-marca: 680ms;
+  --t-onda: 560ms;
+  --t-estallido: 600ms;
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+
+  /* Si no cabe (un teléfono en horizontal), desplaza por dentro. */
+  max-height: calc(100dvh - var(--space-6));
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+
+  /* Aire arriba: es por donde se abren las ondas y salen las estrellas. */
+  padding: var(--space-10) var(--space-5) var(--space-5);
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+
+  /* NEGRO, con la luz de foco de las franjas oscuras: es el único sitio de
+     la caja donde el oro brillante es legal, y por eso el acuse vive aquí. */
+  background: var(--fondo-franja-oscura), var(--cacao-bg);
+  box-shadow: var(--shadow-overlay), var(--edge);
+  color: var(--cacao-fg);
+  color-scheme: dark;
+  text-align: center;
+
+  container-type: inline-size;
+  container-name: acuse;
+}
+
+@container acuse (min-width: 460px) {
+  .textos,
+  .accion {
+    padding-inline: var(--space-4);
+  }
+}
+
+/* ==========================================================================
+   1. EL TELÓN  ·  del blanco del formulario al negro del acuse
+   --------------------------------------------------------------------------
+   El fondo REAL de la ventana ya es negro. El telón son dos capas que solo
+   existen durante el cambio:
+
+     · `::before`, el blanco del formulario que acaba de irse. Aguanta hasta
+       que el negro lo ha cubierto entero y entonces desaparece de golpe —
+       nadie lo ve irse, porque ya está tapado—.
+     · `::after`, un círculo negro que nace abajo, en el centro —donde estaba
+       el botón de cobrar—, y crece hasta cubrir la ventana. Al llegar se
+       funde, y deja ver el fondo de verdad con su luz de foco.
+
+   Va en su propia caja recortada: el círculo mide más que la ventana, y sin
+   recorte la haría desplazar.
+   ========================================================================== */
+
+.telon {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.telon::before,
+.telon::after {
+  content: '';
+  position: absolute;
+  opacity: 0;
+}
+
+.telon::before {
+  inset: 0;
+  background: var(--blanco);
+  animation: telon-blanco 760ms linear both;
+}
+
+.telon::after {
+  /* Centrado en el borde inferior. 1400 px de diámetro cubren la ventana
+     más alta que puede darse (520 × 700) desde ese punto. */
+  left: 50%;
+  bottom: 0;
+  width: 1400px;
+  aspect-ratio: 1;
+  margin: 0 0 -700px -700px;
+  border-radius: var(--radius-full);
+  background: var(--cacao-bg);
+  /* `--ease-hero`, la curva de los recorridos largos: arranca contenido —el
+     círculo «carga» bajo el dedo— y barre la ventana. Con `--ease-out` el
+     negro llegaba arriba en un parpadeo y no se veía de dónde salía. */
+  animation: telon-negro 760ms var(--ease-hero) both;
+}
+
+@keyframes telon-blanco {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  71%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Crece en el primer 70 % (con la curva de la propiedad) y se funde en el
+   resto. Arranca pequeño y opaco, nunca desde `scale(0)`. */
+@keyframes telon-negro {
+  0% {
+    opacity: 1;
+    scale: 0.05;
+  }
+  70% {
+    opacity: 1;
+    scale: 1;
+    animation-timing-function: linear;
+  }
+  100% {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+/* ==========================================================================
+   LO QUE ENTRA CON RETARDO  ·  el texto, la X y el botón
+   --------------------------------------------------------------------------
+   Sube 10 px y aparece. El retardo lo pone cada pieza con `--retardo`; antes
+   de que le toque está invisible (`both`), que es lo que evita ver letras
+   claras sobre el telón todavía blanco.
+   ========================================================================== */
+
+.entra {
+  animation: subir var(--dur-slow) var(--ease-out) var(--retardo, 0ms) both;
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+/* La X: en la esquina, en el tono tenue de la franja negra. */
+.cerrar {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--cacao-fg-2);
+  cursor: pointer;
+  transition:
+    rotate var(--dur-base) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  /* Sin relleno: la X gira un cuarto de vuelta, como todas las del sistema. */
+  .cerrar:hover {
+    rotate: 90deg;
+    color: var(--cacao-fg);
+  }
+}
+
+.cerrar:focus-visible {
+  outline: 2px solid var(--gold-300);
+  outline-offset: -4px;
+}
+
+/* ==========================================================================
+   2. LA ESCENA  ·  halo, ondas, sello y estrellas
+   ========================================================================== */
+
+.escena {
+  position: relative;
+  flex-shrink: 0;
+  width: 104px;
+  aspect-ratio: 1;
+}
+
+/* La luz detrás del sello: llega con él y se queda, más tenue. */
+.halo {
+  position: absolute;
+  inset: -72px;
+  border-radius: var(--radius-full);
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--gold-500) 26%, transparent),
+    color-mix(in srgb, var(--gold-500) 8%, transparent) 55%,
+    transparent
+  );
+  opacity: 0.6;
+  animation: halo 1200ms var(--ease-out) var(--t-sello) both;
+}
+
+@keyframes halo {
+  0% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  45% {
+    opacity: 1;
+    scale: 1.06;
+  }
+}
+
+/* Las ondas: dos anillos de 1 px que se abren desde el canto del sello y se
+   apagan. En `box-shadow` y no en `border`: no ocupan caja. */
+.onda {
+  position: absolute;
+  inset: 8px;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1px var(--gold-300);
+  opacity: 0;
+  /* `forwards` y no `both`: con `both`, durante el retardo ya valdría el
+     primer fotograma (0,85 de opacidad) y el anillo se vería quieto, antes
+     de que el sello haya caído. */
+  animation: onda 900ms var(--ease-out) var(--t-onda) forwards;
+}
+
+.ondaSegunda {
+  animation-delay: calc(var(--t-onda) + 160ms);
+}
+
+@keyframes onda {
+  from {
+    opacity: 0.85;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 2.5;
+  }
+}
+
+/* EL SELLO: un disco de oro con la luz arriba a la izquierda, de donde viene
+   la luz en todo el sistema. Cae con el rebote de lo que se gana
+   (`--ease-spring`): una confirmación, una vez. */
+.sello {
+  position: absolute;
+  inset: 8px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: radial-gradient(
+    circle at 32% 26%,
+    var(--gold-300),
+    var(--gold-400) 38%,
+    var(--gold-500) 68%,
+    var(--gold-600)
+  );
+  /* La ✓ en tinta sobre el oro: 8,5:1 contra `--gold-500`. */
+  color: var(--tinta-1);
+  box-shadow: var(--shadow-flotante);
+  animation: sellar 520ms var(--ease-spring) var(--t-sello) both;
+}
+
+@keyframes sellar {
+  from {
+    opacity: 0;
+    scale: 0.5;
+    rotate: -14deg;
+  }
+}
+
+/* LA ✓ QUE SE DIBUJA. `.marca` es la ventana fija; `.cortina` entra desde la
+   izquierda y `.trazo`, dentro, viaja lo mismo en sentido contrario. Las dos
+   traslaciones se anulan: el trazo no se mueve en pantalla, y lo que avanza
+   es el borde por el que se ve. */
+.marca {
+  display: block;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.cortina {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: cortina 340ms var(--ease-out) var(--t-marca) both;
+}
+
+.trazo {
+  display: block;
+  animation: trazo 340ms var(--ease-out) var(--t-marca) both;
+}
+
+@keyframes cortina {
+  from {
+    translate: -101% 0;
+  }
+}
+
+@keyframes trazo {
+  from {
+    translate: 101% 0;
+  }
+}
+
+/* ==========================================================================
+   3. LAS ESTRELLAS  ·  la de ORUM, de cuatro puntas, en oro y en plata
+   --------------------------------------------------------------------------
+   Nacen en el centro del sello, salen cada una hacia su `--dx`/`--dy` y se
+   apagan girando. Salida decelerada: disparan rápido y frenan, como una
+   chispa, no como confeti que cae.
+
+   La forma es un `clip-path` FIJO (no se anima): un rombo de lados cóncavos.
+   ========================================================================== */
+
+.estrella {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--talla, 10px);
+  aspect-ratio: 1;
+  margin: calc(var(--talla, 10px) / -2) 0 0 calc(var(--talla, 10px) / -2);
+  clip-path: polygon(
+    50% 0%,
+    61% 39%,
+    100% 50%,
+    61% 61%,
+    50% 100%,
+    39% 61%,
+    0% 50%,
+    39% 39%
+  );
+  opacity: 0;
+  animation: estallar 1000ms var(--ease-out) calc(var(--t-estallido) + var(--retardo, 0ms)) both;
+}
+
+.oro {
+  background: var(--gold-400);
+}
+
+.oroClaro {
+  background: var(--gold-300);
+}
+
+.oroHondo {
+  background: var(--gold-500);
+}
+
+.plata {
+  background: var(--n-200);
+}
+
+@keyframes estallar {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.4;
+    rotate: 0deg;
+  }
+  16% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: var(--dx, 0) var(--dy, 0);
+    scale: 1;
+    rotate: var(--giro, 120deg);
+  }
+}
+
+/* ==========================================================================
+   4. LO QUE DICE  ·  título, monto, socio y la línea honesta
+   ========================================================================== */
+
+.textos {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+/* EL MONTO: el número que acaba de cobrarse, en el serif de display y en el
+   oro pálido de la franja negra (`--gold-300`, 14,6:1). Cuenta de cero al
+   total (`CifraAnimada`). Cifras tabulares: no baila de ancho al contar. */
+.monto {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-1);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 13cqi, 3.75rem);
+  line-height: 1.05;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--gold-300);
+  -webkit-font-smoothing: auto;
+}
+
+/* El signo de pesos: pequeño y arriba, como en una etiqueta de precio. */
+.moneda {
+  margin-top: 0.3em;
+  font-size: 0.42em;
+  font-weight: 600;
+  color: var(--gold-400);
+}
+
+.nota {
+  display: grid;
+  gap: 2px;
+  margin: var(--space-1) 0 0;
+  font-size: var(--t-body-size);
+  font-weight: 600;
+  color: var(--cacao-fg);
+  overflow-wrap: anywhere;
+}
+
+.notaMeta {
+  font-size: var(--t-footnote-size);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--cacao-fg-2);
+}
+
+/*
+  LA LÍNEA HONESTA: «esto no se puede anular desde aquí». En el tono más
+  tenue de la franja (`--cacao-fg-3`, 7,1:1 sobre negro) y con medida corta:
+  tiene que estar, pero no puede competir con el monto ni con el botón.
+*/
+.aviso {
+  max-width: 44ch;
+  margin: var(--space-2) 0 0;
+  font-size: var(--t-footnote-size);
+  line-height: 1.5;
+  color: var(--cacao-fg-3);
+  text-wrap: pretty;
+}
+
+/* El botón: a todo el ancho, abajo, donde estaba el de cobrar. */
+.accion {
+  width: 100%;
+}

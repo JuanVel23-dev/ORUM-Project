@@ -1,12 +1,13 @@
 'use client'
 
 import { useActionState, useEffect } from 'react'
-import { Check, RotateCcw, X } from 'lucide-react'
+import { RotateCcw, X } from 'lucide-react'
 import { iniciales } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { error as vibrarError, exito as vibrarExito } from '@/lib/shared/haptica'
 import { registrarVenta, type MiembroEncontrado, type RegistrarVentaState } from '../actions'
+import { AcuseVenta } from './acuse-venta'
 import { ConfirmarVentaForm } from './confirmar-venta-form'
 import type { MetodoRegistroVenta, TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 import styles from './verificar.module.css'
@@ -20,12 +21,6 @@ type Promocion = {
 }
 
 const estadoInicial: RegistrarVentaState = {}
-
-const PESOS = new Intl.NumberFormat('es-CO', {
-  style: 'currency',
-  currency: 'COP',
-  maximumFractionDigits: 0,
-})
 
 /*
   EL FOCO INICIAL DE LA VENTANA, EN LA X.
@@ -65,7 +60,8 @@ const enfocarAlAbrir = (nodo: HTMLButtonElement | null) => {
     · EL SOCIO, justo debajo: iniciales, nombre, plan y número. El nombre es
       lo que confirma que el carnet es de quien lo entrega.
     · Si está ACTIVA, el formulario de venta. Si NO, qué hacer y la vuelta.
-    · Al registrar, la ventana entera pasa a ser el ACUSE.
+    · Al registrar, la ventana entera pasa a ser el ACUSE (`AcuseVenta`): se
+      vuelve negro y oro, con la animación de pagar.
 
   NO SE CIERRA AL PULSAR FUERA (`cerrarAlPulsarFuera={false}`): hay un
   importe a medio teclear y un toque en el velo lo perdería. La cierran su X,
@@ -165,58 +161,13 @@ function Contenido({
 
   if (venta.ok) {
     return (
-      <article className={`${styles.ventana} ${styles.ventanaAcuse}`}>
-        <button type="button" className={styles.cerrarAcuse} onClick={onCerrar} aria-label="Cerrar">
-          <X size={20} aria-hidden="true" />
-        </button>
-
-        <div className={styles.exito} role="status">
-          <span className={styles.exitoIcono} aria-hidden="true">
-            <Check size={30} strokeWidth={2.5} />
-          </span>
-
-          <div className={styles.exitoTextos}>
-            <h2 className={styles.exitoTitulo}>Venta registrada</h2>
-
-            {/*
-              LOS TRES DATOS PARA RECLAMAR: monto, socio y hora. Un cajero que
-              sospecha un error necesita con qué llamar al administrador: «me
-              equivoqué en una venta de esta tarde» no localiza ninguna fila.
-              El monto y la hora los dice el SERVIDOR: son los que quedaron
-              guardados, no los que había en pantalla.
-            */}
-            <p className={styles.exitoNota}>
-              Se cobraron {PESOS.format(venta.valorFinal ?? 0)} a {miembro.nombreCompleto} (N.º{' '}
-              {miembro.numeroMembresia}){venta.hora && <>, a las {venta.hora}</>}.
-            </p>
-
-            {/*
-              HONESTIDAD EN LUGAR DE UN BOTÓN QUE NO EXISTE. El contrato de
-              datos no expone ninguna anulación de venta (`API-CONTRACT.md` §4),
-              así que no se ofrece un «Deshacer» de mentira: se dice a quién
-              acudir y con qué datos, que es lo único cierto que se puede dar.
-            */}
-            <p className={styles.exitoAviso}>
-              ¿Te equivocaste? Esta venta no se puede anular desde aquí: escribe al
-              administrador con la hora y el número del socio.
-            </p>
-          </div>
-
-          {/* La cola sigue: el camino de vuelta es un solo toque, y con
-              teclado un solo Enter — el foco cae aquí al llegar el acuse. */}
-          <Button
-            onClick={onCerrar}
-            variant="brand"
-            size="lg"
-            pildora
-            fullWidth
-            autoFocus
-            icon={<RotateCcw size={17} />}
-          >
-            Verificar otro socio
-          </Button>
-        </div>
-      </article>
+      <AcuseVenta
+        valorFinal={venta.valorFinal ?? 0}
+        nombre={miembro.nombreCompleto}
+        numeroMembresia={miembro.numeroMembresia}
+        hora={venta.hora ?? null}
+        onCerrar={onCerrar}
+      />
     )
   }
 

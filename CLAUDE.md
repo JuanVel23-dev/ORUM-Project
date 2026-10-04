@@ -946,7 +946,7 @@ por la misma razón.
 
 `Button` `Spinner` · `Field` `Input` `Select` `SelectMenu` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·
-`Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` · `Alert` `Toast` · `Modal` `Sheet`
+`Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` `CifraAnimada` · `Alert` `Toast` · `Modal` `Sheet`
 `Overlay` `DropdownMenu` `MenuItem` · `Skeleton` `ProgressBar` `EmptyState` `ErrorState` ·
 `DataList` `AccionEstado` `Copiar` · `PantallaAuth` `ComercioLogo` `QrCode` `WhatsAppButton`
 · `Agitar`
@@ -1064,6 +1064,21 @@ Tres cosas que no son obvias:
   contenedores con desplazamiento, y `showModal()` le daba el foco a la
   tarjeta entera. La prop `autoFocus` de React no sirve aquí: enfoca al
   montar, con el diálogo todavía cerrado.
+
+**La animación de pagar** (`acuse-venta.tsx`, 04/10/2026, encargo expreso del
+propietario: «una animación de pagar cuando se registre una venta; algo muy
+impresionante»). Al registrarse, la ventana blanca se vuelve NEGRO Y ORO: un
+círculo negro nace donde estaba el botón de cobrar y cubre la ventana, cae un
+sello de oro con la ✓ que se dibuja, se abren dos ondas, sale un estallido de
+estrellas de cuatro puntas (la de ORUM, en oro y plata) y el monto sube de
+cero a lo cobrado (`CifraAnimada`). Dura algo más de segundo y medio. Es una
+excepción consciente a la regla cero —una venta ocurre decenas de veces al
+día—, y por eso se cuidó lo que esa regla protege: **no hace esperar**
+(«Verificar otro socio» está enfocado y pulsable desde el primer fotograma),
+es **solo `transform` y `opacity`** (la ✓ se «dibuja» con dos traslaciones
+opuestas, no animando el trazo) y con **movimiento reducido** cada pieza
+queda en su estado final. En su CSS el estado BASE es el final y los
+`@keyframes` solo dicen de dónde viene cada pieza: no la copies al revés.
 
 El formulario de venta: la promoción se elige de un toque (un grupo de radios
 con la cifra de cada una; con más de seis pasa a un `SelectMenu`), la sucursal
