@@ -319,7 +319,18 @@ export function MenuItem({
         role={excluyente ? 'menuitemradio' : 'menuitem'}
         aria-checked={excluyente ? selected : undefined}
         className={clase}
-        onClick={(e) => cerrarMenu(e.currentTarget)}
+        onClick={(e) => {
+          cerrarMenu(e.currentTarget)
+          /*
+            Con `onSelect`, el enlace es el RESPALDO sin JavaScript y la
+            acción la resuelve quien lo usa (el directorio filtra en el
+            cliente, sin ir al servidor). Se respetan ctrl/cmd/shift+clic:
+            quien los usa quiere otra pestaña.
+          */
+          if (!onSelect || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+          e.preventDefault()
+          onSelect()
+        }}
       >
         {contenido}
       </Link>

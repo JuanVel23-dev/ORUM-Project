@@ -35,8 +35,9 @@ export const metadata: Metadata = {
   JavaScript salvo abrir los dos menús desplegables, se comparte por
   WhatsApp tal cual y sobrevive a un refresco.
 
-  Filtrar ocurre en el servidor sobre la lista ya cargada (`filtrarDirectorio`,
-  función pura y probada): cuesta microsegundos y la consulta es una sola.
+  Filtrar ocurre sobre la lista ya cargada (`filtrarDirectorio`, función pura
+  y probada), desde el 03/10/2026 en el navegador: aplicar un filtro ya no
+  viaja al servidor.
 
   La ficha de cada comercio se abre ENCIMA (`@modal/(.)explorar/[id]`), y por
   enlace directo a pantalla completa.
@@ -47,13 +48,10 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 
-export default async function ExplorarPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}) {
-  const [crudos, directorio, soporte, abiertoEn] = await Promise.all([
-    searchParams,
+export default async function ExplorarPage() {
+  /* Los filtros de la URL los lee el directorio en el cliente
+     (`DirectorioInteractivo`); aquí ya no hacen falta. */
+  const [directorio, soporte, abiertoEn] = await Promise.all([
     obtenerDirectorioPublico(),
     obtenerWhatsappSoporte(),
     obtenerInstanteServidor(),
@@ -63,7 +61,6 @@ export default async function ExplorarPage({
     <>
       <DirectorioComercios
         base="/explorar"
-        crudos={crudos}
         directorio={directorio}
         bajada="Descubre todos los comercios aliados de ORUM y comienza a disfrutar tus beneficios."
       />

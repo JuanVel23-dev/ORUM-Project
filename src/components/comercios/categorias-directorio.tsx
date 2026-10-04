@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { Check, ChevronDown, LayoutGrid } from 'lucide-react'
 import { Agitar } from '@/components/ui/agitar'
 import { Button } from '@/components/ui/button'
@@ -44,9 +43,13 @@ import estilos from './categorias-directorio.module.css'
 
   VARIAS A LA VEZ (30/09/2026, encargo del propietario). Cada categoría se
   enciende y se apaga sola, con una marca de verificación en su círculo;
-  «Todas» limpia la selección. Para que el toque responda al instante y no
-  cuando vuelve el servidor, la selección se refleja de forma OPTIMISTA en
-  `optimista`, que se descarta en cuanto llegan las opciones nuevas.
+  «Todas» limpia la selección.
+
+  EL TOQUE LO RESUELVE EL DIRECTORIO, AL INSTANTE (`onElegir`, 03/10/2026).
+  Antes cada opción navegaba con un `href` calculado en el servidor, y dos
+  toques rápidos se pisaban: el segundo enlace no sabía del primero y lo
+  desmarcaba. Ahora el directorio filtra en el cliente partiendo siempre del
+  estado real de la URL. El `href` queda de respaldo sin JavaScript.
 
   Los `href` llegan calculados del servidor (`hrefDirectorio`), así que este
   componente no conoce la forma de la URL.
@@ -62,52 +65,35 @@ export type OpcionCategoria = {
 
 type Props = {
   opciones: OpcionCategoria[]
+  /** Enciende o apaga una categoría (`null` = «Todas»: limpia la selección). */
+  onElegir: (id: number | null) => void
   /** Cuántos comercios muestra la rejilla con los filtros actuales. */
   total: number
 }
 
-export function CategoriasDirectorio({ opciones, total }: Props) {
+export function CategoriasDirectorio({ opciones, onElegir, total }: Props) {
   const [abierta, setAbierta] = useState(false)
-  /* La selección optimista, atada a las opciones sobre las que se calculó:
-     cuando el servidor devuelve opciones nuevas, deja de valer sola. */
-  const [optimista, setOptimista] = useState<{
-    base: OpcionCategoria[]
-    ids: Set<number | null>
-  } | null>(null)
 
-  const vigente = optimista?.base === opciones ? optimista.ids : null
-  const estaActiva = (o: OpcionCategoria) => (vigente ? vigente.has(o.id) : o.activa)
-
-  function alTocar(o: OpcionCategoria) {
-    const actuales = new Set(opciones.filter(estaActiva).map((x) => x.id))
-    let ids: Set<number | null>
-    if (o.id === null) {
-      ids = new Set([null])
-    } else {
-      actuales.delete(null)
-      if (actuales.has(o.id)) actuales.delete(o.id)
-      else actuales.add(o.id)
-      ids = actuales.size > 0 ? actuales : new Set([null])
-    }
-    setOptimista({ base: opciones, ids })
-  }
-
-  const elegidas = opciones.filter((o) => o.id !== null && estaActiva(o))
+  const elegidas = opciones.filter((o) => o.id !== null && o.activa)
   const resumen =
     elegidas.length === 0 ? 'Todas' : elegidas.length === 1 ? elegidas[0].nombre : `${elegidas.length}`
 
   const lista = (
     <ul className={estilos.rejilla}>
       {opciones.map((o) => {
-        const activa = estaActiva(o)
+        const activa = o.activa
         return (
           <li key={o.id ?? 'todas'}>
-            <Link
+            <a
               href={o.href}
-              scroll={false}
               className={estilos.opcion}
               data-activa={activa || undefined}
-              onClick={() => alTocar(o)}
+              onClick={(e) => {
+                // ctrl/cmd/shift+clic: otra pestaña, con el `href` de respaldo.
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+                e.preventDefault()
+                onElegir(o.id)
+              }}
             >
               {/* El temblor va en el GLIFO, dentro del círculo, y no en el
                   círculo: `Agitar` se aplica al icono, nunca a la superficie. */}
@@ -130,7 +116,7 @@ export function CategoriasDirectorio({ opciones, total }: Props) {
               <span className={estilos.nombre}>{o.nombre}</span>
               {/* El estado, dicho con palabras al lector de pantalla. */}
               {activa && <span className="sr-only"> (elegida)</span>}
-            </Link>
+            </a>
           </li>
         )
       })}

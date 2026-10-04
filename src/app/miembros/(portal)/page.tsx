@@ -21,16 +21,11 @@ export const metadata = { title: 'Comercios y beneficios · ORUM' }
   misma lista de comercios activos, con su beneficio destacado. Nada de lo
   que se muestra aquí es privado del socio.
 */
-export default async function MiembrosHomePage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}) {
+export default async function MiembrosHomePage() {
   const miembro = await requireMiembroVigente()
   const supabase = await createClient()
 
-  const [crudos, directorio, { data: filasFavoritos }] = await Promise.all([
-    searchParams,
+  const [directorio, { data: filasFavoritos }] = await Promise.all([
     obtenerDirectorioPublico(),
     /*
       LOS FAVORITOS DEL SOCIO (30/09/2026): el corazón de cada tarjeta y el
@@ -51,7 +46,6 @@ export default async function MiembrosHomePage({
   return (
     <DirectorioComercios
       base="/miembros"
-      crudos={crudos}
       directorio={directorio}
       /* El texto le habla a quien YA es socio (29/09/2026): no «descubre
          el club», sino dónde usar lo que ya tiene. */

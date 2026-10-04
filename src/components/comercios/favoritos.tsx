@@ -38,6 +38,8 @@ import estilos from './favoritos.module.css'
 */
 
 type ContextoFavoritos = {
+  /** Los favoritos de ahora mismo (optimistas incluidos). */
+  ids: ReadonlySet<number>
   esFavorito: (comercioId: number) => boolean
   alternar: (comercioId: number) => void
   enCurso: (comercioId: number) => boolean
@@ -122,6 +124,7 @@ export function ProveedorFavoritos({
 
   const valor = useMemo<ContextoFavoritos>(
     () => ({
+      ids,
       esFavorito: (id) => ids.has(id),
       alternar,
       enCurso: (id) => pendientes.has(id),
@@ -132,6 +135,11 @@ export function ProveedorFavoritos({
   )
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
+}
+
+/** El estado de favoritos de la pantalla, o `null` fuera del proveedor (la fachada). */
+export function useFavoritos(): ContextoFavoritos | null {
+  return useContext(Contexto)
 }
 
 /** Los seis puntos del estallido, repartidos en círculo. */
