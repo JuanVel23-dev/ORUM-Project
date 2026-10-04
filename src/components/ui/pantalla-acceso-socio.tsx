@@ -69,9 +69,18 @@ export function PantallaAccesoSocio({ titular, apoyo, pie, children }: Props) {
         <div className={styles.velo} aria-hidden="true" />
 
         <div className={styles.fotoContenido}>
-          <Link href="/" className={styles.marca} aria-label="ORUM, ir al inicio">
-            <LogoOrum variante="plata" className={styles.logo} preload />
-          </Link>
+          {/* Arriba: el logotipo y la vuelta al inicio. La vuelta vive AQUÍ y
+              no bajo el formulario: allí alargaba el panel y obligaba a
+              desplazar en un portátil. */}
+          <div className={styles.barra}>
+            <Link href="/" className={styles.marca} aria-label="ORUM, ir al inicio">
+              <LogoOrum variante="plata" className={styles.logo} preload />
+            </Link>
+            <Link href="/" className={styles.volver}>
+              <ArrowLeft size={15} aria-hidden="true" className={styles.volverFlecha} />
+              Volver al inicio
+            </Link>
+          </div>
 
           <div className={styles.mensaje}>
             <p className={[styles.insignia, ENTRADA].join(' ')} style={retardoEntrada(1)}>
@@ -101,11 +110,6 @@ export function PantallaAccesoSocio({ titular, apoyo, pie, children }: Props) {
           {children}
 
           {pie && <p className={styles.pie}>{pie}</p>}
-
-          <Link href="/" className={styles.volver}>
-            <ArrowLeft size={15} aria-hidden="true" className={styles.volverFlecha} />
-            Volver al inicio
-          </Link>
         </div>
       </main>
     </div>

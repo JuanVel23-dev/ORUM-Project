@@ -35,10 +35,19 @@
   --border-subtle: color-mix(in srgb, var(--tinta-1) 12%, transparent);
 }
 
+/*
+  EN ESCRITORIO LA PANTALLA MIDE LO QUE LA VENTANA, NI UN PÍXEL MÁS
+  (03/10/2026: «que ocupe la página y no me tenga que desplazar»). La página
+  no desplaza; si en una ventana muy baja el formulario no cupiera, desplaza
+  SOLO su panel, por dentro, y la foto se queda quieta.
+*/
 @media (min-width: 900px) {
   .pantalla {
-    grid-template-rows: none;
+    grid-template-rows: minmax(0, 1fr);
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
   }
 }
 
@@ -60,7 +69,7 @@
 
 @media (min-width: 900px) {
   .foto {
-    min-height: 100dvh;
+    min-height: 0;
   }
 }
 
@@ -101,8 +110,15 @@
   }
 }
 
+/* Logotipo a la izquierda, «Volver al inicio» a la derecha. */
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
 .marca {
-  align-self: flex-start;
   display: inline-flex;
   border-radius: var(--radius-xs);
 }
@@ -195,7 +211,23 @@
     align-items: center;
     margin-top: 0;
     border-radius: 0;
-    padding: var(--space-9) var(--space-8);
+    padding: var(--space-5) var(--space-8);
+    /* El respaldo para ventanas muy bajas: desplaza el panel, no la página. */
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Más apretado que en el teléfono: aquí manda que quepa de una vez. */
+  .columna {
+    gap: var(--space-4);
+  }
+
+  .columna form {
+    gap: var(--space-4);
   }
 }
 
@@ -228,16 +260,17 @@
   text-wrap: pretty;
 }
 
+/* «Volver al inicio», sobre la foto: texto claro, sin subrayado. */
 .volver {
-  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   min-height: var(--tap-min);
   font-size: var(--t-footnote-size);
   font-weight: 600;
-  color: var(--text-2);
+  color: var(--cacao-fg-2);
   text-decoration: none;
+  white-space: nowrap;
   transition: color var(--dur-fast) var(--ease-out);
 }
 
@@ -247,7 +280,7 @@
 
 @media (hover: hover) {
   .volver:hover {
-    color: var(--text);
+    color: var(--cacao-fg);
   }
 
   /* La respuesta es movimiento: la flecha se asoma hacia donde lleva. */
@@ -257,7 +290,7 @@
 }
 
 .volver:focus-visible {
-  outline: 2px solid var(--focus);
+  outline: 2px solid var(--cacao-brand);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
