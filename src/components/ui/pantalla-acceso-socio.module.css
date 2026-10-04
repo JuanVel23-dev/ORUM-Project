@@ -34,12 +34,15 @@
   --shadow-flotante: var(--sombra-fachada-3);
   --border-subtle: color-mix(in srgb, var(--tinta-1) 12%, transparent);
 
-  /* El botón de entrar, en el oro PÁLIDO de «siempre a mano» (03/10/2026:
-     «que sea claro como la tipografía»), con texto en tinta: 12,65:1. Como
-     el de WhatsApp de la ficha: el relleno pálido no marca un filo de 3:1
-     contra el blanco, y no lo necesita — el texto nombra el botón y la
-     sombra lo levanta. */
-  --action-gold: var(--gold-300);
+  /* El botón de entrar, en el ORO DE MARCA (`--gold-500`) con texto en
+     tinta: 8,5:1. Tercer intento (03/10/2026): el oro de acción del sistema
+     (`--gold-600`) se veía apagado y el pálido de la frase (`--gold-300`),
+     deslavado sobre blanco. Este es el oro del logotipo. Como relleno no
+     marca un filo de 3:1 contra el blanco, y no lo necesita — el texto
+     nombra el botón y la sombra lo levanta (misma relajación que el botón
+     de WhatsApp de la ficha). Es RELLENO, nunca texto: sobre claro este oro
+     sigue prohibido como color de letra. */
+  --action-gold: var(--gold-500);
   --action-gold-fg: var(--tinta-1);
 }
 
