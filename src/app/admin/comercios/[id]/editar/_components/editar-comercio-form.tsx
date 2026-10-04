@@ -21,7 +21,6 @@ type ComercioInicial = {
   descripcion: string | null
   marca_id: number | null
   categoria_id: number | null
-  logo_url: string | null
   indexable: boolean
   /** Correo real de Auth, o cadena vacía si no tiene cuenta. */
   correo: string
@@ -95,15 +94,6 @@ export function EditarComercioForm({
               </Select>
             </Field>
           </div>
-
-          <Field label="URL del logo" optional>
-            <Input
-              name="logo_url"
-              type="url"
-              defaultValue={comercio.logo_url ?? ''}
-              placeholder="https://…"
-            />
-          </Field>
 
           <Switch
             name="indexable"
