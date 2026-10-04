@@ -946,6 +946,15 @@ el contenido anterior todavía montado detrás.
 La ranura necesita **su propio `loading.tsx`**. Sin él, Next cae al `loading.tsx` de
 la sección y dibuja el esqueleto de la tabla dentro del hueco del modal.
 
+⚠️ **Y en la RAÍZ de la ranura ese `loading.tsx` no pinta nada** (`return null`);
+la ventana de carga va en cada grupo interceptado (`@modal/(.)miembros/loading.tsx`,
+`(.)comercios/…`). Hasta el 04/10/2026 la raíz del panel pintaba la ventana, y
+como el comodín `[...resto]` vacía la ranura en cada navegación, **cualquier
+clic a una sección enseñaba un instante una ventana cargando**. Solo pasa en
+producción: allí `<Link>` precarga hasta la primera carga de cada ranura y la
+pinta al pulsar; en desarrollo no se precarga y no se ve. Miembros y el
+Público ya seguían este reparto.
+
 Tras mover o añadir rutas paralelas, **reinicia el servidor de desarrollo**: el
 manifiesto de rutas queda obsoleto y la interceptación falla en silencio, lo que
 parece un bug de código y no lo es.
