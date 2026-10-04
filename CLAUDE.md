@@ -994,6 +994,17 @@ Su wordmark es `<LogoOrum variante="plata">`: la pantalla es siempre oscura
 (`data-theme="dark"` en el contenedor, pase lo que pase con el tema elegido), así que
 la variante nunca cambia.
 
+⚠️ **Excepción desde el 03/10/2026: la puerta del SOCIO.** `/miembros/login` y
+`/miembros/login/recuperar` usan **`PantallaAccesoSocio`**
+(`src/components/ui/pantalla-acceso-socio.tsx`), por encargo del propietario
+(«un rediseño total de este login; utiliza el estilo del portal principal»):
+la foto de marca del héroe con el logotipo en plata a un lado y el formulario
+sobre blanco al otro, siempre en claro, con `TituloSeccion` y el botón dorado
+en píldora. `PantallaAuth` sigue siendo la envoltura de administración,
+comercios y la activación de cuenta, que siguen cambiando juntas; las dos
+pantallas del socio cambian juntas entre sí. Sus formularios siguen tomando
+las clases de `estilosAuth` (la sacudida al fallar depende de ello).
+
 **La marca del cliente son imágenes, no texto.** Logotipo «ORUM» (plata,
 dorado, blanco, negro), monograma y estrella viven recortados en
 `src/components/ui/marca/` y se usan con `LogoOrum`, `MonogramaOrum`,
