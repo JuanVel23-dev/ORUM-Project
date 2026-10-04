@@ -4,7 +4,6 @@ import { obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
 import { MENSAJE_WHATSAPP_PUBLICO } from '@/lib/publico/whatsapp'
 import { EncabezadoPublico } from './_components/encabezado-publico'
 import { PieSitio } from '@/components/pie/pie-sitio'
-import { AvisoInstalar } from '@/components/pwa/instalar-movil'
 import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import estilos from './publico.module.css'
 
@@ -86,9 +85,6 @@ export default async function PublicoLayout({
         telefono={soporte}
         mensaje={MENSAJE_WHATSAPP_PUBLICO}
       />
-
-      {/* La invitación a instalar la app, solo en celulares (03/10/2026). */}
-      <AvisoInstalar />
     </div>
   )
 }

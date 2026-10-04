@@ -1,5 +1,4 @@
 import FichaPublicaPage from '@/app/(publico)/explorar/[id]/page'
-import { OverlayFichaPublica } from './overlay-ficha-publica'
 
 /*
   LA FICHA PÚBLICA, INTERCEPTADA  ·  se abre encima sin abandonar la lista
@@ -25,9 +24,6 @@ export default async function FichaPublicaInterceptada({
 }: {
   params: Promise<{ id: string }>
 }) {
-  return (
-    <OverlayFichaPublica>
-      <FichaPublicaPage params={params} enOverlay />
-    </OverlayFichaPublica>
-  )
+  // La ventana la pone `layout.tsx`, que persiste entre la carga y la ficha.
+  return <FichaPublicaPage params={params} enOverlay />
 }

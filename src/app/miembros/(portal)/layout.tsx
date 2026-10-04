@@ -112,7 +112,12 @@ export default async function MiembrosLayout({
       <main className={styles.main}>{children}</main>
 
       {/* El pie del Portal Público, completo, en todas las páginas. */}
-      <PieSitio soporte={soporte} mensajeSoporte={MENSAJE_SOPORTE} className={styles.pie} />
+      <PieSitio
+        soporte={soporte}
+        mensajeSoporte={MENSAJE_SOPORTE}
+        className={styles.pie}
+        instalar
+      />
 
       {modal}
 
