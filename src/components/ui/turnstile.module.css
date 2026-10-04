@@ -3,4 +3,9 @@
      renderizarse no empuje el botón de envío: un salto de maqueta en el
      login se lee como un fallo. */
   min-height: 65px;
+
+  /* Centrado en su columna: el widget mide 300px fijos y, pegado a la
+     izquierda de un formulario más ancho, quedaba descolgado del botón. */
+  display: flex;
+  justify-content: center;
 }
