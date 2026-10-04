@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getPerfilActual } from '@/lib/auth/auth'
-import { PantallaAccesoSocio } from '@/components/ui/pantalla-acceso-socio'
+import { PantallaAcceso } from '@/components/ui/pantalla-acceso'
 import { LoginMiembroForm } from './_components/login-form'
 
 export const metadata = { title: 'Iniciar sesión · ORUM Miembros' }
@@ -23,12 +23,13 @@ export default async function LoginMiembroPage({
   const mensajeInicial = error ? MENSAJES[error] : undefined
 
   return (
-    <PantallaAccesoSocio
+    <PantallaAcceso
+      puerta="socio"
       titular="Portal de Miembros"
       apoyo="Entra con tu número de membresía."
       pie="¿No recuerdas tu número de membresía? Está en tu carnet o pídelo en el punto donde te inscribiste."
     >
       <LoginMiembroForm mensajeInicial={mensajeInicial} />
-    </PantallaAccesoSocio>
+    </PantallaAcceso>
   )
 }

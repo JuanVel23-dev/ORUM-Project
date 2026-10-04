@@ -6,10 +6,10 @@ import fotoMarca from '@/components/ui/marca/foto-hero.webp'
 import { AdornoEstrella, LogoOrum } from '@/components/ui/marca/marca'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { ENTRADA, retardoEntrada } from '@/lib/shared/revelado'
-import styles from './pantalla-acceso-socio.module.css'
+import styles from './pantalla-acceso.module.css'
 
 /*
-  LA PUERTA DEL SOCIO  ·  con el estilo del Portal Público (03/10/2026)
+  LAS PUERTAS DE ORUM  ·  con el estilo del Portal Público (03/10/2026)
   ---------------------------------------------------------------------------
   Encargo del propietario: «un rediseño total de este login; utiliza el
   estilo de diseño del portal principal».
@@ -27,11 +27,13 @@ import styles from './pantalla-acceso-socio.module.css'
     · En el teléfono la foto va arriba y el formulario monta sobre ella con
       las esquinas redondas, como «Así es como te unes» sobre el héroe.
 
-  ⚠️ ESTO SEPARA LA PUERTA DEL SOCIO DE LAS DEMÁS, a propósito y por encargo.
-  `PantallaAuth` sigue siendo la envoltura de administración, comercios y la
-  activación de cuenta; su regla («cambian siempre a la vez») ya no incluye
-  estas dos pantallas del socio (login y recuperar contraseña), que cambian
-  juntas entre sí.
+  Nació como la puerta del socio. El mismo día el propietario pidió «el
+  mismo estilo de login a todos los logins, pero que cada uno tenga un
+  mensaje diferente para diferenciarlos»: ahora es la envoltura de TODAS las
+  pantallas de acceso (socios, comercios, administración y la activación de
+  cuenta), y reemplaza a la antigua `PantallaAuth` oscura. Vuelven a cambiar
+  todas a la vez; lo único que varía es la `puerta`, que elige el mensaje
+  sobre la foto (`MENSAJES`), más el titular, el apoyo y los campos.
 
   Los formularios de dentro siguen tomando sus clases de `estilosAuth`
   (`pantalla-auth.tsx`): la sacudida al fallar depende de que `.formulario` y
@@ -40,7 +42,48 @@ import styles from './pantalla-acceso-socio.module.css'
   Siempre en claro (`data-theme="light"`), como la fachada.
 */
 
+/** A quién le habla la foto. Cada puerta dice lo suyo: es lo que las distingue. */
+export type PuertaAcceso = 'socio' | 'comercio' | 'admin' | 'activar' | 'recuperar'
+
+type Mensaje = { insignia: string; frase: string; acento: string; bajada: string }
+
+/* `frase` + `acento` forman una sola oración; el acento va en cursiva dorada. */
+const MENSAJES: Record<PuertaAcceso, Mensaje> = {
+  socio: {
+    insignia: 'Apoya lo local · te da más',
+    frase: 'Tus beneficios,',
+    acento: 'siempre a mano',
+    bajada: 'Tu carnet, los comercios aliados y lo que has ahorrado, en un solo lugar.',
+  },
+  comercio: {
+    insignia: 'Comercios aliados',
+    frase: 'Tu negocio,',
+    acento: 'más cerca de tus clientes',
+    bajada: 'Valida el carnet de cada socio y registra sus compras en segundos.',
+  },
+  admin: {
+    insignia: 'Equipo ORUM',
+    frase: 'El club,',
+    acento: 'bajo control',
+    bajada: 'Socios, comercios aliados y membresías, gestionados desde un solo panel.',
+  },
+  activar: {
+    insignia: 'Te damos la bienvenida',
+    frase: 'A un paso de',
+    acento: 'estar dentro',
+    bajada: 'Elige tu contraseña y tu cuenta queda lista para usar.',
+  },
+  recuperar: {
+    insignia: 'Recupera tu acceso',
+    frase: 'Vuelve a entrar,',
+    acento: 'sin complicaciones',
+    bajada: 'Una contraseña nueva y sigues donde lo dejaste.',
+  },
+}
+
 type Props = {
+  /** Qué puerta es: elige el mensaje sobre la foto. */
+  puerta: PuertaAcceso
   /** El `<h1>` de la pantalla. La última palabra sale en cursiva dorada. */
   titular: string
   /** Una línea que dice con qué se entra. */
@@ -50,7 +93,9 @@ type Props = {
   children: ReactNode
 }
 
-export function PantallaAccesoSocio({ titular, apoyo, pie, children }: Props) {
+export function PantallaAcceso({ puerta, titular, apoyo, pie, children }: Props) {
+  const mensaje = MENSAJES[puerta]
+
   return (
     <div className={styles.pantalla} data-theme="light">
       {/* ── LA FOTO DE MARCA ─────────────────────────────────────────────── */}
@@ -85,15 +130,15 @@ export function PantallaAccesoSocio({ titular, apoyo, pie, children }: Props) {
           <div className={styles.mensaje}>
             <p className={[styles.insignia, ENTRADA].join(' ')} style={retardoEntrada(1)}>
               <AdornoEstrella tono="plata" />
-              Apoya lo local · te da más
+              {mensaje.insignia}
             </p>
             {/* No es un encabezado: el `h1` de la pantalla es el del
                 formulario. Esto es la frase de la marca. */}
             <p className={[styles.frase, ENTRADA].join(' ')} style={retardoEntrada(2)}>
-              Tus beneficios, <em className={styles.acento}>siempre a mano</em>
+              {mensaje.frase} <em className={styles.acento}>{mensaje.acento}</em>
             </p>
             <p className={[styles.bajada, ENTRADA].join(' ')} style={retardoEntrada(3)}>
-              Tu carnet, los comercios aliados y lo que has ahorrado, en un solo lugar.
+              {mensaje.bajada}
             </p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getPerfilActual } from '@/lib/auth/auth'
-import { PantallaAuth } from '@/components/ui/pantalla-auth'
+import { PantallaAcceso } from '@/components/ui/pantalla-acceso'
 import { LoginComercioForm } from './_components/login-form'
 
 export const metadata = { title: 'Iniciar sesión · ORUM Comercios' }
@@ -23,12 +23,13 @@ export default async function LoginComercioPage({
   const mensajeInicial = error ? MENSAJES[error] : undefined
 
   return (
-    <PantallaAuth
+    <PantallaAcceso
+      puerta="comercio"
       titular="Herramienta de comercios"
       apoyo="Entra con el correo de tu comercio."
       pie="¿Problemas para entrar? Escribe al administrador del club."
     >
       <LoginComercioForm mensajeInicial={mensajeInicial} />
-    </PantallaAuth>
+    </PantallaAcceso>
   )
 }

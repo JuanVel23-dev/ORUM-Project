@@ -986,24 +986,24 @@ una pantalla de caja es espacio robado a la tabla.
 `<button type="submit">` dentro del `<form>` que envuelve al menú, así funciona sin
 JavaScript. `MenuItem href` renderiza un `<Link>` — nunca un `<a>` dentro de un `<button>`.
 
-**`PantallaAuth`** es la envoltura de TODA pantalla de acceso (administración y miembros).
-Son dos puertas al mismo club: si una tuviera dirección de arte propia, parecería otra
-empresa. Sus clases de formulario se toman de `estilosAuth`, no de un módulo local —
-la sacudida al fallar usa `:has(.alerta)` y ambas clases deben salir del mismo módulo CSS.
-Su wordmark es `<LogoOrum variante="plata">`: la pantalla es siempre oscura
-(`data-theme="dark"` en el contenedor, pase lo que pase con el tema elegido), así que
-la variante nunca cambia.
+**`PantallaAcceso`** (`src/components/ui/pantalla-acceso.tsx`) es la envoltura de
+TODA pantalla de acceso: socios, comercios, administración, recuperar contraseña y
+activar cuenta. Tiene el estilo del Portal Público (encargo del propietario,
+03/10/2026: primero la puerta del socio, y el mismo día «el mismo estilo a todos
+los logins, pero que cada uno tenga un mensaje diferente»): la foto de marca del
+héroe con el logotipo en plata a un lado y el formulario sobre blanco al otro,
+siempre en claro (`data-theme="light"`), con `TituloSeccion` y el botón en píldora
+en el oro de marca (`--gold-500` como RELLENO, con texto en tinta). Son puertas al
+mismo club y cambian siempre a la vez; lo que las distingue es la prop **`puerta`**
+(`socio` · `comercio` · `admin` · `activar` · `recuperar`), que elige el mensaje
+sobre la foto (`MENSAJES`, en el propio componente), más el titular, el apoyo y
+los campos. La pantalla mide lo que la ventana y no desplaza: se adapta por alto
+y ancho con `@media` (no hay contenedor `contenido` fuera de los portales).
 
-⚠️ **Excepción desde el 03/10/2026: la puerta del SOCIO.** `/miembros/login` y
-`/miembros/login/recuperar` usan **`PantallaAccesoSocio`**
-(`src/components/ui/pantalla-acceso-socio.tsx`), por encargo del propietario
-(«un rediseño total de este login; utiliza el estilo del portal principal»):
-la foto de marca del héroe con el logotipo en plata a un lado y el formulario
-sobre blanco al otro, siempre en claro, con `TituloSeccion` y el botón dorado
-en píldora. `PantallaAuth` sigue siendo la envoltura de administración,
-comercios y la activación de cuenta, que siguen cambiando juntas; las dos
-pantallas del socio cambian juntas entre sí. Sus formularios siguen tomando
-las clases de `estilosAuth` (la sacudida al fallar depende de ello).
+La antigua **`PantallaAuth`** (tarjeta oscura con halo) se retiró ese día. De su
+módulo queda `estilosAuth` (`pantalla-auth.tsx`), de donde los formularios siguen
+tomando sus clases — la sacudida al fallar usa `:has(.alerta)` y ambas clases
+deben salir del mismo módulo CSS.
 
 **La marca del cliente son imágenes, no texto.** Logotipo «ORUM» (plata,
 dorado, blanco, negro), monograma y estrella viven recortados en

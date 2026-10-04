@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getPerfilActual } from '@/lib/auth/auth'
-import { PantallaAuth } from '@/components/ui/pantalla-auth'
+import { PantallaAcceso } from '@/components/ui/pantalla-acceso'
 import { LoginForm } from './login-form'
 
 export const metadata = {
@@ -30,12 +30,13 @@ export default async function LoginPage({
   const mensajeInicial = error ? MENSAJES[error] : undefined
 
   return (
-    <PantallaAuth
+    <PantallaAcceso
+      puerta="admin"
       titular="Administración"
       apoyo="Entra con tu correo y tu contraseña."
       pie="¿Problemas para entrar? Contacta al administrador del club."
     >
       <LoginForm mensajeInicial={mensajeInicial} />
-    </PantallaAuth>
+    </PantallaAcceso>
   )
 }
