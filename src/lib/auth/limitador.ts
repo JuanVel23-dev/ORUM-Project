@@ -51,18 +51,40 @@ export const ERROR_LIMITE_LOGIN =
   'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'
 
 /**
- * Cupo de un intento de inicio de sesión: uno por cuenta (correo o número de
- * membresía) y otro por IP. Se gastan los dos aunque falle el primero, para que
- * una IP que prueba muchas cuentas no recupere cupo por haber topado en una.
+ * Cupo de un intento de inicio de sesión. Tres contadores, todos gastados aunque
+ * falle alguno (para que una IP que prueba muchas cuentas no recupere cupo por
+ * haber topado en una):
+ *
+ * - cuenta + IP: el tope fino. Quien insiste desde su conexión se bloquea a sí
+ *   mismo y no impide entrar al dueño de la cuenta desde la suya.
+ * - IP: frena a quien prueba muchas cuentas desde un sitio.
+ * - cuenta sola: techo alto contra quien rota de IP (ver `LIMITES`).
+ *
  * Falla hacia «permitir»: ver `AlFallar`.
  */
 export async function cupoDeLogin(cuenta: string): Promise<boolean> {
   const ip = await ipDelCliente()
-  const [porCuenta, porIp] = await Promise.all([
-    hayCupo(claveCupo('login', 'cuenta', huella(cuenta)), LIMITES.loginPorCuenta, 'permitir'),
+  const h = huella(cuenta)
+  const [porCuentaYIp, porIp, porCuenta] = await Promise.all([
+    hayCupo(claveCupo('login', 'cuenta-ip', `${h}:${ip}`), LIMITES.loginPorCuentaYIp, 'permitir'),
     hayCupo(claveCupo('login', 'ip', ip), LIMITES.loginPorIp, 'permitir'),
+    hayCupo(claveCupo('login', 'cuenta', h), LIMITES.loginPorCuenta, 'permitir'),
   ])
-  return porCuenta && porIp
+  return porCuentaYIp && porIp && porCuenta
+}
+
+/**
+ * Tras un acierto la cuenta vuelve a empezar: el tope cuenta fallos seguidos.
+ * Se reinician la pareja cuenta + IP y el techo de la cuenta; el de la IP no,
+ * porque lo comparten otras cuentas.
+ */
+export async function reiniciarLogin(cuenta: string): Promise<void> {
+  const ip = await ipDelCliente()
+  const h = huella(cuenta)
+  await Promise.all([
+    reiniciarCupo(claveCupo('login', 'cuenta-ip', `${h}:${ip}`)),
+    reiniciarCupo(claveCupo('login', 'cuenta', h)),
+  ])
 }
 
 /**
@@ -90,11 +112,6 @@ export async function cupoDeSolicitudAliado(ip: string): Promise<boolean> {
     hayCupo(claveCupo('aliados', 'global', 'dia'), LIMITES.aliadosGlobalDia, 'bloquear'),
   ])
   return porIp && global
-}
-
-/** Tras un acierto, la cuenta vuelve a empezar: el tope cuenta fallos seguidos. */
-export function reiniciarLogin(cuenta: string): Promise<void> {
-  return reiniciarCupo(claveCupo('login', 'cuenta', huella(cuenta)))
 }
 
 /** Pone a cero el contador de `clave` (el login, al acertar). Nunca lanza. */

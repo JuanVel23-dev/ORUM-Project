@@ -21,15 +21,22 @@ const DIA = 24 * HORA
  * - `recuperar`: por correo (o número de membresía) evita inundar un buzón
  *   ajeno; por IP evita barrer muchas cuentas desde un mismo sitio.
  * - `login`: cuenta intentos y se reinicia al acertar, así que en la práctica
- *   son fallos seguidos. Por IP es más holgado: una oficina comparte salida.
+ *   son fallos seguidos. El tope fino es por PAREJA cuenta + IP: quien insiste
+ *   desde su conexión se bloquea a sí mismo, no al dueño de la cuenta (el número
+ *   de membresía son 8 dígitos correlativos, fáciles de adivinar, y un tope por
+ *   cuenta sola dejaría a cualquiera bloquear a un socio con 11 intentos). Por
+ *   IP es más holgado: una oficina comparte salida. El de cuenta sola es solo un
+ *   techo alto contra quien rota de IP: bloquear a un socio ajeno exige ahora
+ *   resolver cien captchas, no once.
  */
 export const LIMITES = {
   aliadosPorIp: { tope: 3, ventanaSegundos: HORA },
   aliadosGlobalDia: { tope: 30, ventanaSegundos: DIA },
   recuperarPorCuenta: { tope: 3, ventanaSegundos: HORA },
   recuperarPorIp: { tope: 10, ventanaSegundos: HORA },
-  loginPorCuenta: { tope: 10, ventanaSegundos: 15 * 60 },
+  loginPorCuentaYIp: { tope: 10, ventanaSegundos: 15 * 60 },
   loginPorIp: { tope: 30, ventanaSegundos: 15 * 60 },
+  loginPorCuenta: { tope: 100, ventanaSegundos: HORA },
 } as const satisfies Record<string, Limite>
 
 /** Valor de `ipDeCabeceras` cuando la petición no trae ninguna IP (solo en local). */
@@ -45,8 +52,10 @@ export function huella(valor: string): string {
   return createHash('sha256').update(normalizado).digest('hex').slice(0, 32)
 }
 
+export type TipoClave = 'ip' | 'cuenta' | 'cuenta-ip' | 'global'
+
 /** Clave de un contador: `accion:tipo:valor`. */
-export function claveCupo(accion: string, tipo: 'ip' | 'cuenta' | 'global', valor: string): string {
+export function claveCupo(accion: string, tipo: TipoClave, valor: string): string {
   return `${accion}:${tipo}:${valor}`
 }
 

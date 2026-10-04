@@ -22,6 +22,16 @@ describe('claveCupo', () => {
     expect(claveCupo('login', 'ip', '203.0.113.5')).toBe('login:ip:203.0.113.5')
   })
 
+  it('la pareja cuenta + IP es una clave distinta de la cuenta sola', () => {
+    expect(claveCupo('login', 'cuenta-ip', 'abc:203.0.113.5')).not.toBe(claveCupo('login', 'cuenta', 'abc'))
+  })
+
+  it('la misma cuenta desde otra IP tiene otro contador', () => {
+    expect(claveCupo('login', 'cuenta-ip', 'abc:203.0.113.5')).not.toBe(
+      claveCupo('login', 'cuenta-ip', 'abc:198.51.100.7'),
+    )
+  })
+
   it('separa la misma persona en acciones distintas', () => {
     expect(claveCupo('login', 'cuenta', 'abc')).not.toBe(claveCupo('recuperar', 'cuenta', 'abc'))
   })
@@ -99,6 +109,10 @@ describe('LIMITES', () => {
       expect(tope).toBeGreaterThan(0)
       expect(ventanaSegundos).toBeGreaterThan(0)
     }
+  })
+
+  it('el techo por cuenta sola es mucho más alto que el de la pareja cuenta + IP', () => {
+    expect(LIMITES.loginPorCuenta.tope).toBeGreaterThanOrEqual(LIMITES.loginPorCuentaYIp.tope * 5)
   })
 
   it('el techo global de aliados no baja del tope por IP', () => {
