@@ -281,7 +281,22 @@
   font-size: var(--t-footnote-size);
   line-height: 1.55;
   color: var(--text-3);
-  text-wrap: pretty;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* El enlace de la nota (soporte por WhatsApp): el oro de texto, subrayado. */
+.pie a {
+  font-weight: 600;
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pie a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
 }
 
 /* «Volver al inicio», sobre la foto: texto claro, sin subrayado. */
