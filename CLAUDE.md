@@ -1234,6 +1234,18 @@ encima); siempre decorativa (`aria-hidden`). La imagen para compartir en
 redes es `(publico)/opengraph-image.jpg` (logo dorado sobre negro, el JPG con
 fondo incrustado: solo ahí).
 
+**La foto de marca es UN archivo** (`src/components/ui/marca/foto-hero.webp`,
+1672×940) y la usan cuatro sitios: el héroe de la portada, el banner del
+directorio (público y miembros), el banner de comercios y las pantallas de
+acceso. Desde el 04/10/2026 es una **familia en el café** que ocupa todo el
+ancho (antes, una socia sola a la derecha): al cambiarla hay que revisar el
+`object-position` de los cuatro, no solo el archivo. Hoy: héroe `72%` en el
+teléfono y centrada en escritorio (el velo izquierdo sostiene el titular
+sobre el padre y el hijo); banners `60%` en el teléfono y `center 8%` en
+escritorio (las caras están en el tercio superior: con `35%` quedaban tras
+la cabecera); acceso `86%` (más al centro, el padre sale cortado por la
+mitad).
+
 **`LogoOrumTema`** (hoy sin consumidores: la cabecera de miembros pasó a dos
 variantes fijas, oro y plata, elegidas por `.cabeceraInicio` al fijarse el
 portal en claro) es la excepción a «una variante por superficie fija»: monta

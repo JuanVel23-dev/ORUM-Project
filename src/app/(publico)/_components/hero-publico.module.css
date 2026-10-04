@@ -54,9 +54,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* La socia está a la derecha de la foto y el texto a la izquierda. En un
-     teléfono, donde la foto se recorta a lo alto, se ancla a la derecha
-     para que ella y la tarjeta ORUM sigan en cuadro. En color: los dorados
+  /* LA FOTO DE MARCA es una familia en el café (cambiada el 04/10/2026; antes,
+     una socia sola a la derecha). Ocupa todo el ancho: el padre y el hijo
+     quedan a la izquierda, en la penumbra del velo, detrás del titular; la
+     madre con la tarjeta ORUM y la hija, a la derecha, a plena luz. En un
+     teléfono, donde la foto se recorta a lo alto, se ancla hacia la derecha
+     para que la madre y la tarjeta sigan en cuadro. En color: los dorados
      de la foto son los de la marca. */
   object-position: 72% center;
 

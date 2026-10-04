@@ -74,14 +74,16 @@
 .bannerFoto {
   z-index: -2;
   object-fit: cover;
-  /* La socia está a la derecha: en un teléfono la foto se ancla ahí. */
-  object-position: 72% center;
+  /* El encuadre del banner del directorio: en un teléfono, algo a la derecha
+     del centro (entra la familia entera); en escritorio, anclada arriba,
+     donde están las caras. */
+  object-position: 60% center;
   animation: foto-asienta calc(var(--dur-page) * 4) var(--ease-out) both;
 }
 
 @media (min-width: 768px) {
   .bannerFoto {
-    object-position: center 35%;
+    object-position: center 8%;
   }
 }
 

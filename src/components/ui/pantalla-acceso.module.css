@@ -86,8 +86,11 @@
 
 .fotoImagen {
   object-fit: cover;
-  /* El encuadre del héroe: la persona queda a la derecha. */
-  object-position: 70% center;
+  /* En el panel alto de escritorio la foto se recorta a lo ancho: se ancla a
+     la derecha para que entren el hijo, la madre con la tarjeta ORUM y la
+     hija. Más al centro, el padre salía cortado por la mitad en el borde. En
+     el teléfono la franja es apaisada y cabe la familia entera. */
+  object-position: 86% center;
   z-index: -2;
 }
 
