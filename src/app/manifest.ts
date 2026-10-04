@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { COLOR_ARRANQUE, ICONOS_APP } from '@/lib/shared/manifiesto-app'
 
 /**
  * Manifest de la aplicación instalable.
@@ -14,7 +15,9 @@ export default function manifest(): MetadataRoute.Manifest {
       'Tus beneficios en los comercios aliados del club ORUM: el catálogo completo y tu carnet de socio, siempre a mano.',
 
     /*
-      LA APP INSTALABLE ES LA DEL SOCIO, no la del empleado.
+      LA APP INSTALABLE ES LA DEL SOCIO, no la del empleado. (El comercio
+      tiene la suya, con su propio manifiesto que abre en `/comercios`:
+      `app/manifest-comercios.webmanifest/route.ts`.)
 
       Antes apuntaba a `/admin`, y eso convertía el acceso administrativo en la
       primera pantalla de quien instalara la aplicación. Con `display:
@@ -47,39 +50,15 @@ export default function manifest(): MetadataRoute.Manifest {
        exista una hoja de estilos. Si la paleta cambia, cambian a mano — y si no,
        la aplicación instalada arranca con el color de la dirección anterior,
        que es lo que acababa de pasar. */
-    background_color: '#111114',
-    theme_color: '#111114',
+    background_color: COLOR_ARRANQUE,
+    theme_color: COLOR_ARRANQUE,
 
     lang: 'es-CO',
     dir: 'ltr',
     categories: ['business', 'productivity'],
 
-    /*
-      EL MONOGRAMA DE ORUM EN DORADO Y SIN FONDO (29/09/2026, encargo del
-      propietario: «el icono de ORUM para todas las páginas», «dorado y sin
-      fondo»). PNG transparentes generados desde
-      `src/components/ui/marca/monograma.png`: la «O» con la estrella del
-      cliente, no un dibujo aproximado. iOS pinta de negro lo transparente
-      del icono de inicio; Android usa `background_color`. La variante `maskable`
-      deja el monograma dentro del 80 % central, que es lo que Android no
-      recorta al aplicar su forma.
-    */
-    icons: [
-      { src: '/icons/orum-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: '/icons/orum-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-      {
-        src: '/icons/orum-maskable-192.png',
-        sizes: '192x192',
-        type: 'image/png',
-        purpose: 'maskable',
-      },
-      {
-        src: '/icons/orum-maskable-512.png',
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'maskable',
-      },
-    ],
+    /* El monograma dorado, compartido con la aplicación del comercio. */
+    icons: ICONOS_APP,
 
     /*
       Mantener pulsado el icono da acceso directo a las dos cosas que el SOCIO

@@ -1035,6 +1035,19 @@ veredicto sigue siendo una franja de color sólido con punto lleno / hueco, y
 el recorrido es el mismo. `obtenerMiComercio` (`lib/comercios/comercio-sesion.ts`)
 es el comercio de la sesión, con `cache`: lo piden el layout y la página.
 
+**El comercio también instala su portal** (04/10/2026). El layout monta
+`WhatsAppFlotante` y `AvisoInstalar`, y el pie lleva el icono de instalar,
+igual que el Portal de Miembros. Lo que cambia es QUÉ se instala: hay **dos
+aplicaciones** sobre el mismo sitio, cada una con su manifiesto.
+`app/manifest.ts` es la del socio (abre en `/miembros`);
+`app/manifest-comercios.webmanifest/route.ts` es la del comercio (abre en
+`/comercios`, `scope: '/comercios'`, `id` propio). `comercios/layout.tsx`
+—que no pinta nada— lo enlaza con `metadata.manifest` para el portal y sus
+dos pantallas de acceso. Sin eso, la app instalada desde la caja abriría en
+la puerta del socio en cada arranque. Los iconos y el color de arranque de
+los dos manifiestos salen de `lib/shared/manifiesto-app.ts`: si la paleta
+cambia, se mueven ahí una sola vez.
+
 **La marca del cliente son imágenes, no texto.** Logotipo «ORUM» (plata,
 dorado, blanco, negro), monograma y estrella viven recortados en
 `src/components/ui/marca/` y se usan con `LogoOrum`, `MonogramaOrum`,
@@ -1217,6 +1230,9 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    en una vista previa local con datos de ejemplo (1366, 820 y 390 px), no con
    una sesión de comercio real. Falta verlo en producción y en la caja: el
    escaneo con cámara, una venta de punta a punta y un comercio con logotipo.
+   Y **instalar la app del comercio en un teléfono real** (Android e iPhone):
+   se comprobó que `/comercios` enlaza su manifiesto y que este se sirve bien,
+   no que el sistema la instale y abra en `/comercios`.
 5. **La v6 solo se ha visto en el Portal Público** (landing y `/explorar`,
    24/09/2026, en el navegador del panel, a 1280px y emulando 390px). El resto
    de portales sigue sin mirarse: entraron por tokens, `tsc`, `eslint`, las

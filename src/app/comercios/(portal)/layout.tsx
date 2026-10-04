@@ -10,6 +10,8 @@ import { ComercioLogo } from '@/components/ui/comercio-logo'
 import fotoMarca from '@/components/ui/marca/foto-hero.webp'
 import { AdornoEstrella, LogoOrum } from '@/components/ui/marca/marca'
 import { PieSitio } from '@/components/pie/pie-sitio'
+import { AvisoInstalar } from '@/components/pwa/instalar-movil'
+import { WhatsAppFlotante } from '@/components/ui/whatsapp-flotante'
 import escaparate from '@/app/(publico)/escaparate.module.css'
 import cromo from '@/app/miembros/(portal)/portal.module.css'
 import { cerrarSesionComercio } from '../login/actions'
@@ -42,6 +44,13 @@ const MENSAJE_SOPORTE = 'Hola, necesito ayuda con la herramienta de comercios de
     · EL CONTENIDO va en tarjetas blancas MONTADAS sobre el canto del banner,
       como «Así es como te unes» sobre el héroe de la portada.
     · EL PIE es el del sitio, con el soporte por WhatsApp.
+    · WHATSAPP FLOTANTE E INSTALAR, como en el Portal de Miembros (encargo
+      del mismo día: «añade la opción de WhatsApp y la de descargar; los
+      comercios pueden también descargar este portal»). El botón de instalar
+      solo aparece en celulares y donde instalar es posible; el pie lleva el
+      mismo icono también en computador. Lo que se instala desde aquí es la
+      aplicación del COMERCIO: `comercios/layout.tsx` enlaza un manifiesto
+      propio que abre en `/comercios`, no en la puerta del socio.
 
   SIEMPRE EN CLARO (`data-theme="light"`), como la fachada y el Portal de
   Miembros: con el teléfono en modo oscuro las franjas claras salían negras.
@@ -125,7 +134,15 @@ export default async function ComerciosLayout({ children }: { children: ReactNod
 
       <main className={styles.main}>{children}</main>
 
-      <PieSitio soporte={soporte} mensajeSoporte={MENSAJE_SOPORTE} />
+      <PieSitio soporte={soporte} mensajeSoporte={MENSAJE_SOPORTE} instalar />
+
+      {/* El atajo al soporte, fijo en la esquina: en la caja, la ayuda tiene
+          que estar a un toque. Sin número configurado no se pinta. */}
+      <WhatsAppFlotante telefono={soporte} mensaje={MENSAJE_SOPORTE} />
+
+      {/* La invitación a instalar la app, encima del de WhatsApp: solo en
+          celulares, y solo mientras no esté ya instalada. */}
+      <AvisoInstalar />
     </div>
   )
 }

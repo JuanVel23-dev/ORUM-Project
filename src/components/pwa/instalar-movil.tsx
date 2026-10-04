@@ -8,7 +8,7 @@ import { GuiaInstalacionAndroid, GuiaInstalacionIOS, useInstalacion } from './in
 import estilos from './instalar-movil.module.css'
 
 /*
-  INSTALAR ORUM COMO APLICACIÓN  ·  fachada pública y portal de miembros
+  INSTALAR ORUM COMO APLICACIÓN  ·  portal de miembros y portal de comercios
   ---------------------------------------------------------------------------
   Encargo del propietario (03/10/2026): «que se pueda descargar y ver como
   una aplicación en el celular; un botón de descarga que detecte cuando está
@@ -17,7 +17,11 @@ import estilos from './instalar-movil.module.css'
   La base ya existía —manifiesto (`app/manifest.ts`, que abre en `/miembros`
   a pantalla completa), iconos y service worker— pero la invitación a
   instalar solo vivía en el panel de administración. Aquí están las dos
-  entradas de los portales del cliente:
+  entradas de los portales del cliente.
+
+  Desde el 04/10/2026 también las monta el Portal de Comercios. Este
+  componente no cambia: QUÉ aplicación se instala lo decide el manifiesto que
+  enlaza la página, y `/comercios` enlaza el suyo (abre en `/comercios`):
 
     · `AvisoInstalar`  — un botón redondo con el icono de descarga, encima
       del de WhatsApp, SOLO EN CELULARES.
