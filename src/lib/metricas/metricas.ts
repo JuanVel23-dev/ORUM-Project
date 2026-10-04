@@ -141,3 +141,90 @@ export function agruparVentasPorMiembroYComercio(
     .sort((a, b) => b.veces - a.veces)
     .slice(0, 20)
 }
+
+/** Tope de ventas que se listan en el detalle de un comercio. */
+export const LIMITE_VENTAS_DETALLE = 100
+
+export type VentaDetalleRegistro = {
+  id: number
+  miembro_id: number
+  sucursal_id: number
+  promocion_id: number | null
+  valor_compra: number
+  valor_descuento: number
+  valor_final: number
+  fecha_hora: string
+}
+export type SucursalNombre = { id: number; nombre: string | null }
+export type PromocionInfo = { id: number; titulo: string }
+
+export type DetalleVenta = {
+  id: number
+  /** Instante tal como llega de la base (timestamptz): formatear en America/Bogota. */
+  fechaHora: string
+  miembroNombre: string
+  sucursalNombre: string
+  promocionTitulo: string | null
+  valorCompra: number
+  valorDescuento: number
+  valorFinal: number
+}
+
+/** Resuelve los nombres de cada venta. Conserva el orden recibido. */
+export function detallarVentas(
+  ventas: VentaDetalleRegistro[],
+  sucursales: SucursalNombre[],
+  miembros: MiembroInfo[],
+  promociones: PromocionInfo[],
+): DetalleVenta[] {
+  const nombreSucursal = new Map(sucursales.map((s) => [s.id, s.nombre ?? 'Sin nombre']))
+  const nombreMiembro = new Map(miembros.map((m) => [m.id, `${m.nombres} ${m.apellidos}`.trim()]))
+  const tituloPromocion = new Map(promociones.map((p) => [p.id, p.titulo]))
+
+  return ventas.map((v) => ({
+    id: v.id,
+    fechaHora: v.fecha_hora,
+    miembroNombre: nombreMiembro.get(v.miembro_id) ?? `Miembro #${v.miembro_id}`,
+    sucursalNombre: nombreSucursal.get(v.sucursal_id) ?? `Sucursal #${v.sucursal_id}`,
+    promocionTitulo: v.promocion_id === null ? null : (tituloPromocion.get(v.promocion_id) ?? null),
+    valorCompra: v.valor_compra,
+    valorDescuento: v.valor_descuento,
+    valorFinal: v.valor_final,
+  }))
+}
+
+/** Cantidad, monto final y descuento total de un conjunto de ventas. */
+export function totalesVentas(ventas: Pick<VentaRegistro, 'valor_final' | 'valor_descuento'>[]): {
+  cantidad: number
+  monto: number
+  descuento: number
+} {
+  return ventas.reduce(
+    (t, v) => ({
+      cantidad: t.cantidad + 1,
+      monto: t.monto + v.valor_final,
+      descuento: t.descuento + v.valor_descuento,
+    }),
+    { cantidad: 0, monto: 0, descuento: 0 },
+  )
+}
+
+function esFechaISO(valor: string | undefined): valor is string {
+  if (!valor || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false
+  const [a, m, d] = valor.split('-').map(Number)
+  const fecha = new Date(Date.UTC(a, m - 1, d))
+  return fecha.getUTCFullYear() === a && fecha.getUTCMonth() === m - 1 && fecha.getUTCDate() === d
+}
+
+/**
+ * Rango que llega por la URL. Si falta, no es una fecha real o está invertido,
+ * cae a los últimos 30 días: una URL manipulada no debe romper la consulta.
+ */
+export function normalizarRango(
+  desde: string | undefined,
+  hasta: string | undefined,
+  hoy: Date = new Date(),
+): { desde: string; hasta: string } {
+  if (esFechaISO(desde) && esFechaISO(hasta) && desde <= hasta) return { desde, hasta }
+  return rangoUltimosDias(30, hoy)
+}

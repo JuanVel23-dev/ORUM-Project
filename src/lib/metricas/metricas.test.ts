@@ -4,6 +4,9 @@ import {
   agruparMembresiasPorEmpleado,
   agruparVentasPorComercio,
   agruparVentasPorMiembroYComercio,
+  detallarVentas,
+  totalesVentas,
+  normalizarRango,
 } from './metricas'
 
 describe('rangoUltimosDias', () => {
@@ -134,5 +137,105 @@ describe('agruparVentasPorMiembroYComercio', () => {
       miembros,
     )
     expect(resultado).toEqual([])
+  })
+})
+
+describe('detallarVentas', () => {
+  const sucursales = [
+    { id: 10, nombre: 'Centro' },
+    { id: 11, nombre: null },
+  ]
+  const miembros = [{ id: 1, nombres: 'Ana', apellidos: 'Ruiz' }]
+  const promociones = [{ id: 5, titulo: '2x1 en cafés' }]
+  const base = {
+    id: 100,
+    miembro_id: 1,
+    sucursal_id: 10,
+    promocion_id: 5,
+    valor_compra: 50000,
+    valor_descuento: 5000,
+    valor_final: 45000,
+    fecha_hora: '2026-09-30T01:30:00Z',
+  }
+
+  it('resuelve nombres de miembro, sucursal y promoción', () => {
+    const [d] = detallarVentas([base], sucursales, miembros, promociones)
+    expect(d).toEqual({
+      id: 100,
+      fechaHora: '2026-09-30T01:30:00Z',
+      miembroNombre: 'Ana Ruiz',
+      sucursalNombre: 'Centro',
+      promocionTitulo: '2x1 en cafés',
+      valorCompra: 50000,
+      valorDescuento: 5000,
+      valorFinal: 45000,
+    })
+  })
+
+  it('conserva el orden recibido', () => {
+    const resultado = detallarVentas(
+      [{ ...base, id: 2 }, { ...base, id: 1 }],
+      sucursales,
+      miembros,
+      promociones,
+    )
+    expect(resultado.map((d) => d.id)).toEqual([2, 1])
+  })
+
+  it('usa textos de respaldo cuando falta un dato', () => {
+    const [d] = detallarVentas(
+      [{ ...base, miembro_id: 9, sucursal_id: 11, promocion_id: null }],
+      sucursales,
+      miembros,
+      promociones,
+    )
+    expect(d.miembroNombre).toBe('Miembro #9')
+    expect(d.sucursalNombre).toBe('Sin nombre')
+    expect(d.promocionTitulo).toBeNull()
+  })
+
+  it('no inventa una sucursal desconocida', () => {
+    const [d] = detallarVentas([{ ...base, sucursal_id: 99 }], sucursales, miembros, promociones)
+    expect(d.sucursalNombre).toBe('Sucursal #99')
+  })
+})
+
+describe('totalesVentas', () => {
+  it('suma cantidad, monto final y descuento', () => {
+    expect(
+      totalesVentas([
+        { valor_final: 1000, valor_descuento: 100 },
+        { valor_final: 2000, valor_descuento: 300 },
+      ]),
+    ).toEqual({ cantidad: 2, monto: 3000, descuento: 400 })
+  })
+
+  it('devuelve ceros sin ventas', () => {
+    expect(totalesVentas([])).toEqual({ cantidad: 0, monto: 0, descuento: 0 })
+  })
+})
+
+describe('normalizarRango', () => {
+  const hoy = new Date('2026-07-31T12:00:00Z')
+
+  it('acepta un rango válido', () => {
+    expect(normalizarRango('2026-07-01', '2026-07-15', hoy)).toEqual({
+      desde: '2026-07-01',
+      hasta: '2026-07-15',
+    })
+  })
+
+  it('cae al rango por defecto si falta o no es una fecha', () => {
+    const defecto = { desde: '2026-07-01', hasta: '2026-07-31' }
+    expect(normalizarRango(undefined, undefined, hoy)).toEqual(defecto)
+    expect(normalizarRango('basura', '2026-07-15', hoy)).toEqual(defecto)
+    expect(normalizarRango('2026-02-31', '2026-07-15', hoy)).toEqual(defecto)
+  })
+
+  it('cae al rango por defecto si desde es posterior a hasta', () => {
+    expect(normalizarRango('2026-07-20', '2026-07-10', hoy)).toEqual({
+      desde: '2026-07-01',
+      hasta: '2026-07-31',
+    })
   })
 })

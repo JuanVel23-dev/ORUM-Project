@@ -265,6 +265,9 @@ export default async function MetricasPage({
             items={porComercio}
             columns={COL_COMERCIO}
             getKey={(r) => r.comercioId}
+            rowHref={(r) =>
+              `/admin/metricas/comercio/${r.comercioId}?desde=${desde}&hasta=${hasta}`
+            }
             empty={
               <EmptyState
                 icon={<BarChart3 size={24} />}

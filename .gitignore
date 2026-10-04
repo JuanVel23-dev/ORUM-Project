@@ -53,3 +53,7 @@ next-env.d.ts
 
 # Registros de los servidores locales (next dev / next start)
 *.log
+
+# Salidas de Playwright y credenciales de usuarios de prueba: nunca al repositorio.
+.playwright-mcp/
+Usuarios Pruebas PlayWright.txt
