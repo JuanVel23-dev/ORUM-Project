@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react'
 import { Check, RotateCcw, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CifraAnimada } from '@/components/ui/cifra-animada'
+import { LogoOrum } from '@/components/ui/marca/marca'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import styles from './acuse-venta.module.css'
 
@@ -19,19 +20,24 @@ const PESOS = new Intl.NumberFormat('es-CO', {
   Encargo del propietario: «una animación de pagar, cuando se registre una
   venta. Algo muy impresionante».
 
-  La ventana blanca del formulario se vuelve NEGRO Y ORO, que es donde el oro
-  brillante de la marca puede lucir (sobre claro está prohibido). En orden, y
-  en algo más de segundo y medio:
+  SOBRE BLANCO, CON EL LOGOTIPO DE ORUM. La primera versión volvía la ventana
+  negra y oro; el propietario la vio y pidió otra cosa: «no me gusta que sea
+  de color negro; podríamos añadir el logo de ORUM y animarlo junto con la
+  animación que ya está, y quitar el fondo negro». El acuse es ahora la misma
+  tarjeta blanca del formulario, con el logotipo dorado a la cabeza. En orden,
+  y en algo más de segundo y medio:
 
-    1. EL TELÓN. Un círculo negro nace donde estaba el botón de cobrar —abajo,
-       en el centro— y crece hasta cubrir la ventana: lo que llega sale de lo
-       que se tocó (regla 4 de «Movimiento»: anclado al origen).
-    2. EL SELLO. Un disco de oro cae con el rebote de lo que se gana, y la ✓
+    1. LA OLA DE LUZ. Un círculo de luz dorada nace donde estaba el botón de
+       cobrar —abajo, en el centro—, barre la ventana y se apaga: lo que
+       llega sale de lo que se tocó (regla 4 de «Movimiento»).
+    2. EL LOGOTIPO de ORUM, en oro, baja a su sitio; cuando el sello ya ha
+       caído, un brillo lo cruza de lado a lado.
+    3. EL SELLO. Un disco de oro cae con el rebote de lo que se gana, y la ✓
        se dibuja dentro de izquierda a derecha.
-    3. LAS ONDAS Y LAS ESTRELLAS. Dos anillos se abren desde el sello y un
+    4. LAS ONDAS Y LAS ESTRELLAS. Dos anillos se abren desde el sello y un
        puñado de estrellas de cuatro puntas —la de ORUM— sale disparado y se
        apaga. Oro y plata.
-    4. EL MONTO sube de cero a lo cobrado, en el serif de display y en oro.
+    5. EL MONTO sube de cero a lo cobrado, en el serif de display.
 
   POR QUÉ ESTO SÍ, cuando la regla cero dice que lo frecuente no se anima:
   es un encargo expreso, y es el único momento de la caja que es un final
@@ -44,7 +50,7 @@ const PESOS = new Intl.NumberFormat('es-CO', {
       opuestas, no animando el trazo): corre en el compositor, también en el
       teléfono de gama media de una caja.
     · Con movimiento reducido no viaja nada: el recorte global deja cada pieza
-      en su estado final —el acuse negro, el sello puesto, la cifra escrita— y
+      en su estado final —el logotipo y el sello puestos, la cifra escrita— y
       las estrellas no llegan a verse.
 
   Las estrellas van en una TABLA FIJA y no con `Math.random()`: un render no
@@ -119,19 +125,19 @@ export function AcuseVenta({
   onCerrar: () => void
 }) {
   return (
-    <article className={styles.acuse} data-theme="dark">
-      {/* El telón: el blanco del formulario que se va y el negro que llega. */}
+    <article className={styles.acuse}>
+      {/* La ola de luz dorada que sale de donde estaba el botón de cobrar. */}
       <span className={styles.telon} aria-hidden="true" />
 
-      <button
-        type="button"
-        className={`${styles.cerrar} ${styles.entra}`}
-        style={tras(560)}
-        onClick={onCerrar}
-        aria-label="Cerrar"
-      >
+      <button type="button" className={styles.cerrar} onClick={onCerrar} aria-label="Cerrar">
         <X size={20} aria-hidden="true" />
       </button>
+
+      {/* ── EL LOGOTIPO: la cabeza del recibo. En oro, que es el que va sobre
+             blanco. Dice de quién es el acuse; su `alt` ya es «ORUM». ── */}
+      <span className={styles.logo}>
+        <LogoOrum variante="dorado" className={styles.logoImagen} />
+      </span>
 
       {/* ── LA ESCENA: halo, ondas, sello y estrellas. Toda decorativa. ── */}
       <div className={styles.escena} aria-hidden="true">
@@ -170,13 +176,13 @@ export function AcuseVenta({
       </p>
 
       <div className={styles.textos}>
-        <div className={styles.entra} style={tras(480)}>
-          <TituloSeccion como="h2" tamano="bloque" variante="sobreNegro" texto="Venta registrada" />
+        <div className={styles.entra} style={tras(440)}>
+          <TituloSeccion como="h2" tamano="bloque" texto="Venta registrada" />
         </div>
 
-        <p className={`${styles.monto} ${styles.entra}`} style={tras(580)} aria-hidden="true">
+        <p className={`${styles.monto} ${styles.entra}`} style={tras(540)} aria-hidden="true">
           <span className={styles.moneda}>$</span>
-          <CifraAnimada valor={valorFinal} duracion={0.9} retardo={0.62} />
+          <CifraAnimada valor={valorFinal} duracion={0.9} retardo={0.58} />
         </p>
 
         {/*
@@ -184,7 +190,7 @@ export function AcuseVenta({
           sospecha un error necesita con qué llamar al administrador: «me
           equivoqué en una venta de esta tarde» no localiza ninguna fila.
         */}
-        <p className={`${styles.nota} ${styles.entra}`} style={tras(700)} aria-hidden="true">
+        <p className={`${styles.nota} ${styles.entra}`} style={tras(660)} aria-hidden="true">
           {nombre}
           <span className={styles.notaMeta}>
             N.º {numeroMembresia}
@@ -198,7 +204,7 @@ export function AcuseVenta({
           no se ofrece un «Deshacer» de mentira: se dice a quién acudir y con
           qué datos, que es lo único cierto que se puede dar.
         */}
-        <p className={`${styles.aviso} ${styles.entra}`} style={tras(800)}>
+        <p className={`${styles.aviso} ${styles.entra}`} style={tras(760)}>
           ¿Te equivocaste? Esta venta no se puede anular desde aquí: escribe al administrador
           con la hora y el número del socio.
         </p>
@@ -207,7 +213,7 @@ export function AcuseVenta({
       {/* La cola sigue: el camino de vuelta es un solo toque, y con teclado un
           solo Enter — el foco cae aquí al llegar el acuse, sin esperar a la
           animación. */}
-      <div className={`${styles.accion} ${styles.entra}`} style={tras(220)}>
+      <div className={`${styles.accion} ${styles.entra}`} style={tras(120)}>
         <Button
           onClick={onCerrar}
           variant="brand"

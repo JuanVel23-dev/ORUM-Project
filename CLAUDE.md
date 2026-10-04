@@ -1067,11 +1067,16 @@ Tres cosas que no son obvias:
 
 **La animación de pagar** (`acuse-venta.tsx`, 04/10/2026, encargo expreso del
 propietario: «una animación de pagar cuando se registre una venta; algo muy
-impresionante»). Al registrarse, la ventana blanca se vuelve NEGRO Y ORO: un
-círculo negro nace donde estaba el botón de cobrar y cubre la ventana, cae un
-sello de oro con la ✓ que se dibuja, se abren dos ondas, sale un estallido de
-estrellas de cuatro puntas (la de ORUM, en oro y plata) y el monto sube de
-cero a lo cobrado (`CifraAnimada`). Dura algo más de segundo y medio. Es una
+impresionante»). El acuse va SOBRE BLANCO y con el logotipo de ORUM: la
+primera versión volvía la ventana negra y oro y no gustó («no me gusta que
+sea de color negro; añade el logo de ORUM y anímalo con la animación que ya
+está»). Al registrarse: una ola de luz dorada nace donde estaba el botón de
+cobrar y barre la ventana, el logotipo dorado baja a su sitio y lo cruza un
+brillo, cae un sello de oro con la ✓ que se dibuja, se abren dos ondas, sale
+un estallido de estrellas de cuatro puntas (la de ORUM) y el monto sube de
+cero a lo cobrado (`CifraAnimada`). Dura algo más de segundo y medio. Sobre
+blanco el oro brillante es solo RELLENO de esas piezas; el monto va en tinta.
+**No lo vuelvas a poner sobre negro.** Es una
 excepción consciente a la regla cero —una venta ocurre decenas de veces al
 día—, y por eso se cuidó lo que esa regla protege: **no hace esperar**
 («Verificar otro socio» está enfocado y pulsable desde el primer fotograma),
