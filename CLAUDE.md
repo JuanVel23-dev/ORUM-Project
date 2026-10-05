@@ -1255,6 +1255,18 @@ escritorio (las caras están en el tercio superior: con `35%` quedaban tras
 la cabecera); acceso `86%` (más al centro, el padre sale cortado por la
 mitad).
 
+**El formulario «Quiero ser aliado» valida con EXIGENCIA** (05/10/2026: «es
+el portal público; no quiero que pongan datos que no son»). Las reglas viven
+en `lib/aliados/solicitud-aliado.ts` (puro, probado; el servidor es quien
+decide) y cada campo tiene su `revisar…`, que devuelve el mensaje de lo que
+falla: nombre y apellido solo con letras; teléfono COLOMBIANO de 10 dígitos
+(celular 3…, fijo 60X…; se rechazan repetidos y escaleras); correo con forma
+entregable, sin dominios desechables ni mal escritos; dirección con número;
+descripción de 20–280 caracteres, sin enlaces ni marcado; enlace solo web
+pública; y en todos, sin relleno (carácter repetido, teclas al azar). Comprueba
+que el dato sea VEROSÍMIL, no que sea verdadero. Si se añade un campo, lleva
+su `revisar…` y sus pruebas.
+
 **`LogoOrumTema`** (hoy sin consumidores: la cabecera de miembros pasó a dos
 variantes fijas, oro y plata, elegidas por `.cabeceraInicio` al fijarse el
 portal en claro) es la excepción a «una variante por superficie fija»: monta

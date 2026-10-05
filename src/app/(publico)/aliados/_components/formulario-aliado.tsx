@@ -141,17 +141,19 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
             type="text"
             defaultValue={previos?.nombreComercio}
             autoComplete="organization"
+            maxLength={80}
             required
           />
         </Field>
 
         <div className={estilos.pareja}>
-          <Field label="Tu nombre" error={errores.nombreContacto}>
+          <Field label="Tu nombre y apellido" error={errores.nombreContacto}>
             <Input
               name="nombreContacto"
               type="text"
               defaultValue={previos?.nombreContacto}
               autoComplete="name"
+              maxLength={60}
               required
             />
           </Field>
@@ -162,12 +164,17 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
               type="text"
               defaultValue={previos?.cargo}
               autoComplete="organization-title"
+              maxLength={60}
             />
           </Field>
         </div>
 
         <div className={estilos.pareja}>
-          <Field label="Teléfono" help="Con WhatsApp, si lo tienes" error={errores.telefono}>
+          <Field
+            label="Teléfono"
+            help="Celular de 10 dígitos, con WhatsApp si lo tienes"
+            error={errores.telefono}
+          >
             <Input
               name="telefono"
               type="tel"
@@ -177,6 +184,8 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
                  el `+` y los ceros a la izquierda. */
               inputMode="tel"
               autoComplete="tel"
+              placeholder="310 000 0000"
+              maxLength={20}
               required
             />
           </Field>
@@ -187,6 +196,7 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
               type="email"
               defaultValue={previos?.correo}
               autoComplete="email"
+              maxLength={254}
               required
             />
           </Field>
@@ -225,6 +235,8 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
             type="text"
             defaultValue={previos?.direccion}
             autoComplete="street-address"
+            placeholder="Cra 15 # 93-47"
+            maxLength={120}
           />
         </Field>
 
@@ -254,6 +266,8 @@ export function FormularioAliado({ superficie, abiertoEn, soporte, onCerrar }: P
             defaultValue={previos?.enlace}
             inputMode="url"
             autoComplete="url"
+            placeholder="instagram.com/tunegocio"
+            maxLength={200}
           />
         </Field>
       </Stack>
