@@ -209,10 +209,23 @@ function Contenido({
       </header>
 
       <div className={styles.socio}>
-        {/* Decorativas: el nombre va al lado. */}
-        <span className={styles.socioIniciales} aria-hidden="true">
-          {iniciales(miembro.nombreCompleto)}
-        </span>
+        {/* LA FOTO DEL CARNET, para cotejar la cara; sin foto, las iniciales.
+            Con texto alternativo: aquí la foto SÍ informa (es lo que se
+            compara con quien está delante). `<img>` y no `next/image`: la URL
+            es de Storage. */}
+        {miembro.fotoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- URL de Storage, no un asset local
+          <img
+            src={miembro.fotoUrl}
+            alt={`Foto de ${miembro.nombreCompleto}`}
+            className={styles.socioFoto}
+            decoding="async"
+          />
+        ) : (
+          <span className={styles.socioIniciales} aria-hidden="true">
+            {iniciales(miembro.nombreCompleto)}
+          </span>
+        )}
         <div className={styles.socioDatos}>
           {/*
             El NOMBRE antes que el número: lo que confirma que el carnet es de

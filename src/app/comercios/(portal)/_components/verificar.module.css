@@ -487,6 +487,17 @@
   color: var(--text);
 }
 
+/* La foto del socio: más grande que las iniciales (72 px), porque es para
+   comparar una cara. Mismo círculo; recorta centrada, como en el carnet. */
+.socioFoto {
+  flex-shrink: 0;
+  width: 72px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--surface-hueco);
+}
+
 .socioDatos {
   display: grid;
   gap: 2px;

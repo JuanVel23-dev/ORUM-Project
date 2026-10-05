@@ -1112,7 +1112,11 @@ es el comercio de la sesión, con `cache`: lo piden el layout y la página.
 04/10/2026: «quiero que sea una ventana encima; no quiero que vaya debajo»).
 `VentanaVeredicto` es un `Modal desnudo` —la ventana ES la tarjeta, como el
 carnet—: su cabeza es la franja del veredicto (color sólido, punto lleno /
-hueco, pegada arriba al desplazar), debajo el socio, y si la membresía vale,
+hueco, pegada arriba al desplazar), debajo el socio —con **su foto del
+carnet** para cotejar la cara (05/10/2026; sin foto, las iniciales): la
+función `buscar_miembro_comercio` no la trae, así que `buscarMiembro` la pide
+aparte con la `service_role`, solo esa columna y solo del miembro ya
+resuelto—, y si la membresía vale,
 el formulario de venta; al registrar, la ventana entera pasa a ser el acuse.
 Tres cosas que no son obvias:
 

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireRolComercio } from '@/lib/comercios/requerir-comercio'
 import type { MetodoRegistroVenta } from '@/lib/supabase/database.types'
 import { calcularDescuento, calcularValorFinal } from '@/lib/comercios/ventas'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { hoyISO } from '@/lib/shared/fecha'
 
@@ -14,6 +15,8 @@ export type MiembroEncontrado = {
   vigente: boolean
   membresiaId: number | null
   planNombre: string | null
+  /** La foto del carnet, para cotejar la cara en la caja. `null` si no tiene. */
+  fotoUrl: string | null
 }
 
 export type BuscarMiembroState = {
@@ -55,6 +58,22 @@ export async function buscarMiembro(
     return { error: 'No se encontró un miembro con ese número.' }
   }
 
+  /*
+    LA FOTO DEL SOCIO (05/10/2026: «cuando pongo la membresía no aparece la
+    foto»). La función `buscar_miembro_comercio` no la devuelve, y el comercio
+    no puede leer `miembros` con su sesión (RLS). Se pide aparte con la
+    `service_role`, SOLO esa columna y SOLO del miembro que la función ya
+    resolvió para este comercio autenticado: es la misma foto que el socio
+    enseña en su carnet, y sirve para lo mismo, cotejar la cara. Si falla, la
+    ventana cae a las iniciales: la foto no puede tumbar una verificación.
+  */
+  const { data: fila } = await createAdminClient()
+    .from('miembros')
+    .select('foto_url')
+    .eq('id', data.miembro_id)
+    .is('deleted_at', null)
+    .maybeSingle()
+
   return {
     metodo,
     consultaId: Date.now(),
@@ -65,6 +84,8 @@ export async function buscarMiembro(
       vigente: data.vigente,
       membresiaId: data.membresia_id,
       planNombre: data.plan_nombre,
+      /* Una cadena vacía no es una foto: sería un `<img src="">`. */
+      fotoUrl: (fila?.foto_url ?? '').trim() || null,
     },
   }
 }
