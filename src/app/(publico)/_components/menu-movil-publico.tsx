@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type MouseEvent } from 'react'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
+import { pedirFormularioAliados } from './aliados-overlay-trigger'
 import { ANCLAS, HREF_UNETE } from './anclas'
 import escaparate from '../escaparate.module.css'
 import estilos from './menu-movil-publico.module.css'
@@ -38,10 +39,20 @@ import estilos from './menu-movil-publico.module.css'
     1. «EN ESTA PÁGINA»: las cinco secciones de la portada, cada una con su
        icono y una flecha. Son anclas: bajan a su sitio.
     2. EL DIRECTORIO, aparte y destacado: no es una sección, es otra página.
-       Lleva una línea que lo explica.
+       Lleva una línea que lo explica. Una tarjeta BLANCA con sombra: se
+       probó negra y el propietario no la quiso («no me gusta que tenga el
+       fondo negro»).
     3. LAS ACCIONES, abajo, en la zona del pulgar y como BOTONES: «Únete a
-       ORUM» en el oro de la marca, «Iniciar sesión» de contorno, y debajo la
-       puerta de los negocios.
+       ORUM» en el oro de la marca (`--gold-500`, el de los accesos; el
+       `--gold-600` de serie se veía «muy oscuro»), «Iniciar sesión» de
+       contorno, y debajo la puerta de los negocios.
+
+  «ALÍATE CON ORUM» ABRE EL FORMULARIO ENCIMA, igual que el botón «Quiero ser
+  aliado» de la página («debería ser igual que darle al botón»): se lo pide
+  por evento al disparador que ya vive en la portada y en el directorio. Si
+  en la página no hay ninguno, el enlace navega a `/aliados`, su respaldo.
+
+  Las secciones VIAJAN hasta su sitio (`DesplazamientoSuave`, en el layout).
 
   Lleva DOS entradas más que la cabecera de escritorio —el directorio y
   «¿Tienes un negocio?»—: en un menú que ya está abierto encima de todo,
@@ -61,6 +72,13 @@ const ICONOS: Record<string, LucideIcon> = {
 export function MenuMovilPublico() {
   const [abierto, setAbierto] = useState(false)
   const cerrar = () => setAbierto(false)
+
+  /* Abre el formulario encima si la página tiene uno; si no, deja navegar. */
+  const alAliarse = (e: MouseEvent<HTMLAnchorElement>) => {
+    cerrar()
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+    if (pedirFormularioAliados()) e.preventDefault()
+  }
 
   return (
     <div className={estilos.soloMovil}>
@@ -143,7 +161,7 @@ export function MenuMovilPublico() {
               Iniciar sesión
             </Button>
 
-            <Link href="/aliados" className={estilos.negocio} onClick={cerrar}>
+            <Link href="/aliados" className={estilos.negocio} onClick={alAliarse}>
               <Handshake size={17} aria-hidden="true" />
               ¿Tienes un negocio? <strong>Alíate con ORUM</strong>
             </Link>

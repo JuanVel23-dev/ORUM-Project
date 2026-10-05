@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type MouseEvent } from 'react'
+import { useEffect, useState, type MouseEvent } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Button, type ButtonVariant } from '@/components/ui/button'
 import { Overlay } from '@/components/ui/overlay'
@@ -30,6 +30,23 @@ import { FormularioAliado } from '@/app/(publico)/aliados/_components/formulario
   ruta que lo aloja. Dos copias se desincronizan a la primera corrección.
 */
 
+/**
+ * El evento con el que OTRA pieza pide abrir este formulario encima: el menú
+ * de móvil («Alíate con ORUM»), que vive en la cabecera y no tiene ni el
+ * sello del servidor ni el número de soporte que el formulario necesita.
+ */
+const EVENTO_ABRIR_ALIADOS = 'orum:abrir-aliados'
+
+/**
+ * Pide abrir el formulario de aliados encima de la página. Devuelve `true` si
+ * alguien lo abrió; `false` si en esta página no hay formulario que abrir
+ * (entonces quien llama deja que el enlace navegue a `/aliados`).
+ */
+export function pedirFormularioAliados(): boolean {
+  const evento = new Event(EVENTO_ABRIR_ALIADOS, { cancelable: true })
+  return !window.dispatchEvent(evento)
+}
+
 type Props = {
   /**
    * Instante del reloj del SERVIDOR en que se pintó la landing. Viaja al
@@ -57,6 +74,19 @@ export function AliadosOverlayTrigger({
   className,
 }: Props) {
   const [abierto, setAbierto] = useState(false)
+
+  // Abrirse también a petición del menú. `preventDefault` es el acuse: dice
+  // «ya lo abro yo», y si hubiera dos disparadores en la página, solo el
+  // primero responde.
+  useEffect(() => {
+    const alPedir = (e: Event) => {
+      if (e.defaultPrevented) return
+      e.preventDefault()
+      setAbierto(true)
+    }
+    window.addEventListener(EVENTO_ABRIR_ALIADOS, alPedir)
+    return () => window.removeEventListener(EVENTO_ABRIR_ALIADOS, alPedir)
+  }, [])
 
   const interceptar = (e: MouseEvent<HTMLAnchorElement>) => {
     /*

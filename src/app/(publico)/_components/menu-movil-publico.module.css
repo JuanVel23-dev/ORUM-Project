@@ -116,21 +116,22 @@
 }
 
 /*
-  EL DIRECTORIO: una tarjeta, porque es OTRA página y hay que distinguirla de
-  las secciones. Negra, como la franja de «Comercios destacados», con el oro
-  pálido que solo es legal sobre negro. Se levanta al apuntarla y se hunde al
-  tocarla.
+  EL DIRECTORIO: una TARJETA, porque es OTRA página y hay que distinguirla de
+  las secciones. Blanca, definida por su sombra y sin trazo, como las de la
+  fachada (se probó negra y el propietario no la quiso). Se levanta al
+  apuntarla —con el filo dorado— y se hunde al tocarla.
 */
 .destacado {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4);
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
 
-  background: var(--cacao-bg);
-  color: var(--cacao-fg);
-  box-shadow: var(--shadow-card);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-card), var(--edge);
   text-decoration: none;
 
   transition:
@@ -141,7 +142,7 @@
 @media (hover: hover) {
   .destacado:hover {
     translate: 0 -2px;
-    box-shadow: var(--shadow-raised);
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
   }
 
   .destacado:hover .destacadoFlecha {
@@ -151,7 +152,7 @@
 
 .destacado:active {
   translate: 0 1px;
-  box-shadow: var(--shadow-press);
+  box-shadow: var(--shadow-press), var(--edge);
 }
 
 .destacadoIcono {
@@ -161,8 +162,8 @@
   width: 44px;
   aspect-ratio: 1;
   border-radius: var(--radius-full);
-  box-shadow: inset 0 0 0 1px var(--cacao-brand);
-  color: var(--gold-300);
+  background: var(--gold-bg);
+  color: var(--brand);
 }
 
 .destacadoTextos {
@@ -180,19 +181,30 @@
 .destacadoBajada {
   font-size: var(--t-caption-size);
   line-height: 1.4;
-  color: var(--cacao-fg-2);
+  color: var(--text-2);
 }
 
 .destacadoFlecha {
   flex-shrink: 0;
-  color: var(--gold-300);
+  color: var(--brand);
   transition: translate var(--dur-fast) var(--ease-out);
 }
 
-/* LAS ACCIONES: dos botones apilados y, debajo, la puerta de los negocios. */
+/*
+  LAS ACCIONES: dos botones apilados y, debajo, la puerta de los negocios.
+
+  «Únete a ORUM» va en el ORO DE MARCA (`--gold-500`) con texto en tinta
+  (8,5:1), el mismo par que los botones de los accesos y de comercios. El
+  relleno de serie de la fachada (`--gold-600`) se veía «muy oscuro». Como
+  relleno no marca un filo de 3:1 contra el blanco: lo identifica su texto
+  (la relajación de la fachada). Sigue siendo RELLENO, nunca color de letra.
+*/
 .acciones {
   display: grid;
   gap: var(--space-3);
+
+  --action-gold: var(--gold-500);
+  --action-gold-fg: var(--tinta-1);
 }
 
 /* «¿Tienes un negocio?»: un enlace de texto, centrado. La parte que invita

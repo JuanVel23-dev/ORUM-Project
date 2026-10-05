@@ -1,3 +1,4 @@
+import { DesplazamientoSuave } from './_components/desplazamiento-suave'
 import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import { obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
@@ -62,6 +63,8 @@ export default async function PublicoLayout({
       no aplica. Mismo mecanismo que `PantallaAuth` usa para fijar el oscuro.
     */
     <div className={estilos.fachada} data-theme="light">
+      {/* Las anclas de la cabecera y del menú viajan hasta su sección. */}
+      <DesplazamientoSuave />
       <EncabezadoPublico />
 
       {/*

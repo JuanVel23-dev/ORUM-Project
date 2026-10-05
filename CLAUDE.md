@@ -1267,6 +1267,21 @@ pública; y en todos, sin relleno (carácter repetido, teclas al azar). Comprueb
 que el dato sea VEROSÍMIL, no que sea verdadero. Si se añade un campo, lleva
 su `revisar…` y sus pruebas.
 
+**El menú de móvil del Portal Público** (`menu-movil-publico.tsx`,
+rediseñado el 05/10/2026) va en tres bloques: «En esta página» (las anclas,
+con icono), el directorio en una tarjeta BLANCA aparte (negra se probó y el
+propietario no la quiso) y las acciones como botones —«Únete a ORUM» en
+`--gold-500`, no en el `--gold-600` de serie, que se veía «muy oscuro»—.
+«Alíate con ORUM» abre el formulario ENCIMA, igual que el botón de la página:
+se lo pide por evento al disparador (`pedirFormularioAliados()`), y si la
+página no tiene ninguno, navega a `/aliados`.
+
+**Las anclas de la fachada VIAJAN hasta su sección** (`DesplazamientoSuave`,
+un escuchador delegado en el layout público, 05/10/2026). En fase de CAPTURA:
+`<Link>` decide si navega mirando `defaultPrevented` en su `onClick`, que
+corre después. Solo actúa si el destino está en la página actual; con
+movimiento reducido, salta como antes.
+
 **`LogoOrumTema`** (hoy sin consumidores: la cabecera de miembros pasó a dos
 variantes fijas, oro y plata, elegidas por `.cabeceraInicio` al fijarse el
 portal en claro) es la excepción a «una variante por superficie fija»: monta
