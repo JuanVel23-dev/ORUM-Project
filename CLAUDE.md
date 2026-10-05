@@ -1165,10 +1165,12 @@ que adorno; marca ligera, monto grande, a quién y cuándo):
 El monto, la compra y el descuento del recibo los dice el servidor
 (`RegistrarVentaState`), no lo que había tecleado el cajero.
 
-El formulario de venta: la promoción se elige de un toque (un grupo de radios
-con la cifra de cada una; con más de seis pasa a un `SelectMenu`), la sucursal
-es un `SelectMenu` que arranca vacío a propósito —preelegir una atribuiría la
-venta a una sede que nadie eligió— y se comprueba al enviar, y el total
+El formulario de venta: la promoción y la sucursal son dos `SelectMenu` que
+arrancan vacíos a propósito —preelegir una sucursal atribuiría la venta a una
+sede que nadie eligió— y se comprueban al enviar. **No existe «Sin
+promoción»** (propietario, 05/10/2026; antes eran radios de un toque con esa
+opción marcada): con promociones vigentes hay que elegir una, y solo un
+comercio sin ninguna registra la venta sin promoción. El total
 con el botón de cobrar van en un pie pegado abajo, siempre a la vista. El
 monto del acuse lo dice el servidor (`valorFinal`), no lo tecleado.
 

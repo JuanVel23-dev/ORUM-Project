@@ -8,7 +8,7 @@ import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { SelectMenu } from '@/components/ui/select-menu'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
-import { formatearBeneficio, formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
+import { formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import { calcularDescuento, calcularValorFinal } from '@/lib/comercios/ventas'
 import type { RegistrarVentaState } from '../actions'
 import type { MetodoRegistroVenta, TipoBeneficioCodigo } from '@/lib/supabase/database.types'
@@ -41,12 +41,6 @@ const soloDigitos = (valor: string) => valor.replace(/\D+/g, '')
 /** Tope de nueve dígitos: mil millones de pesos en una compra es un dedo pegado. */
 const MAX_DIGITOS = 9
 
-/**
- * Hasta cuántas promociones se enseñan como opciones de un toque. Con más, la
- * lista empujaría el total fuera de la ventana: se vuelve al desplegable.
- */
-const MAX_OPCIONES = 6
-
 const enPesos = (digitos: string) => (digitos === '' ? '' : MILES.format(Number(digitos)))
 
 /*
@@ -56,10 +50,13 @@ const enPesos = (digitos: string) => (digitos === '' ? '' : MILES.format(Number(
   los tres salen de cómo se usa esto: de pie, con una mano y el cliente
   delante.
 
-    1. LA PROMOCIÓN SE ELIGE DE UN TOQUE. Era un desplegable: abrir, buscar,
-       elegir. Ahora cada promoción vigente es una opción a la vista, con su
-       cifra («10%», «2x1») en grande. Es un grupo de radios de verdad: se
-       recorre con las flechas y viaja en el envío sin JavaScript de por medio.
+    1. LA PROMOCIÓN ES UN DESPLEGABLE, como la sucursal, y NO existe «Sin
+       promoción» (encargo del 05/10/2026: «que no esté la opción de poner
+       sin promoción, y que las promociones estén en una lista desplegable,
+       como las sucursales»). Antes eran opciones de un toque con «Sin
+       promoción» marcada de entrada. Arranca vacío y hay que elegir una: se
+       comprueba al enviar, igual que la sucursal. Solo un comercio sin
+       promociones vigentes registra la venta sin promoción.
     2. EL DESCUENTO YA NO SE DISFRAZA DE CAMPO. Había un recuadro punteado con
        forma de campo que no se podía tocar. Lo que calcula la promoción es un
        RENGLÓN del recibo, no un control.
@@ -108,6 +105,9 @@ export function ConfirmarVentaForm({
   const [sucursalId, setSucursalId] = useState('')
   const [faltaSucursal, setFaltaSucursal] = useState(false)
   const campoSucursal = useRef<HTMLDivElement>(null)
+  /* La promoción, igual: arranca vacía y se exige al enviar. */
+  const [faltaPromocion, setFaltaPromocion] = useState(false)
+  const campoPromocion = useRef<HTMLDivElement>(null)
 
   const promocionSeleccionada = promociones.find((p) => String(p.id) === promocionId) ?? null
 
@@ -134,15 +134,20 @@ export function ConfirmarVentaForm({
   const hayImporte = compra > 0
 
   const haySelectorSucursal = sucursales.length > 1
-  const promocionesComoOpciones = promociones.length > 0 && promociones.length <= MAX_OPCIONES
+  const hayPromociones = promociones.length > 0
 
-  /* Sin sucursal no se envía: se dice en el propio campo y se lleva el foco
-     hasta él —enfocarlo lo trae a la vista si quedó bajo el pie pegado—. */
+  /* Sin promoción o sin sucursal no se envía: se dice en el propio campo y
+     se lleva el foco al primero que falte —enfocarlo lo trae a la vista si
+     quedó bajo el pie pegado—. */
   const alEnviar = (e: FormEvent<HTMLFormElement>) => {
-    if (!haySelectorSucursal || sucursalId !== '') return
+    const sinPromocion = hayPromociones && promocionId === ''
+    const sinSucursal = haySelectorSucursal && sucursalId === ''
+    if (!sinPromocion && !sinSucursal) return
     e.preventDefault()
-    setFaltaSucursal(true)
-    campoSucursal.current?.querySelector('button')?.focus()
+    setFaltaPromocion(sinPromocion)
+    setFaltaSucursal(sinSucursal)
+    const primero = sinPromocion ? campoPromocion.current : campoSucursal.current
+    primero?.querySelector('button')?.focus()
   }
 
   return (
@@ -214,61 +219,30 @@ export function ConfirmarVentaForm({
       </div>
 
       {/* ── LA PROMOCIÓN ─────────────────────────────────────────────────── */}
-      {promocionesComoOpciones ? (
-        <fieldset className={styles.opciones}>
-          <legend className={styles.leyenda}>Promoción</legend>
-
-          <label className={`${styles.opcion} ${styles.opcionSin}`}>
-            <input
-              type="radio"
+      {hayPromociones ? (
+        <div ref={campoPromocion}>
+          <Field
+            label="Promoción"
+            error={faltaPromocion ? 'Elige la promoción que se aplica a esta venta.' : null}
+          >
+            <SelectMenu
               name="promocion_id"
-              value=""
-              className="sr-only"
-              checked={promocionId === ''}
-              onChange={() => setPromocionId('')}
-            />
-            <span className={styles.opcionTitulo}>Sin promoción</span>
-            <span className={styles.opcionRadio} aria-hidden="true" />
-          </label>
-
-          {promociones.map((p) => (
-            <label key={p.id} className={styles.opcion}>
-              <input
-                type="radio"
-                name="promocion_id"
-                value={p.id}
-                className="sr-only"
-                checked={promocionId === String(p.id)}
-                onChange={() => setPromocionId(String(p.id))}
-              />
-              {/* La cifra corta del directorio («10%», «2x1»): el título de
-                  al lado dice el resto. */}
-              <span className={styles.opcionValor}>
-                {formatearBeneficioCorto(p.tipoCodigo, p.valor)}
-              </span>
-              <span className={styles.opcionTitulo}>{p.titulo}</span>
-              <span className={styles.opcionRadio} aria-hidden="true" />
-            </label>
-          ))}
-        </fieldset>
-      ) : promociones.length > 0 ? (
-        /* Muchas promociones: un desplegable, que no empuja el total fuera
-           de la ventana. El del sitio, no el del sistema. */
-        <Field label="Promoción">
-          <SelectMenu
-            name="promocion_id"
-            etiqueta="Promoción"
-            value={promocionId}
-            onChange={setPromocionId}
-            opciones={[
-              { value: '', label: 'Sin promoción' },
-              ...promociones.map((p) => ({
+              etiqueta="Promoción"
+              placeholder="Selecciona una promoción"
+              value={promocionId}
+              onChange={(id) => {
+                setPromocionId(id)
+                setFaltaPromocion(false)
+              }}
+              opciones={promociones.map((p) => ({
                 value: String(p.id),
-                label: `${p.titulo} — ${formatearBeneficio(p.tipoCodigo, p.valor)}`,
-              })),
-            ]}
-          />
-        </Field>
+                /* La cifra corta DELANTE («30% · …»): si el título es largo
+                   y se corta, lo que se pierde es el final, no el beneficio. */
+                label: `${formatearBeneficioCorto(p.tipoCodigo, p.valor)} · ${p.titulo}`,
+              }))}
+            />
+          </Field>
+        </div>
       ) : (
         /* Sin promociones vigentes no hay nada que elegir. */
         <input type="hidden" name="promocion_id" value="" />
