@@ -1170,7 +1170,10 @@ arrancan vacíos a propósito —preelegir una sucursal atribuiría la venta a u
 sede que nadie eligió— y se comprueban al enviar. **No existe «Sin
 promoción»** (propietario, 05/10/2026; antes eran radios de un toque con esa
 opción marcada): con promociones vigentes hay que elegir una, y solo un
-comercio sin ninguna registra la venta sin promoción. El total
+comercio sin ninguna registra la venta sin promoción. El importe tampoco
+lleva `required`: los tres campos se comprueban en `alEnviar` y se marcan a
+la vez con el mismo aviso del sitio (el globo del navegador cortaba el envío
+antes de marcar los otros dos). El total
 con el botón de cobrar van en un pie pegado abajo, siempre a la vista. El
 monto del acuse lo dice el servidor (`valorFinal`), no lo tecleado.
 

@@ -108,6 +108,15 @@ export function ConfirmarVentaForm({
   /* La promoción, igual: arranca vacía y se exige al enviar. */
   const [faltaPromocion, setFaltaPromocion] = useState(false)
   const campoPromocion = useRef<HTMLDivElement>(null)
+  /*
+    Y EL IMPORTE, con el MISMO aviso que los otros dos (encargo del
+    05/10/2026). Llevaba `required`, y lo que salía al enviar vacío era el
+    globo del navegador —otro aspecto, otro idioma según el sistema—, que
+    además cortaba el envío antes de que se marcaran la promoción y la
+    sucursal. Ahora los tres se comprueban aquí y se marcan a la vez.
+  */
+  const [faltaImporte, setFaltaImporte] = useState(false)
+  const campoImporte = useRef<HTMLDivElement>(null)
 
   const promocionSeleccionada = promociones.find((p) => String(p.id) === promocionId) ?? null
 
@@ -136,18 +145,21 @@ export function ConfirmarVentaForm({
   const haySelectorSucursal = sucursales.length > 1
   const hayPromociones = promociones.length > 0
 
-  /* Sin promoción o sin sucursal no se envía: se dice en el propio campo y
-     se lleva el foco al primero que falte —enfocarlo lo trae a la vista si
-     quedó bajo el pie pegado—. */
+  /* Sin importe, sin promoción o sin sucursal no se envía: se dice en el
+     propio campo y se lleva el foco al primero que falte —enfocarlo lo trae
+     a la vista si quedó bajo el pie pegado—. */
   const alEnviar = (e: FormEvent<HTMLFormElement>) => {
+    const sinImporte = compra <= 0
     const sinPromocion = hayPromociones && promocionId === ''
     const sinSucursal = haySelectorSucursal && sucursalId === ''
-    if (!sinPromocion && !sinSucursal) return
+    if (!sinImporte && !sinPromocion && !sinSucursal) return
     e.preventDefault()
+    setFaltaImporte(sinImporte)
     setFaltaPromocion(sinPromocion)
     setFaltaSucursal(sinSucursal)
-    const primero = sinPromocion ? campoPromocion.current : campoSucursal.current
-    primero?.querySelector('button')?.focus()
+    if (sinImporte) campoImporte.current?.querySelector('input')?.focus()
+    else if (sinPromocion) campoPromocion.current?.querySelector('button')?.focus()
+    else campoSucursal.current?.querySelector('button')?.focus()
   }
 
   return (
@@ -186,8 +198,11 @@ export function ConfirmarVentaForm({
         lista. `styles.importe` va en el ENVOLTORIO, no en el `Input`: ver el
         porqué de la especificidad en `verificar.module.css`.
       */}
-      <div className={styles.importe}>
-        <Field label="Valor de la compra">
+      <div ref={campoImporte} className={styles.importe}>
+        <Field
+          label="Valor de la compra"
+          error={faltaImporte ? 'Escribe el valor de la compra.' : null}
+        >
           <Input
             /*
               El campo VISIBLE no se envía: lleva los puntos de millar para que
@@ -211,8 +226,12 @@ export function ConfirmarVentaForm({
             placeholder="0"
             numeric
             value={enPesos(valorCompra)}
-            onChange={(e) => setValorCompra(soloDigitos(e.target.value).slice(0, MAX_DIGITOS))}
-            required
+            onChange={(e) => {
+              setValorCompra(soloDigitos(e.target.value).slice(0, MAX_DIGITOS))
+              setFaltaImporte(false)
+            }}
+            /* Sin `required`: lo comprueba `alEnviar`, con el aviso del sitio. */
+            aria-required="true"
           />
         </Field>
         <input type="hidden" name="valor_compra" value={valorCompra || '0'} />
