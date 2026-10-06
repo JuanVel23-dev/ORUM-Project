@@ -163,7 +163,11 @@ export async function registrarVenta(
   const [{ data: miembroData, error: miembroError }, { data: comercio }, { data: promo }] =
     await Promise.all([
       supabase.rpc('buscar_miembro_comercio', { p_numero: numeroMembresia }).maybeSingle(),
-      supabase.from('comercios').select('id').eq('perfil_id', actor.userId).maybeSingle(),
+      supabase
+        .from('comercios')
+        .select('id, activo, deleted_at')
+        .eq('perfil_id', actor.userId)
+        .maybeSingle(),
       promocionId
         ? supabase
             .from('promociones')
@@ -184,6 +188,19 @@ export async function registrarVenta(
   const membresiaId = miembroData.membresia_id
 
   if (!comercio) return { error: 'No se encontró el comercio asociado a esta cuenta.' }
+
+  /*
+    Un comercio retirado del club («Retirar del club» en la ficha de admin) ya
+    no se anuncia, pero su cuenta puede seguir con sesión abierta: son dos
+    interruptores independientes. Sin esta comprobación seguiría cobrando
+    descuentos a los socios. La misma regla vive en `fn_validar_venta`, que es
+    la que protege si alguien llama a la API sin pasar por aquí.
+  */
+  if (!comercio.activo || comercio.deleted_at) {
+    return {
+      error: 'Este comercio ya no es aliado de ORUM, así que no puede registrar ventas. Escribe al soporte si crees que es un error.',
+    }
+  }
 
   if (promocionId && (!promo || promo.comercio_id !== comercio.id)) {
     return { error: 'La promoción seleccionada no es válida.' }
