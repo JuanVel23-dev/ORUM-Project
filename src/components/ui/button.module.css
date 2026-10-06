@@ -15,7 +15,9 @@
   flex-shrink: 0;
 
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  /* `--boton-radio`: el panel de administración lo pone en píldora, como los
+     botones de la fachada. Sin él, el radio de siempre. */
+  border-radius: var(--boton-radio, var(--radius-sm));
 
   font-family: var(--font-sans);
   font-weight: 600;
@@ -210,11 +212,15 @@
 /* --- Variantes ------------------------------------------------------------ */
 
 /*
-  Primario = TINTA. Es el primario de ADMINISTRACIÓN y de la HERRAMIENTA DE
-  COMERCIOS, y ahí no cambia (§2.4): son herramientas de trabajo y el oro sería
-  ruido. En el Portal de Miembros y en las seis pantallas de acceso el primario
-  es `.brand`, el relleno dorado — esa diferencia la resuelve el `variant` del
-  componente, no hay que decidirla en cada pantalla.
+  Primario = TINTA. Es el primario de ADMINISTRACIÓN, y ahí no cambia (§2.4):
+  es una herramienta de trabajo y el oro sería ruido. Desde el rediseño del
+  panel (04/10/2026) va en PÍLDORA, como los de la fachada (`--boton-radio`,
+  que pone el shell), y su acción ceremonial —«Registrar miembro»— es
+  `.brand`. En el Portal de
+  Miembros, en la Herramienta de Comercios (desde el 04/10/2026) y en las
+  pantallas de acceso el primario es `.brand`, el relleno dorado — esa
+  diferencia la resuelve el `variant` del componente, no hay que decidirla en
+  cada pantalla.
 */
 .primary {
   background: var(--action);
@@ -335,7 +341,7 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 1px;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border-radius: var(--boton-radio, var(--radius-sm)) var(--boton-radio, var(--radius-sm)) 0 0;
   background: var(--gold-hairline);
 
   opacity: 0;

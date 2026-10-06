@@ -1,15 +1,21 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Receipt } from 'lucide-react'
+import { ChevronRight, Receipt } from 'lucide-react'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
 import { createClient } from '@/lib/supabase/server'
 import { obtenerBitacora } from '@/lib/miembros/datos-movimientos'
-import { limiteSolicitado, PASO_VER_MAS, type Movimiento } from '@/lib/miembros/movimientos'
+import {
+  agruparPorMes,
+  limiteSolicitado,
+  PASO_VER_MAS,
+  type Movimiento,
+} from '@/lib/miembros/movimientos'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Cifra } from '@/components/ui/cifra'
-import { DataList, type Column } from '@/components/ui/data-list'
+import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { EmptyState, ErrorState } from '@/components/ui/feedback'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
+import { ENTRADA, REVELAR, retardoEntrada } from '@/lib/shared/revelado'
+import { CifraAnimada } from '@/components/ui/cifra-animada'
 import styles from './movimientos.module.css'
 
 export const metadata = { title: 'Mis movimientos · ORUM' }
@@ -32,15 +38,46 @@ export const metadata = { title: 'Mis movimientos · ORUM' }
 
   Sin JavaScript: «Ver más» es un enlace que sube el límite y vuelve a
   renderizar en el servidor.
+
+  REDISEÑO DEL 03/10/2026 (encargo del propietario: «mejora el diseño, no me
+  convence, tanto para móvil como PC»). Era un título, una tarjeta con el
+  total y una tabla de seis columnas con el aspecto del panel de
+  administración; en el móvil, tarjetas apiladas con seis etiquetas cada una.
+  Ahora habla el idioma del portal:
+
+    · EL RESUMEN es una tarjeta clara, como las del portal inicial (la
+      primera versión, negra, no gustó), sin icono: lo ahorrado en el
+      serif de display, y los usos y el ahorro promedio. En
+      escritorio se queda fija a la izquierda mientras se recorre la lista;
+      en el móvil va arriba.
+    · LA LISTA va por MESES (`agruparPorMes`), y cada movimiento es una fila
+      con el logotipo del comercio: a un lado dónde, qué beneficio y cuándo;
+      al otro, lo que se ahorró —lo que el socio viene a ver— y lo que pagó
+      junto al precio original tachado. Sin encabezados de columna ni
+      etiquetas repetidas.
+    · Cada fila lleva a la ficha del comercio.
+
+  MOVIMIENTO (03/10/2026), con las clases del portal (`revelado.ts`):
+    · Al cargar, entran escalonados el título, el resumen y las filas del
+      primer mes (`ENTRADA`, con tope en el retardo: la fila 20 no llega un
+      segundo tarde). La cifra del ahorro cuenta de cero al total.
+    · Los meses siguientes se revelan al desplazar (`REVELAR`), como las
+      secciones de la portada.
+    · Las clases van en ENVOLTORIOS (`<li>`, `<section>`), nunca en la fila
+      enlazada: una animación con `fill: both` le ganaría a su acuse.
 */
 
+/** Tope del escalonado de filas: a partir de aquí entran todas a la vez. */
+const TOPE_ESCALONADO = 6
+
 /* Zona del negocio, no la del servidor: una compra de las 7 p. m. en Colombia
-   es ya el día siguiente en UTC. `timestamptz` → Bogotá (CLAUDE.md, «Fechas»). */
-const FECHA_HORA = new Intl.DateTimeFormat('es-CO', {
+   es ya el día siguiente en UTC. `timestamptz` → Bogotá (CLAUDE.md, «Fechas»).
+   Sin el año: el encabezado del grupo ya lo dice. */
+const DIA_HORA = new Intl.DateTimeFormat('es-CO', {
   timeZone: 'America/Bogota',
+  weekday: 'short',
   day: 'numeric',
   month: 'short',
-  year: 'numeric',
   hour: 'numeric',
   minute: '2-digit',
 })
@@ -52,40 +89,55 @@ const PESOS = new Intl.NumberFormat('es-CO', {
   maximumFractionDigits: 0,
 })
 
-const COLUMNAS: ReadonlyArray<Column<Movimiento>> = [
-  {
-    key: 'comercio',
-    header: 'Comercio',
-    primary: true,
-    cell: (m) => (
-      <span className={styles.comercio}>
-        <span className={styles.comercioNombre}>{m.comercio}</span>
-        {m.sucursal && <span className={styles.secundario}>{m.sucursal}</span>}
+/** Una fila del historial. Enlace a la ficha si el comercio sigue disponible. */
+function FilaMovimiento({ m }: { m: Movimiento }) {
+  const contenido = (
+    <>
+      <ComercioLogo logoUrl={m.logoUrl} nombre={m.comercio} className={styles.logo} />
+
+      <span className={styles.donde}>
+        <span className={styles.comercio}>{m.comercio}</span>
+        <span className={styles.detalle}>
+          {m.promocion ?? 'Sin promoción'}
+          {m.sucursal && ` · ${m.sucursal}`}
+        </span>
+        <time className={styles.fecha} dateTime={m.fechaHora}>
+          {DIA_HORA.format(new Date(m.fechaHora))}
+        </time>
       </span>
-    ),
-  },
-  {
-    key: 'beneficio',
-    header: 'Beneficio',
-    cell: (m) =>
-      m.promocion ?? <span className={styles.secundario}>Sin promoción</span>,
-  },
-  {
-    key: 'fecha',
-    header: 'Fecha',
-    cell: (m) => (
-      <time dateTime={m.fechaHora}>{FECHA_HORA.format(new Date(m.fechaHora))}</time>
-    ),
-  },
-  { key: 'compra', header: 'Compra', numeric: true, cell: (m) => PESOS.format(m.valorCompra) },
-  {
-    key: 'ahorro',
-    header: 'Ahorraste',
-    numeric: true,
-    cell: (m) => <strong>{PESOS.format(m.ahorro)}</strong>,
-  },
-  { key: 'final', header: 'Pagaste', numeric: true, cell: (m) => PESOS.format(m.valorFinal) },
-]
+
+      <span className={styles.importes}>
+        <span className={styles.ahorro}>
+          <span className={styles.etiqueta}>Ahorraste</span> {PESOS.format(m.ahorro)}
+        </span>
+        <span className={styles.pago}>
+          <span className={styles.etiqueta}>Pagaste</span> {PESOS.format(m.valorFinal)}
+          {m.valorCompra > m.valorFinal && (
+            <>
+              {' '}
+              <s className={styles.antes}>
+                <span className="sr-only">antes </span>
+                {PESOS.format(m.valorCompra)}
+              </s>
+            </>
+          )}
+        </span>
+      </span>
+
+      {m.comercioId !== null && (
+        <ChevronRight size={16} aria-hidden="true" className={styles.flecha} />
+      )}
+    </>
+  )
+
+  return m.comercioId !== null ? (
+    <Link href={`/miembros/comercios/${m.comercioId}`} className={styles.fila}>
+      {contenido}
+    </Link>
+  ) : (
+    <div className={styles.fila}>{contenido}</div>
+  )
+}
 
 export default async function MovimientosPage({
   searchParams,
@@ -107,10 +159,11 @@ export default async function MovimientosPage({
   if (!miembro) redirect('/miembros/inactiva')
 
   const bitacora = await obtenerBitacora(miembro.id, limite)
+  const meses = bitacora ? agruparPorMes(bitacora.movimientos) : []
 
   return (
     <div className={styles.pantalla}>
-      <header className={styles.encabezado}>
+      <header className={[styles.encabezado, ENTRADA].join(' ')}>
         <TituloSeccion como="h1" texto="Mis movimientos" tamano="bloque" />
         <p className={styles.lede}>Dónde has usado tu membresía y cuánto has ahorrado.</p>
       </header>
@@ -132,41 +185,98 @@ export default async function MovimientosPage({
           }
         />
       ) : (
-        <>
-          <Card className={styles.resumen}>
-            <Cifra
-              size="display"
-              etiqueta="Has ahorrado"
-              valor={PESOS.format(bitacora.ahorroTotal)}
-              nota={`en ${bitacora.total.toLocaleString('es-CO')} ${
-                bitacora.total === 1 ? 'movimiento' : 'movimientos'
-              }`}
-            />
-          </Card>
+        <div className={styles.cuerpo}>
+          {/* ── EL RESUMEN ────────────────────────────────────────────── */}
+          <aside
+            className={[styles.resumen, ENTRADA].join(' ')}
+            style={retardoEntrada(1)}
+            aria-label="Resumen de tu ahorro"
+          >
+            {/* Sin icono (03/10/2026: ni la alcancía ni la estrella
+                convencieron): la jerarquía la pone la tipografía. El signo
+                de pesos va pequeño y en oro, para que mande el número. */}
+            <p className={styles.resumenEtiqueta}>Has ahorrado</p>
+            <p className={styles.resumenTotal}>
+              <span className={styles.resumenMoneda} aria-hidden="true">
+                $
+              </span>
+              <span className="sr-only">{PESOS.format(bitacora.ahorroTotal)}</span>
+              <CifraAnimada valor={bitacora.ahorroTotal} />
+            </p>
+            <p className={styles.resumenNota}>con tu membresía ORUM</p>
 
-          <DataList
-            caption="Movimientos de tu membresía"
-            items={bitacora.movimientos}
-            columns={COLUMNAS}
-            getKey={(m) => m.id}
-          />
+            <dl className={styles.cifras}>
+              <div className={styles.cifra}>
+                <dt>{bitacora.total === 1 ? 'Uso' : 'Usos'}</dt>
+                <dd>{bitacora.total.toLocaleString('es-CO')}</dd>
+              </div>
+              <div className={styles.cifra}>
+                <dt>Ahorro promedio</dt>
+                <dd>{PESOS.format(Math.round(bitacora.ahorroTotal / bitacora.total))}</dd>
+              </div>
+            </dl>
+          </aside>
 
-          {bitacora.total > bitacora.movimientos.length && (
-            <div className={styles.verMas}>
-              <Button
-                href={`/miembros/movimientos?mostrar=${limite + PASO_VER_MAS}`}
-                variant="secondary"
-                pildora
+          {/* ── LA LISTA, POR MESES ───────────────────────────────────── */}
+          <div className={styles.lista}>
+            {meses.map((mes, n) => (
+              /* El primer mes ya está a la vista: entra al cargar. Los
+                 siguientes, al llegar a ellos. */
+              <section
+                key={mes.clave}
+                aria-labelledby={`mes-${mes.clave}`}
+                className={n === 0 ? undefined : REVELAR}
               >
-                Ver más movimientos
-              </Button>
-              <p className={styles.secundario}>
-                Mostrando {bitacora.movimientos.length.toLocaleString('es-CO')} de{' '}
-                {bitacora.total.toLocaleString('es-CO')}
-              </p>
-            </div>
-          )}
-        </>
+                <div
+                  className={[styles.mesCabecera, n === 0 && ENTRADA].filter(Boolean).join(' ')}
+                  style={n === 0 ? retardoEntrada(2) : undefined}
+                >
+                  <h2 id={`mes-${mes.clave}`} className={styles.mes}>
+                    {mes.titulo}
+                  </h2>
+                  <p className={styles.mesAhorro}>
+                    <span className="sr-only">Ahorro del mes: </span>
+                    {PESOS.format(mes.ahorro)}
+                  </p>
+                </div>
+
+                {/* La tarjeta del primer mes entra con su cabecera; sus filas,
+                    escalonadas después. Sin esto la tarjeta blanca aparecía
+                    de golpe y las filas llegaban dentro. */}
+                <ul
+                  className={[styles.filas, n === 0 && ENTRADA].filter(Boolean).join(' ')}
+                  style={n === 0 ? retardoEntrada(2) : undefined}
+                >
+                  {mes.movimientos.map((m, i) => (
+                    <li
+                      key={m.id}
+                      className={n === 0 ? ENTRADA : undefined}
+                      style={n === 0 ? retardoEntrada(3 + Math.min(i, TOPE_ESCALONADO)) : undefined}
+                    >
+                      <FilaMovimiento m={m} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+
+            {bitacora.total > bitacora.movimientos.length && (
+              <div className={[styles.verMas, REVELAR].join(' ')}>
+                <Button
+                  href={`/miembros/movimientos?mostrar=${limite + PASO_VER_MAS}`}
+                  variant="secondary"
+                  pildora
+                >
+                  Ver más movimientos
+                </Button>
+                <p className={styles.contador}>
+                  Mostrando {bitacora.movimientos.length.toLocaleString('es-CO')} de{' '}
+                  {bitacora.total.toLocaleString('es-CO')}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   )

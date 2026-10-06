@@ -35,6 +35,17 @@
   letter-spacing: normal;
 }
 
+/* --- `pagina`: 28→36px, el `h1` de una pantalla de trabajo --------------
+   El del panel de administración (lo pinta `PageHeader`): la misma escala
+   que tenía su titular en sans, ahora en el serif de la fachada. Un serif
+   pide menos peso y tracking más abierto que un sans (CLAUDE.md, v6). */
+.titulo.pagina {
+  font-size: var(--t-display-2-size);
+  line-height: var(--t-display-2-leading);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
 /* --- `sobreNegro`: el de «Comercios destacados» ------------------------- */
 .titulo.sobreNegro {
   font-style: italic;

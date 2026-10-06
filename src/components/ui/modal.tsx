@@ -21,6 +21,39 @@ import styles from './modal.module.css'
   viven los bugs de accesibilidad de los modales caseros.
 */
 
+/*
+  LA PÁGINA DE DETRÁS NO DESPLAZA mientras haya un diálogo abierto. `showModal`
+  la deja inerte, pero NO le quita el desplazamiento: con el carnet abierto en
+  el teléfono, arrastrar movía el catálogo por debajo. Un contador, porque los
+  diálogos se apilan (el carnet sobre la ficha): el fondo se suelta al cerrar
+  el último. El relleno compensa la barra de desplazamiento que desaparece,
+  para que la página no dé un salto lateral en escritorio.
+*/
+let bloqueos = 0
+let previo = { overflow: '', paddingRight: '' }
+
+function bloquearFondo(): () => void {
+  const raiz = document.documentElement
+  if (bloqueos === 0) {
+    previo = { overflow: raiz.style.overflow, paddingRight: raiz.style.paddingRight }
+    const barra = window.innerWidth - raiz.clientWidth
+    raiz.style.overflow = 'hidden'
+    if (barra > 0) raiz.style.paddingRight = `${barra}px`
+  }
+  bloqueos += 1
+
+  let suelto = false
+  return () => {
+    if (suelto) return
+    suelto = true
+    bloqueos -= 1
+    if (bloqueos === 0) {
+      raiz.style.overflow = previo.overflow
+      raiz.style.paddingRight = previo.paddingRight
+    }
+  }
+}
+
 type Props = {
   open: boolean
   onClose: () => void
@@ -43,6 +76,18 @@ type Props = {
   desnudo?: boolean
   /** Clase extra del `<dialog>` (p. ej. un `::backdrop` propio del visor de fotos). */
   className?: string
+  /**
+   * `false` para una ventana con un formulario a medio llenar que no debe
+   * perderse por un toque en el velo (la venta en la caja): solo la cierran
+   * su propia X y Escape. Por defecto, pulsar fuera cierra.
+   */
+  cerrarAlPulsarFuera?: boolean
+  /**
+   * Escape (y el «atrás» de Android) en una ventana con PASOS: vuelve un paso
+   * en vez de cerrarla (el ajuste de una imagen en «Mi negocio» vuelve a la
+   * rejilla). Sin él, Escape llama a `onClose`.
+   */
+  onAtras?: () => void
   children?: ReactNode
 }
 
@@ -57,22 +102,38 @@ export function Modal({
   hideClose = false,
   desnudo = false,
   className,
+  cerrarAlPulsarFuera = true,
+  onAtras,
   children,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
   const cerrando = useRef(false)
+  /** Lo que React quiere AHORA; lo consulta el final de una salida en vuelo. */
+  const quiereAbierto = useRef(open)
+  /** Cada salida lleva su turno: una salida vieja no cierra por una nueva. */
+  const turno = useRef(0)
+  /** Dónde empezó la pulsación: ver `alPulsar`. */
+  const pulsacionEnFondo = useRef(false)
 
   /** Anima la salida y solo entonces cierra de verdad el diálogo. */
   const cerrarConAnimacion = useCallback(() => {
     const dialogo = ref.current
     if (!dialogo || cerrando.current) return
     cerrando.current = true
+    const miTurno = ++turno.current
 
     // Marca el cierre para que el ::backdrop se desvanezca a la vez que el
     // panel. Es un pseudo-elemento: solo CSS puede animarlo.
     dialogo.classList.add(styles.cerrando)
 
+    /*
+      Si mientras salía se volvió a abrir (cerrar y pulsar «Carnet» en el
+      mismo cuarto de segundo), esta salida ya NO cierra. Antes cerraba
+      igual: el `<dialog>` quedaba cerrado con `open` en `true`, y como el
+      estado no cambiaba, ningún clic posterior volvía a abrirlo.
+    */
     const fin = () => {
+      if (turno.current !== miTurno || quiereAbierto.current) return
       dialogo.close()
       dialogo.classList.remove(styles.cerrando)
       cerrando.current = false
@@ -105,8 +166,15 @@ export function Modal({
   useEffect(() => {
     const dialogo = ref.current
     if (!dialogo) return
+    quiereAbierto.current = open
 
     if (open) {
+      // Reabierto a media salida: esa salida queda anulada (ver `fin`).
+      if (cerrando.current) {
+        turno.current += 1
+        cerrando.current = false
+        dialogo.classList.remove(styles.cerrando)
+      }
       if (!dialogo.open) dialogo.showModal()
 
       /*
@@ -132,17 +200,66 @@ export function Modal({
     }
   }, [open, cerrarConAnimacion])
 
+  // El fondo, quieto mientras esté abierto (y se suelta al desmontar).
+  useEffect(() => {
+    if (!open) return
+    return bloquearFondo()
+  }, [open])
+
+  /*
+    SOLO LOS EVENTOS DE ESTE DIÁLOGO (04/10/2026). En el DOM, `cancel` y
+    `close` de un `<dialog>` no burbujean; en React SÍ: React los reparte por
+    todo el árbol de componentes, de hijo a padre. Y llegan dos que no son de
+    esta ventana:
+
+      · El `cancel` de un `<input type="file">` (Chrome 113+), que se dispara
+        al cerrar el selector de archivos sin elegir nada — y ese sí burbujea
+        también en el DOM. Cancelar el selector cerraba la ventana entera:
+        «Mi negocio», «Mi foto», la imagen de un comercio en administración.
+      · El `cancel` y el `close` de un diálogo ANIDADO: la confirmación de
+        «Quitar» dentro de «Mi negocio», el visor de fotos dentro de la ficha.
+        Cerrar el de arriba cerraba también el de abajo.
+
+    Por eso los dos manejadores miran que el evento sea del propio diálogo.
+  */
+  const esDeEsteDialogo = (e: React.SyntheticEvent<HTMLDialogElement>) =>
+    e.target === e.currentTarget
+
   // Escape dispara `cancel`. Se intercepta para que el cierre lo decida React
-  // (vía onClose) y no el navegador saltándose la animación.
+  // (vía onClose, u `onAtras` si la ventana tiene pasos) y no el navegador
+  // saltándose la animación.
   const alCancelar = (e: React.SyntheticEvent<HTMLDialogElement>) => {
+    if (!esDeEsteDialogo(e)) return
     e.preventDefault()
-    onClose()
+    ;(onAtras ?? onClose)()
+  }
+
+  /*
+    El navegador puede cerrar el diálogo por su cuenta, sin pasar por `cancel`
+    (Chrome lo hace al segundo Escape o al segundo «atrás» de Android seguidos).
+    Si React sigue creyéndolo abierto, se le avisa: si no, la ventana quedaba
+    cerrada con el estado en «abierta» y no volvía a abrirse. Aquí va SIEMPRE
+    a `onClose`, nunca a `onAtras`: el diálogo ya está cerrado de verdad.
+  */
+  const alCerrarNativo = (e: React.SyntheticEvent<HTMLDialogElement>) => {
+    if (!esDeEsteDialogo(e)) return
+    if (quiereAbierto.current) onClose()
   }
 
   // Clic fuera del contenido = clic sobre el propio <dialog>, que ocupa solo
   // la caja del panel; el área restante es el ::backdrop.
+  //
+  // Solo cuenta si la pulsación EMPEZÓ también fuera. Un arrastre que nace
+  // dentro (mover la barra de zoom del editor de foto, seleccionar texto) y
+  // se suelta sobre el velo produce un `click` cuyo destino es el diálogo, y
+  // cerraba la ventana a mitad de la tarea.
+  const alApretar = (e: React.PointerEvent<HTMLDialogElement>) => {
+    pulsacionEnFondo.current = e.target === ref.current
+  }
   const alPulsar = (e: React.MouseEvent<HTMLDialogElement>) => {
-    if (e.target === ref.current) onClose()
+    const enFondo = pulsacionEnFondo.current
+    pulsacionEnFondo.current = false
+    if (cerrarAlPulsarFuera && e.target === ref.current && enFondo) onClose()
   }
 
   const tieneCabecera = Boolean(title || description || !hideClose)
@@ -153,6 +270,8 @@ export function Modal({
       className={[styles.dialog, desnudo && styles.desnudo, className].filter(Boolean).join(' ')}
       style={{ '--ancho': width } as CSSProperties}
       onCancel={alCancelar}
+      onClose={alCerrarNativo}
+      onPointerDown={alApretar}
       onClick={alPulsar}
       aria-labelledby={title ? 'modal-titulo' : undefined}
       aria-label={!title && ariaLabel ? ariaLabel : undefined}

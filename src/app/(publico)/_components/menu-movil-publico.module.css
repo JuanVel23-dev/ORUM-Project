@@ -11,58 +11,409 @@
   }
 }
 
+/* ==========================================================================
+   EL MENÚ  ·  tres bloques: secciones, directorio y acciones (05/10/2026)
+   ========================================================================== */
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* El rótulo del bloque, en el oro de texto de la fachada (4,93:1 sobre blanco). */
+.rotulo {
+  margin: 0 0 var(--space-1);
+  padding: 0 var(--space-2);
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
 .lista {
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 /*
-  Filas anchas, no chips. El objetivo táctil se consigue con `min-height` —lo
-  que se ve y lo que se toca coinciden aquí, porque una fila de menú DEBE ser
-  grande— y no con un `::after` ampliador, que se reserva para los controles
-  que deben verse pequeños.
+  UNA SECCIÓN: icono, nombre y flecha. Fila ancha —lo que se ve y lo que se
+  toca coinciden— y SIN sombra ni relleno: es una fila de lista. Al apuntarla
+  se desliza; al tocarla baja la opacidad (regla de las listas).
 */
 .fila {
   display: flex;
   align-items: center;
-  min-height: var(--tap-min);
-
-  padding: var(--space-3) var(--space-2);
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
 
   font-size: var(--t-body-size);
-  line-height: var(--t-body-leading);
-  font-weight: 510;
+  font-weight: 600;
   color: var(--text);
   text-decoration: none;
 
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    opacity var(--dur-press) var(--ease-out);
+}
+
+/* Un hairline entre secciones: dice dónde acaba cada área de toque. */
+.lista li + li .fila {
+  border-top: 1px solid var(--border-subtle);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* El icono en su círculo dorado claro, como las insignias de la fachada. */
+.filaIcono {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: var(--gold-bg);
+  color: var(--brand);
+}
+
+.filaTexto {
+  flex: 1;
+  min-width: 0;
+}
+
+.filaFlecha {
+  flex-shrink: 0;
+  color: var(--text-2);
   transition: translate var(--dur-fast) var(--ease-out);
 }
 
-/* Separador entre filas: una lista de cuatro destinos distintos necesita que
-   se vea dónde acaba cada área de toque. */
-.fila + .fila {
-  border-top: 1px solid var(--border-subtle);
-}
-
-/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
-   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
-   FUERA a propósito — un teclado existe en cualquier dispositivo. */
-
 @media (hover: hover) {
   .fila:hover {
-    translate: 4px 0;
+    translate: 3px 0;
+  }
+
+  .fila:hover .filaFlecha {
+    translate: 2px 0;
   }
 }
 
-.fila:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: -2px;
+.fila:active {
+  opacity: 0.62;
 }
 
-/* La fila de «Únete»: la acción de la hoja, en el oro legible sobre crema
-   (`--brand` = `--gold-700`, 4,87:1). El peso la distingue de las anclas. */
-.filaAccion {
+.fila:focus-visible,
+.destacado:focus-visible,
+.negocio:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+  EL DIRECTORIO: una TARJETA, porque es OTRA página y hay que distinguirla de
+  las secciones. Blanca, definida por su sombra y sin trazo, como las de la
+  fachada (se probó negra y el propietario no la quiso). Se levanta al
+  apuntarla —con el filo dorado— y se hunde al tocarla.
+*/
+.destacado {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-md);
+
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-card), var(--edge);
+  text-decoration: none;
+
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .destacado:hover {
+    translate: 0 -2px;
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+  }
+
+  .destacado:hover .destacadoFlecha {
+    translate: 3px 0;
+  }
+}
+
+.destacado:active {
+  translate: 0 1px;
+  box-shadow: var(--shadow-press), var(--edge);
+}
+
+.destacadoIcono {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: var(--gold-bg);
+  color: var(--brand);
+}
+
+.destacadoTextos {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.destacadoTitulo {
+  font-size: var(--t-body-size);
+  font-weight: 700;
+}
+
+.destacadoBajada {
+  font-size: var(--t-caption-size);
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.destacadoFlecha {
+  flex-shrink: 0;
+  color: var(--brand);
+  transition: translate var(--dur-fast) var(--ease-out);
+}
+
+/*
+  LAS ACCIONES: dos botones apilados y, debajo, la puerta de los negocios.
+
+  «Únete a ORUM» va en el ORO DE MARCA (`--gold-500`) con texto en tinta
+  (8,5:1), el mismo par que los botones de los accesos y de comercios. El
+  relleno de serie de la fachada (`--gold-600`) se veía «muy oscuro». Como
+  relleno no marca un filo de 3:1 contra el blanco: lo identifica su texto
+  (la relajación de la fachada). Sigue siendo RELLENO, nunca color de letra.
+*/
+.acciones {
+  display: grid;
+  gap: var(--space-3);
+
+  --action-gold: var(--gold-500);
+  --action-gold-fg: var(--tinta-1);
+}
+
+/* «¿Tienes un negocio?»: un enlace de texto, centrado. La parte que invita
+   va en el oro de texto y en negrita. */
+.negocio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--t-callout-size);
+  color: var(--text-2);
+  text-decoration: none;
+
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    opacity var(--dur-press) var(--ease-out);
+}
+
+.negocio strong {
   font-weight: 700;
   color: var(--brand);
+}
+
+@media (hover: hover) {
+  .negocio:hover {
+    translate: 0 -1px;
+  }
+}
+
+.negocio:active {
+  opacity: 0.62;
+}
+
+/*
+  TELÉFONOS BAJOS (un 360 × 640): todo cabe sin desplazar si se aprieta. Un
+  menú que se desplaza esconde justo lo último, que aquí son las acciones.
+  `@media` por ALTO de ventana: la hoja mide lo que la pantalla.
+*/
+@media (max-height: 700px) {
+  .menu {
+    gap: var(--space-3);
+  }
+
+  .fila {
+    min-height: var(--tap-min);
+    padding-block: 0;
+  }
+
+  .filaIcono {
+    width: 30px;
+  }
+
+  .destacado {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  /* La línea de apoyo es lo primero que sobra: el título ya lo dice. */
+  .destacadoBajada {
+    display: none;
+  }
+
+  .destacadoIcono {
+    width: 36px;
+  }
+
+  .acciones {
+    gap: var(--space-2);
+  }
+}
+
+/* ==========================================================================
+   EL MOVIMIENTO DEL MENÚ  ·  05/10/2026
+   --------------------------------------------------------------------------
+   Encargo del propietario: «añádele a las opciones, botones, todo de ese
+   apartado, animaciones». El menú se abre de vez en cuando, no cien veces al
+   día: admite una entrada cuidada (regla cero de «Movimiento»).
+
+   CÓMO ESTÁ HECHO
+     · El estado BASE de cada pieza es el final; los `@keyframes` solo dicen
+       de dónde viene. Con movimiento reducido (regla global de `globals.css`)
+       todo queda puesto, sin viaje.
+     · Son `@keyframes` y no transiciones porque la hoja pasa de no pintarse a
+       pintarse al abrirse: no hay valor de partida que transicionar, y así la
+       entrada se repite cada vez que se abre.
+     · Solo `translate`, `scale`, `rotate` y `opacity`.
+     · ESCALONADO con el paso del sistema (`--escalonado`, 40 ms) y TOPE de 8:
+       la última pieza no llega tarde. `backwards` las tiene escondidas
+       durante su espera.
+   ========================================================================== */
+
+@keyframes menu-sube {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+
+@keyframes menu-brota {
+  from {
+    opacity: 0;
+    scale: 0.8;
+  }
+}
+
+@keyframes menu-gira {
+  from {
+    rotate: -120deg;
+  }
+}
+
+@keyframes menu-asoma {
+  from {
+    opacity: 0;
+    translate: -8px 0;
+  }
+}
+
+/* --- La entrada, pieza a pieza -------------------------------------------- */
+
+.rotulo,
+.lista li,
+.destacado,
+.acciones > * {
+  animation: menu-sube var(--dur-slow) var(--ease-out) backwards;
+  animation-delay: calc(var(--orden, 0) * var(--escalonado));
+}
+
+.lista li:nth-child(1) { --orden: 1; }
+.lista li:nth-child(2) { --orden: 2; }
+.lista li:nth-child(3) { --orden: 3; }
+.lista li:nth-child(4) { --orden: 4; }
+.lista li:nth-child(5) { --orden: 5; }
+.destacado { --orden: 6; }
+.acciones > :nth-child(1) { --orden: 7; }
+/* El tope: de aquí en adelante entran juntas. */
+.acciones > :nth-child(n + 2) { --orden: 8; }
+
+/* El icono de cada sección BROTA un instante después que su fila, con el
+   rebote que se gana una aparición (`--ease-spring`). */
+.filaIcono {
+  animation: menu-brota var(--dur-slow) var(--ease-spring) backwards;
+  animation-delay: calc(var(--orden, 0) * var(--escalonado) + var(--dur-fast));
+}
+
+/* La flecha de cada fila asoma desde la izquierda: señala hacia dónde lleva. */
+.filaFlecha {
+  animation: menu-asoma var(--dur-slow) var(--ease-out) backwards;
+  animation-delay: calc(var(--orden, 0) * var(--escalonado) + var(--dur-base));
+}
+
+/* La brújula del directorio gira hasta orientarse, una vez. */
+.destacadoIcono svg {
+  animation: menu-gira var(--dur-page) var(--ease-out) backwards;
+  animation-delay: calc(6 * var(--escalonado) + var(--dur-fast));
+}
+
+/* La corona de «Únete» y la puerta de «Iniciar sesión» brotan con su botón. */
+.acciones > :nth-child(-n + 2) svg {
+  animation: menu-brota var(--dur-slow) var(--ease-spring) backwards;
+  animation-delay: calc(8 * var(--escalonado) + var(--dur-fast));
+}
+
+/* --- La respuesta al dedo -------------------------------------------------
+   En un teléfono no hay «apuntar»: lo que se siente es el toque. La fila
+   sigue acusándolo con opacidad (regla de las listas) y además su icono se
+   encoge y su flecha avanza: dos piezas pequeñas, no la fila entera. */
+
+.filaIcono,
+.destacadoIcono {
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+.fila:active .filaIcono,
+.destacado:active .destacadoIcono {
+  scale: 0.88;
+}
+
+.fila:active .filaFlecha {
+  translate: 4px 0;
+}
+
+.destacado:active .destacadoFlecha {
+  translate: 4px 0;
+}
+
+/* Al apuntar (ratón), el icono crece un poco: la misma respuesta que los
+   iconos de campo de la fachada. */
+@media (hover: hover) {
+  .fila:hover .filaIcono,
+  .destacado:hover .destacadoIcono {
+    scale: 1.08;
+  }
+}
+
+/* «Alíate»: el apretón de manos se inclina al tocarlo o apuntarlo. */
+.negocio svg {
+  transition: rotate var(--dur-base) var(--ease-out);
+}
+
+.negocio:active svg {
+  rotate: -12deg;
+}
+
+@media (hover: hover) {
+  .negocio:hover svg {
+    rotate: -12deg;
+  }
 }

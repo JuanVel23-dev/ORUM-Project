@@ -1,0 +1,569 @@
+/* ==========================================================================
+   EL ACUSE DE LA VENTA  ·  el recibo (04/10/2026, cuarta pasada)
+   --------------------------------------------------------------------------
+   El guion y el porqué de cada pieza están en `acuse-venta.tsx`. Aquí, cómo
+   se ve y cómo se mueve.
+
+   UNA TARJETA BLANCA, ENTERA. Arriba la cabeza (logotipo, marca con sus
+   estrellas, monto); abajo los renglones del recibo, bajo una línea de corte.
+   El talón ya NO va en crema: el propietario no quiso ese color («no me gusta
+   el color de abajo»). Un solo oro, y de LÍNEA: `--brand` / `--brand-edge`,
+   los oros que sí valen sobre claro. Nada relleno salvo el botón.
+
+   CABE EN LA VENTANA, SIN DESPLAZAR («quiero que no me tenga que desplazar
+   para abajo, que se vea todo»). Con descuento el recibo lleva cinco
+   renglones y medía 680 px: en un portátil de 635 px de alto había que bajar
+   para ver el botón. Ahora cada medida vertical —rellenos, marca, monto,
+   renglones— es un `clamp()` contra el alto de la ventana (`dvh`): en una
+   pantalla alta el recibo respira, y en una baja se aprieta en vez de
+   desbordar. El desplazamiento interno queda solo como respaldo para un
+   teléfono en horizontal.
+
+   TRES REGLAS QUE SOSTIENEN TODO EL ARCHIVO:
+
+   1. SOLO `opacity`, `translate`, `scale` y `rotate`. Nada de aquí recalcula
+      layout ni repinta: corre en el compositor.
+   2. EL ESTADO BASE ES EL FINAL. Cada pieza se escribe como queda al acabar,
+      y su `@keyframes` solo dice DE DÓNDE viene (`from`). Así, donde la
+      animación no corre —movimiento reducido, que el recorte global deja en
+      0,01 ms y en una sola vuelta— lo que se ve es el recibo terminado, con
+      las estrellas puestas y quietas. Las únicas piezas que acaban
+      invisibles son las que solo existen mientras se mueven: el eco del
+      anillo y el brillo del logotipo.
+   3. LOS TIEMPOS SALEN DE LOS TOKENS DE DURACIÓN, y el compás de la escena,
+      de una sola tabla (`--t-*`, abajo).
+   ========================================================================== */
+
+.acuse {
+  /* EL COMPÁS. Cuándo empieza cada golpe, desde que la venta queda registrada. */
+  --media-vuelta: var(--dur-base); /* cada media luna del anillo */
+  --t-anillo: var(--dur-fast);
+  --t-visto: calc(var(--t-anillo) + var(--media-vuelta) * 2);
+  --t-monto: var(--dur-page);
+  --t-brillo: calc(var(--dur-page) * 2.4);
+  /* Lo que tarda cada estrella en salir del centro a su sitio. */
+  --vuelo: calc(var(--dur-page) * 1.6);
+
+  /* LAS MEDIDAS QUE SIGUEN AL ALTO DE LA VENTANA. Entre un mínimo y un máximo
+     de la escala de espaciado: nunca más apretado que lo uno ni más holgado
+     que lo otro. */
+  --aire-arriba: clamp(var(--space-4), 4dvh, var(--space-8));
+  --aire-abajo: clamp(var(--space-3), 3dvh, var(--space-7));
+  --aire-medio: clamp(var(--space-2), 2.2dvh, var(--space-6));
+  --lado-marca: clamp(46px, 9.5dvh, 72px);
+  --pad-lado: var(--space-5);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+
+  /* El respaldo, para un teléfono en horizontal: desplaza por dentro. */
+  max-height: calc(100dvh - var(--space-6));
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-overlay), var(--edge);
+  color: var(--text);
+  text-align: center;
+
+  container-type: inline-size;
+  container-name: acuse;
+
+  /* El recibo se asienta: llega un punto más pequeño y aparece. Sin rebote. */
+  animation: asentar var(--dur-page) var(--ease-out) both;
+}
+
+@container acuse (min-width: 460px) {
+  .cabeza,
+  .talon {
+    --pad-lado: var(--space-7);
+  }
+}
+
+@keyframes asentar {
+  from {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+
+/* Lo que entra con retardo: sube 8 px y aparece. El retardo lo pone cada
+   pieza con `--retardo`. */
+.entra {
+  animation: subir var(--dur-slow) var(--ease-out) var(--retardo, 0ms) both;
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
+/* La X: en la esquina, en el tono secundario. */
+.cerrar {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    rotate var(--dur-base) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  /* Sin relleno: la X gira un cuarto de vuelta, como todas las del sistema. */
+  .cerrar:hover {
+    rotate: 90deg;
+    color: var(--text);
+  }
+}
+
+.cerrar:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -4px;
+}
+
+/* ==========================================================================
+   LA CABEZA  ·  de quién es el recibo, que salió bien y cuánto
+   ========================================================================== */
+
+.cabeza {
+  display: grid;
+  justify-items: center;
+  padding: var(--aire-arriba) var(--pad-lado) var(--aire-abajo);
+}
+
+/* --- El logotipo de ORUM ---------------------------------------------------
+   En oro, porque va sobre blanco («sobre negro, plata; sobre blanco, oro»).
+   Pequeño: es el membrete del recibo, no su titular. Aparece, y cuando todo
+   lo demás ya se asentó, un BRILLO lo cruza una vez.
+
+   El brillo es una banda blanca translúcida que se traslada por encima,
+   recortada a la caja del logotipo. Sobre el fondo blanco no se ve; solo se
+   nota donde pisa el oro de las letras. Es un `translate` y nada más. */
+.logo {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  animation: aparecer var(--dur-page) var(--ease-out) both;
+}
+
+/* El alto lo fija esta clase; el ancho lo deriva la imagen. */
+.logoImagen {
+  height: clamp(18px, 3.4dvh, 26px);
+}
+
+.logo::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    color-mix(in srgb, var(--blanco) 88%, transparent) 50%,
+    transparent
+  );
+  opacity: 0;
+  animation: brillo calc(var(--dur-page) * 2) var(--ease-in-out) var(--t-brillo) forwards;
+}
+
+/* Entra por la izquierda, cruza y sale. Fuera de ese viaje no existe. */
+@keyframes brillo {
+  0% {
+    opacity: 1;
+    translate: -110% 0;
+  }
+  99% {
+    opacity: 1;
+    translate: 250% 0;
+  }
+  100% {
+    opacity: 0;
+    translate: 250% 0;
+  }
+}
+
+/* --- La marca: el anillo que se cierra y la ✓ que se dibuja ----------------
+   De LÍNEA, no rellena: el mismo trazo fino para el anillo y para la ✓.
+
+   EL ANILLO SE CIERRA CON DOS MEDIAS LUNAS QUE GIRAN. Cada mitad de la marca
+   es una ventana (`overflow: hidden`) con un anillo entero dentro, recortado
+   a la mitad contraria. Girado media vuelta, ese medio anillo queda fuera de
+   su ventana; al volver a su sitio va asomando, y el ojo lo lee como un
+   trazo que avanza. Primero la mitad derecha —de arriba hacia abajo— y
+   luego la izquierda —de abajo hacia arriba—: una vuelta en el sentido del
+   reloj. El `clip-path` es fijo; lo único que se anima es `rotate`.
+
+   El grosor (1,5 px) es el del dibujo de un icono, como el trazo de la ✓: no
+   es un filo de interfaz. */
+.marca {
+  position: relative;
+  width: var(--lado-marca);
+  aspect-ratio: 1;
+  margin-top: var(--aire-medio);
+}
+
+.mitad {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  overflow: hidden;
+}
+
+.mitadDerecha {
+  left: 50%;
+}
+
+.mitadIzquierda {
+  left: 0;
+}
+
+.arco {
+  position: absolute;
+  top: 0;
+  width: 200%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1.5px var(--brand-edge);
+}
+
+.arcoDerecho {
+  left: -100%;
+  clip-path: inset(0 0 0 50%);
+  animation: girar var(--media-vuelta) linear var(--t-anillo) both;
+}
+
+.arcoIzquierdo {
+  left: 0;
+  clip-path: inset(0 50% 0 0);
+  animation: girar var(--media-vuelta) linear calc(var(--t-anillo) + var(--media-vuelta)) both;
+}
+
+@keyframes girar {
+  from {
+    rotate: -180deg;
+  }
+}
+
+/* LA ✓. `.visto` es la ventana fija; `.cortina` entra desde la izquierda y
+   `.trazo`, dentro, viaja lo mismo en sentido contrario. Las dos traslaciones
+   se anulan: el trazo no se mueve en pantalla, y lo que avanza es el borde
+   por el que se ve. Mide una proporción de la marca, que cambia con el alto
+   de la ventana. */
+.visto {
+  position: absolute;
+  top: 29%;
+  left: 29%;
+  width: 42%;
+  height: 42%;
+  overflow: hidden;
+  color: var(--brand);
+}
+
+.cortina {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: cortina var(--dur-slow) var(--ease-out) var(--t-visto) both;
+}
+
+.trazo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: trazo var(--dur-slow) var(--ease-out) var(--t-visto) both;
+}
+
+@keyframes cortina {
+  from {
+    translate: -101% 0;
+  }
+}
+
+@keyframes trazo {
+  from {
+    translate: 101% 0;
+  }
+}
+
+/* El eco: cuando el anillo se cierra, uno igual se abre y se apaga. Uno
+   solo, y tenue. `forwards` y no `both`: con `both`, durante el retardo ya
+   valdría su primer fotograma y se vería quieto antes de tiempo. */
+.eco {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1px var(--brand-edge);
+  opacity: 0;
+  animation: eco calc(var(--dur-page) * 2) var(--ease-out) var(--t-visto) forwards;
+}
+
+@keyframes eco {
+  from {
+    opacity: 0.45;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1.55;
+  }
+}
+
+/* --- Las estrellas de ORUM -------------------------------------------------
+   La estrella de cuatro puntas del logotipo —la imagen del cliente, no un
+   dibujo aproximado—, repartida a los dos lados de la marca como una
+   constelación. Dos movimientos, y los dos son `transform` y `opacity`:
+
+     · SALEN. Cuando el anillo se cierra, cada una viaja del centro de la
+       marca a su sitio, girando un cuarto de vuelta, escalonadas. Salida
+       decelerada: disparan y frenan.
+     · TITILAN. Ya en su sitio se quedan respirando, cada una a su ritmo
+       (`--ritmo`), para que el recibo no quede inmóvil. Es lo que le da
+       vida mientras el cajero lee; con movimiento reducido se quedan quietas.
+
+   El viaje va en el envoltorio y el titilar en la imagen de dentro: dos
+   animaciones de `scale` sobre el mismo elemento se pisarían.
+
+   Solo a los lados de la marca, nunca encima del logotipo ni del monto. */
+.estrella {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--talla, 10px);
+  height: var(--talla, 10px);
+  margin: calc(var(--talla, 10px) / -2) 0 0 calc(var(--talla, 10px) / -2);
+  translate: var(--dx, 0) var(--dy, 0);
+  animation: salir var(--vuelo) var(--ease-out)
+    calc(var(--t-visto) + var(--orden, 0) * var(--escalonado)) both;
+}
+
+@keyframes salir {
+  from {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.4;
+    rotate: -90deg;
+  }
+}
+
+.destello {
+  display: block;
+  height: 100%;
+  animation: titilar calc(var(--dur-page) * (5 + var(--ritmo, 0))) var(--ease-in-out)
+    calc(var(--t-visto) + var(--vuelo) + var(--orden, 0) * var(--dur-fast)) infinite alternate;
+}
+
+/* Respira y gira un octavo de vuelta: una estrella de cuatro puntas que
+   rota 45° pasa por su propia silueta, y eso es lo que se lee como destello. */
+@keyframes titilar {
+  from {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+  to {
+    opacity: 0.4;
+    scale: 0.72;
+    rotate: 45deg;
+  }
+}
+
+/* --- Lo que dice ------------------------------------------------------------ */
+
+/* «Venta registrada», en versalitas espaciadas y en el oro de texto del
+   portal: una etiqueta sobre el monto, no un titular que compita con él. */
+.etiqueta {
+  margin: var(--aire-medio) 0 0;
+  font-size: var(--t-overline-size);
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+/* EL MONTO: el serif de display, en tinta. El protagonismo lo da el tamaño,
+   que sigue al ancho de la tarjeta Y al alto de la ventana: el que mande
+   menos. */
+.monto {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, min(15cqi, 9.5dvh), 4.25rem);
+  line-height: 1.1;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  color: var(--text);
+  -webkit-font-smoothing: auto;
+}
+
+/* El signo de pesos: pequeño, arriba y en oro, como en una etiqueta de precio. */
+.moneda {
+  margin: 0.34em var(--space-1) 0 0;
+  font-size: 0.4em;
+  font-weight: 600;
+  color: var(--brand);
+}
+
+/*
+  EL MONTO QUE RUEDA. Cada dígito es una columna de un renglón de alto, y
+  dentro va la tira con los diez dígitos DOS veces (veinte casillas). La tira
+  acaba parada en la casilla `10 + dígito`, y viene desde la primera: así
+  todas las columnas ruedan al menos una vuelta entera —también los ceros— y
+  cada una frena sobre el suyo. Se escalonan de izquierda a derecha.
+
+  Cada casilla es el 5 % de la tira, y `translate` en % se mide contra la
+  propia tira: no hace falta saber cuánto mide un dígito.
+
+  EL ANCHO DE CADA COLUMNA ES EL DE SU DÍGITO FINAL (`.medida`, invisible y
+  en el flujo), no el del dígito más ancho: con cifras tabulares el «1»
+  quedaba con un hueco a cada lado y el monto se leía «1 40.000». La tira va
+  fuera del flujo, centrada, y la columna solo recorta en vertical: si al
+  pasar un «8» por una columna estrecha asoma un pelo por los lados, se ve.
+*/
+.columna {
+  position: relative;
+  display: inline-block;
+  height: 1.1em;
+  overflow-x: visible;
+  overflow-y: clip;
+}
+
+.medida {
+  visibility: hidden;
+}
+
+.tira {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: block;
+  translate: -50% calc((var(--digito, 0) + 10) * -5%);
+  animation: rodar calc(var(--dur-page) * 2.4) var(--ease-out)
+    calc(var(--t-monto) + var(--orden, 0) * var(--escalonado) * 1.5) both;
+}
+
+.digito {
+  display: block;
+  height: 1.1em;
+  text-align: center;
+}
+
+@keyframes rodar {
+  0% {
+    opacity: 0;
+    translate: -50% 0;
+  }
+  22% {
+    opacity: 1;
+  }
+}
+
+/* Los puntos de millar no ruedan: aparecen con las columnas. */
+.separador {
+  animation: aparecer var(--dur-slow) var(--ease-out) var(--t-monto) both;
+}
+
+/* ==========================================================================
+   EL TALÓN  ·  los renglones del recibo, bajo la línea de corte
+   --------------------------------------------------------------------------
+   Sobre el mismo blanco que la cabeza. Lo que lo separa es la línea de
+   corte: un trazo discontinuo de 1 px —una división DENTRO de la tarjeta, no
+   un filo suyo—, con el aire de un tiquete.
+   ========================================================================== */
+
+.talon {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(var(--space-2), 1.8dvh, var(--space-4));
+  padding: clamp(var(--space-3), 2.4dvh, var(--space-5)) var(--pad-lado)
+    clamp(var(--space-4), 3dvh, var(--space-7));
+  border-top: 1px dashed color-mix(in srgb, var(--tinta-1) 26%, transparent);
+}
+
+.renglones {
+  display: grid;
+  margin: 0;
+}
+
+/* Fila de lista: sin sombra ni movimiento propio; solo su entrada. */
+.renglon {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: clamp(var(--space-1), 0.9dvh, var(--space-2));
+}
+
+.renglon + .renglon {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.renglon dt {
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+.renglon dd {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* El descuento, en el oro de texto del portal (`--brand`: 4,93:1 sobre
+   blanco). El signo menos es el segundo canal. */
+.renglon dd.acento {
+  color: var(--brand);
+}
+
+/*
+  LA LÍNEA HONESTA: «esto no se puede anular desde aquí». En el tono más
+  tenue (`--text-3`) y con medida corta: tiene que estar, pero no puede
+  competir con el monto ni con el botón.
+*/
+.aviso {
+  max-width: 46ch;
+  margin: 0 auto;
+  font-size: var(--t-footnote-size);
+  line-height: 1.45;
+  color: var(--text-3);
+  text-wrap: pretty;
+}
+
+/* En una ventana MUY baja la línea honesta se retira antes que obligar a
+   desplazar para llegar al botón: lo que dice ya lo sabe quien administra. */
+@media (max-height: 540px) {
+  .aviso {
+    display: none;
+  }
+}

@@ -35,7 +35,7 @@ export type VentaCruda = {
   valor_final: number
   sucursales: {
     nombre: string
-    comercios: { id: number; nombre: string } | null
+    comercios: { id: number; nombre: string; logo_url?: string | null } | null
   } | null
   promociones: { titulo: string } | null
 }
@@ -45,6 +45,8 @@ export type Movimiento = {
   fechaHora: string
   comercioId: number | null
   comercio: string
+  /** El logotipo del comercio, o `null` (la placa pinta su inicial). */
+  logoUrl: string | null
   sucursal: string | null
   promocion: string | null
   valorCompra: number
@@ -66,6 +68,7 @@ export function normalizarMovimiento(venta: VentaCruda): Movimiento {
     fechaHora: venta.fecha_hora,
     comercioId: comercio?.id ?? null,
     comercio: comercio?.nombre ?? COMERCIO_NO_DISPONIBLE,
+    logoUrl: (comercio?.logo_url ?? '').trim() || null,
     sucursal: venta.sucursales?.nombre ?? null,
     promocion: venta.promociones?.titulo ?? null,
     valorCompra: aNumero(venta.valor_compra),
@@ -93,4 +96,66 @@ export function limiteSolicitado(valor: string | string[] | undefined): number {
   const n = Number(valor)
   if (n < LIMITE_INICIAL) return LIMITE_INICIAL
   return Math.min(n, LIMITE_MAXIMO)
+}
+
+/** Un mes del historial, con sus movimientos en el orden en que llegaron. */
+export type MesDeMovimientos = {
+  /** `YYYY-MM`, en la hora de Colombia. Sirve de `key` y para ordenar. */
+  clave: string
+  /** «Octubre de 2026». */
+  titulo: string
+  /** Lo ahorrado en los movimientos CARGADOS de ese mes. */
+  ahorro: number
+  movimientos: Movimiento[]
+}
+
+const PARTES_MES = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  year: 'numeric',
+  month: '2-digit',
+})
+
+const TITULO_MES = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  month: 'long',
+  year: 'numeric',
+})
+
+/**
+ * Agrupa los movimientos por mes, conservando el orden de entrada (la lista
+ * llega de más reciente a más antiguo, y así salen los meses).
+ *
+ * El mes se decide en la hora de COLOMBIA: `fecha_hora` es `timestamptz`, y
+ * una compra del 31 a las 8 p. m. ya es día 1 en UTC — leída en UTC caería
+ * en el mes equivocado.
+ */
+export function agruparPorMes(movimientos: readonly Movimiento[]): MesDeMovimientos[] {
+  const meses: MesDeMovimientos[] = []
+  const porClave = new Map<string, MesDeMovimientos>()
+
+  for (const m of movimientos) {
+    const fecha = new Date(m.fechaHora)
+    const partes = PARTES_MES.formatToParts(fecha)
+    const anio = partes.find((p) => p.type === 'year')?.value ?? ''
+    // `padStart`: en `es-CO` el mes de «2-digit» puede llegar como «9».
+    const mes = (partes.find((p) => p.type === 'month')?.value ?? '').padStart(2, '0')
+    const clave = `${anio}-${mes}`
+
+    let grupo = porClave.get(clave)
+    if (!grupo) {
+      const titulo = TITULO_MES.format(fecha)
+      grupo = {
+        clave,
+        titulo: titulo.charAt(0).toUpperCase() + titulo.slice(1),
+        ahorro: 0,
+        movimientos: [],
+      }
+      porClave.set(clave, grupo)
+      meses.push(grupo)
+    }
+    grupo.movimientos.push(m)
+    grupo.ahorro = Math.round((grupo.ahorro + m.ahorro) * 100) / 100
+  }
+
+  return meses
 }

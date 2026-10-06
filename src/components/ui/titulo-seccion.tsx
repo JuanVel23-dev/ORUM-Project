@@ -31,8 +31,11 @@ type Props = {
   /** Nivel del encabezado. Un `h1` por pantalla. */
   como?: 'h1' | 'h2'
   id?: string
-  /** `seccion` para las narrativas (grande), `bloque` para las de uso. */
-  tamano?: 'seccion' | 'bloque'
+  /**
+   * `seccion` para las narrativas (grande), `bloque` para las de uso,
+   * `pagina` para el `h1` de una pantalla de trabajo (`PageHeader`).
+   */
+  tamano?: 'seccion' | 'bloque' | 'pagina'
   /** `sobreNegro`: el título de las franjas negras del Portal Público. */
   variante?: 'normal' | 'sobreNegro'
   className?: string
@@ -50,6 +53,7 @@ export function TituloSeccion({
   const clases = [
     estilos.titulo,
     tamano === 'bloque' && estilos.bloque,
+    tamano === 'pagina' && estilos.pagina,
     variante === 'sobreNegro' && estilos.sobreNegro,
     className,
   ]

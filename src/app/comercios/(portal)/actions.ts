@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireRolComercio } from '@/lib/comercios/requerir-comercio'
 import type { MetodoRegistroVenta } from '@/lib/supabase/database.types'
 import { calcularDescuento, calcularValorFinal } from '@/lib/comercios/ventas'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { hoyISO } from '@/lib/shared/fecha'
 
@@ -14,12 +15,21 @@ export type MiembroEncontrado = {
   vigente: boolean
   membresiaId: number | null
   planNombre: string | null
+  /** La foto del carnet, para cotejar la cara en la caja. `null` si no tiene. */
+  fotoUrl: string | null
 }
 
 export type BuscarMiembroState = {
   error?: string
   miembro?: MiembroEncontrado
   metodo?: MetodoRegistroVenta
+  /**
+   * Identifica ESTA consulta. La ventana del veredicto lo usa para dos cosas:
+   * saber cuál se cerró (y no reabrirla) y arrancar el formulario de venta en
+   * limpio con cada socio. Dos búsquedas seguidas del mismo carnet son dos
+   * consultas distintas, y por eso no sirve el id del miembro.
+   */
+  consultaId?: number
 }
 
 /** Busca un miembro por número de membresía vía la función segura `buscar_miembro_comercio` (RF-21/RF-22). */
@@ -48,8 +58,25 @@ export async function buscarMiembro(
     return { error: 'No se encontró un miembro con ese número.' }
   }
 
+  /*
+    LA FOTO DEL SOCIO (05/10/2026: «cuando pongo la membresía no aparece la
+    foto»). La función `buscar_miembro_comercio` no la devuelve, y el comercio
+    no puede leer `miembros` con su sesión (RLS). Se pide aparte con la
+    `service_role`, SOLO esa columna y SOLO del miembro que la función ya
+    resolvió para este comercio autenticado: es la misma foto que el socio
+    enseña en su carnet, y sirve para lo mismo, cotejar la cara. Si falla, la
+    ventana cae a las iniciales: la foto no puede tumbar una verificación.
+  */
+  const { data: fila } = await createAdminClient()
+    .from('miembros')
+    .select('foto_url')
+    .eq('id', data.miembro_id)
+    .is('deleted_at', null)
+    .maybeSingle()
+
   return {
     metodo,
+    consultaId: Date.now(),
     miembro: {
       id: data.miembro_id,
       nombreCompleto: `${data.nombres} ${data.apellidos}`.trim(),
@@ -57,6 +84,8 @@ export async function buscarMiembro(
       vigente: data.vigente,
       membresiaId: data.membresia_id,
       planNombre: data.plan_nombre,
+      /* Una cadena vacía no es una foto: sería un `<img src="">`. */
+      fotoUrl: (fila?.foto_url ?? '').trim() || null,
     },
   }
 }
@@ -76,6 +105,15 @@ export type RegistrarVentaState = {
    * Devolviéndola aquí, el dato llega con el acuse y no hay nada que sincronizar.
    */
   hora?: string
+  /**
+   * Lo que se cobró, tal como quedó GUARDADO. El acuse lo enseña desde aquí y
+   * no desde lo que había tecleado el cajero: el descuento lo recalcula el
+   * servidor, y es su cifra la que vale.
+   */
+  valorFinal?: number
+  /** La compra y el descuento guardados: los renglones del recibo. */
+  valorCompra?: number
+  valorDescuento?: number
 }
 
 /* Zona del negocio, no la del servidor: en UTC un acuse de las 7pm en Colombia
@@ -194,5 +232,11 @@ export async function registrarVenta(
   })
   if (errVenta) return { error: `No se pudo registrar la venta: ${errVenta.message}` }
 
-  return { ok: true, hora: HORA_BOGOTA.format(new Date()) }
+  return {
+    ok: true,
+    hora: HORA_BOGOTA.format(new Date()),
+    valorFinal,
+    valorCompra,
+    valorDescuento,
+  }
 }

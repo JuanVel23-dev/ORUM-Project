@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react'
-import { LogoOrum } from './marca/marca'
 import styles from './pantalla-auth.module.css'
 
 /**
  * Clases compartidas por los formularios de acceso, que son componentes
- * cliente y viven DENTRO de `PantallaAuth`.
+ * cliente y viven DENTRO de `PantallaAcceso` (la pantalla oscura
+ * `PantallaAuth` se retiró el 03/10/2026; el nombre del módulo se conserva
+ * para no tocar los seis formularios que lo importan).
  *
  * `formulario` incluye la sacudida al fallar, que se dispara con `:has(.alerta)`
  * — por eso ambas clases tienen que salir del MISMO módulo CSS: si el aviso
@@ -25,63 +25,3 @@ export const estilosAuth = {
   alerta: styles.alerta,
   enlace: styles.enlace,
 } as const
-
-type PantallaAuthProps = {
-  /**
-   * El `<h1>` de la pantalla: qué puerta es esta. Antes era un `<span>` y
-   * estas pantallas no tenían NINGÚN encabezado — un fallo de accesibilidad,
-   * no una preferencia.
-   */
-  titular: string
-  /**
-   * Una línea que dice con qué se entra. Resuelve la duda de «¿me pide el
-   * correo o el número?» antes de que el usuario toque el campo.
-   */
-  apoyo?: string
-  /**
-   * Texto de ayuda bajo la tarjeta, y FUERA de ella: no forma parte de la
-   * tarea, así que no debe compartir su superficie. Sobre el fondo se lee como
-   * una nota al pie; dentro competía con los campos.
-   */
-  pie?: ReactNode
-  children: ReactNode
-}
-
-/**
- * Envoltura de las SEIS pantallas de acceso: fondo oscuro con halo dorado,
- * tarjeta de material con filo de luz y wordmark.
- *
- * Las comparten administración, comercios, miembros y la activación de cuenta.
- * Son puertas al mismo club: si una tuviera dirección de arte propia, parecería
- * otra empresa. Por eso cambian siempre a la vez.
- *
- * Lo único que varía entre ellas es el `titular`, el `apoyo` y los campos.
- */
-export function PantallaAuth({ titular, apoyo, pie, children }: PantallaAuthProps) {
-  return (
-    <div className={styles.pantalla} data-theme="dark">
-      {/*
-        El marco existe para que el pie quede FUERA de la tarjeta conservando
-        su misma anchura. `.pantalla` centra un solo bloque; sin él, tarjeta y
-        pie serían dos elementos centrados por separado y el pie se alinearía
-        con el viewport, no con la tarjeta.
-      */}
-      <div className={styles.marco}>
-        <div className={styles.tarjeta}>
-          <header className={styles.cabecera}>
-            {/* Siempre `data-theme="dark"` en esta pantalla: la variante es
-                siempre plata (CLAUDE.md → «sobre negro, plata»). La imagen del
-                cliente, no un wordmark de texto con degradado. */}
-            <LogoOrum variante="plata" className={styles.wordmark} preload />
-            <h1 className={styles.titular}>{titular}</h1>
-            {apoyo && <p className={styles.apoyo}>{apoyo}</p>}
-          </header>
-
-          {children}
-        </div>
-
-        {pie && <p className={styles.pie}>{pie}</p>}
-      </div>
-    </div>
-  )
-}

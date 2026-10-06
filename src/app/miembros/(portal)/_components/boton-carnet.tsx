@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useId, useState, type ReactNode } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { ArrowLeft, Camera, IdCard, Maximize2, X } from 'lucide-react'
 import { iniciales } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -54,13 +55,40 @@ type Estado = {
   abrir: () => void
   cerrar: () => void
   verQr: (si: boolean) => void
+  /** Cierra el carnet para ir a cambiar la foto, y lo reabre al volver. */
+  irACambiarFoto: () => void
 }
+
+const RUTA_FOTO = '/miembros/perfil/foto'
 
 const ContextoCarnet = createContext<Estado | null>(null)
 
 export function ProveedorCarnet({ children }: { children: ReactNode }) {
   const [abierto, setAbierto] = useState(false)
   const [soloQr, setSoloQr] = useState(false)
+
+  /*
+    VOLVER AL CARNET DESPUÉS DE LA FOTO. Tocar la foto cierra el carnet y abre
+    el editor encima; al guardar o cerrar, el socio quedaba en la página de
+    detrás, sin ver cómo había quedado su carnet. Ahora, si al editor se entró
+    DESDE el carnet, al salir de su ruta el carnet se reabre (ya con la foto
+    nueva: la acción revalida el layout). Se ajusta durante el render —el
+    patrón de React para «estado que depende de un cambio de prop»— y no en
+    un efecto, que pintaría un fotograma sin carnet.
+  */
+  const ruta = usePathname()
+  const [rutaPrevia, setRutaPrevia] = useState(ruta)
+  const [volverAlCarnet, setVolverAlCarnet] = useState(false)
+  if (ruta !== rutaPrevia) {
+    setRutaPrevia(ruta)
+    if (volverAlCarnet && ruta !== RUTA_FOTO) {
+      setVolverAlCarnet(false)
+      if (rutaPrevia === RUTA_FOTO) {
+        setSoloQr(false)
+        setAbierto(true)
+      }
+    }
+  }
 
   const estado: Estado = {
     abierto,
@@ -71,6 +99,10 @@ export function ProveedorCarnet({ children }: { children: ReactNode }) {
     },
     cerrar: () => setAbierto(false),
     verQr: setSoloQr,
+    irACambiarFoto: () => {
+      setVolverAlCarnet(true)
+      setAbierto(false)
+    },
   }
 
   return <ContextoCarnet.Provider value={estado}>{children}</ContextoCarnet.Provider>
@@ -125,7 +157,7 @@ export function BotonMostrarCarnet({ className }: { className?: string }) {
 }
 
 export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
-  const { abierto, soloQr, cerrar, verQr } = useCarnet()
+  const { abierto, soloQr, cerrar, verQr, irACambiarFoto } = useCarnet()
   const { nombre, plan, numeroMembresia, vigencia, fotoUrl } = datos
   const etiquetaQr = `Código de la membresía ${numeroMembresia} de ${nombre}`
 
@@ -181,11 +213,15 @@ export function VentanaCarnet({ datos }: { datos: DatosCarnet }) {
               <div className={estilos.identidad}>
                 {/* Un formulario no navega: `/miembros/perfil/foto` se abre
                     encima por la ranura `@modal`. El carnet se cierra antes,
-                    para no apilar dos ventanas. */}
+                    para no apilar dos ventanas, y se reabre al volver. */}
                 <Link
                   href="/miembros/perfil/foto"
                   className={estilos.foto}
-                  onClick={cerrar}
+                  onClick={(e) => {
+                    // Abrir en otra pestaña no cierra el carnet de esta.
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+                    irACambiarFoto()
+                  }}
                   aria-label="Cambiar foto"
                 >
                   {/* Foto y velo en el MISMO círculo recortado: al acercarse

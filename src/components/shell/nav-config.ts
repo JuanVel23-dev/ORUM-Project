@@ -61,17 +61,20 @@ const BITACORA: NavItem = { href: '/admin/bitacora', label: 'Bitácora', icon: S
 /*
   "Mi contraseña" NO está aquí a propósito.
 
-  La barra lateral es para los sitios donde se trabaja —miembros, comercios,
-  métricas—, y cambiar la contraseña se hace una vez cada muchos meses. Tenerla
-  fija ocupaba un grupo entero de la barra, con su encabezado, para una tarea
-  que además YA vivía en el menú del avatar: la misma acción listada dos veces
-  en la misma pantalla.
+  La barra de opciones es para los sitios donde se trabaja —miembros,
+  comercios, métricas—, y cambiar la contraseña se hace una vez cada muchos
+  meses. Tenerla fija ocupaba un hueco de la barra para una tarea que además
+  YA vive en el menú de la cuenta: la misma acción listada dos veces en la
+  misma pantalla.
 
   Vive en el menú de la cuenta (escritorio) y en la hoja "Más" (móvil), que es
   donde la gente busca lo suyo. Ambos son parte del shell, no de esta lista.
 */
 
-/** Grupos de la barra lateral, según el rol. */
+/**
+ * Grupos de la barra de opciones (rediseño del 04/10/2026; antes, la barra
+ * lateral), según el rol. Cada grupo se separa del siguiente con un filo.
+ */
 export function navegacionPara(rol: RolCodigo): NavGroup[] {
   if (rol === 'super_admin') {
     return [

@@ -3,8 +3,8 @@
 import { useEffect } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { ErrorState } from '@/components/ui/feedback'
+import styles from './_components/verificar.module.css'
 
 /**
  * Frontera de error de la Herramienta de Comercios.
@@ -21,8 +21,10 @@ import { ErrorState } from '@/components/ui/feedback'
  *    único destino, así que un segundo botón solo sería una decisión más que
  *    tomar de pie en la caja.
  * 2. **No pone su propio marco.** Esta frontera vive DENTRO de `(portal)`, así
- *    que el layout —cabecera, zonas seguras, `<main>` con su relleno— sigue
- *    montado. La de Miembros sí lo pone porque sustituye al suyo.
+ *    que el layout —cabecera, banner con el nombre del comercio, `<main>` con
+ *    su relleno— sigue montado. La de Miembros sí lo pone porque sustituye al
+ *    suyo. Lo único suyo es la tarjeta, la misma de la herramienta, que monta
+ *    sobre el canto del banner.
  */
 export default function ComerciosError({
   error,
@@ -37,7 +39,7 @@ export default function ComerciosError({
   }, [error])
 
   return (
-    <Card padding="none">
+    <div className={`${styles.tarjeta} ${styles.aviso}`}>
       <ErrorState
         title="No pudimos cargar la herramienta"
         description="Puede ser algo pasajero de la conexión. Vuelve a intentarlo; si sigue igual, escribe al administrador del club."
@@ -45,11 +47,11 @@ export default function ComerciosError({
         // revelar nada interno.
         detail={error.digest ? `Referencia: ${error.digest}` : undefined}
         actions={
-          <Button onClick={reset} size="lg" icon={<RotateCcw size={17} />}>
+          <Button onClick={reset} variant="brand" size="lg" pildora icon={<RotateCcw size={17} />}>
             Reintentar
           </Button>
         }
       />
-    </Card>
+    </div>
   )
 }

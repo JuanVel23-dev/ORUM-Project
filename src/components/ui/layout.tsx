@@ -1,4 +1,5 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from 'react'
+import { TituloSeccion } from './titulo-seccion'
 import styles from './layout.module.css'
 
 /** Pasos de la rejilla de 4pt. Ningún espaciado fuera de esta escala. */
@@ -197,17 +198,22 @@ export function Section({
 /* --- PageHeader ----------------------------------------------------------- */
 
 type PageHeaderProps = {
+  /**
+   * Con un TEXTO, el titular de la fachada (04/10/2026, rediseño del panel):
+   * Playfair, la estrella al lado y la última palabra en cursiva dorada
+   * (`TituloSeccion tamano="pagina"`). Con un nodo, se pinta tal cual en el
+   * titular de siempre.
+   */
   title: ReactNode
   description?: ReactNode
   /** Acción primaria de la pantalla. En móvil pasa a ocupar todo el ancho. */
   actions?: ReactNode
   /**
-   * El `h1` en el SERIF DE DISPLAY, a 44–72px (v4 §3).
+   * El `h1` en el SERIF DE DISPLAY, a 44–72px (v4 §3), el tamaño del héroe.
    *
    * ⛔ NO en Administración ni en la Herramienta de Comercios. Son pantallas
-   * de trabajo, y por eso esto es opt-in y no el valor por defecto: si el
-   * serif colgara de `.t-display-*`, el panel se lo llevaría entero sin que
-   * nadie lo pidiera.
+   * de trabajo: su titular es el de la fachada a 28–36px (el `title` en
+   * texto, sin esta prop), no un héroe de 72px encima de una tabla.
    *
    * Su sitio es el recibimiento del socio y las seis puertas de acceso — donde
    * el titular ES el contenido, no una etiqueta encima de una tabla.
@@ -226,12 +232,17 @@ export function PageHeader({
   return (
     <header className={[styles.pageHeader, className].filter(Boolean).join(' ')}>
       <div className={styles.pageTextos}>
-        <h1 className={[styles.pageTitulo, display && styles.pageTituloDisplay]
-          .filter(Boolean)
-          .join(' ')}
-        >
-          {title}
-        </h1>
+        {typeof title === 'string' && !display ? (
+          <TituloSeccion como="h1" tamano="pagina" texto={title} />
+        ) : (
+          <h1
+            className={[styles.pageTitulo, display && styles.pageTituloDisplay]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {title}
+          </h1>
+        )}
         {description && <p className={styles.pageDescripcion}>{description}</p>}
       </div>
       {actions && <div className={styles.pageAcciones}>{actions}</div>}

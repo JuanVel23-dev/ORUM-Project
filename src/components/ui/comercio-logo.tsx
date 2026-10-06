@@ -100,7 +100,12 @@ export function ComercioLogo({
   nombreTransicion,
 }: ComercioLogoProps) {
   const inicial = nombre.trim().charAt(0).toUpperCase()
-  const clases = [styles.placa, variante !== 'tarjeta' && styles[variante], className]
+  const clases = [
+    styles.placa,
+    variante !== 'tarjeta' && styles[variante],
+    !logoUrl && styles.sinLogo,
+    className,
+  ]
     .filter(Boolean)
     .join(' ')
 

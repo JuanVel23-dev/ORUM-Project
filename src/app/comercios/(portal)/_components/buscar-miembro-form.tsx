@@ -1,29 +1,17 @@
 'use client'
 
-import { useActionState, useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Camera, Search, X } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Stack } from '@/components/ui/layout'
 import { Spinner } from '@/components/ui/spinner'
-import { error as vibrarError, toque } from '@/lib/shared/haptica'
-import { buscarMiembro, type BuscarMiembroState } from '../actions'
-import { ResultadoMiembro } from './resultado-miembro'
-import { ConfirmarVentaForm } from './confirmar-venta-form'
-import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
+import { TituloSeccion } from '@/components/ui/titulo-seccion'
+import { toque } from '@/lib/shared/haptica'
+import type { BuscarMiembroState } from '../actions'
 import styles from './verificar.module.css'
-
-type Sucursal = { id: number; nombre: string | null }
-type Promocion = {
-  id: number
-  titulo: string
-  tipoCodigo: TipoBeneficioCodigo
-  valor: number | null
-}
 
 /*
   El escáner pesa medio mega: trae su propio detector de códigos de barras
@@ -43,8 +31,6 @@ const EscanerQr = dynamic(() => import('./escaner-qr').then((m) => m.EscanerQr),
   ),
 })
 
-const estadoInicial: BuscarMiembroState = {}
-
 /** Los dígitos del carnet. Ocho, sin separadores y con los ceros de delante. */
 const LARGO_NUMERO = 8
 
@@ -59,16 +45,24 @@ const soloDigitos = (valor: string) => valor.replace(/\D+/g, '')
  */
 type Vista = 'reposo' | 'numero' | 'camara'
 
+/**
+ * La tarjeta de buscar: escanear o teclear el número.
+ *
+ * Solo BUSCA. El estado de la búsqueda (`useActionState`) vive en
+ * `VerificacionTool`, que es quien abre la ventana del veredicto con el
+ * resultado: esta tarjeta se remonta al cerrar la ventana para volver al
+ * reposo, y si el estado viviera aquí se perdería con ella a mitad de la
+ * animación de salida.
+ */
 export function BuscarMiembroForm({
-  sucursales,
-  promociones,
-  onNuevaVerificacion,
+  state,
+  formAction,
+  pending,
 }: {
-  sucursales: Sucursal[]
-  promociones: Promocion[]
-  onNuevaVerificacion: () => void
+  state: BuscarMiembroState
+  formAction: (datos: FormData) => void
+  pending: boolean
 }) {
-  const [state, formAction, pending] = useActionState(buscarMiembro, estadoInicial)
   const [vista, setVista] = useState<Vista>('reposo')
   const [numero, setNumero] = useState('')
   const [metodo, setMetodo] = useState<'qr' | 'numero'>('numero')
@@ -93,26 +87,12 @@ export function BuscarMiembroForm({
   */
   const [peticionEnvio, setPeticionEnvio] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
+  const idTitulo = useId()
 
   useEffect(() => {
     if (peticionEnvio === 0) return
     formRef.current?.requestSubmit()
   }, [peticionEnvio])
-
-  /*
-    Háptica de «no» (`haptica.ts`, regla de causalidad: en el evento que la
-    causa). Se dispara en dos veredictos distintos y suena igual a propósito:
-    para el cajero, «no encontrado» y «no vigente» significan lo mismo —no se
-    aplica el beneficio—. El «sí» no vibra: esa señal se reserva entera para la
-    venta registrada, que es el final feliz de verdad.
-  */
-  useEffect(() => {
-    if (state.error) vibrarError()
-  }, [state.error])
-
-  useEffect(() => {
-    if (state.miembro && !state.miembro.vigente) vibrarError()
-  }, [state.miembro])
 
   function escribirNumero() {
     setFalloCamara(null)
@@ -127,8 +107,16 @@ export function BuscarMiembroForm({
   }
 
   return (
-    <Stack gap={5}>
-      <Card padding="lg">
+    /* La tarjeta PRINCIPAL de la pantalla: por aquí empieza todo. */
+      <section className={`${styles.tarjeta} ${styles.principal}`} aria-labelledby={idTitulo}>
+        <header className={styles.cabeceraTarjeta}>
+          <TituloSeccion id={idTitulo} como="h2" tamano="bloque" texto="Verificar membresía" />
+          {/* Nombra las dos vías sin enseñar todavía ninguna: en reposo solo
+              se ve el botón de escanear, y saber que existe la alternativa
+              antes de necesitarla evita el «y si el carnet está rayado». */}
+          <p className={styles.lede}>Escanea el carnet del socio o escribe su número.</p>
+        </header>
+
         <form ref={formRef} action={formAction} className={styles.paso}>
           {/* `key` con el propio mensaje: si el cajero reintenta y falla con
               EXACTAMENTE el mismo error, React reutilizaría el nodo y el lector
@@ -144,7 +132,7 @@ export function BuscarMiembroForm({
               key={falloCamara}
               tone="warning"
               actions={
-                <Button variant="secondary" onClick={escribirNumero}>
+                <Button variant="secondary" pildora onClick={escribirNumero}>
                   Escribir el número
                 </Button>
               }
@@ -166,9 +154,12 @@ export function BuscarMiembroForm({
                 texto — dos botones grandes compitiendo obligan a elegir, y
                 elegir de pie con el cliente delante cuesta segundos.
               */}
+              {/* La acción del portal, en píldora dorada: el botón de la fachada. */}
               <Button
                 type="button"
+                variant="brand"
                 size="lg"
+                pildora
                 fullWidth
                 onClick={abrirCamara}
                 icon={<Camera size={19} />}
@@ -213,6 +204,7 @@ export function BuscarMiembroForm({
                 type="button"
                 variant="secondary"
                 size="lg"
+                pildora
                 fullWidth
                 onClick={() => setVista('reposo')}
                 icon={<X size={17} />}
@@ -266,6 +258,7 @@ export function BuscarMiembroForm({
                   type="button"
                   variant="secondary"
                   size="lg"
+                  pildora
                   onClick={abrirCamara}
                   icon={<Camera size={17} />}
                 >
@@ -279,9 +272,10 @@ export function BuscarMiembroForm({
                 */}
                 <Button
                   type="submit"
+                  variant="brand"
                   size="lg"
+                  pildora
                   loading={pending}
-                  fullWidth
                   icon={<Search size={17} />}
                 >
                   {pending ? 'Verificando…' : 'Buscar'}
@@ -290,35 +284,6 @@ export function BuscarMiembroForm({
             </>
           )}
         </form>
-      </Card>
-
-      {/*
-        El veredicto es un MENSAJE DE ESTADO (WCAG 4.1.3): aparece sin que el
-        foco se mueva, así que sin región en vivo un cajero con lector de
-        pantalla no se entera de si la membresía vale — tendría que ir a
-        buscarlo. La región se monta VACÍA desde el primer render: si naciera
-        junto con el resultado, el lector no la habría registrado todavía y no
-        anunciaría nada. `aria-atomic` hace que se lea el veredicto entero
-        —nombre, número y estado—, no solo el trozo que cambió.
-      */}
-      <div aria-live="polite" aria-atomic="true">
-        {state.miembro && <ResultadoMiembro miembro={state.miembro} />}
-      </div>
-
-      {/* La venta solo se ofrece si hay derecho a beneficio. Queda FUERA de la
-          región en vivo: anunciar el formulario entero al abrirse sepultaría
-          el veredicto, que es lo único que hay que oír. */}
-      {state.miembro?.vigente && (
-        <ConfirmarVentaForm
-          miembroId={state.miembro.id}
-          membresiaId={state.miembro.membresiaId}
-          numeroMembresia={state.miembro.numeroMembresia}
-          metodo={state.metodo ?? 'numero'}
-          sucursales={sucursales}
-          promociones={promociones}
-          onExito={onNuevaVerificacion}
-        />
-      )}
-    </Stack>
+      </section>
   )
 }

@@ -56,6 +56,10 @@ import estilos from './editor-foto.module.css'
       para encuadrar; se acerca con la barra, la rueda o pellizcando; se gira
       de 90 en 90. El círculo NUNCA queda con hueco (`limitarEncuadre`).
 
+  El ajuste es un PASO (04/10/2026): su X y «Cancelar» vuelven al reposo sin
+  guardar; la ventana se cierra desde el reposo. Antes la X la cerraba entera
+  y se perdía la foto a medio encuadrar.
+
   Al guardar, el recorte se pinta en un `canvas` de 640 px y se sube como
   JPEG. Eso es lo que permite aceptar la foto de un teléfono tal cual (5 MB,
   4000 px, incluso HEIC donde el navegador la abre): lo que viaja son
@@ -194,6 +198,17 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
 
   function elegir() {
     entrada.current?.click()
+  }
+
+  /** Vuelve al reposo sin guardar (y suelta la foto que se estuviera abriendo). */
+  function descartar() {
+    if (pendiente.current) URL.revokeObjectURL(pendiente.current)
+    pendiente.current = null
+    setPreparando(false)
+    setFuente(null)
+    setEncuadre(ENCUADRE_INICIAL)
+    setDeclarada(false)
+    setErrorLocal(null)
   }
 
   /* --- Gestos: arrastrar con un dedo, pellizcar con dos ------------------- */
@@ -366,7 +381,18 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
         <Titulo id={idTitulo} className={estilos.titulo}>
           {fuente ? 'Ajusta tu foto' : 'Mi foto'}
         </Titulo>
-        {enPagina ? (
+        {/* Mientras se ajusta, la X cancela el ajuste: vuelve al reposo. */}
+        {fuente ? (
+          <button
+            type="button"
+            className={estilos.cerrar}
+            onClick={descartar}
+            disabled={ocupado}
+            aria-label="Cancelar y volver"
+          >
+            <X size={20} aria-hidden="true" />
+          </button>
+        ) : enPagina ? (
           <Link href="/miembros" className={estilos.cerrar} aria-label="Volver al portal">
             <X size={20} aria-hidden="true" />
           </Link>
@@ -493,10 +519,15 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
             onChange={setDeclarada}
           />
 
+          {/* Las dos secundarias, como enlaces; «Guardar» baja a su propia
+              fila si no le queda sitio. */}
           <div className={estilos.acciones}>
-            <button type="button" className={estilos.enlace} onClick={elegir}>
+            <button type="button" className={estilos.enlace} onClick={elegir} disabled={ocupado}>
               <ImagePlus size={16} aria-hidden="true" />
               Elegir otra
+            </button>
+            <button type="button" className={estilos.enlace} onClick={descartar} disabled={ocupado}>
+              Cancelar
             </button>
             <Button
               variant="primary"
@@ -505,6 +536,7 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
               disabled={!declarada}
               icon={<Check size={16} aria-hidden="true" />}
               onClick={guardar}
+              className={estilos.principal}
             >
               Guardar foto
             </Button>

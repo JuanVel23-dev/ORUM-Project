@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent, type MouseEvent } from 'react'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { ArrowUpDown, ChevronDown, Heart, LayoutGrid, MapPin, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
@@ -82,7 +82,23 @@ type Props = {
 }
 
 export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio }: Props) {
-  const filtros = leerFiltrosDirectorio(crudosDe(useSearchParams()))
+  /*
+    LOS FILTROS SE LEEN SOLO CUANDO LA URL ES LA DEL DIRECTORIO (bug del
+    03/10/2026). Al tocar un comercio, la ficha se abre ENCIMA como ruta
+    interceptada y la URL pasa a ser `/miembros/comercios/12`, sin filtros:
+    el directorio, que sigue montado detrás, los leía de esa URL, se veía
+    «sin filtros» mientras la ficha cargaba y los recuperaba al cerrarla.
+    Con una ficha encima, se conservan los últimos que tuvo su propia URL.
+    (`setState` durante el render: el patrón de React para derivar estado de
+    algo que cambia, sin efecto y sin pintar un fotograma con el valor malo.)
+  */
+  const enSuRuta = usePathname() === base
+  const cadenaActual = useSearchParams().toString()
+  const [cadenaPropia, setCadenaPropia] = useState(cadenaActual)
+  if (enSuRuta && cadenaActual !== cadenaPropia) setCadenaPropia(cadenaActual)
+  const filtros = leerFiltrosDirectorio(
+    crudosDe(new URLSearchParams(enSuRuta ? cadenaActual : cadenaPropia)),
+  )
   /* El estado de favoritos de la pantalla; `null` en la fachada pública,
      donde no hay corazones ni filtro. */
   const favoritos = useFavoritos()

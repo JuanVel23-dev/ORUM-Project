@@ -1,9 +1,18 @@
+/* ==========================================================================
+   LA PORTADA DEL PANEL  ·  rediseño del 04/10/2026
+   --------------------------------------------------------------------------
+   Sobre el blanco de la fachada y con su paleta (la pone el shell). Se adapta
+   con `@container contenido`: el ancho útil es el del `<main>` del panel.
+   ========================================================================== */
+
+/* --- La tarjeta principal: registrar y buscar ----------------------------- */
+
 .destacado {
   position: relative;
   overflow: hidden;
 }
 
-/* Filo dorado superior: esta es la tarjeta de marca de la pantalla, y la única. */
+/* El filo dorado superior: la tarjeta de marca de la pantalla, y la única. */
 .destacado::before {
   content: '';
   position: absolute;
@@ -19,13 +28,7 @@
   gap: var(--space-6);
 }
 
-/*
-  `@container`, no `@media`: esta pantalla se pinta dentro de `.main` del shell
-  (`app-shell.module.css`, `container-name: contenido`), y su ancho útil cambia
-  según la barra lateral esté abierta o en rail. Un `@media` se equivoca en
-  ~200px justo en el rango de los portátiles.
-*/
-@container contenido (max-width: 640px) {
+@container contenido (max-width: 720px) {
   .destacadoCuerpo {
     flex-direction: column;
     align-items: stretch;
@@ -39,113 +42,168 @@
   min-width: 0;
 }
 
+/* El rótulo, en el oro de texto de la fachada (`--brand`: 4,93:1 sobre blanco). */
+.rotulo {
+  margin: 0;
+  font-size: var(--t-overline-size);
+  line-height: var(--t-overline-leading);
+  letter-spacing: var(--t-overline-tracking);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+/* El titular de la tarjeta, en el serif de la fachada: es el bloque de uso
+   de la pantalla, como «Así es como te unes». */
 .destacadoTitulo {
-  font-size: var(--t-title-2-size);
-  line-height: var(--t-title-2-leading);
-  letter-spacing: var(--t-title-2-tracking);
-  font-weight: var(--t-title-2-weight);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-title-1-size);
+  line-height: var(--t-title-1-leading);
+  font-weight: 700;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  -webkit-font-smoothing: auto;
   text-wrap: balance;
 }
 
 .destacadoDescripcion {
+  margin: 0;
   font-size: var(--t-callout-size);
   line-height: var(--t-body-leading);
   color: var(--text-2);
   max-width: 52ch;
 }
 
-/* --- Cifras ---------------------------------------------------------------- */
+.destacadoAcciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
 
-/* --- Accesos --------------------------------------------------------------- */
+@container contenido (max-width: 720px) {
+  .destacadoAcciones {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 
-.acceso {
+  .destacadoAcciones > * {
+    flex: 1 1 200px;
+  }
+}
+
+/* La tecla del atajo dentro de «Buscar un miembro»: una tecla de verdad.
+   En una pantalla táctil no hay teclado al que enseñárselo. */
+@media (pointer: coarse) {
+  .tecla {
+    display: none;
+  }
+}
+
+.tecla {
+  margin-left: var(--space-2);
+  padding: 1px var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+}
+
+/* --- Los atajos ------------------------------------------------------------ */
+
+/*
+  Un atajo es una TARJETA que lleva a un sitio: flota (sombra de escalón 1) y
+  al apuntarla se levanta —sube 2px, gana el escalón siguiente y aparece el
+  filo dorado—, como manda «Presionar hunde, apuntar levanta». Sin trazo en
+  reposo: lo define la sombra.
+*/
+.atajo {
   display: flex;
   align-items: center;
   gap: var(--space-4);
 
-  padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border-superficie);
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-card), var(--edge);
   color: var(--text);
+  text-decoration: none;
 
   transition:
-    border-color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out),
-    transform var(--dur-instant) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
 }
 
-/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
-   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
-   FUERA a propósito — un teclado existe en cualquier dispositivo. */
-
 @media (hover: hover) {
-  .acceso:hover {
-    border-color: var(--border);
-    box-shadow: var(--shadow-raised), var(--edge);
+  .atajo:hover {
+    translate: 0 -2px;
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
   }
 }
 
-.acceso:active {
-  scale: 0.99;
+.atajo:active {
+  translate: 0 1px;
+  box-shadow: var(--shadow-press), var(--edge);
 }
 
-.acceso:focus-visible {
+.atajo:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
-.accesoIcono {
+/* El icono en su círculo dorado claro, como las insignias de la fachada. */
+.atajoIcono {
   display: grid;
   place-items: center;
   flex-shrink: 0;
 
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  color: var(--text-2);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--gold-bg);
+  color: var(--brand);
 }
 
-.accesoIcono svg {
-  width: 19px;
-  height: 19px;
+.atajoIcono svg {
+  width: 20px;
+  height: 20px;
 }
 
-.accesoTextos {
+.atajoTextos {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
 
-.accesoTitulo {
+.atajoTitulo {
   font-size: var(--t-callout-size);
   font-weight: 600;
 }
 
-.accesoDescripcion {
+.atajoDescripcion {
   font-size: var(--t-caption-size);
-  color: var(--text-3);
+  line-height: 1.4;
+  color: var(--text-2);
 }
 
-.flecha {
+.atajoFlecha {
   margin-left: auto;
   flex-shrink: 0;
-  color: var(--text-3);
-  transition: transform var(--dur-base) var(--ease-out),
-    scale var(--dur-rebote) var(--ease-rebote);
+  color: var(--text-2);
+  transition:
+    translate var(--dur-base) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 /* Apunta en la dirección del gesto: telegrafía a dónde lleva. */
-
-/* En táctil el `:hover` NO se retira al levantar el dedo: lo que se toca se
-   queda encendido hasta que se toca otra cosa. El `:focus-visible` se queda
-   FUERA a propósito — un teclado existe en cualquier dispositivo. */
-
 @media (hover: hover) {
-  .acceso:hover .flecha {
-    transform: translateX(3px);
+  .atajo:hover .atajoFlecha {
+    translate: 3px 0;
+    color: var(--brand);
   }
 }

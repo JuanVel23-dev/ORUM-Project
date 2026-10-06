@@ -300,10 +300,26 @@ salían negras). `miembros/(portal)/layout.tsx` fija `data-theme="light"` en
 `.portal`, que además pinta su propio `background-color`/`color` —el `body`
 sigue con el tema del documento—, y el menú de la cuenta ya no ofrece
 selector de tema. La cabecera de Inicio es la única pieza oscura, con su
-propio `data-theme="dark"`. Administración y Comercios siguen con los dos
-temas. Y su fondo es **blanco puro**
+propio `data-theme="dark"`. Y su fondo es **blanco puro**
 (`--blanco`, no el crema `--w-0`): `publico.module.css` remapea `--w-0` en
 la fachada; las franjas tintadas siguen en crema.
+
+⚠️ **Y la Herramienta de Comercios, desde el 04/10/2026** (encargo del
+propietario: «vamos a rediseñar comercios; utiliza el estilo del portal
+inicial y miembros, sus reglas, colores y estilo»). `comercios/(portal)/layout.tsx`
+fija `data-theme="light"` y **no copia el cromo: importa el del Portal de
+Miembros** (`miembros/(portal)/portal.module.css`), así que la cabecera
+negra fundida, el fondo blanco y la paleta de la fachada son los mismos por
+construcción. El selector de tema que vivía en el menú del avatar se retiró
+con el menú.
+
+⚠️ **Y el Panel de Administración, desde el mismo 04/10/2026** (encargo:
+«un rediseño total, con el mismo estilo que el portal inicial, comercios y
+miembros, pero muy administrativo»). `AppShell` fija `data-theme="light"` e
+importa el mismo cromo de miembros para la paleta y el fondo blanco; el
+selector de tema se retiró con la barra lateral. **Ya ningún portal ofrece
+el tema oscuro**: sus tokens siguen en `globals.css` (el `QrCode`, la franja
+negra y `/dev/ui` los usan), pero ninguna pantalla de producción lo pinta.
 
 ### La paleta de la fachada pública es la del rediseño aprobado
 
@@ -355,8 +371,20 @@ contraste de esta sección. Donde no se cumplan, sigue siendo tinta.
 
 **Jamás codifica datos.**
 
-- **Panel de Administración y Herramienta de Comercios**: botón primario =
-  **tinta**, negro sobre claro, blanco sobre oscuro. No cambia.
+- **Panel de Administración**: botón primario = **tinta**, negro sobre
+  claro. No cambia: es la herramienta de trabajo, y el negro es el de su
+  propio cromo. Desde el rediseño del 04/10/2026 todos sus botones van en
+  **píldora** (`--boton-radio`, el gancho de `button.module.css` que pone el
+  shell) y su acción ceremonial —«Registrar miembro», en la cabecera y en la
+  portada— es `variant="brand"` en `--gold-500` con texto en tinta, como en
+  comercios. `--action` NO se pasó al oro: también pinta la casilla marcada,
+  y su filo daría 1,9:1 contra el blanco.
+- **Herramienta de Comercios** (desde el 04/10/2026): la acción principal va
+  en píldora con relleno `--gold-500` y texto en tinta (8,5:1), el mismo par
+  que las puertas de acceso. Antes era tinta; el rediseño la pasó al oro de
+  la fachada. Como relleno no marca un filo de 3:1 contra el blanco: lo
+  identifica su texto (la misma relajación de la fachada). Sigue siendo
+  RELLENO: `--gold-500` como color de letra sobre claro continúa prohibido.
 - **Portal de Miembros y las seis pantallas de acceso**: el botón primario
   puede usar relleno dorado con texto en tinta, **condicionado** a que el par
   concreto cumpla a la vez:
@@ -523,12 +551,15 @@ que sea un corte auténtico, no una oblicua sintética. Pesos 500–800.
 | Token | Valor | Dónde |
 |---|---|---|
 | `--font-sans` | Montserrat | Todo lo que NO es titular ceremonial |
-| `--font-display` | Playfair Display | Solo donde ya vivía antes: héroe, «así funciona», `Cifra`, la ficha de comercio, el carnet del socio |
+| `--font-display` | Playfair Display | Héroe, «así funciona», `Cifra`, la ficha de comercio, el carnet del socio, `TituloSeccion` y —desde el rediseño del panel, 04/10/2026— el `h1` de `PageHeader` |
 
 `--font-display` sigue siendo la ÚNICA puerta por la que un serif puede
-entrar a una pantalla: la lista de consumidores no creció con la v6, solo
-cambió qué familia hay detrás de la puerta. Nada que no pidiera
-`--font-display` antes lo hace ahora.
+entrar a una pantalla. La lista de consumidores creció UNA vez, y por
+encargo: `PageHeader` con un `title` de texto pinta el titular de la
+fachada (`TituloSeccion tamano="pagina"`, 28–36px, estrella y última
+palabra en cursiva dorada). Lo usan el Panel de Administración entero y
+`/novedades`. Un titular en serif nuevo entra por ahí, no con su propio
+`font-family`.
 
 **Lo que sigue DEROGADO de la v4** (no vuelve con la v6): «nunca en
 Administración», «nunca por debajo de 28px», «un acento por pantalla». Lo que
@@ -863,10 +894,10 @@ ocupaba un grupo entero, con encabezado, para algo que se hace una vez cada
 muchos meses — y encima ya estaba en el menú del avatar: la misma acción listada
 dos veces en la misma pantalla.
 
-Al sacar algo de la barra lateral, **comprueba el móvil**: allí no hay menú del
-avatar (vive en el pie de la barra, que está oculta), así que la hoja "Más" es la
-única puerta. Si el destino salía de `navegacionPara`, hay que listarlo a mano en
-esa hoja o desaparece del teléfono.
+Al sacar algo de la barra de opciones, **comprueba el móvil**: allí no hay menú
+de la cuenta (en el teléfono no se pinta), así que la hoja "Más" es la única
+puerta. Si el destino salía de `navegacionPara`, hay que listarlo a mano en esa
+hoja o desaparece del teléfono.
 
 Los dos modos:
 
@@ -875,6 +906,14 @@ Los dos modos:
   ver el fondo; `large` si solo sirve a pantalla completa)
 
 Ambos salen del mismo componente: `<Overlay>`.
+
+⚠️ **En React, `cancel` y `close` BURBUJEAN** (en el DOM no). Llegan al
+`<dialog>` de fuera el `cancel` de un `<input type="file">` cuyo selector se
+cerró sin elegir (Chrome 113+) y el `cancel`/`close` de un diálogo anidado
+(la confirmación de «Quitar», el visor de fotos dentro de la ficha). Hasta el
+04/10/2026 eso cerraba la ventana entera. `Modal`, `Sheet` y la paleta solo
+atienden los suyos (`e.target === e.currentTarget`); **un `<dialog>` nuevo
+hace lo mismo**.
 
 Se montan como **rutas interceptadas** (`@modal/(.)ruta`). Eso da gratis: el botón
 atrás cierra, un enlace directo abre a pantalla completa, y la lista de detrás
@@ -907,6 +946,15 @@ el contenido anterior todavía montado detrás.
 La ranura necesita **su propio `loading.tsx`**. Sin él, Next cae al `loading.tsx` de
 la sección y dibuja el esqueleto de la tabla dentro del hueco del modal.
 
+⚠️ **Y en la RAÍZ de la ranura ese `loading.tsx` no pinta nada** (`return null`);
+la ventana de carga va en cada grupo interceptado (`@modal/(.)miembros/loading.tsx`,
+`(.)comercios/…`). Hasta el 04/10/2026 la raíz del panel pintaba la ventana, y
+como el comodín `[...resto]` vacía la ranura en cada navegación, **cualquier
+clic a una sección enseñaba un instante una ventana cargando**. Solo pasa en
+producción: allí `<Link>` precarga hasta la primera carga de cada ranura y la
+pinta al pulsar; en desarrollo no se precarga y no se ve. Miembros y el
+Público ya seguían este reparto.
+
 Tras mover o añadir rutas paralelas, **reinicia el servidor de desarrollo**: el
 manifiesto de rutas queda obsoleto y la interceptación falla en silencio, lo que
 parece un bug de código y no lo es.
@@ -930,12 +978,23 @@ desde el rediseño del 27/09/2026, el Portal de Miembros. Las clases de revelado
 desplazar (`REVELAR`, `revelarEscalonado`…) viven en `src/lib/shared/revelado.ts`
 por la misma razón.
 
-`Button` `Spinner` · `Field` `Input` `Select` `Textarea` `Switch` `Checkbox` `Radio`
+`Button` `Spinner` · `Field` `Input` `Select` `SelectMenu` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·
-`Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` · `Alert` `Toast` · `Modal` `Sheet`
+`Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` `CifraAnimada` · `Alert` `Toast` · `Modal` `Sheet`
 `Overlay` `DropdownMenu` `MenuItem` · `Skeleton` `ProgressBar` `EmptyState` `ErrorState` ·
 `DataList` `AccionEstado` `Copiar` · `PantallaAuth` `ComercioLogo` `QrCode` `WhatsAppButton`
 · `Agitar`
+
+**`SelectMenu`** (04/10/2026) es un desplegable CON DISEÑO: el campo se ve
+como un `Input` y la lista que abre es el `DropdownMenu` del sitio, no la del
+sistema (en Windows, un recuadro gris que el CSS no puede vestir). Nació para
+la sucursal de la venta en la caja («ponle diseño a la lista desplegable»).
+Va dentro de un `Field` y el valor viaja en un campo oculto con su `name`.
+**No valida solo** —un campo oculto no admite `required`—: quien lo usa
+comprueba el valor al enviar y le pasa el error al `Field`. **No sustituye a
+`Select`** en los formularios largos de administración, donde la rueda nativa
+del teléfono sigue siendo más rápida. `DropdownMenu` ganó para esto la prop
+`igualarAncho` (la lista mide lo que su campo).
 
 **`Agitar`** envuelve un icono y lo agita **una vez** cuando su prop `activo`
 pasa de `false` a `true` — el acento de «seleccionado» en un filtro. Se le pasa
@@ -986,13 +1045,185 @@ una pantalla de caja es espacio robado a la tabla.
 `<button type="submit">` dentro del `<form>` que envuelve al menú, así funciona sin
 JavaScript. `MenuItem href` renderiza un `<Link>` — nunca un `<a>` dentro de un `<button>`.
 
-**`PantallaAuth`** es la envoltura de TODA pantalla de acceso (administración y miembros).
-Son dos puertas al mismo club: si una tuviera dirección de arte propia, parecería otra
-empresa. Sus clases de formulario se toman de `estilosAuth`, no de un módulo local —
-la sacudida al fallar usa `:has(.alerta)` y ambas clases deben salir del mismo módulo CSS.
-Su wordmark es `<LogoOrum variante="plata">`: la pantalla es siempre oscura
-(`data-theme="dark"` en el contenedor, pase lo que pase con el tema elegido), así que
-la variante nunca cambia.
+**`PantallaAcceso`** (`src/components/ui/pantalla-acceso.tsx`) es la envoltura de
+TODA pantalla de acceso: socios, comercios, administración, recuperar contraseña y
+activar cuenta. Tiene el estilo del Portal Público (encargo del propietario,
+03/10/2026: primero la puerta del socio, y el mismo día «el mismo estilo a todos
+los logins, pero que cada uno tenga un mensaje diferente»): la foto de marca del
+héroe con el logotipo en plata a un lado y el formulario sobre blanco al otro,
+siempre en claro (`data-theme="light"`), con `TituloSeccion` y el botón en píldora
+en el oro de marca (`--gold-500` como RELLENO, con texto en tinta). Son puertas al
+mismo club y cambian siempre a la vez; lo que las distingue es la prop **`puerta`**
+(`socio` · `comercio` · `admin` · `activar` · `recuperar`), que elige el mensaje
+sobre la foto (`MENSAJES`, en el propio componente), más el titular, el apoyo y
+los campos. La pantalla mide lo que la ventana y no desplaza: se adapta por alto
+y ancho con `@media` (no hay contenedor `contenido` fuera de los portales).
+
+La antigua **`PantallaAuth`** (tarjeta oscura con halo) se retiró ese día. De su
+módulo queda `estilosAuth` (`pantalla-auth.tsx`), de donde los formularios siguen
+tomando sus clases — la sacudida al fallar usa `:has(.alerta)` y ambas clases
+deben salir del mismo módulo CSS.
+
+**El Panel de Administración** (`AppShell`, `src/components/shell/`,
+rediseño del 04/10/2026) es la cuarta cara de la fachada, **sin su foto**
+(«no quiero la imagen inicial, quiero una barra de opciones»):
+
+- **La cabecera negra** de los otros portales: logotipo en plata con el
+  rótulo «Panel», el buscador (el disparador de la paleta, con su tecla a
+  la vista), «Registrar miembro» en oro y el menú de la cuenta. Va en el
+  flujo: se va al desplazar.
+- **La barra de opciones**, negra, debajo: todas las secciones a la vista,
+  en sus grupos (`navegacionPara`), separados por un filo. ESA es pegajosa.
+  La activa la dicen un filo dorado que se desliza (`layoutId`), el oro
+  pálido del texto, el peso y `aria-current` — nunca un relleno. Entre 768 y
+  1099 px van sin icono; por debajo de 768, la barra inferior (también
+  negra) y la hoja «Más».
+- ⚠️ **La cabecera NO lleva `data-theme="dark"`**: el menú de la cuenta es
+  un popover que se pinta dentro de ella y heredaría el oscuro. El negro lo
+  ponen los tokens `--cacao-*`, y solo el botón dorado va en el ámbito
+  `sobreFoto` de la fachada (la misma solución que la cabecera pública).
+- **Los atajos**: ⌘K / Ctrl+K desde cualquier sitio, `/` cuando no se está
+  escribiendo, y `abrirPaleta()` (un evento) para abrirla desde una página
+  de servidor —lo usa `BotonPaleta`—. La tecla se enseña (`TeclaPaleta`)
+  salvo en pantallas táctiles. La paleta lista también métricas, bitácora,
+  novedades y los «nuevo …».
+- **La portada** (`admin/_components/inicio-panel.tsx`, pintada por
+  `page.tsx`, que solo consulta): la tarjeta principal (registrar y buscar),
+  cuatro cifras —con «por vencer en 30 días»— y atajos a lo que se crea. No
+  repite la navegación, y no anima nada: es la pantalla que más se abre.
+- `/dev/shell` la enseña con datos falsos: rol, sección simulada
+  (`AppShell rutaSimulada`) y la portada.
+
+**La Herramienta de Comercios** (`src/app/comercios/(portal)/`, rediseño del
+04/10/2026) es la tercera cara de la fachada. El layout pone la cabecera del
+Portal de Miembros (importada, no copiada), **el banner** —la foto de marca
+con el logotipo y el nombre del comercio, que es el `h1`: dice quién opera la
+caja— y el pie del sitio. El banner vive en el layout y no en la página
+porque el portal tiene UN destino: así el esqueleto de carga y la frontera de
+error se pintan debajo de él y nada salta. La página monta sus tarjetas
+SOBRE el canto del banner (`--monta`): a la izquierda la tarjeta de buscar
+(escanear o teclear el número) y a la derecha las promociones vigentes y la
+ayuda por WhatsApp; en el teléfono, una sola columna. Sus superficies son
+`.tarjeta` de `verificar.module.css` (radio `--radius-lg`, como los paneles
+de la fachada), no `Card`. `obtenerMiComercio` (`lib/comercios/comercio-sesion.ts`)
+es el comercio de la sesión, con `cache`: lo piden el layout y la página.
+
+**El resultado de buscar llega en una VENTANA encima, no debajo** (encargo del
+04/10/2026: «quiero que sea una ventana encima; no quiero que vaya debajo»).
+`VentanaVeredicto` es un `Modal desnudo` —la ventana ES la tarjeta, como el
+carnet—: su cabeza es la franja del veredicto (color sólido, punto lleno /
+hueco, pegada arriba al desplazar), debajo el socio —con **su foto del
+carnet** para cotejar la cara (05/10/2026; sin foto, las iniciales): la
+función `buscar_miembro_comercio` no la trae, así que `buscarMiembro` la pide
+aparte con la `service_role`, solo esa columna y solo del miembro ya
+resuelto—, y si la membresía vale,
+el formulario de venta; al registrar, la ventana entera pasa a ser el acuse.
+Tres cosas que no son obvias:
+
+- **El estado de la búsqueda vive en `VerificacionTool`, no en la tarjeta de
+  buscar.** La tarjeta se remonta al cerrar la ventana (para volver al
+  reposo) y la ventana tiene que seguir pintando al socio mientras se anima
+  su salida. Cerrar no borra el resultado: lo marca como descartado por su
+  `consultaId`, que el servidor renueva en cada búsqueda.
+- **No se cierra al pulsar fuera** (`Modal cerrarAlPulsarFuera={false}`): hay
+  un importe a medio teclear. La cierran su X, Escape y «Verificar otro socio».
+- **El foco inicial va a la X por el atributo `autofocus`**, puesto con un
+  `ref`. La ventana desplaza por dentro, Chrome hace enfocables los
+  contenedores con desplazamiento, y `showModal()` le daba el foco a la
+  tarjeta entera. La prop `autoFocus` de React no sirve aquí: enfoca al
+  montar, con el diálogo todavía cerrado.
+
+**El acuse de la venta es un RECIBO** (`acuse-venta.tsx`, 04/10/2026). Es la
+tercera versión, y las dos primeras están descartadas por el propietario: el
+acuse negro y oro con estallido de estrellas («no me gusta que sea de color
+negro») y el mismo sobre blanco («no me gusta el diseño ni la animación;
+busca referencias de 2026; debe ser elegante»). **No vuelvas a ninguna de las
+dos**: ni fondo negro, ni disco de oro macizo, ni estallido, ni olas de color.
+Lo que hay, y viene de las referencias de pantallas de pago (contención antes
+que adorno; marca ligera, monto grande, a quién y cuándo):
+
+- Una tarjeta **blanca, entera**. Arriba, el logotipo de ORUM en oro (pequeño,
+  como membrete), la marca y el monto. Abajo, los renglones —socio, membresía,
+  compra y descuento si lo hubo, hora— bajo una línea de corte discontinua.
+  **El talón NO va en crema**: se probó y el propietario no quiso ese color.
+- **Cabe en la ventana, sin desplazar** («que no me tenga que desplazar para
+  abajo, que se vea todo»). Las medidas verticales son `clamp()` contra el
+  alto de la ventana (`dvh`): a 1366 × 635 con descuento mide 557 px. Si
+  añades un renglón o subes un relleno, vuelve a medirlo a esa altura.
+- **La marca es de LÍNEA**: un anillo fino que se cierra y la ✓ que se dibuja
+  dentro. Un solo oro (`--brand` / `--brand-edge`), nada relleno salvo el botón.
+- **Las estrellas de ORUM** (`EstrellaOrum`, la imagen del cliente) van como
+  una constelación a los lados de la marca: salen del centro cuando el anillo
+  se cierra y se quedan titilando, cada una a su ritmo. Pedidas expresamente
+  («añade las estrellas de ORUM y anímalas para que tenga más dinamismo»). No
+  son el estallido descartado: son pocas, a los lados, y no tapan nada.
+- **El monto RUEDA** dígito a dígito, como un odómetro, en el serif de display
+  y en tinta. No cuenta de cero al total.
+- Dura algo más de un segundo. Es **solo `transform` y `opacity`** (el anillo
+  son dos medias lunas que giran; la ✓, dos traslaciones opuestas), **no hace
+  esperar** («Verificar otro socio» está enfocado y pulsable desde el primer
+  fotograma) y con **movimiento reducido** cada pieza queda en su estado
+  final. En su CSS el estado BASE es el final y los `@keyframes` solo dicen de
+  dónde viene cada pieza; las duraciones salen de los tokens.
+
+El monto, la compra y el descuento del recibo los dice el servidor
+(`RegistrarVentaState`), no lo que había tecleado el cajero.
+
+El formulario de venta: la promoción y la sucursal son dos `SelectMenu` que
+arrancan vacíos a propósito —preelegir una sucursal atribuiría la venta a una
+sede que nadie eligió— y se comprueban al enviar. **No existe «Sin
+promoción»** (propietario, 05/10/2026; antes eran radios de un toque con esa
+opción marcada): con promociones vigentes hay que elegir una, y solo un
+comercio sin ninguna registra la venta sin promoción. El importe tampoco
+lleva `required`: los tres campos se comprueban en `alEnviar` y se marcan a
+la vez con el mismo aviso del sitio (el globo del navegador cortaba el envío
+antes de marcar los otros dos). El total
+con el botón de cobrar van en un pie pegado abajo, siempre a la vista. El
+monto del acuse lo dice el servidor (`valorFinal`), no lo tecleado.
+
+**El comercio cambia su logotipo y sus fotos** («Mi negocio», 04/10/2026,
+`_components/mi-negocio.tsx`). Un botón en la cabecera abre una ventana
+encima —no una página— con el logotipo y las fotos del negocio, y cada
+imagen se AJUSTA antes de subirla, como la foto del socio:
+
+- **Ocho fotos como máximo, contando la portada** (`portada_url` + filas de
+  `comercio_imagenes`). La primera es la portada. El tope vive en
+  `lib/comercios/fotos-negocio.ts` y lo comprueban la interfaz y el servidor.
+- **El editor es `EditorEncuadre`** (`components/imagenes/`): arrastrar,
+  acercar (barra, rueda, pellizco), girar y restablecer, para cualquier marco.
+  Su geometría es `lib/imagenes/marco.ts` (probada aparte); el editor del
+  socio y su `encuadre.ts` NO se tocaron. Las fotos van a 16:9 (la portada de
+  la ficha); el logotipo, a un círculo en el que puede verse ENTERO —cabe su
+  diagonal, no solo el cuadrado— sobre blanco, que es como lo pinta la placa.
+- **Las acciones** (`comercios/(portal)/imagenes-actions.ts`) toman el
+  comercio de la SESIÓN, nunca del formulario, y buscan cada foto con
+  `comercio_id = el mío`: usan la `service_role`, así que esa comprobación es
+  la política. Al guardar sueltan la caché pública con `updateTag('publico')`
+  para que la ficha enseñe la imagen nueva al momento.
+- Las imágenes de un comercio quedan fuera de la declaración de derechos del
+  socio (spec de derechos de imagen, §3): no se pide aquí.
+- **«Editar» abre la imagen que YA está**, no el selector de archivos
+  (`useImagenElegida().abrirActual`: la descarga como datos, porque pintarla
+  desde su URL contaminaría el `canvas`). Desde el editor, «Elegir otra» la
+  reemplaza. Una imagen ya publicada arranca **como se ve**
+  (`encuadreInicialEnMarco(…, comoSeVe)`): abrir y guardar sin tocar no la
+  encoge. Si no se puede descargar, el aviso ofrece elegir un archivo.
+- **El ajuste es un paso, no la ventana**: su X, «Cancelar» y Escape
+  (`Modal onAtras`) vuelven a la rejilla sin guardar. Lo mismo en «Mi foto»
+  del socio. Un editor de imagen nuevo sigue esta regla.
+
+**El comercio también instala su portal** (04/10/2026). El layout monta
+`WhatsAppFlotante` y `AvisoInstalar`, y el pie lleva el icono de instalar,
+igual que el Portal de Miembros. Lo que cambia es QUÉ se instala: hay **dos
+aplicaciones** sobre el mismo sitio, cada una con su manifiesto.
+`app/manifest.ts` es la del socio (abre en `/miembros`);
+`app/manifest-comercios.webmanifest/route.ts` es la del comercio (abre en
+`/comercios`, `scope: '/comercios'`, `id` propio). `comercios/layout.tsx`
+—que no pinta nada— lo enlaza con `metadata.manifest` para el portal y sus
+dos pantallas de acceso. Sin eso, la app instalada desde la caja abriría en
+la puerta del socio en cada arranque. Los iconos y el color de arranque de
+los dos manifiestos salen de `lib/shared/manifiesto-app.ts`: si la paleta
+cambia, se mueven ahí una sola vez.
 
 **La marca del cliente son imágenes, no texto.** Logotipo «ORUM» (plata,
 dorado, blanco, negro), monograma y estrella viven recortados en
@@ -1011,6 +1242,45 @@ y las seis pantallas de acceso usan las piezas `-plata`
 encima); siempre decorativa (`aria-hidden`). La imagen para compartir en
 redes es `(publico)/opengraph-image.jpg` (logo dorado sobre negro, el JPG con
 fondo incrustado: solo ahí).
+
+**La foto de marca es UN archivo** (`src/components/ui/marca/foto-hero.webp`,
+1672×940) y la usan cuatro sitios: el héroe de la portada, el banner del
+directorio (público y miembros), el banner de comercios y las pantallas de
+acceso. Desde el 04/10/2026 es una **familia en el café** que ocupa todo el
+ancho (antes, una socia sola a la derecha): al cambiarla hay que revisar el
+`object-position` de los cuatro, no solo el archivo. Hoy: héroe `72%` en el
+teléfono y centrada en escritorio (el velo izquierdo sostiene el titular
+sobre el padre y el hijo); banners `60%` en el teléfono y `center 8%` en
+escritorio (las caras están en el tercio superior: con `35%` quedaban tras
+la cabecera); acceso `86%` (más al centro, el padre sale cortado por la
+mitad).
+
+**El formulario «Quiero ser aliado» valida con EXIGENCIA** (05/10/2026: «es
+el portal público; no quiero que pongan datos que no son»). Las reglas viven
+en `lib/aliados/solicitud-aliado.ts` (puro, probado; el servidor es quien
+decide) y cada campo tiene su `revisar…`, que devuelve el mensaje de lo que
+falla: nombre y apellido solo con letras; teléfono COLOMBIANO de 10 dígitos
+(celular 3…, fijo 60X…; se rechazan repetidos y escaleras); correo con forma
+entregable, sin dominios desechables ni mal escritos; dirección con número;
+descripción de 20–280 caracteres, sin enlaces ni marcado; enlace solo web
+pública; y en todos, sin relleno (carácter repetido, teclas al azar). Comprueba
+que el dato sea VEROSÍMIL, no que sea verdadero. Si se añade un campo, lleva
+su `revisar…` y sus pruebas.
+
+**El menú de móvil del Portal Público** (`menu-movil-publico.tsx`,
+rediseñado el 05/10/2026) va en tres bloques: «En esta página» (las anclas,
+con icono), el directorio en una tarjeta BLANCA aparte (negra se probó y el
+propietario no la quiso) y las acciones como botones —«Únete a ORUM» en
+`--gold-500`, no en el `--gold-600` de serie, que se veía «muy oscuro»—.
+«Alíate con ORUM» abre el formulario ENCIMA, igual que el botón de la página:
+se lo pide por evento al disparador (`pedirFormularioAliados()`), y si la
+página no tiene ninguno, navega a `/aliados`.
+
+**Las anclas de la fachada VIAJAN hasta su sección** (`DesplazamientoSuave`,
+un escuchador delegado en el layout público, 05/10/2026). En fase de CAPTURA:
+`<Link>` decide si navega mirando `defaultPrevented` en su `onClick`, que
+corre después. Solo actúa si el destino está en la página actual; con
+movimiento reducido, salta como antes.
 
 **`LogoOrumTema`** (hoy sin consumidores: la cabecera de miembros pasó a dos
 variantes fijas, oro y plata, elegidas por `.cabeceraInicio` al fijarse el
@@ -1172,6 +1442,20 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    pide al usuario una captura o usa un dispositivo real.
 4. El Portal de Miembros solo se ha visto en su pantalla de acceso: el resto exige un
    miembro con membresía vigente y esas credenciales no están disponibles aquí.
+   Lo mismo la **Herramienta de Comercios**: su rediseño del 04/10/2026 se miró
+   en una vista previa local con datos de ejemplo (1366, 820 y 390 px), no con
+   una sesión de comercio real. Falta verlo en producción y en la caja: el
+   escaneo con cámara, una venta de punta a punta y un comercio con logotipo.
+   Tampoco se ha guardado de verdad una imagen desde «Mi negocio»: la vista
+   previa probó la rejilla, el editor y que al guardar se exporta y se llama
+   a la acción, pero sin sesión de comercio la acción redirige al acceso.
+   El **Panel de Administración** rediseñado (04/10/2026) tampoco se ha visto
+   con sesión: se miró en `/dev/shell` (1366, 1024, 820, 768 y 390 px) con
+   datos falsos. Las pantallas de cada sección heredan el cromo, los tokens y
+   el titular nuevo, pero no se han recorrido una a una.
+   Y **instalar la app del comercio en un teléfono real** (Android e iPhone):
+   se comprobó que `/comercios` enlaza su manifiesto y que este se sirve bien,
+   no que el sistema la instale y abra en `/comercios`.
 5. **La v6 solo se ha visto en el Portal Público** (landing y `/explorar`,
    24/09/2026, en el navegador del panel, a 1280px y emulando 390px). El resto
    de portales sigue sin mirarse: entraron por tokens, `tsc`, `eslint`, las

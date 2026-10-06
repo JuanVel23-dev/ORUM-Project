@@ -35,15 +35,19 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* La socia está a la derecha: en un teléfono la foto se ancla ahí para
-     que siga en cuadro. A color, como en el héroe de la landing. */
-  object-position: 72% center;
+  /* La familia ocupa todo el ancho de la foto. En un teléfono se ancla algo
+     a la derecha del centro: entran el padre, el hijo, la madre con la
+     tarjeta ORUM y la cara de la hija. A color, como en el héroe. */
+  object-position: 60% center;
   animation: foto-asienta calc(var(--dur-page) * 4) var(--ease-out) both;
 }
 
+/* En escritorio el banner es una franja baja y la foto se recorta a lo alto:
+   se ancla ARRIBA. Las caras están en el tercio superior, y con el encuadre
+   de antes (35 %) quedaban detrás de la cabecera. */
 @container contenido (min-width: 768px) {
   .bannerFoto {
-    object-position: center 35%;
+    object-position: center 8%;
   }
 }
 

@@ -91,22 +91,138 @@ export const AVISO_DESCRIPCION = 260
  */
 export const SEGUNDOS_MINIMOS = 3
 
-/** Copy de error por campo. Vive junto al validador para no duplicarlo en la UI. */
+/*
+  VALIDACIÓN EXIGENTE  ·  05/10/2026
+  ---------------------------------------------------------------------------
+  Encargo del propietario: «excepciones muy exigentes, ya que es el portal
+  público; no quiero que pongan datos que no son». Hasta hoy bastaba con que
+  los campos no estuvieran vacíos: «asdf» era un nombre, «1111111» un teléfono
+  y «a@b.c» un correo.
+
+  Lo que una función pura PUEDE comprobar es que el dato sea VEROSÍMIL —que
+  tenga la forma de un nombre, de un teléfono colombiano, de un correo
+  entregable—, no que sea verdadero. Eso lo sigue diciendo la llamada de quien
+  lee la solicitud. Cada regla de aquí rechaza un tipo de relleno visto en
+  formularios públicos: teclas al azar, un carácter repetido, enlaces o
+  marcado metidos donde va un nombre, teléfonos de mentira, correos
+  desechables.
+
+  Cada campo tiene su función `revisar…`, que devuelve el MENSAJE de lo que
+  falla (o `null`): el aviso dice qué corregir, no solo «inválido».
+*/
+
+/** Copy del error BASE por campo (vacío o sin elegir). Los demás motivos, abajo. */
 export const ERRORES: Record<CampoSolicitud, string> = {
   nombreComercio: 'Escribe el nombre de tu negocio.',
-  nombreContacto: 'Escribe tu nombre.',
-  cargo: '',
-  telefono: 'Escribe un teléfono válido, de 7 a 10 dígitos.',
-  correo: 'Escribe un correo electrónico válido.',
+  nombreContacto: 'Escribe tu nombre y tu apellido.',
+  cargo: 'Escribe un cargo real, solo con letras (por ejemplo, «Propietaria»).',
+  telefono:
+    'Escribe un teléfono colombiano válido: un celular de 10 dígitos que empiece por 3, o un fijo con su indicativo (60…).',
+  correo: 'Escribe un correo electrónico válido, como nombre@dominio.com.',
   ciudad: 'Selecciona una ciudad.',
-  direccion: '',
+  direccion: 'Escribe la dirección completa, con su número (por ejemplo, «Cra 15 # 93-47»).',
   categoria: 'Selecciona una categoría.',
   descripcion: 'Cuéntanos brevemente qué ofrece tu negocio.',
-  enlace: 'Escribe un enlace válido.',
+  enlace: 'Escribe un enlace válido, como instagram.com/tunegocio.',
 }
 
 /** Mensaje propio: el vacío y el «demasiado largo» no son el mismo problema. */
 export const ERROR_DESCRIPCION_LARGA = `La descripción no puede pasar de ${MAX_DESCRIPCION} caracteres.`
+
+/** La descripción tiene que decir algo: al menos esto. */
+export const MIN_DESCRIPCION = 20
+export const ERROR_DESCRIPCION_CORTA = `Cuéntanos un poco más: al menos ${MIN_DESCRIPCION} caracteres y unas cuantas palabras.`
+
+export const ERROR_TEXTO_NO_VALIDO =
+  'Esto no parece un dato real. Escríbelo sin símbolos, enlaces ni letras repetidas.'
+export const ERROR_NOMBRE_COMERCIO =
+  'Escribe el nombre real de tu negocio: de 2 a 80 caracteres, con letras.'
+export const ERROR_NOMBRE_CONTACTO =
+  'Escribe tu nombre y tu apellido, solo con letras.'
+export const ERROR_CORREO_TEMPORAL =
+  'Usa un correo permanente: no aceptamos correos temporales o desechables.'
+export const ERROR_CORREO_DOMINIO =
+  'Revisa el dominio del correo: parece mal escrito (¿gmail.com, hotmail.com…?).'
+export const ERROR_DESCRIPCION_ENLACE =
+  'No pongas enlaces aquí: para eso está el campo de sitio web o red social.'
+
+/* --- Piezas comunes --------------------------------------------------------- */
+
+/** Letras de cualquier alfabeto (con tildes y ñ). */
+const LETRAS = /\p{L}/gu
+const VOCAL = /[aeiouáéíóúüy]/i
+
+function contarLetras(valor: string): number {
+  return valor.match(LETRAS)?.length ?? 0
+}
+
+/** Marcado, llaves o barras invertidas: nunca forman parte de un dato real. */
+function tieneMarcado(valor: string): boolean {
+  return /[<>{}[\]\\`|^~]/.test(valor)
+}
+
+/** Un enlace metido donde no va. */
+function tieneEnlace(valor: string): boolean {
+  return /https?:\/\/|www\./i.test(valor)
+}
+
+/** El mismo carácter cuatro veces seguidas («aaaa», «....»): relleno. */
+function tieneRepeticion(valor: string, veces = 4): boolean {
+  return new RegExp(`(.)\\1{${veces - 1},}`, 'u').test(valor)
+}
+
+/**
+ * Teclas al azar: una palabra larga sin ninguna vocal («sdfghj»), o con cinco
+ * consonantes seguidas («asdfgh»). Solo mira palabras de 5 letras o más, para
+ * no tropezar con siglas ni abreviaturas («Cra», «SAS», «Ltda»).
+ */
+function pareceAlAzar(valor: string): boolean {
+  const palabras = valor.split(/[^\p{L}]+/u).filter((p) => p.length >= 5)
+  return palabras.some(
+    (p) => !VOCAL.test(p) || /[^aeiouáéíóúüy\P{L}]{5,}/iu.test(p),
+  )
+}
+
+/* --- Nombre del comercio ---------------------------------------------------- */
+
+export function revisarNombreComercio(valor: string): string | null {
+  const v = valor.trim()
+  if (v === '') return ERRORES.nombreComercio
+  if (v.length < 2 || v.length > 80 || contarLetras(v) < 2) return ERROR_NOMBRE_COMERCIO
+  // Letras, números y la puntuación que de verdad lleva un nombre comercial.
+  if (!/^[\p{L}\p{N} &'’.,\-+#/()°!¡]+$/u.test(v)) return ERROR_TEXTO_NO_VALIDO
+  if (tieneMarcado(v) || tieneEnlace(v) || tieneRepeticion(v) || pareceAlAzar(v)) {
+    return ERROR_TEXTO_NO_VALIDO
+  }
+  return null
+}
+
+/* --- Nombre de la persona y cargo ------------------------------------------- */
+
+export function revisarNombreContacto(valor: string): string | null {
+  const v = valor.trim().replace(/\s+/g, ' ')
+  if (v === '') return ERRORES.nombreContacto
+  // Solo letras, espacios, apóstrofo, punto y guion: un nombre no lleva cifras.
+  if (v.length > 60 || !/^[\p{L}][\p{L} '’.-]*$/u.test(v)) return ERROR_NOMBRE_CONTACTO
+  const palabras = v.split(' ').filter((p) => contarLetras(p) >= 2)
+  // Nombre Y apellido: con una sola palabra no se sabe a quién llamar.
+  if (palabras.length < 2) return ERROR_NOMBRE_CONTACTO
+  if (palabras.some((p) => !VOCAL.test(p))) return ERROR_TEXTO_NO_VALIDO
+  if (tieneRepeticion(v, 3) || pareceAlAzar(v)) return ERROR_TEXTO_NO_VALIDO
+  return null
+}
+
+/** Opcional: vacío vale. Si hay algo, tiene que ser un cargo con letras. */
+export function revisarCargo(valor: string): string | null {
+  const v = valor.trim()
+  if (v === '') return null
+  if (v.length < 2 || v.length > 60 || contarLetras(v) < 2) return ERRORES.cargo
+  if (!/^[\p{L}][\p{L} '’.,/&-]*$/u.test(v)) return ERRORES.cargo
+  if (tieneRepeticion(v, 3) || pareceAlAzar(v)) return ERROR_TEXTO_NO_VALIDO
+  return null
+}
+
+/* --- Teléfono ---------------------------------------------------------------- */
 
 /**
  * Solo dígitos, tras quitar `+`, espacios, guiones y paréntesis.
@@ -119,27 +235,136 @@ export function soloDigitos(valor: string): string {
   return valor.replace(/\D/g, '')
 }
 
-/** 7–10 dígitos: fijo nacional corto por abajo, celular colombiano por arriba. */
-export function telefonoValido(valor: string): boolean {
+/** Los 10 dígitos nacionales: quita el indicativo `57` si viene («+57 300…»). */
+export function telefonoNacional(valor: string): string {
   const digitos = soloDigitos(valor)
-  return digitos.length >= 7 && digitos.length <= 10
+  return digitos.length === 12 && digitos.startsWith('57') ? digitos.slice(2) : digitos
 }
+
+/**
+ * Un teléfono COLOMBIANO de verdad: 10 dígitos, y o es un celular (empieza
+ * por 3) o un fijo con su indicativo (60 + una cifra de zona + 7 dígitos).
+ * Se rechazan los de mentira: un mismo dígito repetido («3000000000»,
+ * «3111111111») y las escaleras («3123456789»).
+ */
+export function telefonoValido(valor: string): boolean {
+  // Solo cifras y los separadores de siempre: letras en un teléfono, no.
+  if (!/^[\d\s()+.-]+$/.test(valor.trim())) return false
+  const n = telefonoNacional(valor)
+  if (n.length !== 10) return false
+  if (!/^3\d{9}$/.test(n) && !/^60[1-8]\d{7}$/.test(n)) return false
+  // Siete o más veces el mismo dígito seguido.
+  if (/(\d)\1{6,}/.test(n)) return false
+  // Una escalera de siete: 1234567, 7654321.
+  if (/1234567|2345678|3456789|9876543|8765432|7654321/.test(n)) return false
+  return true
+}
+
+/* --- Correo ------------------------------------------------------------------ */
 
 /*
-  Comprobación de correo DELIBERADAMENTE laxa.
-
-  Validar direcciones con una expresión regular estricta rechaza direcciones
-  legítimas —las reglas reales del RFC 5322 no caben en una— y el castigo de un
-  falso negativo aquí es perder un comercio aliado. Se comprueba la forma
-  mínima que hace que un correo pueda entregarse: algo, arroba y dominio con al
-  menos un punto. El resto lo dice el rebote.
+  La forma de un correo ENTREGABLE: usuario con los caracteres habituales, que
+  no empieza ni acaba en punto; dominio de etiquetas válidas; y una extensión
+  de letras, de 2 a 24. Más estricta que la de antes («algo@algo.algo»), que
+  aceptaba «a@b.c». No es el RFC 5322 entero —no cabe en una expresión— pero
+  no rechaza ninguna dirección de las que usa un negocio.
 */
-const FORMA_CORREO = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/
+const FORMA_CORREO =
+  /^[a-z0-9_%+-]+(?:\.[a-z0-9_%+-]+)*@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/i
+
+/** Servicios de correo de usar y tirar: quien los usa no quiere que lo llamen. */
+const DOMINIOS_DESECHABLES = new Set([
+  'mailinator.com',
+  'yopmail.com',
+  'guerrillamail.com',
+  'guerrillamail.net',
+  'sharklasers.com',
+  '10minutemail.com',
+  'tempmail.com',
+  'temp-mail.org',
+  'tempmailo.com',
+  'trashmail.com',
+  'getnada.com',
+  'dispostable.com',
+  'maildrop.cc',
+  'fakeinbox.com',
+  'throwawaymail.com',
+  'mohmal.com',
+  'emailondeck.com',
+  'moakt.com',
+  'example.com',
+  'example.org',
+  'test.com',
+])
+
+/** Los tropiezos de dedo más comunes: el correo llegaría a ninguna parte. */
+const DOMINIOS_MAL_ESCRITOS = new Set([
+  'gmial.com',
+  'gmai.com',
+  'gmal.com',
+  'gamil.com',
+  'gnail.com',
+  'gmail.co',
+  'gmail.con',
+  'gmail.cm',
+  'gmail.om',
+  'hotmial.com',
+  'hotmal.com',
+  'hotmai.com',
+  'hotmail.con',
+  'hotmail.co',
+  'homail.com',
+  'outlok.com',
+  'outloo.com',
+  'outlook.con',
+  'yaho.com',
+  'yahooo.com',
+  'yahoo.con',
+  'icloud.con',
+])
+
+export function revisarCorreo(valor: string): string | null {
+  const v = valor.trim().toLowerCase()
+  if (v === '' || v.length > 254 || !FORMA_CORREO.test(v)) return ERRORES.correo
+  const [usuario, dominio] = v.split('@')
+  if (usuario.length > 64) return ERRORES.correo
+  if (DOMINIOS_MAL_ESCRITOS.has(dominio)) return ERROR_CORREO_DOMINIO
+  if (DOMINIOS_DESECHABLES.has(dominio)) return ERROR_CORREO_TEMPORAL
+  return null
+}
 
 export function correoValido(valor: string): boolean {
-  const limpio = valor.trim()
-  return limpio.length <= 254 && FORMA_CORREO.test(limpio)
+  return revisarCorreo(valor) === null
 }
+
+/* --- Dirección --------------------------------------------------------------- */
+
+/** Opcional. Si hay algo, tiene que parecer una dirección: letras Y un número. */
+export function revisarDireccion(valor: string): string | null {
+  const v = valor.trim()
+  if (v === '') return null
+  if (v.length < 6 || v.length > 120) return ERRORES.direccion
+  if (contarLetras(v) < 2 || !/\d/.test(v)) return ERRORES.direccion
+  if (!/^[\p{L}\p{N} #°º.,\-/()'’]+$/u.test(v)) return ERROR_TEXTO_NO_VALIDO
+  if (tieneEnlace(v) || tieneRepeticion(v, 5) || pareceAlAzar(v)) return ERROR_TEXTO_NO_VALIDO
+  return null
+}
+
+/* --- Descripción ------------------------------------------------------------- */
+
+export function revisarDescripcion(valor: string): string | null {
+  const v = valor.trim()
+  if (v === '') return ERRORES.descripcion
+  if (v.length > MAX_DESCRIPCION) return ERROR_DESCRIPCION_LARGA
+  const palabras = v.split(/\s+/).filter((p) => contarLetras(p) >= 2)
+  if (v.length < MIN_DESCRIPCION || palabras.length < 4) return ERROR_DESCRIPCION_CORTA
+  if (tieneMarcado(v)) return ERROR_TEXTO_NO_VALIDO
+  if (tieneEnlace(v)) return ERROR_DESCRIPCION_ENLACE
+  if (tieneRepeticion(v) || pareceAlAzar(v)) return ERROR_TEXTO_NO_VALIDO
+  return null
+}
+
+/* --- Enlace ------------------------------------------------------------------ */
 
 /**
  * Antepone `https://` si falta.
@@ -154,15 +379,22 @@ export function normalizarEnlace(valor: string): string {
   return /^https?:\/\//i.test(limpio) ? limpio : `https://${limpio}`
 }
 
-/** Vacío es válido: el enlace es opcional. Si hay algo, tiene que ser una URL con dominio. */
+/**
+ * Vacío es válido: el enlace es opcional. Si hay algo, tiene que ser una
+ * dirección web pública: `http(s)`, un dominio con extensión de letras (no
+ * una IP ni `localhost`), sin usuario ni contraseña incrustados y sin
+ * espacios.
+ */
 export function enlaceValido(valor: string): boolean {
   const limpio = valor.trim()
   if (limpio === '') return true
+  if (limpio.length > 200 || /\s/.test(limpio) || tieneMarcado(limpio)) return false
 
   try {
     const url = new URL(normalizarEnlace(limpio))
-    // `https://taller` parsea sin error y no lleva a ningún sitio: exige punto.
-    return url.hostname.includes('.') && !url.hostname.endsWith('.')
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false
+    if (url.username !== '' || url.password !== '') return false
+    return /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/i.test(url.hostname)
   } catch {
     return false
   }
@@ -174,6 +406,10 @@ function normalizar(entrada: EntradaSolicitudAliado): SolicitudAliado {
   for (const campo of CAMPOS_SOLICITUD) {
     limpio[campo] = (entrada[campo] ?? '').trim()
   }
+  // Los espacios dobles de un nombre pegado no son parte del nombre.
+  limpio.nombreComercio = limpio.nombreComercio.replace(/\s+/g, ' ')
+  limpio.nombreContacto = limpio.nombreContacto.replace(/\s+/g, ' ')
+  limpio.correo = limpio.correo.toLowerCase()
   limpio.enlace = normalizarEnlace(limpio.enlace)
   return limpio
 }
@@ -193,11 +429,15 @@ export function validarSolicitudAliado(
 ): ResultadoValidacion {
   const datos = normalizar(entrada)
   const errores: ErroresSolicitud = {}
+  const anotar = (campo: CampoSolicitud, motivo: string | null) => {
+    if (motivo) errores[campo] = motivo
+  }
 
-  if (datos.nombreComercio === '') errores.nombreComercio = ERRORES.nombreComercio
-  if (datos.nombreContacto === '') errores.nombreContacto = ERRORES.nombreContacto
-  if (!telefonoValido(datos.telefono)) errores.telefono = ERRORES.telefono
-  if (!correoValido(datos.correo)) errores.correo = ERRORES.correo
+  anotar('nombreComercio', revisarNombreComercio(datos.nombreComercio))
+  anotar('nombreContacto', revisarNombreContacto(datos.nombreContacto))
+  anotar('cargo', revisarCargo(datos.cargo))
+  anotar('telefono', telefonoValido(datos.telefono) ? null : ERRORES.telefono)
+  anotar('correo', revisarCorreo(datos.correo))
 
   /*
     La lista fija se comprueba TAMBIÉN contra su contenido, no solo contra el
@@ -207,19 +447,18 @@ export function validarSolicitudAliado(
   if (!CIUDADES_ALIADO.includes(datos.ciudad as (typeof CIUDADES_ALIADO)[number])) {
     errores.ciudad = ERRORES.ciudad
   }
+  anotar('direccion', revisarDireccion(datos.direccion))
   if (
     !CATEGORIAS_ALIADO.includes(datos.categoria as (typeof CATEGORIAS_ALIADO)[number])
   ) {
     errores.categoria = ERRORES.categoria
   }
 
-  if (datos.descripcion === '') {
-    errores.descripcion = ERRORES.descripcion
-  } else if (datos.descripcion.length > MAX_DESCRIPCION) {
-    errores.descripcion = ERROR_DESCRIPCION_LARGA
-  }
+  anotar('descripcion', revisarDescripcion(datos.descripcion))
+  anotar('enlace', enlaceValido(datos.enlace) ? null : ERRORES.enlace)
 
-  if (!enlaceValido(datos.enlace)) errores.enlace = ERRORES.enlace
+  // El teléfono viaja ya limpio: los 10 dígitos, que es lo que se marca.
+  if (!errores.telefono) datos.telefono = telefonoNacional(datos.telefono)
 
   const hayError = CAMPOS_SOLICITUD.some((campo) => errores[campo])
   return hayError ? { ok: false, errores } : { ok: true, datos }

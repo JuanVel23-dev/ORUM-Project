@@ -145,7 +145,7 @@ export function ActivarForm() {
           {mensajeInvalido}
         </Alert>
 
-        <Button href={login} variant="secondary" size="lg" fullWidth>
+        <Button href={login} variant="secondary" size="lg" pildora fullWidth>
           Ir a iniciar sesión
         </Button>
       </div>
@@ -206,6 +206,7 @@ export function ActivarForm() {
         type="submit"
         variant="brand"
         size="lg"
+        pildora
         fullWidth
         loading={estado === 'guardando'}
         icon={<ShieldCheck size={17} />}

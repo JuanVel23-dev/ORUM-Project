@@ -82,11 +82,18 @@
   cursor: pointer;
   transition:
     color var(--dur-fast) var(--ease-out),
-    rotate var(--dur-base) var(--ease-out);
+    rotate var(--dur-base) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+/* Mientras se guarda, la X del ajuste no cancela a medias. */
+.cerrar:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 @media (hover: hover) {
-  .cerrar:hover {
+  .cerrar:not(:disabled):hover {
     color: var(--cacao-fg);
     rotate: 90deg;
   }
@@ -448,12 +455,16 @@
 /* Elegir otra + Guardar, en una fila: la principal se lleva el ancho. */
 .acciones {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
 }
 
-.acciones > :last-child {
-  flex: 1;
+/* «Guardar» se lleva el resto de la fila; con menos de 180 px, baja a la
+   suya y la ocupa entera. */
+.principal {
+  flex: 1 1 180px;
+  min-width: 0;
 }
 
 .enlace {
@@ -475,8 +486,13 @@
     translate var(--dur-fast) var(--ease-out);
 }
 
+.enlace:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 @media (hover: hover) {
-  .enlace:hover {
+  .enlace:not(:disabled):hover {
     color: var(--cacao-fg);
     translate: 0 -1px;
   }

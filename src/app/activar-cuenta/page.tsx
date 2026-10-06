@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { PantallaAuth } from '@/components/ui/pantalla-auth'
+import { PantallaAcceso } from '@/components/ui/pantalla-acceso'
 import { textosActivacion } from '@/lib/auth/activacion'
 import { ActivarForm } from './_components/activar-form'
 
@@ -11,7 +11,8 @@ export default async function ActivarCuentaPage({
   const { modo } = await searchParams
 
   return (
-    <PantallaAuth
+    <PantallaAcceso
+      puerta={modo === 'recuperar' ? 'recuperar' : 'activar'}
       titular={textosActivacion(modo).subtitulo}
       apoyo={
         modo === 'recuperar'
@@ -22,6 +23,6 @@ export default async function ActivarCuentaPage({
       <Suspense>
         <ActivarForm />
       </Suspense>
-    </PantallaAuth>
+    </PantallaAcceso>
   )
 }

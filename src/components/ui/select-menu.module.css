@@ -1,0 +1,123 @@
+/* ==========================================================================
+   SELECT CON DISEÑO  ·  el campo de siempre, con la lista del sitio
+   --------------------------------------------------------------------------
+   El botón copia la métrica de `.control` (`input.module.css`) para que al
+   lado de un `Input` no se note cuál es cuál: mismo alto, mismo relleno, el
+   mismo filo en reposo y el mismo anillo de foco. Si se toca allí, se toca
+   aquí.
+
+   La lista NO está aquí: es `DropdownMenu` (`menu.module.css`).
+   ========================================================================== */
+
+.envoltorio {
+  display: block;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-3);
+
+  /* UN CONTROL SÍ CONSERVA SU BORDE EN REPOSO: es donde se elige, y sin filo
+     sobre blanco no se sabría que está ahí. `--border-control`, no `--border`. */
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+
+  font-family: var(--font-sans);
+  font-size: var(--t-control-size);
+  line-height: var(--t-body-leading);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  /* El anillo de foco se dibuja con `box-shadow` para que CREZCA desde 0. */
+  box-shadow: 0 0 0 0 transparent;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  /* Señalar enciende el oro: el filo ya existe, así que CAMBIA de color. */
+  .control:hover:not(:focus-visible) {
+    border-color: var(--brand-edge);
+  }
+}
+
+/* `outline: none` es legal aquí porque está SUSTITUIDO por el anillo, igual
+   que en `.control` de `Input`. */
+.control:focus-visible {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 30%, transparent);
+}
+
+/* Abierto: el mismo filo dorado, para que se vea de qué campo es la lista. */
+.envoltorio:has(:popover-open) .control {
+  border-color: var(--brand-edge);
+}
+
+/* El error no va solo en el color: el `Field` escribe el mensaje debajo. */
+.control[data-invalido] {
+  border-color: var(--danger);
+}
+
+.control[data-invalido]:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+.valor,
+.placeholder {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* `--text-2` y no `--text-3`: no es un ejemplo de qué escribir, es la
+   instrucción («Selecciona una sucursal») y tiene que leerse. */
+.placeholder {
+  color: var(--text-2);
+}
+
+/* La flecha gira al abrir: dice «esto se despliega» y «ya está desplegado». */
+.flecha {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--text-3);
+  transition:
+    rotate var(--dur-base) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.envoltorio:has(:popover-open) .flecha {
+  rotate: 180deg;
+  color: var(--text-2);
+}
+
+/* Muchas opciones: la lista desplaza por dentro en vez de salirse de la
+   ventana. Sin barra visible, como el resto de las superficies del portal. */
+.lista {
+  max-height: min(288px, 46dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.lista::-webkit-scrollbar {
+  display: none;
+}
+
+/* En táctil, filas más altas: el mínimo de un objetivo es `--tap-min`. */
+@media (pointer: coarse) {
+  .lista > * {
+    min-height: var(--tap-min);
+  }
+}

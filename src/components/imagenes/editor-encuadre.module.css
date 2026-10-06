@@ -1,0 +1,337 @@
+/* ==========================================================================
+   EL EDITOR DE ENCUADRE  ·  el escenario, la barra y las acciones
+   --------------------------------------------------------------------------
+   Sobre claro: lo usa el Portal de Comercios, que va en blanco. El escenario
+   sí es oscuro —una foto se juzga mejor contra negro, y lo que queda fuera
+   del marco tiene que verse atenuado—; todo lo demás sale de los tokens de
+   la superficie donde vive.
+
+   TODA LA GEOMETRÍA CUELGA DE UNA VARIABLE: `--proporcion`, el alto del marco
+   en anchos de marco (1 en el círculo del logotipo; 9/16 en las fotos). El
+   marco deja un 6 % de aire a cada lado del escenario, así que el alto del
+   escenario es `0,88 × proporción + 0,12` anchos. Si cambia ese 6 %, cambia
+   en los cuatro sitios que lo usan: el escenario, el marco, el velo y el filo.
+   ========================================================================== */
+
+.editor {
+  display: grid;
+  /* La columna no crece con su contenido: lo que no quepa se reacomoda
+     dentro, nunca ensancha la ventana (en un teléfono salía desplazamiento
+     lateral). */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* --- El escenario ------------------------------------------------------------ */
+
+.escenario {
+  position: relative;
+  justify-self: center;
+  width: 100%;
+  aspect-ratio: 1 / calc(0.88 * var(--proporcion) + 0.12);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--cacao-900);
+  cursor: grab;
+  /* El gesto es nuestro: sin esto el navegador desplaza la ventana y cancela
+     el arrastre a medio encuadrar. */
+  touch-action: none;
+  user-select: none;
+}
+
+/* El círculo es cuadrado y alto: se acota para que los controles y el botón
+   de guardar sigan a la vista sin desplazar. */
+.escenario[data-forma='circulo'] {
+  width: min(100%, 320px, max(200px, 100dvh - 400px));
+}
+
+/* La foto, apaisada: se acota por el alto de la ventana (su escenario mide
+   ~0,62 veces su ancho), para que la barra y «Guardar» sigan a la vista. */
+.escenario[data-forma='rectangulo'] {
+  width: min(100%, max(320px, (100dvh - 300px) * 1.6));
+}
+
+.escenario:active {
+  cursor: grabbing;
+}
+
+.escenario:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* El marco: la caja contra la que se mide la imagen. No recorta —lo de fuera
+   se ve, atenuado—; quien recorta es el escenario. */
+.marco {
+  position: absolute;
+  top: 50%;
+  right: 6%;
+  left: 6%;
+  aspect-ratio: 1 / var(--proporcion);
+  translate: 0 -50%;
+}
+
+/* En el CÍRCULO el marco es blanco: un logotipo alejado deja hueco
+   alrededor, y ese hueco sale BLANCO en el archivo (es el fondo de la placa
+   del logotipo). Así lo que se ve al ajustar es lo que se guarda. */
+.escenario[data-forma='circulo'] .marco {
+  border-radius: var(--radius-full);
+  background: var(--blanco);
+}
+
+/*
+  LA IMAGEN. Su ancho es `--w` anchos de marco (lo que hace que, girada o no,
+  cubra el marco a zoom 1) y el alto lo deriva su proporción natural. Se
+  coloca desde el centro: el desplazamiento llega en fracciones de su PROPIO
+  tamaño (`--tx`, `--ty`), que es lo que entiende `translate` en %.
+
+  Sin transición: arrastrar y pellizcar siguen al dedo 1:1.
+*/
+.imagen {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--w) * 100%);
+  max-width: none;
+  height: auto;
+  aspect-ratio: var(--lado-ancho) / var(--lado-alto);
+  transform: translate(-50%, -50%) translate(calc(var(--tx) * 100%), calc(var(--ty) * 100%))
+    rotate(var(--giro)) scale(var(--zoom));
+  pointer-events: none;
+}
+
+/* Solo para lo que SALTA (girar, restablecer, los botones ±): ahí un corte
+   seco desorienta. */
+.suave {
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+/*
+  EL VELO: lo de fuera del marco, atenuado. Un negro translúcido sobre todo
+  el escenario con un HUECO donde está el marco.
+
+    · Rectángulo: el hueco se abre con `clip-path` (regla par-impar): el
+      polígono recorre el escenario y luego el marco, y lo de dentro del
+      segundo recorrido queda sin pintar.
+    · Círculo: un degradado radial. `closest-side` es medio lado del
+      escenario, y el círculo ocupa el 88 % de ese lado.
+
+  El alto del marco, en fracción del alto del escenario, sale de la misma
+  cuenta que su proporción.
+*/
+.velo {
+  --alto-marco: calc(0.88 * var(--proporcion) / (0.88 * var(--proporcion) + 0.12));
+  --arriba: calc((1 - var(--alto-marco)) * 50%);
+
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--cacao-900) 66%, transparent);
+  clip-path: polygon(
+    evenodd,
+    0 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 0,
+    6% var(--arriba),
+    6% calc(100% - var(--arriba)),
+    94% calc(100% - var(--arriba)),
+    94% var(--arriba),
+    6% var(--arriba)
+  );
+  pointer-events: none;
+}
+
+.escenario[data-forma='circulo'] .velo {
+  background: radial-gradient(
+    circle closest-side,
+    transparent 88%,
+    color-mix(in srgb, var(--cacao-900) 66%, transparent) calc(88% + 1px)
+  );
+  clip-path: none;
+}
+
+/* El filo claro del marco: dice exactamente qué se va a guardar. */
+.filo {
+  position: absolute;
+  top: 50%;
+  right: 6%;
+  left: 6%;
+  aspect-ratio: 1 / var(--proporcion);
+  translate: 0 -50%;
+  border-radius: var(--radius-xs);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--n-50) 80%, transparent);
+  pointer-events: none;
+}
+
+.escenario[data-forma='circulo'] .filo {
+  border-radius: var(--radius-full);
+}
+
+/* --- Los controles ----------------------------------------------------------- */
+
+.controles {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: min(100%, 360px);
+  justify-self: center;
+}
+
+.icono {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out),
+    rotate var(--dur-base) var(--ease-out);
+}
+
+.icono:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  /* Sin relleno: el icono crece. */
+  .icono:not(:disabled):hover {
+    color: var(--text);
+    scale: 1.1;
+  }
+
+  .girar:hover {
+    rotate: 30deg;
+  }
+}
+
+.icono:not(:disabled):active {
+  scale: 0.92;
+}
+
+.icono:focus-visible,
+.enlace:focus-visible,
+.deslizador:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.separador {
+  width: 1px;
+  height: var(--space-5);
+  background: var(--border-subtle);
+}
+
+/* La barra de zoom. El tramo recorrido, en tinta; el resto, en el hairline. */
+.deslizador {
+  flex: 1;
+  min-width: 0;
+  height: var(--tap-min);
+  margin: 0;
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.deslizador::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    var(--text) var(--progreso),
+    var(--border-subtle) var(--progreso)
+  );
+}
+
+.deslizador::-moz-range-track {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    var(--text) var(--progreso),
+    var(--border-subtle) var(--progreso)
+  );
+}
+
+.deslizador::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--text);
+  box-shadow: var(--shadow-press);
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+.deslizador::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--text);
+  box-shadow: var(--shadow-press);
+}
+
+.deslizador:active::-webkit-slider-thumb {
+  scale: 1.15;
+}
+
+/* --- Las acciones: «Elegir otra», «Cancelar» y guardar --------------------- */
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* La principal se lleva el resto de la fila. Si le quedan menos de 220 px
+   (un teléfono), baja a la suya y la ocupa entera. */
+.principal {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  font-family: inherit;
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out);
+}
+
+.enlace:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .enlace:not(:disabled):hover {
+    color: var(--text);
+    translate: 0 -1px;
+  }
+}

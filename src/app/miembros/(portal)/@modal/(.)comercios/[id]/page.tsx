@@ -1,5 +1,4 @@
 import FichaComercioPage from '@/app/miembros/(portal)/comercios/[id]/page'
-import { OverlayFicha } from './overlay-ficha'
 
 /*
   LA FICHA, INTERCEPTADA  ·  se abre encima sin abandonar el catálogo
@@ -29,9 +28,6 @@ export default async function FichaInterceptada({
   params: Promise<{ id: string }>
   searchParams: Promise<{ volver?: string | string[] }>
 }) {
-  return (
-    <OverlayFicha>
-      <FichaComercioPage params={params} searchParams={searchParams} enOverlay />
-    </OverlayFicha>
-  )
+  // La ventana la pone `layout.tsx`, que persiste entre la carga y la ficha.
+  return <FichaComercioPage params={params} searchParams={searchParams} enOverlay />
 }

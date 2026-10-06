@@ -53,6 +53,7 @@ export function PieSitio({
   mensajeSoporte = MENSAJE_SOPORTE,
   className,
   compacto = false,
+  instalar = false,
 }: {
   soporte: string | null
   /** Lo que llega escrito en WhatsApp. Cada portal pregunta lo suyo. */
@@ -65,6 +66,12 @@ export function PieSitio({
    * y el soporte ya están en el pie del Inicio y en el menú de la cuenta.
    */
   compacto?: boolean
+  /**
+   * Enseña el icono de «instalar la app» junto al soporte. Solo lo pide el
+   * Portal de Miembros (03/10/2026, encargo del propietario: «únicamente en
+   * miembros por el momento»); la fachada pública no lo ofrece.
+   */
+  instalar?: boolean
 }) {
   if (compacto) {
     return (
@@ -117,10 +124,9 @@ export function PieSitio({
               Soporte por WhatsApp
             </a>
           )}
-          {/* La entrada PERMANENTE a instalar la app (03/10/2026): el aviso
-              flotante del celular se puede cerrar, y esto es lo que queda. Solo
-              se pinta donde instalar es posible y la app no corre ya instalada. */}
-          <EnlaceInstalar className={estilos.soporte} />
+          {/* Instalar la app: solo el icono, al lado del soporte. Solo se
+              pinta donde instalar es posible y la app no corre ya instalada. */}
+          {instalar && <EnlaceInstalar className={estilos.instalar} />}
         </div>
       </div>
 

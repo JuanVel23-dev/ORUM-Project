@@ -3,8 +3,11 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  BarChart3,
   CreditCard,
   KeyRound,
+  Megaphone,
+  ScrollText,
   Search,
   Store,
   UserPlus,
@@ -28,17 +31,64 @@ import styles from './command-palette.module.css'
   membresía pasa de 3 navegaciones a un atajo desde cualquier pantalla.
 */
 
-/** Escucha ⌘K / Ctrl+K en toda la aplicación. */
+/** El evento con el que cualquier pantalla pide abrir la paleta. */
+const EVENTO_ABRIR = 'orum:abrir-paleta'
+
+/**
+ * Abre la paleta desde fuera del shell (un atajo de la portada, por ejemplo).
+ * Un evento y no un contexto: así lo puede llamar un componente de cliente
+ * suelto dentro de una página de servidor, sin envolverla.
+ */
+export function abrirPaleta() {
+  window.dispatchEvent(new Event(EVENTO_ABRIR))
+}
+
+/** ¿El foco está donde se escribe? Ahí «/» es un carácter, no un atajo. */
+function escribiendo(destino: EventTarget | null): boolean {
+  if (!(destino instanceof HTMLElement)) return false
+  return (
+    destino.isContentEditable ||
+    destino instanceof HTMLInputElement ||
+    destino instanceof HTMLTextAreaElement ||
+    destino instanceof HTMLSelectElement
+  )
+}
+
+/**
+ * Los atajos de la paleta, en toda la aplicación:
+ *   · ⌘K / Ctrl+K, desde cualquier sitio (también desde un campo).
+ *   · «/», el atajo de buscar de casi toda herramienta de trabajo, solo
+ *     cuando no se está escribiendo.
+ *   · El evento `abrirPaleta()`.
+ */
 export function useAtajoPaleta(abrir: () => void) {
   useEffect(() => {
     const alPulsar = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         abrir()
+        return
+      }
+      if (
+        e.key === '/' &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.defaultPrevented &&
+        !escribiendo(e.target) &&
+        // Con un diálogo abierto, «/» es suyo (o no es de nadie).
+        !document.querySelector('dialog[open]')
+      ) {
+        e.preventDefault()
+        abrir()
       }
     }
     window.addEventListener('keydown', alPulsar)
-    return () => window.removeEventListener('keydown', alPulsar)
+    window.addEventListener(EVENTO_ABRIR, abrir)
+    return () => {
+      window.removeEventListener('keydown', alPulsar)
+      window.removeEventListener(EVENTO_ABRIR, abrir)
+    }
   }, [abrir])
 }
 
@@ -75,6 +125,21 @@ const ACCIONES: Accion[] = [
     soloSuperAdmin: true,
   },
   {
+    id: 'metricas',
+    label: 'Ver métricas',
+    icon: BarChart3,
+    href: '/admin/metricas',
+    soloSuperAdmin: true,
+  },
+  {
+    id: 'bitacora',
+    label: 'Ver bitácora',
+    hint: 'Quién hizo qué',
+    icon: ScrollText,
+    href: '/admin/bitacora',
+    soloSuperAdmin: true,
+  },
+  {
     id: 'planes',
     label: 'Ver planes de membresía',
     icon: CreditCard,
@@ -82,10 +147,38 @@ const ACCIONES: Accion[] = [
     soloSuperAdmin: true,
   },
   {
+    id: 'nuevo-plan',
+    label: 'Nuevo plan de membresía',
+    icon: CreditCard,
+    href: '/admin/planes/nuevo',
+    soloSuperAdmin: true,
+  },
+  {
     id: 'usuarios',
     label: 'Ver usuarios',
     icon: UserCog,
     href: '/admin/usuarios',
+    soloSuperAdmin: true,
+  },
+  {
+    id: 'nuevo-usuario',
+    label: 'Nuevo usuario del panel',
+    icon: UserCog,
+    href: '/admin/usuarios/nuevo',
+    soloSuperAdmin: true,
+  },
+  {
+    id: 'novedades',
+    label: 'Ver novedades',
+    icon: Megaphone,
+    href: '/admin/anuncios',
+    soloSuperAdmin: true,
+  },
+  {
+    id: 'nueva-novedad',
+    label: 'Publicar una novedad',
+    icon: Megaphone,
+    href: '/admin/anuncios/nuevo',
     soloSuperAdmin: true,
   },
   {
@@ -228,6 +321,9 @@ export function CommandPalette({
       ref={dialogRef}
       className={styles.dialog}
       onCancel={(e) => {
+        // Solo el suyo: en React burbujea el `cancel` de lo que haya dentro
+        // (ver `modal.tsx`).
+        if (e.target !== e.currentTarget) return
         e.preventDefault()
         onClose()
       }}

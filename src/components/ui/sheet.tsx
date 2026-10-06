@@ -316,7 +316,11 @@ export function Sheet({
     })
   }
 
+  // Solo el `cancel` de ESTA hoja: en React burbujea el de un selector de
+  // archivos cancelado o el de un diálogo anidado (ver `modal.tsx`), y antes
+  // cerraba la hoja entera.
   const alCancelar = (e: React.SyntheticEvent<HTMLDialogElement>) => {
+    if (e.target !== e.currentTarget) return
     e.preventDefault()
     onClose()
   }

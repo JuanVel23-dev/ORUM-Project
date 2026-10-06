@@ -20,7 +20,10 @@
 .progreso {
   height: 100%;
   width: 100%;
-  background: var(--gold-sheen);
+  /* Corre sobre la cabecera NEGRA del panel (rediseño del 04/10/2026): el oro
+     de la franja, brillante en los dos temas. El barrido `--gold-sheen` se
+     remapea en claro a la mitad oscura de la rampa y apenas se veía. */
+  background: var(--cacao-brand);
 
   /*
     Se escala, no se ensancha: animar `width` recalcula el layout en cada

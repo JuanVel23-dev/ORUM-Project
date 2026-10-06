@@ -1,0 +1,295 @@
+/* ==========================================================================
+   MI NEGOCIO  ·  la ventana del logotipo y las fotos
+   --------------------------------------------------------------------------
+   La ventana ES la tarjeta (`Modal desnudo`), como las demás de este portal.
+   Blanca, sin trazo, con el radio de los paneles de la fachada. Se adapta al
+   ancho de la propia ventana (`@container negocio`).
+   ========================================================================== */
+
+.ventana {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  /* Si no cabe, desplaza por dentro y la página de detrás se queda quieta. */
+  max-height: calc(100dvh - var(--space-6));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-overlay), var(--edge);
+  color: var(--text);
+
+  container-type: inline-size;
+  container-name: negocio;
+
+  --pad: var(--space-5);
+}
+
+@container negocio (min-width: 520px) {
+  .cabeza,
+  .cuerpo {
+    --pad: var(--space-7);
+  }
+}
+
+/* --- La cabeza: título y cerrar ---------------------------------------------- */
+
+.cabeza {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3) 0 var(--pad);
+}
+
+.titulo {
+  flex: 1;
+  min-width: 0;
+}
+
+.cerrar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    rotate var(--dur-base) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.cerrar:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  /* Sin relleno: la X gira un cuarto de vuelta. */
+  .cerrar:not(:disabled):hover {
+    color: var(--text);
+    rotate: 90deg;
+  }
+}
+
+.cerrar:focus-visible,
+.tejaBoton:focus-visible,
+.hueco:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --- El cuerpo --------------------------------------------------------------- */
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--pad) var(--pad);
+}
+
+.bajada {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.bloque {
+  display: grid;
+  gap: var(--space-3);
+}
+
+/* Un hairline entre el logotipo y las fotos: una división DENTRO de la tarjeta. */
+.bloque + .bloque {
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.subtitulo {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.filaTitulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.recuento {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--brand);
+}
+
+.nota {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+/* --- El logotipo ------------------------------------------------------------- */
+
+.filaLogo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* `.filaLogo .logo` (0,2,0): le gana a `.placa`, que vive en otro módulo. */
+.filaLogo .logo {
+  --placa-logo-w: 88px;
+  box-shadow: var(--shadow-card);
+}
+
+.logoTextos {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* --- Las fotos --------------------------------------------------------------- */
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Una foto subida: 16:9, como sale en la ficha. Sin sombra: es una celda de
+   una rejilla, no una tarjeta que se levanta. */
+.teja {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hueco);
+}
+
+.tejaFoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* «Portada»: texto sobre un negro casi opaco, legible encima de cualquier foto. */
+.insignia {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--cacao-900) 82%, transparent);
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  color: var(--blanco);
+}
+
+.tejaAcciones {
+  position: absolute;
+  right: var(--space-1);
+  bottom: var(--space-1);
+  display: flex;
+  gap: var(--space-1);
+}
+
+/* Se ven de 32 px y se tocan de 44: el área crece con un `::after`. Fondo
+   negro casi opaco (sin `backdrop-filter`: es una rejilla). */
+.tejaBoton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--cacao-900) 82%, transparent);
+  color: var(--blanco);
+  cursor: pointer;
+  transition:
+    scale var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.tejaBoton::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  translate: -50% -50%;
+}
+
+.tejaBoton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .tejaBoton:not(:disabled):hover {
+    scale: 1.1;
+  }
+}
+
+.tejaBoton:not(:disabled):active {
+  scale: 0.92;
+}
+
+/* El hueco para añadir: un control, así que conserva su filo en reposo. */
+.hueco {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: var(--space-2);
+  border: 1px dashed var(--border-control);
+  border-radius: var(--radius-sm);
+  background: none;
+  font-family: inherit;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--brand);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.hueco:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .hueco:not(:disabled):hover {
+    border-color: var(--brand-edge);
+  }
+}
+
+.hueco:not(:disabled):active {
+  opacity: 0.6;
+}

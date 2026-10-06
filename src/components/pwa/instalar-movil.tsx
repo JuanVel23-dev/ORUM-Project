@@ -1,15 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, X } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { useMediaQuery } from '@/components/use-media-query'
-import { usePreferenciaLocal } from '@/components/use-preferencia-local'
 import { lanzarInstalacion } from './instalable'
 import { GuiaInstalacionAndroid, GuiaInstalacionIOS, useInstalacion } from './instalar-app'
 import estilos from './instalar-movil.module.css'
 
 /*
-  INSTALAR ORUM COMO APLICACIÓN  ·  fachada pública y portal de miembros
+  INSTALAR ORUM COMO APLICACIÓN  ·  portal de miembros y portal de comercios
   ---------------------------------------------------------------------------
   Encargo del propietario (03/10/2026): «que se pueda descargar y ver como
   una aplicación en el celular; un botón de descarga que detecte cuando está
@@ -18,13 +17,15 @@ import estilos from './instalar-movil.module.css'
   La base ya existía —manifiesto (`app/manifest.ts`, que abre en `/miembros`
   a pantalla completa), iconos y service worker— pero la invitación a
   instalar solo vivía en el panel de administración. Aquí están las dos
-  entradas de los portales del cliente:
+  entradas de los portales del cliente.
 
-    · `AvisoInstalar`  — una tarjeta flotante abajo, SOLO EN CELULARES, que
-      se puede cerrar y recuerda la decisión. Deja libre la esquina del
-      botón de WhatsApp.
-    · `EnlaceInstalar` — la entrada permanente, en el pie: quien cerró el
-      aviso tiene que poder encontrar cómo instalarla después.
+  Desde el 04/10/2026 también las monta el Portal de Comercios. Este
+  componente no cambia: QUÉ aplicación se instala lo decide el manifiesto que
+  enlaza la página, y `/comercios` enlaza el suyo (abre en `/comercios`):
+
+    · `AvisoInstalar`  — un botón redondo con el icono de descarga, encima
+      del de WhatsApp, SOLO EN CELULARES.
+    · `EnlaceInstalar` — la entrada del pie, también en computador.
 
   NO HAY UN SOLO «BOTÓN DE DESCARGA» POSIBLE, porque cada sistema instala a
   su manera (`modoInstalacion`):
@@ -62,49 +63,42 @@ function useAccionInstalar() {
 }
 
 /**
- * La tarjeta flotante. Solo en celulares (`pointer: coarse` y pantalla
- * estrecha): en un computador la app instalada no aporta lo mismo, y la
- * entrada del pie sigue ahí para quien la quiera.
+ * El botón flotante: un círculo con el icono de descarga, ENCIMA del de
+ * WhatsApp (encargo del 03/10/2026: «un icono de descarga encima de
+ * WhatsApp y ya» — la tarjeta con texto que hubo antes sobraba).
+ *
+ * Solo en celulares (`pointer: coarse` y pantalla estrecha): en un
+ * computador la entrada del pie sigue ahí para quien la quiera. Y solo donde
+ * instalar es posible: con la app ya instalada, desaparece.
  */
 export function AvisoInstalar() {
   const { modo, instalar, guias } = useAccionInstalar()
   const enCelular = useMediaQuery('(pointer: coarse) and (max-width: 900px)')
-  const [descartado, setDescartado] = usePreferenciaLocal('orum-instalar-descartado')
 
   if (!modo) return null
 
   return (
     <>
-      {enCelular && !descartado && (
-        <aside className={estilos.aviso} aria-label="Instalar la aplicación de ORUM">
-          <span className={estilos.textos}>
-            <span className={estilos.titulo}>Instala ORUM</span>
-            <span className={estilos.detalle}>Como una app</span>
-          </span>
-
-          <button type="button" className={estilos.instalar} onClick={instalar}>
-            <Download size={14} aria-hidden="true" />
-            {/* «Instalar» siempre: donde no hay diálogo nativo abre la guía,
-                que es el camino para instalarla igual. */}
-            Instalar
-          </button>
-
-          <button
-            type="button"
-            className={estilos.cerrar}
-            onClick={() => setDescartado(true)}
-            aria-label="No mostrar más"
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
-        </aside>
+      {enCelular && (
+        <button
+          type="button"
+          className={estilos.flotante}
+          onClick={instalar}
+          aria-label="Instalar la aplicación de ORUM"
+        >
+          <Download size={24} aria-hidden="true" />
+        </button>
       )}
       {guias}
     </>
   )
 }
 
-/** La entrada permanente del pie, con el aspecto del enlace que le pasen. */
+/**
+ * La entrada del pie: SOLO EL ICONO de descarga, al lado de «Soporte por
+ * WhatsApp» (03/10/2026: la fila con texto «Instalar la app» no gustó). El
+ * nombre lo dice `aria-label`, y `title` lo enseña al apuntar con ratón.
+ */
 export function EnlaceInstalar({ className }: { className?: string }) {
   const { modo, instalar, guias } = useAccionInstalar()
 
@@ -112,9 +106,14 @@ export function EnlaceInstalar({ className }: { className?: string }) {
 
   return (
     <>
-      <button type="button" className={[estilos.enlace, className].filter(Boolean).join(' ')} onClick={instalar}>
-        <Download size={16} aria-hidden="true" />
-        Instalar la app
+      <button
+        type="button"
+        className={[estilos.enlace, className].filter(Boolean).join(' ')}
+        onClick={instalar}
+        aria-label="Instalar la app"
+        title="Instalar la app"
+      >
+        <Download size={18} aria-hidden="true" />
       </button>
       {guias}
     </>

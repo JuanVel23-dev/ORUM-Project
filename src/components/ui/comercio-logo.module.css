@@ -30,7 +30,19 @@
    el eje horizontal tiene el diámetro completo disponible— pero ya lejos del
    recorte.
 
-   El fondo y el filo NO SIGUEN EL TEMA (ver `tokens.css` §11). Es el mismo
+   ⚠️ 03/10/2026 — SIN FILO Y SIN RELLENO (encargo del propietario: «no quiero
+   que tenga ese borde circular; quiero que se ajusten bien los logos»). El
+   logotipo ocupa el círculo ENTERO: se retiraron el aro gris interior y el
+   relleno que lo dejaba al 78 % del diámetro, y el fondo pasa a blanco puro
+   (casi todos los logos traen su propio fondo blanco, y sobre la placa crema
+   se veía un cuadro dentro de un círculo). `contain` SE QUEDA: un logotipo
+   cuadrado llena el círculo —que le redondea las esquinas, como una foto de
+   perfil—, y uno apaisado se sigue viendo entero, con aire arriba y abajo.
+   Lo que se acepta a cambio: a un logotipo apaisado cuyo dibujo llegue a los
+   bordes, el círculo le roza las esquinas. Los párrafos de abajo sobre el
+   cuadrado inscrito y el filo cuentan cómo era antes.
+
+   El fondo NO SIGUE EL TEMA (ver `tokens.css` §11). Es el mismo
    caso de `QrCode`: el activo no es nuestro y asume fondo claro. Un PNG
    transparente con logotipo oscuro desaparecía sobre la placa oscura.
    ========================================================================== */
@@ -39,7 +51,7 @@
   /* Relleno interior. Local, no token del sistema: es la geometría de esta
      pieza, igual que el diámetro. En 4pt, que es la única regla que la escala
      tiene. 8px sobre 72 deja el contenido en 56px = 78 % del diámetro. */
-  --placa-pad: var(--space-2);
+  --placa-pad: 0;
 
   flex-shrink: 0; /* Un círculo de 68px junto a otro de 72px destroza la
                      rejilla antes que cualquier logo feo. */
@@ -56,7 +68,7 @@
      variante ajuste: a `--radius-full` las tres escalas son la misma forma, y
      por eso las variantes de abajo ya no tocan el radio. */
   border-radius: var(--radius-full);
-  background: var(--placa-logo-bg);
+  background: var(--blanco);
 
   /*
     El filo va como sombra interior y no como `border` a propósito: un borde
@@ -66,7 +78,7 @@
     En tema claro esto es lo ÚNICO que dibuja la placa: su cuerpo blanco da
     1,00:1 contra la tarjeta.
   */
-  box-shadow: inset 0 0 0 1px var(--placa-logo-borde);
+  box-shadow: 0 0 rgba(0, 0, 0, 0); /* 03/10/2026: sin filo. Ver la cabecera. */
 
   /*
     `line-height: 1` y NO un `calc` derivado de la proporción.
@@ -121,6 +133,13 @@
   —`--placa-logo-inicial`, 4,71:1 sobre la placa—, así que subir el
   tamaño solo puede mejorar su legibilidad, nunca empeorarla.
 */
+/* Sin logotipo no hay imagen que dibuje el círculo, y sin filo la letra
+   flotaría sola: la placa se tiñe con el relleno claro. `--w-100` crudo y
+   no `--surface-alt-2`: la placa no sigue al tema, y la inicial tampoco. */
+.sinLogo {
+  background: var(--w-100);
+}
+
 .inicial {
   font-weight: 620;
   font-size: calc(var(--placa-logo-w) * 0.32);
@@ -148,7 +167,6 @@
    ========================================================================== */
 
 .hero {
-  --placa-pad: var(--space-4);
   --placa-logo-w: 144px;
 }
 
@@ -182,6 +200,5 @@
    ========================================================================== */
 
 .portada {
-  --placa-pad: var(--space-6);
   --placa-logo-w: min(50cqi, 176px);
 }

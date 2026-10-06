@@ -51,7 +51,15 @@ export function RecuperarComercioForm() {
 
       <Turnstile />
 
-      <Button type="submit" size="lg" fullWidth loading={pending} icon={<Mail size={17} />}>
+      <Button
+        type="submit"
+        variant="brand"
+        size="lg"
+        pildora
+        fullWidth
+        loading={pending}
+        icon={<Mail size={17} />}
+      >
         Enviar enlace
       </Button>
 

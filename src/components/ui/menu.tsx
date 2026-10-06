@@ -56,10 +56,21 @@ type DropdownMenuProps = {
   trigger: ReactElement<Record<string, unknown>>
   /** Alineación horizontal respecto al disparador. */
   align?: 'start' | 'end'
+  /**
+   * El menú mide, como mínimo, lo que su disparador. Para cuando el
+   * disparador es un CAMPO (`SelectMenu`): una lista más estrecha que el
+   * campo del que cuelga se lee como un menú suelto, no como su desplegable.
+   */
+  igualarAncho?: boolean
   children: ReactNode
 }
 
-export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuProps) {
+export function DropdownMenu({
+  trigger,
+  align = 'end',
+  igualarAncho = false,
+  children,
+}: DropdownMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
   const disparadorRef = useRef<HTMLSpanElement>(null)
   const id = useId()
@@ -71,6 +82,8 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
     if (!menu || !ancla) return
 
     const r = ancla.getBoundingClientRect()
+    // Antes de medir: el ancho mínimo cambia el `offsetWidth` de abajo.
+    if (igualarAncho) menu.style.minWidth = `${r.width}px`
     const { offsetWidth: ancho, offsetHeight: alto } = menu
     const vw = window.innerWidth
     const vh = window.innerHeight
@@ -94,7 +107,7 @@ export function DropdownMenu({ trigger, align = 'end', children }: DropdownMenuP
     const origenX = align === 'end' ? `${r.right - left}px` : `${r.left - left}px`
     menu.style.transformOrigin = `${origenX} ${arriba ? 'bottom' : 'top'}`
     menu.style.setProperty('--desplazamiento-entrada', arriba ? '4px' : '-4px')
-  }, [align])
+  }, [align, igualarAncho])
 
   /*
     EL MENÚ SIGUE A SU BOTÓN (bug del 30/09/2026: «cuando las activo y me
