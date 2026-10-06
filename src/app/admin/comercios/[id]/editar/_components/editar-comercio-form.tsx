@@ -19,7 +19,6 @@ type ComercioInicial = {
   perfil_id: string | null
   nombre: string
   descripcion: string | null
-  marca_id: number | null
   categoria_id: number | null
   indexable: boolean
   /** Correo real de Auth, o cadena vacía si no tiene cuenta. */
@@ -30,11 +29,9 @@ const estadoInicial: EditarComercioState = {}
 
 export function EditarComercioForm({
   comercio,
-  marcas,
   categorias,
 }: {
   comercio: ComercioInicial
-  marcas: Opcion[]
   categorias: Opcion[]
 }) {
   const [state, formAction, pending] = useActionState(editarComercio, estadoInicial)
@@ -71,29 +68,16 @@ export function EditarComercioForm({
             <Input name="descripcion" defaultValue={comercio.descripcion ?? ''} />
           </Field>
 
-          <div className={styles.pareja}>
-            <Field label="Marca" optional>
-              <Select name="marca_id" defaultValue={comercio.marca_id ?? ''}>
-                <option value="">Sin marca</option>
-                {marcas.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.nombre}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-
-            <Field label="Categoría" optional>
-              <Select name="categoria_id" defaultValue={comercio.categoria_id ?? ''}>
-                <option value="">Sin categoría</option>
-                {categorias.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
+          <Field label="Categoría" optional>
+            <Select name="categoria_id" defaultValue={comercio.categoria_id ?? ''}>
+              <option value="">Sin categoría</option>
+              {categorias.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nombre}
+                </option>
+              ))}
+            </Select>
+          </Field>
 
           <Switch
             name="indexable"

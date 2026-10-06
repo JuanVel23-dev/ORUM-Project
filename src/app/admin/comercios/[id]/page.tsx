@@ -45,7 +45,7 @@ export default async function FichaComercioPage({
   const admin = createAdminClient()
   const { data: comercio } = await admin
     .from('comercios')
-    .select('id, perfil_id, nombre, descripcion, marca_id, categoria_id, logo_url, activo')
+    .select('id, perfil_id, nombre, descripcion, categoria_id, logo_url, activo')
     .eq('id', comercioId)
     .is('deleted_at', null)
     .maybeSingle()
@@ -53,15 +53,11 @@ export default async function FichaComercioPage({
   if (!comercio) notFound()
 
   const [
-    { data: marca },
     { data: categoria },
     { data: sucursales },
     { data: promociones },
     { data: tipos },
   ] = await Promise.all([
-    comercio.marca_id
-      ? admin.from('marcas').select('nombre').eq('id', comercio.marca_id).maybeSingle()
-      : Promise.resolve({ data: null }),
     comercio.categoria_id
       ? admin
           .from('categorias')
@@ -182,7 +178,6 @@ export default async function FichaComercioPage({
         <Card padding="lg">
           <div className={styles.datos}>
             <Dato etiqueta="Correo" valor={correo} />
-            <Dato etiqueta="Marca" valor={marca?.nombre ?? null} />
             <Dato etiqueta="Categoría" valor={categoria?.nombre ?? null} />
           </div>
         </Card>

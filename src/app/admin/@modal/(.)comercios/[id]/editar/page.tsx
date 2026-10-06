@@ -13,14 +13,13 @@ export default async function EditarComercioInterceptado({
   const { id } = await params
 
   const admin = createAdminClient()
-  const [{ data: comercio }, { data: marcas }, { data: categorias }] = await Promise.all([
+  const [{ data: comercio }, { data: categorias }] = await Promise.all([
     admin
       .from('comercios')
-      .select('id, perfil_id, nombre, descripcion, marca_id, categoria_id, logo_url, indexable')
+      .select('id, perfil_id, nombre, descripcion, categoria_id, logo_url, indexable')
       .eq('id', Number(id))
       .is('deleted_at', null)
       .maybeSingle(),
-    admin.from('marcas').select('id, nombre').order('nombre'),
     admin.from('categorias').select('id, nombre').order('nombre'),
   ])
 
@@ -36,7 +35,6 @@ export default async function EditarComercioInterceptado({
     <OverlayRuta title="Editar comercio" description={comercio.nombre} width="640px">
       <EditarComercioForm
         comercio={{ ...comercio, correo }}
-        marcas={marcas ?? []}
         categorias={categorias ?? []}
       />
     </OverlayRuta>

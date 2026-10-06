@@ -21,7 +21,7 @@ const estadoInicial: CrearComercioState = {}
  * El estado vive en `FormularioComercio`; esta capa solo lo remonta (vía `key`)
  * al pulsar «Crear otro», para volver a un formulario limpio sin navegar.
  */
-export function ComercioForm(props: { marcas: Opcion[]; categorias: Opcion[] }) {
+export function ComercioForm(props: { categorias: Opcion[] }) {
   const [instancia, setInstancia] = useState(0)
   return (
     <FormularioComercio
@@ -33,11 +33,9 @@ export function ComercioForm(props: { marcas: Opcion[]; categorias: Opcion[] }) 
 }
 
 function FormularioComercio({
-  marcas,
   categorias,
   onCrearOtro,
 }: {
-  marcas: Opcion[]
   categorias: Opcion[]
   onCrearOtro: () => void
 }) {
@@ -69,29 +67,16 @@ function FormularioComercio({
             <Input name="descripcion" />
           </Field>
 
-          <div className={styles.pareja}>
-            <Field label="Marca" optional>
-              <Select name="marca_id" defaultValue="">
-                <option value="">Sin marca</option>
-                {marcas.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.nombre}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-
-            <Field label="Categoría" optional>
-              <Select name="categoria_id" defaultValue="">
-                <option value="">Sin categoría</option>
-                {categorias.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
+          <Field label="Categoría" optional>
+            <Select name="categoria_id" defaultValue="">
+              <option value="">Sin categoría</option>
+              {categorias.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nombre}
+                </option>
+              ))}
+            </Select>
+          </Field>
 
           <Switch
             name="indexable"
