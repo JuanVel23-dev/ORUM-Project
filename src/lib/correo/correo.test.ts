@@ -38,7 +38,8 @@ describe('construirCorreoInvitacion', () => {
       ...base,
       nombre: 'Juan <img src=x onerror=alert(1)>',
     })
-    expect(correo.html).not.toContain('<img')
+    // El logo de la cabecera sí es un <img>; lo que no puede existir es el inyectado.
+    expect(correo.html).not.toContain('<img src=x')
     expect(correo.html).toContain('&lt;img')
     expect(correo.texto).toContain('Juan <img src=x onerror=alert(1)>')
   })
