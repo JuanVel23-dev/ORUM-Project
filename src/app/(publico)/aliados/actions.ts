@@ -9,6 +9,8 @@ import {
   type EntradaSolicitudAliado,
   type SolicitudAliadoState,
 } from '@/lib/aliados/solicitud-aliado'
+import { cupoDeSolicitudAliado, ipDelCliente } from '@/lib/auth/limitador'
+import { ERROR_TURNSTILE, verificarTurnstileDeFormulario } from '@/lib/auth/turnstile-request'
 import { enviarCorreoSolicitudAliado } from '@/lib/correo/correo'
 
 function leer(formData: FormData, campo: CampoSolicitud): string {
@@ -92,6 +94,34 @@ export async function enviarSolicitudAliado(
     return {
       error:
         'Debes aceptar los Términos y condiciones y la Política de privacidad para enviar la solicitud.',
+      valores,
+      aceptaTerminos,
+    }
+  }
+
+  /*
+    Turnstile va DESPUÉS de las validaciones, no antes: un token solo se puede
+    comprobar una vez, y un formulario mal rellenado no debería gastarlo. Y va
+    ANTES del tope: sin token no se llega a consumir cupo, así que un robot no
+    puede agotar el techo diario de solicitudes sin resolver el desafío.
+    El widget pide token nuevo tras cada respuesta (ver `reiniciarAl`).
+  */
+  const captcha = await verificarTurnstileDeFormulario(formData)
+  if (!captcha.valido) {
+    return { error: ERROR_TURNSTILE, valores, aceptaTerminos }
+  }
+
+  /*
+    El tope va DESPUÉS de las validaciones: un formulario mal rellenado no gasta
+    cupo, solo el que de verdad va a enviar un correo. Y el rechazo es visible
+    (no un «ok» falso): quien llega aquí pasó el campo trampa y el tiempo mínimo,
+    puede ser una persona, y perder su solicitud en silencio es justo lo que este
+    formulario no se permite.
+  */
+  if (!(await cupoDeSolicitudAliado(await ipDelCliente()))) {
+    return {
+      error:
+        'Hemos recibido varias solicitudes seguidas. Inténtalo de nuevo más tarde o escríbenos por WhatsApp.',
       valores,
       aceptaTerminos,
     }

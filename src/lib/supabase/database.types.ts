@@ -583,6 +583,16 @@ export type Database = {
           ultimo_uso: Timestamp
         }[]
       }
+      /** Límite de uso: suma 1 al contador de la clave y dice si queda cupo. Solo `service_role`. */
+      consumir_cupo: {
+        Args: { p_clave: string; p_tope: number; p_ventana_segundos: number }
+        Returns: boolean
+      }
+      /** Borra el contador de una clave (el login lo usa al acertar). Solo `service_role`. */
+      reiniciar_cupo: {
+        Args: { p_clave: string }
+        Returns: undefined
+      }
     }
     Enums: {
       tipo_membresia: 'nueva' | 'renovada'

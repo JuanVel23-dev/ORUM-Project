@@ -67,7 +67,7 @@ export function LoginMiembroForm({ mensajeInicial }: { mensajeInicial?: string }
         ¿Olvidaste tu contraseña?
       </Link>
 
-      <Turnstile />
+      <Turnstile reiniciarAl={state} />
 
       {/* Relleno dorado PLANO (`brand`), nunca el barrido (`gold`): ver la
           nota del acceso de administración. */}
