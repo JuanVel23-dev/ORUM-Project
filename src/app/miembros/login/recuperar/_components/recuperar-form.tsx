@@ -53,7 +53,7 @@ export function RecuperarMiembroForm() {
         />
       </Field>
 
-      <Turnstile />
+      <Turnstile reiniciarAl={state} />
 
       {/* Dorado y en píldora, como el de iniciar sesión: las dos pantallas
           del socio comparten puerta (`PantallaAccesoSocio`). */}

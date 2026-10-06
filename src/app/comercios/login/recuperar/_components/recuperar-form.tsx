@@ -49,7 +49,7 @@ export function RecuperarComercioForm() {
         />
       </Field>
 
-      <Turnstile />
+      <Turnstile reiniciarAl={state} />
 
       <Button
         type="submit"

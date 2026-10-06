@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getPerfilActual } from '@/lib/auth/auth'
+import { cupoDeLogin, ERROR_LIMITE_LOGIN, reiniciarLogin } from '@/lib/auth/limitador'
 import { ERROR_TURNSTILE, verificarTurnstileDeFormulario } from '@/lib/auth/turnstile-request'
 
 export type LoginState = { error?: string }
@@ -30,12 +31,17 @@ export async function iniciarSesion(
     return { error: ERROR_TURNSTILE }
   }
 
+  if (!(await cupoDeLogin(email))) {
+    return { error: ERROR_LIMITE_LOGIN }
+  }
+
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) {
     return { error: 'Correo o contraseña incorrectos.' }
   }
+  await reiniciarLogin(email)
 
   // Validar que tenga un perfil activo con rol permitido para este portal.
   const perfil = await getPerfilActual()

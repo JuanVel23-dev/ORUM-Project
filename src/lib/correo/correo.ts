@@ -1,6 +1,12 @@
 import nodemailer from 'nodemailer'
 import type { Transporter } from 'nodemailer'
 import { escaparHtml } from '../shared/html'
+import {
+  envolverCorreo,
+  escaparConSaltos,
+  parrafo,
+  parrafoSecundario,
+} from './plantilla'
 
 export type InputCorreoInvitacion = {
   nombre: string
@@ -19,13 +25,17 @@ export function construirCorreoInvitacion(input: InputCorreoInvitacion): CuerpoC
   const correo = escaparHtml(input.correo)
   const asunto = 'Bienvenido a ORUM — activa tu cuenta'
 
-  const html = `
-    <p>Hola ${nombre},</p>
-    <p>Se creó tu cuenta en ORUM (${correo}). Activa el acceso y elige tu propia
-    contraseña con este enlace de un solo uso:</p>
-    <p><a href="${escaparHtml(input.urlInvitacion)}">Activar mi cuenta</a></p>
-    <p>Si no esperabas este correo, puedes ignorarlo.</p>
-  `.trim()
+  const html = envolverCorreo({
+    titulo: 'Bienvenido a ORUM',
+    preheader: 'Activa tu cuenta y elige tu contraseña.',
+    cuerpoHtml:
+      parrafo(`Hola ${nombre},`) +
+      parrafo(
+        `Se creó tu cuenta en ORUM (${correo}). Activa el acceso y elige tu propia contraseña con este enlace de un solo uso:`,
+      ),
+    boton: { texto: 'Activar mi cuenta', url: input.urlInvitacion },
+    cierreHtml: parrafoSecundario('Si no esperabas este correo, puedes ignorarlo.'),
+  })
 
   const texto = [
     `Hola ${input.nombre},`,
@@ -46,13 +56,19 @@ export type InputCorreoRecuperacion = { urlRecuperacion: string }
 export function construirCorreoRecuperacion(input: InputCorreoRecuperacion): CuerpoCorreo {
   const asunto = 'Restablece tu contraseña en ORUM'
 
-  const html = `
-    <p>Hola,</p>
-    <p>Recibimos una solicitud para restablecer tu contraseña en ORUM. Elige una
-    nueva con este enlace de un solo uso:</p>
-    <p><a href="${escaparHtml(input.urlRecuperacion)}">Restablecer mi contraseña</a></p>
-    <p>Si no fuiste tú, puedes ignorarlo: tu contraseña actual sigue funcionando.</p>
-  `.trim()
+  const html = envolverCorreo({
+    titulo: 'Restablece tu contraseña',
+    preheader: 'Elige una contraseña nueva con un enlace de un solo uso.',
+    cuerpoHtml:
+      parrafo('Hola,') +
+      parrafo(
+        'Recibimos una solicitud para restablecer tu contraseña en ORUM. Elige una nueva con este enlace de un solo uso:',
+      ),
+    boton: { texto: 'Restablecer mi contraseña', url: input.urlRecuperacion },
+    cierreHtml: parrafoSecundario(
+      'Si no fuiste tú, puedes ignorarlo: tu contraseña actual sigue funcionando.',
+    ),
+  })
 
   const texto = [
     'Hola,',
@@ -213,19 +229,27 @@ export function construirCorreoSolicitudAliado(
 
   const filas = filasSolicitud(input)
 
+  /* Dos columnas: etiqueta fija a la izquierda, valor a la derecha, con una
+     línea fina entre filas para que un dato largo no se confunda con el
+     siguiente. `vertical-align:top` mantiene la etiqueta junto a la primera
+     línea cuando el valor se parte en varias. */
   const filasHtml = filas
     .map(
       ([etiqueta, valor]) =>
-        `<tr><td><strong>${escaparHtml(etiqueta)}</strong></td><td>${escaparHtml(valor)}</td></tr>`,
+        `<tr><td valign="top" style="padding:8px 16px 8px 0;border-bottom:1px solid #F5EFDF;font-family:Montserrat, Arial, Helvetica, sans-serif;font-size:13px;line-height:20px;font-weight:700;color:#5A5044;white-space:nowrap;">${escaparHtml(etiqueta)}</td><td valign="top" style="padding:8px 0;border-bottom:1px solid #F5EFDF;font-family:Montserrat, Arial, Helvetica, sans-serif;font-size:14px;line-height:20px;color:#201B15;word-break:break-word;">${escaparHtml(valor)}</td></tr>`,
     )
     .join('')
 
-  const html = `
-    <p>Llegó una postulación desde la página pública de ORUM.</p>
-    <table>${filasHtml}</table>
-    <p><strong>Qué ofrece</strong><br>${escaparHtml(input.descripcion)}</p>
-    <p>Responde a este correo para escribirle directamente a quien postuló.</p>
-  `.trim()
+  const html = envolverCorreo({
+    titulo: 'Nueva solicitud de comercio aliado',
+    preheader: `${input.nombreComercio} quiere sumarse a ORUM.`,
+    cuerpoHtml:
+      parrafo('Llegó una postulación desde la página pública de ORUM.') +
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">${filasHtml}</table>` +
+      parrafo(`<strong>Qué ofrece</strong><br>${escaparConSaltos(input.descripcion)}`) +
+      parrafoSecundario('Responde a este correo para escribirle directamente a quien postuló.'),
+    pieHtml: 'Correo interno de ORUM, generado por el formulario «Quiero ser aliado».',
+  })
 
   const texto = [
     'Llegó una postulación desde la página pública de ORUM.',

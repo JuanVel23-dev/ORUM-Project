@@ -19,18 +19,24 @@ export type CrearComercioState = {
   email?: string
 }
 
-/** Lee y valida los campos comunes de un comercio desde el formulario. */
+/**
+ * Lee y valida los campos comunes de un comercio desde el formulario.
+ *
+ * `marca_id` NO se lee ni se escribe: el selector de marca se retiró del
+ * formulario (era confuso para el admin y `marcas` no tiene pantalla propia).
+ * Las columnas y los datos siguen en la base. Por eso `editarComercio` tampoco
+ * lo incluye en su `update`: mandarlo vacío borraría la marca de los comercios
+ * que ya la tienen.
+ */
 function leerCamposComercio(formData: FormData) {
   const nombre = String(formData.get('nombre') ?? '').trim()
   const descripcion = String(formData.get('descripcion') ?? '').trim() || null
-  const marcaRaw = String(formData.get('marca_id') ?? '').trim()
   const categoriaRaw = String(formData.get('categoria_id') ?? '').trim()
   // Un interruptor apagado no envía nada: la ausencia ES el `false`.
   const indexable = formData.get('indexable') === 'on'
   return {
     nombre,
     descripcion,
-    marca_id: marcaRaw ? Number(marcaRaw) : null,
     categoria_id: categoriaRaw ? Number(categoriaRaw) : null,
     indexable,
   }
@@ -88,7 +94,6 @@ export async function crearComercio(
     perfil_id: userId,
     nombre: campos.nombre,
     descripcion: campos.descripcion,
-    marca_id: campos.marca_id,
     categoria_id: campos.categoria_id,
     indexable: campos.indexable,
     activo: true,
@@ -116,7 +121,7 @@ export async function crearComercio(
 export type EditarComercioState = { error?: string; ok?: boolean }
 
 /**
- * Edita nombre, descripción, marca, categoría, indexable y (si cambió) el correo.
+ * Edita nombre, descripción, categoría, indexable y (si cambió) el correo.
  * El logo ya no se toca aquí: se sube como archivo desde la pestaña de imágenes.
  */
 export async function editarComercio(
@@ -139,7 +144,6 @@ export async function editarComercio(
     .update({
       nombre: campos.nombre,
       descripcion: campos.descripcion,
-      marca_id: campos.marca_id,
       categoria_id: campos.categoria_id,
       indexable: campos.indexable,
     })

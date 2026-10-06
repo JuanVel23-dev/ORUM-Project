@@ -13,14 +13,13 @@ export default async function EditarComercioPage({ params }: { params: Promise<{
   const comercioId = Number(id)
 
   const admin = createAdminClient()
-  const [{ data: comercio }, { data: marcas }, { data: categorias }] = await Promise.all([
+  const [{ data: comercio }, { data: categorias }] = await Promise.all([
     admin
       .from('comercios')
-      .select('id, perfil_id, nombre, descripcion, marca_id, categoria_id, indexable')
+      .select('id, perfil_id, nombre, descripcion, categoria_id, indexable')
       .eq('id', comercioId)
       .is('deleted_at', null)
       .maybeSingle(),
-    admin.from('marcas').select('id, nombre').order('nombre'),
     admin.from('categorias').select('id, nombre').order('nombre'),
   ])
   if (!comercio) notFound()
@@ -39,7 +38,6 @@ export default async function EditarComercioPage({ params }: { params: Promise<{
       <FormCard>
         <EditarComercioForm
           comercio={{ ...comercio, correo }}
-          marcas={marcas ?? []}
           categorias={categorias ?? []}
         />
       </FormCard>

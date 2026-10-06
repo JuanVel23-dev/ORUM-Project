@@ -10,10 +10,7 @@ export default async function NuevoComercioPage() {
   await requireRol('super_admin')
 
   const admin = createAdminClient()
-  const [{ data: marcas }, { data: categorias }] = await Promise.all([
-    admin.from('marcas').select('id, nombre').order('nombre'),
-    admin.from('categorias').select('id, nombre').order('nombre'),
-  ])
+  const { data: categorias } = await admin.from('categorias').select('id, nombre').order('nombre')
 
   return (
     <>
@@ -21,7 +18,7 @@ export default async function NuevoComercioPage() {
         title="Crear comercio"
         description="Se crea el comercio y su cuenta de acceso a la herramienta de ventas."
       />
-      <FormCard><ComercioForm marcas={marcas ?? []} categorias={categorias ?? []} /></FormCard>
+      <FormCard><ComercioForm categorias={categorias ?? []} /></FormCard>
     </>
   )
 }
