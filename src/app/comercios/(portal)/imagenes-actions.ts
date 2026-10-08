@@ -28,6 +28,7 @@
   toca la base. O la imagen nueva, o la anterior intacta; nunca a medias.
 */
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath, updateTag } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireRolComercio } from '@/lib/comercios/requerir-comercio'
@@ -115,7 +116,7 @@ export async function guardarMiLogo(
     // El archivo ya está arriba, pero la columna sigue apuntando al anterior:
     // lo que se ve del comercio NO cambió. Se dice tal cual.
     return {
-      error: `El logotipo se subió pero no se pudo guardar: ${error.message}. Se conserva el anterior.`,
+      error: mensajeDeError('El logotipo se subió pero no se pudo guardar', error, 'Se conserva el anterior.'),
     }
   }
 
@@ -194,7 +195,7 @@ export async function guardarMiFotoNegocio(
       .eq('id', comercio.id)
     if (error) {
       return {
-        error: `La foto se subió pero no se pudo guardar: ${error.message}. Se conserva la anterior.`,
+        error: mensajeDeError('La foto se subió pero no se pudo guardar', error, 'Se conserva la anterior.'),
       }
     }
 
@@ -247,7 +248,7 @@ export async function guardarMiFotoNegocio(
   if (error) {
     // La fila no entró: el archivo recién subido no lo referencia nadie.
     await borrarObjeto(admin, BUCKET_IMAGENES_COMERCIOS, resultado.ruta)
-    return { error: `No se pudo guardar la foto: ${error.message}` }
+    return { error: mensajeDeError('No se pudo guardar la foto', error) }
   }
 
   // Sustituida: la anterior sobra. Solo si es nuestra; una URL externa no se toca.
@@ -289,7 +290,7 @@ export async function quitarMiFotoNegocio(
       .from('comercios')
       .update({ portada_url: null })
       .eq('id', comercio.id)
-    if (error) return { error: `No se pudo quitar la portada: ${error.message}` }
+    if (error) return { error: mensajeDeError('No se pudo quitar la portada', error) }
 
     await borrarPorUrlPublica(admin, BUCKET_IMAGENES_COMERCIOS, comercio.portada_url)
 
@@ -326,7 +327,7 @@ export async function quitarMiFotoNegocio(
     .delete()
     .eq('id', fila.id)
     .eq('comercio_id', comercio.id)
-  if (error) return { error: `No se pudo quitar la foto: ${error.message}` }
+  if (error) return { error: mensajeDeError('No se pudo quitar la foto', error) }
 
   const ruta = rutaDesdeUrlPublica(fila.url, BUCKET_IMAGENES_COMERCIOS)
   if (ruta) await borrarObjeto(admin, BUCKET_IMAGENES_COMERCIOS, ruta)

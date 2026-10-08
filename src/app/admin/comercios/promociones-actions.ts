@@ -1,5 +1,6 @@
 'use server'
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -80,7 +81,7 @@ export async function crearPromocion(_prev: PromocionState, formData: FormData):
     fecha_fin: campos.fecha_fin,
     activo: true,
   })
-  if (error) return { error: `No se pudo crear la promoción: ${error.message}` }
+  if (error) return { error: mensajeDeError('No se pudo crear la promoción', error) }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
   return { ok: true }
@@ -121,7 +122,7 @@ export async function editarPromocion(_prev: PromocionState, formData: FormData)
     })
     .eq('id', id)
     .eq('comercio_id', comercioId)
-  if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
+  if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
   return { ok: true }

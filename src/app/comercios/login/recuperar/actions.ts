@@ -25,9 +25,15 @@ export async function solicitarRecuperacionComercio(
   const ip = await ipDelCliente()
 
   after(async () => {
-    // Pasado el tope no se envía nada, y la respuesta ya salió igual.
-    if (!(await cupoDeRecuperacion(email, ip))) return
-    await enviarRecuperacion(email, 'comercio')
+    // La respuesta ya salió: un fallo aquí (correo, base) solo puede ir al log,
+    // nunca al usuario. Sin el `catch` quedaba como error sin capturar.
+    try {
+      // Pasado el tope no se envía nada, y la respuesta ya salió igual.
+      if (!(await cupoDeRecuperacion(email, ip))) return
+      await enviarRecuperacion(email, 'comercio')
+    } catch (err) {
+      console.error('No se pudo procesar la recuperación de contraseña de comercio:', err)
+    }
   })
 
   return { enviado: true }

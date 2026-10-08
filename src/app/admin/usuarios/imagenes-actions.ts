@@ -12,6 +12,7 @@
   aparte y se escribe aquí explícitamente.
 */
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -68,7 +69,7 @@ export async function guardarAvatarUsuario(
 
   if (error) {
     return {
-      error: `La imagen se subió pero no se pudo guardar en el usuario: ${error.message}. Se conserva la anterior.`,
+      error: mensajeDeError('La imagen se subió pero no se pudo guardar en el usuario', error, 'Se conserva la anterior.'),
     }
   }
 

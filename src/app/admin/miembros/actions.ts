@@ -1,5 +1,6 @@
 'use server'
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual, type PerfilActual } from '@/lib/auth/auth'
@@ -121,7 +122,7 @@ export async function registrarMiembro(
   if (errAuth || !creado?.user) {
     const msg = /already been registered|already registered|exists/i.test(errAuth?.message ?? '')
       ? 'Ya existe un usuario con ese correo.'
-      : `No se pudo crear el usuario: ${errAuth?.message ?? 'error desconocido'}`
+      : mensajeDeError('No se pudo crear el usuario', errAuth)
     return { error: msg }
   }
   const userId = creado.user.id
@@ -150,7 +151,7 @@ export async function registrarMiembro(
     .upsert({ id: userId, rol_id: rolMiembro.id, activo: true }, { onConflict: 'id' })
   if (errPerfil) {
     await revertir()
-    return { error: `No se pudo crear el perfil: ${errPerfil.message}` }
+    return { error: mensajeDeError('No se pudo crear el perfil', errPerfil) }
   }
 
   // 7) Insertar miembro con el número de registro elegido del pozo.
@@ -177,7 +178,7 @@ export async function registrarMiembro(
     const msg =
       errMiembro?.code === '23505'
         ? 'Ese número de registro acaba de asignarse a otro miembro. Elige otro.'
-        : `No se pudo registrar el miembro: ${errMiembro?.message ?? 'error desconocido'}`
+        : mensajeDeError('No se pudo registrar el miembro', errMiembro)
     return { error: msg }
   }
   const miembroId = filaMiembro.id
@@ -213,7 +214,7 @@ export async function registrarMiembro(
   })
   if (errMembresia) {
     await revertir()
-    return { error: `No se pudo registrar la membresía: ${errMembresia.message}` }
+    return { error: mensajeDeError('No se pudo registrar la membresía', errMembresia) }
   }
 
   await registrarActividad(admin, {
@@ -303,7 +304,7 @@ export async function renovarMembresia(
       .update({ estado: 'vencida' })
       .eq('id', vigente.id)
     if (errVencer) {
-      return { error: `No se pudo completar la renovación: ${errVencer.message}` }
+      return { error: mensajeDeError('No se pudo completar la renovación', errVencer) }
     }
   }
 
@@ -326,7 +327,7 @@ export async function renovarMembresia(
     if (vigente) {
       await admin.from('membresias').update({ estado: 'activa' }).eq('id', vigente.id)
     }
-    return { error: `No se pudo registrar la renovación: ${errNueva?.message ?? 'error desconocido'}` }
+    return { error: mensajeDeError('No se pudo registrar la renovación', errNueva) }
   }
 
   await registrarActividad(admin, {
@@ -401,7 +402,7 @@ export async function editarMiembro(
     .from('miembros')
     .update({ nombres, apellidos, cedula, telefono, direccion, ciudad_id })
     .eq('id', miembroId)
-  if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
+  if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
 
   await registrarActividad(admin, {
     actorId: actor.userId,
@@ -420,7 +421,7 @@ export async function editarMiembro(
     if (errCorreo) {
       const msg = /already been registered|already registered|exists/i.test(errCorreo.message)
         ? 'Ese correo ya está en uso por otro usuario.'
-        : `No se pudo actualizar el correo: ${errCorreo.message}`
+        : mensajeDeError('No se pudo actualizar el correo', errCorreo)
       return { error: msg }
     }
   }

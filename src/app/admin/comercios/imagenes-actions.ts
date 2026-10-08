@@ -16,6 +16,7 @@
   verdades sobre quién es administrador es como se cuelan los agujeros.
 */
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -117,7 +118,7 @@ export async function guardarImagenComercio(
     // El archivo ya está arriba, pero la columna sigue apuntando a lo anterior:
     // el estado visible del producto NO cambió. Se dice tal cual.
     return {
-      error: `La imagen se subió pero no se pudo guardar en el comercio: ${error.message}. Se conserva la anterior.`,
+      error: mensajeDeError('La imagen se subió pero no se pudo guardar en el comercio', error, 'Se conserva la anterior.'),
     }
   }
 
@@ -191,7 +192,7 @@ export async function agregarImagenGaleria(
     // La fila no entró: el archivo suelto en Storage no lo referencia nadie y
     // se queda huérfano. Se borra para no dejar basura acumulándose.
     await borrarObjeto(admin, BUCKET_IMAGENES_COMERCIOS, resultado.ruta)
-    return { error: `No se pudo añadir la imagen a la galería: ${error.message}` }
+    return { error: mensajeDeError('No se pudo añadir la imagen a la galería', error) }
   }
 
   await registrarCambioImagen(admin, {

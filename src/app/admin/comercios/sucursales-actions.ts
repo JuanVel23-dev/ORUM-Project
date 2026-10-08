@@ -1,5 +1,6 @@
 'use server'
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -50,7 +51,7 @@ export async function crearSucursal(_prev: SucursalState, formData: FormData): P
     ciudad_id: campos.ciudad_id,
     activo: true,
   })
-  if (error) return { error: `No se pudo crear la sucursal: ${error.message}` }
+  if (error) return { error: mensajeDeError('No se pudo crear la sucursal', error) }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
   return { ok: true }
@@ -78,7 +79,7 @@ export async function editarSucursal(_prev: SucursalState, formData: FormData): 
     })
     .eq('id', id)
     .eq('comercio_id', comercioId)
-  if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
+  if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
   return { ok: true }

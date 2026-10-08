@@ -13,6 +13,7 @@
   ocioso: aquí se usa el cliente `service_role`, que ignora RLS.
 */
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireRolMiembro } from '@/lib/miembros/requerir-miembro'
@@ -66,7 +67,7 @@ export async function guardarMiFoto(
     // ya subida, se borra para no dejar un archivo huérfano.
     await borrarObjeto(admin, BUCKET_AVATARES, resultado.ruta)
     return {
-      error: `Subimos la foto pero no pudimos guardarla en tu carnet: ${error.message}. Se conserva la anterior.`,
+      error: mensajeDeError('Subimos la foto pero no pudimos guardarla en tu carnet', error, 'Se conserva la anterior.'),
     }
   }
 
