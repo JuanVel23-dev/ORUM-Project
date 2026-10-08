@@ -1,3 +1,10 @@
 allowBuilds:
   sharp: true
   unrs-resolver: true
+# Auditoría del 05/10/2026: dependencias internas de `next` con aviso de
+# seguridad. Se fuerzan a la versión parcheada; quitar cuando `next` las suba.
+overrides:
+  nanoid@<3.3.18: '>=3.3.18'
+  browserslist@<4.28.7: '>=4.28.7'
+  source-map-js@<1.2.2: '>=1.2.2'
+  baseline-browser-mapping@<2.11.0: '>=2.11.0'
