@@ -66,6 +66,7 @@ export async function crearAnuncio(_prev: AnuncioState, formData: FormData): Pro
 
   const admin = createAdminClient()
   const { error } = await admin.from('anuncios').insert({
+    updated_by: actor.actorId,
     titulo: campos.titulo,
     cuerpo: campos.cuerpo,
     mostrar_publico: campos.mostrarPublico,
@@ -93,6 +94,7 @@ export async function editarAnuncio(_prev: AnuncioState, formData: FormData): Pr
   const { error } = await admin
     .from('anuncios')
     .update({
+      updated_by: actor.actorId,
       titulo: campos.titulo,
       cuerpo: campos.cuerpo,
       mostrar_publico: campos.mostrarPublico,
@@ -115,7 +117,7 @@ export async function cambiarEstadoAnuncio(formData: FormData): Promise<void> {
   if (!Number.isInteger(id) || id < 1) redirect('/admin/anuncios')
 
   const admin = createAdminClient()
-  await admin.from('anuncios').update({ activo: activar }).eq('id', id)
+  await admin.from('anuncios').update({ updated_by: actor.actorId, activo: activar }).eq('id', id)
 
   refrescar()
   redirect('/admin/anuncios')

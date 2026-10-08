@@ -148,7 +148,10 @@ export async function registrarMiembro(
   // 6) Perfil (rol miembro).
   const { error: errPerfil } = await admin
     .from('perfiles')
-    .upsert({ id: userId, rol_id: rolMiembro.id, activo: true }, { onConflict: 'id' })
+    .upsert(
+      { id: userId, rol_id: rolMiembro.id, activo: true, updated_by: actor.userId },
+      { onConflict: 'id' },
+    )
   if (errPerfil) {
     await revertir()
     return { error: mensajeDeError('No se pudo crear el perfil', errPerfil) }
@@ -159,6 +162,7 @@ export async function registrarMiembro(
   const { data: filaMiembro, error: errMiembro } = await admin
     .from('miembros')
     .insert({
+      updated_by: actor.userId,
       perfil_id: userId,
       numero_membresia: numero,
       nombres,
@@ -203,6 +207,7 @@ export async function registrarMiembro(
   const fecha_inicio = hoyISO()
   const fecha_fin = calcularFechaFin(fecha_inicio, plan.duracion_meses)
   const { error: errMembresia } = await admin.from('membresias').insert({
+    updated_by: actor.userId,
     miembro_id: miembroId,
     plan_id,
     tipo: 'nueva',
@@ -301,7 +306,7 @@ export async function renovarMembresia(
   if (vigente) {
     const { error: errVencer } = await admin
       .from('membresias')
-      .update({ estado: 'vencida' })
+      .update({ estado: 'vencida', updated_by: actor.userId })
       .eq('id', vigente.id)
     if (errVencer) {
       return { error: mensajeDeError('No se pudo completar la renovación', errVencer) }
@@ -311,6 +316,7 @@ export async function renovarMembresia(
   const { data: nueva, error: errNueva } = await admin
     .from('membresias')
     .insert({
+      updated_by: actor.userId,
       miembro_id,
       plan_id,
       tipo: 'renovada',
@@ -325,7 +331,10 @@ export async function renovarMembresia(
     .single()
   if (errNueva || !nueva) {
     if (vigente) {
-      await admin.from('membresias').update({ estado: 'activa' }).eq('id', vigente.id)
+      await admin
+        .from('membresias')
+        .update({ estado: 'activa', updated_by: actor.userId })
+        .eq('id', vigente.id)
     }
     return { error: mensajeDeError('No se pudo registrar la renovación', errNueva) }
   }
@@ -400,7 +409,7 @@ export async function editarMiembro(
 
   const { error } = await admin
     .from('miembros')
-    .update({ nombres, apellidos, cedula, telefono, direccion, ciudad_id })
+    .update({ nombres, apellidos, cedula, telefono, direccion, ciudad_id, updated_by: actor.userId })
     .eq('id', miembroId)
   if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
 

@@ -6,9 +6,9 @@ import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
 
-async function exigirSuperAdmin(): Promise<boolean> {
+async function exigirSuperAdmin(): Promise<string | null> {
   const actor = await getPerfilActual()
-  return !!actor && actor.activo && actor.rolCodigo === 'super_admin'
+  return actor && actor.activo && actor.rolCodigo === 'super_admin' ? actor.userId : null
 }
 
 export type SucursalState = { error?: string; ok?: boolean }
@@ -34,7 +34,8 @@ function leerCamposSucursal(formData: FormData):
 }
 
 export async function crearSucursal(_prev: SucursalState, formData: FormData): Promise<SucursalState> {
-  if (!(await exigirSuperAdmin())) return { error: 'No tienes permiso para realizar esta acción.' }
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) return { error: 'No tienes permiso para realizar esta acción.' }
 
   const comercioId = Number(formData.get('comercio_id'))
   if (!Number.isInteger(comercioId) || comercioId < 1) return { error: 'Falta el identificador del comercio.' }
@@ -44,6 +45,7 @@ export async function crearSucursal(_prev: SucursalState, formData: FormData): P
 
   const admin = createAdminClient()
   const { error } = await admin.from('sucursales').insert({
+    updated_by: actorId,
     comercio_id: comercioId,
     nombre: campos.nombre,
     direccion: campos.direccion,
@@ -58,7 +60,8 @@ export async function crearSucursal(_prev: SucursalState, formData: FormData): P
 }
 
 export async function editarSucursal(_prev: SucursalState, formData: FormData): Promise<SucursalState> {
-  if (!(await exigirSuperAdmin())) return { error: 'No tienes permiso para realizar esta acción.' }
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) return { error: 'No tienes permiso para realizar esta acción.' }
 
   const id = Number(formData.get('id'))
   const comercioId = Number(formData.get('comercio_id'))
@@ -72,6 +75,7 @@ export async function editarSucursal(_prev: SucursalState, formData: FormData): 
   const { error } = await admin
     .from('sucursales')
     .update({
+      updated_by: actorId,
       nombre: campos.nombre,
       direccion: campos.direccion,
       telefono: campos.telefono,
@@ -87,7 +91,8 @@ export async function editarSucursal(_prev: SucursalState, formData: FormData): 
 
 /** Activa o desactiva una sucursal (`sucursales.activo`). */
 export async function cambiarEstadoSucursal(formData: FormData): Promise<void> {
-  if (!(await exigirSuperAdmin())) redirect('/login?error=sin_permiso')
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) redirect('/login?error=sin_permiso')
 
   const id = Number(formData.get('id'))
   const comercioId = Number(formData.get('comercio_id'))
@@ -96,7 +101,7 @@ export async function cambiarEstadoSucursal(formData: FormData): Promise<void> {
   if (!Number.isInteger(comercioId) || comercioId < 1) redirect('/admin/comercios')
 
   const admin = createAdminClient()
-  const { error } = await admin.from('sucursales').update({ activo: activar }).eq('id', id)
+  const { error } = await admin.from('sucursales').update({ updated_by: actorId, activo: activar }).eq('id', id)
 
   if (!error) {
     revalidatePath(`/admin/comercios/${comercioId}`)

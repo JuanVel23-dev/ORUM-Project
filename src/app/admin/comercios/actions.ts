@@ -9,9 +9,9 @@ import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
-async function exigirSuperAdmin(): Promise<boolean> {
+async function exigirSuperAdmin(): Promise<string | null> {
   const actor = await getPerfilActual()
-  return !!actor && actor.activo && actor.rolCodigo === 'super_admin'
+  return actor && actor.activo && actor.rolCodigo === 'super_admin' ? actor.userId : null
 }
 
 export type CrearComercioState = {
@@ -52,7 +52,8 @@ export async function crearComercio(
   _prev: CrearComercioState,
   formData: FormData,
 ): Promise<CrearComercioState> {
-  if (!(await exigirSuperAdmin())) return { error: 'No tienes permiso para realizar esta acción.' }
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) return { error: 'No tienes permiso para realizar esta acción.' }
 
   const email = String(formData.get('correo') ?? '').trim().toLowerCase()
   if (!email || !email.includes('@')) return { error: 'Ingresa un correo electrónico válido.' }
@@ -85,13 +86,15 @@ export async function crearComercio(
 
   const { error: errPerfil } = await admin
     .from('perfiles')
-    .upsert({ id: userId, rol_id: rol.id, activo: true }, { onConflict: 'id' })
+    .upsert({ updated_by: actorId, id: userId, rol_id: rol.id, activo: true }, { onConflict: 'id' })
   if (errPerfil) {
     await revertir()
     return { error: mensajeDeError('No se pudo crear el perfil', errPerfil) }
   }
 
   const { error: errComercio } = await admin.from('comercios').insert({
+
+    updated_by: actorId,
     perfil_id: userId,
     nombre: campos.nombre,
     descripcion: campos.descripcion,
@@ -129,7 +132,8 @@ export async function editarComercio(
   _prev: EditarComercioState,
   formData: FormData,
 ): Promise<EditarComercioState> {
-  if (!(await exigirSuperAdmin())) return { error: 'No tienes permiso para realizar esta acción.' }
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) return { error: 'No tienes permiso para realizar esta acción.' }
 
   const id = Number(formData.get('id'))
   const perfilId = String(formData.get('perfil_id') ?? '')
@@ -143,6 +147,7 @@ export async function editarComercio(
   const { error } = await admin
     .from('comercios')
     .update({
+      updated_by: actorId,
       nombre: campos.nombre,
       descripcion: campos.descripcion,
       categoria_id: campos.categoria_id,
@@ -175,14 +180,15 @@ export async function editarComercio(
 
 /** Activa o desactiva el comercio como aliado (`comercios.activo`, D2). */
 export async function cambiarEstadoComercio(formData: FormData): Promise<void> {
-  if (!(await exigirSuperAdmin())) redirect('/login?error=sin_permiso')
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) redirect('/login?error=sin_permiso')
 
   const id = Number(formData.get('id'))
   const activar = String(formData.get('activar') ?? '') === 'true'
   if (!Number.isInteger(id) || id < 1) redirect('/admin/comercios')
 
   const admin = createAdminClient()
-  await admin.from('comercios').update({ activo: activar }).eq('id', id)
+  await admin.from('comercios').update({ updated_by: actorId, activo: activar }).eq('id', id)
 
   revalidatePath('/admin/comercios')
   revalidatePath(`/admin/comercios/${id}`)
@@ -191,7 +197,8 @@ export async function cambiarEstadoComercio(formData: FormData): Promise<void> {
 
 /** Activa o desactiva el acceso a la cuenta del comercio (`perfiles.activo`, D2). */
 export async function cambiarEstadoAccesoComercio(formData: FormData): Promise<void> {
-  if (!(await exigirSuperAdmin())) redirect('/login?error=sin_permiso')
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) redirect('/login?error=sin_permiso')
 
   const id = Number(formData.get('id'))
   const perfilId = String(formData.get('perfil_id') ?? '')
@@ -199,7 +206,7 @@ export async function cambiarEstadoAccesoComercio(formData: FormData): Promise<v
   if (!Number.isInteger(id) || id < 1 || !perfilId) redirect('/admin/comercios')
 
   const admin = createAdminClient()
-  await admin.from('perfiles').update({ activo: activar }).eq('id', perfilId)
+  await admin.from('perfiles').update({ updated_by: actorId, activo: activar }).eq('id', perfilId)
 
   revalidatePath('/admin/comercios')
   revalidatePath(`/admin/comercios/${id}`)

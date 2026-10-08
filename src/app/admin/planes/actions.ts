@@ -9,9 +9,9 @@ import { getPerfilActual } from '@/lib/auth/auth'
 export type PlanState = { error?: string; ok?: boolean }
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
-async function exigirSuperAdmin(): Promise<boolean> {
+async function exigirSuperAdmin(): Promise<string | null> {
   const actor = await getPerfilActual()
-  return !!actor && actor.activo && actor.rolCodigo === 'super_admin'
+  return actor && actor.activo && actor.rolCodigo === 'super_admin' ? actor.userId : null
 }
 
 /** Lee y valida los campos comunes de un plan desde el formulario. */
@@ -41,13 +41,15 @@ function leerCampos(formData: FormData):
 }
 
 export async function crearPlan(_prev: PlanState, formData: FormData): Promise<PlanState> {
-  if (!(await exigirSuperAdmin())) return { error: 'No tienes permiso para realizar esta acción.' }
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) return { error: 'No tienes permiso para realizar esta acción.' }
 
   const campos = leerCampos(formData)
   if (!campos.ok) return { error: campos.error }
 
   const admin = createAdminClient()
   const { error } = await admin.from('planes_membresia').insert({
+    updated_by: actorId,
     nombre: campos.nombre,
     descripcion: campos.descripcion,
     precio: campos.precio,
@@ -61,7 +63,8 @@ export async function crearPlan(_prev: PlanState, formData: FormData): Promise<P
 }
 
 export async function editarPlan(_prev: PlanState, formData: FormData): Promise<PlanState> {
-  if (!(await exigirSuperAdmin())) return { error: 'No tienes permiso para realizar esta acción.' }
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) return { error: 'No tienes permiso para realizar esta acción.' }
 
   const id = Number(formData.get('id'))
   if (!Number.isInteger(id) || id < 1) return { error: 'Falta el identificador del plan.' }
@@ -73,6 +76,7 @@ export async function editarPlan(_prev: PlanState, formData: FormData): Promise<
   const { error } = await admin
     .from('planes_membresia')
     .update({
+      updated_by: actorId,
       nombre: campos.nombre,
       descripcion: campos.descripcion,
       precio: campos.precio,
@@ -87,14 +91,15 @@ export async function editarPlan(_prev: PlanState, formData: FormData): Promise<
 
 /** Activa o desactiva un plan (planes_membresia.activo). */
 export async function cambiarEstadoPlan(formData: FormData): Promise<void> {
-  if (!(await exigirSuperAdmin())) redirect('/login?error=sin_permiso')
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) redirect('/login?error=sin_permiso')
 
   const id = Number(formData.get('id'))
   const activar = String(formData.get('activar') ?? '') === 'true'
   if (!Number.isInteger(id) || id < 1) redirect('/admin/planes')
 
   const admin = createAdminClient()
-  await admin.from('planes_membresia').update({ activo: activar }).eq('id', id)
+  await admin.from('planes_membresia').update({ updated_by: actorId, activo: activar }).eq('id', id)
 
   revalidatePath('/admin/planes')
   redirect('/admin/planes')

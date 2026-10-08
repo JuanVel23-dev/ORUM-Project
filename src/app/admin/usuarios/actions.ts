@@ -37,7 +37,8 @@ export async function crearUsuario(
   _prev: CrearUsuarioState,
   formData: FormData
 ): Promise<CrearUsuarioState> {
-  if (!(await exigirSuperAdmin())) {
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) {
     return { error: 'No tienes permiso para realizar esta acción.' }
   }
 
@@ -91,7 +92,7 @@ export async function crearUsuario(
 
   const { error: errPerfil } = await admin
     .from('perfiles')
-    .upsert({ id: userId, rol_id: rol.id, activo: true }, { onConflict: 'id' })
+    .upsert({ updated_by: actorId, id: userId, rol_id: rol.id, activo: true }, { onConflict: 'id' })
   if (errPerfil) {
     await revertir()
     return { error: mensajeDeError('No se pudo crear el perfil', errPerfil) }
@@ -99,7 +100,7 @@ export async function crearUsuario(
 
   const { error: errEmpleado } = await admin
     .from('empleados')
-    .insert({ perfil_id: userId, ...datosEmpleado })
+    .insert({ updated_by: actorId, perfil_id: userId, ...datosEmpleado })
   if (errEmpleado) {
     await revertir()
     return { error: mensajeDeError('No se pudo registrar el empleado', errEmpleado) }
@@ -130,7 +131,8 @@ export async function editarUsuario(
   _prev: EditarUsuarioState,
   formData: FormData
 ): Promise<EditarUsuarioState> {
-  if (!(await exigirSuperAdmin())) {
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) {
     return { error: 'No tienes permiso para realizar esta acción.' }
   }
 
@@ -158,6 +160,7 @@ export async function editarUsuario(
   const { error } = await admin
     .from('empleados')
     .update({
+      updated_by: actorId,
       nombres,
       apellidos,
       cedula,
@@ -188,14 +191,15 @@ export async function editarUsuario(
 
 /** Activa o desactiva el acceso de un usuario (perfiles.activo). */
 export async function cambiarEstadoAcceso(formData: FormData): Promise<void> {
-  if (!(await exigirSuperAdmin())) redirect('/login?error=sin_permiso')
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) redirect('/login?error=sin_permiso')
 
   const perfilId = String(formData.get('perfil_id') ?? '')
   const activar = String(formData.get('activar') ?? '') === 'true'
   if (!perfilId) redirect('/admin/usuarios')
 
   const admin = createAdminClient()
-  await admin.from('perfiles').update({ activo: activar }).eq('id', perfilId)
+  await admin.from('perfiles').update({ updated_by: actorId, activo: activar }).eq('id', perfilId)
 
   revalidatePath('/admin/usuarios')
   redirect('/admin/usuarios')
