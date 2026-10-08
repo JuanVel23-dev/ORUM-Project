@@ -59,7 +59,7 @@ export async function guardarMiFoto(
 
   const { error } = await admin
     .from('miembros')
-    .update({ foto_url: resultado.url, foto_declaracion_at: new Date().toISOString() })
+    .update({ foto_url: resultado.url, foto_declaracion_at: new Date().toISOString(), updated_by: perfil.userId })
     .eq('id', miembro.id)
 
   if (error) {

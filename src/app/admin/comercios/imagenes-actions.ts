@@ -110,7 +110,9 @@ export async function guardarImagenComercio(
   const { error } = await admin
     .from('comercios')
     .update(
-      destino === 'logo' ? { logo_url: resultado.url } : { portada_url: resultado.url },
+      destino === 'logo'
+        ? { logo_url: resultado.url, updated_by: actorId }
+        : { portada_url: resultado.url, updated_by: actorId },
     )
     .eq('id', comercioId)
 

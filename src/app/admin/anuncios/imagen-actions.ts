@@ -69,7 +69,7 @@ export async function guardarImagenAnuncio(
 
   const { error } = await admin
     .from('anuncios')
-    .update({ imagen_url: resultado.url })
+    .update({ imagen_url: resultado.url, updated_by: actorId })
     .eq('id', anuncioId)
 
   if (error) {

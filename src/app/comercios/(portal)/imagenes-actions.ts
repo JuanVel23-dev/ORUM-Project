@@ -109,7 +109,7 @@ export async function guardarMiLogo(
 
   const { error } = await admin
     .from('comercios')
-    .update({ logo_url: resultado.url })
+    .update({ logo_url: resultado.url, updated_by: actorId })
     .eq('id', comercio.id)
 
   if (error) {
@@ -191,7 +191,7 @@ export async function guardarMiFotoNegocio(
 
     const { error } = await admin
       .from('comercios')
-      .update({ portada_url: resultado.url })
+      .update({ portada_url: resultado.url, updated_by: actorId })
       .eq('id', comercio.id)
     if (error) {
       return {
@@ -288,7 +288,7 @@ export async function quitarMiFotoNegocio(
 
     const { error } = await admin
       .from('comercios')
-      .update({ portada_url: null })
+      .update({ portada_url: null, updated_by: actorId })
       .eq('id', comercio.id)
     if (error) return { error: mensajeDeError('No se pudo quitar la portada', error) }
 

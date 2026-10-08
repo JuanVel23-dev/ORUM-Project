@@ -30,6 +30,8 @@ export type Database = {
     Tables: {
       anuncios: {
         Row: {
+          /** Quién hizo el cambio. Solo viaja en la escritura: `fn_capturar_actor` lo pasa a la bitácora y lo vacía. */
+          updated_by: string | null
           id: number
           titulo: string
           cuerpo: string
@@ -43,6 +45,7 @@ export type Database = {
           deleted_at: Timestamp | null
         }
         Insert: {
+          updated_by?: string | null
           id?: number
           titulo: string
           cuerpo: string
@@ -75,6 +78,8 @@ export type Database = {
       }
       perfiles: {
         Row: {
+          /** Quién hizo el cambio. Solo viaja en la escritura: `fn_capturar_actor` lo pasa a la bitácora y lo vacía. */
+          updated_by: string | null
           id: string // uuid = auth.users.id
           rol_id: number
           /** Foto de quien trabaja en el club. Se muestra en bitácora y reportes. */
@@ -84,6 +89,7 @@ export type Database = {
           updated_at: Timestamp
         }
         Insert: {
+          updated_by?: string | null
           id: string
           rol_id: number
           avatar_url?: string | null
@@ -96,6 +102,8 @@ export type Database = {
       }
       empleados: {
         Row: {
+          /** Quién hizo el cambio. Solo viaja en la escritura: `fn_capturar_actor` lo pasa a la bitácora y lo vacía. */
+          updated_by: string | null
           id: number
           perfil_id: string | null
           nombres: string
@@ -107,6 +115,7 @@ export type Database = {
           deleted_at: Timestamp | null
         }
         Insert: {
+          updated_by?: string | null
           id?: number
           perfil_id?: string | null
           nombres: string
@@ -122,6 +131,8 @@ export type Database = {
       }
       comercios: {
         Row: {
+          /** Quién hizo el cambio. Solo viaja en la escritura: `fn_capturar_actor` lo pasa a la bitácora y lo vacía. */
+          updated_by: string | null
           id: number
           perfil_id: string | null
           marca_id: number | null
@@ -139,6 +150,7 @@ export type Database = {
           deleted_at: Timestamp | null
         }
         Insert: {
+          updated_by?: string | null
           id?: number
           perfil_id?: string | null
           marca_id?: number | null
@@ -198,6 +210,8 @@ export type Database = {
       }
       planes_membresia: {
         Row: {
+          /** Quién hizo el cambio. Solo viaja en la escritura: `fn_capturar_actor` lo pasa a la bitácora y lo vacía. */
+          updated_by: string | null
           id: number
           nombre: string
           descripcion: string | null
@@ -209,6 +223,7 @@ export type Database = {
           deleted_at: Timestamp | null
         }
         Insert: {
+          updated_by?: string | null
           id?: number
           nombre: string
           descripcion?: string | null
@@ -224,6 +239,8 @@ export type Database = {
       }
       miembros: {
         Row: {
+          /** Quién hizo el cambio. Solo viaja en la escritura: `fn_capturar_actor` lo pasa a la bitácora y lo vacía. */
+          updated_by: string | null
           id: number
           perfil_id: string | null
           codigo_publico: string
@@ -245,6 +262,7 @@ export type Database = {
           deleted_at: Timestamp | null
         }
         Insert: {
+          updated_by?: string | null
           id?: number
           perfil_id?: string | null
           codigo_publico?: string
@@ -296,6 +314,8 @@ export type Database = {
       }
       membresias: {
         Row: {
+          /** Quién hizo el cambio. Solo viaja en la escritura: `fn_capturar_actor` lo pasa a la bitácora y lo vacía. */
+          updated_by: string | null
           id: number
           miembro_id: number
           plan_id: number
@@ -311,6 +331,7 @@ export type Database = {
           updated_at: Timestamp
         }
         Insert: {
+          updated_by?: string | null
           id?: number
           miembro_id: number
           plan_id: number
@@ -349,6 +370,8 @@ export type Database = {
       }
       sucursales: {
         Row: {
+          /** Quién hizo el cambio. Solo viaja en la escritura: `fn_capturar_actor` lo pasa a la bitácora y lo vacía. */
+          updated_by: string | null
           id: number
           comercio_id: number
           ciudad_id: number
@@ -361,6 +384,7 @@ export type Database = {
           deleted_at: Timestamp | null
         }
         Insert: {
+          updated_by?: string | null
           id?: number
           comercio_id: number
           ciudad_id: number
@@ -393,6 +417,8 @@ export type Database = {
       }
       promociones: {
         Row: {
+          /** Quién hizo el cambio. Solo viaja en la escritura: `fn_capturar_actor` lo pasa a la bitácora y lo vacía. */
+          updated_by: string | null
           id: number
           comercio_id: number
           tipo_beneficio_id: number
@@ -407,6 +433,7 @@ export type Database = {
           deleted_at: Timestamp | null
         }
         Insert: {
+          updated_by?: string | null
           id?: number
           comercio_id: number
           tipo_beneficio_id: number

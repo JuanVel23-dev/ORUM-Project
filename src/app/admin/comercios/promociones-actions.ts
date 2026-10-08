@@ -8,9 +8,9 @@ import { getPerfilActual } from '@/lib/auth/auth'
 import { validarValorPromocion } from '@/lib/comercios/promociones'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 
-async function exigirSuperAdmin(): Promise<boolean> {
+async function exigirSuperAdmin(): Promise<string | null> {
   const actor = await getPerfilActual()
-  return !!actor && actor.activo && actor.rolCodigo === 'super_admin'
+  return actor && actor.activo && actor.rolCodigo === 'super_admin' ? actor.userId : null
 }
 
 export type PromocionState = { error?: string; ok?: boolean }
@@ -51,7 +51,8 @@ function leerCamposPromocion(formData: FormData):
 }
 
 export async function crearPromocion(_prev: PromocionState, formData: FormData): Promise<PromocionState> {
-  if (!(await exigirSuperAdmin())) return { error: 'No tienes permiso para realizar esta acción.' }
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) return { error: 'No tienes permiso para realizar esta acción.' }
 
   const comercioId = Number(formData.get('comercio_id'))
   if (!Number.isInteger(comercioId) || comercioId < 1) return { error: 'Falta el identificador del comercio.' }
@@ -72,6 +73,8 @@ export async function crearPromocion(_prev: PromocionState, formData: FormData):
   if (!validacion.ok) return { error: validacion.error }
 
   const { error } = await admin.from('promociones').insert({
+
+    updated_by: actorId,
     comercio_id: comercioId,
     tipo_beneficio_id: campos.tipo_beneficio_id,
     titulo: campos.titulo,
@@ -88,7 +91,8 @@ export async function crearPromocion(_prev: PromocionState, formData: FormData):
 }
 
 export async function editarPromocion(_prev: PromocionState, formData: FormData): Promise<PromocionState> {
-  if (!(await exigirSuperAdmin())) return { error: 'No tienes permiso para realizar esta acción.' }
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) return { error: 'No tienes permiso para realizar esta acción.' }
 
   const id = Number(formData.get('id'))
   const comercioId = Number(formData.get('comercio_id'))
@@ -113,6 +117,7 @@ export async function editarPromocion(_prev: PromocionState, formData: FormData)
   const { error } = await admin
     .from('promociones')
     .update({
+      updated_by: actorId,
       tipo_beneficio_id: campos.tipo_beneficio_id,
       titulo: campos.titulo,
       descripcion: campos.descripcion,
@@ -130,7 +135,8 @@ export async function editarPromocion(_prev: PromocionState, formData: FormData)
 
 /** Activa o desactiva una promoción (`promociones.activo`). */
 export async function cambiarEstadoPromocion(formData: FormData): Promise<void> {
-  if (!(await exigirSuperAdmin())) redirect('/login?error=sin_permiso')
+  const actorId = await exigirSuperAdmin()
+  if (!actorId) redirect('/login?error=sin_permiso')
 
   const id = Number(formData.get('id'))
   const comercioId = Number(formData.get('comercio_id'))
@@ -139,7 +145,7 @@ export async function cambiarEstadoPromocion(formData: FormData): Promise<void> 
   if (!Number.isInteger(comercioId) || comercioId < 1) redirect('/admin/comercios')
 
   const admin = createAdminClient()
-  const { error } = await admin.from('promociones').update({ activo: activar }).eq('id', id)
+  const { error } = await admin.from('promociones').update({ updated_by: actorId, activo: activar }).eq('id', id)
 
   if (!error) {
     revalidatePath(`/admin/comercios/${comercioId}`)

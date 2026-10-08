@@ -71,7 +71,7 @@ export async function guardarFotoMiembro(
 
   const { error } = await admin
     .from('miembros')
-    .update({ foto_url: resultado.url, foto_declaracion_at: new Date().toISOString() })
+    .update({ foto_url: resultado.url, foto_declaracion_at: new Date().toISOString(), updated_by: actorId })
     .eq('id', miembroId)
 
   if (error) {
@@ -159,7 +159,7 @@ export async function retirarFotoMiembro(
   //    lo que ya no está no da error).
   const { error } = await admin
     .from('miembros')
-    .update({ foto_url: null, foto_declaracion_at: null })
+    .update({ foto_url: null, foto_declaracion_at: null, updated_by: actor.userId })
     .eq('id', miembroId)
   if (error) return { error: mensajeDeError('No se pudo retirar la foto', error, 'Inténtalo de nuevo.') }
 

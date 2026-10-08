@@ -64,7 +64,7 @@ export async function guardarAvatarUsuario(
 
   const { error } = await admin
     .from('perfiles')
-    .update({ avatar_url: resultado.url })
+    .update({ avatar_url: resultado.url, updated_by: actorId })
     .eq('id', perfilId)
 
   if (error) {
