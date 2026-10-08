@@ -1,25 +1,43 @@
 'use server'
 
+import { cupoDeLogin, ERROR_LIMITE_LOGIN, reiniciarLogin } from '@/lib/auth/limitador'
+import { verificarPasswordActual } from '@/lib/auth/password-actual'
+import { LONGITUD_MINIMA } from '@/lib/shared/password-fortaleza'
+import { mensajeDeError } from '@/lib/shared/errores'
 import { createClient } from '@/lib/supabase/server'
 
-export type PasswordState = { error?: string; ok?: boolean }
+/** `campo` dice en qué campo del formulario se pinta el error. */
+export type PasswordState = { error?: string; campo?: 'actual' | 'nueva'; ok?: boolean }
 
 /**
  * Cambia la contraseña del usuario actualmente autenticado.
  * Usa la sesión (cliente servidor con cookies), no el cliente admin.
+ *
+ * Pide la contraseña ACTUAL: sin ella, quien se llevara una sesión abierta (un
+ * equipo sin bloquear, una cookie robada) podría fijar una contraseña nueva y
+ * quedarse con la cuenta aunque la sesión original caducara. La comprobación
+ * comparte los contadores del login, así que adivinar la actual desde aquí gasta
+ * el mismo cupo que adivinarla en la pantalla de acceso.
  */
 export async function cambiarPassword(
   _prev: PasswordState,
   formData: FormData
 ): Promise<PasswordState> {
+  const actual = String(formData.get('actual') ?? '')
   const nueva = String(formData.get('password') ?? '')
   const confirmar = String(formData.get('confirmar') ?? '')
 
-  if (nueva.length < 8) {
-    return { error: 'La contraseña debe tener al menos 8 caracteres.' }
+  if (!actual) {
+    return { campo: 'actual', error: 'Escribe tu contraseña actual.' }
+  }
+  if (nueva.length < LONGITUD_MINIMA) {
+    return { campo: 'nueva', error: `La contraseña debe tener al menos ${LONGITUD_MINIMA} caracteres.` }
   }
   if (nueva !== confirmar) {
-    return { error: 'Las contraseñas no coinciden.' }
+    return { campo: 'nueva', error: 'Las contraseñas no coinciden.' }
+  }
+  if (nueva === actual) {
+    return { campo: 'nueva', error: 'La nueva contraseña debe ser distinta de la actual.' }
   }
 
   const supabase = await createClient()
@@ -27,13 +45,30 @@ export async function cambiarPassword(
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) {
+  if (!user?.email) {
     return { error: 'Tu sesión expiró. Vuelve a iniciar sesión.' }
   }
 
+  if (!(await cupoDeLogin(user.email))) {
+    return { campo: 'actual', error: ERROR_LIMITE_LOGIN }
+  }
+  if (!(await verificarPasswordActual(user.email, actual))) {
+    return { campo: 'actual', error: 'La contraseña actual no es correcta.' }
+  }
+  await reiniciarLogin(user.email)
+
   const { error } = await supabase.auth.updateUser({ password: nueva })
   if (error) {
-    return { error: `No se pudo cambiar la contraseña: ${error.message}` }
+    // La protección contra contraseñas filtradas de Supabase rechaza las que
+    // aparecen en brechas conocidas. Es un mensaje que el usuario necesita ver:
+    // sin él no sabría por qué la suya «no vale».
+    if (error.code === 'weak_password') {
+      return {
+        campo: 'nueva',
+        error: 'Esa contraseña es muy común o aparece en filtraciones conocidas. Elige otra.',
+      }
+    }
+    return { error: mensajeDeError('No se pudo cambiar la contraseña', error) }
   }
 
   return { ok: true }

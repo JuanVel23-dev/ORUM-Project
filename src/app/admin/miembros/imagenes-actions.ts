@@ -12,6 +12,7 @@
   quien atiende en el mostrador, que es donde se toma la foto.
 */
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -79,7 +80,7 @@ export async function guardarFotoMiembro(
     // sustituye sola).
     await borrarObjeto(admin, BUCKET_AVATARES, resultado.ruta)
     return {
-      error: `La foto se subió pero no se pudo guardar en el miembro: ${error.message}. Se conserva la anterior.`,
+      error: mensajeDeError('La foto se subió pero no se pudo guardar en el miembro', error, 'Se conserva la anterior.'),
     }
   }
 
@@ -149,7 +150,7 @@ export async function retirarFotoMiembro(
   if (ruta) {
     const { error: errorArchivo } = await admin.storage.from(BUCKET_AVATARES).remove([ruta])
     if (errorArchivo) {
-      return { error: `No se pudo borrar el archivo de la foto: ${errorArchivo.message}. Inténtalo de nuevo.` }
+      return { error: mensajeDeError('No se pudo borrar el archivo de la foto', errorArchivo, 'Inténtalo de nuevo.') }
     }
   }
 
@@ -160,7 +161,7 @@ export async function retirarFotoMiembro(
     .from('miembros')
     .update({ foto_url: null, foto_declaracion_at: null })
     .eq('id', miembroId)
-  if (error) return { error: `No se pudo retirar la foto: ${error.message}. Inténtalo de nuevo.` }
+  if (error) return { error: mensajeDeError('No se pudo retirar la foto', error, 'Inténtalo de nuevo.') }
 
   // 3) Rastro: quién, cuándo y por qué.
   await registrarCambioImagen(admin, {

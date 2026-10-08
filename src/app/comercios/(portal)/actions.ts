@@ -1,5 +1,6 @@
 'use server'
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { createClient } from '@/lib/supabase/server'
 import { requireRolComercio } from '@/lib/comercios/requerir-comercio'
 import type { MetodoRegistroVenta } from '@/lib/supabase/database.types'
@@ -247,7 +248,7 @@ export async function registrarVenta(
     metodo_registro: metodoRegistro,
     registrada_por_perfil: actor.userId,
   })
-  if (errVenta) return { error: `No se pudo registrar la venta: ${errVenta.message}` }
+  if (errVenta) return { error: mensajeDeError('No se pudo registrar la venta', errVenta) }
 
   return {
     ok: true,

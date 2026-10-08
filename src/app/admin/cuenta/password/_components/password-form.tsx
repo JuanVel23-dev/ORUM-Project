@@ -36,6 +36,7 @@ export function PasswordForm() {
   const [state, formAction, pending] = useActionState(cambiarPassword, estadoInicial)
   const { toast } = useToast()
 
+  const [actual, setActual] = useState('')
   const [password, setPassword] = useState('')
   const [confirmar, setConfirmar] = useState('')
   const [ver, setVer] = useState(false)
@@ -55,6 +56,7 @@ export function PasswordForm() {
       title: 'Contraseña actualizada',
       description: 'Úsala la próxima vez que inicies sesión.',
     })
+    setActual('')
     setPassword('')
     setConfirmar('')
   }, [state, toast])
@@ -67,17 +69,18 @@ export function PasswordForm() {
     /* Sin `Card`: la superficie la pone quien usa el formulario —el overlay o
        la página—, nunca el formulario. */
     <form action={formAction} className={styles.formulario} noValidate>
+      {/* Los errores sin `campo` (sesión caducada, fallo del servidor) van en el
+          último campo que se escribe, como hasta ahora. */}
       <Field
-        label="Nueva contraseña"
-        help={`Mínimo ${LONGITUD_MINIMA} caracteres.`}
-        error={state.error}
+        label="Contraseña actual"
+        error={state.campo === 'actual' ? state.error : undefined}
       >
         <Input
-          name="password"
+          name="actual"
           type={ver ? 'text' : 'password'}
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+          value={actual}
+          onChange={(e) => setActual(e.target.value)}
           required
           autoFocus
           endAdornment={
@@ -88,6 +91,21 @@ export function PasswordForm() {
               {ver ? <EyeOff size={17} /> : <Eye size={17} />}
             </InputButton>
           }
+        />
+      </Field>
+
+      <Field
+        label="Nueva contraseña"
+        help={`Mínimo ${LONGITUD_MINIMA} caracteres.`}
+        error={state.campo !== 'actual' ? state.error : undefined}
+      >
+        <Input
+          name="password"
+          type={ver ? 'text' : 'password'}
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
         />
       </Field>
 
@@ -132,7 +150,7 @@ export function PasswordForm() {
         <Button
           type="submit"
           loading={pending}
-          disabled={!fortaleza.cumpleMinimo || noCoinciden}
+          disabled={actual.length === 0 || !fortaleza.cumpleMinimo || noCoinciden}
           icon={<ShieldCheck size={16} />}
         >
           Cambiar contraseña

@@ -1,5 +1,6 @@
 'use server'
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -78,7 +79,7 @@ export async function crearUsuario(
   if (errAuth || !creado?.user) {
     const msg = /already been registered|already registered|exists/i.test(errAuth?.message ?? '')
       ? 'Ya existe un usuario con ese correo.'
-      : `No se pudo crear el usuario: ${errAuth?.message ?? 'error desconocido'}`
+      : mensajeDeError('No se pudo crear el usuario', errAuth)
     return { error: msg }
   }
   const userId = creado.user.id
@@ -93,7 +94,7 @@ export async function crearUsuario(
     .upsert({ id: userId, rol_id: rol.id, activo: true }, { onConflict: 'id' })
   if (errPerfil) {
     await revertir()
-    return { error: `No se pudo crear el perfil: ${errPerfil.message}` }
+    return { error: mensajeDeError('No se pudo crear el perfil', errPerfil) }
   }
 
   const { error: errEmpleado } = await admin
@@ -101,7 +102,7 @@ export async function crearUsuario(
     .insert({ perfil_id: userId, ...datosEmpleado })
   if (errEmpleado) {
     await revertir()
-    return { error: `No se pudo registrar el empleado: ${errEmpleado.message}` }
+    return { error: mensajeDeError('No se pudo registrar el empleado', errEmpleado) }
   }
 
   await enviarCorreoInvitacion({
@@ -163,7 +164,7 @@ export async function editarUsuario(
       telefono: String(formData.get('telefono') ?? '').trim() || null,
     })
     .eq('perfil_id', perfilId)
-  if (error) return { error: `No se pudieron guardar los cambios: ${error.message}` }
+  if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
 
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
   const emailOriginal = String(formData.get('email_original') ?? '').trim().toLowerCase()
@@ -176,7 +177,7 @@ export async function editarUsuario(
     if (errEmail) {
       const msg = /already been registered|already registered|exists/i.test(errEmail.message)
         ? 'Ese correo ya está en uso por otro usuario.'
-        : `No se pudo actualizar el correo: ${errEmail.message}`
+        : mensajeDeError('No se pudo actualizar el correo', errEmail)
       return { error: msg }
     }
   }

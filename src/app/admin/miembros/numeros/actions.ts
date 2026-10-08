@@ -1,5 +1,6 @@
 'use server'
 
+import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -84,7 +85,7 @@ export async function cargarRangoNumeros(
       { onConflict: 'numero', ignoreDuplicates: true },
     )
     .select('numero')
-  if (error) return { error: `No se pudieron cargar los números: ${error.message}` }
+  if (error) return { error: mensajeDeError('No se pudieron cargar los números', error) }
 
   const creados = insertados?.length ?? 0
   revalidatePath(RUTA)
