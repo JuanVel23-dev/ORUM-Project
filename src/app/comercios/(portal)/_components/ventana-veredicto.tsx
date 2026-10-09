@@ -1,7 +1,8 @@
 'use client'
 
 import { useActionState, useEffect } from 'react'
-import { RotateCcw, X } from 'lucide-react'
+import { AlertCircle, RotateCcw, X } from 'lucide-react'
+import type { HistorialVisitas } from '@/lib/comercios/visitas'
 import { iniciales } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
@@ -132,6 +133,59 @@ export function VentanaVeredicto({
   )
 }
 
+/*
+  LAS ÚLTIMAS VISITAS DEL SOCIO A ESTE COMERCIO (08/10/2026). Solo cuándo
+  vino: fecha y hora, y la sucursal si el comercio tiene varias. Sin importes
+  ni promoción, y sin juzgar si es «primera vez».
+
+  SI FALLA, NO SE CALLA: filas de relleno DIFUMINADAS con el aviso encima.
+  Las filas son decoración (`aria-hidden`): lo que informa —también al lector
+  de pantalla— es el texto. Un bloque que desaparece sin más haría creer al
+  cajero que el socio no ha venido nunca, y eso es un dato falso.
+*/
+const FILAS_RELLENO = [0, 1, 2]
+
+function HistorialVisitasLista({ historial }: { historial: HistorialVisitas }) {
+  return (
+    <section className={styles.historial} aria-labelledby="titulo-visitas">
+      <h3 id="titulo-visitas" className={styles.historialTitulo}>
+        Visitas a este comercio
+      </h3>
+
+      {!historial.ok ? (
+        <div className={styles.historialError} role="status">
+          <ul className={styles.historialLista} aria-hidden="true">
+            {FILAS_RELLENO.map((i) => (
+              <li key={i} className={`${styles.visita} ${styles.visitaDifuminada}`}>
+                <span>mié, 00 ooo 0000</span>
+                <span>0:00 p. m.</span>
+              </li>
+            ))}
+          </ul>
+          <p className={styles.historialAviso}>
+            <AlertCircle size={16} aria-hidden="true" />
+            No se pudo cargar el historial. Cierra y vuelve a verificar al socio.
+          </p>
+        </div>
+      ) : historial.visitas.length === 0 ? (
+        <p className={styles.historialVacio}>Aún no ha visitado este comercio.</p>
+      ) : (
+        <ul className={styles.historialLista}>
+          {historial.visitas.map((v) => (
+            <li key={v.id} className={styles.visita}>
+              <span>
+                {v.fecha}
+                {v.sucursal && <span className={styles.visitaSucursal}> · {v.sucursal}</span>}
+              </span>
+              <span className={styles.visitaHora}>{v.hora}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 function Contenido({
   miembro,
   metodo,
@@ -241,6 +295,8 @@ function Contenido({
           </p>
         </div>
       </div>
+
+      {vigente && <HistorialVisitasLista historial={miembro.historial} />}
 
       {vigente ? (
         <ConfirmarVentaForm

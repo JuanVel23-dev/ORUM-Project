@@ -554,6 +554,87 @@
   border-top: 1px solid var(--border-subtle);
 }
 
+/* --- Las últimas visitas del socio a este comercio -------------------------- */
+
+.historial {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-5) var(--pad-ventana) 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.historialTitulo {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--text-3);
+}
+
+/* Filas de lista: sin sombra ni movimiento. Solo hairlines. */
+.historialLista {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.visita {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  font-size: var(--t-footnote-size);
+  color: var(--text);
+}
+
+.visita + .visita {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.visitaSucursal {
+  color: var(--text-3);
+}
+
+.visitaHora {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+
+.historialVacio {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  color: var(--text-3);
+}
+
+/* Error: filas de relleno difuminadas (decorativas) y el aviso encima. El
+   desenfoque es de un `filter` estático, no de `backdrop-filter`. */
+.historialError {
+  position: relative;
+}
+
+.visitaDifuminada {
+  filter: blur(calc(var(--blur-sm) / 2));
+  opacity: 0.6;
+  user-select: none;
+}
+
+.historialAviso {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  text-align: center;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--danger);
+}
+
 /* Qué hacer, no solo qué pasa: un veredicto negativo sin instrucción deja al
    cajero decidiendo a solas delante del cliente. */
 .instruccion {

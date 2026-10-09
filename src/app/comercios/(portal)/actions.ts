@@ -8,6 +8,8 @@ import { calcularDescuento, calcularValorFinal } from '@/lib/comercios/ventas'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { hoyISO } from '@/lib/shared/fecha'
+import { obtenerMiComercio } from '@/lib/comercios/comercio-sesion'
+import { MAX_VISITAS, prepararVisitas, type HistorialVisitas } from '@/lib/comercios/visitas'
 
 export type MiembroEncontrado = {
   id: number
@@ -18,6 +20,44 @@ export type MiembroEncontrado = {
   planNombre: string | null
   /** La foto del carnet, para cotejar la cara en la caja. `null` si no tiene. */
   fotoUrl: string | null
+  /** Las últimas visitas del socio a ESTE comercio, o el aviso de que fallaron. */
+  historial: HistorialVisitas
+}
+
+/**
+ * Las últimas visitas del socio al comercio de la sesión.
+ *
+ * `service_role` filtrada por el `comercio_id` de la cookie (misma razón que la
+ * foto: el comercio no lee `ventas` de otros). Nunca lanza: devuelve
+ * `{ ok: false }` y la ventana lo dice, porque el historial es una ayuda y no
+ * puede tumbar una verificación.
+ */
+async function obtenerHistorial(miembroId: number): Promise<HistorialVisitas> {
+  try {
+    const comercio = await obtenerMiComercio()
+    if (!comercio) return { ok: false }
+
+    const admin = createAdminClient()
+    const { data: sucursales, error: errSuc } = await admin
+      .from('sucursales')
+      .select('id, nombre')
+      .eq('comercio_id', comercio.id)
+    if (errSuc || !sucursales) return { ok: false }
+    if (sucursales.length === 0) return { ok: true, visitas: [] }
+
+    const { data: filas, error } = await admin
+      .from('ventas')
+      .select('id, fecha_hora, sucursal_id')
+      .eq('miembro_id', miembroId)
+      .in('sucursal_id', sucursales.map((s) => s.id))
+      .order('fecha_hora', { ascending: false })
+      .limit(MAX_VISITAS)
+    if (error || !filas) return { ok: false }
+
+    return { ok: true, visitas: prepararVisitas(filas, sucursales) }
+  } catch {
+    return { ok: false }
+  }
 }
 
 export type BuscarMiembroState = {
@@ -68,12 +108,15 @@ export async function buscarMiembro(
     enseña en su carnet, y sirve para lo mismo, cotejar la cara. Si falla, la
     ventana cae a las iniciales: la foto no puede tumbar una verificación.
   */
-  const { data: fila } = await createAdminClient()
-    .from('miembros')
-    .select('foto_url')
-    .eq('id', data.miembro_id)
-    .is('deleted_at', null)
-    .maybeSingle()
+  const [{ data: fila }, historial] = await Promise.all([
+    createAdminClient()
+      .from('miembros')
+      .select('foto_url')
+      .eq('id', data.miembro_id)
+      .is('deleted_at', null)
+      .maybeSingle(),
+    obtenerHistorial(data.miembro_id),
+  ])
 
   return {
     metodo,
@@ -87,6 +130,7 @@ export async function buscarMiembro(
       planNombre: data.plan_nombre,
       /* Una cadena vacía no es una foto: sería un `<img src="">`. */
       fotoUrl: (fila?.foto_url ?? '').trim() || null,
+      historial,
     },
   }
 }
