@@ -305,14 +305,18 @@ export function Modal({
           )}
 
           {children && (
-            <div
-              /* La barra de desplazamiento con diseño (`globals.css`). */
-              data-barra=""
-              className={[styles.cuerpo, !tieneCabecera && styles.cuerpoSinCabecera]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {children}
+            /* El marco pinta la pista de «hay más abajo» de borde a borde,
+               por encima de la barra del cuerpo (ver `modal.module.css`). */
+            <div className={styles.marcoCuerpo}>
+              <div
+                /* La barra de desplazamiento con diseño (`globals.css`). */
+                data-barra=""
+                className={[styles.cuerpo, !tieneCabecera && styles.cuerpoSinCabecera]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {children}
+              </div>
             </div>
           )}
 

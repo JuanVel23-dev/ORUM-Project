@@ -208,25 +208,46 @@
       inactiva (nada que desplazar) se queda en su `opacity: 0` de base.
     · Se APAGA al llegar al final (en los últimos 48px del recorrido): así
       nunca tapa el último contenido, que es el que se busca al bajar.
-    · Sin JavaScript: `animation-timeline: scroll()`. Donde el navegador no
-      lo soporta (`@supports`), no se pinta nada — mejor sin pista que una
+    · Sin JavaScript: una línea de tiempo de scroll. Donde el navegador no
+      la soporta (`@supports`), no se pinta nada — mejor sin pista que una
       pista que se queda fija encima del final.
 
-  `position: sticky` + `bottom: 0` lo clava al filo visible; el margen
-  negativo lo saca del flujo (no añade hueco) y lo estira hasta los bordes
-  del cuerpo, por encima de su relleno lateral.
+  VIVE EN EL MARCO, NO DENTRO DEL CUERPO (09/10/2026). Era un `::after`
+  pegajoso del propio cuerpo, y un hijo del cuerpo solo puede ocupar su área
+  de contenido: al darle a los formularios su barra de desplazamiento, el
+  degradado se quedó 12 px más estrecho que la ventana, con su esquina
+  redondeada flotando por dentro («está mal el diseño»). Ahora lo pinta
+  `.marcoCuerpo`, que envuelve al cuerpo y mide lo que la ventana: va de
+  borde a borde, POR ENCIMA de la barra. Lo mueve el desplazamiento del
+  cuerpo por una línea de tiempo con nombre (`scroll-timeline` en el cuerpo,
+  `timeline-scope` en el marco para que su `::after` la vea).
 */
-@supports (animation-timeline: scroll()) {
-  .cuerpo::after {
+.marcoCuerpo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.marcoCuerpo > .cuerpo {
+  min-height: 0;
+}
+
+@supports (animation-timeline: scroll()) and (timeline-scope: --x) {
+  .marcoCuerpo {
+    timeline-scope: --cuerpo-hoja;
+  }
+
+  .marcoCuerpo > .cuerpo {
+    scroll-timeline: --cuerpo-hoja block;
+  }
+
+  .marcoCuerpo::after {
     content: '';
-    position: sticky;
-    /* Menos el relleno inferior del cuerpo: el filo pegajoso se mide desde
-       su caja de contenido, y con `0` quedaba una franja blanca de 24px
-       debajo del degradado, cortándolo. */
-    bottom: calc(-1 * var(--space-6));
-    display: block;
+    position: absolute;
+    inset: auto 0 0 0;
     height: 72px;
-    margin: -72px calc(-1 * var(--space-6)) 0;
     pointer-events: none;
 
     background: linear-gradient(
@@ -237,7 +258,7 @@
 
     opacity: 0;
     animation: pistaHayMas linear both;
-    animation-timeline: scroll(nearest block);
+    animation-timeline: --cuerpo-hoja;
     /* Se apaga en los ÚLTIMOS 48px del recorrido, no en un porcentaje: en
        una ficha larga el 15 % final eran cientos de píxeles con el efecto a
        medias. Al tocar fondo vale 0, sea cual sea la longitud. */

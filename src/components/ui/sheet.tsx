@@ -381,8 +381,11 @@ export function Sheet({
         )}
 
         {children && (
-          <div className={styles.cuerpo} data-barra="">
-            {children}
+          /* El marco pinta la pista de «hay más abajo» de borde a borde. */
+          <div className={styles.marcoCuerpo}>
+            <div className={styles.cuerpo} data-barra="">
+              {children}
+            </div>
           </div>
         )}
         {footer && <div className={styles.pie}>{footer}</div>}
