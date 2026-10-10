@@ -89,7 +89,7 @@ export function SelectMenu({
         }
       >
         {/* Desplaza por dentro si son muchas: el menú no tiene tope de alto. */}
-        <div className={styles.lista} data-barra="">
+        <div className={styles.lista} data-barra="" data-desvanece="">
           {opciones.map((o) => (
             <MenuItem key={o.value} selected={o.value === value} onSelect={() => onChange(o.value)}>
               {o.label}

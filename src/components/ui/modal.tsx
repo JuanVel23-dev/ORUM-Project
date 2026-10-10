@@ -305,12 +305,14 @@ export function Modal({
           )}
 
           {children && (
-            /* El marco pinta la pista de «hay más abajo» de borde a borde,
-               por encima de la barra del cuerpo (ver `modal.module.css`). */
+            /* El marco recorta el cuerpo a las esquinas de la ventana (ver
+               `modal.module.css`). */
             <div className={styles.marcoCuerpo}>
               <div
-                /* La barra de desplazamiento con diseño (`globals.css`). */
+                /* La barra con diseño y el desvanecido de los bordes al
+                   desplazar (los dos, en `globals.css`). */
                 data-barra=""
+                data-desvanece=""
                 className={[styles.cuerpo, !tieneCabecera && styles.cuerpoSinCabecera]
                   .filter(Boolean)
                   .join(' ')}

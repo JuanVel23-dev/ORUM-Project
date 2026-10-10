@@ -1615,13 +1615,39 @@ textarea:active,
 }
 
 /*
-  EL DESVANECIDO DE UNA LISTA QUE DESPLAZA  ·  `--desvanece-arriba/abajo`
+  LO QUE DESPLAZA SE DESVANECE HACIA SUS BORDES  ·  `[data-desvanece]`
   ---------------------------------------------------------------------------
-  Dos longitudes REGISTRADAS (`@property`) para poder animarlas: una
-  propiedad personalizada sin registrar no se interpola, salta. Las mueve una
-  animación ligada al desplazamiento de la propia lista (ver
-  `select-menu.module.css`) y alimentan su máscara: cuánto se desvanece el
-  borde de arriba y el de abajo. Valen 0 en reposo, o sea sin máscara.
+  Cuarta y última forma de resolver «al desplazar se ve cortado» (09/10/2026).
+  Las tres anteriores ponían una CAPA encima del contenido (un degradado
+  oscuro, luego uno del color de la ventana), y una capa siempre tiene un
+  canto en algún sitio: contra la esquina redondeada, contra la columna de la
+  barra, contra la sombra de un botón que tapa a medias. El propietario fue
+  encontrando cada costura.
+
+  Esto no pone nada encima: es una MÁSCARA sobre el propio contenedor que
+  desplaza. Su contenido se vuelve transparente hacia el borde y lo que se ve
+  detrás es el fondo real de la ventana, sea el que sea. Sin capa no hay
+  canto, ni color que casar, ni esquina que seguir; la barra se desvanece a
+  la vez que el contenido.
+
+    · ARRIBA se funde en cuanto se ha bajado algo (los primeros 24px).
+    · ABAJO se funde mientras queda contenido, y deja de hacerlo al llegar
+      al final (los últimos 24px): lo último se ve entero.
+    · Sin recorrido (todo cabe), las líneas de tiempo están inactivas y las
+      dos longitudes valen 0: no hay máscara.
+    · Sin JavaScript. Donde el navegador no soporta animaciones ligadas al
+      desplazamiento, no se aplica nada (`@supports`).
+
+  Las dos longitudes van REGISTRADAS (`@property`): una propiedad
+  personalizada sin registrar no se interpola, salta. Y son dos animaciones,
+  no una, porque cada una tiene su tramo del recorrido (`animation-range`).
+
+  El negro de la máscara no es un color de interfaz: es su canal alfa.
+
+  QUIÉN LO LLEVA: el cuerpo de `Modal` y de `Sheet`, la lista de `SelectMenu`
+  y la de la paleta. NO una ventana que desplaza entera (se fundiría su
+  propio fondo) ni un contenedor con algo pegado abajo (`sticky`), que
+  quedaría a medio ver.
 */
 @property --desvanece-arriba {
   syntax: '<length>';
@@ -1633,4 +1659,43 @@ textarea:active,
   syntax: '<length>';
   inherits: false;
   initial-value: 0px;
+}
+
+@supports (animation-timeline: scroll()) {
+  [data-desvanece] {
+    --desvanece-alto: var(--space-7);
+
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black var(--desvanece-arriba),
+      black calc(100% - var(--desvanece-abajo)),
+      transparent
+    );
+    animation:
+      desvanece-arriba linear both,
+      desvanece-abajo linear both;
+    animation-timeline: scroll(self block), scroll(self block);
+    animation-range:
+      0 var(--space-6),
+      calc(100% - var(--space-6)) 100%;
+  }
+
+  @keyframes desvanece-arriba {
+    from {
+      --desvanece-arriba: 0px;
+    }
+    to {
+      --desvanece-arriba: var(--desvanece-alto);
+    }
+  }
+
+  @keyframes desvanece-abajo {
+    from {
+      --desvanece-abajo: var(--desvanece-alto);
+    }
+    to {
+      --desvanece-abajo: 0px;
+    }
+  }
 }

@@ -351,7 +351,7 @@ export function CommandPalette({
           <span className={styles.atajo}>ESC</span>
         </div>
 
-        <div className={styles.lista} data-barra="" ref={listaRef} role="listbox" aria-label="Resultados">
+        <div className={styles.lista} data-barra="" data-desvanece="" ref={listaRef} role="listbox" aria-label="Resultados">
           {acciones.length > 0 && <div className={styles.grupoTitulo}>Acciones</div>}
 
           {acciones.map((accion, i) => (

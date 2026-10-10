@@ -381,9 +381,8 @@ export function Sheet({
         )}
 
         {children && (
-          /* El marco pinta la pista de «hay más abajo» de borde a borde. */
           <div className={styles.marcoCuerpo}>
-            <div className={styles.cuerpo} data-barra="">
+            <div className={styles.cuerpo} data-barra="" data-desvanece="">
               {children}
             </div>
           </div>

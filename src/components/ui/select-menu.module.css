@@ -103,55 +103,12 @@
 }
 
 /* Muchas opciones: la lista desplaza por dentro en vez de salirse de la
-   ventana, con la barra de los formularios (`data-barra`, en `globals.css`). */
+   ventana, con la barra de los formularios (`data-barra`) y desvaneciéndose
+   hacia sus bordes (`data-desvanece`), los dos en `globals.css`. */
 .lista {
   max-height: min(288px, 46dvh);
   overflow-y: auto;
   overscroll-behavior: contain;
-}
-
-/*
-  LAS OPCIONES SE DESVANECEN AL DESPLAZAR, no se cortan en seco (09/10/2026:
-  «cuando se desplaza se ve cortado»). Una máscara que funde el borde de
-  arriba cuando ya se ha bajado y el de abajo mientras queda lista: la
-  animación va ligada al desplazamiento de la propia lista y mueve las dos
-  longitudes registradas en `globals.css`. Sin recorrido (lista corta) la
-  línea de tiempo está inactiva y no hay máscara. El negro de la máscara no
-  es un color de interfaz: es su canal alfa (opaco = se ve).
-*/
-@supports (animation-timeline: scroll()) {
-  .lista {
-    --fundido: var(--space-5);
-
-    mask-image: linear-gradient(
-      to bottom,
-      transparent,
-      black var(--desvanece-arriba),
-      black calc(100% - var(--desvanece-abajo)),
-      transparent
-    );
-    animation: desvaneceLista linear both;
-    animation-timeline: scroll(self block);
-  }
-
-  @keyframes desvaneceLista {
-    0% {
-      --desvanece-arriba: 0px;
-      --desvanece-abajo: var(--fundido);
-    }
-    10% {
-      --desvanece-arriba: var(--fundido);
-      --desvanece-abajo: var(--fundido);
-    }
-    90% {
-      --desvanece-arriba: var(--fundido);
-      --desvanece-abajo: var(--fundido);
-    }
-    100% {
-      --desvanece-arriba: var(--fundido);
-      --desvanece-abajo: 0px;
-    }
-  }
 }
 
 /* En táctil, filas más altas: el mínimo de un objetivo es `--tap-min`. */

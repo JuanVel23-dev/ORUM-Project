@@ -1301,23 +1301,24 @@ no con `::-webkit-scrollbar`**: los pseudoelementos los pinta Chrome en el
 hilo principal y el pulgar se quedaba atrás al desplazar rápido («trabada»);
 con la propiedad estándar la barra sigue siendo la nativa, que mueve el
 compositor. La forma la pone el sistema; no la cambies a costa de eso.
-**Los fundidos del cuerpo de `Modal` y `Sheet`** (tercera versión,
-09/10/2026). El degradado NEGRO de «hay más abajo» se retiró: sobre una
-ventana blanca había que casarlo al píxel con la esquina y los campos se
-veían cortados al pasar por debajo. Ahora el contenido se DESVANECE hacia el
-borde, arriba y abajo, en el color de la ventana (`--surface`), y la pista de
-«puedes bajar» la da la barra. Los pinta `.marcoCuerpo` (no el cuerpo, que se
-los llevaría al desplazar), movidos por una línea de tiempo de scroll con
-nombre, y dejan libre la columna de la barra. **No vuelvas al degradado
-oscuro.**
+**Lo que desplaza se DESVANECE hacia sus bordes con una máscara**
+(`[data-desvanece]`, en `globals.css`; cuarta y última versión, 09/10/2026).
+Las tres anteriores ponían una CAPA encima del contenido —un degradado
+negro, luego uno del color de la ventana— y una capa siempre tiene un canto
+en algún sitio (la esquina redondeada, la columna de la barra, la sombra de
+un botón tapada a medias); el propietario fue encontrando cada costura. La
+máscara no pone nada encima: el contenido se vuelve transparente hacia el
+borde y se ve el fondo real. Dos animaciones ligadas al desplazamiento
+mueven `--desvanece-arriba/abajo` (registradas con `@property`): arriba se
+funde tras bajar 24px, abajo deja de fundirse al llegar al final. Lo llevan
+el cuerpo de `Modal` y de `Sheet`, la lista de `SelectMenu` y la de la
+paleta. **No en una ventana que desplaza entera** (se fundiría su fondo)
+**ni con algo `sticky` abajo.** No vuelvas a un degradado superpuesto.
 
-**`.marcoCuerpo` RECORTA a la forma de la ventana** (`overflow: hidden` con
-el radio interior, abajo si no hay pie y arriba si no hay cabecera). El
-`<dialog>` no puede recortar —perdería su sombra—, y sin esto asomaban por la
-curva el canto del fundido, el borde de un campo o el final de la barra. No
-redondees pieza por pieza: recorta el marco. La lista de `SelectMenu` se
-desvanece con una máscara ligada a su desplazamiento
-(`--desvanece-arriba/abajo`, registradas con `@property` en `globals.css`).
+**`.marcoCuerpo` (Modal) RECORTA a la forma de la ventana** (`overflow:
+hidden` con el radio interior, abajo si no hay pie y arriba si no hay
+cabecera). El `<dialog>` no puede recortar —perdería su sombra—, y sin esto
+asomaban por la curva el borde de un campo o el final de la barra.
 
 **Una ventana con cabecera de color no desplaza ENTERA** (veredicto de
 comercios): desplaza su cuerpo (`.ventanaCuerpo`, que lleva el `data-barra`).

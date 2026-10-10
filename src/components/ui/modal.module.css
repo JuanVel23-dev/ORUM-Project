@@ -159,36 +159,12 @@
 }
 
 /*
-  LOS FUNDIDOS DEL CUERPO  ·  «hay más arriba / hay más abajo»
-  ---------------------------------------------------------------------------
-  Tercera versión (09/10/2026). La historia, para no repetirla:
+  EL MARCO DEL CUERPO. Envuelve a lo que desplaza y no desplaza él.
 
-    1. Un degradado NEGRO pegado abajo (29/09/2026: «una sombra o difuminado
-       negro para que intuyan que pueden bajar»). Vivía dentro del cuerpo.
-    2. Al darle al cuerpo su barra de desplazamiento quedó más estrecho que
-       la ventana; se sacó a este marco para ir de borde a borde.
-    3. Y aun así «no se ve bien»: un gris oscuro sobre una ventana blanca
-       necesita casar al píxel con su esquina redondeada (el filo de 1px de
-       la ventana dejaba una raya blanca), y los campos se veían CORTADOS al
-       pasar por debajo, arriba y abajo.
-
-  Ahora el fundido es DEL COLOR DE LA VENTANA (`--surface`): el contenido se
-  desvanece hacia el borde en vez de cortarse en seco, y como es blanco sobre
-  blanco no hay canto ni esquina que casar. La pista de «puedes bajar» la da
-  ya la barra de desplazamiento, que está a la vista.
-
-    · ARRIBA: aparece en cuanto se ha bajado un poco (los primeros 24px).
-    · ABAJO: está mientras queda contenido y se apaga al llegar al final (los
-      últimos 24px), para no velar lo último.
-    · No tapan la barra: dejan libre su columna (`--espacio-barra`).
-    · Solo existen si el cuerpo desplaza: sin recorrido, la línea de tiempo
-      está inactiva y se quedan en su `opacity: 0` de base.
-    · Sin JavaScript. Donde el navegador no soporta líneas de tiempo de
-      scroll con nombre (`@supports`), no se pinta ninguno.
-
-  Viven en el MARCO, no en el cuerpo: un hijo del cuerpo se desplazaría con
-  él. El marco lee el desplazamiento del cuerpo por una línea de tiempo con
-  nombre (`scroll-timeline` en el cuerpo, `timeline-scope` en el marco).
+  El desvanecido de los bordes ya NO vive aquí: eran dos capas (`::before` y
+  `::after`) puestas encima del contenido, y una capa siempre acaba teniendo
+  un canto visible. Ahora es una máscara sobre el propio cuerpo
+  (`data-desvanece`, en `globals.css`).
 */
 .marcoCuerpo {
   position: relative;
@@ -206,15 +182,14 @@
   EL MARCO RECORTA A LA FORMA DE LA VENTANA (09/10/2026). El `<dialog>` no
   puede llevar `overflow: hidden` (recortaría su sombra y sus menús), así que
   nada recortaba el cuerpo a las esquinas redondeadas: al desplazar, por la
-  curva asomaban el canto recto del fundido, el borde de un campo o el final
-  de la barra («cuando se desplaza aparecen los errores»).
+  curva asomaban el borde de un campo o el final de la barra.
 
   El marco sí recorta, y con el radio INTERIOR de la ventana (el suyo menos
   su filo de 1px), para que no quede ni una raya entre los dos:
     · abajo, cuando es lo último de la ventana (no hay pie debajo);
     · arriba, cuando es lo primero (no hay cabecera encima).
-  Con eso el contenido, los dos fundidos y la barra siguen la curva sin que
-  cada pieza tenga que redondearse por su cuenta.
+  Con eso el contenido y la barra siguen la curva sin que cada pieza tenga
+  que redondearse por su cuenta.
 */
 .marcoCuerpo {
   --radio-interior: calc(var(--radius-lg) - 1px);
@@ -230,68 +205,6 @@
 .marcoCuerpo:first-child {
   border-top-left-radius: var(--radio-interior);
   border-top-right-radius: var(--radio-interior);
-}
-
-@supports (animation-timeline: scroll()) and (timeline-scope: --x) {
-  .marcoCuerpo {
-    timeline-scope: --cuerpo-modal;
-
-    --fundido-alto: var(--space-7);
-    /* El ancho de la barra del cuerpo (`[data-barra]`, en `globals.css`). */
-    --espacio-barra: var(--space-3);
-  }
-
-  .marcoCuerpo > .cuerpo {
-    scroll-timeline: --cuerpo-modal block;
-  }
-
-  .marcoCuerpo::before,
-  .marcoCuerpo::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: var(--espacio-barra);
-    z-index: 1;
-    height: var(--fundido-alto);
-    pointer-events: none;
-
-    opacity: 0;
-    animation-timing-function: linear;
-    animation-fill-mode: both;
-    animation-timeline: --cuerpo-modal;
-  }
-
-  .marcoCuerpo::before {
-    top: 0;
-    background: linear-gradient(to bottom, var(--surface), transparent);
-    animation-name: fundidoAparece;
-    animation-range: 0 var(--space-6);
-  }
-
-  .marcoCuerpo::after {
-    bottom: 0;
-    background: linear-gradient(to top, var(--surface), transparent);
-    animation-name: fundidoSeVa;
-    animation-range: calc(100% - var(--space-6)) 100%;
-  }
-
-  @keyframes fundidoAparece {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes fundidoSeVa {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
-  }
 }
 
 .cuerpoSinCabecera {
