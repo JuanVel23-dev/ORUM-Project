@@ -970,13 +970,26 @@ rutas o varios portales, vive en `src/components/<dominio>/` — mismo principio
 `src/lib/`, aplicado a componentes: `anuncios/` (`AnuncioBanner`, portal público y de
 miembros) y `comercios/` (`CategoriasDirectorio`, directorio público y catálogo de
 miembros: nació en `(publico)/explorar` y se movió aquí cuando el catálogo de
-miembros dejó de tener su propia fila de chips para usar el mismo botón + ventana).
+miembros dejó de tener su propia fila de chips para usar el mismo componente).
 Si algo bajo la `_components/` de una ruta empieza a importarlo una segunda ruta,
 esa es la señal de moverlo aquí — nunca duplicarlo.
 `pie/` (`PieSitio`) es el pie de las puertas de socio y comercio (la de administración se retiró el 29/09/2026: el pie es público y no anuncia el panel): lo montan el Portal Público y,
 desde el rediseño del 27/09/2026, el Portal de Miembros. Las clases de revelado al
 desplazar (`REVELAR`, `revelarEscalonado`…) viven en `src/lib/shared/revelado.ts`
 por la misma razón.
+
+**Las categorías del directorio van A LA VISTA, en dos filas** (09/10/2026,
+encargo del propietario; antes eran un botón «Categorías: Todas» que abría
+una ventana). `CategoriasDirectorio` pinta dentro del panel de filtros,
+encima del recuento, una tira de los círculos de siempre en DOS FILAS —una
+sola lista en orden de lectura, con `--columnas` calculado— que se desplaza
+de lado con desplazamiento nativo (dedo, rueda, panel táctil) y, con ratón,
+con dos flechas en los cantos. La última ficha es «Ver más» («Ver todas»
+mientras quepan): abre la ventana con TODAS y un campo para buscar por
+nombre, sin tildes ni mayúsculas. La tira enseña hasta `LIMITE_TIRA` (24,
+`lib/comercios/tira-categorias.ts`, probado), más cualquier ELEGIDA que caiga
+después del corte. Favoritos, Ciudad y Ordenar siguen siendo píldoras, debajo.
+No vuelvas al botón que las escondía.
 
 `Button` `Spinner` · `Field` `Input` `Select` `SelectMenu` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·

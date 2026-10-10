@@ -1,58 +1,57 @@
 'use client'
 
-import { useState } from 'react'
-import { Check, ChevronDown, LayoutGrid } from 'lucide-react'
+import { useCallback, useRef, useState, useSyncExternalStore } from 'react'
+import type { CSSProperties, RefObject } from 'react'
+import { Check, ChevronLeft, ChevronRight, LayoutGrid, Search } from 'lucide-react'
 import { Agitar } from '@/components/ui/agitar'
 import { Button } from '@/components/ui/button'
 import { IconoCategoria } from '@/components/ui/icono-categoria'
+import { Input } from '@/components/ui/input'
 import { Overlay } from '@/components/ui/overlay'
+import { buscarCategorias, repartirTira } from '@/lib/comercios/tira-categorias'
 import estilos from './categorias-directorio.module.css'
 
 /*
-  LAS CATEGORÍAS  ·  un botón que abre una ventana con todas
+  LAS CATEGORÍAS  ·  a la vista, en dos filas, y una ventana con todas
   ---------------------------------------------------------------------------
-  Nació en el directorio del Portal Público (encargo del propietario: las
-  quince categorías ya no ocupan el panel antes de los comercios) y se
-  compartió con el catálogo del Portal de Miembros, que hasta entonces filtraba
-  con una fila de chips en línea — dos lenguajes distintos para la misma
-  tarea. Vive en `src/components/comercios/` y no en la ruta del público
-  porque ahora lo consumen los dos: `CLAUDE.md` reserva las rutas para lo que
-  solo usa esa ruta.
+  Lo comparten el directorio del Portal Público y el catálogo del Portal de
+  Miembros; por eso vive en `src/components/comercios/` y no en una ruta.
 
-  Hay un botón «Categorías», junto a Ciudad y Ordenar (o solo), y al tocarlo se
-  abre una ventana con todas: diálogo centrado en escritorio, hoja inferior en
-  móvil (el `Overlay` del sistema decide).
+  TERCERA FORMA (09/10/2026, encargo del propietario: «quiero que se vean
+  directamente las categorías, con dos filas, y al final, después de unas 20
+  o 30, un apartado de ver más; y se muestren todas con apartado para buscar
+  directamente; que el usuario pueda desplazar»). Antes fueron una rejilla
+  entera dentro del panel y luego un botón «Categorías: Todas» que abría una
+  ventana: lo primero empujaba los comercios hacia abajo y lo segundo
+  escondía el filtro principal detrás de un toque.
 
-  ES SEGURO EN LOS DOS TEMAS a propósito, a diferencia de la mayoría de lo que
-  vive bajo `(publico)`: el Portal Público fuerza claro, pero el Portal de
-  Miembros sostiene los dos. Por eso el glifo seleccionado y el filo del
-  disparador usan `--text` y `--border-subtle` — semánticos que SÍ cambian de
-  valor por tema — y no `--tinta-1`, que es un primitivo fijo y oscuro: en
-  oscuro habría pintado un glifo negro sobre negro y un filo invisible.
+    · LA TIRA: los mismos círculos de siempre, en DOS FILAS dentro del panel.
+      Si no caben a lo ancho se desplaza de lado —con el dedo, con la rueda o
+      el panel táctil, y en un ordenador con las dos flechas que aparecen en
+      los cantos—. El desplazamiento es el nativo del navegador (como
+      `Carril`): sin gesto propio.
+    · «VER MÁS», la última ficha de la tira: abre la ventana con TODAS y un
+      campo para buscar por nombre. La tira enseña hasta `LIMITE_TIRA`
+      (`lib/comercios/tira-categorias.ts`); una elegida que caiga después del
+      corte sale igualmente, para que el filtro puesto esté siempre a la
+      vista. Mientras todas quepan, la ficha dice «Ver todas»: no hay «más»,
+      pero el buscador sigue a un toque.
+
+  UNA SOLA LISTA, EN ORDEN DE LECTURA. Las dos filas son una rejilla con el
+  número de columnas calculado (`--columnas`), no dos listas ni un flujo por
+  columnas: así el orden del teclado y del lector es el mismo que se ve, de
+  izquierda a derecha y luego abajo.
 
   CADA CATEGORÍA TIEMBLA AL TOCARLA, con `Agitar` —el acento de «seleccionado»
-  del sistema, corto y sin repetición para que no se lea como error—. Se agita
-  en el MISMO instante del toque, no cuando vuelve el servidor: `pendiente`
-  guarda la que se acaba de tocar mientras la navegación viaja. Como manda la
-  regla de `Agitar`, no tiembla al montar ni al apagarse.
+  del sistema—, en el mismo instante del toque. No tiembla al montar ni al
+  apagarse.
 
   Las opciones siguen siendo ENLACES (el filtro vive en la URL: se comparte y
-  sobrevive a un refresco). La ventana NO se cierra sola al elegir: el
-  visitante ve el temblor y la selección, y cierra con «Ver comercios», que
-  ya dice cuántos hay.
-
-  VARIAS A LA VEZ (30/09/2026, encargo del propietario). Cada categoría se
-  enciende y se apaga sola, con una marca de verificación en su círculo;
-  «Todas» limpia la selección.
-
-  EL TOQUE LO RESUELVE EL DIRECTORIO, AL INSTANTE (`onElegir`, 03/10/2026).
-  Antes cada opción navegaba con un `href` calculado en el servidor, y dos
-  toques rápidos se pisaban: el segundo enlace no sabía del primero y lo
-  desmarcaba. Ahora el directorio filtra en el cliente partiendo siempre del
-  estado real de la URL. El `href` queda de respaldo sin JavaScript.
-
-  Los `href` llegan calculados del servidor (`hrefDirectorio`), así que este
-  componente no conoce la forma de la URL.
+  sobrevive a un refresco) y se pueden elegir VARIAS: cada una se enciende y
+  se apaga sola, con su marca de verificación; «Todas» limpia la selección.
+  El toque lo resuelve el directorio al instante (`onElegir`); el `href`
+  queda de respaldo sin JavaScript. La ventana no se cierra sola al elegir:
+  se cierra con «Ver N comercios».
 */
 
 export type OpcionCategoria = {
@@ -71,81 +70,186 @@ type Props = {
   total: number
 }
 
+/* --- La ficha de una categoría: la misma en la tira y en la ventana ------- */
+
+function Ficha({
+  opcion,
+  onElegir,
+}: {
+  opcion: OpcionCategoria
+  onElegir: (id: number | null) => void
+}) {
+  const { activa } = opcion
+  return (
+    <a
+      href={opcion.href}
+      className={estilos.opcion}
+      data-activa={activa || undefined}
+      onClick={(e) => {
+        // ctrl/cmd/shift+clic: otra pestaña, con el `href` de respaldo.
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+        e.preventDefault()
+        onElegir(opcion.id)
+      }}
+    >
+      {/* El temblor va en el GLIFO, dentro del círculo, y no en el círculo:
+          `Agitar` se aplica al icono, nunca a la superficie. */}
+      <span className={estilos.icono} aria-hidden="true">
+        <Agitar activo={activa}>
+          {opcion.id === null ? (
+            <LayoutGrid size={20} aria-hidden="true" />
+          ) : (
+            <IconoCategoria nombre={opcion.nombre} size={20} />
+          )}
+        </Agitar>
+        {/* La marca de «elegida»: con varias a la vez, el anillo solo no
+            basta para contarlas de un vistazo. */}
+        {activa && opcion.id !== null && (
+          <span className={estilos.marca}>
+            <Check size={11} strokeWidth={3} aria-hidden="true" />
+          </span>
+        )}
+      </span>
+      <span className={estilos.nombre}>{opcion.nombre}</span>
+      {/* El estado, dicho con palabras al lector de pantalla. */}
+      {activa && <span className="sr-only"> (elegida)</span>}
+    </a>
+  )
+}
+
+/* --- Hacia dónde queda tira por ver --------------------------------------- */
+
+const HAY_ANTES = 1
+const HAY_DESPUES = 2
+/** Holgura: los navegadores redondean el desplazamiento a fracciones de píxel. */
+const HOLGURA = 4
+
+/*
+  El desplazamiento de la pista es estado EXTERNO (lo mueve el navegador, no
+  React): se lee con `useSyncExternalStore`, como manda `CLAUDE.md`, y solo
+  vuelve a pintar cuando cambia la respuesta —«hay antes», «hay después»—, no
+  en cada píxel.
+*/
+function useDesborde(ref: RefObject<HTMLUListElement | null>): number {
+  const suscribir = useCallback(
+    (avisar: () => void) => {
+      const pista = ref.current
+      if (!pista) return () => {}
+      pista.addEventListener('scroll', avisar, { passive: true })
+      const observador = new ResizeObserver(avisar)
+      observador.observe(pista)
+      return () => {
+        pista.removeEventListener('scroll', avisar)
+        observador.disconnect()
+      }
+    },
+    [ref],
+  )
+  const leer = useCallback(() => {
+    const pista = ref.current
+    if (!pista) return 0
+    const recorrido = pista.scrollWidth - pista.clientWidth
+    if (recorrido <= HOLGURA) return 0
+    return (
+      (pista.scrollLeft > HOLGURA ? HAY_ANTES : 0) |
+      (pista.scrollLeft < recorrido - HOLGURA ? HAY_DESPUES : 0)
+    )
+  }, [ref])
+  return useSyncExternalStore(suscribir, leer, () => 0)
+}
+
+/** Con cinco fichas o menos, dos filas serían dos medias filas: va en una. */
+const MINIMO_DOS_FILAS = 6
+
 export function CategoriasDirectorio({ opciones, onElegir, total }: Props) {
   const [abierta, setAbierta] = useState(false)
+  const [busqueda, setBusqueda] = useState('')
+  const pistaRef = useRef<HTMLUListElement>(null)
+  const desborde = useDesborde(pistaRef)
 
-  const elegidas = opciones.filter((o) => o.id !== null && o.activa)
-  const resumen =
-    elegidas.length === 0 ? 'Todas' : elegidas.length === 1 ? elegidas[0].nombre : `${elegidas.length}`
+  const { visibles, ocultas } = repartirTira(opciones)
+  const fichas = visibles.length + 1 // + «Ver más»
+  const columnas = fichas < MINIMO_DOS_FILAS ? fichas : Math.ceil(fichas / 2)
 
-  const lista = (
-    <ul className={estilos.rejilla}>
-      {opciones.map((o) => {
-        const activa = o.activa
-        return (
-          <li key={o.id ?? 'todas'}>
-            <a
-              href={o.href}
-              className={estilos.opcion}
-              data-activa={activa || undefined}
-              onClick={(e) => {
-                // ctrl/cmd/shift+clic: otra pestaña, con el `href` de respaldo.
-                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
-                e.preventDefault()
-                onElegir(o.id)
-              }}
-            >
-              {/* El temblor va en el GLIFO, dentro del círculo, y no en el
-                  círculo: `Agitar` se aplica al icono, nunca a la superficie. */}
-              <span className={estilos.icono} aria-hidden="true">
-                <Agitar activo={activa}>
-                  {o.id === null ? (
-                    <LayoutGrid size={20} aria-hidden="true" />
-                  ) : (
-                    <IconoCategoria nombre={o.nombre} size={20} />
-                  )}
-                </Agitar>
-                {/* La marca de «elegida»: con varias a la vez, el anillo solo
-                    no basta para contarlas de un vistazo. */}
-                {activa && o.id !== null && (
-                  <span className={estilos.marca}>
-                    <Check size={11} strokeWidth={3} aria-hidden="true" />
-                  </span>
-                )}
-              </span>
-              <span className={estilos.nombre}>{o.nombre}</span>
-              {/* El estado, dicho con palabras al lector de pantalla. */}
-              {activa && <span className="sr-only"> (elegida)</span>}
-            </a>
-          </li>
-        )
-      })}
-    </ul>
-  )
+  const encontradas = buscarCategorias(opciones, busqueda)
+
+  function cerrar() {
+    setAbierta(false)
+    setBusqueda('')
+  }
+
+  /* Casi una pantalla de tira por pulsación: lo último que se veía sigue a
+     la vista. La suavidad la pone el CSS de la pista (`scroll-behavior`),
+     que la retira con movimiento reducido. */
+  function avanzar(sentido: 1 | -1) {
+    const pista = pistaRef.current
+    if (!pista) return
+    pista.scrollBy({ left: sentido * pista.clientWidth * 0.8 })
+  }
 
   return (
     <>
-      <button
-        type="button"
-        className={estilos.disparador}
-        aria-haspopup="dialog"
-        aria-expanded={abierta}
-        onClick={() => setAbierta(true)}
-      >
-        <span className={estilos.disparadorIcono} aria-hidden="true">
-          <LayoutGrid size={13} />
-        </span>
-        <span className={estilos.disparadorTexto}>
-          Categorías: {resumen}
-        </span>
-        <ChevronDown size={14} aria-hidden="true" className={estilos.chevron} />
-      </button>
+      <nav aria-label="Categorías" className={estilos.tira}>
+        <ul
+          ref={pistaRef}
+          className={estilos.pista}
+          data-antes={desborde & HAY_ANTES ? '' : undefined}
+          data-despues={desborde & HAY_DESPUES ? '' : undefined}
+          style={{ '--columnas': columnas } as CSSProperties}
+        >
+          {visibles.map((o) => (
+            <li key={o.id ?? 'todas'}>
+              <Ficha opcion={o} onElegir={onElegir} />
+            </li>
+          ))}
+          <li>
+            <button
+              type="button"
+              className={[estilos.opcion, estilos.verMas].join(' ')}
+              aria-haspopup="dialog"
+              aria-expanded={abierta}
+              onClick={() => setAbierta(true)}
+            >
+              <span className={estilos.icono} aria-hidden="true">
+                <Search size={20} />
+              </span>
+              <span className={estilos.nombre}>{ocultas > 0 ? 'Ver más' : 'Ver todas'}</span>
+              <span className="sr-only">
+                {ocultas > 0 ? ` (${ocultas} categorías más, con buscador)` : ' las categorías, con buscador'}
+              </span>
+            </button>
+          </li>
+        </ul>
+
+        {/* Las flechas: solo con ratón (el CSS las retira en táctil, donde
+            se desliza con el dedo) y solo hacia donde queda tira por ver. */}
+        {desborde & HAY_ANTES ? (
+          <button
+            type="button"
+            className={[estilos.flecha, estilos.flechaAntes].join(' ')}
+            aria-label="Ver las categorías anteriores"
+            onClick={() => avanzar(-1)}
+          >
+            <ChevronLeft size={18} aria-hidden="true" />
+          </button>
+        ) : null}
+        {desborde & HAY_DESPUES ? (
+          <button
+            type="button"
+            className={[estilos.flecha, estilos.flechaDespues].join(' ')}
+            aria-label="Ver más categorías"
+            onClick={() => avanzar(1)}
+          >
+            <ChevronRight size={18} aria-hidden="true" />
+          </button>
+        ) : null}
+      </nav>
 
       <Overlay
         open={abierta}
-        onClose={() => setAbierta(false)}
+        onClose={cerrar}
         title="Categorías"
-        description="Toca una o varias para ver esos comercios."
+        description="Busca una, o toca varias para ver esos comercios."
         detent="large"
         width="640px"
         footer={
@@ -154,13 +258,49 @@ export function CategoriasDirectorio({ opciones, onElegir, total }: Props) {
             pildora
             fullWidth
             className={estilos.botonVer}
-            onClick={() => setAbierta(false)}
+            onClick={cerrar}
           >
             {total === 1 ? 'Ver 1 comercio' : `Ver ${total} comercios`}
           </Button>
         }
       >
-        <nav aria-label="Categorías">{lista}</nav>
+        <div className={estilos.ventana}>
+          <Input
+            type="search"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            startIcon={<Search size={18} />}
+            placeholder="Buscar categoría"
+            aria-label="Buscar categoría"
+            autoComplete="off"
+            enterKeyHint="search"
+          />
+
+          {/* Lo que cambia al teclear, dicho al lector de pantalla. */}
+          <p className="sr-only" aria-live="polite">
+            {busqueda.trim() === ''
+              ? ''
+              : encontradas.length === 1
+                ? '1 categoría encontrada'
+                : `${encontradas.length} categorías encontradas`}
+          </p>
+
+          {encontradas.length > 0 ? (
+            <nav aria-label="Todas las categorías">
+              <ul className={estilos.rejilla}>
+                {encontradas.map((o) => (
+                  <li key={o.id ?? 'todas'}>
+                    <Ficha opcion={o} onElegir={onElegir} />
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ) : (
+            <p className={estilos.sinResultados}>
+              Ninguna categoría coincide con «{busqueda.trim()}».
+            </p>
+          )}
+        </div>
       </Overlay>
     </>
   )

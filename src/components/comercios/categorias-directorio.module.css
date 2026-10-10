@@ -1,8 +1,250 @@
 /* ==========================================================================
-   CATEGORÍAS DEL DIRECTORIO  ·  botón + ventana con todas
+   CATEGORÍAS DEL DIRECTORIO  ·  tira de dos filas + ventana con todas
    ========================================================================== */
 
-/* --- La rejilla ------------------------------------------------------------ */
+/* --- La tira: dos filas a la vista, que se desplazan de lado ---------------
+
+   Desplazamiento NATIVO (el mismo criterio que `Carril`): el dedo, la rueda
+   y el panel táctil ya traen seguimiento 1:1, inercia y rebote del sistema.
+   Ningún gesto propio, ningún `touch-action`. */
+
+.tira {
+  position: relative;
+  /* El ancho de una ficha. */
+  --ficha: 80px;
+}
+
+@container contenido (min-width: 768px) {
+  .tira {
+    --ficha: 92px;
+  }
+}
+
+.pista {
+  margin: 0;
+  list-style: none;
+
+  /*
+    DOS FILAS EN ORDEN DE LECTURA: una rejilla de `--columnas` columnas (lo
+    calcula el componente: la mitad de las fichas). Cada columna mide al
+    menos una ficha y, si sobra ancho, se lo reparten (`1fr`): con pocas
+    categorías la tira llena el panel en vez de dejar media fila vacía; con
+    muchas, las columnas se quedan en su mínimo y la tira desplaza.
+  */
+  display: grid;
+  grid-template-columns: repeat(var(--columnas), minmax(var(--ficha), 1fr));
+  gap: var(--space-4) var(--space-1);
+
+  overflow-x: auto;
+  /* Llegar al final de la tira no arrastra la página ni dispara el «atrás»
+     por gesto del navegador. */
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--space-2);
+
+  /*
+    AIRE PARA LO QUE SOBRESALE. `overflow-x: auto` recorta también arriba y
+    abajo: sin este relleno se cortaban el halo de la elegida (crece un 8 % y
+    lleva un anillo por fuera), la sombra del círculo y el anillo de foco. El
+    margen negativo lo cancela: la tira sigue empezando donde empieza el
+    panel.
+  */
+  padding: var(--space-3) var(--space-2);
+  margin: calc(var(--space-3) * -1) calc(var(--space-2) * -1);
+
+  /* Sin barra a la vista: la tira se desliza, y en un ordenador están las
+     flechas. Una barra gris debajo de dos filas de iconos las subrayaría. */
+  scrollbar-width: none;
+}
+
+.pista::-webkit-scrollbar {
+  display: none;
+}
+
+.pista > li {
+  scroll-snap-align: start;
+  /* Una ficha mide su columna; el nombre largo se parte en dos renglones. */
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Las flechas avanzan deslizando, no de un salto. */
+  .pista {
+    scroll-behavior: smooth;
+  }
+
+  /*
+    PRIMERA PINTURA, ESCALONADA: las fichas llegan una tras otra, con el paso
+    del sistema y su tope de 8 (a partir de ahí entran todas a la vez: la
+    número 25 no espera un segundo). El estado base es el final; el
+    fotograma solo dice de dónde viene.
+  */
+  .pista > li {
+    animation: entrarFicha var(--dur-slow) var(--ease-out) backwards;
+    animation-delay: calc(var(--escalonado) * 8);
+  }
+
+  .pista > li:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .pista > li:nth-child(2) {
+    animation-delay: calc(var(--escalonado) * 1);
+  }
+
+  .pista > li:nth-child(3) {
+    animation-delay: calc(var(--escalonado) * 2);
+  }
+
+  .pista > li:nth-child(4) {
+    animation-delay: calc(var(--escalonado) * 3);
+  }
+
+  .pista > li:nth-child(5) {
+    animation-delay: calc(var(--escalonado) * 4);
+  }
+
+  .pista > li:nth-child(6) {
+    animation-delay: calc(var(--escalonado) * 5);
+  }
+
+  .pista > li:nth-child(7) {
+    animation-delay: calc(var(--escalonado) * 6);
+  }
+
+  .pista > li:nth-child(8) {
+    animation-delay: calc(var(--escalonado) * 7);
+  }
+
+  @keyframes entrarFicha {
+    from {
+      opacity: 0;
+      translate: 0 var(--space-2);
+    }
+  }
+}
+
+/*
+  «HAY MÁS»: la tira se desvanece hacia el canto por el que sigue. Es una
+  máscara sobre la propia pista (como `data-desvanece`), no una capa encima:
+  no hay color que casar con el panel. El negro es su canal alfa, no un
+  color de interfaz. Los atributos los pone el componente según el
+  desplazamiento.
+*/
+.pista[data-antes]:not([data-despues]) {
+  mask-image: linear-gradient(to right, transparent, black var(--space-7));
+}
+
+.pista[data-despues]:not([data-antes]) {
+  mask-image: linear-gradient(to left, transparent, black var(--space-7));
+}
+
+.pista[data-antes][data-despues] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--space-7),
+    black calc(100% - var(--space-7)),
+    transparent
+  );
+}
+
+/* --- Las flechas -----------------------------------------------------------
+   Un disco blanco con su sombra en cada canto, a media altura. Solo con
+   ratón: en táctil la tira se desliza con el dedo y un botón encima de las
+   fichas estorbaría. Con teclado no hacen falta (el navegador desplaza la
+   tira al enfocar cada ficha), pero se pueden usar. */
+.flecha {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .flecha {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: var(--tap-min);
+    height: var(--tap-min);
+    margin-top: calc(var(--tap-min) / -2);
+    padding: 0;
+
+    border: 1px solid var(--border-superficie);
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    box-shadow: var(--shadow-flotante), var(--edge);
+    color: var(--text);
+    cursor: pointer;
+
+    animation: entrarFlecha var(--dur-fast) var(--ease-out);
+    transition:
+      scale var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .flecha:hover {
+    scale: 1.08;
+    color: var(--brand);
+    box-shadow: var(--filo-activo), var(--shadow-flotante), var(--edge);
+  }
+
+  .flecha:active {
+    scale: 0.94;
+    box-shadow: var(--shadow-press), var(--edge);
+  }
+
+  .flecha:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .flechaAntes {
+    left: calc(var(--space-3) * -1);
+  }
+
+  .flechaDespues {
+    right: calc(var(--space-3) * -1);
+  }
+
+  @keyframes entrarFlecha {
+    from {
+      opacity: 0;
+      scale: 0.92;
+    }
+  }
+}
+
+/* «Ver más»: una ficha como las demás, que es un botón y no un enlace. */
+.verMas {
+  width: 100%;
+  border: 0;
+  background: none;
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+/* --- La ventana: el buscador y, debajo, todas ------------------------------ */
+
+.ventana {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  /* Al buscar la lista se acorta: sin este mínimo la ventana encogería a
+     cada letra, con el campo saltando bajo el dedo. */
+  min-height: 280px;
+}
+
+.sinResultados {
+  margin: var(--space-5) 0 0;
+  font-size: var(--t-footnote-size);
+  line-height: var(--t-footnote-leading);
+  color: var(--text-2);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* --- La rejilla de la ventana ---------------------------------------------- */
 
 .rejilla {
   margin: 0;
@@ -161,82 +403,6 @@
 
 .opcion[data-activa] .nombre {
   font-weight: 700;
-}
-
-/* --- El botón de móvil ------------------------------------------------------
-   El mismo lenguaje que Ciudad y Ordenar (`explorar.module.css`): píldora
-   blanca, icono en anillo de oro, filo de tinta al 15 % y sombra corta. */
-.disparador {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  max-width: 100%;
-  min-height: var(--tap-min);
-  padding: 0 var(--space-4) 0 var(--space-2);
-
-  /* `--border-subtle`, no un `color-mix` de `--tinta-1`: ese primitivo es
-     fijo y oscuro, y en tema oscuro un filo mezclado con él sería invisible
-     contra una superficie ya oscura. `--border-subtle` es el semántico
-     calibrado para un hairline sobre `--surface` en los dos temas. */
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-full);
-  background: var(--surface);
-  box-shadow: var(--shadow-card);
-
-  font-family: var(--font-sans);
-  font-size: var(--t-footnote-size);
-  font-weight: 600;
-  color: var(--text);
-  text-align: start;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-
-  transition:
-    scale var(--dur-press) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
-}
-
-.disparador:active {
-  scale: var(--escala-press);
-  box-shadow: var(--shadow-press);
-}
-
-.disparador:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.disparadorIcono {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-full);
-  box-shadow: inset 0 0 0 1.5px var(--brand);
-  color: var(--brand);
-}
-
-.disparadorTexto {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.chevron {
-  flex-shrink: 0;
-  color: var(--text-3);
-}
-
-/* En el teléfono ocupa su fila entera: es el filtro principal y así se lee
-   de un vistazo cuál está puesto. En escritorio mide su texto, al lado de
-   Ciudad y Ordenar. */
-@container contenido (max-width: 767px) {
-  .disparador {
-    width: 100%;
-  }
 }
 
 /*

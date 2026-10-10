@@ -207,7 +207,7 @@
   }
 }
 
-/* Las categorías (rejilla en escritorio, botón + ventana en móvil) viven en
+/* Las categorías (la tira de dos filas y la ventana con todas) viven en
    `src/components/comercios/categorias-directorio.module.css`. */
 
 /* --- Recuento, ciudad y orden --------------------------------------------- */
@@ -233,8 +233,7 @@
   gap: var(--space-2);
 }
 
-/* En el teléfono los filtros ocupan el ancho del panel: Categorías en su
-   fila, Ciudad y Ordenar debajo. */
+/* En el teléfono los filtros ocupan el ancho del panel, uno debajo de otro. */
 @container contenido (max-width: 767px) {
   .menus {
     width: 100%;
