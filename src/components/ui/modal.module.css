@@ -202,6 +202,36 @@
   min-height: 0;
 }
 
+/*
+  EL MARCO RECORTA A LA FORMA DE LA VENTANA (09/10/2026). El `<dialog>` no
+  puede llevar `overflow: hidden` (recortaría su sombra y sus menús), así que
+  nada recortaba el cuerpo a las esquinas redondeadas: al desplazar, por la
+  curva asomaban el canto recto del fundido, el borde de un campo o el final
+  de la barra («cuando se desplaza aparecen los errores»).
+
+  El marco sí recorta, y con el radio INTERIOR de la ventana (el suyo menos
+  su filo de 1px), para que no quede ni una raya entre los dos:
+    · abajo, cuando es lo último de la ventana (no hay pie debajo);
+    · arriba, cuando es lo primero (no hay cabecera encima).
+  Con eso el contenido, los dos fundidos y la barra siguen la curva sin que
+  cada pieza tenga que redondearse por su cuenta.
+*/
+.marcoCuerpo {
+  --radio-interior: calc(var(--radius-lg) - 1px);
+
+  overflow: hidden;
+}
+
+.marcoCuerpo:last-child {
+  border-bottom-left-radius: var(--radio-interior);
+  border-bottom-right-radius: var(--radio-interior);
+}
+
+.marcoCuerpo:first-child {
+  border-top-left-radius: var(--radio-interior);
+  border-top-right-radius: var(--radio-interior);
+}
+
 @supports (animation-timeline: scroll()) and (timeline-scope: --x) {
   .marcoCuerpo {
     timeline-scope: --cuerpo-modal;
@@ -243,14 +273,6 @@
     background: linear-gradient(to top, var(--surface), transparent);
     animation-name: fundidoSeVa;
     animation-range: calc(100% - var(--space-6)) 100%;
-  }
-
-  /* Sin pie debajo, el marco es lo último de la ventana: el fundido de abajo
-     sigue la curva de su esquina (el radio interior: el de la ventana menos
-     su filo de 1px). Sin esto, su esquina cuadrada asomaba por fuera. A la
-     derecha no llega a la esquina: ahí está la columna de la barra. */
-  .marcoCuerpo:last-child::after {
-    border-bottom-left-radius: calc(var(--radius-lg) - 1px);
   }
 
   @keyframes fundidoAparece {

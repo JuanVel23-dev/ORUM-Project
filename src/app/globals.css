@@ -1613,3 +1613,24 @@ textarea:active,
     display: none;
   }
 }
+
+/*
+  EL DESVANECIDO DE UNA LISTA QUE DESPLAZA  ·  `--desvanece-arriba/abajo`
+  ---------------------------------------------------------------------------
+  Dos longitudes REGISTRADAS (`@property`) para poder animarlas: una
+  propiedad personalizada sin registrar no se interpola, salta. Las mueve una
+  animación ligada al desplazamiento de la propia lista (ver
+  `select-menu.module.css`) y alimentan su máscara: cuánto se desvanece el
+  borde de arriba y el de abajo. Valen 0 en reposo, o sea sin máscara.
+*/
+@property --desvanece-arriba {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --desvanece-abajo {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}

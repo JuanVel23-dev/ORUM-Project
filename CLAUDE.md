@@ -1311,6 +1311,14 @@ los llevaría al desplazar), movidos por una línea de tiempo de scroll con
 nombre, y dejan libre la columna de la barra. **No vuelvas al degradado
 oscuro.**
 
+**`.marcoCuerpo` RECORTA a la forma de la ventana** (`overflow: hidden` con
+el radio interior, abajo si no hay pie y arriba si no hay cabecera). El
+`<dialog>` no puede recortar —perdería su sombra—, y sin esto asomaban por la
+curva el canto del fundido, el borde de un campo o el final de la barra. No
+redondees pieza por pieza: recorta el marco. La lista de `SelectMenu` se
+desvanece con una máscara ligada a su desplazamiento
+(`--desvanece-arriba/abajo`, registradas con `@property` en `globals.css`).
+
 **Una ventana con cabecera de color no desplaza ENTERA** (veredicto de
 comercios): desplaza su cuerpo (`.ventanaCuerpo`, que lleva el `data-barra`).
 Si desplaza la ventana, la barra le quita ancho a la franja y deja una tira
