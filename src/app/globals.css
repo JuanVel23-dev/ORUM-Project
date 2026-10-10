@@ -1495,11 +1495,11 @@ textarea:active,
   de la paleta. Un contenedor nuevo que desplace un formulario pone
   `data-barra` y nada más.
 
-  CÓMO SE VE (segunda versión, 09/10/2026: la primera, en gris, «no me
-  convence»): un carril invisible y un pulgar fino en píldora EN ORO, el del
-  filo de la marca, a media fuerza para no competir con los campos. Al
-  apuntarlo o arrastrarlo sube a oro pleno y engorda. Sale de los tokens del
-  ámbito (`--brand-edge`), así que sobre una ventana negra usa su oro claro.
+  CÓMO SE VE: un carril invisible y un pulgar fino en píldora, GRIS y tenue
+  —está, pero no se nota—. Al apuntarlo o arrastrarlo se oscurece un poco y
+  engorda. Se probó en oro y el propietario volvió al gris («algo simple y
+  discreto, gris, que no se note tanto»): no lo pases a oro otra vez. Sale
+  de `--text`, así que sobre una ventana negra se aclara solo.
 
   DOS MOTORES, y no se pueden mezclar: en Chrome, declarar `scrollbar-width`
   o `scrollbar-color` APAGA los pseudoelementos `::-webkit-scrollbar`, que
@@ -1508,8 +1508,8 @@ textarea:active,
   (Firefox).
 */
 [data-barra] {
-  --barra-pulgar: color-mix(in srgb, var(--brand-edge) 62%, transparent);
-  --barra-pulgar-activo: var(--brand-edge);
+  --barra-pulgar: color-mix(in srgb, var(--text) 20%, transparent);
+  --barra-pulgar-activo: color-mix(in srgb, var(--text) 42%, transparent);
   --barra-ancho: var(--space-3);
 }
 
@@ -1561,17 +1561,13 @@ textarea:active,
   portales». Es la del `<html>`, así que una sola regla alcanza a los cuatro
   portales y a las pantallas de acceso.
 
-  NEGRO Y ORO, los dos colores de la marca (segunda versión, mismo día: la
-  primera —carril blanco y pulgar gris— «no me convence»: se leía como la del
-  sistema, solo que más pálida). El carril es el NEGRO de la cabecera y del
-  pie, así que la barra continúa el cromo de arriba abajo en vez de cortarlo;
-  el pulgar, una píldora fina en el ORO de marca, que sobre negro es donde
-  ese oro luce (9:1). Al apuntarlo o arrastrarlo pasa al oro pálido y
-  engorda.
+  GRIS Y DISCRETA (versión final, 09/10/2026). Se probó en negro y oro y el
+  propietario la quiso de vuelta en gris: «algo simple y discreto, gris, que
+  no se note tanto». Carril blanco —el fondo de los portales—, pulgar gris
+  claro y barra FINA. No la vuelvas a vestir de marca.
 
-  Con los tokens CRUDOS (`--cacao-900`, `--gold-500`, `--gold-300`) y no con
-  los semánticos: el `<html>` sigue el tema del sistema, y la barra tiene que
-  ser la misma en todos los equipos.
+  Con tokens CRUDOS (`--blanco`, `--tinta-1`) y no con los semánticos: el
+  `<html>` sigue el tema del sistema, y los portales se pintan en claro.
 
   SOLO EN EQUIPOS CON RATÓN (`hover: hover` y `pointer: fine`), encargo del
   mismo día: «esta barra únicamente para dispositivos como PC; los móviles
@@ -1585,14 +1581,14 @@ textarea:active,
   principal, junto con todo lo demás de la página, y al desplazar deprisa el
   pulgar se queda atrás. Con `scrollbar-color` la barra sigue siendo la
   nativa —la mueve el compositor, sin esperar a la página— y solo cambia de
-  color. Se pierde la píldora con aire alrededor (la forma la decide el
-  sistema); se conservan los dos colores de la marca. Los `[data-barra]` de
+  color y se afina. La forma la decide el sistema. Los `[data-barra]` de
   los formularios siguen con pseudoelementos: son cajas pequeñas y ahí la
   forma importa más.
 */
 @media (hover: hover) and (pointer: fine) {
   html {
-    scrollbar-color: var(--gold-500) var(--cacao-900);
+    scrollbar-color: color-mix(in srgb, var(--tinta-1) 24%, var(--blanco)) var(--blanco);
+    scrollbar-width: thin;
   }
 }
 
