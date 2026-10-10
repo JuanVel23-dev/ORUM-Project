@@ -1511,6 +1511,17 @@ textarea:active,
   --barra-pulgar: color-mix(in srgb, var(--text) 20%, transparent);
   --barra-pulgar-activo: color-mix(in srgb, var(--text) 42%, transparent);
   --barra-ancho: var(--space-3);
+
+  /*
+    `scrollbar-color` SE HEREDA, y el `<html>` lo declara para la barra de la
+    página. Heredado aquí, Chrome apagaba los pseudoelementos de abajo y
+    pintaba la barra del sistema —con flechas, cuadrada y pegada al borde,
+    fuera de la esquina redondeada de la ventana— (lo vio el propietario el
+    09/10/2026: «la barra no se acopla a los formularios, se sale del
+    diseño»). `auto` corta la herencia y devuelve el mando a los
+    pseudoelementos.
+  */
+  scrollbar-color: auto;
 }
 
 @supports not selector(::-webkit-scrollbar) {

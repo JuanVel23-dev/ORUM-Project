@@ -1301,6 +1301,10 @@ no con `::-webkit-scrollbar`**: los pseudoelementos los pinta Chrome en el
 hilo principal y el pulgar se quedaba atrás al desplazar rápido («trabada»);
 con la propiedad estándar la barra sigue siendo la nativa, que mueve el
 compositor. La forma la pone el sistema; no la cambies a costa de eso.
+⚠️ **`scrollbar-color` SE HEREDA.** El del `<html>` bajaba hasta los
+`[data-barra]` y les apagaba los pseudoelementos: salía la barra del sistema,
+con flechas y fuera de la esquina redondeada. Por eso `[data-barra]` declara
+`scrollbar-color: auto`. No lo quites.
 ⚠️ En Chrome, `scrollbar-width`/`scrollbar-color` APAGAN los
 `::-webkit-scrollbar`: las propiedades estándar van solo bajo
 `@supports not selector(::-webkit-scrollbar)`.
