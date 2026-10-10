@@ -127,26 +127,6 @@
   max-width: 40rem;
 }
 
-.puente {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--tap-min);
-
-  font-size: var(--t-callout-size);
-  font-weight: 600;
-  color: var(--gold-300);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  text-decoration-thickness: 1px;
-}
-
-.puente:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-  border-radius: var(--radius-xs);
-}
-
 .insignia {
   margin: 0;
   display: inline-flex;

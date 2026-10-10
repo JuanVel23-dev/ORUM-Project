@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { getPerfilActual } from '@/lib/auth/auth'
 import {
   obtenerAnunciosPublicos,
   obtenerInstanteServidor,
@@ -86,11 +85,10 @@ export default async function LandingPublica() {
     sitio. `cache()` evita que el layout y esta página consulten dos veces el
     número de soporte dentro de la misma petición.
   */
-  const [vitrina, planes, soporte, perfil, abiertoEn, anuncios] = await Promise.all([
+  const [vitrina, planes, soporte, abiertoEn, anuncios] = await Promise.all([
     obtenerVitrinaPublica(),
     obtenerPlanesPublicos(),
     obtenerWhatsappSoporte(),
-    getPerfilActual(),
     obtenerInstanteServidor(),
     obtenerAnunciosPublicos(),
   ])
@@ -101,7 +99,7 @@ export default async function LandingPublica() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: ORGANIZACION_JSONLD }}
       />
-      <HeroPublico esSocio={perfil?.rolCodigo === 'miembro'} />
+      <HeroPublico />
 
       <ComoFunciona />
 

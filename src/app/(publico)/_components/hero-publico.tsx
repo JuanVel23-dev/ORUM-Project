@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { ArrowRight, Compass } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HREF_UNETE } from './anclas'
@@ -35,12 +34,13 @@ import estilos from './hero-publico.module.css'
   Server Component: cero JavaScript.
 */
 
-type Props = {
-  /** El visitante tiene sesión de socio: se le tiende el puente a su portal. */
-  esSocio: boolean
-}
-
-export function HeroPublico({ esSocio }: Props) {
+/*
+  Sin el enlace «Ya eres socio. Ir a mi portal» (retirado el 09/10/2026: al
+  propietario no le gustaba). El socio entra por «Iniciar sesión», en la
+  cabecera. Con él se fue la lectura del perfil en la portada: ya nada de
+  esta página depende de quién la mira.
+*/
+export function HeroPublico() {
   return (
     <section
       id="inicio"
@@ -83,25 +83,6 @@ export function HeroPublico({ esSocio }: Props) {
       </div>
 
       <div className={[estilos.contenido, escaparate.sobreFoto].join(' ')}>
-        {/*
-          EL SOCIO CON SESIÓN ABIERTA QUE LLEGA A `/`.
-
-          No se le redirige: la landing es información pública y puede estar
-          enseñándosela a un amigo. Pero tampoco se le deja buscar la entrada.
-          Vive DENTRO del héroe desde que la cabecera es fija: fuera de él
-          quedaría tapado por ella.
-        */}
-        {esSocio && (
-          <Link
-            href="/miembros"
-            className={[estilos.puente, ENTRADA].join(' ')}
-            style={retardoEntrada(0)}
-          >
-            Ya eres socio. Ir a mi portal
-            <ArrowRight size={14} aria-hidden="true" />
-          </Link>
-        )}
-
         <p className={[estilos.insignia, ENTRADA].join(' ')} style={retardoEntrada(1)}>
           <EstrellaOrum tono="plata" className={estilos.estrellaInsignia} />
           Apoya lo local · Te da más
