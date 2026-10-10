@@ -230,7 +230,7 @@ function Contenido({
   const vigente = miembro.vigente
 
   return (
-    <article className={styles.ventana}>
+    <article className={styles.ventana} data-barra="">
       <header
         className={`${styles.dictamen} ${vigente ? styles.dictamenActiva : styles.dictamenInactiva}`}
       >

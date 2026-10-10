@@ -1479,3 +1479,75 @@ textarea:active,
     scale: 1;
   }
 }
+
+/*
+  LA BARRA DE DESPLAZAMIENTO CON DISEÑO  ·  `[data-barra]`  (09/10/2026)
+  ---------------------------------------------------------------------------
+  Encargo del propietario: «un diseño para todos los formularios; que tengan
+  la barra para desplazar, pero con diseño, para que no se vea mal». Hasta hoy
+  los portales ESCONDÍAN toda barra interior (la gris del sistema se veía
+  dentro de la tarjeta), y un formulario largo no decía que seguía hacia
+  abajo.
+
+  Lo lleva todo lo que desplaza un formulario: el cuerpo de `Modal` y de
+  `Sheet` (por ahí pasan todos los formularios en overlay), las ventanas
+  desnudas (veredicto, «Mi negocio», «Mi foto»), la lista de `SelectMenu` y la
+  de la paleta. Un contenedor nuevo que desplace un formulario pone
+  `data-barra` y nada más.
+
+  CÓMO SE VE: un carril invisible y un pulgar fino en píldora, en tinta
+  translúcida — está, pero no compite con los campos. Al apuntarlo o
+  arrastrarlo se enciende en ORO: es la respuesta al toque del sistema. Sale
+  de los tokens del ámbito, así que sobre una ventana negra se aclara solo.
+
+  DOS MOTORES, y no se pueden mezclar: en Chrome, declarar `scrollbar-width`
+  o `scrollbar-color` APAGA los pseudoelementos `::-webkit-scrollbar`, que
+  son los únicos que permiten el pulgar redondeado y con aire. Por eso las
+  propiedades estándar van solo donde no existen esos pseudoelementos
+  (Firefox).
+*/
+[data-barra] {
+  --barra-pulgar: color-mix(in srgb, var(--text) 26%, transparent);
+  --barra-pulgar-activo: var(--brand-edge);
+  --barra-ancho: var(--space-3);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  [data-barra] {
+    scrollbar-width: thin;
+    scrollbar-color: var(--barra-pulgar) transparent;
+  }
+}
+
+[data-barra]::-webkit-scrollbar {
+  width: var(--barra-ancho);
+  height: var(--barra-ancho);
+}
+
+/* El carril no se pinta, y se separa de las esquinas redondeadas de la
+   ventana para que el pulgar no quede cortado por ellas. */
+[data-barra]::-webkit-scrollbar-track {
+  margin: var(--space-3);
+  background: transparent;
+}
+
+/* El pulgar: una píldora de 4 px dentro de un carril de 12 (el resto es
+   borde transparente): se ve fino y se agarra ancho. */
+[data-barra]::-webkit-scrollbar-thumb {
+  min-height: var(--space-9);
+  border: var(--space-1) solid transparent;
+  border-radius: var(--radius-full);
+  background-color: var(--barra-pulgar);
+  background-clip: content-box;
+}
+
+[data-barra]::-webkit-scrollbar-thumb:hover,
+[data-barra]::-webkit-scrollbar-thumb:active {
+  /* Un píxel más gruesa al tocarla: se nota que se ha cogido. */
+  border-width: calc(var(--space-1) - 1px);
+  background-color: var(--barra-pulgar-activo);
+}
+
+[data-barra]::-webkit-scrollbar-corner {
+  background: transparent;
+}

@@ -370,6 +370,7 @@ export function EditorFoto({ nombre, fotoUrl, enPagina = false }: Props) {
   return (
     <section
       className={estilos.tarjeta}
+      data-barra=""
       data-theme="dark"
       data-soltando={soltando || undefined}
       aria-labelledby={idTitulo}

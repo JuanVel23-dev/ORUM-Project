@@ -65,12 +65,14 @@
   sistema se veía dentro de la tarjeta. El desplazamiento sigue igual; la
   barra de la página (del `<html>`) no se toca.
 */
+/* Salvo lo que lleva `data-barra` (09/10/2026): los formularios enseñan su
+   barra, con el diseño de `globals.css`. */
 .portal,
-.portal :global(*) {
+.portal :global(*:not([data-barra])) {
   scrollbar-width: none;
 }
 
-.portal :global(*)::-webkit-scrollbar {
+.portal :global(*:not([data-barra]))::-webkit-scrollbar {
   display: none;
 }
 

@@ -380,7 +380,11 @@ export function Sheet({
           </div>
         )}
 
-        {children && <div className={styles.cuerpo}>{children}</div>}
+        {children && (
+          <div className={styles.cuerpo} data-barra="">
+            {children}
+          </div>
+        )}
         {footer && <div className={styles.pie}>{footer}</div>}
       </div>
     </dialog>

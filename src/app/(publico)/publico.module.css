@@ -14,12 +14,14 @@
   La barra de la PÁGINA no se toca: es del `<html>`, que queda fuera de este
   ámbito, y es la que dice cuánto queda por leer.
 */
+/* Salvo lo que lleva `data-barra` (09/10/2026): los formularios enseñan su
+   barra, con el diseño de `globals.css`. */
 .fachada,
-.fachada :global(*) {
+.fachada :global(*:not([data-barra])) {
   scrollbar-width: none;
 }
 
-.fachada :global(*)::-webkit-scrollbar {
+.fachada :global(*:not([data-barra]))::-webkit-scrollbar {
   display: none;
 }
 

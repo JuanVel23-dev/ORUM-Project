@@ -291,7 +291,7 @@ export function VentanaNegocio({ datos }: { datos: DatosNegocio }) {
       /* Con una imagen a medio encuadrar, un toque en el velo no la pierde. */
       cerrarAlPulsarFuera={!ajustando && !ocupado}
     >
-      <article className={styles.ventana}>
+      <article className={styles.ventana} data-barra="">
         <header className={styles.cabeza}>
           <TituloSeccion como="h2" tamano="bloque" texto={titulo} className={styles.titulo} />
           {/* Mientras se ajusta, la X cancela el ajuste: vuelve a la rejilla. */}

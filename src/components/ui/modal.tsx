@@ -306,6 +306,8 @@ export function Modal({
 
           {children && (
             <div
+              /* La barra de desplazamiento con diseño (`globals.css`). */
+              data-barra=""
               className={[styles.cuerpo, !tieneCabecera && styles.cuerpoSinCabecera]
                 .filter(Boolean)
                 .join(' ')}

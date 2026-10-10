@@ -1282,6 +1282,18 @@ un escuchador delegado en el layout público, 05/10/2026). En fase de CAPTURA:
 corre después. Solo actúa si el destino está en la página actual; con
 movimiento reducido, salta como antes.
 
+**Los formularios enseñan su barra de desplazamiento, CON DISEÑO**
+(`[data-barra]`, en `globals.css`, 09/10/2026: «que tengan la barra para
+desplazar, pero con diseño»). Los portales siguen escondiendo toda barra
+interior SALVO la de lo que lleva `data-barra`: el cuerpo de `Modal` y de
+`Sheet` (todos los formularios en overlay), las ventanas desnudas (veredicto,
+«Mi negocio», «Mi foto»), la lista de `SelectMenu` y la de la paleta. Es un
+pulgar fino en píldora, en tinta translúcida, que se enciende en oro al
+apuntarlo. Un contenedor nuevo que desplace un formulario pone `data-barra`.
+⚠️ En Chrome, `scrollbar-width`/`scrollbar-color` APAGAN los
+`::-webkit-scrollbar`: las propiedades estándar van solo bajo
+`@supports not selector(::-webkit-scrollbar)`.
+
 **`LogoOrumTema`** (hoy sin consumidores: la cabecera de miembros pasó a dos
 variantes fijas, oro y plata, elegidas por `.cabeceraInicio` al fijarse el
 portal en claro) es la excepción a «una variante por superficie fija»: monta

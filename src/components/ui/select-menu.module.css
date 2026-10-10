@@ -103,16 +103,11 @@
 }
 
 /* Muchas opciones: la lista desplaza por dentro en vez de salirse de la
-   ventana. Sin barra visible, como el resto de las superficies del portal. */
+   ventana, con la barra de los formularios (`data-barra`, en `globals.css`). */
 .lista {
   max-height: min(288px, 46dvh);
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: none;
-}
-
-.lista::-webkit-scrollbar {
-  display: none;
 }
 
 /* En táctil, filas más altas: el mínimo de un objetivo es `--tap-min`. */
