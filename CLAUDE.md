@@ -981,14 +981,15 @@ por la misma razón.
 **Las categorías del directorio van A LA VISTA, en dos filas** (09/10/2026,
 encargo del propietario; antes eran un botón «Categorías: Todas» que abría
 una ventana). `CategoriasDirectorio` pinta dentro del panel de filtros,
-encima del recuento, una tira de los círculos de siempre en DOS FILAS —una
+DEBAJO del recuento y los filtros y separada de ellos por una línea fina
+(`--border-subtle`; pedido así el mismo día), una tira de los círculos de siempre en DOS FILAS —una
 sola lista en orden de lectura, con `--columnas` calculado— que se desplaza
 de lado con desplazamiento nativo (dedo, rueda, panel táctil) y, con ratón,
 con dos flechas en los cantos. La última ficha es «Ver más» («Ver todas»
 mientras quepan): abre la ventana con TODAS y un campo para buscar por
 nombre, sin tildes ni mayúsculas. La tira enseña hasta `LIMITE_TIRA` (24,
 `lib/comercios/tira-categorias.ts`, probado), más cualquier ELEGIDA que caiga
-después del corte. Favoritos, Ciudad y Ordenar siguen siendo píldoras, debajo.
+después del corte. Favoritos, Ciudad y Ordenar siguen siendo píldoras, arriba.
 No vuelvas al botón que las escondía.
 
 `Button` `Spinner` · `Field` `Input` `Select` `SelectMenu` `Textarea` `Switch` `Checkbox` `Radio`

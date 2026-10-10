@@ -220,6 +220,18 @@
   gap: var(--space-3);
 }
 
+/*
+  LA LÍNEA ENTRE LOS FILTROS Y LAS CATEGORÍAS (09/10/2026, encargo del
+  propietario: «ciudad, ordenar y favoritos arriba, y las categorías separadas
+  por una línea muy delgada»). Es una división DENTRO de la superficie, así
+  que va en el hairline (`--border-subtle`), no en un filo de control. Solo
+  existe si debajo hay categorías.
+*/
+.herramientas:not(:last-child) {
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
 .recuento {
   margin: 0;
   font-size: var(--t-footnote-size);

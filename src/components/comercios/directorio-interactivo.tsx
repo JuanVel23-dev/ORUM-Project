@@ -226,38 +226,6 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
         className={[estilos.panel, REVELAR].join(' ')}
         aria-label="Filtros del directorio"
       >
-        {/* Las categorías, a la vista: dos filas que se desplazan, y «Ver
-            más» al final (ver `CategoriasDirectorio`). */}
-        {directorio.categorias.length > 0 && (
-          <CategoriasDirectorio
-            total={comercios.length}
-            /* VARIAS a la vez: cada una se enciende y se apaga sola;
-               «Todas» limpia la selección. */
-            onElegir={(id) =>
-              cambiar((f) => ({
-                categoriaIds: id === null ? [] : alternarCategoria(f.categoriaIds, id),
-              }))
-            }
-            opciones={[
-              {
-                id: null,
-                nombre: 'Todas',
-                href: hrefDirectorio(filtros, { categoriaIds: [] }, base),
-                activa: filtros.categoriaIds.length === 0,
-              },
-              ...directorio.categorias.map((c) => ({
-                id: c.id,
-                nombre: c.nombre,
-                href: hrefDirectorio(
-                  filtros,
-                  { categoriaIds: alternarCategoria(filtros.categoriaIds, c.id) },
-                  base,
-                ),
-                activa: filtros.categoriaIds.includes(c.id),
-              })),
-            ]}
-          />
-        )}
         <div className={estilos.herramientas}>
           <p className={estilos.recuento} aria-live="polite">
             {comercios.length === 1 ? '1 comercio' : `${comercios.length} comercios`}
@@ -349,6 +317,39 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
             </DropdownMenu>
           </div>
         </div>
+        {/* Las categorías, a la vista, DEBAJO de los filtros y separadas de
+            ellos por una línea fina (la pone `.herramientas`): dos filas que
+            se desplazan, y «Ver más» al final (ver `CategoriasDirectorio`). */}
+        {directorio.categorias.length > 0 && (
+          <CategoriasDirectorio
+            total={comercios.length}
+            /* VARIAS a la vez: cada una se enciende y se apaga sola;
+               «Todas» limpia la selección. */
+            onElegir={(id) =>
+              cambiar((f) => ({
+                categoriaIds: id === null ? [] : alternarCategoria(f.categoriaIds, id),
+              }))
+            }
+            opciones={[
+              {
+                id: null,
+                nombre: 'Todas',
+                href: hrefDirectorio(filtros, { categoriaIds: [] }, base),
+                activa: filtros.categoriaIds.length === 0,
+              },
+              ...directorio.categorias.map((c) => ({
+                id: c.id,
+                nombre: c.nombre,
+                href: hrefDirectorio(
+                  filtros,
+                  { categoriaIds: alternarCategoria(filtros.categoriaIds, c.id) },
+                  base,
+                ),
+                activa: filtros.categoriaIds.includes(c.id),
+              })),
+            ]}
+          />
+        )}
       </section>
 
       {/* ── LA REJILLA ──────────────────────────────────────────────────── */}
