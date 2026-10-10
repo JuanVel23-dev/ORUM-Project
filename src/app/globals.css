@@ -1573,48 +1573,36 @@ textarea:active,
   los semánticos: el `<html>` sigue el tema del sistema, y la barra tiene que
   ser la misma en todos los equipos.
 
-  Mismo aviso de los dos motores: las propiedades estándar solo donde no
-  existen los pseudoelementos (Firefox), o Chrome apagaría el pulgar redondo.
-*/
-html {
-  --barra-pagina-carril: var(--cacao-900);
-  --barra-pagina-pulgar: var(--gold-500);
-  --barra-pagina-activo: var(--gold-300);
-}
+  SOLO EN EQUIPOS CON RATÓN (`hover: hover` y `pointer: fine`), encargo del
+  mismo día: «esta barra únicamente para dispositivos como PC; los móviles
+  táctiles no deben tenerla». En un teléfono o una tableta la página NO
+  enseña barra (ni la del sistema): se desplaza con el dedo, como siempre.
+  La de los formularios (`[data-barra]`) SÍ se queda en el teléfono.
 
-@supports not selector(::-webkit-scrollbar) {
+  CON LAS PROPIEDADES ESTÁNDAR, NO CON `::-webkit-scrollbar`, y es por
+  rendimiento («que no se sienta tan trabada cuando se desplaza rápido»): una
+  barra dibujada con los pseudoelementos la pinta Chrome en el hilo
+  principal, junto con todo lo demás de la página, y al desplazar deprisa el
+  pulgar se queda atrás. Con `scrollbar-color` la barra sigue siendo la
+  nativa —la mueve el compositor, sin esperar a la página— y solo cambia de
+  color. Se pierde la píldora con aire alrededor (la forma la decide el
+  sistema); se conservan los dos colores de la marca. Los `[data-barra]` de
+  los formularios siguen con pseudoelementos: son cajas pequeñas y ahí la
+  forma importa más.
+*/
+@media (hover: hover) and (pointer: fine) {
   html {
-    scrollbar-color: var(--barra-pagina-pulgar) var(--barra-pagina-carril);
+    scrollbar-color: var(--gold-500) var(--cacao-900);
   }
 }
 
-html::-webkit-scrollbar {
-  width: calc(var(--space-3) + 2px);
-  height: calc(var(--space-3) + 2px);
-}
+/* Táctil: la página sin barra. Solo el `<html>`; lo de dentro no cambia. */
+@media (hover: none), (pointer: coarse) {
+  html {
+    scrollbar-width: none;
+  }
 
-html::-webkit-scrollbar-track {
-  background: var(--barra-pagina-carril);
-}
-
-/* Sin flechas: el carril es entero del pulgar. */
-html::-webkit-scrollbar-button {
-  display: none;
-}
-
-html::-webkit-scrollbar-thumb {
-  min-height: var(--space-10);
-  border: var(--space-1) solid var(--barra-pagina-carril);
-  border-radius: var(--radius-full);
-  background-color: var(--barra-pagina-pulgar);
-}
-
-html::-webkit-scrollbar-thumb:hover,
-html::-webkit-scrollbar-thumb:active {
-  border-width: calc(var(--space-1) - 1px);
-  background-color: var(--barra-pagina-activo);
-}
-
-html::-webkit-scrollbar-corner {
-  background: var(--barra-pagina-carril);
+  html::-webkit-scrollbar {
+    display: none;
+  }
 }

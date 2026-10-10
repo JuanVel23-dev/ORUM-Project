@@ -1292,9 +1292,15 @@ pulgar fino en píldora, en ORO a media fuerza, que sube a oro pleno al
 apuntarlo (la primera versión, gris, no convenció al propietario). Un contenedor nuevo que desplace un formulario pone `data-barra`.
 **La barra de la PÁGINA también** (regla sobre `html`, mismo día, «en todos
 los portales»): NEGRO Y ORO —carril en el negro de la cabecera y del pie,
-sin flechas; pulgar en píldora en `--gold-500`, oro pálido al apuntarlo—. La
-primera versión (carril blanco, pulgar gris) no convenció: no vuelvas a
-ella. Usa tokens CRUDOS porque el `<html>` sigue el tema del sistema.
+pulgar en `--gold-500`—. La primera versión (carril blanco, pulgar gris) no
+convenció: no vuelvas a ella. Usa tokens CRUDOS porque el `<html>` sigue el
+tema del sistema. **Solo en equipos con ratón** (`hover: hover` y
+`pointer: fine`); en táctil la página NO enseña barra («los móviles no deben
+tenerla»), y la de los formularios sí se queda. **Va con `scrollbar-color`,
+no con `::-webkit-scrollbar`**: los pseudoelementos los pinta Chrome en el
+hilo principal y el pulgar se quedaba atrás al desplazar rápido («trabada»);
+con la propiedad estándar la barra sigue siendo la nativa, que mueve el
+compositor. Se pierde la forma de píldora; no la recuperes a costa de eso.
 ⚠️ En Chrome, `scrollbar-width`/`scrollbar-color` APAGAN los
 `::-webkit-scrollbar`: las propiedades estándar van solo bajo
 `@supports not selector(::-webkit-scrollbar)`.
