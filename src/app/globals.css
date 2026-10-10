@@ -1495,10 +1495,11 @@ textarea:active,
   de la paleta. Un contenedor nuevo que desplace un formulario pone
   `data-barra` y nada más.
 
-  CÓMO SE VE: un carril invisible y un pulgar fino en píldora, en tinta
-  translúcida — está, pero no compite con los campos. Al apuntarlo o
-  arrastrarlo se enciende en ORO: es la respuesta al toque del sistema. Sale
-  de los tokens del ámbito, así que sobre una ventana negra se aclara solo.
+  CÓMO SE VE (segunda versión, 09/10/2026: la primera, en gris, «no me
+  convence»): un carril invisible y un pulgar fino en píldora EN ORO, el del
+  filo de la marca, a media fuerza para no competir con los campos. Al
+  apuntarlo o arrastrarlo sube a oro pleno y engorda. Sale de los tokens del
+  ámbito (`--brand-edge`), así que sobre una ventana negra usa su oro claro.
 
   DOS MOTORES, y no se pueden mezclar: en Chrome, declarar `scrollbar-width`
   o `scrollbar-color` APAGA los pseudoelementos `::-webkit-scrollbar`, que
@@ -1507,7 +1508,7 @@ textarea:active,
   (Firefox).
 */
 [data-barra] {
-  --barra-pulgar: color-mix(in srgb, var(--text) 26%, transparent);
+  --barra-pulgar: color-mix(in srgb, var(--brand-edge) 62%, transparent);
   --barra-pulgar-activo: var(--brand-edge);
   --barra-ancho: var(--space-3);
 }
@@ -1560,23 +1561,25 @@ textarea:active,
   portales». Es la del `<html>`, así que una sola regla alcanza a los cuatro
   portales y a las pantallas de acceso.
 
-  La misma idea que `[data-barra]`, un punto más gruesa porque es la barra
-  principal: carril BLANCO (el fondo de todos los portales; el gris con
-  flechas del sistema desentonaba junto al negro de la cabecera y del pie),
-  pulgar en píldora de tinta translúcida, y ORO al apuntarlo o arrastrarlo.
+  NEGRO Y ORO, los dos colores de la marca (segunda versión, mismo día: la
+  primera —carril blanco y pulgar gris— «no me convence»: se leía como la del
+  sistema, solo que más pálida). El carril es el NEGRO de la cabecera y del
+  pie, así que la barra continúa el cromo de arriba abajo en vez de cortarlo;
+  el pulgar, una píldora fina en el ORO de marca, que sobre negro es donde
+  ese oro luce (9:1). Al apuntarlo o arrastrarlo pasa al oro pálido y
+  engorda.
 
-  Con los tokens CRUDOS (`--blanco`, `--tinta-1`, `--gold-600`) y no con los
-  semánticos: el `<html>` sigue el tema del sistema, pero todos los portales
-  se pintan en claro; con los semánticos, en un equipo en modo oscuro la
-  barra saldría oscura junto a una página blanca.
+  Con los tokens CRUDOS (`--cacao-900`, `--gold-500`, `--gold-300`) y no con
+  los semánticos: el `<html>` sigue el tema del sistema, y la barra tiene que
+  ser la misma en todos los equipos.
 
   Mismo aviso de los dos motores: las propiedades estándar solo donde no
   existen los pseudoelementos (Firefox), o Chrome apagaría el pulgar redondo.
 */
 html {
-  --barra-pagina-carril: var(--blanco);
-  --barra-pagina-pulgar: color-mix(in srgb, var(--tinta-1) 32%, var(--blanco));
-  --barra-pagina-activo: var(--gold-600);
+  --barra-pagina-carril: var(--cacao-900);
+  --barra-pagina-pulgar: var(--gold-500);
+  --barra-pagina-activo: var(--gold-300);
 }
 
 @supports not selector(::-webkit-scrollbar) {

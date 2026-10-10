@@ -1288,12 +1288,13 @@ desplazar, pero con diseño»). Los portales siguen escondiendo toda barra
 interior SALVO la de lo que lleva `data-barra`: el cuerpo de `Modal` y de
 `Sheet` (todos los formularios en overlay), las ventanas desnudas (veredicto,
 «Mi negocio», «Mi foto»), la lista de `SelectMenu` y la de la paleta. Es un
-pulgar fino en píldora, en tinta translúcida, que se enciende en oro al
-apuntarlo. Un contenedor nuevo que desplace un formulario pone `data-barra`.
+pulgar fino en píldora, en ORO a media fuerza, que sube a oro pleno al
+apuntarlo (la primera versión, gris, no convenció al propietario). Un contenedor nuevo que desplace un formulario pone `data-barra`.
 **La barra de la PÁGINA también** (regla sobre `html`, mismo día, «en todos
-los portales»): carril blanco sin flechas, pulgar en píldora y oro al
-apuntarlo. Usa tokens CRUDOS porque el `<html>` sigue el tema del sistema y
-los portales van en claro.
+los portales»): NEGRO Y ORO —carril en el negro de la cabecera y del pie,
+sin flechas; pulgar en píldora en `--gold-500`, oro pálido al apuntarlo—. La
+primera versión (carril blanco, pulgar gris) no convenció: no vuelvas a
+ella. Usa tokens CRUDOS porque el `<html>` sigue el tema del sistema.
 ⚠️ En Chrome, `scrollbar-width`/`scrollbar-color` APAGAN los
 `::-webkit-scrollbar`: las propiedades estándar van solo bajo
 `@supports not selector(::-webkit-scrollbar)`.
