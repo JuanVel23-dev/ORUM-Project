@@ -1551,3 +1551,67 @@ textarea:active,
 [data-barra]::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/*
+  LA BARRA DE LA PÁGINA, TAMBIÉN CON DISEÑO  ·  09/10/2026
+  ---------------------------------------------------------------------------
+  Encargo del propietario, sobre la barra del navegador a la derecha de la
+  portada: «quiero que esta barra también tenga diseño, y esto en todos los
+  portales». Es la del `<html>`, así que una sola regla alcanza a los cuatro
+  portales y a las pantallas de acceso.
+
+  La misma idea que `[data-barra]`, un punto más gruesa porque es la barra
+  principal: carril BLANCO (el fondo de todos los portales; el gris con
+  flechas del sistema desentonaba junto al negro de la cabecera y del pie),
+  pulgar en píldora de tinta translúcida, y ORO al apuntarlo o arrastrarlo.
+
+  Con los tokens CRUDOS (`--blanco`, `--tinta-1`, `--gold-600`) y no con los
+  semánticos: el `<html>` sigue el tema del sistema, pero todos los portales
+  se pintan en claro; con los semánticos, en un equipo en modo oscuro la
+  barra saldría oscura junto a una página blanca.
+
+  Mismo aviso de los dos motores: las propiedades estándar solo donde no
+  existen los pseudoelementos (Firefox), o Chrome apagaría el pulgar redondo.
+*/
+html {
+  --barra-pagina-carril: var(--blanco);
+  --barra-pagina-pulgar: color-mix(in srgb, var(--tinta-1) 32%, var(--blanco));
+  --barra-pagina-activo: var(--gold-600);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-color: var(--barra-pagina-pulgar) var(--barra-pagina-carril);
+  }
+}
+
+html::-webkit-scrollbar {
+  width: calc(var(--space-3) + 2px);
+  height: calc(var(--space-3) + 2px);
+}
+
+html::-webkit-scrollbar-track {
+  background: var(--barra-pagina-carril);
+}
+
+/* Sin flechas: el carril es entero del pulgar. */
+html::-webkit-scrollbar-button {
+  display: none;
+}
+
+html::-webkit-scrollbar-thumb {
+  min-height: var(--space-10);
+  border: var(--space-1) solid var(--barra-pagina-carril);
+  border-radius: var(--radius-full);
+  background-color: var(--barra-pagina-pulgar);
+}
+
+html::-webkit-scrollbar-thumb:hover,
+html::-webkit-scrollbar-thumb:active {
+  border-width: calc(var(--space-1) - 1px);
+  background-color: var(--barra-pagina-activo);
+}
+
+html::-webkit-scrollbar-corner {
+  background: var(--barra-pagina-carril);
+}
