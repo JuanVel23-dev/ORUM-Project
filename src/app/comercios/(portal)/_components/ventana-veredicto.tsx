@@ -230,7 +230,7 @@ function Contenido({
   const vigente = miembro.vigente
 
   return (
-    <article className={styles.ventana} data-barra="">
+    <article className={styles.ventana}>
       <header
         className={`${styles.dictamen} ${vigente ? styles.dictamenActiva : styles.dictamenInactiva}`}
       >
@@ -262,74 +262,81 @@ function Contenido({
         </h2>
       </header>
 
-      <div className={styles.socio}>
-        {/* LA FOTO DEL CARNET, para cotejar la cara; sin foto, las iniciales.
-            Con texto alternativo: aquí la foto SÍ informa (es lo que se
-            compara con quien está delante). `<img>` y no `next/image`: la URL
-            es de Storage. */}
-        {miembro.fotoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- URL de Storage, no un asset local
-          <img
-            src={miembro.fotoUrl}
-            alt={`Foto de ${miembro.nombreCompleto}`}
-            className={styles.socioFoto}
-            decoding="async"
+      {/* LO QUE DESPLAZA es esto, no la ventana entera: así la franja del
+          veredicto se queda arriba a todo el ancho y la barra de
+          desplazamiento (`data-barra`) empieza DEBAJO de ella. Cuando
+          desplazaba la ventana, la barra le quitaba ancho a la franja y
+          dejaba una tira blanca a su derecha. */}
+      <div className={styles.ventanaCuerpo} data-barra="">
+        <div className={styles.socio}>
+          {/* LA FOTO DEL CARNET, para cotejar la cara; sin foto, las iniciales.
+              Con texto alternativo: aquí la foto SÍ informa (es lo que se
+              compara con quien está delante). `<img>` y no `next/image`: la URL
+              es de Storage. */}
+          {miembro.fotoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- URL de Storage, no un asset local
+            <img
+              src={miembro.fotoUrl}
+              alt={`Foto de ${miembro.nombreCompleto}`}
+              className={styles.socioFoto}
+              decoding="async"
+            />
+          ) : (
+            <span className={styles.socioIniciales} aria-hidden="true">
+              {iniciales(miembro.nombreCompleto)}
+            </span>
+          )}
+          <div className={styles.socioDatos}>
+            {/*
+              El NOMBRE antes que el número: lo que confirma que el carnet es de
+              quien lo está entregando es la cara y el nombre. El número baja a
+              dato de cotejo, que es para lo que sirve.
+            */}
+            <p className={styles.nombre}>{miembro.nombreCompleto}</p>
+            <p className={styles.socioMeta}>
+              {vigente && miembro.planNombre && (
+                <span className={styles.plan}>{miembro.planNombre}</span>
+              )}
+              <span className={styles.numero}>N.º {miembro.numeroMembresia}</span>
+            </p>
+          </div>
+        </div>
+
+        {vigente && <HistorialVisitasLista historial={miembro.historial} />}
+
+        {vigente ? (
+          <ConfirmarVentaForm
+            miembroId={miembro.id}
+            membresiaId={miembro.membresiaId}
+            numeroMembresia={miembro.numeroMembresia}
+            metodo={metodo}
+            sucursales={sucursales}
+            promociones={promociones}
+            state={venta}
+            formAction={registrar}
+            pending={registrando}
           />
         ) : (
-          <span className={styles.socioIniciales} aria-hidden="true">
-            {iniciales(miembro.nombreCompleto)}
-          </span>
+          <div className={styles.cuerpoVentana}>
+            {/* Qué hacer, no solo qué pasa: un veredicto negativo sin
+                instrucción deja al cajero decidiendo a solas delante del cliente. */}
+            <p className={styles.instruccion}>
+              No apliques el beneficio. El socio puede reactivar su membresía con el club.
+            </p>
+
+            <Button
+              onClick={onCerrar}
+              variant="brand"
+              size="lg"
+              pildora
+              fullWidth
+              icon={<RotateCcw size={17} />}
+            >
+              Verificar otro socio
+            </Button>
+          </div>
         )}
-        <div className={styles.socioDatos}>
-          {/*
-            El NOMBRE antes que el número: lo que confirma que el carnet es de
-            quien lo está entregando es la cara y el nombre. El número baja a
-            dato de cotejo, que es para lo que sirve.
-          */}
-          <p className={styles.nombre}>{miembro.nombreCompleto}</p>
-          <p className={styles.socioMeta}>
-            {vigente && miembro.planNombre && (
-              <span className={styles.plan}>{miembro.planNombre}</span>
-            )}
-            <span className={styles.numero}>N.º {miembro.numeroMembresia}</span>
-          </p>
-        </div>
       </div>
-
-      {vigente && <HistorialVisitasLista historial={miembro.historial} />}
-
-      {vigente ? (
-        <ConfirmarVentaForm
-          miembroId={miembro.id}
-          membresiaId={miembro.membresiaId}
-          numeroMembresia={miembro.numeroMembresia}
-          metodo={metodo}
-          sucursales={sucursales}
-          promociones={promociones}
-          state={venta}
-          formAction={registrar}
-          pending={registrando}
-        />
-      ) : (
-        <div className={styles.cuerpoVentana}>
-          {/* Qué hacer, no solo qué pasa: un veredicto negativo sin
-              instrucción deja al cajero decidiendo a solas delante del cliente. */}
-          <p className={styles.instruccion}>
-            No apliques el beneficio. El socio puede reactivar su membresía con el club.
-          </p>
-
-          <Button
-            onClick={onCerrar}
-            variant="brand"
-            size="lg"
-            pildora
-            fullWidth
-            icon={<RotateCcw size={17} />}
-          >
-            Verificar otro socio
-          </Button>
-        </div>
-      )}
     </article>
   )
 }

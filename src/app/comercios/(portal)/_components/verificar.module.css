@@ -322,11 +322,12 @@
   display: flex;
   flex-direction: column;
 
-  /* Si no cabe —un teléfono bajo, el formulario entero—, desplaza por dentro
-     y la página de detrás se queda quieta. */
+  /* Si no cabe —un teléfono bajo, el formulario entero—, desplaza SU CUERPO
+     (`.ventanaCuerpo`), no ella: la franja del veredicto se queda fija arriba
+     y la página de detrás, quieta. `overflow: hidden` recorta el contenido a
+     sus esquinas redondeadas. */
   max-height: calc(100dvh - var(--space-6));
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
 
   border: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg);
@@ -340,6 +341,17 @@
   /* El relleno lateral de la ventana, publicado una vez: lo usan el socio, el
      formulario y el pie pegado, que se sangra exactamente esa medida. */
   --pad-ventana: var(--space-5);
+}
+
+/* El cuerpo de la ventana: lo que desplaza, con la barra de los
+   formularios. La franja del veredicto queda fuera, encima. */
+.ventanaCuerpo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 @container ventana (min-width: 460px) {
@@ -371,9 +383,8 @@
   por encima del 3:1 de 1.4.11 con esos mismos números.
 */
 .dictamen {
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  /* Ya no hace falta `sticky`: está FUERA de lo que desplaza. */
+  flex-shrink: 0;
 
   display: flex;
   align-items: center;

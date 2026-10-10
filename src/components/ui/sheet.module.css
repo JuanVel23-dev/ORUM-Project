@@ -198,29 +198,36 @@
 }
 
 /*
-  «HAY MÁS ABAJO» (29/09/2026, encargo del propietario: «una sombra o
-  difuminado negro para que los usuarios intuyan que pueden bajar»).
+  LOS FUNDIDOS DEL CUERPO  ·  «hay más arriba / hay más abajo»
+  ---------------------------------------------------------------------------
+  Tercera versión (09/10/2026). La historia, para no repetirla:
 
-  Un degradado oscuro pegado al borde inferior del cuerpo mientras queda
-  contenido por debajo. Tres reglas lo hacen honesto:
+    1. Un degradado NEGRO pegado abajo (29/09/2026: «una sombra o difuminado
+       negro para que intuyan que pueden bajar»). Vivía dentro del cuerpo.
+    2. Al darle al cuerpo su barra de desplazamiento quedó más estrecho que
+       la ventana; se sacó a este marco para ir de borde a borde.
+    3. Y aun así «no se ve bien»: un gris oscuro sobre una ventana blanca
+       necesita casar al píxel con su esquina redondeada (el filo de 1px de
+       la ventana dejaba una raya blanca), y los campos se veían CORTADOS al
+       pasar por debajo, arriba y abajo.
 
-    · Solo existe si el cuerpo DESPLAZA: con una línea de tiempo de scroll
-      inactiva (nada que desplazar) se queda en su `opacity: 0` de base.
-    · Se APAGA al llegar al final (en los últimos 48px del recorrido): así
-      nunca tapa el último contenido, que es el que se busca al bajar.
-    · Sin JavaScript: una línea de tiempo de scroll. Donde el navegador no
-      la soporta (`@supports`), no se pinta nada — mejor sin pista que una
-      pista que se queda fija encima del final.
+  Ahora el fundido es DEL COLOR DE LA VENTANA (`--surface`): el contenido se
+  desvanece hacia el borde en vez de cortarse en seco, y como es blanco sobre
+  blanco no hay canto ni esquina que casar. La pista de «puedes bajar» la da
+  ya la barra de desplazamiento, que está a la vista.
 
-  VIVE EN EL MARCO, NO DENTRO DEL CUERPO (09/10/2026). Era un `::after`
-  pegajoso del propio cuerpo, y un hijo del cuerpo solo puede ocupar su área
-  de contenido: al darle a los formularios su barra de desplazamiento, el
-  degradado se quedó 12 px más estrecho que la ventana, con su esquina
-  redondeada flotando por dentro («está mal el diseño»). Ahora lo pinta
-  `.marcoCuerpo`, que envuelve al cuerpo y mide lo que la ventana: va de
-  borde a borde, POR ENCIMA de la barra. Lo mueve el desplazamiento del
-  cuerpo por una línea de tiempo con nombre (`scroll-timeline` en el cuerpo,
-  `timeline-scope` en el marco para que su `::after` la vea).
+    · ARRIBA: aparece en cuanto se ha bajado un poco (los primeros 24px).
+    · ABAJO: está mientras queda contenido y se apaga al llegar al final (los
+      últimos 24px), para no velar lo último.
+    · No tapan la barra: dejan libre su columna (`--espacio-barra`).
+    · Solo existen si el cuerpo desplaza: sin recorrido, la línea de tiempo
+      está inactiva y se quedan en su `opacity: 0` de base.
+    · Sin JavaScript. Donde el navegador no soporta líneas de tiempo de
+      scroll con nombre (`@supports`), no se pinta ninguno.
+
+  Viven en el MARCO, no en el cuerpo: un hijo del cuerpo se desplazaría con
+  él. El marco lee el desplazamiento del cuerpo por una línea de tiempo con
+  nombre (`scroll-timeline` en el cuerpo, `timeline-scope` en el marco).
 */
 .marcoCuerpo {
   position: relative;
@@ -237,35 +244,56 @@
 @supports (animation-timeline: scroll()) and (timeline-scope: --x) {
   .marcoCuerpo {
     timeline-scope: --cuerpo-hoja;
+
+    --fundido-alto: var(--space-7);
+    /* El ancho de la barra del cuerpo (`[data-barra]`, en `globals.css`). */
+    --espacio-barra: var(--space-3);
   }
 
   .marcoCuerpo > .cuerpo {
     scroll-timeline: --cuerpo-hoja block;
   }
 
+  .marcoCuerpo::before,
   .marcoCuerpo::after {
     content: '';
     position: absolute;
-    inset: auto 0 0 0;
-    height: 72px;
+    left: 0;
+    right: var(--espacio-barra);
+    z-index: 1;
+    height: var(--fundido-alto);
     pointer-events: none;
 
-    background: linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--tinta-1) 0%, transparent),
-      color-mix(in srgb, var(--tinta-1) 34%, transparent)
-    );
-
     opacity: 0;
-    animation: pistaHayMas linear both;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
     animation-timeline: --cuerpo-hoja;
-    /* Se apaga en los ÚLTIMOS 48px del recorrido, no en un porcentaje: en
-       una ficha larga el 15 % final eran cientos de píxeles con el efecto a
-       medias. Al tocar fondo vale 0, sea cual sea la longitud. */
-    animation-range: calc(100% - 48px) 100%;
   }
 
-  @keyframes pistaHayMas {
+  .marcoCuerpo::before {
+    top: 0;
+    background: linear-gradient(to bottom, var(--surface), transparent);
+    animation-name: fundidoAparece;
+    animation-range: 0 var(--space-6);
+  }
+
+  .marcoCuerpo::after {
+    bottom: 0;
+    background: linear-gradient(to top, var(--surface), transparent);
+    animation-name: fundidoSeVa;
+    animation-range: calc(100% - var(--space-6)) 100%;
+  }
+
+  @keyframes fundidoAparece {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fundidoSeVa {
     from {
       opacity: 1;
     }

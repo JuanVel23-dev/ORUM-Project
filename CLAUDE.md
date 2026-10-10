@@ -1301,6 +1301,21 @@ no con `::-webkit-scrollbar`**: los pseudoelementos los pinta Chrome en el
 hilo principal y el pulgar se quedaba atrás al desplazar rápido («trabada»);
 con la propiedad estándar la barra sigue siendo la nativa, que mueve el
 compositor. La forma la pone el sistema; no la cambies a costa de eso.
+**Los fundidos del cuerpo de `Modal` y `Sheet`** (tercera versión,
+09/10/2026). El degradado NEGRO de «hay más abajo» se retiró: sobre una
+ventana blanca había que casarlo al píxel con la esquina y los campos se
+veían cortados al pasar por debajo. Ahora el contenido se DESVANECE hacia el
+borde, arriba y abajo, en el color de la ventana (`--surface`), y la pista de
+«puedes bajar» la da la barra. Los pinta `.marcoCuerpo` (no el cuerpo, que se
+los llevaría al desplazar), movidos por una línea de tiempo de scroll con
+nombre, y dejan libre la columna de la barra. **No vuelvas al degradado
+oscuro.**
+
+**Una ventana con cabecera de color no desplaza ENTERA** (veredicto de
+comercios): desplaza su cuerpo (`.ventanaCuerpo`, que lleva el `data-barra`).
+Si desplaza la ventana, la barra le quita ancho a la franja y deja una tira
+blanca a su derecha.
+
 ⚠️ **`scrollbar-color` SE HEREDA.** El del `<html>` bajaba hasta los
 `[data-barra]` y les apagaba los pseudoelementos: salía la barra del sistema,
 con flechas y fuera de la esquina redondeada. Por eso `[data-barra]` declara
