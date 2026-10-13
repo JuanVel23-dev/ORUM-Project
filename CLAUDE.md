@@ -1226,6 +1226,20 @@ imagen se AJUSTA antes de subirla, como la foto del socio:
   (`Modal onAtras`) vuelven a la rejilla sin guardar. Lo mismo en «Mi foto»
   del socio. Un editor de imagen nuevo sigue esta regla.
 
+**El panel edita las imágenes de un comercio igual que el comercio**
+(13/10/2026; `admin/comercios/[id]/imagenes`, `GestorImagenes`). Antes eran
+tres subidas de archivo y una lista con «orden» numérico: no se podía
+encuadrar ni quitar el logotipo o la portada. Ahora es la rejilla de «Mi
+negocio» con lo que añade el administrador: el logotipo en su círculo
+(«Editar», «Quitar»); la portada primero y la galería detrás, cada foto con
+sus acciones DEBAJO (mover con flechas, editar, quitar); y el ajuste en una
+ventana encima con `EditorEncuadre` (y la descripción, en las de galería).
+Las opciones del marco son LAS MISMAS que en «Mi negocio» (círculo que deja
+ver el logotipo entero; fotos a 16:9): las dos puertas producen la misma
+imagen. Respeta el mismo tope de ocho fotos, y sus acciones
+(`admin/comercios/imagenes-actions.ts`) sueltan la caché `publico`.
+`ordenTrasMover` (`lib/shared/orden.ts`) es el de la publicidad.
+
 **El comercio también instala su portal** (04/10/2026). El layout monta
 `WhatsAppFlotante` y `AvisoInstalar`, y el pie lleva el icono de instalar,
 igual que el Portal de Miembros. Lo que cambia es QUÉ se instala: hay **dos

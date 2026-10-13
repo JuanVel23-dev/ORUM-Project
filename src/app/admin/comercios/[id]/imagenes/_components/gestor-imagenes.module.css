@@ -1,126 +1,256 @@
 /* ==========================================================================
-   GESTOR DE IMÁGENES DE UN COMERCIO
+   GESTOR DE IMÁGENES DE UN COMERCIO  ·  en el panel
    --------------------------------------------------------------------------
-   Tres bloques en una sola columna, separados por hairline. El hairline es
-   una DIVISIÓN INTERNA, que es lo único para lo que la v3 conserva el trazo
-   (§2.1): la superficie ya la pone el overlay o la tarjeta de la página.
+   El logotipo y, debajo, la rejilla de fotos. No pone tarjeta propia: la
+   superficie es de quien lo usa (la ventana interceptada o el `FormCard` de
+   la pantalla completa).
    ========================================================================== */
 
 .gestor {
-  display: grid;
-  gap: var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
 .bloque {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
+/* Un hairline entre el logotipo y las fotos: una división DENTRO de la
+   superficie, no un filo de tarjeta. */
 .bloque + .bloque {
-  padding-top: var(--space-7);
+  padding-top: var(--space-6);
   border-top: 1px solid var(--border-subtle);
 }
 
 .titulo {
-  font-size: var(--t-title-3-size);
-  line-height: var(--t-title-3-leading);
-  letter-spacing: var(--t-title-3-tracking);
-  font-weight: var(--t-title-3-weight);
+  margin: 0;
+  font-size: var(--t-callout-size);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.filaTitulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.recuento {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--brand);
 }
 
 .nota {
+  margin: 0;
+  max-width: 62ch;
   font-size: var(--t-footnote-size);
-  line-height: var(--t-footnote-leading);
+  line-height: 1.5;
   color: var(--text-2);
 }
 
-/* Texto alternativo y orden, dentro del formulario de subida. */
-.meta {
+/* --- El logotipo ------------------------------------------------------------- */
+
+.filaLogo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* `.filaLogo .logo` (0,2,0): le gana a `.placa`, que vive en otro módulo. */
+.filaLogo .logo {
+  --placa-logo-w: 96px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-card);
+}
+
+.logoTextos {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 96px;
-  gap: var(--space-4);
+  justify-items: start;
+  gap: var(--space-3);
+  min-width: 0;
 }
 
-@media (max-width: 640px) {
-  .meta {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.logoAcciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
-.vacia {
-  font-size: var(--t-footnote-size);
-  line-height: var(--t-footnote-leading);
-  color: var(--text-3);
-}
+/* --- La rejilla de fotos ------------------------------------------------------ */
 
-/* --- Piezas ya subidas ---------------------------------------------------- */
-
-.lista {
+.rejilla {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--space-4);
-  list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-/*
-  Una fila de lista NO flota (§5 de la v3): se HUNDE. Mismo tratamiento que
-  `Card.sunk` —hairline y sombra hacia dentro—, que es lo que agrupa sin
-  añadir otra capa elevada a una pantalla que ya tiene overlay encima.
-*/
-.pieza {
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr) auto;
-  align-items: start;
-  gap: var(--space-4);
-
-  padding: var(--space-4);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--surface-sunk);
-  box-shadow: var(--shadow-hundida);
-}
-
-@media (max-width: 640px) {
-  .pieza {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.miniatura {
-  display: grid;
-  place-items: center;
+/* Una foto con sus acciones: una tarjeta, así que la define su sombra. */
+.teja {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   overflow: hidden;
-
-  width: 112px;
-  aspect-ratio: 16 / 9;
-  border-radius: var(--radius-xs);
-  background: var(--placa-logo-bg);
-  border: 1px solid var(--placa-logo-borde);
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), var(--edge);
 }
 
-.miniaturaImagen {
+/* 16:9, como sale en la ficha. */
+.marco {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--surface-hueco);
+}
+
+.foto {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.piezaCampos {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 96px auto;
-  align-items: end;
-  gap: var(--space-3);
-  min-width: 0;
+/* «Portada» o el puesto: texto sobre un negro casi opaco, legible encima de
+   cualquier foto. */
+.insignia {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-6);
+  min-height: var(--space-6);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--cacao-900) 82%, transparent);
+  font-size: var(--t-caption-size);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--blanco);
 }
 
-@media (max-width: 860px) {
-  .piezaCampos {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
+.texto {
+  margin: 0;
+  padding: var(--space-3) var(--space-3) 0;
+  font-size: var(--t-footnote-size);
+  line-height: 1.4;
+  color: var(--text);
+  /* Un renglón: todas las tejas miden lo mismo. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.texto[data-vacio] {
+  color: var(--text-3);
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: auto;
+  padding: var(--space-1) var(--space-2) var(--space-2);
+}
+
+/* Empuja editar y quitar a la derecha: mover queda a la izquierda. */
+.separador {
+  flex: 1;
+}
+
+.boton {
+  display: grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.boton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  /* Sin relleno al apuntar: el icono crece y toma el oro. */
+  .boton:not(:disabled):hover {
+    color: var(--brand);
+    scale: 1.12;
   }
 }
 
-.piezaQuitar {
+.boton:not(:disabled):active {
+  scale: 0.92;
+}
+
+.boton:focus-visible,
+.hueco:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+/* El hueco para añadir: un control, así que conserva su filo en reposo. Mide
+   lo que una teja para que la rejilla no baile. */
+.hueco {
   display: grid;
-  align-items: end;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  padding: var(--space-3);
+  border: 1px dashed var(--border-control);
+  border-radius: var(--radius-md);
+  background: none;
+  font-family: inherit;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  color: var(--brand);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.hueco:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .hueco:not(:disabled):hover {
+    border-color: var(--brand-edge);
+  }
+}
+
+.hueco:not(:disabled):active {
+  opacity: 0.6;
+}
+
+/* --- La ventana de ajuste ------------------------------------------------------ */
+
+.ajuste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
 }

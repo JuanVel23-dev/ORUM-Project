@@ -48,21 +48,6 @@ export function textoAlternativo(descripcion: string): string {
   return descripcion.trim() || DESCRIPCION_POR_DEFECTO
 }
 
-/**
- * El orden que queda al mover una pieza un puesto: `-1` hacia el principio,
- * `1` hacia el final. Devuelve `null` si no hay nada que mover (la pieza no
- * está, o ya está en ese extremo).
- */
-export function ordenTrasMover(
-  ids: readonly number[],
-  id: number,
-  sentido: -1 | 1,
-): number[] | null {
-  const desde = ids.indexOf(id)
-  const hasta = desde + sentido
-  if (desde === -1 || hasta < 0 || hasta >= ids.length) return null
-  const nuevo = [...ids]
-  nuevo[desde] = ids[hasta]
-  nuevo[hasta] = ids[desde]
-  return nuevo
-}
+/* Cómo queda el orden al mover una pieza: lo comparten este carrusel y la
+   galería de un comercio (`lib/shared/orden.ts`). */
+export { ordenTrasMover } from '@/lib/shared/orden'
