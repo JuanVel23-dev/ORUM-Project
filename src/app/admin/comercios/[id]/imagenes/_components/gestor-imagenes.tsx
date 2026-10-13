@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useTransition, type ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, ImagePlus, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ImagePlus, Pencil, Star, Trash2 } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
@@ -22,6 +22,7 @@ import {
   moverFotoGaleria,
   quitarFotoGaleria,
   quitarImagenComercio,
+  usarFotoComoPortada,
 } from '@/app/admin/comercios/imagenes-actions'
 import styles from './gestor-imagenes.module.css'
 
@@ -55,6 +56,11 @@ import styles from './gestor-imagenes.module.css'
 
   EL ORDEN, CON FLECHAS: ya no hay que escribir números. La portada no se
   mueve: es siempre la primera.
+
+  CUALQUIER FOTO DE LA GALERÍA PUEDE SER LA PORTADA (la estrella de cada
+  teja). Es un intercambio: la elegida sube a portada y la portada que había
+  ocupa su puesto en la galería; no se pierde ninguna. Es un cambio de un
+  toque y reversible (basta elegir otra), así que no pide confirmación.
 
   Es de cliente (antes era de servidor con islas): las acciones se llaman
   dentro de una transición y, al terminar, revalidan la ruta — las imágenes
@@ -219,6 +225,18 @@ export function GestorImagenes({
     enTransicion(async () => {
       const resultado = await moverFotoGaleria(ESTADO_SUBIDA_INICIAL, datos)
       if (!resultado.ok) setError(resultado.error ?? 'No se pudo mover la foto.')
+    })
+  }
+
+  function hacerPortada(fotoId: number) {
+    const datos = new FormData()
+    datos.set('comercio_id', String(comercioId))
+    datos.set('foto_id', String(fotoId))
+
+    setError(null)
+    enTransicion(async () => {
+      const resultado = await usarFotoComoPortada(ESTADO_SUBIDA_INICIAL, datos)
+      if (!resultado.ok) setError(resultado.error ?? 'No se pudo cambiar la portada.')
     })
   }
 
@@ -403,6 +421,13 @@ export function GestorImagenes({
                   </BotonTeja>
                   <span className={styles.separador} aria-hidden="true" />
                   <BotonTeja
+                    etiqueta={`Usar ${nombreFoto} como portada`}
+                    deshabilitado={bloqueado}
+                    onClick={() => hacerPortada(foto.id)}
+                  >
+                    <Star size={16} aria-hidden="true" />
+                  </BotonTeja>
+                  <BotonTeja
                     etiqueta={`Editar ${nombreFoto}`}
                     deshabilitado={bloqueado}
                     ocupado={
@@ -441,7 +466,8 @@ export function GestorImagenes({
 
         <p className={styles.nota}>
           La primera es la portada: la foto grande de la ficha y la que sale en el directorio. Las
-          demás se ven en ese orden.
+          demás se ven en ese orden. Con la estrella, cualquiera pasa a ser la portada y la que
+          había ocupa su lugar.
           {cupos === 0 && ` Ya tiene las ${TOPE_FOTOS_NEGOCIO}: quita una para añadir otra.`}
         </p>
       </section>

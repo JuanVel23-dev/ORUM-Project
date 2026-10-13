@@ -1239,6 +1239,13 @@ ver el logotipo entero; fotos a 16:9): las dos puertas producen la misma
 imagen. Respeta el mismo tope de ocho fotos, y sus acciones
 (`admin/comercios/imagenes-actions.ts`) sueltan la caché `publico`.
 `ordenTrasMover` (`lib/shared/orden.ts`) es el de la publicidad.
+**Cualquier foto de la galería puede ser la portada** (la estrella;
+`usarFotoComoPortada`): es un INTERCAMBIO, la portada que había ocupa el
+puesto de la elegida. ⚠️ La portada subida vive en una ruta de nombre fijo
+(`portada.ext`) que la siguiente subida pisa: antes de bajarla a la galería
+el archivo se MUEVE a una ruta de galería. Y por lo mismo, al subir una
+portada nueva se borra la anterior si vivía en otra ruta (también en las
+acciones del comercio).
 
 **El comercio también instala su portal** (04/10/2026). El layout monta
 `WhatsAppFlotante` y `AvisoInstalar`, y el pie lleva el icono de instalar,

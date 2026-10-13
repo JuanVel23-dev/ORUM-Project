@@ -199,6 +199,13 @@ export async function guardarMiFotoNegocio(
       }
     }
 
+    // La portada anterior sobra si vivía en otra ruta: el panel puede haber
+    // puesto de portada una foto de la galería (`usarFotoComoPortada`).
+    const rutaAnterior = rutaDesdeUrlPublica(comercio.portada_url, BUCKET_IMAGENES_COMERCIOS)
+    if (rutaAnterior && rutaAnterior !== resultado.ruta) {
+      await borrarObjeto(admin, BUCKET_IMAGENES_COMERCIOS, rutaAnterior)
+    }
+
     await registrarCambioImagen(admin, {
       actorId,
       entidad: 'comercio',

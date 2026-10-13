@@ -86,7 +86,9 @@
 
 .rejilla {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  /* 260px: caben los cinco botones de una foto de galería (mover ×2,
+     portada, editar, quitar) a 44px cada uno. */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: var(--space-4);
   margin: 0;
   padding: 0;

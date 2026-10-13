@@ -136,6 +136,17 @@ export async function guardarImagenComercio(
     }
   }
 
+  /*
+    El archivo anterior sobra si vivía en OTRA ruta. Con el nombre fijo
+    (`logo.ext`, `portada.ext`) la subida ya lo pisó; pero una portada
+    elegida de la galería (`usarFotoComoPortada`) vive en `galeria/…`, y al
+    sustituirla se quedaría huérfana. Una URL externa no se toca.
+  */
+  const rutaAnterior = rutaDesdeUrlPublica(anterior, BUCKET_IMAGENES_COMERCIOS)
+  if (rutaAnterior && rutaAnterior !== resultado.ruta) {
+    await borrarObjeto(admin, BUCKET_IMAGENES_COMERCIOS, rutaAnterior)
+  }
+
   await registrarCambioImagen(admin, {
     actorId,
     entidad: 'comercio',
@@ -424,4 +435,122 @@ export async function quitarFotoGaleria(
 
   refrescar(comercioId)
   return { ok: true }
+}
+
+/**
+ * Pone una foto de la galería como PORTADA (13/10/2026, encargo del
+ * propietario: «quiero poder elegir, de las imágenes de galería, cuál debe
+ * ser la portada»).
+ *
+ * Es un INTERCAMBIO: la foto elegida pasa a ser la portada y la portada que
+ * había ocupa su puesto en la galería. No se pierde ninguna imagen ni cambia
+ * la cuenta de fotos. Si no había portada, la foto simplemente sale de la
+ * galería.
+ *
+ * LO QUE NO ES OBVIO: la portada subida desde aquí vive en una ruta de
+ * NOMBRE FIJO (`comercios/{id}/portada.ext`), que la siguiente subida de
+ * portada pisa. Si esa dirección se guardara tal cual en la galería, la
+ * próxima portada nueva cambiaría también esa foto de la galería. Por eso,
+ * antes de bajarla a la galería, el archivo se MUEVE a una ruta de galería
+ * con su clave propia.
+ */
+export async function usarFotoComoPortada(
+  _prev: EstadoSubida,
+  formData: FormData,
+): Promise<EstadoSubida> {
+  const actorId = await actorSuperAdmin()
+  if (!actorId) return { error: SIN_PERMISO }
+
+  const comercioId = leerEntero(formData, 'comercio_id')
+  const fotoId = leerEntero(formData, 'foto_id')
+  if (comercioId === null || fotoId === null) {
+    return { error: 'Falta la foto que se quiere poner de portada.' }
+  }
+
+  const admin = createAdminClient()
+  const [{ data: comercio }, { data: foto }] = await Promise.all([
+    admin
+      .from('comercios')
+      .select('id, portada_url')
+      .eq('id', comercioId)
+      .is('deleted_at', null)
+      .maybeSingle(),
+    admin
+      .from('comercio_imagenes')
+      .select('id, url')
+      .eq('id', fotoId)
+      .eq('comercio_id', comercioId)
+      .maybeSingle(),
+  ])
+  if (!comercio) return { error: 'El comercio ya no existe.' }
+  if (!foto) return { error: 'Esa foto ya no existe.' }
+
+  const portadaAnterior = (comercio.portada_url ?? '').trim() || null
+
+  // 1. La portada que había, lista para vivir en la galería.
+  let urlParaGaleria = portadaAnterior
+  const rutaFija = rutaDesdeUrlPublica(portadaAnterior, BUCKET_IMAGENES_COMERCIOS)
+  if (rutaFija && !rutaFija.includes('/galeria/')) {
+    const extension = rutaFija.split('.').pop() ?? 'jpg'
+    const destino = rutaGaleriaComercio(
+      comercioId,
+      claveGaleria(Date.now(), Math.random()),
+      extension,
+    )
+    const { error: errorMover } = await admin.storage
+      .from(BUCKET_IMAGENES_COMERCIOS)
+      .move(rutaFija, destino)
+    if (errorMover) {
+      console.error('[imagenes] No se pudo mover la portada a la galería:', errorMover.message)
+      return { error: 'No se pudo cambiar la portada. Inténtalo de nuevo.' }
+    }
+    urlParaGaleria = admin.storage.from(BUCKET_IMAGENES_COMERCIOS).getPublicUrl(destino)
+      .data.publicUrl
+  }
+
+  // 2. La foto elegida pasa a ser la portada.
+  const { error: errorPortada } = await admin
+    .from('comercios')
+    .update({ portada_url: foto.url, updated_by: actorId })
+    .eq('id', comercioId)
+  if (errorPortada) {
+    return { error: mensajeDeError('No se pudo cambiar la portada', errorPortada) }
+  }
+
+  // 3. Su puesto en la galería lo ocupa la portada anterior; si no había, se va.
+  const { error: errorGaleria } = urlParaGaleria
+    ? await admin
+        .from('comercio_imagenes')
+        .update({ url: urlParaGaleria, descripcion: null })
+        .eq('id', foto.id)
+        .eq('comercio_id', comercioId)
+    : await admin
+        .from('comercio_imagenes')
+        .delete()
+        .eq('id', foto.id)
+        .eq('comercio_id', comercioId)
+  if (errorGaleria) {
+    // La portada ya cambió; lo que no cuadró fue la galería. Se dice tal cual.
+    refrescar(comercioId)
+    return {
+      error: mensajeDeError(
+        'La portada se cambió, pero no se pudo actualizar la galería',
+        errorGaleria,
+        'Revisa las fotos.',
+      ),
+    }
+  }
+
+  await registrarCambioImagen(admin, {
+    actorId,
+    entidad: 'comercio',
+    entidadId: comercioId,
+    campo: 'portada_url',
+    urlAnterior: portadaAnterior,
+    urlNueva: foto.url,
+    contexto: { origen: 'galeria' },
+  })
+
+  refrescar(comercioId)
+  return { ok: true, url: foto.url }
 }
