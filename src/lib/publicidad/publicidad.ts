@@ -50,4 +50,4 @@ export function textoAlternativo(descripcion: string): string {
 
 /* Cómo queda el orden al mover una pieza: lo comparten este carrusel y la
    galería de un comercio (`lib/shared/orden.ts`). */
-export { ordenTrasMover } from '@/lib/shared/orden'
+export { ordenTrasMover } from '../shared/orden'
