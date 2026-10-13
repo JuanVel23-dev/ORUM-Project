@@ -10,9 +10,7 @@
 
 /*
   En escritorio, dos columnas: el carrusel toma ~60 % (1,6 fr contra 1) con
-  un techo de 680px, y `align-items: stretch` lo estira a la altura del
-  TEXTO. El carrusel no tiene alto propio en esta disposición —sus fotos son
-  absolutas—, así que nunca puede ser más alto que la columna de al lado.
+  un techo de 680px. Su alto lo pone su proporción (4:3, más abajo).
 */
 @container contenido (min-width: 900px) {
   .conFotos {
@@ -47,21 +45,24 @@
   text-wrap: pretty;
 }
 
-/* En móvil el carrusel va debajo y necesita alto propio: 4:5, un retrato
-   que llena el ancho sin empujar la sección hasta el infinito. */
+/*
+  EL CARRUSEL, SIEMPRE EN 4:3 (13/10/2026). Sus imágenes son publicidad que
+  el administrador encuadra en `/admin/publicidad`, y el marco de aquel
+  editor es 4:3: con la misma proporción aquí, lo que ajusta allí es lo que
+  se ve, en el teléfono y en escritorio. Antes era 4:5 en móvil y en
+  escritorio se estiraba a la altura del texto, así que cada pantalla
+  recortaba la imagen por un sitio distinto.
+*/
 .carrusel {
-  aspect-ratio: 4 / 5;
-  max-height: 70svh;
+  aspect-ratio: 4 / 3;
 }
 
 @container contenido (min-width: 900px) {
   .carrusel {
-    aspect-ratio: auto;
-    max-height: none;
+    /* No se estira a la columna: mide lo que su ancho, y se centra. */
+    align-self: center;
+    width: 100%;
     max-width: 680px;
-    /* Sin misión y visión la columna de texto es corta: el carrusel ya no
-       se estira a ella, pone su propio alto mínimo. */
-    min-height: 420px;
   }
 }
 

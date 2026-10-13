@@ -60,6 +60,32 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['anuncios']['Insert']>
         Relationships: []
       }
+      /** Las imágenes del carrusel de la portada (20261013120000_publicidad.sql). */
+      publicidad: {
+        Row: {
+          id: number
+          imagen_url: string
+          /** Texto alternativo de la imagen. */
+          descripcion: string
+          /** Puesto en el carrusel, de menor a mayor. */
+          orden: number
+          /** false = guardada pero oculta. */
+          activo: boolean
+          creado_por: string | null
+          created_at: Timestamp
+        }
+        Insert: {
+          id?: number
+          imagen_url: string
+          descripcion?: string
+          orden?: number
+          activo?: boolean
+          creado_por?: string | null
+          created_at?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['publicidad']['Insert']>
+        Relationships: []
+      }
       roles: {
         Row: {
           id: number

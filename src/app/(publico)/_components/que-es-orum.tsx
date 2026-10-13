@@ -9,14 +9,19 @@ import estilos from './que-es-orum.module.css'
 /*
   QUÉ ES ORUM  ·  «Una red de valor que se nota»
   ---------------------------------------------------------------------------
-  Dos columnas: el texto —qué es ORUM— y a su lado un carrusel de fotos
-  reales de comercios aliados.
+  Dos columnas: el texto —qué es ORUM— y a su lado un carrusel.
+
+  EL CARRUSEL ES PUBLICIDAD (13/10/2026). Sus imágenes las sube, ordena,
+  oculta y quita el administrador desde `/admin/publicidad`; antes eran las
+  portadas de los comercios y nadie podía cambiarlas. Va SIEMPRE en 4:3
+  (`que-es-orum.module.css`), la misma proporción con la que el
+  administrador encuadra cada imagen: lo que ajusta allí es lo que sale aquí.
 
   Misión y visión ya NO viven aquí: el cliente no las quería tan arriba, y
   pasaron a su propia sección después de «Hazte socio hoy»
   (`mision-vision.tsx`).
 
-  Sin fotos cargadas, el carrusel no se pinta y el texto ocupa el ancho: un
+  Sin imágenes, el carrusel no se pinta y el texto ocupa el ancho: un
   rectángulo negro vacío junto a «una red de valor que se nota» diría lo
   contrario de lo que dice el titular.
 
@@ -50,7 +55,7 @@ export function QueEsOrum({ fotos }: { fotos: FotoPublica[] }) {
           {hayFotos && (
             <CarruselFotos
               fotos={fotos}
-              etiqueta="Fotos de comercios aliados"
+              etiqueta="Novedades y publicidad de ORUM"
               className={[estilos.carrusel, REVELAR_DER].join(' ')}
             />
           )}

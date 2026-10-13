@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   BarChart3,
   CreditCard,
+  Images,
   KeyRound,
   Megaphone,
   ScrollText,
@@ -179,6 +180,13 @@ const ACCIONES: Accion[] = [
     label: 'Publicar una novedad',
     icon: Megaphone,
     href: '/admin/anuncios/nuevo',
+    soloSuperAdmin: true,
+  },
+  {
+    id: 'publicidad',
+    label: 'Publicidad de la portada',
+    icon: Images,
+    href: '/admin/publicidad',
     soloSuperAdmin: true,
   },
   {

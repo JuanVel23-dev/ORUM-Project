@@ -7,6 +7,7 @@ import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { formatearBeneficio, formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
+import { TOPE_PUBLICIDAD, textoAlternativo } from '@/lib/publicidad/publicidad'
 import { hoyISO } from '@/lib/shared/fecha'
 import { compararNombres, ordenarCategorias } from './directorio'
 import { prepararPlanes, type PlanPublico } from './planes'
@@ -177,7 +178,8 @@ export type FotoPublica = { url: string; alt: string }
 export type DatosVitrina = {
   /** «Comercios destacados», hasta `TOPE_DESTACADOS`. */
   destacados: ComercioVitrina[]
-  /** Portadas reales para el héroe y el carrusel, hasta `TOPE_FOTOS`. */
+  /** Portadas reales de comercios, hasta `TOPE_FOTOS`. Hoy solo son el
+   *  respaldo del carrusel mientras no exista la tabla `publicidad`. */
   fotos: FotoPublica[]
   /** Cuántos comercios activos hay en total. */
   totalComercios: number
@@ -352,6 +354,59 @@ export const obtenerVitrinaPublica = cache(async (): Promise<DatosVitrina> => {
     totalComercios: comercios.length,
   }
 })
+
+/* ==========================================================================
+   LA PUBLICIDAD  ·  las imágenes del carrusel de la portada (13/10/2026)
+   --------------------------------------------------------------------------
+   Las sube y ordena el administrador (`/admin/publicidad`); ya no salen de
+   las portadas de los comercios.
+
+   DEVUELVE `null` SI LA TABLA TODAVÍA NO EXISTE. El esquema se aplica a mano
+   (`supabase/README.md`), así que este código puede llegar a producción
+   antes que su tabla: en ese caso la portada sigue con las fotos de los
+   comercios, como hasta hoy, en vez de quedarse sin carrusel. Con la tabla
+   creada manda SOLO lo que haya puesto el administrador — también si no ha
+   puesto nada: quitarlas todas tiene que poder dejar la portada sin carrusel.
+   ========================================================================== */
+
+/** Postgres (`42P01`) y PostgREST (`PGRST205`) dicen así «esa tabla no existe». */
+const TABLA_AUSENTE = new Set(['42P01', 'PGRST205'])
+
+async function leerPublicidadPublica(): Promise<FotoPublica[] | null> {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('publicidad')
+    .select('imagen_url, descripcion')
+    .eq('activo', true)
+    .order('orden', { ascending: true })
+    .order('id', { ascending: true })
+    .limit(TOPE_PUBLICIDAD)
+
+  if (error) {
+    if (TABLA_AUSENTE.has(error.code)) return null
+    throw new Error(`[publico] No se pudo leer la publicidad: ${error.message}`)
+  }
+
+  return (data ?? []).flatMap((p) => {
+    const url = (p.imagen_url ?? '').trim()
+    return url ? [{ url, alt: textoAlternativo(p.descripcion ?? '') }] : []
+  })
+}
+
+const publicidadEnCache = unstable_cache(
+  leerPublicidadPublica,
+  ['publico-publicidad'],
+  OPCIONES_CACHE,
+)
+
+/**
+ * Las imágenes del carrusel, en su orden. `null` = la tabla aún no existe o
+ * la base falló dos veces: quien llama cae a las fotos de los comercios.
+ */
+export const obtenerPublicidadPublica = cache(
+  async (): Promise<FotoPublica[] | null> =>
+    conRespaldo(() => publicidadEnCache(), null, 'la publicidad'),
+)
 
 /** El directorio entero, con sus opciones de filtro. */
 export const obtenerDirectorioPublico = cache(

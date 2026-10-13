@@ -1,0 +1,68 @@
+/*
+  LA PUBLICIDAD DE LA PORTADA  ·  reglas puras
+  ---------------------------------------------------------------------------
+  Encargo del propietario (13/10/2026): las imágenes del carrusel de «Una red
+  de valor que se nota» dejan de ser las portadas de los comercios y pasan a
+  ser publicidad que el administrador sube, ordena, oculta y quita.
+
+  Aquí vive lo que tienen que decir igual la interfaz y el servidor: el tope,
+  la descripción y cómo queda el orden al mover una pieza.
+*/
+
+/** Cuántas imágenes puede tener el carrusel, contando las ocultas. */
+export const TOPE_PUBLICIDAD = 10
+
+/** Largo máximo de la descripción (el texto alternativo de la imagen). */
+export const DESCRIPCION_MAXIMA = 140
+
+/** Lo que se lee cuando una imagen no trae descripción. */
+export const DESCRIPCION_POR_DEFECTO = 'Publicidad de ORUM'
+
+/** Una pieza de publicidad, tal como la necesita el panel. */
+export type PiezaPublicidad = {
+  id: number
+  url: string
+  descripcion: string
+  activa: boolean
+}
+
+/**
+ * Limpia la descripción y dice si vale. Es opcional: vacía se acepta (la
+ * portada usa entonces `DESCRIPCION_POR_DEFECTO`).
+ */
+export function revisarDescripcion(
+  cruda: string,
+): { ok: true; descripcion: string } | { ok: false; error: string } {
+  const descripcion = cruda.replace(/\s+/g, ' ').trim()
+  if (descripcion.length > DESCRIPCION_MAXIMA) {
+    return {
+      ok: false,
+      error: `La descripción no puede pasar de ${DESCRIPCION_MAXIMA} caracteres.`,
+    }
+  }
+  return { ok: true, descripcion }
+}
+
+/** El texto alternativo con el que la imagen sale en la portada. */
+export function textoAlternativo(descripcion: string): string {
+  return descripcion.trim() || DESCRIPCION_POR_DEFECTO
+}
+
+/**
+ * El orden que queda al mover una pieza un puesto: `-1` hacia el principio,
+ * `1` hacia el final. Devuelve `null` si no hay nada que mover (la pieza no
+ * está, o ya está en ese extremo).
+ */
+export function ordenTrasMover(
+  ids: readonly number[],
+  id: number,
+  sentido: -1 | 1,
+): number[] | null {
+  const desde = ids.indexOf(id)
+  const hasta = desde + sentido
+  if (desde === -1 || hasta < 0 || hasta >= ids.length) return null
+  const nuevo = [...ids]
+  nuevo[desde] = ids[hasta]
+  nuevo[hasta] = ids[desde]
+  return nuevo
+}

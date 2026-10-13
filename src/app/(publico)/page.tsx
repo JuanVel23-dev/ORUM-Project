@@ -3,6 +3,7 @@ import {
   obtenerAnunciosPublicos,
   obtenerInstanteServidor,
   obtenerPlanesPublicos,
+  obtenerPublicidadPublica,
   obtenerVitrinaPublica,
   obtenerWhatsappSoporte,
 } from '@/lib/publico/datos-publicos'
@@ -63,7 +64,7 @@ export const metadata: Metadata = {
  *
  *   Héroe ........................ NEGRO (foto)  ← «Descubre lo mejor de tu ciudad»
  *   Así es como te unes .......... tarjeta sobre el filo del héroe
- *   Qué es ORUM .................. BLANCO        ← texto + carrusel de fotos reales
+ *   Qué es ORUM .................. BLANCO        ← texto + carrusel de publicidad
  *   Descubre · Disfruta · … ...... BLANCO        ← los cuatro verbos del club
  *   Comercios destacados ......... NEGRO         ← cinco reales + «Ver todos»
  *   Elige tu membresía ........... BLANCO        ← precios de la base, con ahorro calculado
@@ -85,8 +86,9 @@ export default async function LandingPublica() {
     sitio. `cache()` evita que el layout y esta página consulten dos veces el
     número de soporte dentro de la misma petición.
   */
-  const [vitrina, planes, soporte, abiertoEn, anuncios] = await Promise.all([
+  const [vitrina, publicidad, planes, soporte, abiertoEn, anuncios] = await Promise.all([
     obtenerVitrinaPublica(),
+    obtenerPublicidadPublica(),
     obtenerPlanesPublicos(),
     obtenerWhatsappSoporte(),
     obtenerInstanteServidor(),
@@ -110,7 +112,10 @@ export default async function LandingPublica() {
       */}
       <AnuncioBanner anuncio={anuncios[0] ?? null} hrefHistorial="/novedades" />
 
-      <QueEsOrum fotos={vitrina.fotos} />
+      {/* El carrusel es PUBLICIDAD que pone el administrador
+          (`/admin/publicidad`). `null` = su tabla aún no existe: mientras
+          tanto, las portadas de los comercios, como hasta hoy. */}
+      <QueEsOrum fotos={publicidad ?? vitrina.fotos} />
 
       <ValoresOrum />
 

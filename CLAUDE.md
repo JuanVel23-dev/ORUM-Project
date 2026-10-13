@@ -1269,6 +1269,28 @@ escritorio (las caras están en el tercio superior: con `35%` quedaban tras
 la cabecera); acceso `86%` (más al centro, el padre sale cortado por la
 mitad).
 
+**El carrusel de la portada es PUBLICIDAD del administrador** (13/10/2026;
+antes eran las portadas de los comercios y nadie podía cambiarlas). Vive en
+la tabla `publicidad` (`supabase/migrations/20261013120000_publicidad.sql`)
+y se gestiona en `/admin/publicidad` (solo super administrador, en la barra
+junto a Novedades): `GestorPublicidad` es una rejilla con cada imagen en su
+puesto y sus acciones debajo —mover antes/después (botones, no arrastre),
+ocultar sin borrar, editar y quitar— y el ajuste en una ventana encima con
+`EditorEncuadre` y la descripción (su texto alternativo). Cuatro cosas:
+
+- **El marco es 4:3, y el carrusel también, en todos los anchos**
+  (`que-es-orum.module.css`): lo que se encuadra es lo que se ve. Si cambia
+  una proporción, cambia la otra.
+- **Tope de 10** (`lib/publicidad/publicidad.ts`, puro y probado), que
+  comprueban la interfaz y el servidor. Las imágenes van al bucket
+  `imagenes-anuncios`, carpeta `publicidad/`, con clave nueva en cada subida.
+- **`obtenerPublicidadPublica` devuelve `null` si la tabla no existe** y la
+  portada cae a las portadas de los comercios: el esquema se aplica a mano y
+  el código puede llegar antes. Con la tabla creada manda solo lo que ponga
+  el administrador; vacía = sin carrusel.
+- Las acciones sueltan la caché con `updateTag('publico')`: el cambio se ve
+  al momento, no al minuto.
+
 **El formulario «Quiero ser aliado» valida con EXIGENCIA** (05/10/2026: «es
 el portal público; no quiero que pongan datos que no son»). Las reglas viven
 en `lib/aliados/solicitud-aliado.ts` (puro, probado; el servidor es quien

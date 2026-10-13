@@ -42,6 +42,17 @@ export function rutaImagenAnuncio(anuncioId: number, extension: string): string 
   return `anuncios/${anuncioId}/imagen.${extension}`
 }
 
+/**
+ * `imagenes-anuncios/publicidad/{clave}.{ext}` — una imagen del carrusel de
+ * la portada. No pertenece a ningún comercio, así que no lleva `id` de dueño;
+ * la clave es opaca y nueva en cada subida (`claveGaleria`), para que la
+ * dirección cambie al sustituirla. El bucket solo lo escribe el super
+ * administrador.
+ */
+export function rutaPublicidad(clave: string, extension: string): string {
+  return `publicidad/${clave}.${extension}`
+}
+
 export function rutaLogoMarca(marcaId: number, extension: string): string {
   return `marcas/${marcaId}/logo.${extension}`
 }

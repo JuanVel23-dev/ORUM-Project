@@ -12,6 +12,18 @@
 | 2 | `migrations/20260914090000_favoritos_y_mas_usados.sql` | Favoritos del socio, «los que más usas», y la galería de imágenes de la ficha |
 | 3 | `migrations/20260914140000_top_descuentos.sql` | El top de descuentos más usados del club (global). **Añadido después: si ya corriste los dos primeros, este es el único que te falta** |
 
+### Añadido el 13/10/2026 — publicidad de la portada
+
+| Archivo | Qué añade |
+|---|---|
+| `migrations/20261013120000_publicidad.sql` | La tabla `publicidad`: las imágenes del carrusel de la portada, que el administrador sube y ordena en `/admin/publicidad`. No crea bucket: usa `imagenes-anuncios` |
+
+Hasta que se ejecute, la sección **Publicidad** del panel avisa de que falta y
+la portada sigue enseñando las fotos de los comercios. Al ejecutarlo, el
+carrusel pasa a enseñar SOLO lo que suba el administrador: recién creado está
+vacío, así que la portada queda sin carrusel hasta que se suba la primera
+imagen.
+
 ## Cómo se corren
 
 **Opción A — desde el panel de Supabase** (la más rápida si no tienes la CLI):
