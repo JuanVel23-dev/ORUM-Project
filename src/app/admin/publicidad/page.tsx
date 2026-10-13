@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { Alert } from '@/components/ui/alert'
 import { PageHeader } from '@/components/ui/layout'
 import type { PiezaPublicidad } from '@/lib/publicidad/publicidad'
-import { GestorPublicidad } from './_components/gestor-publicidad'
+import { GestorPublicidad } from './_components/gestor-portada'
 
 export const metadata = { title: 'Publicidad · ORUM' }
 

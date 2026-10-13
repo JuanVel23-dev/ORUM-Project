@@ -25,7 +25,7 @@ import {
   moverPublicidad,
   quitarPublicidad,
 } from '../actions'
-import styles from './gestor-publicidad.module.css'
+import styles from './gestor-portada.module.css'
 
 /*
   EL GESTOR DE PUBLICIDAD  ·  las imágenes del carrusel de la portada
@@ -51,6 +51,11 @@ import styles from './gestor-publicidad.module.css'
   MOVER ES CON BOTONES, no arrastrando: funcionan igual con ratón, con el
   dedo y con teclado, y con diez imágenes como mucho un puesto por pulsación
   alcanza.
+
+  EL ARCHIVO SE LLAMA `gestor-portada` Y NO `gestor-publicidad`: el nombre
+  de un módulo CSS acaba dentro de sus clases, y los bloqueadores de
+  anuncios ocultan lo que lleve «publicidad» en la clase o en la dirección
+  (ver `rutaPublicidad`).
 
   Las acciones se llaman directamente dentro de una transición (como en «Mi
   negocio»): al terminar, la acción revalida la página y las imágenes nuevas

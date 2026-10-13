@@ -1283,7 +1283,14 @@ ocultar sin borrar, editar y quitar— y el ajuste en una ventana encima con
   una proporción, cambia la otra.
 - **Tope de 10** (`lib/publicidad/publicidad.ts`, puro y probado), que
   comprueban la interfaz y el servidor. Las imágenes van al bucket
-  `imagenes-anuncios`, carpeta `publicidad/`, con clave nueva en cada subida.
+  `imagenes-anuncios`, carpeta `portada/`, con clave nueva en cada subida.
+- ⚠️ **Nada que llegue al navegador se llama «publicidad», «ads» ni
+  «banner»**: ni la carpeta de Storage ni un módulo CSS (su nombre acaba en
+  las clases). Los bloqueadores de anuncios ocultan esas direcciones y
+  clases: el primer día la carpeta se llamó `publicidad/` y la imagen no se
+  veía en el navegador del propietario, ni en el panel ni en la portada. Por
+  eso el componente vive en `gestor-portada.tsx`. La ruta del panel y la
+  tabla sí pueden llamarse así.
 - **`obtenerPublicidadPublica` devuelve `null` si la tabla no existe** y la
   portada cae a las portadas de los comercios: el esquema se aplica a mano y
   el código puede llegar antes. Con la tabla creada manda solo lo que ponga

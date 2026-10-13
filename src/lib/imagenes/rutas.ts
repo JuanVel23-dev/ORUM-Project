@@ -43,14 +43,21 @@ export function rutaImagenAnuncio(anuncioId: number, extension: string): string 
 }
 
 /**
- * `imagenes-anuncios/publicidad/{clave}.{ext}` — una imagen del carrusel de
- * la portada. No pertenece a ningún comercio, así que no lleva `id` de dueño;
+ * `imagenes-anuncios/portada/{clave}.{ext}` — una imagen del carrusel de la
+ * portada. No pertenece a ningún comercio, así que no lleva `id` de dueño;
  * la clave es opaca y nueva en cada subida (`claveGaleria`), para que la
  * dirección cambie al sustituirla. El bucket solo lo escribe el super
  * administrador.
+ *
+ * LA CARPETA NO SE LLAMA «publicidad» A PROPÓSITO (13/10/2026). Se llamó
+ * así el primer día y la imagen no se veía en el navegador del propietario,
+ * ni en el panel ni en la portada: los bloqueadores de anuncios ocultan
+ * cualquier dirección que contenga `/publicidad/`, `/ads/`, `/banner/`… Ni
+ * en esta ruta ni en el nombre de un archivo o de una clase que acabe en el
+ * navegador debe aparecer una de esas palabras.
  */
 export function rutaPublicidad(clave: string, extension: string): string {
-  return `publicidad/${clave}.${extension}`
+  return `portada/${clave}.${extension}`
 }
 
 export function rutaLogoMarca(marcaId: number, extension: string): string {
