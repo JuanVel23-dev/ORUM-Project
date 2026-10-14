@@ -17,6 +17,7 @@
 | Archivo | Qué añade |
 |---|---|
 | `migrations/20261013120000_publicidad.sql` | La tabla `publicidad`: las imágenes del carrusel de la portada, que el administrador sube y ordena en `/admin/publicidad`. No crea bucket: usa `imagenes-anuncios` |
+| `migrations/20261013130000_publicidad_cierra_lectura_anon.sql` | Quita la lectura anónima de `publicidad` (dejaba ver `creado_por`). La portada lee con `service_role`, así que no cambia nada visible. Ejecutar **después** del anterior |
 
 Hasta que se ejecute, la sección **Publicidad** del panel avisa de que falta y
 la portada sigue enseñando las fotos de los comercios. Al ejecutarlo, el

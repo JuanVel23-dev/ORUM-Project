@@ -181,5 +181,13 @@ export function rutaDesdeUrlPublica(url: string | null, bucket: string): string 
   if (i === -1) return null
   const cola = url.slice(i + marca.length)
   const sinConsulta = cola.split('?')[0]
-  return sinConsulta ? decodeURIComponent(sinConsulta) : null
+  if (!sinConsulta) return null
+  try {
+    return decodeURIComponent(sinConsulta)
+  } catch {
+    // Una dirección mal codificada (`%E0%A4%A`) no tiene objeto que borrar, y
+    // lanzar aquí tumbaría la acción que la llama justo después de haber
+    // borrado la fila.
+    return null
+  }
 }

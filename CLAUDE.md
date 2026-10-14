@@ -1616,3 +1616,22 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
     `-webkit-font-smoothing` que esos comentarios describían) pero el nombre
     de la familia que citan sigue siendo el viejo (Fraunces, no Playfair
     Display). No afecta al render — se limpia cuando se toque cada módulo.
+11. **Falta una Content-Security-Policy completa.** `next.config.ts` solo
+    manda `frame-ancestors 'none'` (anti-clickjacking); no limita qué
+    scripts, imágenes o conexiones puede cargar la página, así que no frena
+    un XSS si algún día se cuela. Se dejó fuera a propósito: Next inyecta
+    scripts en línea y una CSP estricta rompe la aplicación en producción
+    sin avisar en desarrollo (anotado el 13/10/2026 tras la auditoría de la
+    publicidad). Cómo hacerla:
+    - **Con nonces**, generados por petición en `proxy.ts`. Cuesta que las
+      páginas pasen a dinámicas (se pierde caché estática), así que se mide
+      antes y después.
+    - **Empezar en `Content-Security-Policy-Report-Only`**: no bloquea nada,
+      solo registra qué se habría bloqueado, y la lista se ajusta con tráfico
+      real antes de activarla.
+    - **Lo que tiene que permitir**: imágenes del bucket de Supabase **y**
+      de dominios externos (la columna de logos admite URLs de la web del
+      comercio), la cámara del escáner QR (`camera=(self)`), Cloudflare
+      Turnstile en los logins y las fuentes de `next/font` (locales).
+    - Se prueba **desplegada**, en los cuatro portales y en los logins, no
+      solo en `pnpm dev`.
