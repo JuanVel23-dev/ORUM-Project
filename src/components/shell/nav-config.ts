@@ -84,7 +84,7 @@ export function navegacionPara(rol: RolCodigo): NavGroup[] {
       // Consultar, no operar. Métricas va primero: se mira a diario; la
       // bitácora solo cuando hay que averiguar quién hizo algo.
       { label: 'Análisis', items: [METRICAS, BITACORA] },
-      { label: 'Administración', items: [USUARIOS, PLANES, ANUNCIOS, PUBLICIDAD] },
+      { label: 'El club', items: [PLANES, ANUNCIOS, PUBLICIDAD, USUARIOS] },
     ]
   }
 

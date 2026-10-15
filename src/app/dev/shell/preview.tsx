@@ -113,14 +113,26 @@ export function ShellPreview() {
       {ruta === '/admin' ? (
         <InicioPanel
           esSuperAdmin={rol === 'super_admin'}
+          saludo="Buenas tardes"
+          nombre={rol === 'super_admin' ? 'Daniel' : 'Ana'}
+          fecha="miércoles 15 de octubre"
           cifras={{ miembros: 1284, vigentes: 1032, porVencer: 87, comercios: 46 }}
-          bajada={`Buenas tardes. Hoy es sábado, 4 de octubre; tu sesión es de ${rol === 'super_admin' ? 'super administrador' : 'empleado'}.`}
+          vencen={[
+            { miembroId: 1, nombre: 'Laura Martínez Rojas', numero: '00184472', fotoUrl: null, dias: 0 },
+            { miembroId: 2, nombre: 'Carlos Gómez', numero: '00190038', fotoUrl: null, dias: 1 },
+            { miembroId: 3, nombre: 'Andrea Patiño Vélez', numero: '00201155', fotoUrl: null, dias: 3 },
+            { miembroId: 4, nombre: 'Julián Restrepo', numero: '00200077', fotoUrl: null, dias: 5 },
+          ]}
+          actividad={[
+            { id: 1, quien: 'Ana Restrepo', que: 'Miembro registrado — plan Anual, $120000', miembro: 'Pedro Cano', cuando: 'Hace 12 min' },
+            { id: 2, quien: 'Daniel Bulla', que: 'Membresía renovada — plan Anual, vence 2027-10-15', miembro: 'Laura Gil', cuando: 'Hace 3 h' },
+          ]}
         />
       ) : (
       <>
       <PageHeader
         title="Vista previa del shell"
-        description="Datos falsos. Cambia el rol o la sección para ver cómo se adaptan la barra de opciones y la barra inferior, y pulsa Ctrl+K o «/» para la paleta de comandos."
+        description="Datos falsos. Cambia el rol o la sección para ver cómo se adaptan la barra de opciones y la barra inferior, y escribe en el buscador de arriba."
         actions={<Button icon={<Plus size={16} />}>Registrar miembro</Button>}
       />
 

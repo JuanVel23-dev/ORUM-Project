@@ -1,0 +1,283 @@
+/* ==========================================================================
+   EL BUSCADOR DEL PANEL  ·  un campo y, debajo, lo que coincide
+   ========================================================================== */
+
+.buscador {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: 440px;
+}
+
+/* El campo: un control de entrada, así que conserva su filo en reposo. */
+.campo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  height: 42px;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: text;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.campo:focus-within {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--focus), var(--shadow-card);
+}
+
+.lupa {
+  flex-shrink: 0;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+.campo:focus-within .lupa {
+  scale: 1.1;
+  color: var(--text);
+}
+
+.entrada {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--t-callout-size);
+  color: var(--text);
+}
+
+/* El foco lo pinta el campo entero (`:focus-within`): la entrada no repite. */
+.entrada:focus-visible {
+  outline: none;
+}
+
+.entrada::placeholder {
+  color: var(--text-3);
+}
+
+/* Sin la X propia del navegador: hay una del sistema. */
+.entrada::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.limpiar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: rotate var(--dur-base) var(--ease-out);
+}
+
+.limpiar::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  translate: -50% -50%;
+}
+
+@media (hover: hover) {
+  .limpiar:hover {
+    rotate: 90deg;
+    color: var(--text);
+  }
+}
+
+.limpiar:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* --- El desplegable -------------------------------------------------------- */
+
+.desplegable {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: var(--z-popover);
+  box-sizing: border-box;
+  width: max(100%, min(480px, calc(100vw - var(--space-8))));
+  max-height: min(70dvh, 540px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2);
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-flotante), var(--edge);
+
+  transform-origin: top right;
+  animation: llegar var(--dur-base) var(--ease-out);
+}
+
+@keyframes llegar {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+    scale: 0.98;
+  }
+}
+
+.grupo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  font-size: var(--t-caption-size);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.grupo:not(:first-child) {
+  margin-top: var(--space-2);
+}
+
+/* Una fila de miembro: su ficha y, al lado, el atajo. */
+.fila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-right: var(--space-2);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* La elegida (ratón o flechas): un filo plateado muy sutil, sin relleno. */
+.fila[data-seleccionada='true'],
+.accion[data-seleccionada='true'] {
+  box-shadow: inset 0 0 0 1px var(--border-subtle), var(--shadow-card);
+}
+
+.filaPrincipal,
+.accion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.filaPrincipal {
+  flex: 1;
+  min-width: 0;
+}
+
+.accion {
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.filaPrincipal:focus-visible,
+.accion:focus-visible,
+.atajo:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.filaPrincipal:active,
+.accion:active {
+  opacity: 0.7;
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.nombre {
+  overflow: hidden;
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  font-size: var(--t-caption-size);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.accionIcono {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--text);
+}
+
+/* «Renovar»: una píldora blanca con sombra. */
+.atajo {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-1);
+  height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  font-size: var(--t-caption-size);
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .atajo:hover {
+    translate: 0 -1px;
+    box-shadow: var(--shadow-raised);
+  }
+}
+
+.atajo:active {
+  scale: 0.95;
+}
+
+.vacio {
+  margin: 0;
+  padding: var(--space-3);
+  font-size: var(--t-footnote-size);
+  line-height: 1.5;
+  color: var(--text-2);
+}

@@ -1,209 +1,447 @@
 /* ==========================================================================
-   LA PORTADA DEL PANEL  ·  rediseño del 04/10/2026
-   --------------------------------------------------------------------------
-   Sobre el blanco de la fachada y con su paleta (la pone el shell). Se adapta
-   con `@container contenido`: el ancho útil es el del `<main>` del panel.
+   LA PORTADA DEL PANEL  ·  rediseño del 15/10/2026
    ========================================================================== */
 
-/* --- La tarjeta principal: registrar y buscar ----------------------------- */
-
-.destacado {
-  position: relative;
-  overflow: hidden;
-}
-
-/* El filo dorado superior: la tarjeta de marca de la pantalla, y la única. */
-.destacado::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 1px;
-  background: var(--gold-hairline);
-}
-
-.destacadoCuerpo {
+.inicio {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* --- El saludo ------------------------------------------------------------ */
+
+.cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 
-@container contenido (max-width: 720px) {
-  .destacadoCuerpo {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-.destacadoTextos {
+.saludo {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  min-width: 0;
 }
 
-/* El rótulo, en el oro de texto de la fachada (`--brand`: 4,93:1 sobre blanco). */
-.rotulo {
-  margin: 0;
-  font-size: var(--t-overline-size);
-  line-height: var(--t-overline-leading);
-  letter-spacing: var(--t-overline-tracking);
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--brand);
-}
-
-/* El titular de la tarjeta, en el serif de la fachada: es el bloque de uso
-   de la pantalla, como «Así es como te unes». */
-.destacadoTitulo {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--t-title-1-size);
-  line-height: var(--t-title-1-leading);
-  font-weight: 700;
-  font-feature-settings: 'liga' 1, 'calt' 1;
-  -webkit-font-smoothing: auto;
-  text-wrap: balance;
-}
-
-.destacadoDescripcion {
+.fecha {
   margin: 0;
   font-size: var(--t-callout-size);
-  line-height: var(--t-body-leading);
   color: var(--text-2);
-  max-width: 52ch;
 }
 
-.destacadoAcciones {
+.fechaDia {
+  display: inline-block;
+}
+
+.fechaDia::first-letter {
+  text-transform: uppercase;
+}
+
+.cabezaAcciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* --- Las cifras ------------------------------------------------------------ */
+
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+/* Una cifra: tarjeta blanca con sombra y el contenido CENTRADO (pedido así).
+   Se levanta al pasar el ratón. */
+.cifra {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  flex-shrink: 0;
-}
-
-@container contenido (max-width: 720px) {
-  .destacadoAcciones {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .destacadoAcciones > * {
-    flex: 1 1 200px;
-  }
-}
-
-/* La tecla del atajo dentro de «Buscar un miembro»: una tecla de verdad.
-   En una pantalla táctil no hay teclado al que enseñárselo. */
-@media (pointer: coarse) {
-  .tecla {
-    display: none;
-  }
-}
-
-.tecla {
-  margin-left: var(--space-2);
-  padding: 1px var(--space-2);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-full);
-  font-family: inherit;
-  font-size: var(--t-caption-size);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text-2);
-}
-
-/* --- Los atajos ------------------------------------------------------------ */
-
-/*
-  Un atajo es una TARJETA que lleva a un sitio: flota (sombra de escalón 1) y
-  al apuntarla se levanta —sube 2px, gana el escalón siguiente y aparece el
-  filo dorado—, como manda «Presionar hunde, apuntar levanta». Sin trazo en
-  reposo: lo define la sombra.
-*/
-.atajo {
-  display: flex;
   align-items: center;
-  gap: var(--space-4);
-
-  padding: var(--space-4) var(--space-5);
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-5);
   border: 1px solid var(--border-superficie);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow-card), var(--edge);
-  color: var(--text);
-  text-decoration: none;
-
+  text-align: center;
   transition:
-    translate var(--dur-fast) var(--ease-out),
+    translate var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out);
 }
 
 @media (hover: hover) {
-  .atajo:hover {
-    translate: 0 -2px;
-    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+  .cifra:hover {
+    translate: 0 -3px;
+    box-shadow: var(--shadow-raised), var(--edge);
   }
 }
 
-.atajo:active {
-  translate: 0 1px;
-  box-shadow: var(--shadow-press), var(--edge);
+.cifra > :first-child {
+  align-items: center;
 }
 
-.atajo:focus-visible {
+/* «Vencen en 30 días»: la cifra en ámbar oscuro, con su texto que lo dice. */
+.cifra[data-tono='aviso'] > :first-child > :nth-child(2) {
+  color: var(--warning);
+}
+
+.cifraNota {
+  font-size: var(--t-caption-size);
+  color: var(--text-2);
+}
+
+/* La barra de progreso: el carril es de relleno (`--surface-hueco`), que es
+   uno de los dos sitios donde el relleno es información. */
+.barraProgreso {
+  align-self: stretch;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--surface-hueco);
+}
+
+.barraRelleno {
+  display: block;
+  width: var(--p);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gold-600);
+}
+
+/* --- «Ver la lista»: una píldora blanca con sombra y una flecha que avanza -- */
+
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 30px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
+}
+
+.enlace svg {
+  transition: translate var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .enlace:hover {
+    translate: 0 -1px;
+    box-shadow: var(--shadow-raised);
+  }
+
+  .enlace:hover svg {
+    translate: 3px 0;
+  }
+}
+
+.enlace:active {
+  scale: 0.96;
+}
+
+.enlace:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
-/* El icono en su círculo dorado claro, como las insignias de la fachada. */
-.atajoIcono {
+/* --- Las dos columnas -------------------------------------------------------- */
+
+.dosColumnas {
   display: grid;
-  place-items: center;
-  flex-shrink: 0;
-
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-full);
-  background: var(--gold-bg);
-  color: var(--brand);
+  gap: var(--space-6);
+  align-items: start;
 }
 
-.atajoIcono svg {
-  width: 20px;
-  height: 20px;
+@container contenido (min-width: 900px) {
+  .dosColumnas {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
 }
 
-.atajoTextos {
+.lateral {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-6);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), var(--edge);
+}
+
+.tarjetaCabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) var(--space-3);
+}
+
+.tarjetaTitulo {
+  margin: 0;
+  font-size: var(--t-callout-size);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.vacio {
+  margin: 0;
+  padding: var(--space-2) var(--space-5) var(--space-6);
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+/* --- Vencen esta semana ------------------------------------------------------ */
+
+.vencen {
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  list-style: none;
+}
+
+/* Una fila de lista: sin sombra ni movimiento (regla de listas largas). */
+.vence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 60px;
+  padding: var(--space-2) var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.venceMiembro {
+  display: flex;
+  flex: 1 1 200px;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--dur-press) var(--ease-out);
+}
+
+.venceMiembro:active {
+  opacity: 0.6;
+}
+
+.venceMiembro:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.venceTextos {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
-.atajoTitulo {
+.venceNombre {
+  overflow: hidden;
   font-size: var(--t-callout-size);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.venceNumero {
+  font-size: var(--t-caption-size);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+/*
+  EL VENCIMIENTO, CON COLOR SEGÚN LA URGENCIA. Cada tono cambia también de
+  claridad (no solo de matiz) y lleva su texto. Rojo → naranja → ámbar →
+  azul; azul/naranja mejor que rojo/verde para quien no distingue colores.
+*/
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 26px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--t-caption-size);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.chipPunto {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+
+.chip[data-tono='hoy'] {
+  background: color-mix(in srgb, var(--danger) 11%, var(--blanco));
+  color: var(--danger);
+}
+
+.chip[data-tono='manana'] {
+  background: color-mix(in srgb, var(--warning) 12%, var(--blanco));
+  color: var(--warning);
+}
+
+.chip[data-tono='pronto'] {
+  background: color-mix(in srgb, var(--gold-600) 14%, var(--blanco));
+  color: var(--gold-800);
+}
+
+.chip[data-tono='semana'] {
+  background: color-mix(in srgb, var(--info) 10%, var(--blanco));
+  color: var(--info);
+}
+
+/* --- Crear: cuatro botones sueltos, con su icono y su color -------------------- */
+
+.crear {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.crearBoton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 116px;
+  padding: var(--space-4) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card), var(--edge);
+  color: var(--text);
+  text-align: center;
+  text-decoration: none;
+  transition:
+    translate var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .crearBoton:hover {
+    translate: 0 -3px;
+    box-shadow: var(--shadow-raised), var(--edge);
+  }
+}
+
+.crearBoton:active {
+  translate: 0 1px;
+  scale: 0.97;
+  box-shadow: var(--shadow-press), var(--edge);
+}
+
+.crearBoton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.crearIcono {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--space-1);
+  border-radius: 50%;
+  transition: scale var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .crearBoton:hover .crearIcono {
+    scale: 1.08;
+  }
+}
+
+.crearIcono[data-tono='azul'] {
+  background: color-mix(in srgb, var(--info) 12%, var(--blanco));
+  color: var(--info);
+}
+
+.crearIcono[data-tono='naranja'] {
+  background: color-mix(in srgb, var(--warning) 13%, var(--blanco));
+  color: var(--warning);
+}
+
+.crearIcono[data-tono='dorado'] {
+  background: color-mix(in srgb, var(--gold-600) 15%, var(--blanco));
+  color: var(--gold-800);
+}
+
+.crearIcono[data-tono='verde'] {
+  background: color-mix(in srgb, var(--success) 12%, var(--blanco));
+  color: var(--success);
+}
+
+.crearNombre {
+  font-size: var(--t-footnote-size);
+  font-weight: 700;
+}
+
+.crearNota {
+  font-size: var(--t-caption-size);
+  color: var(--text-2);
+}
+
+/* --- La actividad reciente ------------------------------------------------------ */
+
+.actividad {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-1) var(--space-5) var(--space-5);
+  list-style: none;
+}
+
+.evento {
+  display: flex;
+  gap: var(--space-3);
+  font-size: var(--t-footnote-size);
+  line-height: 1.45;
+}
+
+.eventoPunto {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: var(--radius-full);
+  background: var(--n-400);
+}
+
+.eventoTextos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.eventoQuien {
   font-weight: 600;
 }
 
-.atajoDescripcion {
+.eventoCuando {
   font-size: var(--t-caption-size);
-  line-height: 1.4;
   color: var(--text-2);
-}
-
-.atajoFlecha {
-  margin-left: auto;
-  flex-shrink: 0;
-  color: var(--text-2);
-  transition:
-    translate var(--dur-base) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
-}
-
-/* Apunta en la dirección del gesto: telegrafía a dónde lleva. */
-@media (hover: hover) {
-  .atajo:hover .atajoFlecha {
-    translate: 3px 0;
-    color: var(--brand);
-  }
 }

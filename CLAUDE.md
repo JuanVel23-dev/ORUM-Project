@@ -372,12 +372,11 @@ contraste de esta sección. Donde no se cumplan, sigue siendo tinta.
 **Jamás codifica datos.**
 
 - **Panel de Administración**: botón primario = **tinta**, negro sobre
-  claro. No cambia: es la herramienta de trabajo, y el negro es el de su
-  propio cromo. Desde el rediseño del 04/10/2026 todos sus botones van en
+  claro. No cambia: es la herramienta de trabajo. Todos sus botones van en
   **píldora** (`--boton-radio`, el gancho de `button.module.css` que pone el
-  shell) y su acción ceremonial —«Registrar miembro», en la cabecera y en la
-  portada— es `variant="brand"` en `--gold-500` con texto en tinta, como en
-  comercios. `--action` NO se pasó al oro: también pinta la casilla marcada,
+  shell), los secundarios sin borde y con sombra (15/10/2026), y su acción
+  ceremonial —«Registrar miembro», en la barra de arriba— es
+  `variant="brand"` en `--gold-500` con texto en tinta, como en comercios. `--action` NO se pasó al oro: también pinta la casilla marcada,
   y su filo daría 1,9:1 contra el blanco.
 - **Herramienta de Comercios** (desde el 04/10/2026): la acción principal va
   en píldora con relleno `--gold-500` y texto en tinta (8,5:1), el mismo par
@@ -1079,34 +1078,45 @@ tomando sus clases — la sacudida al fallar usa `:has(.alerta)` y ambas clases
 deben salir del mismo módulo CSS.
 
 **El Panel de Administración** (`AppShell`, `src/components/shell/`,
-rediseño del 04/10/2026) es la cuarta cara de la fachada, **sin su foto**
-(«no quiero la imagen inicial, quiero una barra de opciones»):
+tercer rediseño, 15/10/2026). El propietario rechazó la barra de opciones
+negra y la paleta de comandos («los atajos, el diseño y en general todo no
+me gusta; quiero algo muy profesional, agradable a la vista y sencillo»).
+La propuesta aprobada es el artifact «ORUM — Rediseño Panel de
+Administración». No vuelvas a la barra de opciones horizontal ni a la
+paleta:
 
-- **La cabecera negra** de los otros portales: logotipo en plata con el
-  rótulo «Panel», el buscador (el disparador de la paleta, con su tecla a
-  la vista), «Registrar miembro» en oro y el menú de la cuenta. Va en el
-  flujo: se va al desplazar.
-- **La barra de opciones**, negra, debajo: todas las secciones a la vista,
-  en sus grupos (`navegacionPara`), separados por un filo. ESA es pegajosa.
-  La activa la dicen un filo dorado que se desliza (`layoutId`), el oro
-  pálido del texto, el peso y `aria-current` — nunca un relleno. Entre 768 y
-  1099 px van sin icono; por debajo de 768, la barra inferior (también
-  negra) y la hoja «Más».
-- ⚠️ **La cabecera NO lleva `data-theme="dark"`**: el menú de la cuenta es
-  un popover que se pinta dentro de ella y heredaría el oscuro. El negro lo
-  ponen los tokens `--cacao-*`, y solo el botón dorado va en el ámbito
-  `sobreFoto` de la fachada (la misma solución que la cabecera pública).
-- **Los atajos**: ⌘K / Ctrl+K desde cualquier sitio, `/` cuando no se está
-  escribiendo, y `abrirPaleta()` (un evento) para abrirla desde una página
-  de servidor —lo usa `BotonPaleta`—. La tecla se enseña (`TeclaPaleta`)
-  salvo en pantallas táctiles. La paleta lista también métricas, bitácora,
-  novedades y los «nuevo …».
-- **La portada** (`admin/_components/inicio-panel.tsx`, pintada por
-  `page.tsx`, que solo consulta): la tarjeta principal (registrar y buscar),
-  cuatro cifras —con «por vencer en 30 días»— y atajos a lo que se crea. No
-  repite la navegación, y no anima nada: es la pantalla que más se abre.
-- `/dev/shell` la enseña con datos falsos: rol, sección simulada
-  (`AppShell rutaSimulada`) y la portada.
+- **La barra lateral, negra, a la izquierda** (≥768 px): logotipo en
+  plata, las secciones en grupos (sin título, «Análisis», «El club») y la
+  cuenta al pie (círculo PLATEADO con las iniciales y su menú). La sección
+  activa la dice un **filo PLATEADO muy sutil** con un brillo apenas
+  visible, el texto blanco y el icono en plata — nunca oro, nunca relleno
+  (pedido así: «un borde muy sutil y que sea plateado»; el oro y el punto se
+  probaron y no gustaron). Al pasar, el texto se aclara y el icono se
+  desliza. **El plateado es el acento del cromo negro** («juega mucho más
+  con el plateado»); el oro queda para la acción principal.
+- **La barra de arriba, blanca y pegada**: «Panel / sección», el
+  **buscador** y «Registrar miembro» en oro. En el teléfono, el logotipo en
+  oro a la izquierda y la barra inferior negra con la hoja «Más» (la activa,
+  en plata).
+- **El buscador (`BuscadorPanel`) sustituye a la paleta**: un campo normal
+  que, al escribir, despliega debajo los miembros (con su estado y
+  «Renovar» al lado si está vencido o por vencer) y las acciones que casan
+  (`acciones-panel.ts`). **No se enseña ningún atajo** («no quiero que
+  aparezcan comandos»): Ctrl/⌘+K y «/» siguen llevando al campo, en
+  silencio. `enfocarBuscador()` (un evento) lo pide desde fuera — lo usa la
+  pestaña «Buscar» del teléfono.
+- **Los botones secundarios del panel no tienen borde**: píldora blanca con
+  sombra que sube al pasar y se hunde al pulsar. Los ganchos
+  `--boton-secundario-*` de `button.module.css` los pone el shell; fuera
+  del panel no cambia nada. Los **campos donde se escribe sí conservan su
+  filo** (accesibilidad).
+- **La portada** (`admin/_components/inicio-panel.tsx`; `page.tsx` solo
+  consulta): saludo con el nombre del empleado, cuatro cifras centradas,
+  «Vencen esta semana» con «Renovar» y el vencimiento **con color según la
+  urgencia** (rojo hoy, naranja mañana, ámbar ≤3 días, azul el resto;
+  siempre con texto), los botones de «Crear» sueltos (sin panel ni título)
+  cada uno con su icono y color, y la actividad reciente de la bitácora.
+- `/dev/shell` la enseña con datos falsos (rol, sección simulada y portada).
 
 **La Herramienta de Comercios** (`src/app/comercios/(portal)/`, rediseño del
 04/10/2026) es la tercera cara de la fachada. El layout pone la cabecera del

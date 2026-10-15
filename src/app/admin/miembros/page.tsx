@@ -74,7 +74,7 @@ export default async function MiembrosPage({
   const { q } = await searchParams
   const busqueda = (q ?? '').trim()
 
-  // Misma función que usa la paleta de comandos: una sola definición de qué
+  // Misma función que usa el buscador del panel: una sola definición de qué
   // significa buscar un miembro, y el estado ya viene DERIVADO de
   // `estado` + `fecha_fin`, no leído en crudo de la columna.
   const miembros = await buscarMiembros(busqueda)

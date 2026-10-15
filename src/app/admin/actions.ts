@@ -4,12 +4,12 @@ import { requireRol } from '@/lib/auth/auth'
 import { buscarMiembros, type MiembroEncontrado } from '@/lib/miembros/buscar-miembros'
 
 /**
- * Búsqueda de miembros para la paleta de comandos del shell.
+ * Búsqueda de miembros para el buscador del panel (`BuscadorPanel`).
  *
  * Reutiliza `buscarMiembros`, la misma función que consumirá la lista de
  * `/admin/miembros`: una sola definición de qué significa buscar un miembro.
  *
- * Verifica el rol al entrar, como todas las server actions: ocultar la paleta
+ * Verifica el rol al entrar, como todas las server actions: ocultar el buscador
  * en la interfaz no protegería este endpoint.
  */
 export async function buscarMiembrosAction(termino: string): Promise<MiembroEncontrado[]> {

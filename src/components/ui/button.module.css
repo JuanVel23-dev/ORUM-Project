@@ -249,17 +249,25 @@
   levantado. Al señalarlo se enciende el oro y aparece el primer escalón —ahí
   sí se levanta—, que es el par de §2.3.
 */
+/*
+  GANCHOS PARA EL PANEL (15/10/2026): allí el secundario es una píldora
+  blanca SIN borde y con sombra («no me gustan los bordes dorados; pon una
+  sombra y un efecto al pasar el ratón»). `--boton-secundario-borde`,
+  `--boton-secundario-sombra` y `--boton-secundario-borde-hover` los pone el
+  shell; fuera de él, el secundario sigue como siempre.
+*/
 .secondary {
   background: var(--surface);
   color: var(--text);
-  border-color: var(--border-control);
+  border-color: var(--boton-secundario-borde, var(--border-control));
+  box-shadow: var(--boton-secundario-sombra, 0 0 rgba(0, 0, 0, 0));
 }
 
 @media (hover: hover) {
   .secondary:hover:not(:disabled) {
     translate: 0 -2px;
-    border-color: var(--brand-edge);
-    box-shadow: var(--shadow-card);
+    border-color: var(--boton-secundario-borde-hover, var(--brand-edge));
+    box-shadow: var(--boton-secundario-sombra-hover, var(--shadow-card));
   }
 }
 

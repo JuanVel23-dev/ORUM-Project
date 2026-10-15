@@ -1,27 +1,25 @@
 /* ==========================================================================
-   EL PANEL DE ADMINISTRACIÓN  ·  rediseño del 04/10/2026
+   EL PANEL DE ADMINISTRACIÓN  ·  rediseño del 15/10/2026
    --------------------------------------------------------------------------
-   La paleta de la fachada, el fondo blanco y el `<html>` siempre en claro NO
-   están aquí: salen de `cromo.portal` (`miembros/(portal)/portal.module.css`),
-   que el shell importa tal cual, como la Herramienta de Comercios. Aquí vive
-   lo que es del panel: la cabecera negra SIN foto, la barra de opciones
-   pegada arriba, la barra inferior del teléfono y la hoja «Más».
+   La paleta de la fachada, el fondo blanco y el `<html>` siempre en claro
+   salen de `cromo.portal` (`miembros/(portal)/portal.module.css`). Aquí vive
+   lo que es del panel: la barra lateral negra, la barra de arriba blanca, la
+   barra inferior del teléfono y la hoja «Más».
 
-   El negro sale de los tokens de la franja (`--cacao-*`), que son negros en
-   los dos temas. La cabecera NO lleva `data-theme="dark"`: ver la nota de
-   `app-shell.tsx` sobre el menú de la cuenta.
+   La barra lateral se pinta con los tokens de la franja (`--cacao-*`, negros
+   en los dos temas), no con `data-theme="dark"`: ver `app-shell.tsx`.
    ========================================================================== */
 
 /*
-  LOS BOTONES DEL PANEL, EN PÍLDORA, como los de la fachada. `--boton-radio`
-  es el gancho de `button.module.css` (por defecto, `--radius-sm`).
+  LOS BOTONES DEL PANEL, EN PÍLDORA. `--boton-radio` es el gancho de
+  `button.module.css`. La acción ceremonial (`variant="brand"`) en
+  `--gold-500` con texto en tinta (8,5:1). El primario de trabajo
+  (`variant="primary"`) sigue en tinta.
 
-  El oro de la acción ceremonial (`Button variant="brand"`), en `--gold-500`
-  con texto en tinta (8,5:1), el par de comercios y de las puertas de acceso.
-  El primario de trabajo (`variant="primary"`: Guardar, Crear) SIGUE EN
-  TINTA: es una herramienta de trabajo, y el negro es el del propio cromo.
-  `--action` no se toca a propósito — también pinta la casilla marcada, y en
-  oro su filo daría 1,9:1 contra el blanco (WCAG 1.4.11 pide 3:1).
+  Y LOS SECUNDARIOS, SIN BORDE: una píldora blanca con su sombra (encargo:
+  «no me gustan los bordes; pon una sombra y un efecto al pasar el ratón»).
+  Un `Button secondary` tiene texto, que es lo que lo identifica; los campos
+  donde se escribe sí conservan su filo (ver `CLAUDE.md`).
 
   Doble selector (0,2,0) para ganarle al `[data-theme='light']` de
   `globals.css`, que se evalúa en este mismo elemento.
@@ -30,513 +28,410 @@
   --boton-radio: var(--radius-full);
   --action-gold: var(--gold-500);
   --action-gold-fg: var(--tinta-1);
-}
+  --boton-secundario-borde: transparent;
+  --boton-secundario-sombra: var(--shadow-card);
+  --boton-secundario-borde-hover: transparent;
+  --boton-secundario-sombra-hover: var(--shadow-raised);
 
-/* El margen lateral del cromo: el de la columna del contenido, para que el
-   logo caiga sobre el borde del titular y las acciones sobre el de la
-   rejilla. Lo comparten la cabecera y la barra de opciones. */
-.cabecera,
-.opciones {
-  --margen-columna: max(var(--space-4), env(safe-area-inset-left, 0px));
-
-  padding-left: var(--margen-columna);
-  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
-}
-
-@media (min-width: 768px) {
-  .cabecera,
-  .opciones {
-    --margen-columna: max(
-      var(--space-6),
-      calc((100% - var(--content-max)) / 2 + var(--space-6))
-    );
-
-    padding-left: max(var(--margen-columna), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--margen-columna), env(safe-area-inset-right, 0px));
-  }
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 100dvh;
 }
 
 /* ==========================================================================
-   LA CABECERA  ·  negra, en el flujo: se va al desplazar
+   LA BARRA LATERAL  ·  negra, ≥768 px
    ========================================================================== */
 
-.cabecera {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-
-  min-height: calc(var(--tap-min) + var(--space-3) * 2);
-  padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
-  padding-bottom: var(--space-3);
-
-  background: var(--cacao-bg);
-  color: var(--cacao-fg);
-}
-
-@media (min-width: 768px) {
-  .cabecera {
-    gap: var(--space-6);
-    padding-top: max(var(--space-4), env(safe-area-inset-top, 0px));
-    padding-bottom: var(--space-2);
-  }
-}
-
-/* --- La marca: el logotipo y «Panel» ------------------------------------- */
-
-.marca {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  border-radius: var(--radius-xs);
-  color: inherit;
-  text-decoration: none;
-}
-
-.logo {
-  height: clamp(1.5rem, 1.1rem + 1vw, 2rem);
-}
-
-/* «Panel», en versalitas de rótulo, separado por un filo: dice en qué puerta
-   del club se está sin repetir el nombre. */
-.marcaPanel {
-  padding-left: var(--space-3);
-  border-left: 1px solid color-mix(in srgb, var(--cacao-fg) 24%, transparent);
-  font-size: var(--t-overline-size);
-  line-height: 1.6;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--cacao-fg-2);
-}
-
-.marca:focus-visible {
-  outline: 2px solid var(--cacao-brand);
-  outline-offset: 4px;
-}
-
-/* --- El buscador: el disparador de la paleta ------------------------------ */
-
-/*
-  Se lee como el buscador de la fachada: una píldora con la lupa y el texto
-  en tono de marcador. Su filo es crema al 40 % sobre el negro (~3,6:1, por
-  encima del 3:1 de WCAG 1.4.11); al apuntarlo se enciende en oro, que es la
-  respuesta al toque. En el teléfono no está: «Buscar» vive en la barra
-  inferior, en la zona del pulgar.
-*/
-.buscar {
+.lateral {
   display: none;
-  flex: 1;
-  /* Encoge por debajo del ancho de su texto (que se corta con «…»): sin
-     esto, en una tableta empujaba la cuenta fuera de la cabecera. */
-  min-width: 0;
-  align-items: center;
-  gap: var(--space-3);
-  max-width: 520px;
-  min-height: var(--tap-min);
-  padding: 0 var(--space-2) 0 var(--space-4);
-
-  border: 1px solid color-mix(in srgb, var(--cacao-fg) 40%, transparent);
-  border-radius: var(--radius-full);
-  background: none;
-
-  font-family: inherit;
-  font-size: var(--t-callout-size);
-  color: var(--cacao-fg-2);
-  text-align: left;
-  cursor: pointer;
-
-  transition:
-    border-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out),
-    translate var(--dur-fast) var(--ease-out);
 }
 
 @media (min-width: 768px) {
-  .buscar {
+  .lateral {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    flex: 0 0 var(--sidebar-w);
     display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+    box-sizing: border-box;
+    width: var(--sidebar-w);
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    padding: var(--space-6) var(--space-4) var(--space-4);
+    padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
+
+    background: var(--cacao-bg);
+    color: var(--cacao-fg-2);
   }
-}
 
-@media (hover: hover) {
-  .buscar:hover {
-    border-color: var(--cacao-brand);
-    color: var(--cacao-fg);
-    translate: 0 -1px;
-  }
-}
-
-.buscar:active {
-  translate: 0 1px;
-}
-
-.buscar:focus-visible {
-  outline: 2px solid var(--cacao-brand);
-  outline-offset: 2px;
-}
-
-.buscarIcono {
-  flex-shrink: 0;
-}
-
-.buscarTexto {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* El atajo, como una tecla: el mismo gris del texto, en su propia píldora.
-   En una pantalla táctil no hay teclado al que enseñárselo. */
-@media (pointer: coarse) {
-  .atajo {
+  .lateral::-webkit-scrollbar {
     display: none;
   }
 }
 
-.atajo {
-  flex-shrink: 0;
-  padding: 2px var(--space-2);
-  border: 1px solid color-mix(in srgb, var(--cacao-fg) 28%, transparent);
-  border-radius: var(--radius-full);
-  font-family: inherit;
-  font-size: var(--t-caption-size);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--cacao-fg-2);
-}
-
-/* --- Las acciones: registrar y la cuenta ---------------------------------- */
-
-.acciones {
+.marca {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin-left: auto;
+  padding: var(--space-1) var(--space-3) 0;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
 }
 
-/* «Registrar miembro» queda solo con su icono en un teléfono estrecho y en
-   una tableta, donde el buscador necesita el sitio. */
-.registrarTexto {
-  display: none;
+.marca:focus-visible {
+  outline: 2px solid var(--n-100);
+  outline-offset: 4px;
 }
 
-@media (min-width: 480px) and (max-width: 767px), (min-width: 1024px) {
-  .registrarTexto {
-    display: inline;
+.logo {
+  height: 24px;
+  width: auto;
+}
+
+.marcaPanel {
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--cacao-700);
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cacao-fg-3);
+}
+
+.secciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.grupoTitulo {
+  padding: 0 var(--space-3) var(--space-1);
+  font-size: var(--t-overline-size);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cacao-fg-3);
+}
+
+.grupoLista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+  UNA SECCIÓN. En reposo, gris plata tenue. Al pasar, el texto se aclara y
+  el icono se desliza. La ACTIVA: un filo PLATEADO muy sutil que la rodea,
+  con un brillo apenas perceptible, el texto blanco y el icono en plata.
+  Sin fondo y sin oro (encargo del propietario, 15/10/2026).
+*/
+.seccion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 42px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--t-callout-size);
+  font-weight: 500;
+  color: var(--cacao-fg-2);
+  text-decoration: none;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition:
+    color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-slow) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
+}
+
+.seccionIcono {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  transition:
+    translate var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .seccion:hover {
+    color: var(--cacao-fg);
+  }
+
+  .seccion:hover .seccionIcono {
+    translate: 3px 0;
   }
 }
 
-/* La cuenta, solo en escritorio: en el teléfono vive en la hoja «Más». */
+.seccion:active {
+  scale: 0.97;
+}
+
+.seccion:focus-visible {
+  outline: 2px solid var(--n-100);
+  outline-offset: 1px;
+}
+
+.seccion[data-activo='true'] {
+  font-weight: 600;
+  color: var(--cacao-fg);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--n-100) 26%, transparent),
+    0 0 14px color-mix(in srgb, var(--n-100) 6%, transparent);
+}
+
+.seccion[data-activo='true'] .seccionIcono {
+  color: var(--n-100);
+}
+
+/* --- La cuenta, al pie ------------------------------------------------------ */
+
 .cuenta {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .cuenta {
-    display: block;
-  }
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--cacao-700);
 }
 
 .cuentaBoton {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: var(--tap-min);
-  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
-
-  border: none;
-  border-radius: var(--radius-full);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
   background: none;
   font-family: inherit;
   color: var(--cacao-fg);
   text-align: left;
   cursor: pointer;
-
+  box-shadow: inset 0 0 0 1px transparent;
   transition:
-    translate var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
+    box-shadow var(--dur-base) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
 }
 
 @media (hover: hover) {
   .cuentaBoton:hover {
-    translate: 0 -1px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--n-100) 18%, transparent);
   }
+}
 
-  .cuentaBoton:hover .cuentaFlecha {
-    color: var(--cacao-brand);
-    translate: 0 1px;
-  }
+.cuentaBoton:active {
+  scale: 0.98;
 }
 
 .cuentaBoton:focus-visible {
-  outline: 2px solid var(--cacao-brand);
-  outline-offset: 2px;
+  outline: 2px solid var(--n-100);
+  outline-offset: 1px;
+}
+
+/* El círculo de la cuenta, PLATEADO (encargo: «juega mucho más con el
+   plateado»): un degradado metálico con su brillo arriba. */
+.cuentaCirculo {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, var(--n-50) 0%, var(--n-200) 42%, var(--n-400) 100%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--blanco) 90%, transparent),
+    0 1px 3px color-mix(in srgb, var(--cacao-900) 60%, transparent);
+  font-size: var(--t-caption-size);
+  font-weight: 700;
+  color: var(--cacao-900);
 }
 
 .cuentaTextos {
-  display: none;
+  display: flex;
   flex-direction: column;
+  flex: 1;
   min-width: 0;
-  max-width: 220px;
-}
-
-@media (min-width: 1100px) {
-  .cuentaTextos {
-    display: flex;
-  }
 }
 
 .cuentaNombre {
   overflow: hidden;
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--t-caption-size);
-  font-weight: 600;
 }
 
 .cuentaRol {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--t-overline-size);
-  letter-spacing: var(--t-overline-tracking);
-  text-transform: uppercase;
-  color: var(--cacao-fg-2);
+  font-size: var(--t-caption-size);
+  color: var(--cacao-fg-3);
 }
 
 .cuentaFlecha {
   flex-shrink: 0;
-  color: var(--cacao-fg-2);
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    translate var(--dur-fast) var(--ease-out);
+  color: var(--cacao-fg-3);
 }
 
-/* --- Menú de la cuenta (un popover CLARO: hereda del panel) ------------- */
+/* ==========================================================================
+   LA COLUMNA DEL TRABAJO  ·  la barra de arriba y el contenido
+   ========================================================================== */
 
-.menuCabecera {
+.columna {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 2px;
-  padding: var(--space-2) var(--space-3) var(--space-3);
-  /* Separador dentro de una superficie ya definida. */
-  border-bottom: 1px solid var(--border-subtle);
-  margin-bottom: var(--space-2);
   min-width: 0;
 }
 
-.menuCorreo {
-  font-size: var(--t-callout-size);
-  font-weight: 600;
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
-
-.menuRol {
-  font-size: var(--t-overline-size);
-  letter-spacing: var(--t-overline-tracking);
-  text-transform: uppercase;
-  color: var(--text-2);
-}
-
-/* ==========================================================================
-   LA BARRA DE OPCIONES  ·  negra, pegada arriba, ≥768px
-   --------------------------------------------------------------------------
-   Va donde los otros portales ponen la foto. Todas las secciones a la vista,
-   en sus grupos (separados por un filo dentro de la misma superficie). Si no
-   caben —una tableta en vertical—, desplaza en horizontal, sin barra.
-   ========================================================================== */
-
-.opciones {
+.barra {
   position: sticky;
   top: 0;
-  z-index: var(--z-header);
-
-  display: none;
-  padding-top: env(safe-area-inset-top, 0px);
-
-  background: var(--cacao-bg);
-  color: var(--cacao-fg-2);
-}
-
-@media (min-width: 768px) {
-  .opciones {
-    display: block;
-  }
-}
-
-/*
-  EL FUNDIDO, como el de la cabecera de los otros portales: el negro no
-  acaba en un canto, se apaga hacia abajo. Corto (24 px) y con curva suave
-  —arranca plano y termina plano—, para que no se lea una raya gris sobre el
-  blanco. Se sale por debajo de la caja: ni la agranda ni tapa clics.
-*/
-.opciones::after {
-  --fundido: var(--space-6);
-
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  height: var(--fundido);
-  pointer-events: none;
-
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--cacao-bg) 22%, transparent) 0,
-    color-mix(in srgb, var(--cacao-bg) 16%, transparent) 20%,
-    color-mix(in srgb, var(--cacao-bg) 8%, transparent) 45%,
-    color-mix(in srgb, var(--cacao-bg) 2.5%, transparent) 75%,
-    color-mix(in srgb, var(--cacao-bg) 0%, transparent) 100%
-  );
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .opciones::after {
-    display: none;
-  }
-}
-
-.opcionesFila {
+  z-index: var(--z-sticky);
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) 0 var(--space-3);
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
+  min-height: 68px;
+  padding: var(--space-3) max(var(--space-4), env(safe-area-inset-right, 0px)) var(--space-3)
+    max(var(--space-4), env(safe-area-inset-left, 0px));
+  padding-top: max(var(--space-3), env(safe-area-inset-top, 0px));
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface);
 }
 
-.grupo {
+@media (min-width: 768px) {
+  .barra {
+    gap: var(--space-5);
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+  }
+}
+
+.marcaMovil {
   display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-/* Entre grupos, un filo de 1px: una división dentro de la superficie. */
-.grupo + .grupo {
-  padding-left: var(--space-3);
-  border-left: 1px solid color-mix(in srgb, var(--cacao-fg) 16%, transparent);
-}
-
-.opcion {
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 40px;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-full);
-
-  font-size: var(--t-callout-size);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  color: var(--cacao-fg-2);
-  text-decoration: none;
-
-  /* Sin relleno al apuntar (CLAUDE.md, 29/09/2026): la opción sube un
-     píxel y se aclara. */
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    translate var(--dur-fast) var(--ease-out);
-}
-
-@media (pointer: coarse) {
-  .opcion {
-    min-height: var(--tap-min);
-  }
-}
-
-@media (hover: hover) {
-  .opcion:hover {
-    color: var(--cacao-fg);
-    translate: 0 -1px;
-  }
-}
-
-.opcion:active {
-  translate: 0 1px;
-}
-
-/*
-  LA SECCIÓN ACTIVA: el filo dorado (que se desliza), el oro pálido del texto
-  (`--gold-300`, 13,95:1 sobre negro), el peso y `aria-current`. Nunca un
-  relleno: lo elegido se dice con filo, peso y `aria-*`.
-*/
-.opcion[data-activo='true'] {
-  color: var(--gold-300);
-  font-weight: 600;
-}
-
-.opcionFilo {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: var(--radius-full);
-  box-shadow: inset 0 0 0 1px var(--cacao-brand);
-  pointer-events: none;
-}
-
-.opcion:focus-visible {
-  outline: 2px solid var(--cacao-brand);
-  outline-offset: 2px;
-}
-
-.opcionIcono {
   flex-shrink: 0;
-  width: 17px;
-  height: 17px;
+  border-radius: var(--radius-sm);
 }
 
-/*
-  ENTRE 768 Y 1099 PX (una tableta, un portátil pequeño) las ocho secciones
-  no caben con icono: van solo con su nombre y más juntas. Si aun así no
-  caben, la fila desplaza en horizontal.
-*/
-@media (max-width: 1099px) {
-  .opcionesFila {
-    gap: var(--space-2);
-  }
+.marcaMovil:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
 
-  .grupo + .grupo {
-    padding-left: var(--space-2);
-  }
+.logoMovil {
+  height: 20px;
+  width: auto;
+}
 
-  .opcion {
-    padding: 0 var(--space-3);
-  }
-
-  .opcionIcono {
+@media (min-width: 768px) {
+  .marcaMovil {
     display: none;
   }
 }
 
-@media (max-width: 819px) {
-  .opcion {
-    padding: 0 var(--space-2);
+/* Dónde estás: «Panel / Miembros». Solo en pantallas anchas. */
+.ruta {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .ruta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--t-footnote-size);
+    white-space: nowrap;
   }
 }
 
-/* ==========================================================================
-   EL CONTENIDO
-   ========================================================================== */
+.rutaInicio {
+  color: var(--text-2);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .rutaInicio:hover {
+    color: var(--text);
+  }
+}
+
+.rutaInicio:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs, 4px);
+}
+
+.rutaSeparador {
+  color: var(--text-3);
+}
+
+.rutaActual {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.buscador {
+  flex: 1;
+  min-width: 0;
+  margin-left: auto;
+}
+
+@media (min-width: 1024px) {
+  .buscador {
+    flex: 0 1 440px;
+  }
+}
+
+.registrar {
+  flex-shrink: 0;
+}
+
+/* En el teléfono el botón queda en su círculo, sin el relleno lateral del
+   texto que no se ve. */
+@media (max-width: 639px) {
+  .registrar {
+    width: var(--tap-min);
+    padding-inline: 0;
+    justify-content: center;
+  }
+}
+
+/* En el teléfono, solo el icono. */
+.registrarTexto {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .registrarTexto {
+    display: inline;
+  }
+}
+
+/* --- El contenido ---------------------------------------------------------- */
 
 .main {
   flex: 1;
+  box-sizing: border-box;
   width: 100%;
-  max-width: var(--content-max);
+  max-width: calc(var(--content-max) + var(--space-8) * 2);
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-10);
-  padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
-  padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
+  padding: var(--space-6) max(var(--space-4), env(safe-area-inset-right, 0px)) var(--space-10)
+    max(var(--space-4), env(safe-area-inset-left, 0px));
 
   /*
-    Contenedor de consulta para TODAS las páginas: el sitio correcto para
-    preguntar por el ancho útil es aquí, no el viewport.
+    Contenedor de consulta para TODAS las páginas: el ancho útil se pregunta
+    aquí, no al viewport (la barra lateral se come 264 px).
   */
   container-type: inline-size;
   container-name: contenido;
@@ -544,10 +439,7 @@
 
 @media (min-width: 768px) {
   .main {
-    padding-top: var(--space-8);
-    padding-bottom: var(--space-11);
-    padding-left: max(var(--space-6), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--space-6), env(safe-area-inset-right, 0px));
+    padding: var(--space-8) var(--space-8) var(--space-11);
   }
 }
 
@@ -616,8 +508,16 @@
     opacity var(--dur-press) var(--ease-out);
 }
 
+/* La activa, en plata y con más peso: el mismo lenguaje que la barra
+   lateral, sin oro (15/10/2026). */
 .tab[data-activo='true'] {
-  color: var(--gold-300);
+  color: var(--n-50);
+  font-weight: 700;
+}
+
+.tab[data-activo='true'] .tabIcono {
+  color: var(--n-100);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--n-100) 35%, transparent));
 }
 
 .tab:active {
@@ -625,27 +525,13 @@
 }
 
 .tab:focus-visible {
-  outline: 2px solid var(--cacao-brand);
+  outline: 2px solid var(--n-100);
   outline-offset: -4px;
 }
 
 .tabIcono {
   width: 21px;
   height: 21px;
-}
-
-/* El filo dorado alrededor del icono de la pestaña activa: el mismo
-   lenguaje que la barra de opciones, y también se desliza. */
-.tabIndicador {
-  position: absolute;
-  top: calc(var(--space-2) - 5px);
-  left: 50%;
-  z-index: -1;
-  width: 52px;
-  height: 31px;
-  translate: -50% 0;
-  border-radius: var(--radius-full);
-  box-shadow: inset 0 0 0 1px var(--cacao-brand);
 }
 
 /* ==========================================================================
@@ -707,8 +593,8 @@
 
 /* El destino en el que ya estás: el filo dorado, el peso y `aria-current`. */
 .masItem[data-activo='true'] {
-  font-weight: 600;
-  box-shadow: var(--filo-activo-inset);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--border-subtle), var(--shadow-card);
 }
 
 .masItemIcono {
@@ -727,8 +613,8 @@
    ========================================================================== */
 
 @media print {
-  .cabecera,
-  .opciones,
+  .lateral,
+  .barra,
   .tabbar {
     display: none;
   }
