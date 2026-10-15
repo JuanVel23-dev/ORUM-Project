@@ -18,7 +18,7 @@
 */
 .envoltorio {
   border: 1px solid var(--border-superficie);
-  border-radius: var(--radius-md);
+  border-radius: var(--tabla-radio, var(--radius-md));
   background: var(--surface);
   box-shadow: var(--shadow-card), var(--edge);
   overflow: hidden;
@@ -34,7 +34,8 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--surface-sunk);
+  /* El panel pone una banda gris muy suave (`--tabla-cabeza-fondo`). */
+  background: var(--tabla-cabeza-fondo, var(--surface-sunk));
 }
 
 /*
@@ -46,14 +47,14 @@
 .th {
   text-align: left;
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--tabla-cabeza-filo, var(--border));
 
-  font-size: var(--t-overline-size);
+  font-size: var(--tabla-cabeza-tamano, var(--t-overline-size));
   line-height: var(--t-overline-leading);
-  letter-spacing: var(--t-overline-tracking);
-  font-weight: var(--t-overline-weight);
-  text-transform: uppercase;
-  color: var(--text-3);
+  letter-spacing: var(--tabla-cabeza-tracking, var(--t-overline-tracking));
+  font-weight: var(--tabla-cabeza-peso, var(--t-overline-weight));
+  text-transform: var(--tabla-cabeza-caja, uppercase);
+  color: var(--tabla-cabeza-color, var(--text-3));
   white-space: nowrap;
 }
 

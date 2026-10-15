@@ -1,0 +1,93 @@
+/* ==========================================================================
+   PESTAÑAS DE UNA LISTA  ·  franja suave y la elegida en píldora blanca
+   ========================================================================== */
+
+.pista {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  gap: var(--space-1);
+  max-width: 100%;
+  padding: var(--space-1);
+  border-radius: var(--radius-lg);
+  background: var(--surface-hueco);
+}
+
+.pestana {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 38px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--t-footnote-size);
+  font-weight: 500;
+  color: var(--text-2);
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 0 rgba(0, 0, 0, 0);
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .pestana:not([data-activa]):hover {
+    color: var(--text);
+  }
+}
+
+.pestana:active {
+  scale: 0.96;
+}
+
+.pestana:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* La elegida: una píldora blanca que se levanta. Es un control elegido, no
+   una superficie en reposo: aquí la sombra dice «esta». */
+.pestana[data-activa] {
+  background: var(--surface);
+  font-weight: 700;
+  color: var(--text);
+  box-shadow: var(--shadow-card);
+}
+
+.punto {
+  width: 8px;
+  height: 8px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+}
+
+.punto[data-tono='neutro'] {
+  background: var(--text-3);
+}
+
+.punto[data-tono='exito'] {
+  background: var(--success);
+}
+
+.punto[data-tono='aviso'] {
+  background: var(--warning);
+}
+
+/* Vencida: punto HUECO (la forma cambia, no solo el color). */
+.punto[data-tono='peligro'] {
+  border: 1.5px solid var(--danger);
+}
+
+.punto[data-tono='vacio'] {
+  border: 1.5px solid var(--text-3);
+}
+
+.cuenta {
+  font-size: var(--t-caption-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}

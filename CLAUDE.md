@@ -1116,7 +1116,18 @@ paleta:
   urgencia** (rojo hoy, naranja mañana, ámbar ≤3 días, azul el resto;
   siempre con texto), los botones de «Crear» sueltos (sin panel ni título)
   cada uno con su icono y color, y la actividad reciente de la bitácora.
-- `/dev/shell` la enseña con datos falsos (rol, sección simulada y portada).
+- **Las listas del panel** llevan `Pestanas` (`components/ui/pestanas.tsx`:
+  franja gris suave, la elegida en píldora blanca con sombra, punto de color
+  y recuento; son enlaces), herramientas (buscador GET, filtros como
+  `DropdownMenu` con `MenuItem href`, orden) y `Paginacion` (25 por página,
+  `lib/shared/paginacion.ts`). Todo en la URL. La primera es Miembros
+  (`ListaMiembros`; la lógica pura en `lib/miembros/listado.ts`, la carga en
+  `cargar-listado.ts`, que pide las tablas por páginas de 1000 porque
+  PostgREST corta ahí). Las tablas (`DataList`) toman en el panel la
+  cabecera en banda gris y títulos en minúscula por los ganchos
+  `--tabla-*` que pone el shell.
+- `/dev/shell` la enseña con datos falsos (rol, sección simulada, portada y
+  la lista de miembros).
 
 **La Herramienta de Comercios** (`src/app/comercios/(portal)/`, rediseño del
 04/10/2026) es la tercera cara de la fachada. El layout pone la cabecera del

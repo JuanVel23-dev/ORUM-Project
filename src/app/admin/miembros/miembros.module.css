@@ -1,41 +1,38 @@
-.buscador {
+.lista {
   display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-  margin-bottom: var(--space-5);
+  flex-direction: column;
+  gap: var(--space-5);
 }
 
-.campo {
-  flex: 1;
-  min-width: 0;
-  max-width: 460px;
-}
-
-/*
-  `@container`, no `@media`: la lista vive dentro de `.main` del shell
-  (`container-name: contenido`), cuyo ancho depende del estado de la barra
-  lateral y no del viewport.
-*/
-@container contenido (max-width: 640px) {
-  .buscador {
-    flex-direction: column;
-  }
-
-  .campo {
-    max-width: none;
-    width: 100%;
-  }
-}
-
-.resumen {
+/* Las herramientas: el buscador ocupa lo que sobra; plan y orden a su lado. */
+.herramientas {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
   flex-wrap: wrap;
-  margin-bottom: var(--space-4);
+  align-items: center;
+  gap: var(--space-2);
+}
 
-  font-size: var(--t-footnote-size);
-  color: var(--text-2);
+.buscar {
+  flex: 1 1 280px;
+  max-width: 420px;
+}
+
+.ordenar {
+  margin-left: auto;
+}
+
+.valorFiltro {
+  font-weight: 700;
+}
+
+@container contenido (max-width: 640px) {
+  .buscar {
+    max-width: none;
+  }
+
+  .ordenar {
+    margin-left: 0;
+  }
 }
 
 .celdaNombre {
@@ -45,8 +42,22 @@
   min-width: 0;
 }
 
+.nombreBloque {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.subtitulo {
+  font-size: var(--t-caption-size);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
 .nombre {
   overflow: hidden;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

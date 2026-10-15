@@ -33,6 +33,17 @@
   --boton-secundario-borde-hover: transparent;
   --boton-secundario-sombra-hover: var(--shadow-raised);
 
+  /* Las tablas (`DataList`): esquinas de tarjeta, cabecera en una banda gris
+     muy suave y los títulos en minúscula, más legibles que en versalitas. */
+  --tabla-radio: var(--radius-lg);
+  --tabla-cabeza-fondo: var(--surface-hueco);
+  --tabla-cabeza-tamano: var(--t-caption-size);
+  --tabla-cabeza-tracking: 0;
+  --tabla-cabeza-peso: 600;
+  --tabla-cabeza-caja: none;
+  --tabla-cabeza-color: var(--text-2);
+  --tabla-cabeza-filo: var(--border-subtle);
+
   display: flex;
   flex-direction: row;
   align-items: stretch;

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { InicioPanel } from '@/app/admin/_components/inicio-panel'
+import { ListaMiembros } from '@/app/admin/miembros/_components/lista-miembros'
+import type { FilaMiembro } from '@/lib/miembros/listado'
 import { AppShell } from '@/components/shell/app-shell'
 import { Badge, StatusBadge, VenceEn } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -64,6 +66,30 @@ async function buscarFalso(termino: string): Promise<MiembroEncontrado[]> {
   )
 }
 
+const NOMBRES = ['Laura Martínez Rojas', 'Pedro Cano', 'Andrea Patiño Vélez', 'Julián Restrepo', 'Sofía Guzmán', 'María Salazar', 'David Orozco', 'Carlos Gómez']
+
+/** Filas falsas para la lista de miembros: un poco de cada estado. */
+const FILAS_FALSAS: FilaMiembro[] = Array.from({ length: 63 }, (_, i) => {
+  const tipo = i % 7
+  return {
+    id: i + 1,
+    numeroMembresia: String(184400 + i).padStart(8, '0'),
+    nombre: `${NOMBRES[i % NOMBRES.length]}${i >= NOMBRES.length ? ` ${i}` : ''}`,
+    cedula: String(1020300000 + i * 97),
+    telefono: `300 ${String(1000000 + i * 1234).slice(0, 3)} ${String(1000 + i).slice(0, 4)}`,
+    fotoUrl: null,
+    plan: i % 3 === 0 ? 'Familiar' : 'Anual',
+    planId: i % 3 === 0 ? 2 : 1,
+    estado:
+      tipo === 5
+        ? { activa: false, motivo: 'vencida' }
+        : tipo === 6
+          ? null
+          : { activa: true, diasRestantes: tipo === 0 ? 3 : 40 + i * 3 },
+    fechaFin: tipo === 6 ? null : '2027-01-01',
+  }
+})
+
 export function ShellPreview() {
   const [rol, setRol] = useState<RolCodigo>('super_admin')
   const [ruta, setRuta] = useState('/admin')
@@ -110,7 +136,17 @@ export function ShellPreview() {
           />
         </Stack>
 
-      {ruta === '/admin' ? (
+      {ruta === '/admin/miembros' ? (
+        <ListaMiembros
+          filas={FILAS_FALSAS}
+          planes={[
+            { id: 1, nombre: 'Anual' },
+            { id: 2, nombre: 'Familiar' },
+          ]}
+          params={{}}
+          esSuperAdmin={rol === 'super_admin'}
+        />
+      ) : ruta === '/admin' ? (
         <InicioPanel
           esSuperAdmin={rol === 'super_admin'}
           saludo="Buenas tardes"

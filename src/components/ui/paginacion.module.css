@@ -1,0 +1,75 @@
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-1) 0;
+}
+
+.resumen {
+  margin: 0;
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+.resumen strong {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.paginas {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.boton {
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--t-footnote-size);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  text-decoration: none;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .boton:not([data-inactivo]):not([aria-current]):hover {
+    color: var(--text);
+    scale: 1.08;
+    box-shadow: var(--shadow-card);
+  }
+}
+
+.boton:not([data-inactivo]):active {
+  scale: 0.94;
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.boton[aria-current] {
+  background: var(--action);
+  color: var(--action-fg);
+}
+
+.boton[data-inactivo] {
+  opacity: 0.35;
+}
+
+.salto {
+  padding: 0 var(--space-1);
+  color: var(--text-3);
+}
