@@ -8,6 +8,8 @@ import { Field } from '@/components/ui/field'
 import { Input, Textarea } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/toggle'
 import { Stack } from '@/components/ui/layout'
+import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
+import { largo, obligatorio } from '@/lib/validacion/reglas'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { crearAnuncio, editarAnuncio, type AnuncioState } from '../actions'
 import formStyles from '@/styles/formulario.module.css'
@@ -23,6 +25,13 @@ export type AnuncioInicial = {
 
 const estadoInicial: AnuncioState = {}
 
+const REGLAS = {
+  titulo: [obligatorio('Escribe el título de la novedad.'), largo(4, 120, 'El título')],
+  cuerpo: [obligatorio('Escribe el texto de la novedad.'), largo(10, 600, 'El texto')],
+}
+
+const ETIQUETAS: Record<string, string> = { titulo: 'Título', cuerpo: 'Cuerpo' }
+
 export function AnuncioForm({ anuncio }: { anuncio?: AnuncioInicial }) {
   const editando = Boolean(anuncio)
   const [state, formAction, pending] = useActionState(
@@ -31,15 +40,17 @@ export function AnuncioForm({ anuncio }: { anuncio?: AnuncioInicial }) {
   )
   const cerrar = useCerrarOverlay()
   useCerrarCuando(state.ok)
+  const v = useValidacion(REGLAS)
 
   return (
-    <form action={formAction} className={formStyles.formulario} noValidate>
+    <form action={formAction} className={formStyles.formulario} {...v.propsFormulario}>
       {state.error && <Alert tone="danger">{state.error}</Alert>}
+      <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
 
       {anuncio && <input type="hidden" name="id" value={anuncio.id} />}
 
       <Stack gap={5}>
-        <Field label="Título" help="Lo primero que lee el socio en el aviso.">
+        <Field label="Título" help="Lo primero que lee el socio en el aviso." error={v.error('titulo')}>
           <Input
             name="titulo"
             defaultValue={anuncio?.titulo}
@@ -49,7 +60,11 @@ export function AnuncioForm({ anuncio }: { anuncio?: AnuncioInicial }) {
           />
         </Field>
 
-        <Field label="Cuerpo" help="El texto completo del aviso. Máximo 600 caracteres.">
+        <Field
+          label="Cuerpo"
+          help="El texto completo del aviso. Máximo 600 caracteres."
+          error={v.error('cuerpo')}
+        >
           <Textarea
             name="cuerpo"
             defaultValue={anuncio?.cuerpo}

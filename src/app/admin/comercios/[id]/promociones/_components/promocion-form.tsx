@@ -5,7 +5,18 @@ import { Save, Tag } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input, Select } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
+import { SelectMenu } from '@/components/ui/select-menu'
+import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
+import {
+  fecha,
+  largo,
+  noAntesDe,
+  obligatorio,
+  porcentaje,
+  precio,
+  type Regla,
+} from '@/lib/validacion/reglas'
 import { Stack } from '@/components/ui/layout'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import {
@@ -31,6 +42,35 @@ const estadoInicial: PromocionState = {}
 
 /** Tipos donde el beneficio no se expresa con un número. */
 const TIPOS_SIN_VALOR = new Set(['dos_por_uno', 'regalo'])
+
+const ETIQUETAS: Record<string, string> = {
+  titulo: 'Título',
+  descripcion: 'Descripción',
+  tipo_beneficio_id: 'Tipo de beneficio',
+  valor: 'Valor del beneficio',
+  fecha_inicio: 'Fecha de inicio',
+  fecha_fin: 'Fecha de fin',
+}
+
+/** Las reglas dependen del tipo elegido: el valor se pide como porcentaje, como monto o no se pide. */
+function reglasPara(tipos: TipoOpcion[]) {
+  const valor: Regla = (v, todos) => {
+    const tipo = tipos.find((t) => String(t.id) === todos.tipo_beneficio_id)
+    if (!tipo || TIPOS_SIN_VALOR.has(tipo.codigo)) return null
+    if (v.trim() === '') {
+      return tipo.codigo === 'porcentaje' ? 'Escribe el porcentaje de descuento.' : 'Escribe el monto del beneficio.'
+    }
+    return tipo.codigo === 'porcentaje' ? porcentaje(v, todos) : precio()(v, todos)
+  }
+  return {
+    titulo: [obligatorio('Escribe el título de la promoción.'), largo(4, 80, 'El título')],
+    descripcion: [largo(5, 280, 'La descripción')],
+    tipo_beneficio_id: [obligatorio('Elige el tipo de beneficio.')],
+    valor: [valor],
+    fecha_inicio: [fecha],
+    fecha_fin: [fecha, noAntesDe('fecha_inicio', 'La promoción no puede terminar antes de empezar.')],
+  }
+}
 
 export function PromocionForm({
   comercioId,
@@ -63,11 +103,13 @@ export function PromocionForm({
     : true
 
   const sinTipos = tipos.length === 0
+  const v = useValidacion(reglasPara(tipos))
 
   return (
     <>
-      <form action={formAction} className={styles.formulario} noValidate>
+      <form action={formAction} className={styles.formulario} {...v.propsFormulario}>
         {state.error && <Alert tone="danger">{state.error}</Alert>}
+        <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
 
         {sinTipos && (
           <Alert tone="warning" title="No hay tipos de beneficio">
@@ -80,7 +122,7 @@ export function PromocionForm({
         {promocion && <input type="hidden" name="id" value={promocion.id} />}
 
         <Stack gap={5}>
-          <Field label="Título" help="Es lo que ve el miembro. Sé concreto.">
+          <Field label="Título" help="Es lo que ve el miembro. Sé concreto." error={v.error('titulo')}>
             <Input
               name="titulo"
               defaultValue={promocion?.titulo}
@@ -90,41 +132,28 @@ export function PromocionForm({
             />
           </Field>
 
-          <Field label="Descripción" optional>
+          <Field label="Descripción" optional error={v.error('descripcion')}>
             <Input name="descripcion" defaultValue={promocion?.descripcion ?? ''} />
           </Field>
 
-          <Field label="Tipo de beneficio">
-            <Select
+          <Field label="Tipo de beneficio" error={v.error('tipo_beneficio_id')}>
+            <SelectMenu
               name="tipo_beneficio_id"
-              required
+              etiqueta="Tipo de beneficio"
               value={tipoId}
-              onChange={(e) => setTipoId(e.target.value)}
-              disabled={sinTipos}
-            >
-              {tipos.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.nombre}
-                </option>
-              ))}
-            </Select>
+              onChange={setTipoId}
+              opciones={tipos.map((t) => ({ value: String(t.id), label: t.nombre }))}
+            />
           </Field>
 
           {requiereValor && (
             <Field
               label={esPorcentaje ? 'Porcentaje de descuento' : 'Monto del beneficio'}
-              help={
-                esPorcentaje
-                  ? 'Entre 1 y 100.'
-                  : 'En pesos colombianos, sin puntos ni símbolo.'
-              }
+              help={esPorcentaje ? 'Entre 1 y 100.' : 'En pesos colombianos. Puedes escribirlo con puntos: 20.000.'}
+              error={v.error('valor')}
             >
               <Input
                 name="valor"
-                type="number"
-                min="0"
-                max={esPorcentaje ? 100 : undefined}
-                step="0.01"
                 inputMode="decimal"
                 numeric
                 defaultValue={promocion?.valor ?? ''}
@@ -133,7 +162,7 @@ export function PromocionForm({
           )}
 
           <div className={styles.pareja}>
-            <Field label="Fecha de inicio" optional>
+            <Field label="Fecha de inicio" optional error={v.error('fecha_inicio')}>
               <Input
                 name="fecha_inicio"
                 type="date"
@@ -141,7 +170,7 @@ export function PromocionForm({
               />
             </Field>
 
-            <Field label="Fecha de fin" optional>
+            <Field label="Fecha de fin" optional error={v.error('fecha_fin')}>
               <Input
                 name="fecha_fin"
                 type="date"

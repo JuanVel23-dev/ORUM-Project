@@ -6,7 +6,10 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Copiar } from '@/components/ui/copiar'
 import { Field } from '@/components/ui/field'
-import { Input, Select } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
+import { SelectMenu } from '@/components/ui/select-menu'
+import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
+import { correo, largo, obligatorio } from '@/lib/validacion/reglas'
 import { Stack } from '@/components/ui/layout'
 import { Switch } from '@/components/ui/toggle'
 import { useCerrarOverlay } from '@/components/shell/overlay-ruta'
@@ -16,6 +19,18 @@ import styles from '@/styles/formulario.module.css'
 type Opcion = { id: number; nombre: string }
 
 const estadoInicial: CrearComercioState = {}
+
+const REGLAS = {
+  correo: [obligatorio('Escribe el correo: será su usuario de acceso.'), correo],
+  nombre: [obligatorio('Escribe el nombre del comercio.'), largo(2, 80, 'El nombre')],
+  descripcion: [largo(3, 280, 'La descripción')],
+}
+
+const ETIQUETAS: Record<string, string> = {
+  correo: 'Correo electrónico',
+  nombre: 'Nombre del comercio',
+  descripcion: 'Descripción',
+}
 
 /**
  * El estado vive en `FormularioComercio`; esta capa solo lo remonta (vía `key`)
@@ -41,6 +56,7 @@ function FormularioComercio({
 }) {
   const cerrar = useCerrarOverlay()
   const [state, formAction, pending] = useActionState(crearComercio, estadoInicial)
+  const v = useValidacion(REGLAS)
 
   if (state.ok && state.email) {
     return <Credenciales estado={state} onCerrar={cerrar} onCrearOtro={onCrearOtro} />
@@ -48,34 +64,38 @@ function FormularioComercio({
 
   return (
     <>
-      <form action={formAction} className={styles.formulario} noValidate>
+      <form action={formAction} className={styles.formulario} {...v.propsFormulario}>
         {state.error && <Alert tone="danger">{state.error}</Alert>}
+        <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
 
         <Stack gap={5}>
           <Field
             label="Correo electrónico"
             help="Será el usuario con el que el comercio inicia sesión en su herramienta."
+            error={v.error('correo')}
           >
             <Input name="correo" type="email" autoComplete="email" required autoFocus />
           </Field>
 
-          <Field label="Nombre del comercio">
+          <Field label="Nombre del comercio" error={v.error('nombre')}>
             <Input name="nombre" required />
           </Field>
 
-          <Field label="Descripción" optional>
+          <Field label="Descripción" optional error={v.error('descripcion')}>
             <Input name="descripcion" />
           </Field>
 
           <Field label="Categoría" optional>
-            <Select name="categoria_id" defaultValue="">
-              <option value="">Sin categoría</option>
-              {categorias.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre}
-                </option>
-              ))}
-            </Select>
+            <SelectMenu
+              name="categoria_id"
+              etiqueta="Categoría"
+              placeholder="Sin categoría"
+              defaultValue={''}
+              opciones={[
+                { value: '', label: 'Sin categoría' },
+                ...categorias.map((c) => ({ value: String(c.id), label: c.nombre })),
+              ]}
+            />
           </Field>
 
           <Switch

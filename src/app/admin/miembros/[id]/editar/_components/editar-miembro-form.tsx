@@ -5,7 +5,10 @@ import { Save } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input, Select } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
+import { SelectMenu } from '@/components/ui/select-menu'
+import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
+import { cedula, correo, largo, nombrePersona, obligatorio, telefono } from '@/lib/validacion/reglas'
 import { Stack } from '@/components/ui/layout'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { editarMiembro, type EditarMiembroState } from '../../../actions'
@@ -28,6 +31,26 @@ type MiembroInicial = {
 
 const estadoInicial: EditarMiembroState = {}
 
+/* Las mismas reglas que al registrarlo; el correo puede quedar vacío (un
+   miembro sin cuenta de acceso). */
+const REGLAS = {
+  nombres: [obligatorio('Escribe los nombres.'), nombrePersona],
+  apellidos: [obligatorio('Escribe los apellidos.'), nombrePersona],
+  cedula: [obligatorio('Escribe la cédula.'), cedula],
+  telefono: [telefono],
+  correo: [correo],
+  direccion: [largo(5, 120, 'La dirección')],
+}
+
+const ETIQUETAS: Record<string, string> = {
+  nombres: 'Nombres',
+  apellidos: 'Apellidos',
+  cedula: 'Cédula',
+  telefono: 'Teléfono',
+  correo: 'Correo electrónico',
+  direccion: 'Dirección',
+}
+
 export function EditarMiembroForm({
   miembro,
   ciudades,
@@ -38,11 +61,13 @@ export function EditarMiembroForm({
   const [state, formAction, pending] = useActionState(editarMiembro, estadoInicial)
   const cerrar = useCerrarOverlay()
   useCerrarCuando(state.ok)
+  const v = useValidacion(REGLAS)
 
   return (
     <>
-      <form action={formAction} className={styles.formulario} noValidate>
+      <form action={formAction} className={styles.formulario} {...v.propsFormulario}>
         {state.error && <Alert tone="danger">{state.error}</Alert>}
+        <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
 
         <input type="hidden" name="miembro_id" value={miembro.id} />
         <input type="hidden" name="perfil_id" value={miembro.perfil_id ?? ''} />
@@ -50,7 +75,7 @@ export function EditarMiembroForm({
 
         <Stack gap={5}>
           <div className={styles.pareja}>
-            <Field label="Nombres">
+            <Field label="Nombres" error={v.error('nombres')}>
               <Input
                 name="nombres"
                 defaultValue={miembro.nombres}
@@ -59,7 +84,7 @@ export function EditarMiembroForm({
                 autoFocus
               />
             </Field>
-            <Field label="Apellidos">
+            <Field label="Apellidos" error={v.error('apellidos')}>
               <Input
                 name="apellidos"
                 defaultValue={miembro.apellidos}
@@ -70,7 +95,7 @@ export function EditarMiembroForm({
           </div>
 
           <div className={styles.pareja}>
-            <Field label="Cédula" help="Debe seguir siendo única.">
+            <Field label="Cédula" help="Debe seguir siendo única." error={v.error('cedula')}>
               <Input
                 name="cedula"
                 defaultValue={miembro.cedula}
@@ -79,7 +104,7 @@ export function EditarMiembroForm({
                 required
               />
             </Field>
-            <Field label="Teléfono" optional>
+            <Field label="Teléfono" optional error={v.error('telefono')}>
               <Input
                 name="telefono"
                 defaultValue={miembro.telefono ?? ''}
@@ -93,6 +118,7 @@ export function EditarMiembroForm({
           <Field
             label="Correo electrónico"
             help="Cambiarlo también cambia su usuario de acceso."
+            error={v.error('correo')}
           >
             <Input
               name="correo"
@@ -104,16 +130,18 @@ export function EditarMiembroForm({
 
           <div className={styles.pareja}>
             <Field label="Ciudad" optional>
-              <Select name="ciudad_id" defaultValue={miembro.ciudad_id ?? ''}>
-                <option value="">Sin ciudad</option>
-                {ciudades.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </Select>
+              <SelectMenu
+                name="ciudad_id"
+                etiqueta="Ciudad"
+                placeholder="Sin ciudad"
+                defaultValue={miembro.ciudad_id ? String(miembro.ciudad_id) : ''}
+                opciones={[
+                  { value: '', label: 'Sin ciudad' },
+                  ...ciudades.map((c) => ({ value: String(c.id), label: c.nombre })),
+                ]}
+              />
             </Field>
-            <Field label="Dirección" optional>
+            <Field label="Dirección" optional error={v.error('direccion')}>
               <Input
                 name="direccion"
                 defaultValue={miembro.direccion ?? ''}

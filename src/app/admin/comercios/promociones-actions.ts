@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { validarValorPromocion } from '@/lib/comercios/promociones'
+import { leerPesos } from '@/lib/validacion/reglas'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 
 async function exigirSuperAdmin(): Promise<string | null> {
@@ -36,7 +37,8 @@ function leerCamposPromocion(formData: FormData):
   }
 
   const valorRaw = String(formData.get('valor') ?? '').trim()
-  const valor = valorRaw ? Number(valorRaw) : null
+  // «15 %», «$ 20.000»: se acepta como lo escribe la gente.
+  const valor = valorRaw ? leerPesos(valorRaw.replace('%', '')) : null
   if (valorRaw && !Number.isFinite(valor)) return { ok: false, error: 'El valor debe ser un número.' }
 
   return {

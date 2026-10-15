@@ -5,7 +5,10 @@ import { CreditCard } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input, Select } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
+import { SelectMenu } from '@/components/ui/select-menu'
+import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
+import { obligatorio, precio as reglaPrecio } from '@/lib/validacion/reglas'
 import { useCerrarCuando } from '@/components/shell/overlay-ruta'
 import { renovarMembresia, type RenovarState } from '../../actions'
 import styles from '../ficha.module.css'
@@ -13,6 +16,14 @@ import styles from '../ficha.module.css'
 type PlanOpcion = { id: number; nombre: string; precio: number }
 
 const estadoInicial: RenovarState = {}
+
+/* El precio admite 0: una renovación de cortesía. */
+const REGLAS = {
+  plan_id: [obligatorio('Elige un plan.')],
+  precio_pagado: [obligatorio('Escribe el precio pagado.'), reglaPrecio(undefined, true)],
+}
+
+const ETIQUETAS: Record<string, string> = { plan_id: 'Plan', precio_pagado: 'Precio pagado' }
 
 export function RenovarForm({
   miembroId,
@@ -24,6 +35,7 @@ export function RenovarForm({
   const [state, formAction, pending] = useActionState(renovarMembresia, estadoInicial)
   const [precio, setPrecio] = useState(planes[0] ? String(planes[0].precio) : '')
 
+  const v = useValidacion(REGLAS)
   useCerrarCuando(state.ok)
 
   const sinPlanes = planes.length === 0
@@ -32,8 +44,9 @@ export function RenovarForm({
     /* Sin `Card`: la superficie la pone quien usa el formulario —el overlay o
        la página—, nunca el formulario. Antes ponía la suya y por eso no podía
        reutilizarse dentro de un diálogo sin anidar dos tarjetas. */
-    <form action={formAction} className={styles.renovar} noValidate>
+    <form action={formAction} className={styles.renovar} {...v.propsFormulario}>
       {state.error && <Alert tone="danger">{state.error}</Alert>}
+      <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
 
       {sinPlanes && (
         <Alert tone="warning" title="No hay planes activos">
@@ -44,34 +57,32 @@ export function RenovarForm({
       <input type="hidden" name="miembro_id" value={miembroId} />
 
       <div className={styles.renovarCampos}>
-        <Field label="Plan">
-          <Select
+        <Field label="Plan" error={v.error('plan_id')}>
+          <SelectMenu
             name="plan_id"
-            required
-            defaultValue={planes[0]?.id ?? ''}
-            disabled={sinPlanes}
+            etiqueta="Plan"
+            defaultValue={planes[0] ? String(planes[0].id) : ''}
+            opciones={planes.map((p) => ({
+              value: String(p.id),
+              label: `${p.nombre} · $ ${p.precio.toLocaleString('es-CO')}`,
+            }))}
             // Al cambiar de plan se propone su precio de lista, pero el campo
             // sigue siendo editable: puede haber descuentos puntuales.
-            onChange={(e) => {
-              const plan = planes.find((p) => p.id === Number(e.target.value))
+            onChange={(valor) => {
+              const plan = planes.find((p) => p.id === Number(valor))
               if (plan) setPrecio(String(plan.precio))
             }}
-          >
-            {planes.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nombre} — {p.precio.toLocaleString('es-CO')}
-              </option>
-            ))}
-          </Select>
+          />
         </Field>
 
-        <Field label="Precio pagado" help="Puedes ajustarlo si hubo un descuento.">
+        <Field
+          label="Precio pagado"
+          help="Puedes ajustarlo si hubo un descuento."
+          error={v.error('precio_pagado')}
+        >
           <Input
             name="precio_pagado"
-            type="number"
-            min="0"
-            step="0.01"
-            inputMode="decimal"
+            inputMode="numeric"
             numeric
             required
             value={precio}

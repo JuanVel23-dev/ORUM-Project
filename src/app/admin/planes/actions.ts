@@ -1,5 +1,6 @@
 'use server'
 
+import { leerPesos } from '@/lib/validacion/reglas'
 import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -21,7 +22,7 @@ function leerCampos(formData: FormData):
   const nombre = String(formData.get('nombre') ?? '').trim()
   if (!nombre) return { ok: false, error: 'El nombre del plan es obligatorio.' }
 
-  const precio = Number(formData.get('precio'))
+  const precio = leerPesos(formData.get('precio'))
   if (!Number.isFinite(precio) || precio < 0) {
     return { ok: false, error: 'El precio debe ser un número mayor o igual a 0.' }
   }

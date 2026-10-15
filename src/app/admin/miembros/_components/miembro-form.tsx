@@ -6,7 +6,18 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Copiar } from '@/components/ui/copiar'
 import { Field } from '@/components/ui/field'
-import { Input, Select } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
+import { SelectMenu } from '@/components/ui/select-menu'
+import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
+import {
+  cedula,
+  correo,
+  largo,
+  nombrePersona,
+  obligatorio,
+  precio as reglaPrecio,
+  telefono,
+} from '@/lib/validacion/reglas'
 import { Divider, Section, Stack } from '@/components/ui/layout'
 import { useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { registrarMiembro, type RegistrarMiembroState } from '../actions'
@@ -16,6 +27,32 @@ type Opcion = { id: number; nombre: string }
 type PlanOpcion = { id: number; nombre: string; precio: number }
 
 const estadoInicial: RegistrarMiembroState = {}
+
+/* Lo que se revisa antes de enviar (15/10/2026: «sus formularios no tienen
+   excepciones»). El servidor vuelve a validar por su cuenta. */
+const REGLAS = {
+  nombres: [obligatorio('Escribe los nombres.'), nombrePersona],
+  apellidos: [obligatorio('Escribe los apellidos.'), nombrePersona],
+  cedula: [obligatorio('Escribe la cédula.'), cedula],
+  telefono: [telefono],
+  correo: [obligatorio('Escribe el correo: será su usuario de acceso.'), correo],
+  direccion: [largo(5, 120, 'La dirección')],
+  numero_registro: [obligatorio('Elige el número de registro del carné.')],
+  plan_id: [obligatorio('Elige un plan.')],
+  precio_pagado: [obligatorio('Escribe el precio pagado.'), reglaPrecio()],
+}
+
+const ETIQUETAS: Record<string, string> = {
+  nombres: 'Nombres',
+  apellidos: 'Apellidos',
+  cedula: 'Cédula',
+  telefono: 'Teléfono',
+  correo: 'Correo electrónico',
+  direccion: 'Dirección',
+  numero_registro: 'Número de registro',
+  plan_id: 'Plan',
+  precio_pagado: 'Precio pagado',
+}
 
 /**
  * Sin tarjeta contenedora. Dentro de un overlay la superficie ya la pone el
@@ -54,6 +91,7 @@ function FormularioMiembro({
   const cerrar = useCerrarOverlay()
   const [state, formAction, pending] = useActionState(registrarMiembro, estadoInicial)
   const [precio, setPrecio] = useState(planes[0] ? String(planes[0].precio) : '')
+  const v = useValidacion(REGLAS)
 
   const sinPlanes = planes.length === 0
   const sinNumeros = numerosDisponibles.length === 0
@@ -68,7 +106,9 @@ function FormularioMiembro({
 
   return (
     <>
-      <form action={formAction} className={styles.formulario} noValidate>
+      <form action={formAction} className={styles.formulario} {...v.propsFormulario}>
+        <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
+
         {/* `key` con el mensaje: si el alta vuelve a fallar con el MISMO error,
             React reutilizaría el nodo y el lector no lo re-anunciaría. */}
         {state.error && (
@@ -93,19 +133,24 @@ function FormularioMiembro({
         <Section title="Datos del cliente">
           <Stack gap={5}>
             <div className={styles.pareja}>
-              <Field label="Nombres">
+              <Field label="Nombres" error={v.error('nombres')}>
                 <Input name="nombres" autoComplete="given-name" required autoFocus />
               </Field>
-              <Field label="Apellidos">
+              <Field label="Apellidos" error={v.error('apellidos')}>
                 <Input name="apellidos" autoComplete="family-name" required />
               </Field>
             </div>
 
             <div className={styles.pareja}>
-              <Field label="Cédula" help="Sin puntos ni espacios.">
+              <Field label="Cédula" help="Sin puntos ni espacios." error={v.error('cedula')}>
                 <Input name="cedula" numeric inputMode="numeric" required />
               </Field>
-              <Field label="Teléfono" optional>
+              <Field
+                label="Teléfono"
+                optional
+                help="Celular de 10 cifras. Por aquí le escribimos por WhatsApp."
+                error={v.error('telefono')}
+              >
                 <Input name="telefono" type="tel" numeric inputMode="tel" />
               </Field>
             </div>
@@ -113,22 +158,24 @@ function FormularioMiembro({
             <Field
               label="Correo electrónico"
               help="Será su usuario de acceso al portal de miembros."
+              error={v.error('correo')}
             >
               <Input name="correo" type="email" autoComplete="email" required />
             </Field>
 
             <div className={styles.pareja}>
               <Field label="Ciudad" optional>
-                <Select name="ciudad_id" defaultValue="">
-                  <option value="">Sin ciudad</option>
-                  {ciudades.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nombre}
-                    </option>
-                  ))}
-                </Select>
+                <SelectMenu
+                  name="ciudad_id"
+                  etiqueta="Ciudad"
+                  placeholder="Sin ciudad"
+                  opciones={[
+                    { value: '', label: 'Sin ciudad' },
+                    ...ciudades.map((c) => ({ value: String(c.id), label: c.nombre })),
+                  ]}
+                />
               </Field>
-              <Field label="Dirección" optional>
+              <Field label="Dirección" optional error={v.error('direccion')}>
                 <Input name="direccion" autoComplete="street-address" />
               </Field>
             </div>
@@ -142,48 +189,37 @@ function FormularioMiembro({
             <Field
               label="Número de registro"
               help="El número impreso en el carné que vas a entregar."
+              error={v.error('numero_registro')}
             >
-              <Select
+              <SelectMenu
                 name="numero_registro"
-                required
+                etiqueta="Número de registro"
                 defaultValue={numerosDisponibles[0] ?? ''}
-                disabled={sinNumeros}
-              >
-                {numerosDisponibles.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </Select>
+                opciones={numerosDisponibles.map((n) => ({ value: n, label: n }))}
+              />
             </Field>
 
             <div className={styles.pareja}>
-              <Field label="Plan">
-                <Select
+              <Field label="Plan" error={v.error('plan_id')}>
+                <SelectMenu
                   name="plan_id"
-                  required
-                  defaultValue={planes[0]?.id ?? ''}
-                  disabled={sinPlanes}
-                  onChange={(e) => {
-                    const plan = planes.find((p) => p.id === Number(e.target.value))
+                  etiqueta="Plan"
+                  defaultValue={planes[0] ? String(planes[0].id) : ''}
+                  opciones={planes.map((p) => ({
+                    value: String(p.id),
+                    label: `${p.nombre} · $ ${p.precio.toLocaleString('es-CO')}`,
+                  }))}
+                  onChange={(valor) => {
+                    const plan = planes.find((p) => p.id === Number(valor))
                     if (plan) setPrecio(String(plan.precio))
                   }}
-                >
-                  {planes.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.nombre} — {p.precio.toLocaleString('es-CO')}
-                    </option>
-                  ))}
-                </Select>
+                />
               </Field>
 
-              <Field label="Precio pagado" help="Ajústalo si hubo un descuento.">
+              <Field label="Precio pagado" help="Ajústalo si hubo un descuento." error={v.error('precio_pagado')}>
                 <Input
                   name="precio_pagado"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  inputMode="decimal"
+                  inputMode="numeric"
                   numeric
                   required
                   value={precio}

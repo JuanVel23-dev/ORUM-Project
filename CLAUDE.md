@@ -1004,9 +1004,12 @@ sistema (en Windows, un recuadro gris que el CSS no puede vestir). Nació para
 la sucursal de la venta en la caja («ponle diseño a la lista desplegable»).
 Va dentro de un `Field` y el valor viaja en un campo oculto con su `name`.
 **No valida solo** —un campo oculto no admite `required`—: quien lo usa
-comprueba el valor al enviar y le pasa el error al `Field`. **No sustituye a
-`Select`** en los formularios largos de administración, donde la rueda nativa
-del teléfono sigue siendo más rápida. `DropdownMenu` ganó para esto la prop
+comprueba el valor al enviar y le pasa el error al `Field`. ⚠️ **Desde el
+15/10/2026 SÍ sustituye a `Select` en los formularios del panel** (encargo:
+«las listas desplegables no tienen diseño»; antes esta línea decía lo
+contrario). Sin `value` guarda su propio estado desde `defaultValue`, como un
+`<select>`, y al cambiar su campo oculto avisa con un `input` que burbujea:
+así lo oye `useValidacion`. `DropdownMenu` ganó para esto la prop
 `igualarAncho` (la lista mide lo que su campo).
 
 **`Agitar`** envuelve un icono y lo agita **una vez** cuando su prop `activo`
@@ -1126,6 +1129,22 @@ paleta:
   PostgREST corta ahí). Las tablas (`DataList`) toman en el panel la
   cabecera en banda gris y títulos en minúscula por los ganchos
   `--tabla-*` que pone el shell.
+- **Los formularios del panel VALIDAN campo a campo** (15/10/2026: «sus
+  formularios no tienen excepciones»). Las reglas son puras y probadas
+  (`lib/validacion/reglas.ts`: obligatorio, largo, nombre de persona, cédula,
+  teléfono y correo —los mismos de «Quiero ser aliado»—, entero, precio,
+  porcentaje, fecha, «no antes de», contraseña…), y cada formulario declara
+  las suyas en un `REGLAS` arriba. `useValidacion(REGLAS)`
+  (`components/ui/validacion.tsx`) se extiende sobre el `<form>`: al enviar
+  revisa todo, NO envía si algo falla, marca cada `Field` con su `error` y
+  lleva el foco al primero; al salir de un campo escrito lo revisa ya; al
+  corregir, el aviso se va (y se revisan otra vez todos los avisados, porque
+  hay reglas que dependen de otro campo). `ResumenErrores` pone arriba
+  «Revisa N campos» con un botón a cada uno. El servidor sigue validando: es
+  quien decide. Los importes se escriben como la gente los escribe
+  («$ 120.000») y el servidor los lee con `leerPesos`, nunca `Number()`.
+  Un formulario nuevo del panel lleva sus `REGLAS`; nada de `type="number"`
+  para dinero (en Chrome rechaza los puntos de miles en silencio).
 - `/dev/shell` la enseña con datos falsos (rol, sección simulada, portada y
   la lista de miembros).
 

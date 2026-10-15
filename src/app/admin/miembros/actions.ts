@@ -1,5 +1,6 @@
 'use server'
 
+import { leerPesos } from '@/lib/validacion/reglas'
 import { mensajeDeError } from '@/lib/shared/errores'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -66,7 +67,7 @@ export async function registrarMiembro(
   const ciudadRaw = String(formData.get('ciudad_id') ?? '').trim()
   const ciudad_id = ciudadRaw ? Number(ciudadRaw) : null
   const plan_id = Number(formData.get('plan_id'))
-  const precio_pagado = Number(formData.get('precio_pagado'))
+  const precio_pagado = leerPesos(formData.get('precio_pagado'))
   const numero_registro = String(formData.get('numero_registro') ?? '').trim()
 
   if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
@@ -266,7 +267,7 @@ export async function renovarMembresia(
 
   const miembro_id = Number(formData.get('miembro_id'))
   const plan_id = Number(formData.get('plan_id'))
-  const precio_pagado = Number(formData.get('precio_pagado'))
+  const precio_pagado = leerPesos(formData.get('precio_pagado'))
   if (!Number.isInteger(miembro_id) || miembro_id < 1) return { error: 'Falta el identificador del miembro.' }
   if (!Number.isInteger(plan_id) || plan_id < 1) return { error: 'Selecciona un plan de membresía.' }
   if (!Number.isFinite(precio_pagado) || precio_pagado < 0) {

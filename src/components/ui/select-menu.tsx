@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useField } from './field'
 import { DropdownMenu, MenuItem } from './menu'
@@ -24,11 +25,11 @@ import styles from './select-menu.module.css'
       no un `<select>` disfrazado. El valor viaja en un `<input type="hidden">`
       con el `name` que se le pase, así que el formulario lo envía igual.
     · NO valida solo: un campo oculto no admite `required`. Quien lo use
-      comprueba el valor al enviar y le pasa el error al `Field`.
-    · NO sustituye a `Select` en todo el sistema. Aquel sigue siendo lo
-      correcto en formularios largos de administración, donde la rueda nativa
-      del teléfono es más rápida; este es para donde el diseño de la lista
-      importa.
+      comprueba el valor al enviar y le pasa el error al `Field` (en el
+      panel, `useValidacion` lo hace: el campo oculto avisa con `input`).
+    · Desde el rediseño del panel (15/10/2026: «las listas desplegables no
+      tienen diseño») es TAMBIÉN el desplegable de todos los formularios de
+      administración. `Select` queda para donde no haya otro remedio.
 
   Va DENTRO de un `Field`, que le da el `id` (para que la etiqueta lo enfoque
   al pulsarla) y la descripción (ayuda y error).
@@ -46,9 +47,14 @@ type Props = {
   /** El texto del `Field` que lo envuelve: forma parte del nombre accesible. */
   etiqueta: string
   opciones: OpcionSelectMenu[]
-  /** El `value` elegido; cadena vacía si aún no hay ninguno. */
-  value: string
-  onChange: (value: string) => void
+  /**
+   * El `value` elegido; cadena vacía si aún no hay ninguno. Sin `value`, el
+   * control guarda su propio estado y arranca en `defaultValue` (así lo usan
+   * los formularios del panel, como un `<select>` cualquiera).
+   */
+  value?: string
+  defaultValue?: string
+  onChange?: (value: string) => void
   /** Lo que se lee cuando no hay nada elegido. */
   placeholder?: string
 }
@@ -57,16 +63,39 @@ export function SelectMenu({
   name,
   etiqueta,
   opciones,
-  value,
+  value: controlado,
+  defaultValue = '',
   onChange,
   placeholder = 'Selecciona una opción',
 }: Props) {
   const { id, describedBy, invalid } = useField()
+  const [propio, setPropio] = useState(defaultValue)
+  const value = controlado ?? propio
   const elegida = opciones.find((o) => o.value === value)
+  const oculto = useRef<HTMLInputElement>(null)
+  const montado = useRef(false)
+
+  /*
+    Al cambiar, el campo oculto avisa con un `input` que BURBUJEA: así el
+    formulario que lo contiene se entera como con cualquier otro control (la
+    validación del panel quita el aviso en cuanto se elige algo). No al montar.
+  */
+  useEffect(() => {
+    if (!montado.current) {
+      montado.current = true
+      return
+    }
+    oculto.current?.dispatchEvent(new Event('input', { bubbles: true }))
+  }, [value])
+
+  function elegir(nuevo: string) {
+    if (controlado === undefined) setPropio(nuevo)
+    onChange?.(nuevo)
+  }
 
   return (
-    <span className={styles.envoltorio}>
-      <input type="hidden" name={name} value={value} />
+    <span className={styles.envoltorio} data-campo="">
+      <input ref={oculto} type="hidden" name={name} value={value} />
 
       <DropdownMenu
         align="start"
@@ -91,7 +120,7 @@ export function SelectMenu({
         {/* Desplaza por dentro si son muchas: el menú no tiene tope de alto. */}
         <div className={styles.lista} data-barra="" data-desvanece="">
           {opciones.map((o) => (
-            <MenuItem key={o.value} selected={o.value === value} onSelect={() => onChange(o.value)}>
+            <MenuItem key={o.value} selected={o.value === value} onSelect={() => elegir(o.value)}>
               {o.label}
             </MenuItem>
           ))}

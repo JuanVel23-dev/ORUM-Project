@@ -5,7 +5,10 @@ import { Save } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input, Select } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
+import { SelectMenu } from '@/components/ui/select-menu'
+import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
+import { correo, largo, obligatorio } from '@/lib/validacion/reglas'
 import { Stack } from '@/components/ui/layout'
 import { Switch } from '@/components/ui/toggle'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
@@ -27,6 +30,19 @@ type ComercioInicial = {
 
 const estadoInicial: EditarComercioState = {}
 
+/* El correo puede quedar vacío: un comercio sin cuenta de acceso. */
+const REGLAS = {
+  correo: [correo],
+  nombre: [obligatorio('Escribe el nombre del comercio.'), largo(2, 80, 'El nombre')],
+  descripcion: [largo(3, 280, 'La descripción')],
+}
+
+const ETIQUETAS: Record<string, string> = {
+  correo: 'Correo electrónico',
+  nombre: 'Nombre',
+  descripcion: 'Descripción',
+}
+
 export function EditarComercioForm({
   comercio,
   categorias,
@@ -37,11 +53,13 @@ export function EditarComercioForm({
   const [state, formAction, pending] = useActionState(editarComercio, estadoInicial)
   const cerrar = useCerrarOverlay()
   useCerrarCuando(state.ok)
+  const v = useValidacion(REGLAS)
 
   return (
     <>
-      <form action={formAction} className={styles.formulario} noValidate>
+      <form action={formAction} className={styles.formulario} {...v.propsFormulario}>
         {state.error && <Alert tone="danger">{state.error}</Alert>}
+        <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
 
         <input type="hidden" name="id" value={comercio.id} />
         <input type="hidden" name="perfil_id" value={comercio.perfil_id ?? ''} />
@@ -51,6 +69,7 @@ export function EditarComercioForm({
           <Field
             label="Correo electrónico"
             help="Cambiarlo también cambia su usuario de acceso."
+            error={v.error('correo')}
           >
             <Input
               name="correo"
@@ -60,23 +79,25 @@ export function EditarComercioForm({
             />
           </Field>
 
-          <Field label="Nombre">
+          <Field label="Nombre" error={v.error('nombre')}>
             <Input name="nombre" defaultValue={comercio.nombre} required autoFocus />
           </Field>
 
-          <Field label="Descripción" optional>
+          <Field label="Descripción" optional error={v.error('descripcion')}>
             <Input name="descripcion" defaultValue={comercio.descripcion ?? ''} />
           </Field>
 
           <Field label="Categoría" optional>
-            <Select name="categoria_id" defaultValue={comercio.categoria_id ?? ''}>
-              <option value="">Sin categoría</option>
-              {categorias.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre}
-                </option>
-              ))}
-            </Select>
+            <SelectMenu
+              name="categoria_id"
+              etiqueta="Categoría"
+              placeholder="Sin categoría"
+              defaultValue={comercio.categoria_id ? String(comercio.categoria_id) : ''}
+              opciones={[
+                { value: '', label: 'Sin categoría' },
+                ...categorias.map((c) => ({ value: String(c.id), label: c.nombre })),
+              ]}
+            />
           </Field>
 
           <Switch

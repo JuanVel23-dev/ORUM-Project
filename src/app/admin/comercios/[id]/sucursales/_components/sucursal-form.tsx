@@ -5,7 +5,10 @@ import { MapPin, Save } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input, Select } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
+import { SelectMenu } from '@/components/ui/select-menu'
+import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
+import { largo, obligatorio, telefono } from '@/lib/validacion/reglas'
 import { Stack } from '@/components/ui/layout'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import {
@@ -27,6 +30,20 @@ type SucursalInicial = {
 
 const estadoInicial: SucursalState = {}
 
+const REGLAS = {
+  nombre: [obligatorio('Escribe el nombre de la sucursal.'), largo(2, 60, 'El nombre')],
+  direccion: [largo(5, 120, 'La dirección')],
+  telefono: [telefono],
+  ciudad_id: [obligatorio('Elige la ciudad de la sucursal.')],
+}
+
+const ETIQUETAS: Record<string, string> = {
+  nombre: 'Nombre',
+  direccion: 'Dirección',
+  telefono: 'Teléfono',
+  ciudad_id: 'Ciudad',
+}
+
 export function SucursalForm({
   comercioId,
   ciudades,
@@ -43,21 +60,27 @@ export function SucursalForm({
   )
   const cerrar = useCerrarOverlay()
   useCerrarCuando(state.ok)
+  const v = useValidacion(REGLAS)
 
   return (
     <>
-      <form action={formAction} className={styles.formulario} noValidate>
+      <form action={formAction} className={styles.formulario} {...v.propsFormulario}>
         {state.error && <Alert tone="danger">{state.error}</Alert>}
+        <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
 
         <input type="hidden" name="comercio_id" value={comercioId} />
         {sucursal && <input type="hidden" name="id" value={sucursal.id} />}
 
         <Stack gap={5}>
-          <Field label="Nombre" help="Cómo la reconoce el miembro: «Sede Centro», «Poblado»…">
+          <Field
+            label="Nombre"
+            help="Cómo la reconoce el miembro: «Sede Centro», «Poblado»…"
+            error={v.error('nombre')}
+          >
             <Input name="nombre" defaultValue={sucursal?.nombre} required autoFocus />
           </Field>
 
-          <Field label="Dirección" optional>
+          <Field label="Dirección" optional error={v.error('direccion')}>
             <Input
               name="direccion"
               defaultValue={sucursal?.direccion ?? ''}
@@ -66,7 +89,7 @@ export function SucursalForm({
           </Field>
 
           <div className={styles.pareja}>
-            <Field label="Teléfono" optional>
+            <Field label="Teléfono" optional error={v.error('telefono')}>
               <Input
                 name="telefono"
                 defaultValue={sucursal?.telefono ?? ''}
@@ -76,15 +99,14 @@ export function SucursalForm({
               />
             </Field>
 
-            <Field label="Ciudad">
-              <Select name="ciudad_id" defaultValue={sucursal?.ciudad_id ?? ''} required>
-                <option value="">Selecciona una ciudad</option>
-                {ciudades.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </Select>
+            <Field label="Ciudad" error={v.error('ciudad_id')}>
+              <SelectMenu
+                name="ciudad_id"
+                etiqueta="Ciudad"
+                placeholder="Selecciona una ciudad"
+                defaultValue={sucursal?.ciudad_id ? String(sucursal.ciudad_id) : ''}
+                opciones={ciudades.map((c) => ({ value: String(c.id), label: c.nombre }))}
+              />
             </Field>
           </div>
         </Stack>
