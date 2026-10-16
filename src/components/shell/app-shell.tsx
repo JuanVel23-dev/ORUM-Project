@@ -47,7 +47,7 @@ import styles from './app-shell.module.css'
       la barra inferior negra en la zona del pulgar, con la hoja «Más».
 
   SIEMPRE EN CLARO (`data-theme="light"`). La barra lateral se pinta negra
-  con los tokens de la franja (`--cacao-*`), no con `data-theme="dark"`: el
+  con los tokens de la franja (`--franja-*`), no con `data-theme="dark"`: el
   menú de la cuenta es un popover que se pinta dentro y heredaría el oscuro.
 */
 

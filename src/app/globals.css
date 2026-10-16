@@ -270,7 +270,7 @@
   /* --------------------------------------------------------------------------
      LA FRANJA NEGRA  ·  v5 §2 — no sigue al tema, como el QR
 
-     ⚠️ EL PREFIJO `--cacao-*` ES HEREDADO. Estos ocho tokens se llamaron así
+     ⚠️ EL PREFIJO `--franja-*` ES HEREDADO. Estos ocho tokens se llamaron así
      cuando la franja era marrón; con la v5 es NEGRA y el nombre se conserva a
      propósito, porque seis módulos los consumen y un `var()` roto no falla:
      hereda o se queda transparente, en silencio. Renombrarlos a medias sería
@@ -289,13 +289,13 @@
      mismo orden que el gris claro sobre blanco—, así que sigue leyéndose como
      franja en vez de desaparecer, que era el riesgo real de volverla negra.
 
-       --cacao-fg    blanco sobre la franja ..... 19,78:1
-       --cacao-fg-2  --n-300 sobre la franja .... 11,30:1
-       --cacao-fg-3  --n-400 sobre la franja .....  7,10:1
-       --cacao-brand --gold-400 sobre la franja .. 12,27:1  ← EL TITULAR
-       --cacao-edge  --gold-600 sobre la franja ...  5,61:1
+       --franja-fg    blanco sobre la franja ..... 19,78:1
+       --franja-fg-2  --n-300 sobre la franja .... 11,30:1
+       --franja-fg-3  --n-400 sobre la franja .....  7,10:1
+       --franja-brand --gold-400 sobre la franja .. 12,27:1  ← EL TITULAR
+       --franja-edge  --gold-600 sobre la franja ...  5,61:1
 
-     Y dentro de la tarjeta elevada de la franja (`--cacao-surface`):
+     Y dentro de la tarjeta elevada de la franja (`--franja-surface`):
        blanco 17,70:1 · --n-300 10,11:1 · --n-400 6,35:1 · --gold-400 10,98:1
 
      El presupuesto del ≤5 % de oro quedó LEVANTADO
@@ -312,15 +312,15 @@
     Estos ocho tokens se declaran ahora UNA SOLA VEZ, iguales a los del bloque
     `[data-theme='dark']` de más abajo — es la misma franja, siempre.
   */
-  --cacao-bg: var(--cacao-900);
-  --cacao-surface: var(--cacao-800);
-  --cacao-hover: var(--cacao-700);
-  --cacao-fg: var(--w-0);
-  --cacao-fg-2: var(--n-300);
-  --cacao-fg-3: var(--n-400);
-  --cacao-brand: var(--gold-400);
-  --cacao-edge: var(--gold-500);
-  --cacao-scheme: dark;
+  --franja-bg: var(--negro-900);
+  --franja-surface: var(--negro-800);
+  --franja-hover: var(--negro-700);
+  --franja-fg: var(--w-0);
+  --franja-fg-2: var(--n-300);
+  --franja-fg-3: var(--n-400);
+  --franja-brand: var(--gold-400);
+  --franja-edge: var(--gold-500);
+  --franja-scheme: dark;
 
   /* --------------------------------------------------------------------------
      ACCIÓN CEREMONIAL  ·  el par dorado de `Button variant=brand`
@@ -343,7 +343,7 @@
        filo contra --surface (crema) ..................... 3,27:1  ok 1.4.11
        filo contra --surface-alt (gris claro) ............ 3,13:1  ok 1.4.11
        filo contra --surface-alt-2 (gris hondo) .......... 3,07:1  ok 1.4.11
-       filo contra --cacao-bg (la franja negra) .......... 5,61:1  ok 1.4.11
+       filo contra --franja-bg (la franja negra) .......... 5,61:1  ok 1.4.11
        filo contra --surface-hover (al 3,5 %, ver arriba) . 3,04:1  ok 1.4.11
 
      TODOS LOS MÁRGENES SE ESTRECHARON respecto a la v5 (5,30→4,84 de 1.4.3;
@@ -487,18 +487,18 @@
   claro, y cada uno se audita en SU tema.
 */
 [data-theme='dark'] {
-  /* v6: estos ocho `--cacao-*` ya no cambian de un tema al otro — el `:root`
+  /* v6: estos ocho `--franja-*` ya no cambian de un tema al otro — el `:root`
      de más arriba los fija igual — así que redeclararlos aquí es redundante
      pero inofensivo (mismo valor). Se dejan por si el día de mañana alguien
      necesita diferenciar la franja por tema otra vez; no borrar sin motivo. */
-  --cacao-bg: var(--cacao-900);
-  --cacao-surface: var(--cacao-800);
-  --cacao-hover: var(--cacao-700);
-  --cacao-fg: var(--w-0);
-  --cacao-fg-2: var(--n-300);
-  --cacao-fg-3: var(--n-400);
-  --cacao-brand: var(--gold-400);
-  --cacao-scheme: dark;
+  --franja-bg: var(--negro-900);
+  --franja-surface: var(--negro-800);
+  --franja-hover: var(--negro-700);
+  --franja-fg: var(--w-0);
+  --franja-fg-2: var(--n-300);
+  --franja-fg-3: var(--n-400);
+  --franja-brand: var(--gold-400);
+  --franja-scheme: dark;
   --bg: var(--n-1000);
   --surface: var(--n-900);
   --surface-sunk: var(--n-950);
@@ -609,14 +609,14 @@
    data-theme, se sigue la preferencia del sistema. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']):not([data-theme='dark']) {
-    --cacao-bg: var(--cacao-900);
-    --cacao-surface: var(--cacao-800);
-    --cacao-hover: var(--cacao-700);
-    --cacao-fg: var(--w-0);
-    --cacao-fg-2: var(--n-300);
-    --cacao-fg-3: var(--n-400);
-    --cacao-brand: var(--gold-400);
-    --cacao-scheme: dark;
+    --franja-bg: var(--negro-900);
+    --franja-surface: var(--negro-800);
+    --franja-hover: var(--negro-700);
+    --franja-fg: var(--w-0);
+    --franja-fg-2: var(--n-300);
+    --franja-fg-3: var(--n-400);
+    --franja-brand: var(--gold-400);
+    --franja-scheme: dark;
     --bg: var(--n-1000);
     --surface: var(--n-900);
     --surface-sunk: var(--n-950);

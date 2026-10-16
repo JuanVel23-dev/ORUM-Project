@@ -74,8 +74,8 @@
   /* Baja en el teléfono: el formulario entero —hasta «Iniciar sesión»—
      tiene que verse sin desplazar en un móvil corriente. */
   min-height: clamp(200px, 28dvh, 300px);
-  background: var(--cacao-bg);
-  color: var(--cacao-fg);
+  background: var(--franja-bg);
+  color: var(--franja-fg);
 }
 
 @media (min-width: 900px) {
@@ -102,9 +102,9 @@
   z-index: -1;
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--cacao-bg) 78%, transparent) 0%,
-    color-mix(in srgb, var(--cacao-bg) 38%, transparent) 38%,
-    color-mix(in srgb, var(--cacao-bg) 88%, transparent) 100%
+    color-mix(in srgb, var(--franja-bg) 78%, transparent) 0%,
+    color-mix(in srgb, var(--franja-bg) 38%, transparent) 38%,
+    color-mix(in srgb, var(--franja-bg) 88%, transparent) 100%
   );
 }
 
@@ -138,7 +138,7 @@
 }
 
 .marca:focus-visible {
-  outline: 2px solid var(--cacao-brand);
+  outline: 2px solid var(--franja-brand);
   outline-offset: 4px;
 }
 
@@ -166,7 +166,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
 }
 
 /* La estrella de la insignia, a 20 px, como en el banner del comercio (el
@@ -184,7 +184,7 @@
   line-height: 1.1;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
   text-wrap: balance;
   -webkit-font-smoothing: auto;
 }
@@ -200,7 +200,7 @@
   margin: 0;
   font-size: var(--t-callout-size);
   line-height: 1.55;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
   text-wrap: pretty;
 }
 
@@ -317,7 +317,7 @@
   min-height: var(--tap-min);
   font-size: var(--t-footnote-size);
   font-weight: 600;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
   text-decoration: none;
   white-space: nowrap;
   transition: color var(--dur-fast) var(--ease-out);
@@ -329,7 +329,7 @@
 
 @media (hover: hover) {
   .volver:hover {
-    color: var(--cacao-fg);
+    color: var(--franja-fg);
   }
 
   /* La respuesta es movimiento: la flecha se asoma hacia donde lleva. */
@@ -339,7 +339,7 @@
 }
 
 .volver:focus-visible {
-  outline: 2px solid var(--cacao-brand);
+  outline: 2px solid var(--franja-brand);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
 }

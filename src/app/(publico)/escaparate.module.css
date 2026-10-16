@@ -158,48 +158,48 @@
   se adapta sin saber dónde está.
 
   Ratios medidos con el método WCAG 2.1 al aplicar esta tanda (Z2), contra
-  `--cacao-bg` #2b1a15:
-    --cacao-fg    (papel)    16,24:1
-    --cacao-fg-2  (n-300)     8,56:1
-    --cacao-fg-3  (n-400)     5,78:1
-    --cacao-brand (gold-400)  7,83:1   ← el titular
+  `--franja-bg` #2b1a15:
+    --franja-fg    (papel)    16,24:1
+    --franja-fg-2  (n-300)     8,56:1
+    --franja-fg-3  (n-400)     5,78:1
+    --franja-brand (gold-400)  7,83:1   ← el titular
   Y contra la TARJETA de cacao #3a251e: papel 14,00 · n-300 7,38 · gold-400
   6,75 · n-400 4,98.
 */
-.tonoCacao {
+.tonoNegro {
   /* Luz de foco entrando por arriba a la izquierda, que es de donde viene la
      luz en todo el sistema de sombras. El color plano va DETRÁS como respaldo:
      si un navegador no resolviera el `color-mix`, la franja sigue siendo negra
      y no transparente. */
-  background: var(--fondo-franja-oscura), var(--cacao-bg);
-  color-scheme: var(--cacao-scheme, dark);
+  background: var(--fondo-franja-oscura), var(--franja-bg);
+  color-scheme: var(--franja-scheme, dark);
 
-  --bg: var(--cacao-bg);
-  --surface: var(--cacao-surface);
-  --surface-alt: var(--cacao-surface);
-  --surface-alt-2: var(--cacao-surface);
+  --bg: var(--franja-bg);
+  --surface: var(--franja-surface);
+  --surface-alt: var(--franja-surface);
+  --surface-alt-2: var(--franja-surface);
   --surface-hover: transparent;
-  --surface-sunk: var(--cacao-bg);
+  --surface-sunk: var(--franja-bg);
 
-  --text: var(--cacao-fg);
-  --text-2: var(--cacao-fg-2);
+  --text: var(--franja-fg);
+  --text-2: var(--franja-fg-2);
   /*
-    `--text-3` NO baja a `--cacao-fg-3`, igual que en el catálogo. Los ratios
+    `--text-3` NO baja a `--franja-fg-3`, igual que en el catálogo. Los ratios
     de ese token están calculados contra el FONDO de la franja, y el texto
     tenue vive dentro de las tarjetas, que son más claras. Sobre una tarjeta
     oscura no hay sitio para tres niveles de gris: se colapsa el tercero en el
     segundo y se gana que el texto se lea.
 
-    (Nota de medición: recalculado aquí, `--cacao-fg-3` sobre `--cacao-surface`
+    (Nota de medición: recalculado aquí, `--franja-fg-3` sobre `--franja-surface`
     da 4,98:1 y no los 4,02:1 que anotó Y1 — pasaría AA. Se mantiene el
     colapso igualmente: es la decisión ya tomada para el catálogo y dos
     ámbitos de cacao con jerarquías distintas serían dos sistemas.)
   */
-  --text-3: var(--cacao-fg-2);
+  --text-3: var(--franja-fg-2);
 
-  --brand: var(--cacao-brand);
-  --brand-edge: var(--cacao-edge);
-  --focus: var(--cacao-brand);
+  --brand: var(--franja-brand);
+  --brand-edge: var(--franja-edge);
+  --focus: var(--franja-brand);
 
   color: var(--text);
 }
@@ -326,10 +326,10 @@
    --------------------------------------------------------------------------
    La cabecera, el héroe de la landing y el banner del directorio llevan
    controles del sistema —`Button`— encima de una foto oscura. Igual que
-   `.tonoCacao`, esto es un ÁMBITO DE TEMA: reasigna los semánticos para que
+   `.tonoNegro`, esto es un ÁMBITO DE TEMA: reasigna los semánticos para que
    los componentes se adapten sin saber dónde están.
 
-   Pero SIN fondo, y por eso no es `.tonoCacao`: la foto ya pone el negro.
+   Pero SIN fondo, y por eso no es `.tonoNegro`: la foto ya pone el negro.
    Y se aplica al envoltorio de los controles, nunca a la raíz de la cabecera:
    la hoja del menú móvil se monta DENTRO de la cabecera, y un `<dialog>`
    hereda las propiedades personalizadas de sus ancestros del DOM aunque se
@@ -340,22 +340,22 @@
      · `secondary` → la píldora de contorno claro de la guía de marca:
        relleno transparente y filo de crema al 50 %. Ese filo mide ~4,6:1
        contra el negro de la foto (WCAG 1.4.11 pide 3:1).
-     · `ghost` → texto `--cacao-fg-2` (8,56:1 sobre `--cacao-bg`).
+     · `ghost` → texto `--franja-fg-2` (8,56:1 sobre `--franja-bg`).
      · `brand` → relleno `--gold-300` con texto en tinta, 12,6:1: es el oro
        pálido que pidió el cliente, legal aquí y SOLO aquí, sobre negro.
    ========================================================================== */
 .sobreFoto {
   color-scheme: dark;
 
-  --text: var(--cacao-fg);
-  --text-2: var(--cacao-fg-2);
+  --text: var(--franja-fg);
+  --text-2: var(--franja-fg-2);
   --surface: transparent;
   --surface-hover: transparent;
-  --border-control: color-mix(in srgb, var(--cacao-fg) 50%, transparent);
-  --border-subtle: color-mix(in srgb, var(--cacao-fg) 22%, transparent);
+  --border-control: color-mix(in srgb, var(--franja-fg) 50%, transparent);
+  --border-subtle: color-mix(in srgb, var(--franja-fg) 22%, transparent);
   --brand: var(--gold-300);
   --brand-edge: var(--gold-300);
-  --focus: var(--cacao-brand);
+  --focus: var(--franja-brand);
   --action-gold: var(--gold-300);
   --action-gold-fg: var(--tinta-1);
   /* Una sombra negra sobre una foto negra no se ve; el hover de `secondary`

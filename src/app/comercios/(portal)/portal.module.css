@@ -57,8 +57,8 @@
   padding-left: max(var(--space-4), env(safe-area-inset-left, 0px));
   padding-right: max(var(--space-4), env(safe-area-inset-right, 0px));
 
-  background: var(--fondo-franja-oscura), var(--cacao-bg);
-  color: var(--cacao-fg);
+  background: var(--fondo-franja-oscura), var(--franja-bg);
+  color: var(--franja-fg);
   color-scheme: dark;
 }
 
@@ -112,9 +112,9 @@
   z-index: -1;
   background: linear-gradient(
     0deg,
-    color-mix(in srgb, var(--cacao-bg) 90%, transparent) 0%,
-    color-mix(in srgb, var(--cacao-bg) 68%, transparent) 55%,
-    color-mix(in srgb, var(--cacao-bg) 46%, transparent) 100%
+    color-mix(in srgb, var(--franja-bg) 90%, transparent) 0%,
+    color-mix(in srgb, var(--franja-bg) 68%, transparent) 55%,
+    color-mix(in srgb, var(--franja-bg) 46%, transparent) 100%
   );
 }
 
@@ -168,7 +168,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
 }
 
 /* La estrella de la insignia, a 20 px: la del ornamento del héroe público.
@@ -189,7 +189,7 @@
   font-size: var(--t-hero-2-size);
   line-height: 1.1;
   font-weight: 500;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
   text-wrap: balance;
   overflow-wrap: anywhere;
   -webkit-font-smoothing: auto;
@@ -200,7 +200,7 @@
   max-width: 52ch;
   font-size: var(--t-callout-size);
   line-height: 1.55;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
 }
 
 /* En el teléfono la bajada sobra: la tarjeta de debajo ya dice qué hacer, y

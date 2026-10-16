@@ -12,7 +12,7 @@ import styles from './anuncio-banner.module.css'
 /*
   FRANJA DE ANUNCIO EN LA PORTADA DE CADA PORTAL.
 
-  `<Section tono="cacao">` y no la franja de ancho completo de la landing
+  `<Section tono="negro">` y no la franja de ancho completo de la landing
   (`escaparate.module.css`): esa es un mecanismo propio de `(publico)/page.tsx`
   con su regla `.franja:first-child`. `Section` es la superficie tonal
   GENÉRICA del sistema (`layout.module.css`), sin sangrado a los bordes ni
@@ -47,7 +47,7 @@ export function AnuncioBanner({
   if (!hidratado || !anuncio || cerrado) return null
 
   return (
-    <Section tono="cacao" className={styles.banner}>
+    <Section tono="negro" className={styles.banner}>
       <div className={styles.fila}>
         <Megaphone className={styles.icono} size={20} aria-hidden="true" />
 

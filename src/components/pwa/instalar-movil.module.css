@@ -38,7 +38,7 @@
   padding: 0;
   border: none;
   border-radius: var(--radius-full);
-  background: var(--cacao-900);
+  background: var(--negro-900);
   /* El filo claro interior es para el pie y la cabecera, que son negros:
      sin él, el círculo se fundía con ellos y quedaba el icono suelto. */
   box-shadow:

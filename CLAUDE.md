@@ -36,10 +36,10 @@
 > ⚠️ **Queda DEROGADA**: la regla de «una sola familia tipográfica» de la v5.
 > Si la encuentras escrita en algún sitio, ese sitio está sin actualizar.
 >
-> ⚠️ **Los tokens `--cacao-*` siguen llamándose así y siguen sin ser
-> marrones.** Son la franja negra, en los dos temas, sin excepción. El nombre
-> se conservó a propósito para no dejar `var()` huérfanos; el renombrado sigue
-> en «Deuda conocida».
+> ⚠️ **Los antiguos `--cacao-*` se llaman ahora `--negro-*` (tres crudos) y
+> `--franja-*` (los semánticos).** Son la franja negra, en los dos temas, sin
+> excepción. Renombrados el 16/10/2026 (ver «Deuda conocida» #6); si encuentras
+> un `--cacao-*` en un documento, ese documento está sin actualizar.
 >
 > Cada dirección sustituye a la anterior
 > ([`.claude/docs/DIRECCION-ARTE-v4.md`](.claude/docs/DIRECCION-ARTE-v4.md),
@@ -336,7 +336,7 @@ que los otros tres portales no cambian:
 | Fondo de insignia (`--gold-bg`) | oro 10 % | oro 12 % | — |
 | Sombras de escalón 1–3 | `--shadow-1..3` | `--sombra-fachada-1..3` (más densas) | — |
 | Filo interno (`--border-subtle`) | negro 22 % | tinta 12 % | decorativo |
-| Texto sobre negro, 3.er nivel | colapsa a `--cacao-fg-2` | `--cacao-fg-3` donde el boceto lo pide | 6,35 tarjeta negra |
+| Texto sobre negro, 3.er nivel | colapsa a `--franja-fg-2` | `--franja-fg-3` donde el boceto lo pide | 6,35 tarjeta negra |
 
 **Reglas que se relajan SOLO en la fachada**, porque el boceto las pide y el
 contraste AA de texto se sigue cumpliendo:
@@ -448,7 +448,7 @@ crema alrededor de ellos en vez de perseguir el brillo otra vez.
 
 | Trabajo | Token | Ratio | Prohibición |
 |---|---|---|---|
-| **Display, solo sobre negro** | `--gold-400` | **12,27:1** sobre `--cacao-bg` · 11,69:1 sobre el fondo oscuro — sin cambio | ⛔ Sobre crema da **1,64:1** y sobre gris claro **1,54:1**. Ni el 3:1 de texto grande |
+| **Display, solo sobre negro** | `--gold-400` | **12,27:1** sobre `--franja-bg` · 11,69:1 sobre el fondo oscuro — sin cambio | ⛔ Sobre crema da **1,64:1** y sobre gris claro **1,54:1**. Ni el 3:1 de texto grande |
 | **Marca · acción en oscuro** | `--gold-500` | 9,26:1 sobre el fondo oscuro · 8,25:1 de filo sobre la tarjeta — sin cambio | ⛔ Sobre crema da 1,89:1 |
 | **Relleno de acción · filo** | `--gold-600` | **4,84:1** con texto `--tinta-1` (1.4.3) · **3,27:1** de filo sobre crema, 3,13 sobre gris claro, 3,07 sobre gris hondo, 3,04 sobre `--surface-hover`, 5,61 sobre la franja negra (1.4.11) | — |
 | **Texto e iconos dorados** | `--gold-700` | 4,87:1 crema · 4,67:1 gris claro · **4,58:1 gris hondo** | Cumple sobre **las tres** — el margen sobre la más honda no cambió desde la v5 |
@@ -487,20 +487,21 @@ vacío no sobraba: **le faltaba estructura**.
 | **Crema** `#FAF6EC` | `--bg` · `--surface` | Fondo y tarjeta. Sigue sin haber escalones entre ellos |
 | **Gris claro** `#F7F1E4` | `--surface-alt` | Franja alterna. **1,04:1** contra el crema: separa **sin trazo** |
 | **Gris hondo** `#F5EFDF` | `--surface-alt-2` | Relleno: hueco, carril, esqueleto. Superficie de relleno, no de párrafo |
-| **Negro** `#0A0A0C` | `--cacao-bg` | La franja oscura. El único sitio donde vive el oro de display. Negra en los DOS temas — ver el aviso de abajo |
+| **Negro** `#0A0A0C` | `--franja-bg` | La franja oscura. El único sitio donde vive el oro de display. Negra en los DOS temas — ver el aviso de abajo |
 
 La separación de las franjas **bajó** de 1,08:1 (v5) a 1,04:1 (v6): el crema se
 calibró para conservar el margen de `--gold-600` contra `--w-100` (ver «El
 oro»), y eso no dejaba sitio para separar más las franjas sin romper ese par.
 
-Herramienta: **`<Section tono="crema" | "honda" | "cacao">`**. ⚠️ **Los valores
-de la prop conservan los nombres de la v4** (el componente está fuera del alcance
-de esta tanda): `crema` es ahora gris claro, `honda` gris hondo y `cacao` negro.
+Herramienta: **`<Section tono="crema" | "honda" | "negro">`**. ⚠️ `crema` y `honda`
+conservan los nombres de la v4 y ya no describen su color: `crema` es ahora gris
+claro y `honda` gris hondo. `negro` (antes `cacao`, renombrado el 16/10/2026) sí
+lo describe.
 Una franja **no es una tarjeta**: no lleva sombra ni borde, porque no está
 levantada, está teñida.
 
-⚠️ **CERRADO EN LA v6 — la franja `cacao` en tema claro tenía un bug real.**
-`globals.css` mapeaba `--cacao-bg` a un marfil claro (`--champan-100`) SOLO en
+⚠️ **CERRADO EN LA v6 — la franja negra en tema claro tenía un bug real.**
+`globals.css` mapeaba `--franja-bg` (entonces `--cacao-bg`) a un marfil claro (`--champan-100`) SOLO en
 tema claro, contradiciendo el propio comentario de la línea anterior en ese
 archivo y contradiciendo este documento. Confirmado con el propietario: la
 franja **negra no sigue al tema** —es negra en claro y en oscuro, igual que el
@@ -1046,10 +1047,10 @@ con cualquier hijo sin clonar elementos.
 reimplementes en la página: el panel de inicio ya lo hizo y hubo que extraerla.
 `size="display"` la pone en el peldaño ceremonial a 36–52px (peso 700).
 
-**`<Section tono>`** es la herramienta tonal: `crema`, `honda` o `cacao`. ⚠️ Los
-**nombres de los valores son heredados de la v4** y ya no describen su color:
-`crema` = gris claro, `honda` = gris hondo, `cacao` = **negro**. Es lo que da
-estructura a una pantalla ancha sin dibujar una línea. La franja `cacao` remapea
+**`<Section tono>`** es la herramienta tonal: `crema`, `honda` o `negro`. ⚠️ `crema` y
+`honda` son nombres heredados de la v4 y ya no describen su color:
+`crema` = gris claro, `honda` = gris hondo, `negro` = **negro** (antes `cacao`).
+Es lo que da estructura a una pantalla ancha sin dibujar una línea. La franja `negro` remapea
 sus tokens de texto hacia dentro y es el único sitio del sistema donde el oro
 brillante (`--gold-400`, `--gold-300`) es legal.
 
@@ -1646,11 +1647,12 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    [`.claude/docs/log/v6-crema-oro.md`](.claude/docs/log/v6-crema-oro.md) §8;
    el historial de la v5 sigue en
    [`.claude/docs/log/v5-negro-oro.md`](.claude/docs/log/v5-negro-oro.md).
-6. **Los tokens `--cacao-*` se llaman así y son NEGROS.** Once tokens (tres crudos
-   y ocho semánticos) conservan un nombre que ya no describe su valor. Se
-   mantuvieron a propósito: varios módulos los consumen y un `var()` huérfano no
-   falla, hereda en silencio. El renombrado a `--negro-*` / `--franja-*` es una
-   tanda propia, y tiene que tocar `<Section tono="cacao">` a la vez.
+6. ~~Los tokens `--cacao-*` se llamaban así y eran NEGROS.~~ **Cerrado el
+   16/10/2026**: los tres crudos son `--negro-900/800/700` y los semánticos
+   `--franja-bg|surface|hover|fg|fg-2|fg-3|brand|edge|scheme`; la clase
+   `.tonoCacao` es `.tonoNegro` y `<Section tono="cacao">` es `tono="negro"`.
+   Renombrado mecánico, sin cambio de valor. Los registros históricos de
+   `.claude/docs/log/` conservan el nombre viejo a propósito.
 7. ~~En tema oscuro `--border` reprobaba WCAG 1.4.11 en el borde de los
    controles.~~ **Cerrado**: existe `--border-control`, separado de `--border`.
    En claro vale lo mismo; en oscuro sube a `--n-500` (3,19:1 sobre la tarjeta,
@@ -1673,13 +1675,10 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
    `globals.css` con un comentario sin versión que citaba un encargo posterior
    nunca recogido aquí. Confirmado con el propietario, corregido. Detalle en
    `.claude/docs/log/v6-crema-oro.md` §3.
-10. **Los comentarios de `escaparate.module.css`, `hero-publico.module.css` y
-    otros módulos que consumen `--font-display` citan «Fraunces»** por nombre.
-    Con la v6 eso vuelve a ser conceptualmente cierto (hay un serif de verdad
-    otra vez, con las mismas propiedades de `font-feature-settings` y
-    `-webkit-font-smoothing` que esos comentarios describían) pero el nombre
-    de la familia que citan sigue siendo el viejo (Fraunces, no Playfair
-    Display). No afecta al render — se limpia cuando se toque cada módulo.
+10. ~~Los comentarios de los módulos que consumen `--font-display` citaban
+    «Fraunces».~~ **Cerrado**: ya no queda ninguna mención a Fraunces en
+    `src/` salvo la histórica de `layout.tsx` («desde que la v5 retiró a
+    Fraunces»), que es correcta.
 11. **Falta una Content-Security-Policy completa.** `next.config.ts` solo
     manda `frame-ancestors 'none'` (anti-clickjacking); no limita qué
     scripts, imágenes o conexiones puede cargar la página, así que no frena

@@ -103,7 +103,7 @@
 }
 
 .portadaVacia {
-  background: var(--fondo-franja-oscura), var(--cacao-surface);
+  background: var(--fondo-franja-oscura), var(--franja-surface);
 }
 
 /* La placa del logo con un aro de crema que la separa de la foto y su
@@ -263,7 +263,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--cacao-900) 55%, transparent);
+  background: color-mix(in srgb, var(--negro-900) 55%, transparent);
   font-size: var(--t-title-3-size);
   font-weight: 700;
   color: var(--blanco);

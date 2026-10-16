@@ -140,10 +140,10 @@ export function Divider({ label, className }: { label?: string; className?: stri
  *            de tinta y el oro de texto.
  * - `honda`  más tinte. Es superficie de RELLENO: NO lleva `--text-3` ni oro
  *            de texto (4,18:1 y 4,21:1, reprueban AA). Ver `tokens.css` §1.
- * - `cacao`  la franja oscura, y el ÚNICO sitio donde vive el oro de display.
- *            No sigue al tema: es cacao en claro y en oscuro. Su contenido
+ * - `negro`  la franja oscura, y el ÚNICO sitio donde vive el oro de display.
+ *            No sigue al tema: es negra en claro y en oscuro. Su contenido
  *            hereda `--text`/`--text-2`/`--text-3` ya remapeados a los tonos
- *            que sí contrastan sobre cacao, así que un `<Card>` dentro no hay
+ *            que sí contrastan sobre el negro, así que un `<Card>` dentro no hay
  *            que vestirlo a mano.
  *
  * ⚠️ La franja NO SANGRA hasta el borde del viewport: es una superficie
@@ -151,7 +151,7 @@ export function Divider({ label, className }: { label?: string; className?: stri
  * relleno del contenedor de cada portal y lo decide la página, no este
  * componente.
  */
-export type SectionTono = 'papel' | 'crema' | 'honda' | 'cacao'
+export type SectionTono = 'papel' | 'crema' | 'honda' | 'negro'
 
 type SectionProps = {
   /** Encabezado en mayúsculas pequeñas: agrupa sin competir con el título. */
@@ -168,7 +168,7 @@ const TONOS: Record<SectionTono, string | false> = {
   papel: false,
   crema: styles.tonoCrema,
   honda: styles.tonoHonda,
-  cacao: styles.tonoCacao,
+  negro: styles.tonoNegro,
 }
 
 export function Section({

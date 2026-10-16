@@ -134,7 +134,7 @@
   min-height: var(--space-6);
   padding: 0 var(--space-2);
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--cacao-900) 82%, transparent);
+  background: color-mix(in srgb, var(--negro-900) 82%, transparent);
   font-size: var(--t-caption-size);
   font-weight: 700;
   font-variant-numeric: tabular-nums;

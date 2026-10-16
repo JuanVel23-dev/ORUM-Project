@@ -35,7 +35,7 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
   return (
     <section
       id="comercios"
-      className={[escaparate.franja, escaparate.tonoCacao, estilos.seccion].join(' ')}
+      className={[escaparate.franja, escaparate.tonoNegro, estilos.seccion].join(' ')}
       aria-labelledby="titulo-destacados"
     >
       <Revelar>

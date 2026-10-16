@@ -17,11 +17,11 @@
       color-mix(in srgb, var(--n-200) 14%, transparent),
       transparent 60%
     ),
-    linear-gradient(150deg, var(--cacao-800), var(--cacao-900) 65%);
+    linear-gradient(150deg, var(--negro-800), var(--negro-900) 65%);
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--n-50) 14%, transparent),
     var(--shadow-overlay);
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
   color-scheme: dark;
 
   --plata-brunida: linear-gradient(
@@ -65,7 +65,7 @@
   font-size: var(--t-title-2-size);
   line-height: 1.2;
   font-weight: 600;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
 }
 
 .cerrar {
@@ -78,7 +78,7 @@
   border: none;
   border-radius: var(--radius-full);
   background: none;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
   cursor: pointer;
   transition:
     color var(--dur-fast) var(--ease-out),
@@ -94,7 +94,7 @@
 
 @media (hover: hover) {
   .cerrar:not(:disabled):hover {
-    color: var(--cacao-fg);
+    color: var(--franja-fg);
     rotate: 90deg;
   }
 }
@@ -103,7 +103,7 @@
   margin: calc(-1 * var(--space-2)) 0 0;
   font-size: var(--t-callout-size);
   line-height: 1.5;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
 }
 
 /* Los focos, en plata, como en el carnet. */
@@ -173,7 +173,7 @@
   height: 100%;
   overflow: hidden;
   border-radius: var(--radius-full);
-  background: var(--cacao-800);
+  background: var(--negro-800);
 }
 
 .actualImagen {
@@ -186,7 +186,7 @@
 .inicial {
   font-size: var(--t-display-2-size);
   font-weight: 600;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
 }
 
 /*
@@ -203,7 +203,7 @@
   place-content: center;
   justify-items: center;
   gap: var(--space-1);
-  background: var(--cacao-900);
+  background: var(--negro-900);
 
   font-size: var(--t-caption-size);
   font-weight: 600;
@@ -228,7 +228,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--cacao-900) 58%, transparent);
+  background: color-mix(in srgb, var(--negro-900) 58%, transparent);
 }
 
 .veloTexto {
@@ -257,7 +257,7 @@
 .ayuda {
   margin: 0;
   font-size: var(--t-footnote-size);
-  color: var(--cacao-fg-3);
+  color: var(--franja-fg-3);
 }
 
 /* «O arrástrala hasta aquí» solo tiene sentido con ratón. */
@@ -278,7 +278,7 @@
   justify-self: center;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  background: var(--cacao-900);
+  background: var(--negro-900);
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -327,7 +327,7 @@
   background: radial-gradient(
     circle closest-side,
     transparent 90%,
-    color-mix(in srgb, var(--cacao-900) 72%, transparent) calc(90% + 1px)
+    color-mix(in srgb, var(--negro-900) 72%, transparent) calc(90% + 1px)
   );
   pointer-events: none;
 }
@@ -361,7 +361,7 @@
   border: none;
   border-radius: var(--radius-full);
   background: none;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
   cursor: pointer;
   transition:
     color var(--dur-fast) var(--ease-out),
@@ -376,7 +376,7 @@
 
 @media (hover: hover) {
   .icono:not(:disabled):hover {
-    color: var(--cacao-fg);
+    color: var(--franja-fg);
     scale: 1.1;
   }
 
@@ -479,7 +479,7 @@
   font-size: var(--t-callout-size);
   font-weight: 600;
   white-space: nowrap;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
   cursor: pointer;
   transition:
     color var(--dur-fast) var(--ease-out),
@@ -493,7 +493,7 @@
 
 @media (hover: hover) {
   .enlace:not(:disabled):hover {
-    color: var(--cacao-fg);
+    color: var(--franja-fg);
     translate: 0 -1px;
   }
 }

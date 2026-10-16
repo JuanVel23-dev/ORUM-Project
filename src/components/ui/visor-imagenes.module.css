@@ -43,14 +43,14 @@
    para ganarle al `::backdrop` genérico de `modal.module.css` sin depender
    del orden en que se cargan los módulos. */
 .dialogo.dialogo::backdrop {
-  background: color-mix(in srgb, var(--cacao-900) 90%, transparent);
+  background: color-mix(in srgb, var(--negro-900) 90%, transparent);
 }
 
 .visor {
   position: relative;
   display: grid;
   place-items: center;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
   touch-action: pan-y;
 }
 
@@ -113,7 +113,7 @@
   font-size: var(--t-footnote-size);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
 }
 
 /* --- Controles: la X y las flechas, discos oscuros sobre la imagen -------- */
@@ -129,8 +129,8 @@
   padding: 0;
   border: none;
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--cacao-900) 72%, transparent);
-  color: var(--cacao-fg);
+  background: color-mix(in srgb, var(--negro-900) 72%, transparent);
+  color: var(--franja-fg);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--n-50) 18%, transparent);
   cursor: pointer;
   transition:

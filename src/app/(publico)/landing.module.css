@@ -7,7 +7,7 @@
    EL CIERRE «HAZTE SOCIO HOY»  ·  franja negra
    --------------------------------------------------------------------------
    El aire vertical es mayor que el de una sección normal: es el final de la
-   página y necesita sentirse como tal. El fondo lo pone `.tonoCacao` y no
+   página y necesita sentirse como tal. El fondo lo pone `.tonoNegro` y no
    se redeclara aquí: dos `background` con la misma especificidad dejarían el
    resultado al orden de inyección de las hojas.
    ========================================================================== */
@@ -63,7 +63,7 @@
   color: var(--gold-300);
 }
 
-/* `--text-2` dentro del ámbito de cacao es `--cacao-fg-2`: 8,56:1 medido. */
+/* `--text-2` dentro del ámbito de cacao es `--franja-fg-2`: 8,56:1 medido. */
 .textoCierre {
   margin: 0;
   max-width: 46ch;

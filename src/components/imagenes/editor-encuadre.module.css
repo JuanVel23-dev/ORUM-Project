@@ -32,7 +32,7 @@
   aspect-ratio: 1 / calc(0.88 * var(--proporcion) + 0.12);
   overflow: hidden;
   border-radius: var(--radius-md);
-  background: var(--cacao-900);
+  background: var(--negro-900);
   cursor: grab;
   /* El gesto es nuestro: sin esto el navegador desplaza la ventana y cancela
      el arrastre a medio encuadrar. */
@@ -126,7 +126,7 @@
 
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--cacao-900) 66%, transparent);
+  background: color-mix(in srgb, var(--negro-900) 66%, transparent);
   clip-path: polygon(
     evenodd,
     0 0,
@@ -147,7 +147,7 @@
   background: radial-gradient(
     circle closest-side,
     transparent 88%,
-    color-mix(in srgb, var(--cacao-900) 66%, transparent) calc(88% + 1px)
+    color-mix(in srgb, var(--negro-900) 66%, transparent) calc(88% + 1px)
   );
   clip-path: none;
 }

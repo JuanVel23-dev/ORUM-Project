@@ -104,7 +104,7 @@
   /* LA FRANJA NEGRA  ·  antes «cacao»  (v5 §2)
      --------------------------------------------------------------------------
      ⚠️ EL NOMBRE ES HEREDADO Y EL VALOR YA NO. Estos tres tokens se llamaban
-     `--cacao-*` cuando eran marrones, y CONSERVAN el nombre a propósito: seis
+     `--franja-*` cuando eran marrones, y CONSERVAN el nombre a propósito: seis
      módulos y ocho tokens semánticos los consumen, y un `var()` que apunta a
      un token inexistente NO FALLA —hereda o se queda transparente, en
      silencio—, así que un renombrado a medias es peor que un nombre feo. El
@@ -127,13 +127,13 @@
      es negro sobre blanco en los dos. En oscuro se separa del fondo por 1,05:1
      —el mismo orden que el gris claro sobre blanco—, así que sigue leyéndose
      como franja y no desaparece. Sus tokens semánticos están en `globals.css`
-     con el prefijo `--cacao-*`.
+     con el prefijo `--franja-*`.
 
      ⚠️ CERRADO EN LA v6 — HABÍA UN SEGUNDO COMENTARIO AQUÍ, CONTRADICTORIO.
      Un bloque etiquetado «CHAMPÁN · la franja ceremonial del TEMA CLARO»
      citaba un encargo posterior del propietario («el modo claro es el
      primordial… el negro no lo uses en ese modo») y hacía que `globals.css`
-     mapeara `--cacao-bg` a un marfil claro SOLO en tema claro — exactamente lo
+     mapeara `--franja-bg` a un marfil claro SOLO en tema claro — exactamente lo
      que este párrafo de arriba dice que no debía pasar. `CLAUDE.md` nunca
      recogió esa excepción. Confirmado con el propietario para la v6: la
      franja es negra en los dos temas, sin excepción; el comentario champán y
@@ -148,9 +148,9 @@
   */
   --patron-club: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22240%22%20height%3D%22240%22%20fill%3D%22none%22%20stroke%3D%22%23ae8118%22%20stroke-width%3D%221.3%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%220.16%22%3E%3Cg%20transform%3D%22translate%2826%2030%29%22%3E%3Cpath%20d%3D%22M1%207.5%207.5%201H14v6.5L7.5%2014z%22/%3E%3Ccircle%20cx%3D%2210.5%22%20cy%3D%224.5%22%20r%3D%221.1%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28150%2022%29%22%3E%3Cpath%20d%3D%22M7%201l1.8%203.9%204.2.5-3.1%202.9.8%204.2L7%2010.4%203.3%2012.5l.8-4.2L1%205.4l4.2-.5z%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2896%20112%29%22%3E%3Ccircle%20cx%3D%223%22%20cy%3D%223%22%20r%3D%222%22/%3E%3Ccircle%20cx%3D%2211%22%20cy%3D%2211%22%20r%3D%222%22/%3E%3Cpath%20d%3D%22M12%202%202%2012%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%28196%20146%29%22%3E%3Cpath%20d%3D%22M7%2012.5S1%209%201%205a3%203%200%200%201%206-1%203%203%200%200%201%206%201c0%204-6%207.5-6%207.5z%22/%3E%3C/g%3E%3Cg%20transform%3D%22translate%2836%20180%29%22%3E%3Crect%20x%3D%221%22%20y%3D%223%22%20width%3D%2214%22%20height%3D%229%22%20rx%3D%221.5%22/%3E%3Cpath%20d%3D%22M5%203v9%22/%3E%3C/g%3E%3Ccircle%20cx%3D%22140%22%20cy%3D%22200%22%20r%3D%221.4%22%20fill%3D%22%23ae8118%22%20stroke%3D%22none%22/%3E%3Ccircle%20cx%3D%22210%22%20cy%3D%2284%22%20r%3D%221.4%22%20fill%3D%22%23ae8118%22%20stroke%3D%22none%22/%3E%3Ccircle%20cx%3D%2272%22%20cy%3D%2276%22%20r%3D%221.4%22%20fill%3D%22%23ae8118%22%20stroke%3D%22none%22/%3E%3C/svg%3E");
 
-  --cacao-900: #0a0a0c; /* la franja */
-  --cacao-800: #18181c; /* tarjeta elevada dentro de la franja (1,12:1) */
-  --cacao-700: #26262c; /* hover dentro de la franja (1,32:1) */
+  --negro-900: #0a0a0c; /* la franja */
+  --negro-800: #18181c; /* tarjeta elevada dentro de la franja (1,12:1) */
+  --negro-700: #26262c; /* hover dentro de la franja (1,32:1) */
 
   /* ⚠️ DEUDA ABIERTA Y MEDIDA, no la descubras otra vez: en tema OSCURO,
      `--border` (= `--n-700`) da 1,92:1 contra la tarjeta, y el borde en reposo
@@ -190,7 +190,7 @@
      franja negra, que es donde el encargo lo quería.
 
      DÓNDE ESTÁ PROHIBIDO CADA UNO:
-       --gold-400  DISPLAY, solo sobre NEGRO ..... 12,27:1 sobre --cacao-900
+       --gold-400  DISPLAY, solo sobre NEGRO ..... 12,27:1 sobre --negro-900
                    ⛔ sobre blanco da 1,61:1 y sobre gris claro 1,49:1. Ni el
                       3:1 de texto grande. Es PEOR que en la v4 (2,07) porque
                       el oro subió y el fondo también: el error de poner el oro

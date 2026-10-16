@@ -99,7 +99,7 @@
      `::before` y `::after`, más abajo. `isolation` los deja detrás del
      contenido de la cabecera y delante de la página. */
   isolation: isolate;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
 }
 
 /*
@@ -146,12 +146,12 @@
   /* La máscara solo usa el alfa: el color del token no importa. */
   -webkit-mask-image: linear-gradient(
     to bottom,
-    var(--cacao-bg) var(--solido),
+    var(--franja-bg) var(--solido),
     transparent calc(var(--solido) + var(--fundido) * 0.6)
   );
   mask-image: linear-gradient(
     to bottom,
-    var(--cacao-bg) var(--solido),
+    var(--franja-bg) var(--solido),
     transparent calc(var(--solido) + var(--fundido) * 0.6)
   );
 }
@@ -159,18 +159,18 @@
 .cabecera::after {
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--cacao-bg) 97%, transparent) 0,
-    color-mix(in srgb, var(--cacao-bg) 97%, transparent) var(--solido),
-    color-mix(in srgb, var(--cacao-bg) 94.6%, transparent) calc(var(--solido) + var(--fundido) * 0.1),
-    color-mix(in srgb, var(--cacao-bg) 87.7%, transparent) calc(var(--solido) + var(--fundido) * 0.2),
-    color-mix(in srgb, var(--cacao-bg) 77%, transparent) calc(var(--solido) + var(--fundido) * 0.3),
-    color-mix(in srgb, var(--cacao-bg) 63.5%, transparent) calc(var(--solido) + var(--fundido) * 0.4),
-    color-mix(in srgb, var(--cacao-bg) 48.5%, transparent) calc(var(--solido) + var(--fundido) * 0.5),
-    color-mix(in srgb, var(--cacao-bg) 33.5%, transparent) calc(var(--solido) + var(--fundido) * 0.6),
-    color-mix(in srgb, var(--cacao-bg) 20%, transparent) calc(var(--solido) + var(--fundido) * 0.7),
-    color-mix(in srgb, var(--cacao-bg) 9.3%, transparent) calc(var(--solido) + var(--fundido) * 0.8),
-    color-mix(in srgb, var(--cacao-bg) 2.4%, transparent) calc(var(--solido) + var(--fundido) * 0.9),
-    color-mix(in srgb, var(--cacao-bg) 0%, transparent) calc(var(--solido) + var(--fundido))
+    color-mix(in srgb, var(--franja-bg) 97%, transparent) 0,
+    color-mix(in srgb, var(--franja-bg) 97%, transparent) var(--solido),
+    color-mix(in srgb, var(--franja-bg) 94.6%, transparent) calc(var(--solido) + var(--fundido) * 0.1),
+    color-mix(in srgb, var(--franja-bg) 87.7%, transparent) calc(var(--solido) + var(--fundido) * 0.2),
+    color-mix(in srgb, var(--franja-bg) 77%, transparent) calc(var(--solido) + var(--fundido) * 0.3),
+    color-mix(in srgb, var(--franja-bg) 63.5%, transparent) calc(var(--solido) + var(--fundido) * 0.4),
+    color-mix(in srgb, var(--franja-bg) 48.5%, transparent) calc(var(--solido) + var(--fundido) * 0.5),
+    color-mix(in srgb, var(--franja-bg) 33.5%, transparent) calc(var(--solido) + var(--fundido) * 0.6),
+    color-mix(in srgb, var(--franja-bg) 20%, transparent) calc(var(--solido) + var(--fundido) * 0.7),
+    color-mix(in srgb, var(--franja-bg) 9.3%, transparent) calc(var(--solido) + var(--fundido) * 0.8),
+    color-mix(in srgb, var(--franja-bg) 2.4%, transparent) calc(var(--solido) + var(--fundido) * 0.9),
+    color-mix(in srgb, var(--franja-bg) 0%, transparent) calc(var(--solido) + var(--fundido))
   );
 }
 
@@ -206,7 +206,7 @@
 
 @media (prefers-reduced-transparency: reduce) {
   .cabecera {
-    background: var(--cacao-bg);
+    background: var(--franja-bg);
   }
 }
 
@@ -224,7 +224,7 @@
 }
 
 .marca:focus-visible {
-  outline: 2px solid var(--cacao-brand);
+  outline: 2px solid var(--franja-brand);
   outline-offset: 4px;
 }
 

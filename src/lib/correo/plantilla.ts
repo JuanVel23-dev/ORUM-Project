@@ -26,7 +26,7 @@ import { escaparHtml } from '../shared/html'
 
 /** Paleta de marca para correo. Origen: `tokens.css` (v6 · negro, crema y oro). */
 const COLOR = {
-  negro: '#0A0A0C', //     --cacao-bg · la franja de la cabecera
+  negro: '#0A0A0C', //     --franja-bg · la franja de la cabecera
   crema: '#FAF6EC', //     --w-0 · la tarjeta
   hondo: '#F5EFDF', //     --w-100 · el fondo que rodea la tarjeta
   tinta: '#201B15', //     --tinta-1 · texto y texto del botón

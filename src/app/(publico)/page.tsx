@@ -131,7 +131,7 @@ export default async function LandingPublica() {
       <section
         className={[
           escaparate.franja,
-          escaparate.tonoCacao,
+          escaparate.tonoNegro,
           escaparate.filoBanda,
           estilos.franjaCierre,
         ].join(' ')}

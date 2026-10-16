@@ -24,13 +24,13 @@
       color-mix(in srgb, var(--n-200) 16%, transparent),
       transparent 60%
     ),
-    linear-gradient(150deg, var(--cacao-800), var(--cacao-900) 65%);
+    linear-gradient(150deg, var(--negro-800), var(--negro-900) 65%);
   /* El chaflán de luz de arriba es lo que lo lee como metal y no como
      plástico; lo demás, la sombra del escalón de overlay. */
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--n-50) 14%, transparent),
     var(--shadow-overlay);
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
   color-scheme: dark;
 
   /* La plata bruñida: un degradado metálico de relleno que comparten el aro
@@ -126,7 +126,7 @@
   border: none;
   border-radius: var(--radius-full);
   background: none;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
   cursor: pointer;
 
   transition:
@@ -162,8 +162,8 @@
   padding: 0;
   border: none;
   border-radius: var(--radius-full);
-  background: var(--cacao-800);
-  color: var(--cacao-fg-2);
+  background: var(--negro-800);
+  color: var(--franja-fg-2);
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--n-50) 22%, transparent),
     var(--shadow-flotante);
@@ -183,7 +183,7 @@
 
 @media (hover: hover) {
   .cerrarInsignia:hover {
-    color: var(--cacao-fg);
+    color: var(--franja-fg);
     rotate: 90deg;
   }
 }
@@ -212,12 +212,12 @@
 @media (hover: hover) {
   /* Sin relleno: la X gira un cuarto de vuelta; «volver» se desliza. */
   .cerrar:hover {
-    color: var(--cacao-fg);
+    color: var(--franja-fg);
     rotate: 90deg;
   }
 
   .volver:hover {
-    color: var(--cacao-fg);
+    color: var(--franja-fg);
     translate: -2px 0;
   }
 }
@@ -337,10 +337,10 @@
 .iniciales {
   display: grid;
   place-items: center;
-  background: var(--cacao-800);
+  background: var(--negro-800);
   font-size: var(--t-title-2-size);
   font-weight: 600;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
 }
 
 .quien {
@@ -358,7 +358,7 @@
   line-height: 1.2;
   font-weight: 600;
   letter-spacing: -0.005em;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
   overflow-wrap: anywhere;
 }
 
@@ -372,7 +372,7 @@
   margin: 0;
   font-size: var(--t-callout-size);
   font-weight: 500;
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
 }
 
 /* --- Pie: los datos que se dictan y el QR ----------------------------------- */
@@ -409,7 +409,7 @@
 .etiqueta {
   font-size: var(--t-footnote-size);
   font-weight: 500;
-  color: var(--cacao-fg-3);
+  color: var(--franja-fg-3);
 }
 
 .numero,
@@ -417,7 +417,7 @@
   margin: 0;
   font-size: var(--t-callout-size);
   font-weight: 600;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
 }
 
 /* Cifras tabulares: al dictarlo, cada dígito ocupa lo mismo. */
@@ -481,7 +481,7 @@
   padding: var(--space-2);
   border-radius: inherit;
 
-  background: color-mix(in srgb, var(--cacao-900) 55%, transparent);
+  background: color-mix(in srgb, var(--negro-900) 55%, transparent);
   -webkit-backdrop-filter: blur(var(--blur-md)) saturate(1.2);
   backdrop-filter: blur(var(--blur-md)) saturate(1.2);
 
@@ -505,7 +505,7 @@
 /* Sin transparencias: el velo llega opaco, sin desenfoque. */
 @media (prefers-reduced-transparency: reduce) {
   .velo {
-    background: color-mix(in srgb, var(--cacao-900) 88%, transparent);
+    background: color-mix(in srgb, var(--negro-900) 88%, transparent);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -557,8 +557,8 @@
   aspect-ratio: 1;
   border-radius: var(--radius-full);
   background: var(--n-100);
-  color: var(--cacao-900);
-  box-shadow: 0 0 0 2px var(--cacao-900);
+  color: var(--negro-900);
+  box-shadow: 0 0 0 2px var(--negro-900);
 }
 
 @media (hover: none) {
@@ -604,13 +604,13 @@
   font-size: var(--t-title-2-size);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--cacao-fg);
+  color: var(--franja-fg);
 }
 
 .nombreQr {
   margin: 0;
   font-size: var(--t-footnote-size);
-  color: var(--cacao-fg-2);
+  color: var(--franja-fg-2);
 }
 
 /* En la vista del QR la proporción de tarjeta no aplica: manda el código. */
@@ -641,7 +641,7 @@
   del recorte) y un negro translúcido encima. Solo se anima la opacidad.
 */
 .veloConFoto {
-  background: var(--cacao-900);
+  background: var(--negro-900);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
@@ -661,7 +661,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--cacao-900) 58%, transparent);
+  background: color-mix(in srgb, var(--negro-900) 58%, transparent);
 }
 
 /* El icono y el texto, por encima de la copia y del negro. */

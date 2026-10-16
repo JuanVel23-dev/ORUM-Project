@@ -6,31 +6,31 @@
   EL PIE CIERRA EN NEGRO (guía de marca v6), el mismo negro de la franja y de
   la cabecera: la página abre y cierra con el mismo material.
 
-  Es un ÁMBITO DE TEMA, igual que `.tonoCacao`: reasigna los semánticos en
+  Es un ÁMBITO DE TEMA, igual que `.tonoNegro`: reasigna los semánticos en
   vez de pintar cada texto a mano, así que los enlaces, el foco y el hover
-  salen solos. No usa `.tonoCacao` directamente porque el pie está FUERA del
+  salen solos. No usa `.tonoNegro` directamente porque el pie está FUERA del
   `<main>` y `escaparate.module.css` es vocabulario de las franjas de dentro.
 
   Negro en los DOS temas: como la franja, no sigue a la preferencia.
 
-  Ratios contra `--cacao-bg` (#0a0a0c), método WCAG 2.1:
-    --cacao-fg (crema) 18,3:1 · --cacao-fg-2 11,9:1 · --cacao-fg-3 7,1:1
+  Ratios contra `--franja-bg` (#0a0a0c), método WCAG 2.1:
+    --franja-fg (crema) 18,3:1 · --franja-fg-2 11,9:1 · --franja-fg-3 7,1:1
 */
 .pie {
   display: flex;
   flex-direction: column;
   gap: var(--space-7);
 
-  background: var(--cacao-bg);
+  background: var(--franja-bg);
   color-scheme: dark;
 
-  --text: var(--cacao-fg);
-  --text-2: var(--cacao-fg-2);
-  --text-3: var(--cacao-fg-3);
+  --text: var(--franja-fg);
+  --text-2: var(--franja-fg-2);
+  --text-3: var(--franja-fg-3);
   --brand: var(--gold-300);
-  --focus: var(--cacao-brand);
+  --focus: var(--franja-brand);
   --surface-hover: transparent;
-  --border-subtle: color-mix(in srgb, var(--cacao-fg) 10%, transparent);
+  --border-subtle: color-mix(in srgb, var(--franja-fg) 10%, transparent);
 
   color: var(--text);
 

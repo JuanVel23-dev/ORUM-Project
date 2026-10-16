@@ -55,7 +55,7 @@
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background: var(--cacao-surface);
+  background: var(--franja-surface);
 }
 
 .foto,
@@ -71,7 +71,7 @@
 }
 
 .sinFoto {
-  background: var(--fondo-franja-oscura), var(--cacao-surface);
+  background: var(--fondo-franja-oscura), var(--franja-surface);
 }
 
 .cuerpo {
