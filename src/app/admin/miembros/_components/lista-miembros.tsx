@@ -91,10 +91,17 @@ const COLUMNAS: ReadonlyArray<Column<FilaMiembro>> = [
   },
 ]
 
+/*
+  La membresía tiene DOS estados, vigente o vencida (16/10/2026: «solo
+  existen 2 membresías, ¿por qué en los filtros aparecen más?»). «Vencen
+  pronto» era un subconjunto de las vigentes y se leía como un tercer
+  estado: lo próximo a vencer está en la portada y en «Ordenar: Vencen
+  antes». «Sin membresía» solo sale si hay alguno, que sería un dato a
+  corregir.
+*/
 const PESTANAS: { clave: PestanaEstado; etiqueta: string; tono: TonoPestana }[] = [
   { clave: 'todos', etiqueta: 'Todos', tono: 'neutro' },
   { clave: 'vigentes', etiqueta: 'Vigentes', tono: 'exito' },
-  { clave: 'pronto', etiqueta: 'Vencen pronto', tono: 'aviso' },
   { clave: 'vencidas', etiqueta: 'Vencidas', tono: 'peligro' },
   { clave: 'sin', etiqueta: 'Sin membresía', tono: 'vacio' },
 ]
@@ -173,7 +180,7 @@ export function ListaMiembros({
       <div className={styles.lista}>
         <Pestanas
           etiqueta="Filtrar por estado"
-          items={PESTANAS.map((p) => ({
+          items={PESTANAS.filter((p) => p.clave !== 'sin' || cuentas.sin > 0 || pestana === 'sin').map((p) => ({
             href: href({ estado: p.clave === 'todos' ? undefined : p.clave, pagina: undefined }),
             etiqueta: p.etiqueta,
             cuenta: cuentas[p.clave],

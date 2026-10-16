@@ -1121,10 +1121,14 @@ paleta:
   cada uno con su icono y color, y la actividad reciente de la bitácora.
 - **Las listas del panel** llevan `Pestanas` (`components/ui/pestanas.tsx`:
   franja gris suave, la elegida en píldora blanca con sombra, punto de color
-  y recuento; son enlaces), herramientas (buscador GET, filtros como
+  y recuento; son enlaces; la píldora SE DESLIZA a la pulsada en el acto
+  —FLIP con `element.animate`, solo `transform`, `--dur-slow`/`--ease-out`—
+  sin esperar a la página), herramientas (buscador GET, filtros como
   `DropdownMenu` con `MenuItem href`, orden) y `Paginacion` (25 por página,
   `lib/shared/paginacion.ts`). Todo en la URL. La primera es Miembros
-  (`ListaMiembros`; la lógica pura en `lib/miembros/listado.ts`, la carga en
+  (`ListaMiembros`; pestañas Todos / Vigentes / Vencidas —la membresía
+  tiene DOS estados; «Vencen pronto» se quitó porque se leía como un
+  tercero, y «Sin membresía» solo sale si hay alguno—; la lógica pura en `lib/miembros/listado.ts`, la carga en
   `cargar-listado.ts`, que pide las tablas por páginas de 1000 porque
   PostgREST corta ahí). Las tablas (`DataList`) toman en el panel la
   cabecera en banda gris y títulos en minúscula por los ganchos

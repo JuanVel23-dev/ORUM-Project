@@ -3,6 +3,7 @@
    ========================================================================== */
 
 .pista {
+  position: relative;
   display: inline-flex;
   flex-wrap: wrap;
   align-self: flex-start;
@@ -14,6 +15,8 @@
 }
 
 .pestana {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -55,6 +58,33 @@
   font-weight: 700;
   color: var(--text);
   box-shadow: var(--shadow-card);
+}
+
+/* La píldora que viaja (con JavaScript). Se coloca con `translate` y la
+   anima `transform` desde donde estaba: nunca se anima su ancho. */
+.pildora {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--w, 0);
+  height: var(--h, 0);
+  translate: var(--x, 0) var(--y, 0);
+  transform-origin: 0 50%;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pista[data-pildora] .pildora:not([data-oculta]) {
+  opacity: 1;
+}
+
+/* Con la píldora en marcha, la pestaña elegida ya no pinta la suya. */
+.pista[data-pildora] .pestana[data-activa] {
+  background: transparent;
+  box-shadow: 0 0 rgba(0, 0, 0, 0);
 }
 
 .punto {
