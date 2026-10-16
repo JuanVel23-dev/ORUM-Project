@@ -9,7 +9,8 @@ import { Badge, type BadgeTone } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataList, type Column } from '@/components/ui/data-list'
 import { EmptyState } from '@/components/ui/feedback'
-import { Input, Select } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'
+import { Pestanas, type TonoPestana } from '@/components/ui/pestanas'
 import { PageHeader } from '@/components/ui/layout'
 import styles from './bitacora.module.css'
 
@@ -123,6 +124,14 @@ const COLUMNAS: ReadonlyArray<Column<Evento>> = [
         </span>
       ),
   },
+]
+
+/* Las acciones de la bitácora, como pestañas (antes, un desplegable del sistema). */
+const ACCIONES: { valor: string; etiqueta: string; tono?: TonoPestana }[] = [
+  { valor: '', etiqueta: 'Todas' },
+  { valor: 'alta', etiqueta: 'Altas', tono: 'exito' },
+  { valor: 'edicion', etiqueta: 'Ediciones', tono: 'neutro' },
+  { valor: 'renovacion', etiqueta: 'Renovaciones', tono: 'aviso' },
 ]
 
 export default async function BitacoraPage({
@@ -243,7 +252,28 @@ export default async function BitacoraPage({
         Formulario GET: los filtros quedan en la URL, se pueden compartir y
         sobreviven a un refresco. Funciona sin JavaScript.
       */}
+      <div className={styles.pestanas}>
+        <Pestanas
+          etiqueta="Filtrar por acción"
+          items={ACCIONES.map((a) => {
+            const p = new URLSearchParams()
+            if (busqueda) p.set('q', busqueda)
+            if (desde) p.set('desde', desde)
+            if (hasta) p.set('hasta', hasta)
+            if (a.valor) p.set('accion', a.valor)
+            const qs = p.toString()
+            return {
+              href: qs ? `/admin/bitacora?${qs}` : '/admin/bitacora',
+              etiqueta: a.etiqueta,
+              tono: a.tono,
+              activa: (accion ?? '') === a.valor,
+            }
+          })}
+        />
+      </div>
+
       <form method="get" className={styles.filtros}>
+        {accion && <input type="hidden" name="accion" value={accion} />}
         <div className={styles.campoAncho}>
           <label className={styles.etiqueta} htmlFor="f-q">
             Miembro
@@ -269,18 +299,6 @@ export default async function BitacoraPage({
             Hasta
           </label>
           <Input id="f-hasta" type="date" name="hasta" defaultValue={hasta ?? ''} />
-        </div>
-
-        <div>
-          <label className={styles.etiqueta} htmlFor="f-accion">
-            Acción
-          </label>
-          <Select id="f-accion" name="accion" defaultValue={accion ?? ''}>
-            <option value="">Todas</option>
-            <option value="alta">Alta</option>
-            <option value="edicion">Edición</option>
-            <option value="renovacion">Renovación</option>
-          </Select>
         </div>
 
         <div className={styles.acciones}>

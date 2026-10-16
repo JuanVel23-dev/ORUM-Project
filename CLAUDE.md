@@ -1134,7 +1134,10 @@ paleta:
   buscador sin tildes, categoría, y en cada fila el logotipo y cuántas
   sucursales y promociones ACTIVAS tiene. Las hojas de las listas son una
   sola, `src/styles/lista-panel.module.css` (antes vivía dentro de
-  miembros y Comercios se quedó sin estilo al rehacerla).
+  miembros y Comercios se quedó sin estilo al rehacerla). Usuarios lleva
+  pestañas Todos / Administradores / Empleados / Sin acceso (`?ver=`), y la
+  Bitácora filtra la acción con pestañas (Todas / Altas / Ediciones /
+  Renovaciones) en vez del desplegable del sistema.
 - **La ficha del comercio es UNA página con pestañas** (`?pestana=`
   datos · sucursales · promociones · imagenes, con recuento): cabecera con
   su logotipo y su estado, y cada parte debajo. «Datos» se edita AHÍ MISMO

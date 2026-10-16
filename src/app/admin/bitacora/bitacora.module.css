@@ -1,7 +1,12 @@
+.pestanas {
+  display: flex;
+  margin-bottom: var(--space-4);
+}
+
 /* Barra de filtros: se comporta como una sola pieza, no como 4 campos sueltos. */
 .filtros {
   display: grid;
-  grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(140px, 1fr)) minmax(150px, 1fr) auto;
+  grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(140px, 1fr)) auto;
   gap: var(--space-3);
   align-items: end;
   margin-bottom: var(--space-5);

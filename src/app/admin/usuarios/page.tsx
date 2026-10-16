@@ -9,6 +9,7 @@ import { DataList, type Column } from '@/components/ui/data-list'
 import { EmptyState } from '@/components/ui/feedback'
 import { PageHeader } from '@/components/ui/layout'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
+import { Pestanas, type TonoPestana } from '@/components/ui/pestanas'
 import { cambiarEstadoAcceso } from './actions'
 import styles from '@/styles/lista-panel.module.css'
 
@@ -62,9 +63,21 @@ const COLUMNAS: ReadonlyArray<Column<Fila>> = [
   },
 ]
 
-export default async function UsuariosPage() {
+type Filtro = 'todos' | 'admin' | 'empleados' | 'inactivos'
+
+/* Las pestañas de la lista, como en miembros y comercios. */
+const FILTROS: { clave: Filtro; etiqueta: string; tono: TonoPestana; cumple: (f: Fila) => boolean }[] = [
+  { clave: 'todos', etiqueta: 'Todos', tono: 'neutro', cumple: () => true },
+  { clave: 'admin', etiqueta: 'Administradores', tono: 'aviso', cumple: (f) => f.activo && f.rolCodigo === 'super_admin' },
+  { clave: 'empleados', etiqueta: 'Empleados', tono: 'exito', cumple: (f) => f.activo && f.rolCodigo !== 'super_admin' },
+  { clave: 'inactivos', etiqueta: 'Sin acceso', tono: 'vacio', cumple: (f) => !f.activo },
+]
+
+export default async function UsuariosPage({ searchParams }: { searchParams: Promise<{ ver?: string }> }) {
   // Solo el administrador mayor gestiona usuarios.
   await requireRol('super_admin')
+  const { ver } = await searchParams
+  const filtro = FILTROS.find((x) => x.clave === ver) ?? FILTROS[0]
 
   const admin = createAdminClient()
 
@@ -111,64 +124,77 @@ export default async function UsuariosPage() {
         }
       />
 
-      <DataList
-        caption="Usuarios del panel"
-        items={filas}
-        columns={COLUMNAS}
-        getKey={(f) => f.perfilId}
-        alwaysShowActions
-        empty={
-          <EmptyState
-            title="Aún no hay usuarios"
-            description="Crea el primer empleado o administrador del panel."
-            actions={
-              <Button href="/admin/usuarios/nuevo" icon={<UserPlus size={16} />}>
-                Crear usuario
-              </Button>
-            }
-          />
-        }
-        actions={(f) => (
-          <>
-            <AccionEstado
-              activo={f.activo}
-              accion={cambiarEstadoAcceso}
-              campos={{ perfil_id: f.perfilId }}
-              etiquetaDesactivar="Desactivar"
-              etiquetaActivar="Activar"
-            />
+      <div className={styles.lista}>
+        <Pestanas
+          etiqueta="Filtrar usuarios"
+          items={FILTROS.map((x) => ({
+            href: x.clave === 'todos' ? '/admin/usuarios' : `/admin/usuarios?ver=${x.clave}`,
+            etiqueta: x.etiqueta,
+            cuenta: filas.filter(x.cumple).length,
+            tono: x.tono,
+            activa: x.clave === filtro.clave,
+          }))}
+        />
 
-            <DropdownMenu
-              trigger={
-                <Button
-                  iconOnly
-                  variant="ghost"
-                  size="sm"
-                  aria-label={`Acciones de ${f.nombre}`}
-                >
-                  <MoreHorizontal size={16} />
+        <DataList
+          caption="Usuarios del panel"
+          items={filas.filter(filtro.cumple)}
+          columns={COLUMNAS}
+          getKey={(f) => f.perfilId}
+          alwaysShowActions
+          empty={
+            <EmptyState
+              title="Aún no hay usuarios"
+              description="Crea el primer empleado o administrador del panel."
+              actions={
+                <Button href="/admin/usuarios/nuevo" icon={<UserPlus size={16} />}>
+                  Crear usuario
                 </Button>
               }
-            >
-              <MenuItem
-                href={`/admin/usuarios/${f.perfilId}/editar`}
-                icon={<Pencil size={16} />}
+            />
+          }
+          actions={(f) => (
+            <>
+              <AccionEstado
+                activo={f.activo}
+                accion={cambiarEstadoAcceso}
+                campos={{ perfil_id: f.perfilId }}
+                etiquetaDesactivar="Desactivar"
+                etiquetaActivar="Activar"
+              />
+
+              <DropdownMenu
+                trigger={
+                  <Button
+                    iconOnly
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Acciones de ${f.nombre}`}
+                  >
+                    <MoreHorizontal size={16} />
+                  </Button>
+                }
               >
-                Editar datos
-              </MenuItem>
-              {/* La pantalla existía —página, modal y acción— pero nada
-                  enlazaba a ella: el avatar de un administrador no se podía
-                  cambiar navegando el panel. */}
-              <MenuItem
-                href={`/admin/usuarios/${f.perfilId}/avatar`}
-                icon={<Camera size={16} />}
-              >
-                Cambiar foto
-              </MenuItem>
-            </DropdownMenu>
-          </>
-        )}
-      />
+                <MenuItem
+                  href={`/admin/usuarios/${f.perfilId}/editar`}
+                  icon={<Pencil size={16} />}
+                >
+                  Editar datos
+                </MenuItem>
+                {/* La pantalla existía —página, modal y acción— pero nada
+                    enlazaba a ella: el avatar de un administrador no se podía
+                    cambiar navegando el panel. */}
+                <MenuItem
+                  href={`/admin/usuarios/${f.perfilId}/avatar`}
+                  icon={<Camera size={16} />}
+                >
+                  Cambiar foto
+                </MenuItem>
+              </DropdownMenu>
+            </>
+          )}
+        />
+      </div>
     </>
   )
 }
