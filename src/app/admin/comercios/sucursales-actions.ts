@@ -1,7 +1,7 @@
 'use server'
 
 import { mensajeDeError } from '@/lib/shared/errores'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
@@ -56,6 +56,8 @@ export async function crearSucursal(_prev: SucursalState, formData: FormData): P
   if (error) return { error: mensajeDeError('No se pudo crear la sucursal', error) }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
+
+  updateTag('publico')
   return { ok: true }
 }
 
@@ -86,6 +88,8 @@ export async function editarSucursal(_prev: SucursalState, formData: FormData): 
   if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
+
+  updateTag('publico')
   return { ok: true }
 }
 
@@ -105,6 +109,7 @@ export async function cambiarEstadoSucursal(formData: FormData): Promise<void> {
 
   if (!error) {
     revalidatePath(`/admin/comercios/${comercioId}`)
+    updateTag('publico')
   }
-  redirect(`/admin/comercios/${comercioId}`)
+  redirect(`/admin/comercios/${comercioId}?pestana=sucursales`)
 }

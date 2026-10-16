@@ -1,7 +1,7 @@
 'use server'
 
 import { mensajeDeError } from '@/lib/shared/errores'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
@@ -89,6 +89,8 @@ export async function crearPromocion(_prev: PromocionState, formData: FormData):
   if (error) return { error: mensajeDeError('No se pudo crear la promoción', error) }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
+
+  updateTag('publico')
   return { ok: true }
 }
 
@@ -132,6 +134,8 @@ export async function editarPromocion(_prev: PromocionState, formData: FormData)
   if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
+
+  updateTag('publico')
   return { ok: true }
 }
 
@@ -151,6 +155,7 @@ export async function cambiarEstadoPromocion(formData: FormData): Promise<void> 
 
   if (!error) {
     revalidatePath(`/admin/comercios/${comercioId}`)
+    updateTag('publico')
   }
-  redirect(`/admin/comercios/${comercioId}`)
+  redirect(`/admin/comercios/${comercioId}?pestana=promociones`)
 }

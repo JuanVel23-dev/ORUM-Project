@@ -1,19 +1,20 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { Save } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { Input, Textarea } from '@/components/ui/input'
 import { SelectMenu } from '@/components/ui/select-menu'
+import { useToast } from '@/components/ui/toast'
+import { Switch } from '@/components/ui/toggle'
 import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
 import { correo, largo, obligatorio } from '@/lib/validacion/reglas'
-import { Stack } from '@/components/ui/layout'
-import { Switch } from '@/components/ui/toggle'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { editarComercio, type EditarComercioState } from '../../../actions'
-import styles from '@/styles/formulario.module.css'
+import formStyles from '@/styles/formulario.module.css'
+import styles from './editar-comercio-form.module.css'
 
 type Opcion = { id: number; nombre: string }
 
@@ -30,61 +31,79 @@ type ComercioInicial = {
 
 const estadoInicial: EditarComercioState = {}
 
+const DESCRIPCION_MAXIMA = 280
+
 /* El correo puede quedar vacío: un comercio sin cuenta de acceso. */
 const REGLAS = {
-  correo: [correo],
   nombre: [obligatorio('Escribe el nombre del comercio.'), largo(2, 80, 'El nombre')],
-  descripcion: [largo(3, 280, 'La descripción')],
+  descripcion: [largo(3, DESCRIPCION_MAXIMA, 'La descripción')],
+  correo: [correo],
 }
 
 const ETIQUETAS: Record<string, string> = {
-  correo: 'Correo electrónico',
   nombre: 'Nombre',
   descripcion: 'Descripción',
+  correo: 'Correo de acceso',
 }
 
-export function EditarComercioForm({
-  comercio,
-  categorias,
-}: {
+type Props = {
   comercio: ComercioInicial
   categorias: Opcion[]
-}) {
+  /**
+   * En la pestaña «Datos» de la ficha, y no en una ventana: «Cancelar»
+   * descarta lo escrito (no hay ventana que cerrar) y al guardar se queda
+   * donde está, con un aviso.
+   */
+  enPagina?: boolean
+}
+
+/** Esta capa solo remonta el formulario (vía `key`) para descartar lo escrito. */
+export function EditarComercioForm(props: Props) {
+  const [instancia, setInstancia] = useState(0)
+  return <Formulario key={instancia} {...props} onDescartar={() => setInstancia((n) => n + 1)} />
+}
+
+function Formulario({
+  comercio,
+  categorias,
+  enPagina = false,
+  onDescartar,
+}: Props & { onDescartar: () => void }) {
   const [state, formAction, pending] = useActionState(editarComercio, estadoInicial)
   const cerrar = useCerrarOverlay()
-  useCerrarCuando(state.ok)
+  useCerrarCuando(enPagina ? false : state.ok)
   const v = useValidacion(REGLAS)
+  const { toast } = useToast()
+  const [largoDescripcion, setLargoDescripcion] = useState((comercio.descripcion ?? '').length)
+
+  // En la página, guardar no cierra nada: se avisa y lo guardado pasa a ser lo original.
+  const anunciado = useRef<EditarComercioState | null>(null)
+  const { marcarGuardado } = v
+  useEffect(() => {
+    if (!enPagina || !state.ok || anunciado.current === state) return
+    anunciado.current = state
+    marcarGuardado()
+    toast({ tone: 'success', title: 'Cambios guardados' })
+  }, [enPagina, state, toast, marcarGuardado])
 
   return (
-    <>
-      <form action={formAction} className={styles.formulario} {...v.propsFormulario}>
-        {state.error && <Alert tone="danger">{state.error}</Alert>}
-        <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
+    <form
+      action={formAction}
+      className={[formStyles.formulario, styles.formulario].join(' ')}
+      {...v.propsFormulario}
+    >
+      {state.error && <Alert tone="danger">{state.error}</Alert>}
+      <ResumenErrores errores={v.errores} etiquetas={ETIQUETAS} ir={v.ir} />
 
-        <input type="hidden" name="id" value={comercio.id} />
-        <input type="hidden" name="perfil_id" value={comercio.perfil_id ?? ''} />
-        <input type="hidden" name="correo_original" value={comercio.correo} />
+      <input type="hidden" name="id" value={comercio.id} />
+      <input type="hidden" name="perfil_id" value={comercio.perfil_id ?? ''} />
+      <input type="hidden" name="correo_original" value={comercio.correo} />
 
-        <Stack gap={5}>
-          <Field
-            label="Correo electrónico"
-            help="Cambiarlo también cambia su usuario de acceso."
-            error={v.error('correo')}
-          >
-            <Input
-              name="correo"
-              type="email"
-              defaultValue={comercio.correo}
-              autoComplete="email"
-            />
-          </Field>
-
+      <fieldset className={styles.bloque}>
+        <legend className={styles.titulo}>El comercio</legend>
+        <div className={formStyles.pareja}>
           <Field label="Nombre" error={v.error('nombre')}>
-            <Input name="nombre" defaultValue={comercio.nombre} required autoFocus />
-          </Field>
-
-          <Field label="Descripción" optional error={v.error('descripcion')}>
-            <Input name="descripcion" defaultValue={comercio.descripcion ?? ''} />
+            <Input name="nombre" defaultValue={comercio.nombre} required autoFocus={!enPagina} />
           </Field>
 
           <Field label="Categoría" optional>
@@ -99,24 +118,67 @@ export function EditarComercioForm({
               ]}
             />
           </Field>
-
-          <Switch
-            name="indexable"
-            defaultChecked={comercio.indexable}
-            label="Aparecer en buscadores"
-            description="Google y Bing podrán mostrar la ficha pública de este comercio. Apágalo mientras sean datos de prueba."
-          />
-        </Stack>
-
-        <div className={styles.acciones}>
-          <Button type="submit" loading={pending} icon={<Save size={16} />}>
-            Guardar cambios
-          </Button>
-          <Button type="button" variant="secondary" onClick={cerrar}>
-            Cancelar
-          </Button>
         </div>
-      </form>
-    </>
+
+        <Field
+          label="Descripción"
+          optional
+          help={`Se ve en la ficha del comercio. ${largoDescripcion} / ${DESCRIPCION_MAXIMA}`}
+          error={v.error('descripcion')}
+        >
+          <Textarea
+            name="descripcion"
+            defaultValue={comercio.descripcion ?? ''}
+            rows={3}
+            maxLength={DESCRIPCION_MAXIMA}
+            onChange={(e) => setLargoDescripcion(e.target.value.length)}
+          />
+        </Field>
+      </fieldset>
+
+      <fieldset className={styles.bloque}>
+        <legend className={styles.titulo}>Acceso</legend>
+        <Field
+          label="Correo de acceso"
+          help="Con él entra el comercio a su herramienta. Cambiarlo cambia su usuario."
+          error={v.error('correo')}
+        >
+          <Input name="correo" type="email" defaultValue={comercio.correo} autoComplete="email" />
+        </Field>
+      </fieldset>
+
+      <fieldset className={styles.bloque}>
+        <legend className={styles.titulo}>Buscadores</legend>
+        <Switch
+          name="indexable"
+          defaultChecked={comercio.indexable}
+          label="Aparecer en buscadores"
+          description="Google y Bing podrán mostrar la ficha pública de este comercio. Apágalo mientras sean datos de prueba."
+        />
+      </fieldset>
+
+      <div className={styles.pie} data-en-pagina={enPagina || undefined}>
+        {/* Se anuncia al aparecer: quien edita sabe que aún no está guardado. */}
+        <span className={styles.aviso} role="status">
+          {v.sinGuardar && (
+            <>
+              <span className={styles.punto} aria-hidden="true" />
+              Tienes cambios sin guardar
+            </>
+          )}
+        </span>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={enPagina ? onDescartar : cerrar}
+          disabled={enPagina && !v.sinGuardar}
+        >
+          {enPagina ? 'Descartar' : 'Cancelar'}
+        </Button>
+        <Button type="submit" variant="brand" loading={pending} icon={<Save size={16} />}>
+          Guardar cambios
+        </Button>
+      </div>
+    </form>
   )
 }

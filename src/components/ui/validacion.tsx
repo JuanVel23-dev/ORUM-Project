@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type FocusEvent, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FocusEvent, type FormEvent } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { errorDe, validarTodo, type ReglasFormulario, type Valores } from '@/lib/validacion/reglas'
 import styles from './validacion.module.css'
@@ -54,9 +54,28 @@ function enfocar(form: HTMLFormElement | null, nombre: string) {
   el.scrollIntoView({ block: 'center', behavior: 'smooth' })
 }
 
+/** Lo que el formulario enviaría ahora, en una cadena comparable. */
+function huella(form: HTMLFormElement): string {
+  return JSON.stringify([...new FormData(form)].map(([k, v]) => [k, typeof v === 'string' ? v : v.name]))
+}
+
 export function useValidacion(reglas: ReglasFormulario) {
   const [errores, setErrores] = useState<Record<string, string>>({})
   const [formulario, setFormulario] = useState<HTMLFormElement | null>(null)
+
+  /*
+    «Tienes cambios sin guardar»: la huella del formulario al montarse, y en
+    cada cambio se compara con ella. Si se deshace lo escrito, el aviso se va.
+  */
+  const original = useRef<string | null>(null)
+  const [sinGuardar, setSinGuardar] = useState(false)
+  useEffect(() => {
+    if (formulario) original.current = huella(formulario)
+  }, [formulario])
+
+  function comparar(form: HTMLFormElement) {
+    if (original.current !== null) setSinGuardar(huella(form) !== original.current)
+  }
 
   function revisarCampo(form: HTMLFormElement, nombre: string) {
     if (!(nombre in reglas)) return
@@ -105,14 +124,20 @@ export function useValidacion(reglas: ReglasFormulario) {
       }
     },
     // Al corregir: solo los campos que ya tenían aviso (no se regaña mientras se escribe).
-    onInput: (e: FormEvent<HTMLFormElement>) => revisarAvisados(e.currentTarget),
+    onInput: (e: FormEvent<HTMLFormElement>) => {
+      comparar(e.currentTarget)
+      revisarAvisados(e.currentTarget)
+    },
     // Al salir de un campo con algo escrito: se revisa ya.
     onBlur: (e: FocusEvent<HTMLFormElement>) => {
       const el = e.target as unknown as HTMLInputElement
       if (el.name && (el.value ?? '').trim() !== '') revisarCampo(e.currentTarget, el.name)
     },
     // Un `SelectMenu` cambia un campo oculto: se avisa con `change`.
-    onChange: (e: FormEvent<HTMLFormElement>) => revisarAvisados(e.currentTarget),
+    onChange: (e: FormEvent<HTMLFormElement>) => {
+      comparar(e.currentTarget)
+      revisarAvisados(e.currentTarget)
+    },
   }
 
   return {
@@ -122,6 +147,13 @@ export function useValidacion(reglas: ReglasFormulario) {
     propsFormulario,
     /** Lleva el foco al campo (lo usa el resumen). */
     ir: (nombre: string) => enfocar(formulario, nombre),
+    /** Hay algo distinto de como se abrió el formulario. */
+    sinGuardar,
+    /** Tras guardar: lo de ahora pasa a ser lo original. */
+    marcarGuardado: () => {
+      if (formulario) original.current = huella(formulario)
+      setSinGuardar(false)
+    },
     /** Marca un error que viene de fuera (del servidor). */
     marcar: (nombre: string, mensaje: string) => setErrores((a) => ({ ...a, [nombre]: mensaje })),
   }

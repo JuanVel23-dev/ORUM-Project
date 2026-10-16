@@ -1,0 +1,71 @@
+/*
+  LA LISTA DE COMERCIOS DEL PANEL  ·  puro (15/10/2026)
+  ---------------------------------------------------------------------------
+  El mismo diseño que la de miembros: pestañas con recuento, buscador,
+  filtro de categoría y páginas. Aquí solo vive qué filas salen y en qué
+  orden; la carga está en la página.
+*/
+
+export { FILAS_POR_PAGINA, paginar, paginasVisibles, type Pagina } from '../shared/paginacion'
+
+export type FilaComercio = {
+  id: number
+  nombre: string
+  logoUrl: string | null
+  categoriaId: number | null
+  categoria: string | null
+  activo: boolean
+  /** Sucursales activas. */
+  sucursales: number
+  /** Promociones activas. */
+  promociones: number
+}
+
+/** «Sin promociones»: aliados activos que no ofrecen nada hoy; es lo que hay que perseguir. */
+export type PestanaComercio = 'todos' | 'activos' | 'sin-promociones' | 'inactivos'
+
+const PESTANAS: readonly PestanaComercio[] = ['todos', 'activos', 'sin-promociones', 'inactivos']
+
+export function leerPestanaComercio(valor: string | undefined): PestanaComercio {
+  return PESTANAS.includes(valor as PestanaComercio) ? (valor as PestanaComercio) : 'todos'
+}
+
+export function enPestanaComercio(fila: FilaComercio, pestana: PestanaComercio): boolean {
+  switch (pestana) {
+    case 'activos':
+      return fila.activo
+    case 'sin-promociones':
+      return fila.activo && fila.promociones === 0
+    case 'inactivos':
+      return !fila.activo
+    default:
+      return true
+  }
+}
+
+export function contarPorPestanaComercio(filas: readonly FilaComercio[]): Record<PestanaComercio, number> {
+  const cuentas: Record<PestanaComercio, number> = { todos: 0, activos: 0, 'sin-promociones': 0, inactivos: 0 }
+  for (const f of filas) for (const p of PESTANAS) if (enPestanaComercio(f, p)) cuentas[p]++
+  return cuentas
+}
+
+/** Sin tildes ni mayúsculas: «cafe» encuentra «Café Arábigo». */
+function plano(texto: string): string {
+  return texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+}
+
+export function filtrarComercios(
+  filas: readonly FilaComercio[],
+  { pestana, busqueda, categoriaId }: { pestana: PestanaComercio; busqueda: string; categoriaId: number | null },
+): FilaComercio[] {
+  const palabras = plano(busqueda).split(/\s+/).filter(Boolean)
+  return filas
+    .filter((f) => enPestanaComercio(f, pestana))
+    .filter((f) => categoriaId === null || f.categoriaId === categoriaId)
+    .filter((f) => {
+      if (palabras.length === 0) return true
+      const texto = plano(`${f.nombre} ${f.categoria ?? ''}`)
+      return palabras.every((p) => texto.includes(p))
+    })
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+}

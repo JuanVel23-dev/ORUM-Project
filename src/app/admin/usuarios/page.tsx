@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/feedback'
 import { PageHeader } from '@/components/ui/layout'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { cambiarEstadoAcceso } from './actions'
-import styles from '../miembros/miembros.module.css'
+import styles from '@/styles/lista-panel.module.css'
 
 export const metadata = { title: 'Usuarios · ORUM' }
 

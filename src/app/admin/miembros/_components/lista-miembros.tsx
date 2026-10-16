@@ -33,7 +33,7 @@ import { PageHeader } from '@/components/ui/layout'
 import { DropdownMenu, MenuItem, MenuSeparator } from '@/components/ui/menu'
 import { Paginacion } from '@/components/ui/paginacion'
 import { Pestanas, type TonoPestana } from '@/components/ui/pestanas'
-import styles from '../miembros.module.css'
+import styles from '@/styles/lista-panel.module.css'
 
 
 const COLUMNAS: ReadonlyArray<Column<FilaMiembro>> = [

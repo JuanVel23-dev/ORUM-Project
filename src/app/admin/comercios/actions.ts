@@ -1,7 +1,7 @@
 'use server'
 
 import { mensajeDeError } from '@/lib/shared/errores'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
@@ -174,6 +174,7 @@ export async function editarComercio(
 
   revalidatePath('/admin/comercios')
   revalidatePath(`/admin/comercios/${id}`)
+  updateTag('publico')
   revalidatePath('/sitemap.xml')
   return { ok: true }
 }
@@ -192,6 +193,7 @@ export async function cambiarEstadoComercio(formData: FormData): Promise<void> {
 
   revalidatePath('/admin/comercios')
   revalidatePath(`/admin/comercios/${id}`)
+  updateTag('publico')
   redirect(`/admin/comercios/${id}`)
 }
 
@@ -210,5 +212,6 @@ export async function cambiarEstadoAccesoComercio(formData: FormData): Promise<v
 
   revalidatePath('/admin/comercios')
   revalidatePath(`/admin/comercios/${id}`)
+  updateTag('publico')
   redirect(`/admin/comercios/${id}`)
 }

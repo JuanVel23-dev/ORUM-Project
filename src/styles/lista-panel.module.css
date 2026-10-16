@@ -68,3 +68,17 @@
   gap: var(--space-2);
   flex-wrap: wrap;
 }
+
+/* El logotipo de un comercio en su fila: la placa de siempre, a 40px. */
+.logoFila {
+  --placa-logo-w: 40px;
+  display: contents;
+}
+
+.cifraFila {
+  font-variant-numeric: tabular-nums;
+}
+
+.cifraCero {
+  color: var(--text-3);
+}

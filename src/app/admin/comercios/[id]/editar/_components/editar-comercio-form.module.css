@@ -1,0 +1,93 @@
+/* ==========================================================================
+   LOS DATOS DEL COMERCIO  ·  rediseño del panel (15/10/2026)
+   Bloques con su título en versalitas y un pie con «Tienes cambios sin
+   guardar». En la ficha el pie se queda pegado abajo mientras se desplaza.
+   ========================================================================== */
+
+.formulario {
+  gap: var(--space-7);
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.titulo {
+  padding: 0;
+  margin-bottom: var(--space-4);
+  font-size: var(--t-overline-size);
+  font-weight: 700;
+  letter-spacing: var(--t-overline-tracking);
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* En la ficha: pegado abajo, como una barra de acciones que flota. */
+.pie[data-en-pagina] {
+  position: sticky;
+  bottom: var(--space-4);
+  z-index: 2;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-flotante);
+}
+
+/* En el teléfono, por encima de la barra inferior del panel. */
+@media (max-width: 767px) {
+  .pie[data-en-pagina] {
+    bottom: calc(var(--tabbar-h) + var(--space-3) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.aviso {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-right: auto;
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+/* Vacío no ocupa sitio, pero sigue en el árbol: así el lector anuncia el
+   aviso cuando aparece (una región que nace oculta no se anuncia). */
+.aviso:empty {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* En estrecho: el aviso arriba y los dos botones a partes iguales. */
+@container contenido (max-width: 640px) {
+  .pie {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .aviso {
+    grid-column: 1 / -1;
+  }
+}
+
+.punto {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--warning);
+}

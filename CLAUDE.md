@@ -1129,6 +1129,23 @@ paleta:
   PostgREST corta ahí). Las tablas (`DataList`) toman en el panel la
   cabecera en banda gris y títulos en minúscula por los ganchos
   `--tabla-*` que pone el shell.
+  Comercios sigue el mismo patrón (`lib/comercios/listado-admin.ts`, puro y
+  probado): pestañas Todos / Activos / **Sin promociones** / Inactivos,
+  buscador sin tildes, categoría, y en cada fila el logotipo y cuántas
+  sucursales y promociones ACTIVAS tiene. Las hojas de las listas son una
+  sola, `src/styles/lista-panel.module.css` (antes vivía dentro de
+  miembros y Comercios se quedó sin estilo al rehacerla).
+- **La ficha del comercio es UNA página con pestañas** (`?pestana=`
+  datos · sucursales · promociones · imagenes, con recuento): cabecera con
+  su logotipo y su estado, y cada parte debajo. «Datos» se edita AHÍ MISMO
+  (`EditarComercioForm enPagina`), con un pie pegado que dice «Tienes
+  cambios sin guardar» (lo calcula `useValidacion`: `sinGuardar`) y
+  «Descartar»; a la derecha, las dos decisiones de estado (visible para los
+  socios / acceso a su herramienta), cada una en su tarjeta. Las acciones de
+  sucursales y promociones vuelven a SU pestaña, y todas las del comercio
+  sueltan la caché `publico`. Nuevo/editar sucursal o promoción siguen
+  abriéndose encima. WhatsApp e Instagram del boceto NO están: la tabla
+  `comercios` no tiene esas columnas.
 - **Los formularios del panel VALIDAN campo a campo** (15/10/2026: «sus
   formularios no tienen excepciones»). Las reglas son puras y probadas
   (`lib/validacion/reglas.ts`: obligatorio, largo, nombre de persona, cédula,
