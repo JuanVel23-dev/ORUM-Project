@@ -38,6 +38,7 @@ type Hero = {
   nombre: string
   descripcion: string | null
   categoriaNombre: string | null
+  subcategoriaNombre: string | null
   logoUrl: string | null
 }
 
@@ -54,16 +55,18 @@ const cargarComercio = cache(async (id: number): Promise<Hero | null> => {
   // final no saltan RLS.
   const supabase = await createClient()
 
-  const [{ data: comercio }, { data: marcas }, { data: categorias }] = await Promise.all([
+  const [{ data: comercio }, { data: marcas }, { data: categorias }, { data: subcategorias }] =
+    await Promise.all([
     supabase
       .from('comercios')
-      .select('id, nombre, descripcion, marca_id, categoria_id, logo_url')
+      .select('id, nombre, descripcion, marca_id, categoria_id, subcategoria_id, logo_url')
       .eq('id', id)
       .eq('activo', true)
       .is('deleted_at', null)
       .maybeSingle(),
     supabase.from('marcas').select('id, nombre, logo_url').limit(100),
     supabase.from('categorias').select('id, nombre').limit(100),
+    supabase.from('subcategorias').select('id, subcategoria').limit(300),
   ])
 
   if (!comercio) return null
@@ -80,6 +83,10 @@ const cargarComercio = cache(async (id: number): Promise<Hero | null> => {
     nombre: comercio.nombre,
     descripcion: comercio.descripcion,
     categoriaNombre: categoria?.nombre ?? null,
+    subcategoriaNombre: comercio.subcategoria_id
+      ? ((subcategorias ?? []).find((s) => s.id === comercio.subcategoria_id)?.subcategoria.trim() ??
+        null)
+      : null,
     // La misma cadena comercio -> marca -> inicial que usa el directorio.
     logoUrl: resolverLogoComercio(comercio.logo_url, marca?.logo_url ?? null),
   }
@@ -205,7 +212,7 @@ export default async function FichaComercioPage({
   const ciudadesDelComercio = Array.from(
     new Set(sedes.map((s) => s.ciudadNombre).filter((c): c is string => Boolean(c))),
   )
-  const detalle = [comercio.categoriaNombre, ciudadesDelComercio.join(', ')]
+  const detalle = [comercio.categoriaNombre, comercio.subcategoriaNombre, ciudadesDelComercio.join(', ')]
     .filter(Boolean)
     .join(' · ')
 

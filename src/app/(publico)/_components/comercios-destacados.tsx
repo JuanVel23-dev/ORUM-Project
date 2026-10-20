@@ -87,7 +87,9 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
                   <span className={estilos.textos}>
                     <span className={estilos.nombre}>{c.nombre}</span>
                     {c.categoriaNombre && (
-                      <span className={estilos.categoria}>{c.categoriaNombre}</span>
+                      <span className={estilos.categoria}>
+                        {[c.categoriaNombre, c.subcategoriaNombre].filter(Boolean).join(' · ')}
+                      </span>
                     )}
                     <span className={estilos.ver}>
                       Ver beneficios{' '}

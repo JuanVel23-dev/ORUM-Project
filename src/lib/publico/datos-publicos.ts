@@ -154,6 +154,7 @@ export type ComercioVitrina = {
   descripcion: string | null
   categoriaId: number | null
   categoriaNombre: string | null
+  subcategoriaNombre: string | null
   /** Ids de las ciudades con al menos una sede activa. Alimentan el filtro. */
   ciudadIds: number[]
   ciudades: string[]
@@ -212,20 +213,24 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
   // promociones son fechas civiles, no `timestamptz`. Se comparan como cadenas.
   const hoy = hoyISO()
 
-  const [rComercios, rMarcas, rCategorias] = await Promise.all([
+  const [rComercios, rMarcas, rCategorias, rSubcategorias] = await Promise.all([
     supabase
       .from('comercios')
-      .select('id, nombre, descripcion, logo_url, portada_url, categoria_id, marca_id')
+      .select(
+        'id, nombre, descripcion, logo_url, portada_url, categoria_id, subcategoria_id, marca_id',
+      )
       .eq('activo', true)
       .is('deleted_at', null)
       .order('nombre')
       .limit(TOPE_DIRECTORIO),
     supabase.from('marcas').select('id, logo_url').limit(200),
     supabase.from('categorias').select('id, nombre').limit(100),
+    supabase.from('subcategorias').select('id, subcategoria').limit(300),
   ])
   const comercios = exigir(rComercios, 'los comercios')
   const marcas = exigir(rMarcas, 'las marcas')
   const categorias = exigir(rCategorias, 'las categorías')
+  const subcategorias = exigir(rSubcategorias, 'las subcategorías')
 
   const categoriasOrdenadas = ordenarCategorias(categorias ?? [])
 
@@ -261,6 +266,9 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
 
   const logoDeMarca = new Map((marcas ?? []).map((m) => [m.id, m.logo_url]))
   const nombreCategoria = new Map((categorias ?? []).map((c) => [c.id, c.nombre]))
+  const nombreSubcategoria = new Map(
+    (subcategorias ?? []).map((s) => [s.id, s.subcategoria.trim()]),
+  )
   const nombreCiudad = new Map((ciudades ?? []).map((c) => [c.id, c.nombre]))
   const codigoTipo = new Map((tipos ?? []).map((t) => [t.id, t.codigo]))
 
@@ -296,6 +304,9 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
       descripcion: c.descripcion,
       categoriaId: c.categoria_id,
       categoriaNombre: c.categoria_id ? (nombreCategoria.get(c.categoria_id) ?? null) : null,
+      subcategoriaNombre: c.subcategoria_id
+        ? (nombreSubcategoria.get(c.subcategoria_id) ?? null)
+        : null,
       ciudadIds,
       ciudades: ciudadIds.map((id) => nombreCiudad.get(id) ?? '').filter(Boolean),
       logoUrl: resolverLogoComercio(
@@ -429,6 +440,7 @@ export type FichaPublica = {
   nombre: string
   descripcion: string | null
   categoriaNombre: string | null
+  subcategoriaNombre: string | null
   logoUrl: string | null
   portadaUrl: string | null
   ciudades: string[]
@@ -455,6 +467,7 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
     rComercio,
     rMarcas,
     rCategorias,
+    rSubcategorias,
     rPromociones,
     rTipos,
     rSucursales,
@@ -463,13 +476,16 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
   ] = await Promise.all([
     supabase
       .from('comercios')
-      .select('id, nombre, descripcion, logo_url, portada_url, categoria_id, marca_id, indexable')
+      .select(
+        'id, nombre, descripcion, logo_url, portada_url, categoria_id, subcategoria_id, marca_id, indexable',
+      )
       .eq('id', id)
       .eq('activo', true)
       .is('deleted_at', null)
       .maybeSingle(),
     supabase.from('marcas').select('id, logo_url').limit(200),
     supabase.from('categorias').select('id, nombre').limit(100),
+    supabase.from('subcategorias').select('id, subcategoria').limit(300),
     supabase
       .from('promociones')
       .select('valor, tipo_beneficio_id, activo, fecha_inicio, fecha_fin')
@@ -500,6 +516,7 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
   const comercio = exigir(rComercio, 'el comercio')
   const marcas = exigir(rMarcas, 'las marcas')
   const categorias = exigir(rCategorias, 'las categorías')
+  const subcategorias = exigir(rSubcategorias, 'las subcategorías')
   const promociones = exigir(rPromociones, 'las promociones')
   const tipos = exigir(rTipos, 'los tipos de beneficio')
   const sucursales = exigir(rSucursales, 'las sucursales')
@@ -546,6 +563,10 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
     descripcion: comercio.descripcion,
     categoriaNombre: comercio.categoria_id
       ? ((categorias ?? []).find((c) => c.id === comercio.categoria_id)?.nombre ?? null)
+      : null,
+    subcategoriaNombre: comercio.subcategoria_id
+      ? ((subcategorias ?? []).find((s) => s.id === comercio.subcategoria_id)?.subcategoria.trim() ??
+        null)
       : null,
     logoUrl: resolverLogoComercio(comercio.logo_url, logoMarca),
     portadaUrl: (comercio.portada_url ?? '').trim() || null,

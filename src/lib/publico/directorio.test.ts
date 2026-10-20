@@ -120,7 +120,7 @@ describe('compararNombres', () => {
 
 describe('filtrarDirectorio', () => {
   const lista = [
-    comercio('Zapatería Luna', { categoriaId: 2, categoriaNombre: 'Ropa', ciudadIds: [1], ciudades: ['Bogotá'] }),
+    comercio('Zapatería Luna', { categoriaId: 2, categoriaNombre: 'Ropa', subcategoriaNombre: 'Calzado de mujer', ciudadIds: [1], ciudades: ['Bogotá'] }),
     comercio('Café 10', { categoriaId: 1, categoriaNombre: 'Café', ciudadIds: [2], ciudades: ['Medellín'] }),
     comercio('Café 2', { categoriaId: 1, categoriaNombre: 'Café', ciudadIds: [1, 2], ciudades: ['Bogotá', 'Medellín'] }),
     comercio('Ámbar Spa', { categoriaId: 3, categoriaNombre: 'Spa', ciudadIds: [1], ciudades: ['Bogotá'] }),
@@ -168,6 +168,14 @@ describe('filtrarDirectorio', () => {
       'Café 2',
       'Café 10',
     ])
+  })
+
+  it('la búsqueda casa con la subcategoría, sin tildes', () => {
+    expect(nombres(filtrarDirectorio(lista, { ...SIN_FILTROS, q: 'CALZADO' }))).toEqual([
+      'Zapatería Luna',
+    ])
+    // Un comercio sin subcategoría sigue buscándose por lo demás.
+    expect(nombres(filtrarDirectorio(lista, { ...SIN_FILTROS, q: 'cafe 2' }))).toEqual(['Café 2'])
   })
 
   it('no muta la lista de entrada', () => {

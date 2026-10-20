@@ -54,6 +54,8 @@ export type ComercioFiltrable = {
   nombre: string
   categoriaId: number | null
   categoriaNombre: string | null
+  /** Opcional: un comercio sin subcategoría (o una lista que no la trae) no la busca. */
+  subcategoriaNombre?: string | null
   ciudadIds: number[]
   ciudades: string[]
 }
@@ -174,10 +176,15 @@ export function ordenarCategorias<T extends { nombre: string }>(categorias: read
   )
 }
 
-/** ¿Casa el comercio con la búsqueda libre? Nombre, categoría o ciudad. */
+/** ¿Casa el comercio con la búsqueda libre? Nombre, categoría, subcategoría o ciudad. */
 function casaBusqueda(comercio: ComercioFiltrable, busqueda: string): boolean {
   if (!busqueda) return true
-  const campos = [comercio.nombre, comercio.categoriaNombre ?? '', ...comercio.ciudades]
+  const campos = [
+    comercio.nombre,
+    comercio.categoriaNombre ?? '',
+    comercio.subcategoriaNombre ?? '',
+    ...comercio.ciudades,
+  ]
   return campos.some((campo) => normalizarNombre(campo).includes(busqueda))
 }
 

@@ -29,7 +29,11 @@ export function TarjetaDirectorio({
   /** Portal de Miembros: beneficio legible y ficha de socio. */
   socio?: boolean
 }) {
-  const detalle = [comercio.categoriaNombre, comercio.ciudades.join(', ')]
+  const detalle = [
+    comercio.categoriaNombre,
+    comercio.subcategoriaNombre,
+    comercio.ciudades.join(', '),
+  ]
     .filter(Boolean)
     .join(' · ')
 

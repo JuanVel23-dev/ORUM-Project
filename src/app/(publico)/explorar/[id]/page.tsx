@@ -104,7 +104,9 @@ export default async function FichaPublicaPage({
   ])
   if (!ficha) notFound()
 
-  const detalle = [ficha.categoriaNombre, ficha.ciudades.join(', ')].filter(Boolean).join(' · ')
+  const detalle = [ficha.categoriaNombre, ficha.subcategoriaNombre, ficha.ciudades.join(', ')]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
     <>
