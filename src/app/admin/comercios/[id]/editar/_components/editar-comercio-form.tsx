@@ -6,17 +6,16 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input, Textarea } from '@/components/ui/input'
-import { SelectMenu } from '@/components/ui/select-menu'
 import { useToast } from '@/components/ui/toast'
 import { Switch } from '@/components/ui/toggle'
 import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
 import { correo, largo, obligatorio } from '@/lib/validacion/reglas'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { editarComercio, type EditarComercioState } from '../../../actions'
+import type { CategoriaConSubcategorias } from '@/lib/comercios/categorias-admin'
+import { CamposCategoria } from '../../../_components/campos-categoria'
 import formStyles from '@/styles/formulario.module.css'
 import styles from './editar-comercio-form.module.css'
-
-type Opcion = { id: number; nombre: string }
 
 type ComercioInicial = {
   id: number
@@ -24,6 +23,7 @@ type ComercioInicial = {
   nombre: string
   descripcion: string | null
   categoria_id: number | null
+  subcategoria_id: number | null
   indexable: boolean
   /** Correo real de Auth, o cadena vacía si no tiene cuenta. */
   correo: string
@@ -48,7 +48,7 @@ const ETIQUETAS: Record<string, string> = {
 
 type Props = {
   comercio: ComercioInicial
-  categorias: Opcion[]
+  categorias: CategoriaConSubcategorias[]
   /**
    * En la pestaña «Datos» de la ficha, y no en una ventana: «Cancelar»
    * descarta lo escrito (no hay ventana que cerrar) y al guardar se queda
@@ -101,24 +101,15 @@ function Formulario({
 
       <fieldset className={styles.bloque}>
         <legend className={styles.titulo}>El comercio</legend>
-        <div className={formStyles.pareja}>
-          <Field label="Nombre" error={v.error('nombre')}>
-            <Input name="nombre" defaultValue={comercio.nombre} required autoFocus={!enPagina} />
-          </Field>
+        <Field label="Nombre" error={v.error('nombre')}>
+          <Input name="nombre" defaultValue={comercio.nombre} required autoFocus={!enPagina} />
+        </Field>
 
-          <Field label="Categoría" optional>
-            <SelectMenu
-              name="categoria_id"
-              etiqueta="Categoría"
-              placeholder="Sin categoría"
-              defaultValue={comercio.categoria_id ? String(comercio.categoria_id) : ''}
-              opciones={[
-                { value: '', label: 'Sin categoría' },
-                ...categorias.map((c) => ({ value: String(c.id), label: c.nombre })),
-              ]}
-            />
-          </Field>
-        </div>
+        <CamposCategoria
+          categorias={categorias}
+          categoriaInicial={comercio.categoria_id}
+          subcategoriaInicial={comercio.subcategoria_id}
+        />
 
         <Field
           label="Descripción"

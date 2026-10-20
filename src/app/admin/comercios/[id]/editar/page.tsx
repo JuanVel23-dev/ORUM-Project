@@ -3,6 +3,7 @@ import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/ui/layout'
 import { FormCard } from '@/components/ui/form-card'
+import { cargarCategoriasConSubcategorias } from '@/lib/comercios/categorias-admin'
 import { EditarComercioForm } from './_components/editar-comercio-form'
 
 export const metadata = { title: 'Editar comercio · ORUM' }
@@ -13,14 +14,14 @@ export default async function EditarComercioPage({ params }: { params: Promise<{
   const comercioId = Number(id)
 
   const admin = createAdminClient()
-  const [{ data: comercio }, { data: categorias }] = await Promise.all([
+  const [{ data: comercio }, categorias] = await Promise.all([
     admin
       .from('comercios')
-      .select('id, perfil_id, nombre, descripcion, categoria_id, indexable')
+      .select('id, perfil_id, nombre, descripcion, categoria_id, subcategoria_id, indexable')
       .eq('id', comercioId)
       .is('deleted_at', null)
       .maybeSingle(),
-    admin.from('categorias').select('id, nombre').order('nombre'),
+    cargarCategoriasConSubcategorias(admin),
   ])
   if (!comercio) notFound()
 
@@ -38,7 +39,7 @@ export default async function EditarComercioPage({ params }: { params: Promise<{
       <FormCard>
         <EditarComercioForm
           comercio={{ ...comercio, correo }}
-          categorias={categorias ?? []}
+          categorias={categorias}
         />
       </FormCard>
     </>

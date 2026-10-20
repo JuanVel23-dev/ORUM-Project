@@ -7,16 +7,15 @@ import { Button } from '@/components/ui/button'
 import { Copiar } from '@/components/ui/copiar'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { SelectMenu } from '@/components/ui/select-menu'
 import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
 import { correo, largo, obligatorio } from '@/lib/validacion/reglas'
 import { Stack } from '@/components/ui/layout'
 import { Switch } from '@/components/ui/toggle'
 import { useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { crearComercio, type CrearComercioState } from '../actions'
+import type { CategoriaConSubcategorias } from '@/lib/comercios/categorias-admin'
+import { CamposCategoria } from './campos-categoria'
 import styles from '@/styles/formulario.module.css'
-
-type Opcion = { id: number; nombre: string }
 
 const estadoInicial: CrearComercioState = {}
 
@@ -36,7 +35,7 @@ const ETIQUETAS: Record<string, string> = {
  * El estado vive en `FormularioComercio`; esta capa solo lo remonta (vía `key`)
  * al pulsar «Crear otro», para volver a un formulario limpio sin navegar.
  */
-export function ComercioForm(props: { categorias: Opcion[] }) {
+export function ComercioForm(props: { categorias: CategoriaConSubcategorias[] }) {
   const [instancia, setInstancia] = useState(0)
   return (
     <FormularioComercio
@@ -51,7 +50,7 @@ function FormularioComercio({
   categorias,
   onCrearOtro,
 }: {
-  categorias: Opcion[]
+  categorias: CategoriaConSubcategorias[]
   onCrearOtro: () => void
 }) {
   const cerrar = useCerrarOverlay()
@@ -85,18 +84,7 @@ function FormularioComercio({
             <Input name="descripcion" />
           </Field>
 
-          <Field label="Categoría" optional>
-            <SelectMenu
-              name="categoria_id"
-              etiqueta="Categoría"
-              placeholder="Sin categoría"
-              defaultValue={''}
-              opciones={[
-                { value: '', label: 'Sin categoría' },
-                ...categorias.map((c) => ({ value: String(c.id), label: c.nombre })),
-              ]}
-            />
-          </Field>
+          <CamposCategoria categorias={categorias} />
 
           <Switch
             name="indexable"

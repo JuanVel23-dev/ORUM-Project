@@ -1,10 +1,9 @@
 /**
  * Tipos de la base de datos de ORUM (esquema `public`).
  *
- * Por ahora solo se tipan las tablas que usa el Portal Administrativo en esta
- * fase (autenticación + gestión de usuarios). En fases siguientes se irán
- * agregando el resto (membresias, ventas, promociones, etc.), o se pueden
- * regenerar con:  `supabase gen types typescript --project-id <ID>`.
+ * Se mantiene junto al esquema de Supabase. Al agregar o cambiar tablas,
+ * actualiza aquí Row, Insert, Update y Relationships; también se puede
+ * regenerar con: `supabase gen types typescript --project-id <ID>`.
  *
  * Referencia: ver `docs/referencia/Esquema_BD.txt`.
  */
@@ -163,6 +162,7 @@ export type Database = {
           perfil_id: string | null
           marca_id: number | null
           categoria_id: number | null
+          subcategoria_id: number | null
           nombre: string
           descripcion: string | null
           logo_url: string | null
@@ -181,6 +181,7 @@ export type Database = {
           perfil_id?: string | null
           marca_id?: number | null
           categoria_id?: number | null
+          subcategoria_id?: number | null
           nombre: string
           descripcion?: string | null
           logo_url?: string | null
@@ -219,6 +220,28 @@ export type Database = {
         }
         Update: Partial<Database['public']['Tables']['categorias']['Insert']>
         Relationships: []
+      }
+      subcategorias: {
+        Row:{
+          id: number
+          subcategoria: string
+          categoria_id: number
+        }
+        Insert: {
+          id?: number
+          subcategoria: string
+          categoria_id: number
+        }
+        Update: Partial<Database['public']['Tables']['subcategorias']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'subcategorias_categoria_id_fkey'
+            columns: ['categoria_id']
+            isOneToOne: false
+            referencedRelation: 'categorias'
+            referencedColumns: ['id']
+          },
+        ]
       }
       ciudades: {
         Row: {
@@ -544,6 +567,21 @@ export type Database = {
           created_at?: Timestamp
         }
         Update: Partial<Database['public']['Tables']['favoritos']['Insert']>
+        Relationships: []
+      }
+      /** Contadores de rate limiting; solo se manipulan mediante RPC con service_role. */
+      limite_uso: {
+        Row: {
+          clave: string
+          conteo: number
+          ventana_inicia: Timestamp
+        }
+        Insert: {
+          clave: string
+          conteo: number
+          ventana_inicia?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['limite_uso']['Insert']>
         Relationships: []
       }
       comercio_imagenes: {

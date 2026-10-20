@@ -33,14 +33,36 @@ function leerCamposComercio(formData: FormData) {
   const nombre = String(formData.get('nombre') ?? '').trim()
   const descripcion = String(formData.get('descripcion') ?? '').trim() || null
   const categoriaRaw = String(formData.get('categoria_id') ?? '').trim()
+  const subcategoriaRaw = String(formData.get('subcategoria_id') ?? '').trim()
   // Un interruptor apagado no envía nada: la ausencia ES el `false`.
   const indexable = formData.get('indexable') === 'on'
+  const categoria_id = categoriaRaw ? Number(categoriaRaw) : null
   return {
     nombre,
     descripcion,
-    categoria_id: categoriaRaw ? Number(categoriaRaw) : null,
+    categoria_id,
+    // Sin categoría no hay subcategoría que valga.
+    subcategoria_id: categoria_id && subcategoriaRaw ? Number(subcategoriaRaw) : null,
     indexable,
   }
+}
+
+/**
+ * La subcategoría tiene que existir y ser de la categoría elegida: el
+ * formulario ya lo garantiza, pero el servidor es quien decide.
+ */
+async function subcategoriaInvalida(
+  admin: ReturnType<typeof createAdminClient>,
+  campos: ReturnType<typeof leerCamposComercio>,
+): Promise<string | null> {
+  if (campos.subcategoria_id === null) return null
+  const { data } = await admin
+    .from('subcategorias')
+    .select('id')
+    .eq('id', campos.subcategoria_id)
+    .eq('categoria_id', campos.categoria_id ?? -1)
+    .maybeSingle()
+  return data ? null : 'La subcategoría no pertenece a la categoría elegida.'
 }
 
 /**
@@ -62,6 +84,9 @@ export async function crearComercio(
   if (!campos.nombre) return { error: 'El nombre del comercio es obligatorio.' }
 
   const admin = createAdminClient()
+
+  const errSub = await subcategoriaInvalida(admin, campos)
+  if (errSub) return { error: errSub }
 
   const { data: rol } = await admin.from('roles').select('id').eq('codigo', 'comercio').single()
   if (!rol) return { error: 'No se encontró el rol "comercio" en la base de datos.' }
@@ -99,6 +124,7 @@ export async function crearComercio(
     nombre: campos.nombre,
     descripcion: campos.descripcion,
     categoria_id: campos.categoria_id,
+    subcategoria_id: campos.subcategoria_id,
     indexable: campos.indexable,
     activo: true,
   })
@@ -125,7 +151,7 @@ export async function crearComercio(
 export type EditarComercioState = { error?: string; ok?: boolean }
 
 /**
- * Edita nombre, descripción, categoría, indexable y (si cambió) el correo.
+ * Edita nombre, descripción, categoría, subcategoría, indexable y (si cambió) el correo.
  * El logo ya no se toca aquí: se sube como archivo desde la pestaña de imágenes.
  */
 export async function editarComercio(
@@ -144,6 +170,9 @@ export async function editarComercio(
 
   const admin = createAdminClient()
 
+  const errSub = await subcategoriaInvalida(admin, campos)
+  if (errSub) return { error: errSub }
+
   const { error } = await admin
     .from('comercios')
     .update({
@@ -151,6 +180,7 @@ export async function editarComercio(
       nombre: campos.nombre,
       descripcion: campos.descripcion,
       categoria_id: campos.categoria_id,
+      subcategoria_id: campos.subcategoria_id,
       indexable: campos.indexable,
     })
     .eq('id', id)
