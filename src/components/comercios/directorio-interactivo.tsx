@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type FormEvent, type MouseEvent } from 'react'
+import { useRef, useState, type FormEvent, type MouseEvent } from 'react'
 import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -113,6 +113,8 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
   const [vista, setVista] = useState({ cadena: cadenaActual, url: cadenaActual })
   if (enSuRuta && cadenaActual !== vista.url) setVista({ cadena: cadenaActual, url: cadenaActual })
   const filtros = leerFiltrosDirectorio(crudosDe(new URLSearchParams(vista.cadena)))
+  /** El cambio pedido que aún no se ha aplicado (ver `cambiar`). */
+  const pedida = useRef<string | null>(null)
   /* El estado de favoritos de la pantalla; `null` en la fachada pública,
      donde no hay corazones ni filtro. */
   const favoritos = useFavoritos()
@@ -151,12 +153,21 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
     /** Categorías y subcategorías: el cambio se anima (ver abajo). */
     animar = false,
   ) {
-    const actuales = leerFiltrosDirectorio(crudosDe(new URLSearchParams(window.location.search)))
+    /*
+      Se parte del ÚLTIMO CAMBIO PEDIDO, no de la URL: con la animación, el
+      cambio se aplica un fotograma después (el navegador saca antes la foto
+      del «antes»), y un segundo toque en ese hueco leería la URL vieja —un
+      «quitar» se convertía en «poner otra vez»—.
+    */
+    const desde = pedida.current ?? window.location.search
+    const actuales = leerFiltrosDirectorio(crudosDe(new URLSearchParams(desde)))
     const href = hrefDirectorio(actuales, cambio(actuales), base)
     const cadena = new URL(href, window.location.href).searchParams.toString()
+    pedida.current = cadena
     const aplicar = () => {
       flushSync(() => setVista({ cadena, url: cadena }))
       window.history.replaceState(null, '', href)
+      if (pedida.current === cadena) pedida.current = null
     }
 
     /*
@@ -168,8 +179,8 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
       y sale cada grupo de subcategorías, se desliza la rejilla y se funde su
       contenido. Las tarjetas NO vuelan una a una (no llevan nombre: con
       filtros serían vuelos cruzados, `CLAUDE.md` «Dónde NO»); se funden con
-      su rejilla. Sin la API, o con
-      movimiento reducido, el cambio es instantáneo.
+      su rejilla. Sin la API, o con movimiento reducido, el cambio es
+      instantáneo.
     */
     const raiz = document.documentElement
     if (
