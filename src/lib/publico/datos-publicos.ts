@@ -155,6 +155,7 @@ export type ComercioVitrina = {
   categoriaId: number | null
   categoriaNombre: string | null
   subcategoriaNombre: string | null
+  subcategoriaId: number | null
   /** Ids de las ciudades con al menos una sede activa. Alimentan el filtro. */
   ciudadIds: number[]
   ciudades: string[]
@@ -173,6 +174,13 @@ export type ComercioVitrina = {
 /** Una opción de filtro del directorio: una categoría o una ciudad. */
 export type OpcionFiltro = { id: number; nombre: string }
 
+/**
+ * Una categoría del directorio con sus subcategorías (20/10/2026). Solo las
+ * subcategorías con algún comercio activo: elegir una vacía daría siempre una
+ * rejilla vacía.
+ */
+export type CategoriaFiltro = OpcionFiltro & { subcategorias: OpcionFiltro[] }
+
 /** Una fotografía de la fachada, con su texto alternativo ya resuelto. */
 export type FotoPublica = { url: string; alt: string }
 
@@ -190,7 +198,7 @@ export type CatalogoPublico = {
   /** Todos los comercios activos, en orden alfabético. */
   comercios: ComercioVitrina[]
   /** Todas las categorías del catálogo, aunque alguna esté vacía hoy. */
-  categorias: OpcionFiltro[]
+  categorias: CategoriaFiltro[]
   /**
    * Solo las ciudades con al menos una sede activa: filtrar por una ciudad
    * sin comercios daría siempre una rejilla vacía.
@@ -225,14 +233,24 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
       .limit(TOPE_DIRECTORIO),
     supabase.from('marcas').select('id, logo_url').limit(200),
     supabase.from('categorias').select('id, nombre').limit(100),
-    supabase.from('subcategorias').select('id, subcategoria').limit(300),
+    supabase.from('subcategorias').select('id, subcategoria, categoria_id').limit(300),
   ])
   const comercios = exigir(rComercios, 'los comercios')
   const marcas = exigir(rMarcas, 'las marcas')
   const categorias = exigir(rCategorias, 'las categorías')
   const subcategorias = exigir(rSubcategorias, 'las subcategorías')
 
-  const categoriasOrdenadas = ordenarCategorias(categorias ?? [])
+  // Las subcategorías que algún comercio activo usa, bajo su categoría.
+  const subcategoriasUsadas = new Set((comercios ?? []).map((c) => c.subcategoria_id))
+  const categoriasOrdenadas: CategoriaFiltro[] = ordenarCategorias(
+    (categorias ?? []).map((c) => ({ id: c.id, nombre: c.nombre.trim() })),
+  ).map((c) => ({
+    ...c,
+    subcategorias: (subcategorias ?? [])
+      .filter((s) => s.categoria_id === c.id && subcategoriasUsadas.has(s.id))
+      .map((s) => ({ id: s.id, nombre: s.subcategoria.trim() }))
+      .sort((a, b) => compararNombres(a.nombre, b.nombre)),
+  }))
 
   if (!comercios || comercios.length === 0) {
     return { comercios: [], categorias: categoriasOrdenadas, ciudades: [] }
@@ -307,6 +325,7 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
       subcategoriaNombre: c.subcategoria_id
         ? (nombreSubcategoria.get(c.subcategoria_id) ?? null)
         : null,
+      subcategoriaId: c.subcategoria_id,
       ciudadIds,
       ciudades: ciudadIds.map((id) => nombreCiudad.get(id) ?? '').filter(Boolean),
       logoUrl: resolverLogoComercio(

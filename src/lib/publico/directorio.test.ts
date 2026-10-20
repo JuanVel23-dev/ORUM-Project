@@ -8,6 +8,7 @@ import {
   hrefDirectorio,
   leerFiltrosDirectorio,
   ordenarCategorias,
+  quitarSubcategoriasDe,
   type ComercioFiltrable,
   type FiltrosDirectorio,
 } from './directorio'
@@ -15,6 +16,7 @@ import {
 const SIN_FILTROS: FiltrosDirectorio = {
   q: '',
   categoriaIds: [],
+  subcategoriaIds: [],
   ciudadId: null,
   orden: 'az',
   soloFavoritos: false,
@@ -42,7 +44,14 @@ describe('leerFiltrosDirectorio', () => {
   it('lee los cuatro filtros', () => {
     expect(
       leerFiltrosDirectorio({ q: '  café ', categoria_id: '3', ciudad_id: '7', orden: 'za' }),
-    ).toEqual({ q: 'café', categoriaIds: [3], ciudadId: 7, orden: 'za', soloFavoritos: false })
+    ).toEqual({
+      q: 'café',
+      categoriaIds: [3],
+      subcategoriaIds: [],
+      ciudadId: 7,
+      orden: 'za',
+      soloFavoritos: false,
+    })
   })
 
   it('lee varias categorías: con comas, repetidas, sin duplicados y ordenadas', () => {
@@ -238,5 +247,55 @@ describe('favoritos', () => {
     const lista = [{ id: 3 }, { id: 1 }, { id: 2 }]
     expect(filtrarFavoritos(lista, [2, 3, 9])).toEqual([{ id: 3 }, { id: 2 }])
     expect(filtrarFavoritos(lista, [])).toEqual([])
+  })
+})
+
+describe('subcategorías', () => {
+  // Gastronomía (1): Pizzerías (3) y Alitas (4). Belleza (3): Uñas (15).
+  const categoriaDe = new Map([
+    [3, 1],
+    [4, 1],
+    [15, 3],
+  ])
+  const lista = [
+    comercio('Pizza Roma', { categoriaId: 1, subcategoriaId: 3 }),
+    comercio('Alitas Ya', { categoriaId: 1, subcategoriaId: 4 }),
+    comercio('Sin sub', { categoriaId: 1, subcategoriaId: null }),
+    comercio('Uñas Bellas', { categoriaId: 3, subcategoriaId: 15 }),
+    comercio('Peluquería Ana', { categoriaId: 3, subcategoriaId: null }),
+  ]
+  const nombres = (f: Partial<FiltrosDirectorio>) =>
+    filtrarDirectorio(lista, { ...SIN_FILTROS, ...f }, categoriaDe).map((c) => c.nombre)
+
+  it('se leen de la URL y vuelven a ella con comas', () => {
+    const f = leerFiltrosDirectorio({ categoria_id: '1', subcategoria_id: '4,3,x' })
+    expect(f.subcategoriaIds).toEqual([3, 4])
+    expect(hrefDirectorio(f)).toBe('/explorar?categoria_id=1&subcategoria_id=3,4')
+  })
+
+  it('afinan su categoría: solo las elegidas', () => {
+    expect(nombres({ categoriaIds: [1], subcategoriaIds: [3] })).toEqual(['Pizza Roma'])
+    expect(nombres({ categoriaIds: [1], subcategoriaIds: [3, 4] })).toEqual(['Alitas Ya', 'Pizza Roma'])
+  })
+
+  it('una categoría sin subcategorías elegidas se ve entera', () => {
+    expect(nombres({ categoriaIds: [1, 3], subcategoriaIds: [15] })).toEqual([
+      'Alitas Ya',
+      'Pizza Roma',
+      'Sin sub',
+      'Uñas Bellas',
+    ])
+  })
+
+  it('una subcategoría de una categoría que no está elegida no filtra nada', () => {
+    expect(nombres({ categoriaIds: [3], subcategoriaIds: [3] })).toEqual(['Peluquería Ana', 'Uñas Bellas'])
+  })
+
+  it('al apagar una categoría se van sus subcategorías', () => {
+    expect(quitarSubcategoriasDe([3, 4, 15], 1, categoriaDe)).toEqual([15])
+  })
+
+  it('cuentan como filtro puesto', () => {
+    expect(hayFiltros({ ...SIN_FILTROS, subcategoriaIds: [3] })).toBe(true)
   })
 })

@@ -55,6 +55,28 @@ export type ClaveIconoCategoria =
   | 'estilista'
   | 'masajes'
   | 'otros'
+  // Desde el 20/10/2026: categorías y subcategorías nuevas del cliente.
+  | 'ninos'
+  | 'contenedores'
+  | 'restaurante'
+  | 'hamburguesa'
+  | 'pizza'
+  | 'alitas'
+  | 'comidaRapida'
+  | 'desayuno'
+  | 'almuerzo'
+  | 'mexicano'
+  | 'cafeteria'
+  | 'bar'
+  | 'mujer'
+  | 'asesoriaImagen'
+  | 'barberia'
+  | 'cejas'
+  | 'hospedaje'
+  | 'agenciaViajes'
+  | 'fotografo'
+  | 'eventos'
+  | 'pilates'
   | 'generico'
 
 /** El respaldo. Se usa cuando ninguna palabra clave casa, y también con nombre vacío. */
@@ -72,8 +94,69 @@ export function normalizarNombre(texto: string): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
+    .replace(/\s+/g, ' ')
     .trim()
 }
+
+/*
+  LAS CATEGORÍAS Y SUBCATEGORÍAS DE HOY, UNA A UNA (20/10/2026: «quiero que
+  cada icono sea alusivo a su categoría, no quiero nada repetido»). Con 11
+  categorías y 25 subcategorías las palabras clave ya no bastaban: casi todo
+  Gastronomía caía en el mismo cubierto, y «Alimentos y Despensa» y
+  «Containers» en la misma etiqueta genérica. Por eso las que existen se
+  nombran AQUÍ, por su nombre exacto (normalizado), y la prueba comprueba que
+  ninguna clave se repite. Las palabras clave de abajo quedan para las que se
+  creen mañana: una categoría nueva sale con un icono alusivo aunque nadie la
+  haya añadido aquí — pero puede coincidir con otra; al crearla, se añade.
+*/
+const EXACTOS: Readonly<Record<string, ClaveIconoCategoria>> = {
+  // Categorías
+  gastronomia: 'comida',
+  'moda y estilo': 'moda',
+  belleza: 'belleza',
+  'viajes y escapadas': 'viajes',
+  'fotografia y eventos': 'fotografia',
+  'alimentos y despensa': 'mercado',
+  'salud y bienestar': 'salud',
+  'ninos y diversion': 'ninos',
+  'deporte y fitness': 'deporte',
+  containers: 'contenedores',
+  otros: 'otros',
+  // Gastronomía
+  restaurantes: 'restaurante',
+  hamburguesas: 'hamburguesa',
+  pizzerias: 'pizza',
+  alitas: 'alitas',
+  'comida rapida': 'comidaRapida',
+  'desayunos y brunch': 'desayuno',
+  almuerzos: 'almuerzo',
+  mexicano: 'mexicano',
+  cafes: 'cafe',
+  cafeterias: 'cafeteria',
+  heladerias: 'heladeria',
+  'bares y gastrobares': 'bar',
+  // Moda y Estilo
+  mujer: 'mujer',
+  'asesoria de imagen': 'asesoriaImagen',
+  // Belleza
+  unas: 'unas',
+  peluqueria: 'estilista',
+  barberia: 'barberia',
+  maquillaje: 'maquillaje',
+  'cejas y pestanas': 'cejas',
+  'masajes reductores': 'masajes',
+  // Viajes y Escapadas
+  hospedaje: 'hospedaje',
+  'agencias de viaje': 'agenciaViajes',
+  // Fotografía y Eventos
+  fotografia: 'fotografo',
+  'salon de eventos': 'eventos',
+  // Deporte y Fitness
+  pilates: 'pilates',
+}
+
+/** Los nombres con icono propio. La prueba los recorre para comprobar que no se repite ninguno. */
+export const NOMBRES_CON_ICONO_PROPIO: readonly string[] = Object.keys(EXACTOS)
 
 /*
   EL ORDEN DE ESTA LISTA ES SIGNIFICATIVO: gana la primera que case.
@@ -97,31 +180,37 @@ const REGLAS: ReadonlyArray<readonly [ClaveIconoCategoria, readonly string[]]> =
     los mismos destellos de «belleza». Cada una tiene ahora su clave, y van
     ANTES que las genéricas (`cafe`, `belleza`) para ganarles.
   */
+  ['contenedores', ['container', 'contenedor']],
+  ['ninos', ['nino', 'infantil', 'juguet', 'bebe']],
+  ['eventos', ['salon de evento', 'banquete', 'boda', 'fiesta']],
+  ['agenciaViajes', ['agencia de viaje', 'agencias de viaje', 'tour']],
+  ['hospedaje', ['hospedaje', 'hotel', 'hostal', 'glamping', 'cabana']],
+  ['pilates', ['pilates']],
+  ['cejas', ['ceja', 'pestan', 'lifting']],
+  ['barberia', ['barber']],
+  ['asesoriaImagen', ['asesoria de imagen', 'imagen personal', 'personal shopper']],
   ['heladeria', ['heladeri', 'helado', 'gelato', 'paleteri']],
+  ['hamburguesa', ['hamburgues', 'burger']],
+  ['pizza', ['pizz']],
+  ['alitas', ['alita', 'wings']],
+  ['comidaRapida', ['comida rapida', 'perro caliente', 'hot dog', 'salchipapa']],
+  ['desayuno', ['desayuno', 'brunch']],
+  ['almuerzo', ['almuerzo', 'corrientazo', 'menu del dia']],
+  ['mexicano', ['mexican', 'taco', 'burrito']],
+  ['bar', ['gastrobar', 'bares', 'coctel', 'cerveceri', 'licores']],
+  ['cafeteria', ['cafeteri', 'panader', 'reposter', 'pasteler', 'postre']],
   ['unas', ['unas', 'manicur', 'pedicur', 'nail']],
   ['maquillaje', ['maquillaje', 'makeup', 'cosmet']],
   ['estilista', ['estilista', 'peluquer', 'barber', 'corte de cabello']],
   ['masajes', ['masaje', 'masoterap', 'quiromasaj']],
   ['spa', ['spa']],
-  ['cafe', ['cafe', 'cafeter', 'panader', 'reposter', 'pasteler', 'postre']],
+  ['cafe', ['cafe']],
+  ['restaurante', ['restaurante', 'asader', 'parrilla', 'sushi', 'cocina']],
+  ['comida', ['comida', 'gastronom']],
   [
-    'comida',
-    [
-      'comida',
-      'restaurante',
-      'gastronom',
-      'pizz',
-      'hamburgues',
-      'sushi',
-      'asader',
-      'parrilla',
-      'bar',
-      'cerveceri',
-      'cocina',
-      'almuerzo',
-    ],
+    'mercado',
+    ['despensa', 'supermercado', 'mercado', 'abarrote', 'tienda de barrio', 'fruver', 'licorer', 'alimento'],
   ],
-  ['mercado', ['supermercado', 'mercado', 'abarrote', 'tienda de barrio', 'fruver', 'licorer']],
   [
     'salud',
     [
@@ -141,9 +230,10 @@ const REGLAS: ReadonlyArray<readonly [ClaveIconoCategoria, readonly string[]]> =
   ],
   [
     'belleza',
-    ['belleza', 'estetic', 'cejas', 'pestan'],
+    ['belleza', 'estetic'],
   ],
   ['deporte', ['deporte', 'gimnasio', 'gym', 'fitness', 'crossfit', 'yoga', 'entrenamiento']],
+  ['mujer', ['mujer', 'dama', 'femenin']],
   ['moda', ['moda', 'ropa', 'calzado', 'zapat', 'boutique', 'vestuario', 'accesorio', 'joyer']],
   ['viajes', ['viaje', 'turismo', 'hotel', 'hospedaje', 'hostal', 'agencia de viaje', 'vuelo']],
   ['educacion', ['educacion', 'academia', 'curso', 'colegio', 'universidad', 'instituto', 'idioma']],
@@ -174,6 +264,10 @@ export function claveIconoCategoria(nombre: string | null | undefined): ClaveIco
      respaldo genérico de una categoría que no se reconoce. Comparación
      exacta: como subcadena, «otro» casaría dentro de otras palabras. */
   if (/^otr[oa]s?$/.test(limpio)) return 'otros'
+
+  // Las de hoy, por su nombre exacto: cada una con el suyo, sin repetir.
+  const exacta = EXACTOS[limpio]
+  if (exacta) return exacta
 
   for (const [clave, palabras] of REGLAS) {
     if (palabras.some((p) => limpio.includes(p))) return clave

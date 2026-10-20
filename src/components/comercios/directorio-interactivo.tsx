@@ -16,12 +16,14 @@ import {
   hayFiltros,
   hrefDirectorio,
   leerFiltrosDirectorio,
+  quitarSubcategoriasDe,
   type FiltrosDirectorio,
   type OrdenDirectorio,
 } from '@/lib/publico/directorio'
 import { ENTRADA, REVELAR, retardoEntrada, revelarEscalonado } from '@/lib/shared/revelado'
 import escaparate from '@/app/(publico)/escaparate.module.css'
 import { CategoriasDirectorio } from './categorias-directorio'
+import { SubcategoriasDirectorio } from './subcategorias-directorio'
 import { BotonFavorito, useFavoritos } from './favoritos'
 import { TarjetaDirectorio } from './tarjeta-directorio'
 import estilos from './directorio-comercios.module.css'
@@ -114,7 +116,13 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
   const [retenidos, setRetenidos] = useState<ReadonlySet<number> | null>(null)
   const idsFavoritos = favoritos && filtros.soloFavoritos ? (retenidos ?? favoritos.ids) : null
 
-  const filtrados = filtrarDirectorio(directorio.comercios, filtros)
+  /* De qué categoría es cada subcategoría: lo necesitan el filtro y el
+     «apagar categoría», que se lleva sus subcategorías con ella. */
+  const categoriaDe = new Map(
+    directorio.categorias.flatMap((c) => c.subcategorias.map((s) => [s.id, c.id] as const)),
+  )
+
+  const filtrados = filtrarDirectorio(directorio.comercios, filtros, categoriaDe)
   const comercios = idsFavoritos ? filtrados.filter((c) => idsFavoritos.has(c.id)) : filtrados
 
   /* La ciudad elegida puede no existir ya (un enlace viejo): se muestra
@@ -207,6 +215,9 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
             />
             {filtros.categoriaIds.length > 0 && (
               <input type="hidden" name="categoria_id" value={filtros.categoriaIds.join(',')} />
+            )}
+            {filtros.subcategoriaIds.length > 0 && (
+              <input type="hidden" name="subcategoria_id" value={filtros.subcategoriaIds.join(',')} />
             )}
             {filtros.ciudadId !== null && (
               <input type="hidden" name="ciudad_id" value={filtros.ciudadId} />
@@ -326,23 +337,34 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
             /* VARIAS a la vez: cada una se enciende y se apaga sola;
                «Todas» limpia la selección. */
             onElegir={(id) =>
-              cambiar((f) => ({
-                categoriaIds: id === null ? [] : alternarCategoria(f.categoriaIds, id),
-              }))
+              cambiar((f) =>
+                id === null
+                  ? { categoriaIds: [], subcategoriaIds: [] }
+                  : {
+                      categoriaIds: alternarCategoria(f.categoriaIds, id),
+                      // Al apagarla se van sus subcategorías; al encenderla no hay ninguna.
+                      subcategoriaIds: quitarSubcategoriasDe(f.subcategoriaIds, id, categoriaDe),
+                    },
+              )
             }
             opciones={[
               {
                 id: null,
                 nombre: 'Todas',
-                href: hrefDirectorio(filtros, { categoriaIds: [] }, base),
+                href: hrefDirectorio(filtros, { categoriaIds: [], subcategoriaIds: [] }, base),
                 activa: filtros.categoriaIds.length === 0,
               },
               ...directorio.categorias.map((c) => ({
                 id: c.id,
                 nombre: c.nombre,
+                // El buscador de «Ver todas» también encuentra por subcategoría.
+                subcategorias: c.subcategorias.map((s) => s.nombre),
                 href: hrefDirectorio(
                   filtros,
-                  { categoriaIds: alternarCategoria(filtros.categoriaIds, c.id) },
+                  {
+                    categoriaIds: alternarCategoria(filtros.categoriaIds, c.id),
+                    subcategoriaIds: quitarSubcategoriasDe(filtros.subcategoriaIds, c.id, categoriaDe),
+                  },
                   base,
                 ),
                 activa: filtros.categoriaIds.includes(c.id),
@@ -350,6 +372,38 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
             ]}
           />
         )}
+        {/* Las subcategorías de las categorías elegidas, debajo: afinan. */}
+        <SubcategoriasDirectorio
+          onElegir={(id) =>
+            cambiar((f) => ({ subcategoriaIds: alternarCategoria(f.subcategoriaIds, id) }))
+          }
+          onTodo={(categoriaId) =>
+            cambiar((f) => ({
+              subcategoriaIds: quitarSubcategoriasDe(f.subcategoriaIds, categoriaId, categoriaDe),
+            }))
+          }
+          grupos={directorio.categorias
+            .filter((c) => filtros.categoriaIds.includes(c.id) && c.subcategorias.length > 0)
+            .map((c) => ({
+              categoriaId: c.id,
+              categoria: c.nombre,
+              hrefTodo: hrefDirectorio(
+                filtros,
+                { subcategoriaIds: quitarSubcategoriasDe(filtros.subcategoriaIds, c.id, categoriaDe) },
+                base,
+              ),
+              opciones: c.subcategorias.map((s) => ({
+                id: s.id,
+                nombre: s.nombre,
+                href: hrefDirectorio(
+                  filtros,
+                  { subcategoriaIds: alternarCategoria(filtros.subcategoriaIds, s.id) },
+                  base,
+                ),
+                activa: filtros.subcategoriaIds.includes(s.id),
+              })),
+            }))}
+        />
       </section>
 
       {/* ── LA REJILLA ──────────────────────────────────────────────────── */}

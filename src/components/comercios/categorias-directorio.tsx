@@ -60,6 +60,8 @@ export type OpcionCategoria = {
   nombre: string
   href: string
   activa: boolean
+  /** Sus subcategorías: el buscador de la ventana también las encuentra. */
+  subcategorias?: string[]
 }
 
 type Props = {

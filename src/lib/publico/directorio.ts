@@ -40,6 +40,13 @@ export type FiltrosDirectorio = {
    * se pueden elegir VARIAS (encargo del propietario).
    */
   categoriaIds: number[]
+  /**
+   * Subcategorías elegidas (20/10/2026), con las mismas reglas que las
+   * categorías. Afinan SU categoría: con «Gastronomía» y «Pizzerías» se ven
+   * solo las pizzerías; una categoría sin ninguna de sus subcategorías
+   * elegidas se ve entera.
+   */
+  subcategoriaIds: number[]
   ciudadId: number | null
   orden: OrdenDirectorio
   /**
@@ -56,6 +63,7 @@ export type ComercioFiltrable = {
   categoriaNombre: string | null
   /** Opcional: un comercio sin subcategoría (o una lista que no la trae) no la busca. */
   subcategoriaNombre?: string | null
+  subcategoriaId?: number | null
   ciudadIds: number[]
   ciudades: string[]
 }
@@ -100,6 +108,21 @@ export function alternarCategoria(ids: readonly number[], id: number): number[] 
   return nuevas.sort((a, b) => a - b)
 }
 
+/** De qué categoría es cada subcategoría: `id de subcategoría → id de categoría`. */
+export type CategoriaDeSubcategoria = ReadonlyMap<number, number>
+
+/**
+ * Al apagar una categoría se van con ella sus subcategorías elegidas: si no,
+ * volver a encenderla la traería ya filtrada, sin que nadie lo pidiera.
+ */
+export function quitarSubcategoriasDe(
+  subcategoriaIds: readonly number[],
+  categoriaId: number,
+  categoriaDe: CategoriaDeSubcategoria,
+): number[] {
+  return subcategoriaIds.filter((s) => categoriaDe.get(s) !== categoriaId)
+}
+
 /**
  * Los filtros del directorio a partir de los `searchParams` de la página.
  *
@@ -111,6 +134,7 @@ export function leerFiltrosDirectorio(params: ParametrosCrudos): FiltrosDirector
   return {
     q: primero(params.q).trim().slice(0, MAX_BUSQUEDA),
     categoriaIds: leerCategorias(params.categoria_id),
+    subcategoriaIds: leerCategorias(params.subcategoria_id),
     ciudadId: idOnulo(primero(params.ciudad_id)),
     orden: orden === 'za' ? 'za' : ORDEN_POR_DEFECTO,
     soloFavoritos: primero(params.favoritos) === '1',
@@ -125,6 +149,9 @@ export function parametrosDirectorio(filtros: FiltrosDirectorio): Record<string,
   const params: Record<string, string> = {}
   if (filtros.q) params.q = filtros.q
   if (filtros.categoriaIds.length > 0) params.categoria_id = filtros.categoriaIds.join(',')
+  if (filtros.subcategoriaIds.length > 0) {
+    params.subcategoria_id = filtros.subcategoriaIds.join(',')
+  }
   if (filtros.ciudadId !== null) params.ciudad_id = String(filtros.ciudadId)
   if (filtros.orden !== ORDEN_POR_DEFECTO) params.orden = filtros.orden
   if (filtros.soloFavoritos) params.favoritos = '1'
@@ -198,13 +225,29 @@ function casaBusqueda(comercio: ComercioFiltrable, busqueda: string): boolean {
 export function filtrarDirectorio<T extends ComercioFiltrable>(
   comercios: readonly T[],
   filtros: FiltrosDirectorio,
+  /** Para saber qué categoría afina cada subcategoría elegida. */
+  categoriaDe: CategoriaDeSubcategoria = new Map(),
 ): T[] {
   const busqueda = normalizarNombre(filtros.q)
+
+  // Las subcategorías elegidas, agrupadas por la categoría que afinan.
+  const afinadas = new Map<number, Set<number>>()
+  for (const s of filtros.subcategoriaIds) {
+    const categoria = categoriaDe.get(s)
+    if (categoria === undefined || !filtros.categoriaIds.includes(categoria)) continue
+    if (!afinadas.has(categoria)) afinadas.set(categoria, new Set())
+    afinadas.get(categoria)!.add(s)
+  }
+  const casaSubcategoria = (c: ComercioFiltrable) => {
+    const elegidas = c.categoriaId !== null ? afinadas.get(c.categoriaId) : undefined
+    return !elegidas || (c.subcategoriaId != null && elegidas.has(c.subcategoriaId))
+  }
 
   const filtrados = comercios.filter(
     (c) =>
       (filtros.categoriaIds.length === 0 ||
         (c.categoriaId !== null && filtros.categoriaIds.includes(c.categoriaId))) &&
+      casaSubcategoria(c) &&
       (filtros.ciudadId === null || c.ciudadIds.includes(filtros.ciudadId)) &&
       casaBusqueda(c, busqueda),
   )
@@ -218,6 +261,7 @@ export function hayFiltros(filtros: FiltrosDirectorio): boolean {
   return (
     Boolean(filtros.q) ||
     filtros.categoriaIds.length > 0 ||
+    filtros.subcategoriaIds.length > 0 ||
     filtros.ciudadId !== null ||
     filtros.soloFavoritos
   )

@@ -57,3 +57,14 @@ describe('buscarCategorias', () => {
     expect(buscarCategorias(opciones, 'tod')).toEqual([])
   })
 })
+
+describe('buscarCategorias · subcategorías', () => {
+  const opciones = [
+    { id: 1, nombre: 'Gastronomía', activa: false, subcategorias: ['Pizzerías', 'Alitas'] },
+    { id: 3, nombre: 'Belleza', activa: false, subcategorias: ['Uñas'] },
+  ]
+  it('encuentra la categoría por una de sus subcategorías, sin tildes', () => {
+    expect(buscarCategorias(opciones, 'pizzeria').map((o) => o.id)).toEqual([1])
+    expect(buscarCategorias(opciones, 'unas').map((o) => o.id)).toEqual([3])
+  })
+})

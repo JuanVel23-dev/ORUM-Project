@@ -11,7 +11,7 @@ import { normalizarNombre } from './iconos-categoria'
 /** Cuántas categorías enseña la tira antes de «Ver más» (sin contar «Todas»). */
 export const LIMITE_TIRA = 24
 
-type ConNombre = { id: number | null; nombre: string; activa: boolean }
+type ConNombre = { id: number | null; nombre: string; activa: boolean; subcategorias?: readonly string[] }
 
 /**
  * Las opciones que salen en la tira y cuántas se quedan fuera.
@@ -40,6 +40,7 @@ export function repartirTira<T extends ConNombre>(
 /**
  * Filtra por nombre, sin distinguir mayúsculas ni tildes. Cada palabra de la
  * búsqueda tiene que aparecer («salud bell» encuentra «Salud y Belleza»).
+ * También busca en sus subcategorías: «pizza» encuentra «Gastronomía».
  * Con la búsqueda vacía devuelve todas; buscando, «Todas» no sale: no es una
  * categoría que se pueda encontrar.
  */
@@ -49,6 +50,10 @@ export function buscarCategorias<T extends ConNombre>(opciones: readonly T[], bu
   return opciones.filter((o) => {
     if (o.id === null) return false
     const nombre = normalizarNombre(o.nombre)
-    return palabras.every((p) => nombre.includes(p))
+    const subs = (o.subcategorias ?? []).map(normalizarNombre)
+    return (
+      palabras.every((p) => nombre.includes(p)) ||
+      subs.some((s) => palabras.every((p) => s.includes(p)))
+    )
   })
 }

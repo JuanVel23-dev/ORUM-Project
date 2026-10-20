@@ -99,12 +99,21 @@ export default async function ComerciosPage({ searchParams }: { searchParams: Pr
   const params = await searchParams
 
   const admin = createAdminClient()
-  const [{ data: comercios }, { data: categorias }, { data: sucursales }, { data: promociones }] =
-    await Promise.all([
-      admin.from('comercios').select('id, nombre, logo_url, categoria_id, activo').is('deleted_at', null),
+  const [
+    { data: comercios },
+    { data: categorias },
+    { data: sucursales },
+    { data: promociones },
+    { data: subcategorias },
+  ] = await Promise.all([
+      admin
+        .from('comercios')
+        .select('id, nombre, logo_url, categoria_id, subcategoria_id, activo')
+        .is('deleted_at', null),
       admin.from('categorias').select('id, nombre').order('nombre'),
       admin.from('sucursales').select('comercio_id').eq('activo', true).is('deleted_at', null),
       admin.from('promociones').select('comercio_id').eq('activo', true).is('deleted_at', null),
+      admin.from('subcategorias').select('id, subcategoria'),
     ])
 
   const contar = (filas: { comercio_id: number }[] | null) => {
@@ -114,14 +123,22 @@ export default async function ComerciosPage({ searchParams }: { searchParams: Pr
   }
   const nSucursales = contar(sucursales)
   const nPromociones = contar(promociones)
-  const nombreCategoria = new Map((categorias ?? []).map((c) => [c.id, c.nombre]))
+  const nombreCategoria = new Map((categorias ?? []).map((c) => [c.id, c.nombre.trim()]))
+  const nombreSubcategoria = new Map((subcategorias ?? []).map((s) => [s.id, s.subcategoria.trim()]))
 
   const filas: FilaComercio[] = (comercios ?? []).map((c) => ({
     id: c.id,
     nombre: c.nombre,
     logoUrl: c.logo_url,
     categoriaId: c.categoria_id,
-    categoria: c.categoria_id ? (nombreCategoria.get(c.categoria_id) ?? null) : null,
+    // «Gastronomía · Pizzerías»: así se ve de un vistazo qué tiene asignado.
+    categoria:
+      [
+        c.categoria_id ? nombreCategoria.get(c.categoria_id) : null,
+        c.subcategoria_id ? nombreSubcategoria.get(c.subcategoria_id) : null,
+      ]
+        .filter(Boolean)
+        .join(' · ') || null,
     activo: c.activo,
     sucursales: nSucursales.get(c.id) ?? 0,
     promociones: nPromociones.get(c.id) ?? 0,

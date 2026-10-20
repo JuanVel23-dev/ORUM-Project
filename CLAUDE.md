@@ -992,6 +992,28 @@ nombre, sin tildes ni mayúsculas. La tira enseña hasta `LIMITE_TIRA` (24,
 después del corte. Favoritos, Ciudad y Ordenar siguen siendo píldoras, arriba.
 No vuelvas al botón que las escondía.
 
+**Las SUBCATEGORÍAS afinan la categoría elegida** (20/10/2026: «se
+agregaron más, son categorías y subcategorías; ajusta el diseño»). No van en
+la tira de círculos: al elegir una categoría que tiene subcategorías aparece
+DEBAJO una fila de píldoras (`SubcategoriasDirectorio`) con «Todo» y cada
+subcategoría con su icono; en el teléfono la fila se desliza de lado. En la
+URL van en `subcategoria_id` (lista con comas, como las categorías) y la
+lógica es pura y probada (`lib/publico/directorio.ts`): una subcategoría
+elegida restringe SOLO su categoría —con «Gastronomía» y «Belleza» y
+«Pizzerías» elegida, Belleza se ve entera—; apagar una categoría se lleva sus
+subcategorías (`quitarSubcategoriasDe`). Solo salen las subcategorías con
+algún comercio activo (`CatalogoPublico.categorias[].subcategorias`), y el
+buscador de «Ver todas» encuentra la categoría por el nombre de una
+subcategoría.
+
+**Cada categoría y subcategoría tiene SU icono, sin repetir** (mismo día:
+«quiero que cada icono sea alusivo, no quiero nada repetido»). Las de hoy van
+por nombre exacto en `EXACTOS` (`lib/comercios/iconos-categoria.ts`) y la
+prueba falla si dos comparten clave; ningún glifo de `GLIFOS`
+(`components/ui/icono-categoria.tsx`) se usa dos veces. Las palabras clave
+quedan para las que se creen después. **Al crear una categoría o
+subcategoría nueva en la base, añádela a `EXACTOS` con un glifo libre.**
+
 `Button` `Spinner` · `Field` `Input` `Select` `SelectMenu` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·
 `Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` `CifraAnimada` · `Alert` `Toast` · `Modal` `Sheet`
