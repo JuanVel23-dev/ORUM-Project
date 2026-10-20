@@ -1139,6 +1139,70 @@ textarea:active,
   animation-duration: var(--dur-base);
 }
 
+/*
+  FILTRAR EL DIRECTORIO  ·  categorías y subcategorías (20/10/2026)
+  ---------------------------------------------------------------------------
+  Encargo: «quiero animación para las subcategorías, y que se sienta más
+  fluido; lo siento muy lento y trabado». Al poner o quitar una categoría la
+  fila de subcategorías aparecía de golpe y la rejilla saltaba. Ahora el
+  cambio va dentro de una View Transition (`DirectorioInteractivo`), y estas
+  reglas solo valen mientras dura (`html[data-filtrando]`), así que no tocan
+  la transición de la ficha:
+
+    · CADA GRUPO DE SUBCATEGORÍAS (`subcategorias-<id>`, en su `style`) entra
+      deslizándose desde arriba y sale más rápido, encogiendo un poco. Las
+      píldoras de dentro llegan escalonadas (su propio CSS).
+    · LA REJILLA (`directorio-resultados`) se desliza como una sola pieza a
+      su sitio nuevo y funde lo que había con lo que hay. Sus tarjetas NO
+      llevan nombre: no vuelan una a una.
+    · Todo en `--dur-base` (la banda de desplegable): es un filtro, se toca
+      muchas veces. La salida, en `--dur-salida`.
+
+  No es la excepción de «elemento compartido» —no hay objeto que viaje de
+  una pantalla a otra—: es la misma pantalla reacomodándose, y la View
+  Transition es la forma de hacerlo en el compositor sin animar alturas.
+*/
+html[data-filtrando] [data-vt='resultados'] {
+  view-transition-name: directorio-resultados;
+}
+
+/* La capa de la transición NO se traga los toques: el siguiente toque llega
+   a la página (que ya está en su estado nuevo). Sin esto, dos categorías
+   tocadas seguidas se sentían bloqueadas mientras duraba la animación. */
+html[data-filtrando]::view-transition {
+  pointer-events: none;
+}
+
+html[data-filtrando]::view-transition-group(*),
+html[data-filtrando]::view-transition-old(*),
+html[data-filtrando]::view-transition-new(*) {
+  animation-duration: var(--dur-base);
+  animation-timing-function: var(--ease-out);
+}
+
+/* Lo que entra (solo hay foto nueva) y lo que sale (solo hay foto vieja). */
+html[data-filtrando]::view-transition-new(*):only-child {
+  animation: vt-filtro-entra var(--dur-base) var(--ease-out) both;
+}
+
+html[data-filtrando]::view-transition-old(*):only-child {
+  animation: vt-filtro-sale var(--dur-salida) var(--ease-out) both;
+}
+
+@keyframes vt-filtro-entra {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+}
+
+@keyframes vt-filtro-sale {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+}
+
 /* ============================================================================
    5. PREFERENCIAS DE ACCESIBILIDAD
    ----------------------------------------------------------------------------

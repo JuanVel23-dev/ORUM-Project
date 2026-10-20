@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, type FormEvent, type MouseEvent } from 'react'
+import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { ArrowUpDown, ChevronDown, Heart, LayoutGrid, MapPin, Search } from 'lucide-react'
@@ -20,6 +21,7 @@ import {
   type FiltrosDirectorio,
   type OrdenDirectorio,
 } from '@/lib/publico/directorio'
+import { prefiereMovimientoReducido } from '@/lib/shared/motion'
 import { ENTRADA, REVELAR, retardoEntrada, revelarEscalonado } from '@/lib/shared/revelado'
 import escaparate from '@/app/(publico)/escaparate.module.css'
 import { CategoriasDirectorio } from './categorias-directorio'
@@ -60,6 +62,9 @@ import estilos from './directorio-comercios.module.css'
 
 const ORDENES: OrdenDirectorio[] = ['az', 'za']
 
+/** Transiciones de filtro en vuelo (toques seguidos se encadenan). */
+let transiciones = 0
+
 /** Los parámetros de la URL en la forma que entiende `leerFiltrosDirectorio`. */
 function crudosDe(parametros: URLSearchParams): Record<string, string | string[]> {
   const crudos: Record<string, string | string[]> = {}
@@ -94,13 +99,20 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
     (`setState` durante el render: el patrón de React para derivar estado de
     algo que cambia, sin efecto y sin pintar un fotograma con el valor malo.)
   */
+  /*
+    LOS FILTROS QUE SE PINTAN viven aquí (`vista`) y no esperan a la URL
+    (20/10/2026: «lo siento muy lento y trabado»). Antes cada toque esperaba a
+    que el enrutador de Next sincronizara `useSearchParams` tras el
+    `replaceState` (~35 ms); ahora el toque pinta en el acto y la URL se
+    escribe a la vez. Si la URL cambia por otro camino (atrás, un enlace), se
+    adopta: `url` recuerda la última que se vio, para distinguir un cambio
+    de fuera del eco del propio toque.
+  */
   const enSuRuta = usePathname() === base
   const cadenaActual = useSearchParams().toString()
-  const [cadenaPropia, setCadenaPropia] = useState(cadenaActual)
-  if (enSuRuta && cadenaActual !== cadenaPropia) setCadenaPropia(cadenaActual)
-  const filtros = leerFiltrosDirectorio(
-    crudosDe(new URLSearchParams(enSuRuta ? cadenaActual : cadenaPropia)),
-  )
+  const [vista, setVista] = useState({ cadena: cadenaActual, url: cadenaActual })
+  if (enSuRuta && cadenaActual !== vista.url) setVista({ cadena: cadenaActual, url: cadenaActual })
+  const filtros = leerFiltrosDirectorio(crudosDe(new URLSearchParams(vista.cadena)))
   /* El estado de favoritos de la pantalla; `null` en la fachada pública,
      donde no hay corazones ni filtro. */
   const favoritos = useFavoritos()
@@ -134,9 +146,48 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
    * instante —no de `filtros`, que es la del último pintado—: dos toques
    * seguidos se suman en vez de pisarse.
    */
-  function cambiar(cambio: (actuales: FiltrosDirectorio) => Partial<FiltrosDirectorio>) {
+  function cambiar(
+    cambio: (actuales: FiltrosDirectorio) => Partial<FiltrosDirectorio>,
+    /** Categorías y subcategorías: el cambio se anima (ver abajo). */
+    animar = false,
+  ) {
     const actuales = leerFiltrosDirectorio(crudosDe(new URLSearchParams(window.location.search)))
-    window.history.replaceState(null, '', hrefDirectorio(actuales, cambio(actuales), base))
+    const href = hrefDirectorio(actuales, cambio(actuales), base)
+    const cadena = new URL(href, window.location.href).searchParams.toString()
+    const aplicar = () => {
+      flushSync(() => setVista({ cadena, url: cadena }))
+      window.history.replaceState(null, '', href)
+    }
+
+    /*
+      LA ANIMACIÓN (20/10/2026: «quiero animación para las subcategorías y
+      que se sienta más fluido»). Es una View Transition del navegador: saca
+      una foto del antes, aplica el cambio y anima entre las dos en el
+      compositor, sin recalcular la página en cada fotograma. Mientras dura,
+      `html[data-filtrando]` enciende sus reglas en `globals.css` §4c: entra
+      y sale cada grupo de subcategorías, se desliza la rejilla y se funde su
+      contenido. Las tarjetas NO vuelan una a una (no llevan nombre: con
+      filtros serían vuelos cruzados, `CLAUDE.md` «Dónde NO»); se funden con
+      su rejilla. Sin la API, o con
+      movimiento reducido, el cambio es instantáneo.
+    */
+    const raiz = document.documentElement
+    if (
+      !animar ||
+      typeof document.startViewTransition !== 'function' ||
+      prefiereMovimientoReducido()
+    ) {
+      aplicar()
+      return
+    }
+    raiz.dataset.filtrando = ''
+    const transicion = document.startViewTransition(aplicar)
+    transiciones += 1
+    transicion.finished.finally(() => {
+      // Con toques seguidos, solo la última transición apaga el atributo.
+      transiciones -= 1
+      if (transiciones === 0) delete raiz.dataset.filtrando
+    })
   }
 
   function alternarFavoritos() {
@@ -337,14 +388,16 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
             /* VARIAS a la vez: cada una se enciende y se apaga sola;
                «Todas» limpia la selección. */
             onElegir={(id) =>
-              cambiar((f) =>
-                id === null
-                  ? { categoriaIds: [], subcategoriaIds: [] }
-                  : {
-                      categoriaIds: alternarCategoria(f.categoriaIds, id),
-                      // Al apagarla se van sus subcategorías; al encenderla no hay ninguna.
-                      subcategoriaIds: quitarSubcategoriasDe(f.subcategoriaIds, id, categoriaDe),
-                    },
+              cambiar(
+                (f) =>
+                  id === null
+                    ? { categoriaIds: [], subcategoriaIds: [] }
+                    : {
+                        categoriaIds: alternarCategoria(f.categoriaIds, id),
+                        // Al apagarla se van sus subcategorías; al encenderla no hay ninguna.
+                        subcategoriaIds: quitarSubcategoriasDe(f.subcategoriaIds, id, categoriaDe),
+                      },
+                true,
               )
             }
             opciones={[
@@ -375,12 +428,15 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
         {/* Las subcategorías de las categorías elegidas, debajo: afinan. */}
         <SubcategoriasDirectorio
           onElegir={(id) =>
-            cambiar((f) => ({ subcategoriaIds: alternarCategoria(f.subcategoriaIds, id) }))
+            cambiar((f) => ({ subcategoriaIds: alternarCategoria(f.subcategoriaIds, id) }), true)
           }
           onTodo={(categoriaId) =>
-            cambiar((f) => ({
-              subcategoriaIds: quitarSubcategoriasDe(f.subcategoriaIds, categoriaId, categoriaDe),
-            }))
+            cambiar(
+              (f) => ({
+                subcategoriaIds: quitarSubcategoriasDe(f.subcategoriaIds, categoriaId, categoriaDe),
+              }),
+              true,
+            )
           }
           grupos={directorio.categorias
             .filter((c) => filtros.categoriaIds.includes(c.id) && c.subcategorias.length > 0)
@@ -407,7 +463,8 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
       </section>
 
       {/* ── LA REJILLA ──────────────────────────────────────────────────── */}
-      <section className={estilos.resultados} aria-label="Comercios aliados">
+      {/* `data-vt`: al filtrar, la rejilla se desliza como UNA pieza (globals.css §4c). */}
+      <section className={estilos.resultados} aria-label="Comercios aliados" data-vt="resultados">
         {comercios.length > 0 ? (
           <ul className={estilos.rejilla}>
             {comercios.map((c, i) => (

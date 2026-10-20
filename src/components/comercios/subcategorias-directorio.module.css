@@ -11,18 +11,25 @@
   border-top: 1px solid var(--border-subtle);
 }
 
-/* Aparecen al elegir la categoría: llegan, no saltan. El estado base es el
-   final; el fotograma solo dice de dónde vienen. */
+/*
+  LA ENTRADA DE LAS PÍLDORAS: una tras otra, con el paso del sistema
+  (`--escalonado`) y su tope de 8. El grupo entero entra y sale con la View
+  Transition del directorio (`globals.css` §4c); esto es lo de DENTRO, que se
+  ve vivo en la foto nueva. El estado base es el final; el fotograma solo
+  dice de dónde vienen.
+*/
 @media (prefers-reduced-motion: no-preference) {
-  .grupo {
-    animation: llegar var(--dur-base) var(--ease-out);
+  .fila > li {
+    animation: llegar var(--dur-base) var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * var(--escalonado));
   }
 }
 
 @keyframes llegar {
   from {
     opacity: 0;
-    translate: 0 -6px;
+    translate: -8px 0;
+    scale: 0.96;
   }
 }
 

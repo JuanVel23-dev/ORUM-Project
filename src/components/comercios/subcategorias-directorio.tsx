@@ -1,6 +1,6 @@
 'use client'
 
-import type { MouseEvent } from 'react'
+import type { CSSProperties, MouseEvent } from 'react'
 import { Check } from 'lucide-react'
 import { IconoCategoria } from '@/components/ui/icono-categoria'
 import estilos from './subcategorias-directorio.module.css'
@@ -59,7 +59,15 @@ export function SubcategoriasDirectorio({ grupos, onElegir, onTodo }: Props) {
       {grupos.map((g) => {
         const ninguna = g.opciones.every((o) => !o.activa)
         return (
-          <nav key={g.categoriaId} className={estilos.grupo} aria-label={`Subcategorías de ${g.categoria}`}>
+          <nav
+            key={g.categoriaId}
+            className={estilos.grupo}
+            aria-label={`Subcategorías de ${g.categoria}`}
+            /* Cada grupo entra y sale por su cuenta en la View Transition del
+               directorio. El nombre sale del id de la categoría, nunca del
+               orden: es lo que casa el antes con el después. */
+            style={{ viewTransitionName: `subcategorias-${g.categoriaId}` }}
+          >
             <span className={estilos.titulo} aria-hidden="true">
               {g.categoria}
             </span>
@@ -83,8 +91,9 @@ export function SubcategoriasDirectorio({ grupos, onElegir, onTodo }: Props) {
                   </span>
                 </a>
               </li>
-              {g.opciones.map((o) => (
-                <li key={o.id}>
+              {g.opciones.map((o, i) => (
+                /* El escalonado de la entrada: el paso del sistema, con tope de 8. */
+                <li key={o.id} style={{ '--i': Math.min(i + 1, 8) } as CSSProperties}>
                   <a
                     href={o.href}
                     className={estilos.pildora}

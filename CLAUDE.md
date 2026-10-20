@@ -825,9 +825,20 @@ texto a la derecha—, y solo cambian de tamaño y de posición.
   en la rejilla, y **dos elementos con el mismo `view-transition-name` vivos en
   el mismo documento anulan la transición entera, en silencio**. El nombre lo
   lleva solo la rejilla, que es la única lista exhaustiva.
-- **Filtrar o cambiar de categoría dentro del catálogo.** Es la misma pantalla
-  cambiando de contenido: morfar tarjetas que se reordenan produce vuelos
-  cruzados. Ahí el patrón es la entrada escalonada.
+- **Filtrar o cambiar de categoría dentro del catálogo** como elemento
+  compartido: morfar tarjetas que se reordenan produce vuelos cruzados. Las
+  TARJETAS no llevan nombre al filtrar. ⚠️ Lo que SÍ hay desde el 20/10/2026
+  («quiero animación para las subcategorías y que se sienta más fluido»): al
+  poner o quitar una categoría o subcategoría, `DirectorioInteractivo` envuelve
+  el cambio en una View Transition propia, con reglas que solo valen bajo
+  `html[data-filtrando]` (`globals.css` §4c): cada grupo de subcategorías
+  (`subcategorias-<id>`) entra y sale, la rejilla entera
+  (`directorio-resultados`) se desliza como UNA pieza y funde su contenido,
+  todo en `--dur-base`, y la capa de la transición deja pasar los toques
+  (`pointer-events: none`). No es un par de elemento compartido: es la misma
+  pantalla reacomodándose sin animar alturas. Los filtros que se pintan viven
+  en estado del componente (`vista`) y la URL se escribe a la vez: el toque
+  ya no espera a que Next sincronice `useSearchParams`.
 - **Cualquier cruce de la frontera de sesión** (acceso → portal).
 
 La regla que decide: **continuidad de objeto real**. El mismo objeto persiste y
