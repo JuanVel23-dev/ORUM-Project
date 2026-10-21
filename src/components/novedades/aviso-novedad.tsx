@@ -9,7 +9,7 @@ import styles from './aviso-novedad.module.css'
 /*
   EL AVISO DE LA ÚLTIMA NOVEDAD, EN LA PORTADA  ·  21/10/2026
   ---------------------------------------------------------------------------
-  Cinco vueltas el mismo día, todas del propietario:
+  Seis vueltas el mismo día, todas del propietario:
 
     1. «El fondo negro no me agrada»: tarjeta BLANCA con su sombra.
     2. «Le doy a "Ver más" y no me lleva a ningún lado; quita el "Ver más"
@@ -27,6 +27,10 @@ import styles from './aviso-novedad.module.css'
     5. «La estrella se ve mal puesta; no quiero degradado, que sea blanco
        con las sombras»: la estrella pasa al lado del título (como en los
        títulos de sección) y la tarjeta es blanca, sin resplandor.
+    6. «En el celular ocupa demasiado; redúcelo también en los demás
+       dispositivos, al fin y al cabo es un anuncio»: COMPACTO en todos los
+       tamaños —una franja baja, una línea de texto—, con la fecha corta y
+       sin flecha en el teléfono.
 
   La tarjeta se pinta en el servidor; solo la X es de cliente.
 
@@ -46,9 +50,9 @@ export function AvisoNovedad({
   return (
     <CerrarAviso>
       <Link href={href} className={styles.aviso} aria-label={`Novedad: ${novedad.titulo}. Ver novedades.`}>
-        {/* El megáfono, grande, en su aro dorado. */}
+        {/* El megáfono, en su aro dorado. */}
         <span className={styles.icono} aria-hidden="true">
-          <Megaphone size={26} />
+          <Megaphone size={22} />
         </span>
 
         <span className={styles.textos}>
@@ -70,7 +74,7 @@ export function AvisoNovedad({
 
         {/* La flecha dice «se abre»: la tarjeta entera es el botón. */}
         <span className={styles.flecha} aria-hidden="true">
-          <ArrowRight size={22} />
+          <ArrowRight size={18} />
         </span>
       </Link>
     </CerrarAviso>

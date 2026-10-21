@@ -1470,13 +1470,13 @@ borrar la imagen»). Tres piezas:
 
 - **El aviso de la portada** (`AvisoNovedad`) es una TARJETA BLANCA con su
   sombra —no la franja negra de antes, ni degradado o resplandor: blanca y
-  sus sombras—, **SIN imagen** y con presencia: el megáfono grande en su aro
-  dorado, «Novedad» y la fecha, el título en el serif de la marca con la
-  estrella de ORUM AL LADO (`AdornoEstrella`, como los títulos de sección;
-  en el hombro del aro se veía mal puesta), dos líneas del texto y una
-  flecha en un círculo dorado, todo con aire generoso (el propietario lo
-  veía «demasiado pequeño, casi no impacta» y con la fecha y la flecha
-  pegadas al borde). **La tarjeta ENTERA es el `<a>`** a `/novedades`, que
+  sus sombras—, **SIN imagen** y **COMPACTA en todos los tamaños**
+  («al fin y al cabo es un anuncio», 21/10/2026; una versión anterior era
+  grande y se pasó de presencia): una franja baja (~112px en escritorio)
+  con el megáfono en su aro dorado, «Novedad» y la fecha en una línea, el
+  título en el serif de la marca con la estrella de ORUM AL LADO
+  (`AdornoEstrella`, como los títulos de sección), UNA línea del texto y
+  una flecha en un círculo dorado. No lo vuelvas a agrandar. **La tarjeta ENTERA es el `<a>`** a `/novedades`, que
   abre ARRIBA con su titular (no al ancla: «que aparezca desde el inicio»).
   Sin «Ver más» ni enlace estirado (el clic no llegaba en el navegador del
   propietario). **Se puede quitar, pero solo por ahora**: una X ENCIMA de la
@@ -1486,13 +1486,13 @@ borrar la imagen»). Tres piezas:
   `localStorage`, que lo dejaba quitado para siempre y no se quería—. La
   tarjeta se pinta en el servidor; solo la X es de cliente. No vuelvas al
   fondo negro ni a la miniatura.
-  **En el teléfono es COMPACTO** («la distribución está mal, ocupa
-  demasiado espacio», 21/10/2026): megáfono de 40px a la izquierda, sin
-  flecha, «Novedad» y la fecha CORTA («26 sept 2026»,
-  `formatearFechaNovedadCorta`) en UNA línea, título y dos líneas de texto;
-  mide ~124px. Y en la portada no suma margen propio
-  (`--aviso-margen-movil: 0`, que pone `publico.module.css`): las franjas de
-  alrededor ya traen su relleno. En el Inicio del socio conserva su margen.
+  **En el teléfono** («la distribución está mal, ocupa demasiado
+  espacio», 21/10/2026): megáfono de 40px a la izquierda, sin flecha,
+  «Novedad» y la fecha CORTA («26 sept 2026», `formatearFechaNovedadCorta`)
+  en UNA línea, título y dos líneas de texto; mide ~124px. Y en la portada
+  no suma margen propio (`--aviso-margen: 0`, que pone
+  `publico.module.css`): las franjas de alrededor ya traen su relleno. En
+  el Inicio del socio conserva su margen.
 - **Y TAMBIÉN EN EL PORTAL DE MIEMBROS** (21/10/2026: «no lo veo en el
   portal de miembros»; desde el 29/09 el Inicio del socio no enseñaba
   ninguna novedad). El Inicio pasa el mismo `AvisoNovedad` al directorio

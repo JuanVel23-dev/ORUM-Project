@@ -1,6 +1,8 @@
 /* ==========================================================================
-   EL AVISO DE LA ÚLTIMA NOVEDAD  ·  tercera vuelta (21/10/2026)
-   Sin imagen, con aire y con presencia: megáfono grande, título en serif.
+   EL AVISO DE LA ÚLTIMA NOVEDAD  ·  cuarta vuelta (21/10/2026)
+   Sin imagen y COMPACTO en todos los tamaños («al fin y al cabo es un
+   anuncio»): una franja baja con el megáfono, «Novedad» y la fecha, el
+   título en serif, UNA línea del texto y la flecha.
    Blanca, con sus sombras: sin degradado ni resplandor (pedido así).
    Sin «anuncio» ni «banner» en el nombre: los bloqueadores.
    ========================================================================== */
@@ -9,8 +11,10 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-6);
-  padding: var(--space-7) var(--space-8);
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  /* Hueco para la X de la esquina: la flecha no queda debajo. */
+  padding-right: var(--space-9);
 
   border: 1px solid var(--border-superficie);
   border-radius: var(--radius-lg);
@@ -67,12 +71,12 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 72px;
-  height: 72px;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
   border-radius: var(--radius-full);
   background: var(--surface);
-  box-shadow: inset 0 0 0 1.5px var(--brand), var(--shadow-card);
+  box-shadow: inset 0 0 0 1.5px var(--brand);
   color: var(--brand);
 }
 
@@ -81,16 +85,17 @@
 .textos {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
   min-width: 0;
 }
 
 .meta {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: var(--space-2) var(--space-3);
-  font-size: var(--t-footnote-size);
+  gap: var(--space-2);
+  font-size: var(--t-caption-size);
+  white-space: nowrap;
   color: var(--text-2);
 }
 
@@ -103,8 +108,8 @@
 .etiqueta {
   display: inline-flex;
   align-items: center;
-  min-height: var(--space-6);
-  padding: 0 var(--space-3);
+  min-height: var(--space-5);
+  padding: 0 var(--space-2);
   border-radius: var(--radius-full);
   background: var(--gold-bg);
   font-size: var(--t-caption-size);
@@ -113,10 +118,10 @@
   color: var(--brand);
 }
 
-/* El título en el serif de la marca: es lo que tiene que impactar. */
+/* El título en el serif de la marca. */
 .titulo {
   font-family: var(--font-display);
-  font-size: var(--t-display-2-size);
+  font-size: var(--t-title-1-size);
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.01em;
@@ -126,11 +131,11 @@
 .extracto {
   display: -webkit-box;
   overflow: hidden;
-  max-width: 70ch;
-  font-size: var(--t-body-size);
-  line-height: 1.55;
+  max-width: 90ch;
+  font-size: var(--t-callout-size);
+  line-height: 1.45;
   color: var(--text-2);
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
 
@@ -139,13 +144,12 @@
 .flecha {
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
   border-radius: var(--radius-full);
   background: var(--gold-500);
   color: var(--tinta-1);
-  box-shadow: var(--shadow-card);
   transition: translate var(--dur-fast) var(--ease-out);
 }
 
@@ -168,29 +172,11 @@
   .icono {
     width: 40px;
     height: 40px;
-    box-shadow: inset 0 0 0 1.5px var(--brand);
   }
 
   .icono svg {
     width: 20px;
     height: 20px;
-  }
-
-  .textos {
-    gap: var(--space-1);
-  }
-
-  /* «Novedad» y la fecha, en una sola línea. */
-  .meta {
-    flex-wrap: nowrap;
-    gap: var(--space-2);
-    font-size: var(--t-caption-size);
-    white-space: nowrap;
-  }
-
-  .etiqueta {
-    min-height: var(--space-5);
-    padding: 0 var(--space-2);
   }
 
   .fechaLarga {
@@ -207,7 +193,7 @@
 
   .extracto {
     font-size: var(--t-footnote-size);
-    line-height: 1.45;
+    -webkit-line-clamp: 2;
   }
 
   .flecha {
@@ -217,18 +203,18 @@
 
 /* --- Quitarlo por ahora (`CerrarAviso`) ------------------------------------ */
 
-/* La envoltura lleva el margen y ancla la X encima de la tarjeta. */
+/* La envoltura lleva el margen y ancla la X encima de la tarjeta. Quien lo
+   monta puede anular el margen (`--aviso-margen`): en la portada las franjas
+   de alrededor ya traen su relleno y sumarle este dejaba un hueco grande
+   arriba y abajo («ocupa demasiado espacio», 21/10/2026). */
 .envoltura {
   position: relative;
-  margin-block: var(--space-8);
+  margin-block: var(--aviso-margen, var(--space-6));
 }
 
-/* En el teléfono, el margen lo puede anular quien lo monta: en la portada
-   las franjas de alrededor ya traen su relleno y sumarle este dejaba un
-   hueco grande arriba y abajo («ocupa demasiado espacio», 21/10/2026). */
 @container contenido (max-width: 640px) {
   .envoltura {
-    margin-block: var(--aviso-margen-movil, var(--space-5));
+    margin-block: var(--aviso-margen, var(--space-5));
   }
 }
 

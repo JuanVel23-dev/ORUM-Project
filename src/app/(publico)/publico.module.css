@@ -121,9 +121,9 @@
   la hereda sin que nadie se acuerde.
 */
 /* El aviso de la última novedad va entre dos franjas que ya traen su
-   relleno: en el teléfono no suma margen propio. */
+   relleno: no suma margen propio. */
 .main {
-  --aviso-margen-movil: 0;
+  --aviso-margen: 0;
 }
 
 .main section[id] {
