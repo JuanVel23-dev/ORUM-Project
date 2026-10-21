@@ -104,16 +104,13 @@ export function FormularioResena({ comercioId, inicial, onGuardada, onPendiente 
 
       {/* Un grupo de radios no tiene un control al que apunte un `<label>`:
           su nombre lo da la leyenda del `fieldset`. */}
-      <fieldset
-        className={estilos.grupoEstrellas}
-        aria-describedby={errorEstrellas ? 'resena-error-estrellas' : undefined}
-        aria-invalid={errorEstrellas ? true : undefined}
-      >
+      <fieldset className={estilos.grupoEstrellas}>
         <legend className={estilos.leyenda}>Calificación</legend>
         <EstrellasSelector
           name="estrellas"
           etiqueta="Calificación"
           valorInicial={inicial?.estrellas}
+          describedBy={errorEstrellas ? 'resena-error-estrellas' : undefined}
         />
         {errorEstrellas && (
           <p id="resena-error-estrellas" className={estilos.errorCampo}>

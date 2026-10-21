@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useRef, type CSSProperties, type ReactNode } from 'react'
 import { animate } from 'motion'
 import { X } from 'lucide-react'
 import {
@@ -88,6 +88,13 @@ type Props = {
    * rejilla). Sin él, Escape llama a `onClose`.
    */
   onAtras?: () => void
+  /**
+   * Se llama cuando la ventana YA terminó de cerrarse (acabada la animación
+   * de salida y llamado `close()`). Para llevar el foco a otro sitio: antes
+   * de eso el resto del documento sigue inerte y el navegador, al cerrar,
+   * devuelve el foco al disparador (que puede haber desaparecido).
+   */
+  onClosed?: () => void
   children?: ReactNode
 }
 
@@ -104,9 +111,16 @@ export function Modal({
   className,
   cerrarAlPulsarFuera = true,
   onAtras,
+  onClosed,
   children,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
+  /** Id propio del título: dos modales montados a la vez no pueden compartirlo. */
+  const tituloId = useId()
+  const alCerradoRef = useRef(onClosed)
+  useEffect(() => {
+    alCerradoRef.current = onClosed
+  })
   const cerrando = useRef(false)
   /** Lo que React quiere AHORA; lo consulta el final de una salida en vuelo. */
   const quiereAbierto = useRef(open)
@@ -137,6 +151,7 @@ export function Modal({
       dialogo.close()
       dialogo.classList.remove(styles.cerrando)
       cerrando.current = false
+      alCerradoRef.current?.()
     }
 
     if (prefiereMovimientoReducido()) {
@@ -273,7 +288,7 @@ export function Modal({
       onClose={alCerrarNativo}
       onPointerDown={alApretar}
       onClick={alPulsar}
-      aria-labelledby={title ? 'modal-titulo' : undefined}
+      aria-labelledby={title ? tituloId : undefined}
       aria-label={!title && ariaLabel ? ariaLabel : undefined}
     >
       {desnudo ? (
@@ -284,7 +299,7 @@ export function Modal({
             <div className={styles.cabecera}>
               <div className={styles.textos}>
                 {title && (
-                  <h2 className={styles.titulo} id="modal-titulo">
+                  <h2 className={styles.titulo} id={tituloId}>
                     {title}
                   </h2>
                 )}
@@ -342,6 +357,8 @@ type ConfirmProps = {
   /** Usa el botón rojo. Reserva `true` para lo que no se puede deshacer. */
   destructive?: boolean
   loading?: boolean
+  /** Ver `onClosed` de `Modal`. */
+  onClosed?: () => void
 }
 
 /**
@@ -361,11 +378,13 @@ export function ConfirmDialog({
   cancelLabel = 'Cancelar',
   destructive = false,
   loading = false,
+  onClosed,
 }: ConfirmProps) {
   return (
     <Modal
       open={open}
       onClose={onClose}
+      onClosed={onClosed}
       title={title}
       description={description}
       width="420px"

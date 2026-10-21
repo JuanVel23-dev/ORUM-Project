@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useTransition, type FormEvent } from 'react'
+import { useEffect, useRef, useState, useTransition, type FormEvent } from 'react'
 import { MessageSquareText, PenLine, Reply, Trash2 } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -63,6 +63,17 @@ export function ResenasComercio({ total, promedio, resenas }: Props) {
   const [errorQuitar, setErrorQuitar] = useState<string | null>(null)
   const [aviso, setAviso] = useState('')
   const zonaRef = useRef<HTMLDivElement>(null)
+  const enfocarZona = useRef(false)
+
+  /* Tras «Quitar» el botón desaparece y el foco caería al `body`. Se espera a
+     que el aviso YA esté pintado: con la zona aún vacía, `focus()` no hace
+     nada (y antes se llamaba en el mismo tick del `setAviso`). */
+  useEffect(() => {
+    if (aviso && enfocarZona.current) {
+      enfocarZona.current = false
+      zonaRef.current?.focus()
+    }
+  }, [aviso])
 
   function abrir(r: ResenaGestion) {
     setAviso('')
@@ -92,8 +103,8 @@ export function ResenasComercio({ total, promedio, resenas }: Props) {
         const res = await quitarMiRespuesta({}, datos)
         if (res.error) setErrorQuitar(res.error)
         else {
+          enfocarZona.current = true
           setAviso('Quitaste tu respuesta.')
-          zonaRef.current?.focus()
         }
       } catch {
         setErrorQuitar('No pudimos conectar. Revisa tu conexión e inténtalo de nuevo.')

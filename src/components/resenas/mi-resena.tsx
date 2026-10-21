@@ -57,6 +57,7 @@ export function MiResena({ comercioId, comercioNombre, puedeResenar, resena }: P
 
   const [aviso, setAviso] = useState('')
   const zonaRef = useRef<HTMLDivElement>(null)
+  const enfocarAlCerrar = useRef(false)
 
   const editando = resena !== null
 
@@ -71,6 +72,13 @@ export function MiResena({ comercioId, comercioNombre, puedeResenar, resena }: P
     setAviso(editando ? 'Tu reseña quedó actualizada.' : 'Tu reseña quedó publicada. ¡Gracias!')
   }
 
+  function enfocarTrasCerrar() {
+    if (!enfocarAlCerrar.current) return
+    enfocarAlCerrar.current = false
+    const zona = zonaRef.current
+    ;(zona?.querySelector<HTMLElement>('[data-resenar]') ?? zona)?.focus()
+  }
+
   function borrar() {
     const datos = new FormData()
     datos.set('comercio_id', String(comercioId))
@@ -83,14 +91,13 @@ export function MiResena({ comercioId, comercioNombre, puedeResenar, resena }: P
           setErrorBorrar(r.error)
           return
         }
+        /* El botón «Borrar» desaparece con la tarjeta y el navegador, al
+           cerrar la ventana, devolvería el foco a un botón que ya no está.
+           Se lleva al botón de escribir (o a esta zona) cuando la ventana
+           YA cerró: ver `enfocarTrasCerrar`. */
+        enfocarAlCerrar.current = true
         setConfirmando(false)
         setAviso('Borraste tu reseña.')
-        /* El botón «Borrar» desaparece con la tarjeta: el foco iría al
-           `body`. Se lleva al botón de escribir, o a esta zona si no hay. */
-        requestAnimationFrame(() => {
-          const zona = zonaRef.current
-          ;(zona?.querySelector<HTMLElement>('[data-resenar]') ?? zona)?.focus()
-        })
       } catch {
         setErrorBorrar('No pudimos conectar. Revisa tu conexión e inténtalo de nuevo.')
       }
@@ -101,23 +108,24 @@ export function MiResena({ comercioId, comercioNombre, puedeResenar, resena }: P
 
   return (
     <div className={estilos.mia} ref={zonaRef} tabIndex={-1}>
-      {(puedeResenar || aviso) && (
-        <div className={estilos.acciones}>
-          {puedeResenar && (
-            <Button
-              data-resenar=""
-              variant={editando ? 'secondary' : 'primary'}
-              icon={editando ? <PenLine size={16} /> : <Star size={16} />}
-              onClick={abrir}
-            >
-              {editando ? 'Editar mi reseña' : 'Escribir reseña'}
-            </Button>
-          )}
-          <p className={estilos.aviso} role="status">
-            {aviso}
-          </p>
-        </div>
-      )}
+      {/* Siempre montado, también el `role="status"`: una región viva que
+          nace ya con su texto no se anuncia. Vacío, el CSS lo saca del flujo
+          sin quitarlo del árbol de accesibilidad. */}
+      <div className={estilos.acciones}>
+        {puedeResenar && (
+          <Button
+            data-resenar=""
+            variant={editando ? 'secondary' : 'primary'}
+            icon={editando ? <PenLine size={16} /> : <Star size={16} />}
+            onClick={abrir}
+          >
+            {editando ? 'Editar mi reseña' : 'Escribir reseña'}
+          </Button>
+        )}
+        <p className={estilos.aviso} role="status">
+          {aviso}
+        </p>
+      </div>
 
       {resena && (
         <div className={estilos.propia}>
@@ -180,6 +188,7 @@ export function MiResena({ comercioId, comercioNombre, puedeResenar, resena }: P
           if (!borrando) setConfirmando(false)
         }}
         ariaLabel="¿Borrar tu reseña?"
+        onClosed={enfocarTrasCerrar}
         width="420px"
         footer={
           <>

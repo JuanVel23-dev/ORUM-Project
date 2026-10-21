@@ -21,6 +21,8 @@ type SelectorProps = {
   /** Nombre accesible del grupo. */
   etiqueta?: string
   disabled?: boolean
+  /** Id del texto de ayuda/error: va en CADA radio, que es quien recibe el foco. */
+  describedBy?: string
 }
 
 export function EstrellasSelector({
@@ -29,6 +31,7 @@ export function EstrellasSelector({
   onChange,
   etiqueta = 'Calificación',
   disabled = false,
+  describedBy,
 }: SelectorProps) {
   const [valor, setValor] = useState<number>(valorInicial ?? 0)
 
@@ -48,6 +51,7 @@ export function EstrellasSelector({
             value={n}
             checked={valor === n}
             disabled={disabled}
+            aria-describedby={describedBy}
             aria-label={n === 1 ? '1 estrella' : `${n} estrellas`}
             onChange={() => {
               setValor(n)

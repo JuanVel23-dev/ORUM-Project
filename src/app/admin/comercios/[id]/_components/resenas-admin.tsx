@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useTransition, type FormEvent } from 'react'
+import { useEffect, useRef, useState, useTransition, type FormEvent } from 'react'
 import { MessageSquareText, PenLine, Reply, Trash2 } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -60,6 +60,18 @@ export function ResenasAdmin({ comercioId, total, promedio, resenas }: Props) {
   const [errorAccion, setErrorAccion] = useState<string | null>(null)
   const [aviso, setAviso] = useState('')
   const zonaRef = useRef<HTMLDivElement>(null)
+  /** 'ahora': enfocar al pintarse el aviso; 'al-cerrar': esperar a que cierre la ventana. */
+  const enfocarZona = useRef<'ahora' | 'al-cerrar' | null>(null)
+
+  /* El botón que se pulsó desaparece con su fila: el foco caería al `body`.
+     Se lleva a la zona del aviso cuando el DOM ya la muestra (antes, la zona
+     estaba oculta y `focus()` en el mismo tick no hacía nada). */
+  useEffect(() => {
+    if (aviso && enfocarZona.current === 'ahora') {
+      enfocarZona.current = null
+      zonaRef.current?.focus()
+    }
+  }, [aviso])
 
   function abrir(r: ResenaGestion) {
     setAviso('')
@@ -83,6 +95,7 @@ export function ResenasAdmin({ comercioId, total, promedio, resenas }: Props) {
     accion: typeof quitarRespuestaAdmin,
     exito: string,
     alTerminar?: () => void,
+    foco: 'ahora' | 'al-cerrar' = 'ahora',
   ) {
     const datos = new FormData()
     datos.set('resena_id', String(r.id))
@@ -95,8 +108,8 @@ export function ResenasAdmin({ comercioId, total, promedio, resenas }: Props) {
         const res = await accion({}, datos)
         if (res.error) setErrorAccion(res.error)
         else {
+          enfocarZona.current = foco
           setAviso(exito)
-          zonaRef.current?.focus()
         }
       } catch {
         setErrorAccion('No pudimos conectar. Revisa tu conexión e inténtalo de nuevo.')
@@ -227,8 +240,12 @@ export function ResenasAdmin({ comercioId, total, promedio, resenas }: Props) {
         onClose={() => setPorEliminar(null)}
         onConfirm={() => {
           if (porEliminar)
-            ejecutar(porEliminar, eliminarResena, 'La reseña se eliminó.', () =>
-              setPorEliminar(null),
+            ejecutar(
+              porEliminar,
+              eliminarResena,
+              'La reseña se eliminó.',
+              () => setPorEliminar(null),
+              'al-cerrar',
             )
         }}
         title="¿Eliminar esta reseña?"
@@ -237,6 +254,14 @@ export function ResenasAdmin({ comercioId, total, promedio, resenas }: Props) {
             ? `Se borrará para siempre la reseña de ${porEliminar.autor}, con las respuestas que tenga. Esta acción no se puede deshacer.`
             : undefined
         }
+        onClosed={() => {
+          /* La confirmación ya cerró del todo: el navegador intentó devolver
+             el foco a «Eliminar», que ya no existe. Aquí se corrige. */
+          if (enfocarZona.current === 'al-cerrar') {
+            enfocarZona.current = null
+            zonaRef.current?.focus()
+          }
+        }}
         confirmLabel="Eliminar para siempre"
         destructive
         loading={ocupadaId !== null && porEliminar !== null && ocupadaId === porEliminar.id}
