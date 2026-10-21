@@ -1469,13 +1469,16 @@ ocultar sin borrar, editar y quitar— y el ajuste en una ventana encima con
 borrar la imagen»). Tres piezas:
 
 - **El aviso de la portada** (`AvisoNovedad`) es una TARJETA BLANCA con su
-  sombra —no la franja negra de antes—: miniatura 16:9 (o el megáfono en un
-  aro dorado), «Novedad» y la fecha, título, una línea del texto y una
-  flecha. **La tarjeta ENTERA es el `<a>`** a ESA novedad
-  (`/novedades#novedad-{id}`): sin «Ver más» ni enlace estirado (el clic no
-  llegaba en el navegador del propietario). **No se puede cerrar** (sin X ni
-  `localStorage`; encargo del mismo día), y por eso se pinta en el servidor.
-  No vuelvas al fondo negro.
+  sombra —no la franja negra de antes—, **SIN imagen** y con presencia: el
+  megáfono grande en su aro dorado con la estrella de ORUM, «Novedad» y la
+  fecha, el título en el serif de la marca, dos líneas del texto y una
+  flecha en un círculo dorado, todo con aire generoso (el propietario lo
+  veía «demasiado pequeño, casi no impacta» y con la fecha y la flecha
+  pegadas al borde). **La tarjeta ENTERA es el `<a>`** a `/novedades`, que
+  abre ARRIBA con su titular (no al ancla: «que aparezca desde el inicio»).
+  Sin «Ver más» ni enlace estirado (el clic no llegaba en el navegador del
+  propietario). **No se puede cerrar** (sin X ni `localStorage`), y por eso
+  se pinta en el servidor. No vuelvas al fondo negro ni a la miniatura.
 - **`/novedades`** va a lo ancho de la fachada: cabecera con
   `TituloSeccion`, la más reciente EN GRANDE (imagen y texto lado a lado),
   las anteriores en rejilla, y al final dos accesos (comercios y
