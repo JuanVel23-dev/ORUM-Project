@@ -24,6 +24,7 @@ import {
   Skeleton,
   SkeletonText,
 } from '@/components/ui/feedback'
+import { EstrellasLectura, EstrellasSelector } from '@/components/ui/estrellas'
 import { Field } from '@/components/ui/field'
 import { Input, Select, Textarea } from '@/components/ui/input'
 import { Divider, Grid, PageHeader, Section, Stack } from '@/components/ui/layout'
@@ -406,6 +407,18 @@ function Contenido() {
           <Avatar nombre="María Fernanda Ospina" size="sm" />
           <Avatar nombre="Carlos Andrés Betancur" size="md" />
           <Avatar nombre="Juliana del Pilar Rojas" size="lg" brand />
+        </Grupo>
+      </Seccion>
+
+      {/* --- Estrellas ------------------------------------------------------ */}
+      <Seccion titulo="Estrellas">
+        <Grupo label="Lectura">
+          <EstrellasLectura valor={4.5} total={12} />
+          <EstrellasLectura valor={3} tamano="md" />
+          <EstrellasLectura valor={null} />
+        </Grupo>
+        <Grupo label="Selector">
+          <EstrellasSelector name="estrellas" valorInicial={3} etiqueta="Tu calificación" />
         </Grupo>
       </Seccion>
 
