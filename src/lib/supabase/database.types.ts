@@ -605,6 +605,62 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['comercio_imagenes']['Insert']>
         Relationships: []
       }
+      /**
+       * Reseñas de socios a comercios (20261020150000_resenas.sql). Solo
+       * escribe `service_role`; `trg_resenas_validar` exige compra previa,
+       * comercio activo y membresía vigente. Socios y comercios leen por las
+       * funciones `resenas_*`; la tabla solo la lee la administración.
+       */
+      resenas: {
+        Row: {
+          id: number
+          comercio_id: number
+          miembro_id: number
+          /** 1 a 5. */
+          estrellas: number
+          /** `null` = solo estrellas. 1–500 caracteres. */
+          mensaje: string | null
+          respuesta_comercio: string | null
+          /** La pone el trigger al escribir o cambiar la respuesta. */
+          respuesta_comercio_at: Timestamp | null
+          /** Se muestra como «ORUM». */
+          respuesta_admin: string | null
+          respuesta_admin_at: Timestamp | null
+          created_at: Timestamp
+          /** Último cambio de estrellas o mensaje; responder no la mueve. */
+          updated_at: Timestamp
+        }
+        Insert: {
+          id?: number
+          comercio_id: number
+          miembro_id: number
+          estrellas: number
+          mensaje?: string | null
+          respuesta_comercio?: string | null
+          respuesta_comercio_at?: Timestamp | null
+          respuesta_admin?: string | null
+          respuesta_admin_at?: Timestamp | null
+          created_at?: Timestamp
+          updated_at?: Timestamp
+        }
+        Update: Partial<Database['public']['Tables']['resenas']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: 'resenas_comercio_id_fkey'
+            columns: ['comercio_id']
+            isOneToOne: false
+            referencedRelation: 'comercios'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'resenas_miembro_id_fkey'
+            columns: ['miembro_id']
+            isOneToOne: false
+            referencedRelation: 'miembros'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       configuracion: {
         Row: {
           id: number
@@ -683,6 +739,38 @@ export type Database = {
       reiniciar_cupo: {
         Args: { p_clave: string }
         Returns: undefined
+      }
+      /**
+       * Cantidad y promedio (a un decimal) de las reseñas de un comercio.
+       * Sin fila si el comercio no está activo; sin reseñas, `total` 0 y
+       * `promedio` null. `numeric` llega como número por PostgREST.
+       */
+      resenas_resumen: {
+        Args: { p_comercio_id: number }
+        Returns: {
+          total: number
+          promedio: number | null
+        }[]
+      }
+      /** Reseñas de un comercio activo, de la más nueva a la más vieja. `autor` = «María G.». */
+      resenas_de_comercio: {
+        Args: { p_comercio_id: number }
+        Returns: {
+          id: number
+          estrellas: number
+          mensaje: string | null
+          autor: string
+          created_at: Timestamp
+          respuesta_comercio: string | null
+          respuesta_admin: string | null
+          /** La reseña es del socio de la sesión. */
+          es_mia: boolean
+        }[]
+      }
+      /** Si el socio de la sesión puede crear o editar su reseña. Pista para la interfaz; la barrera es el trigger. */
+      puedo_resenar: {
+        Args: { p_comercio_id: number }
+        Returns: boolean
       }
     }
     Enums: {
