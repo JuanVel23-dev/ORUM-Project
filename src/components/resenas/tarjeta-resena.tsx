@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { EstrellasLectura } from '@/components/ui/estrellas-lectura'
 import estilos from './seccion-resenas.module.css'
 
@@ -14,6 +15,8 @@ type TarjetaProps = {
   fecha: string
   respuestaComercio: string | null
   respuestaAdmin: string | null
+  /** Controles bajo las respuestas (la vista del comercio: responder). */
+  acciones?: ReactNode
 }
 
 export function TarjetaResena({
@@ -23,6 +26,7 @@ export function TarjetaResena({
   fecha,
   respuestaComercio,
   respuestaAdmin,
+  acciones,
 }: TarjetaProps) {
   return (
     <article className={estilos.resena}>
@@ -36,6 +40,7 @@ export function TarjetaResena({
         <Respuesta quien="Respuesta del comercio" texto={respuestaComercio} />
       )}
       {respuestaAdmin && <Respuesta quien="Respuesta de ORUM" texto={respuestaAdmin} />}
+      {acciones}
     </article>
   )
 }

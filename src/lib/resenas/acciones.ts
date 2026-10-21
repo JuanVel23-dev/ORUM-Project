@@ -8,11 +8,21 @@
 
 import { esTablaAusente } from './resenas'
 
-/** El `comercio_id` del formulario: entero positivo, o `null`. */
-export function leerComercioId(crudo: FormDataEntryValue | null): number | null {
+/** Un id numérico del formulario: entero positivo seguro, o `null`. */
+function leerIdPositivo(crudo: FormDataEntryValue | null): number | null {
   if (typeof crudo !== 'string' || !/^\s*\d+\s*$/.test(crudo)) return null
   const n = Number(crudo)
   return Number.isSafeInteger(n) && n > 0 ? n : null
+}
+
+/** El `comercio_id` del formulario: entero positivo, o `null`. */
+export function leerComercioId(crudo: FormDataEntryValue | null): number | null {
+  return leerIdPositivo(crudo)
+}
+
+/** El `resena_id` del formulario: entero positivo, o `null`. */
+export function leerResenaId(crudo: FormDataEntryValue | null): number | null {
+  return leerIdPositivo(crudo)
 }
 
 type ErrorDeBase = { code?: string; message?: string } | null | undefined

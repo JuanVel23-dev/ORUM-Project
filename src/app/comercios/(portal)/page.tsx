@@ -8,6 +8,8 @@ import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
 import { hoyISO } from '@/lib/shared/fecha'
 import { ENTRADA, retardoEntrada } from '@/lib/shared/revelado'
+import { obtenerResenasParaComercio } from '@/lib/resenas/datos'
+import { ResenasComercio } from './_components/resenas-comercio'
 import { VerificacionTool } from './_components/verificacion-tool'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 import styles from './_components/verificar.module.css'
@@ -54,7 +56,7 @@ export default async function ComerciosHomePage() {
   }
 
   const supabase = await createClient()
-  const [{ data: sucursales }, { data: promocionesRaw }, { data: tipos }, soporteCrudo] =
+  const [{ data: sucursales }, { data: promocionesRaw }, { data: tipos }, soporteCrudo, resenas] =
     await Promise.all([
       supabase
         .from('sucursales')
@@ -73,6 +75,7 @@ export default async function ComerciosHomePage() {
         .limit(50),
       supabase.from('tipos_beneficio').select('id, codigo').limit(10),
       obtenerWhatsappSoporte(),
+      obtenerResenasParaComercio(),
     ])
 
   if (!sucursales || sucursales.length === 0) {
@@ -157,6 +160,17 @@ export default async function ComerciosHomePage() {
           )}
         </p>
       </aside>
+
+      {/* ── LAS RESEÑAS ─────────────────────────────────────────────────── */}
+      {resenas.disponible && (
+        <div className={[styles.resenas, ENTRADA].join(' ')} style={retardoEntrada(6)}>
+          <ResenasComercio
+            total={resenas.total}
+            promedio={resenas.promedio}
+            resenas={resenas.resenas}
+          />
+        </div>
+      )}
     </div>
   )
 }

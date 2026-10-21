@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fechaResena, leerComercioId, traducirErrorResena } from './acciones'
+import { fechaResena, leerComercioId, leerResenaId, traducirErrorResena } from './acciones'
 
 describe('leerComercioId', () => {
   it('acepta un entero positivo como texto', () => {
@@ -13,6 +13,16 @@ describe('leerComercioId', () => {
     }
     expect(leerComercioId(null)).toBeNull()
     expect(leerComercioId(new File([], 'x'))).toBeNull()
+  })
+})
+
+describe('leerResenaId', () => {
+  it('lee un entero positivo y rechaza el resto', () => {
+    expect(leerResenaId('12')).toBe(12)
+    for (const crudo of ['0', '-1', '2.5', 'x', '', '99999999999999999999']) {
+      expect(leerResenaId(crudo)).toBeNull()
+    }
+    expect(leerResenaId(null)).toBeNull()
   })
 })
 

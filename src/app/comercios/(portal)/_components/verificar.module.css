@@ -867,3 +867,19 @@
   display: grid;
   gap: var(--space-3);
 }
+
+/* Las reseñas ocupan el ancho de las dos columnas, debajo de ellas. En una
+   sola columna se quedan en el ancho de una herramienta, como las demás. */
+.resenas {
+  width: 100%;
+  min-width: 0;
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+@container contenido (min-width: 900px) {
+  .resenas {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+}
