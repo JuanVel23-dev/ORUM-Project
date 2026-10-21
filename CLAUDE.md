@@ -1469,9 +1469,11 @@ ocultar sin borrar, editar y quitar— y el ajuste en una ventana encima con
 borrar la imagen»). Tres piezas:
 
 - **El aviso de la portada** (`AvisoNovedad`) es una TARJETA BLANCA con su
-  sombra —no la franja negra de antes—, **SIN imagen** y con presencia: el
-  megáfono grande en su aro dorado con la estrella de ORUM, «Novedad» y la
-  fecha, el título en el serif de la marca, dos líneas del texto y una
+  sombra —no la franja negra de antes, ni degradado o resplandor: blanca y
+  sus sombras—, **SIN imagen** y con presencia: el megáfono grande en su aro
+  dorado, «Novedad» y la fecha, el título en el serif de la marca con la
+  estrella de ORUM AL LADO (`AdornoEstrella`, como los títulos de sección;
+  en el hombro del aro se veía mal puesta), dos líneas del texto y una
   flecha en un círculo dorado, todo con aire generoso (el propietario lo
   veía «demasiado pequeño, casi no impacta» y con la fecha y la flecha
   pegadas al borde). **La tarjeta ENTERA es el `<a>`** a `/novedades`, que

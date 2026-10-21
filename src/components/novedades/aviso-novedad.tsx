@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Megaphone } from 'lucide-react'
-import { EstrellaOrum } from '@/components/ui/marca/marca'
+import { AdornoEstrella } from '@/components/ui/marca/marca'
 import { formatearFechaNovedad } from '@/lib/anuncios/fecha'
 import type { AnuncioResumen } from '@/lib/anuncios/tipos'
 import { CerrarAviso } from './cerrar-aviso'
@@ -9,7 +9,7 @@ import styles from './aviso-novedad.module.css'
 /*
   EL AVISO DE LA ÚLTIMA NOVEDAD, EN LA PORTADA  ·  21/10/2026
   ---------------------------------------------------------------------------
-  Cuatro vueltas el mismo día, todas del propietario:
+  Cinco vueltas el mismo día, todas del propietario:
 
     1. «El fondo negro no me agrada»: tarjeta BLANCA con su sombra.
     2. «Le doy a "Ver más" y no me lleva a ningún lado; quita el "Ver más"
@@ -24,6 +24,9 @@ import styles from './aviso-novedad.module.css'
     4. «Añádele la opción para quitar, pero al recargar debe volver a
        aparecer»: una X encima (`CerrarAviso`) que lo quita solo mientras
        la página siga abierta.
+    5. «La estrella se ve mal puesta; no quiero degradado, que sea blanco
+       con las sombras»: la estrella pasa al lado del título (como en los
+       títulos de sección) y la tarjeta es blanca, sin resplandor.
 
   La tarjeta se pinta en el servidor; solo la X es de cliente.
 
@@ -36,10 +39,9 @@ export function AvisoNovedad({ novedad }: { novedad: AnuncioResumen | null }) {
   return (
     <CerrarAviso>
       <Link href="/novedades" className={styles.aviso} aria-label={`Novedad: ${novedad.titulo}. Ver novedades.`}>
-        {/* El megáfono, grande, en su aro dorado; la estrella de ORUM lo acompaña. */}
+        {/* El megáfono, grande, en su aro dorado. */}
         <span className={styles.icono} aria-hidden="true">
           <Megaphone size={26} />
-          <EstrellaOrum className={styles.estrella} />
         </span>
 
         <span className={styles.textos}>
@@ -47,7 +49,11 @@ export function AvisoNovedad({ novedad }: { novedad: AnuncioResumen | null }) {
             <span className={styles.etiqueta}>Novedad</span>
             <time dateTime={novedad.createdAt}>{formatearFechaNovedad(novedad.createdAt)}</time>
           </span>
-          <span className={styles.titulo}>{novedad.titulo}</span>
+          {/* La estrella de ORUM AL LADO del título, como en todos los de la marca. */}
+          <span className={styles.titulo}>
+            <AdornoEstrella />
+            {novedad.titulo}
+          </span>
           <span className={styles.extracto}>{novedad.cuerpo}</span>
         </span>
 
