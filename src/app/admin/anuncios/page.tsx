@@ -12,12 +12,15 @@ import { EmptyState } from '@/components/ui/feedback'
 import { PageHeader } from '@/components/ui/layout'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { cambiarEstadoAnuncio } from './actions'
+import lista from '@/styles/lista-panel.module.css'
 
 export const metadata = { title: 'Novedades · ORUM' }
 
 type Anuncio = {
   id: number
   titulo: string
+  cuerpo: string
+  imagen_url: string | null
   mostrar_publico: boolean
   mostrar_miembros: boolean
   activo: boolean
@@ -29,7 +32,23 @@ const COLUMNAS: ReadonlyArray<Column<Anuncio>> = [
     key: 'titulo',
     header: 'Título',
     primary: true,
-    cell: (a) => a.titulo,
+    // La miniatura y el comienzo del texto: se reconoce sin abrirla.
+    cell: (a) => (
+      <span className={lista.celdaNombre}>
+        <span className={lista.miniatura} aria-hidden="true">
+          {a.imagen_url ? (
+            // eslint-disable-next-line @next/next/no-img-element -- URL de Storage
+            <img src={a.imagen_url} alt="" loading="lazy" decoding="async" />
+          ) : (
+            <Megaphone size={16} />
+          )}
+        </span>
+        <span className={lista.nombreBloque}>
+          <span className={lista.nombre}>{a.titulo}</span>
+          <span className={lista.subtituloTexto}>{a.cuerpo}</span>
+        </span>
+      </span>
+    ),
   },
   {
     key: 'alcance',
@@ -65,7 +84,7 @@ export default async function AnunciosPage() {
   const admin = createAdminClient()
   const { data: anuncios } = await admin
     .from('anuncios')
-    .select('id, titulo, mostrar_publico, mostrar_miembros, activo, created_at')
+    .select('id, titulo, cuerpo, imagen_url, mostrar_publico, mostrar_miembros, activo, created_at')
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
 

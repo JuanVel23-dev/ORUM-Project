@@ -1,5 +1,115 @@
+/* ==========================================================================
+   NOVEDADES  ·  rediseño del 21/10/2026
+   A lo ancho de la fachada: cabecera, la lista y dos accesos para seguir.
+   ========================================================================== */
+
 .pagina {
-  max-width: 640px;
-  margin-inline: auto;
-  padding-block: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-9);
+  padding-block: var(--space-4) var(--space-6);
+}
+
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: 62ch;
+}
+
+.antetitulo {
+  font-size: var(--t-overline-size);
+  font-weight: 700;
+  letter-spacing: var(--t-overline-tracking);
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+.bajada {
+  font-size: var(--t-body-size);
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
+/* --- Seguir explorando ------------------------------------------------------ */
+
+.seguir {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+/* Una tarjeta que se toca: se levanta al apuntarla y se hunde al pulsarla. */
+.acceso {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--text);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .acceso:hover {
+    translate: 0 -2px;
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+  }
+
+  .acceso:hover .accesoFlecha {
+    translate: 3px 0;
+  }
+}
+
+.acceso:active {
+  translate: 0 1px;
+  box-shadow: var(--shadow-press);
+}
+
+.acceso:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.accesoIcono {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1.5px var(--brand);
+  color: var(--brand);
+}
+
+.accesoTextos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.accesoTitulo {
+  font-weight: 700;
+}
+
+.accesoAyuda {
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+.accesoFlecha {
+  flex-shrink: 0;
+  color: var(--brand);
+  transition: translate var(--dur-fast) var(--ease-out);
 }

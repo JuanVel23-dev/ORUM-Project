@@ -9,7 +9,8 @@ export default async function NuevaAnuncioInterceptada() {
     <OverlayRuta
       title="Nueva novedad"
       description="Nace publicada. Puedes retirarla después sin borrarla."
-      detent="medium"
+      detent="large"
+      width="640px"
     >
       <AnuncioForm />
     </OverlayRuta>

@@ -1,15 +1,21 @@
 'use server'
 
 import { mensajeDeError } from '@/lib/shared/errores'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
+import { registrarCambioImagen } from '@/lib/imagenes/auditoria'
+import { BUCKET_IMAGENES_ANUNCIOS, rutaImagenAnuncio } from '@/lib/imagenes/rutas'
+import { borrarPorUrlPublica, subirImagen } from '@/lib/imagenes/subir'
+import { LIMITE_IMAGENES_COMERCIOS } from '@/lib/imagenes/validacion'
 
 export type AnuncioState = { error?: string; ok?: boolean }
 
 const TITULO_MAXIMO = 120
 const CUERPO_MAXIMO = 600
+
+type Admin = ReturnType<typeof createAdminClient>
 
 /** Verifica que quien ejecuta la acción sea super_admin. Calcado de planes/actions.ts. */
 async function exigirSuperAdmin(): Promise<{ actorId: string } | null> {
@@ -18,12 +24,17 @@ async function exigirSuperAdmin(): Promise<{ actorId: string } | null> {
   return { actorId: actor.userId }
 }
 
-/** Refresca las cuatro superficies que leen anuncios. */
+/**
+ * Refresca las superficies que leen anuncios. `updateTag('publico')` además
+ * suelta la caché de 60 s de la fachada (21/10/2026): sin ella, una novedad
+ * editada tardaba hasta un minuto en verse en la portada y en `/novedades`.
+ */
 function refrescar(): void {
   revalidatePath('/admin/anuncios')
   revalidatePath('/')
   revalidatePath('/novedades')
   revalidatePath('/miembros')
+  updateTag('publico')
 }
 
 /** Lee y valida los campos comunes de un anuncio desde el formulario. */
@@ -43,9 +54,9 @@ function leerCampos(formData: FormData):
   }
 
   const cuerpo = String(formData.get('cuerpo') ?? '').trim()
-  if (!cuerpo) return { ok: false, error: 'El cuerpo es obligatorio.' }
+  if (!cuerpo) return { ok: false, error: 'El texto es obligatorio.' }
   if (cuerpo.length > CUERPO_MAXIMO) {
-    return { ok: false, error: `El cuerpo no puede pasar de ${CUERPO_MAXIMO} caracteres.` }
+    return { ok: false, error: `El texto no puede pasar de ${CUERPO_MAXIMO} caracteres.` }
   }
 
   const mostrarPublico = formData.get('mostrar_publico') === 'true'
@@ -57,6 +68,79 @@ function leerCampos(formData: FormData):
   return { ok: true, titulo, cuerpo, mostrarPublico, mostrarMiembros }
 }
 
+/** El archivo de imagen que viene con el formulario, si viene. */
+function archivoDe(formData: FormData): File | null {
+  const archivo = formData.get('archivo')
+  return archivo instanceof File && archivo.size > 0 ? archivo : null
+}
+
+/*
+  LA IMAGEN VIAJA CON EL FORMULARIO (21/10/2026: «editar novedad está feo y
+  complicado, y no me permite borrar la imagen»). Antes eran dos formularios
+  —los textos y, aparte, «Subir imagen»— y no había forma de quitarla. Ahora
+  un solo «Guardar» lleva los textos, la imagen nueva (ya encuadrada en el
+  navegador) o la orden de quitar la que había.
+
+  La imagen se sube DESPUÉS de guardar los textos: si Storage falla, la
+  novedad queda guardada y el aviso lo dice; la imagen anterior no se toca.
+*/
+async function aplicarImagen(
+  admin: Admin,
+  actorId: string,
+  anuncioId: number,
+  urlAnterior: string | null,
+  formData: FormData,
+): Promise<string | null> {
+  const archivo = archivoDe(formData)
+  const quitar = formData.get('quitar_imagen') === '1'
+
+  if (archivo) {
+    const subida = await subirImagen(admin, {
+      archivo,
+      bucket: BUCKET_IMAGENES_ANUNCIOS,
+      ruta: (ext) => rutaImagenAnuncio(anuncioId, ext),
+      limite: LIMITE_IMAGENES_COMERCIOS,
+    })
+    if (!subida.ok) return `La novedad se guardó, pero la imagen no: ${subida.error}`
+
+    const { error } = await admin
+      .from('anuncios')
+      .update({ imagen_url: subida.url, updated_by: actorId })
+      .eq('id', anuncioId)
+    if (error) {
+      return mensajeDeError('La novedad se guardó, pero no su imagen', error)
+    }
+    await registrarCambioImagen(admin, {
+      actorId,
+      entidad: 'anuncio',
+      entidadId: anuncioId,
+      campo: 'imagen_url',
+      urlAnterior,
+      urlNueva: subida.url,
+    })
+    return null
+  }
+
+  if (quitar && urlAnterior) {
+    const { error } = await admin
+      .from('anuncios')
+      .update({ imagen_url: null, updated_by: actorId })
+      .eq('id', anuncioId)
+    if (error) return mensajeDeError('La novedad se guardó, pero no se pudo quitar su imagen', error)
+    // Best-effort: si el archivo ya no estaba, la novedad queda igual sin imagen.
+    await borrarPorUrlPublica(admin, BUCKET_IMAGENES_ANUNCIOS, urlAnterior)
+    await registrarCambioImagen(admin, {
+      actorId,
+      entidad: 'anuncio',
+      entidadId: anuncioId,
+      campo: 'imagen_url',
+      urlAnterior,
+      urlNueva: null,
+    })
+  }
+  return null
+}
+
 export async function crearAnuncio(_prev: AnuncioState, formData: FormData): Promise<AnuncioState> {
   const actor = await exigirSuperAdmin()
   if (!actor) return { error: 'No tienes permiso para realizar esta acción.' }
@@ -65,19 +149,24 @@ export async function crearAnuncio(_prev: AnuncioState, formData: FormData): Pro
   if (!campos.ok) return { error: campos.error }
 
   const admin = createAdminClient()
-  const { error } = await admin.from('anuncios').insert({
-    updated_by: actor.actorId,
-    titulo: campos.titulo,
-    cuerpo: campos.cuerpo,
-    mostrar_publico: campos.mostrarPublico,
-    mostrar_miembros: campos.mostrarMiembros,
-    activo: true,
-    creado_por: actor.actorId,
-  })
-  if (error) return { error: mensajeDeError('No se pudo crear la novedad', error) }
+  const { data: creado, error } = await admin
+    .from('anuncios')
+    .insert({
+      updated_by: actor.actorId,
+      titulo: campos.titulo,
+      cuerpo: campos.cuerpo,
+      mostrar_publico: campos.mostrarPublico,
+      mostrar_miembros: campos.mostrarMiembros,
+      activo: true,
+      creado_por: actor.actorId,
+    })
+    .select('id')
+    .single()
+  if (error || !creado) return { error: mensajeDeError('No se pudo crear la novedad', error) }
 
+  const errorImagen = await aplicarImagen(admin, actor.actorId, creado.id, null, formData)
   refrescar()
-  return { ok: true }
+  return errorImagen ? { error: errorImagen } : { ok: true }
 }
 
 export async function editarAnuncio(_prev: AnuncioState, formData: FormData): Promise<AnuncioState> {
@@ -91,6 +180,14 @@ export async function editarAnuncio(_prev: AnuncioState, formData: FormData): Pr
   if (!campos.ok) return { error: campos.error }
 
   const admin = createAdminClient()
+  const { data: anterior } = await admin
+    .from('anuncios')
+    .select('imagen_url')
+    .eq('id', id)
+    .is('deleted_at', null)
+    .maybeSingle()
+  if (!anterior) return { error: 'La novedad ya no existe.' }
+
   const { error } = await admin
     .from('anuncios')
     .update({
@@ -103,8 +200,9 @@ export async function editarAnuncio(_prev: AnuncioState, formData: FormData): Pr
     .eq('id', id)
   if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
 
+  const errorImagen = await aplicarImagen(admin, actor.actorId, id, anterior.imagen_url, formData)
   refrescar()
-  return { ok: true }
+  return errorImagen ? { error: errorImagen } : { ok: true }
 }
 
 /** Activa o desactiva un anuncio (anuncios.activo). Calcado de cambiarEstadoPlan. */

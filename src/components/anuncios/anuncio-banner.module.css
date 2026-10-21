@@ -1,67 +1,220 @@
-/* src/components/anuncios/anuncio-banner.module.css */
+/* ==========================================================================
+   EL AVISO DE LA ÚLTIMA NOVEDAD  ·  tarjeta blanca (21/10/2026)
+   ========================================================================== */
 
-.banner {
-  margin-bottom: var(--space-6);
-  /* Nunca `scale(0)`: nace desde 0.95 con opacidad, no desde la nada.
-     Es un mount/unmount de React (el hook decide si existe), así que un
-     `@keyframes` en vez de una transición es lo correcto — no hay valor de
-     partida que transicionar cuando el elemento aparece de cero. */
-  animation: entrar var(--dur-slow) var(--ease-out);
+.aviso {
+  margin-block: var(--space-6);
 }
 
-@keyframes entrar {
+/* Aparece de cero (lo monta el cliente al hidratar): un `@keyframes` con el
+   estado final como base. Nada desde `scale(0)`: llega desde abajo y 0.98. */
+@media (prefers-reduced-motion: no-preference) {
+  .aviso {
+    animation: llegar var(--dur-slow) var(--ease-out);
+  }
+}
+
+@keyframes llegar {
   from {
     opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
+    translate: 0 8px;
+    scale: 0.98;
   }
 }
 
-.fila {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
+.tarjeta {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-4);
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* Toda la tarjeta es el enlace: se levanta al apuntarla. */
+@media (hover: hover) {
+  .tarjeta:hover {
+    translate: 0 -2px;
+    box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
+  }
+
+  .tarjeta:hover .verMas svg {
+    translate: 3px 0;
+  }
+}
+
+.tarjeta:active {
+  translate: 0 1px;
+  box-shadow: var(--shadow-press);
+}
+
+/* El foco del enlace se dibuja en la tarjeta entera. */
+.tarjeta:has(.titulo:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* --- La miniatura -------------------------------------------------------- */
+
+.miniatura {
+  display: grid;
+  place-items: center;
+  width: 132px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+}
+
+.miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .icono {
-  flex-shrink: 0;
-  color: var(--gold-400);
-  margin-top: var(--space-1);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--brand);
+  color: var(--brand);
 }
 
+/* --- Los textos ---------------------------------------------------------- */
+
 .textos {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
   min-width: 0;
 }
 
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--t-caption-size);
+  color: var(--text-2);
+}
+
+/* «Novedad»: una insignia, sin sombra. */
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--space-5);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--gold-bg);
+  font-weight: 700;
+  color: var(--brand);
+}
+
 .titulo {
-  font-weight: 600;
+  font-size: var(--t-title-3-size);
+  font-weight: 700;
+  line-height: 1.3;
   color: var(--text);
+  text-decoration: none;
+  outline: none;
+}
+
+/* El enlace estirado: cubre toda la tarjeta (menos la X, que va encima). */
+.titulo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
 }
 
 .extracto {
-  color: var(--text-2);
-  margin-top: var(--space-1);
-  /* Recorte a dos líneas: un cuerpo de hasta 600 caracteres no puede reventar
-     la franja del banner — el texto completo vive en /novedades. */
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .verMas {
-  flex-shrink: 0;
-  align-self: center;
-  color: var(--gold-300);
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--tinta-1) 15%, transparent);
+  border-radius: var(--radius-full);
+  font-size: var(--t-footnote-size);
+  font-weight: 700;
+  color: var(--text);
   white-space: nowrap;
 }
 
+.verMas svg {
+  color: var(--brand);
+  transition: translate var(--dur-fast) var(--ease-out);
+}
+
+/* --- La X ------------------------------------------------------------------ */
+
 .cerrar {
-  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
   color: var(--text-2);
+  cursor: pointer;
+  transition: rotate var(--dur-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .cerrar:hover {
+    rotate: 90deg;
+    color: var(--text);
+  }
+}
+
+.cerrar:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* --- En el teléfono: miniatura a la izquierda, sin el botón «Ver más» ------ */
+
+@container contenido (max-width: 640px) {
+  .tarjeta {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    padding: var(--space-3);
+  }
+
+  .miniatura {
+    width: 88px;
+  }
+
+  .extracto {
+    -webkit-line-clamp: 2;
+  }
+
+  .verMas {
+    display: none;
+  }
 }

@@ -82,3 +82,32 @@
 .cifraCero {
   color: var(--text-3);
 }
+
+/* La miniatura de una novedad: 16:9, como se ve en la portada. */
+.miniatura {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 64px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hueco);
+  color: var(--text-3);
+}
+
+.miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Una línea del texto, cortada: el resto vive en la ficha. */
+.subtituloTexto {
+  overflow: hidden;
+  max-width: 52ch;
+  font-size: var(--t-caption-size);
+  color: var(--text-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

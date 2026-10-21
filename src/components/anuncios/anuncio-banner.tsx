@@ -1,27 +1,27 @@
 'use client'
 
 import Link from 'next/link'
-import { Megaphone, X } from 'lucide-react'
-import { Section } from '@/components/ui/layout'
-import { Button } from '@/components/ui/button'
+import { ArrowRight, Megaphone, X } from 'lucide-react'
 import { usePreferenciaLocal } from '@/components/use-preferencia-local'
 import { useHidratado } from '@/components/use-hidratado'
+import { formatearFechaNovedad } from '@/lib/anuncios/fecha'
 import type { AnuncioResumen } from '@/lib/anuncios/tipos'
 import styles from './anuncio-banner.module.css'
 
 /*
-  FRANJA DE ANUNCIO EN LA PORTADA DE CADA PORTAL.
+  EL AVISO DE LA ÚLTIMA NOVEDAD, EN LA PORTADA  ·  rediseño del 21/10/2026
+  ---------------------------------------------------------------------------
+  Encargo: «no me gusta cómo se ven, el fondo negro no me agrada». Era una
+  franja negra (`Section tono="negro"`) con un megáfono y el texto. Ahora es
+  una TARJETA BLANCA con su sombra, como el resto de la fachada:
 
-  `<Section tono="negro">` y no la franja de ancho completo de la landing
-  (`escaparate.module.css`): esa es un mecanismo propio de `(publico)/page.tsx`
-  con su regla `.franja:first-child`. `Section` es la superficie tonal
-  GENÉRICA del sistema (`layout.module.css`), sin sangrado a los bordes ni
-  reglas de primer hijo — así este componente no interfiere con esa CSS por
-  compartir un nombre de clase parecido: son dos módulos distintos.
-
-  Se cierra guardando `anuncio-cerrado-{id}` en localStorage. La clave lleva
-  el ID: un anuncio nuevo (id distinto) vuelve a aparecer aunque el socio
-  haya cerrado el anterior, sin backend ni tabla de lecturas.
+    · Su imagen en miniatura (16:9), o el megáfono en un aro dorado si no
+      tiene.
+    · «Novedad» y la fecha, el título y el comienzo del texto.
+    · Toda la tarjeta lleva a ESA novedad en `/novedades` (`#novedad-{id}`),
+      no al principio de la página; «Ver más» lo dice con palabras.
+    · La X la cierra y se recuerda por id (`anuncio-cerrado-{id}`): una
+      novedad nueva vuelve a aparecer aunque se cerrara la anterior.
 */
 export function AnuncioBanner({
   anuncio,
@@ -39,38 +39,53 @@ export function AnuncioBanner({
 
   /*
     Sin `hidratado`, el snapshot de servidor de `usePreferenciaLocal` (siempre
-    `false`) pintaría el banner en cada carga y lo haría desaparecer justo
+    `false`) pintaría el aviso en cada carga y lo haría desaparecer justo
     después de hidratar para quien ya lo había cerrado — parpadeo y salto de
-    layout en las dos páginas más visitadas. Se espera a que el cliente
-    confirme AMBAS cosas: que hay anuncio y que no fue cerrado.
+    layout en la página más visitada. Se espera a que el cliente confirme
+    AMBAS cosas: que hay anuncio y que no fue cerrado.
   */
   if (!hidratado || !anuncio || cerrado) return null
 
   return (
-    <Section tono="negro" className={styles.banner}>
-      <div className={styles.fila}>
-        <Megaphone className={styles.icono} size={20} aria-hidden="true" />
+    <aside className={styles.aviso} aria-label="Novedad del club">
+      <div className={styles.tarjeta}>
+        <span className={styles.miniatura} aria-hidden="true">
+          {anuncio.imagenUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- URL externa de Storage
+            <img src={anuncio.imagenUrl} alt="" decoding="async" />
+          ) : (
+            <span className={styles.icono}>
+              <Megaphone size={20} />
+            </span>
+          )}
+        </span>
 
         <div className={styles.textos}>
-          <p className={styles.titulo}>{anuncio.titulo}</p>
+          <p className={styles.meta}>
+            <span className={styles.etiqueta}>Novedad</span>
+            <time dateTime={anuncio.createdAt}>{formatearFechaNovedad(anuncio.createdAt)}</time>
+          </p>
+          {/* El enlace se estira a toda la tarjeta (`::after`): se toca en cualquier sitio. */}
+          <Link href={`${hrefHistorial}#novedad-${anuncio.id}`} className={styles.titulo}>
+            {anuncio.titulo}
+          </Link>
           <p className={styles.extracto}>{anuncio.cuerpo}</p>
         </div>
 
-        <Link href={hrefHistorial} className={styles.verMas}>
+        <span className={styles.verMas} aria-hidden="true">
           Ver más
-        </Link>
+          <ArrowRight size={16} />
+        </span>
 
-        <Button
-          iconOnly
-          variant="ghost"
-          size="sm"
-          aria-label="Cerrar aviso"
+        <button
+          type="button"
           className={styles.cerrar}
+          aria-label="Cerrar aviso"
           onClick={() => cerrar(true)}
         >
           <X size={16} aria-hidden="true" />
-        </Button>
+        </button>
       </div>
-    </Section>
+    </aside>
   )
 }

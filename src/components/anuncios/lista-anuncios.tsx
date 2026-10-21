@@ -1,11 +1,25 @@
 import { Megaphone } from 'lucide-react'
-import { Card } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/feedback'
-import { Stack } from '@/components/ui/layout'
+import { EstrellaOrum } from '@/components/ui/marca/marca'
 import { formatearFechaNovedad } from '@/lib/anuncios/fecha'
 import type { AnuncioResumen } from '@/lib/anuncios/tipos'
 import styles from './lista-anuncios.module.css'
 
+/*
+  LAS NOVEDADES  ·  rediseño del 21/10/2026
+  ---------------------------------------------------------------------------
+  Encargo: «cuando le doy a "Ver más" me aparece un diseño muy pobre que se
+  ve muy vacío». Era una columna de 640px con tarjetas apiladas. Ahora:
+
+    · LA MÁS RECIENTE, EN GRANDE: imagen y texto lado a lado a todo el ancho
+      de la fachada (uno encima del otro en el teléfono), con su titular en
+      el serif de la marca.
+    · LAS ANTERIORES, EN REJILLA: tarjetas con su imagen en 16:9, la fecha,
+      el título y el texto completo (son textos cortos: 600 caracteres).
+    · SIN IMAGEN no queda un hueco: una lámina con la estrella de ORUM.
+    · CADA UNA TIENE SU ANCLA (`#novedad-{id}`): el «Ver más» del aviso de la
+      portada lleva directo a la suya, que se marca con el filo dorado.
+*/
 export function ListaAnuncios({ anuncios }: { anuncios: AnuncioResumen[] }) {
   if (anuncios.length === 0) {
     return (
@@ -17,25 +31,61 @@ export function ListaAnuncios({ anuncios }: { anuncios: AnuncioResumen[] }) {
     )
   }
 
+  const [destacada, ...anteriores] = anuncios
+
   return (
-    <Stack gap={5}>
-      {anuncios.map((anuncio) => (
-        <Card key={anuncio.id} padding="lg">
-          {anuncio.imagenUrl && (
-            // eslint-disable-next-line @next/next/no-img-element -- URL externa de Storage, no un asset local
-            <img
-              src={anuncio.imagenUrl}
-              alt=""
-              className={styles.imagen}
-              loading="lazy"
-              decoding="async"
-            />
-          )}
-          <p className={styles.fecha}>{formatearFechaNovedad(anuncio.createdAt)}</p>
-          <h2 className={styles.titulo}>{anuncio.titulo}</h2>
-          <p className={styles.cuerpo}>{anuncio.cuerpo}</p>
-        </Card>
-      ))}
-    </Stack>
+    <div className={styles.lista}>
+      <article id={`novedad-${destacada.id}`} className={styles.destacada}>
+        <Imagen url={destacada.imagenUrl} />
+        <div className={styles.destacadaTexto}>
+          <p className={styles.meta}>
+            <span className={styles.etiqueta}>Lo más reciente</span>
+            <time dateTime={destacada.createdAt}>{formatearFechaNovedad(destacada.createdAt)}</time>
+          </p>
+          <h2 className={styles.destacadaTitulo}>{destacada.titulo}</h2>
+          <p className={styles.cuerpo}>{destacada.cuerpo}</p>
+        </div>
+      </article>
+
+      {anteriores.length > 0 && (
+        <section className={styles.anteriores} aria-labelledby="titulo-anteriores">
+          <h2 id="titulo-anteriores" className={styles.subtitulo}>
+            Novedades anteriores
+          </h2>
+          <ul className={styles.rejilla}>
+            {anteriores.map((a) => (
+              <li key={a.id}>
+                <article id={`novedad-${a.id}`} className={styles.tarjeta}>
+                  <Imagen url={a.imagenUrl} />
+                  <div className={styles.tarjetaTexto}>
+                    <p className={styles.meta}>
+                      <time dateTime={a.createdAt}>{formatearFechaNovedad(a.createdAt)}</time>
+                    </p>
+                    <h3 className={styles.tarjetaTitulo}>{a.titulo}</h3>
+                    <p className={styles.cuerpo}>{a.cuerpo}</p>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  )
+}
+
+/** La imagen en 16:9, o la lámina de la marca si no tiene. Decorativa: el título dice qué es. */
+function Imagen({ url }: { url: string | null }) {
+  return (
+    <div className={styles.imagen} aria-hidden="true">
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element -- URL externa de Storage, no un asset local
+        <img src={url} alt="" loading="lazy" decoding="async" />
+      ) : (
+        <span className={styles.lamina}>
+          <EstrellaOrum className={styles.laminaEstrella} />
+        </span>
+      )}
+    </div>
   )
 }

@@ -1461,6 +1461,32 @@ ocultar sin borrar, editar y quitar— y el ajuste en una ventana encima con
 - Las acciones sueltan la caché con `updateTag('publico')`: el cambio se ve
   al momento, no al minuto.
 
+**Las NOVEDADES, rediseñadas** (21/10/2026: «el fondo negro no me agrada;
+"Ver más" se ve muy vacío; editar novedad está feo y complicado, y no me deja
+borrar la imagen»). Tres piezas:
+
+- **El aviso de la portada** (`AnuncioBanner`) es una TARJETA BLANCA con su
+  sombra —no la franja negra de antes—: miniatura 16:9 (o el megáfono en un
+  aro dorado), «Novedad» y la fecha, título, una línea del texto y «Ver más».
+  Toda la tarjeta lleva a ESA novedad (`/novedades#novedad-{id}`, enlace
+  estirado). No vuelvas al fondo negro.
+- **`/novedades`** va a lo ancho de la fachada: cabecera con
+  `TituloSeccion`, la más reciente EN GRANDE (imagen y texto lado a lado),
+  las anteriores en rejilla, y al final dos accesos (comercios y
+  membresías). Sin imagen sale una lámina con la estrella de ORUM, no un
+  hueco. La que señala el ancla lleva el filo dorado (`:target`).
+- **El formulario del panel es UNO** (`AnuncioForm`): la imagen arriba, como
+  se verá (16:9) —vacía, un recuadro donde soltarla o elegirla; con imagen,
+  «Ajustar», «Cambiar» y «Quitar» (que se puede deshacer)—; el ajuste es un
+  PASO con `EditorEncuadre` (Escape vuelve al formulario); los textos con su
+  recuento; dónde se muestra con dos interruptores; y UN «Guardar» que lleva
+  todo. La imagen viaja en un `<input type="file" name="archivo">` oculto
+  (asignado con `DataTransfer`) y la acción la sube DESPUÉS de guardar los
+  textos; `quitar_imagen=1` la borra (fila y archivo). Ya no existe
+  `imagen-actions.ts` ni el segundo formulario con «Subir imagen». Las
+  acciones sueltan la caché `publico` (antes la portada tardaba hasta un
+  minuto en enterarse).
+
 **El formulario «Quiero ser aliado» valida con EXIGENCIA** (05/10/2026: «es
 el portal público; no quiero que pongan datos que no son»). Las reglas viven
 en `lib/aliados/solicitud-aliado.ts` (puro, probado; el servidor es quien
