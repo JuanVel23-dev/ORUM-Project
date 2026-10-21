@@ -87,6 +87,8 @@ export function Sheet({
   const dialogRef = useRef<HTMLDialogElement>(null)
   /** Vale hasta el primer cierre: ver `Modal sinEntrada`. */
   const saltarEntrada = useRef(sinEntrada)
+  /** El fundido del contenido que sustituye a la carga, una sola vez. */
+  const ajustado = useRef(false)
   const tituloId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const veloRef = useRef<HTMLDivElement>(null)
@@ -178,6 +180,13 @@ export function Sheet({
       if (saltarEntrada.current) {
         colocar(destino)
         if (veloRef.current) veloRef.current.style.opacity = '1'
+        /* La hoja mide siempre lo mismo (`--alto-hoja`): no hay tamaño que
+           suavizar, solo el contenido nuevo, que entra con un fundido. */
+        if (!ajustado.current) {
+          ajustado.current = true
+          const cuerpo = panel.querySelector<HTMLElement>('[data-barra]')
+          if (cuerpo) animate(cuerpo, { opacity: [0, 1] }, prefiereMovimientoReducido() ? TWEEN_REDUCIDO : SPRING_UI)
+        }
         return
       }
 
@@ -355,7 +364,7 @@ export function Sheet({
     >
       <div ref={veloRef} className={styles.velo} onClick={onClose} aria-hidden="true" />
 
-      <div ref={panelRef} className={styles.panel} role="document">
+      <div ref={panelRef} className={styles.panel} role="document" data-superficie="">
         <div
           className={styles.agarre}
           onPointerDown={alBajar}

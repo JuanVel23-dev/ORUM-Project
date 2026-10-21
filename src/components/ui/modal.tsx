@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useId, useRef, type CSSProperties, type ReactNode } from 'react'
 import { animate } from 'motion'
 import { X } from 'lucide-react'
+import { cajaDeCarga } from './continuidad-ventana'
 import {
+  SPRING_MOVE,
   SPRING_UI,
   TWEEN_REDUCIDO,
   leerTransformEnPantalla,
@@ -104,6 +106,33 @@ type Props = {
   children?: ReactNode
 }
 
+/*
+  DE LA VENTANA DE CARGA AL FORMULARIO, SIN SALTO (21/10/2026: «suaviza el
+  cambio de tamaño de la ventana»). La silueta de carga mide lo suyo y el
+  formulario lo suyo; al llegar, la ventana cambiaba de tamaño de golpe.
+
+  FLIP, solo con `transform`: la ventana nueva ya está en su tamaño final, se
+  la escala para que arranque con el de la de carga y el resorte la lleva a
+  `scale(1)`. Su contenido (que es nuevo) entra con un fundido algo después,
+  así que mientras la caja se ajusta no se ve el texto deformado. Con
+  movimiento reducido no hay ajuste: solo el fundido del contenido.
+*/
+function ajustarDesdeCarga(dialogo: HTMLDialogElement) {
+  const contenido = dialogo.firstElementChild as HTMLElement | null
+  const antes = cajaDeCarga()
+  if (prefiereMovimientoReducido()) {
+    if (contenido) animate(contenido, { opacity: [0, 1] }, TWEEN_REDUCIDO)
+    return
+  }
+  const sx = antes ? antes.ancho / dialogo.offsetWidth : 1
+  const sy = antes ? antes.alto / dialogo.offsetHeight : 1
+  // Si ya miden casi lo mismo, no hay nada que suavizar más que el contenido.
+  if (Math.abs(sx - 1) > 0.01 || Math.abs(sy - 1) > 0.01) {
+    animate(dialogo, { transform: [`scale(${sx}, ${sy})`, 'scale(1, 1)'] }, SPRING_MOVE)
+  }
+  if (contenido) animate(contenido, { opacity: [0, 1] }, { ...SPRING_UI, delay: 0.06 })
+}
+
 export function Modal({
   open,
   onClose,
@@ -128,6 +157,8 @@ export function Modal({
     cambia una dependencia), y la segunda pasada hacía la entrada entera.
   */
   const saltarEntrada = useRef(sinEntrada)
+  /** El ajuste de tamaño desde la ventana de carga se hace una sola vez. */
+  const ajustado = useRef(false)
   /** Id propio del título: dos modales montados a la vez no pueden compartirlo. */
   const tituloId = useId()
   const alCerradoRef = useRef(onClosed)
@@ -208,7 +239,13 @@ export function Modal({
       if (!dialogo.open) dialogo.showModal()
 
       // Sustituye a la ventana de carga: ya estaba abierta, no se vuelve a abrir.
-      if (saltarEntrada.current) return
+      if (saltarEntrada.current) {
+        if (!ajustado.current) {
+          ajustado.current = true
+          ajustarDesdeCarga(dialogo)
+        }
+        return
+      }
 
       /*
         INTERRUMPIBLE (v3 §3.3): se arranca desde lo que HAY PINTADO, no desde
@@ -300,6 +337,8 @@ export function Modal({
   return (
     <dialog
       ref={ref}
+      // La superficie que mide la ventana de carga (`continuidad-ventana.ts`).
+      data-superficie=""
       className={[styles.dialog, desnudo && styles.desnudo, sinEntrada && styles.sinEntrada, className]
         .filter(Boolean)
         .join(' ')}

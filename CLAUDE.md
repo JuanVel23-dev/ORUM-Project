@@ -976,7 +976,12 @@ llega a sustituirla lo pregunta al montarse (`Overlay continua` →
 `Modal`/`Sheet sinEntrada`) y aparece ya abierta, sin entrada y con el fondo
 quieto (`.sinEntrada`). El aviso vale hasta el primer cierre, no una pasada
 del efecto (React lo repite). Una ventana de carga nueva se registra con
-`registrarVentanaDeCarga()`.
+`registrarVentanaDeCarga()`. **Y el cambio de tamaño se suaviza** (mismo día):
+la ventana de carga anota su caja (`anotarCajaDeCarga`, sobre el
+`[data-superficie]`) y la del formulario hace FLIP desde ella —solo
+`transform`, `SPRING_MOVE`— mientras su contenido entra con un fundido algo
+después, para que no se vea deformado. En el teléfono la hoja mide siempre
+lo mismo: solo el fundido del contenido.
 
 Tras mover o añadir rutas paralelas, **reinicia el servidor de desarrollo**: el
 manifiesto de rutas queda obsoleto y la interceptación falla en silencio, lo que

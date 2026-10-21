@@ -23,6 +23,12 @@
 
 /** Ventanas de carga montadas ahora mismo. */
 let montadas = 0
+/**
+ * El tamaño de la última ventana de carga (su caja, sin transformar). La
+ * ventana que la sustituye arranca con él y se ajusta al suyo
+ * (21/10/2026: «suaviza el cambio de tamaño de la ventana»).
+ */
+let caja: { ancho: number; alto: number } | null = null
 /** Cuándo se retiró la última (ms de `performance.now()`). */
 let retiradaEn = Number.NEGATIVE_INFINITY
 
@@ -46,4 +52,14 @@ export function registrarVentanaDeCarga(): () => void {
 export function sustituyeVentanaDeCarga(): boolean {
   if (typeof window === 'undefined') return false
   return montadas > 0 || performance.now() - retiradaEn < MARGEN_MS
+}
+
+/** La ventana de carga anota su tamaño (al montarse y cada vez que cambia). */
+export function anotarCajaDeCarga(ancho: number, alto: number) {
+  caja = { ancho, alto }
+}
+
+/** El tamaño de la ventana de carga a la que se sustituye, si se conoce. */
+export function cajaDeCarga(): { ancho: number; alto: number } | null {
+  return caja
 }

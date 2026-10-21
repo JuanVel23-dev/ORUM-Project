@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { registrarVentanaDeCarga } from '@/components/ui/continuidad-ventana'
+import { anotarCajaDeCarga, registrarVentanaDeCarga } from '@/components/ui/continuidad-ventana'
 import { Overlay } from '@/components/ui/overlay'
 import { Skeleton } from '@/components/ui/feedback'
 import styles from './overlay-cargando.module.css'
@@ -24,9 +24,24 @@ export function OverlayCargando() {
   // La ventana del formulario que llegue después la continúa (`continuidad-ventana.ts`).
   useEffect(() => registrarVentanaDeCarga(), [])
 
+  /* Su tamaño, para que la ventana del formulario arranque con él y se
+     ajuste al suyo sin salto. Se mide la caja SIN transformar (`offset*`):
+     mientras entra, la ventana está escalada y su `getBoundingClientRect`
+     diría un tamaño que no es el suyo. */
+  const cuerpo = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const superficie = cuerpo.current?.closest<HTMLElement>('[data-superficie]')
+    if (!superficie) return
+    const anotar = () => anotarCajaDeCarga(superficie.offsetWidth, superficie.offsetHeight)
+    anotar()
+    const observador = new ResizeObserver(anotar)
+    observador.observe(superficie)
+    return () => observador.disconnect()
+  }, [])
+
   return (
     <Overlay open onClose={() => router.back()} width="640px">
-      <div className={styles.cuerpo} aria-busy="true" aria-label="Cargando formulario">
+      <div ref={cuerpo} className={styles.cuerpo} aria-busy="true" aria-label="Cargando formulario">
         <div className={styles.cabecera}>
           <Skeleton width="52%" height="24px" radius="var(--radius-sm)" />
           <Skeleton width="78%" height="14px" />
