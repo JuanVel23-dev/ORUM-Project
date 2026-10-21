@@ -99,3 +99,20 @@ describe('esTablaAusente', () => {
     expect(esTablaAusente(undefined)).toBe(false)
   })
 })
+
+import { resumenDeConteos } from './resenas'
+
+describe('resumenDeConteos', () => {
+  it('sin reseñas: total 0 y sin promedio', () => {
+    expect(resumenDeConteos([0, 0, 0, 0, 0])).toEqual({ total: 0, promedio: null })
+  })
+  it('promedia a un decimal', () => {
+    // 1x5, 1x4, 1x3 => 4
+    expect(resumenDeConteos([0, 0, 1, 1, 1])).toEqual({ total: 3, promedio: 4 })
+    // 2x5 + 1x4 => 4,67 -> 4,7
+    expect(resumenDeConteos([0, 0, 0, 1, 2])).toEqual({ total: 3, promedio: 4.7 })
+  })
+  it('no se trunca a 1000', () => {
+    expect(resumenDeConteos([0, 0, 0, 0, 1500]).total).toBe(1500)
+  })
+})

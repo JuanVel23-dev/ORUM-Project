@@ -111,6 +111,23 @@ export function promedio(estrellas: number[]): number | null {
   return Math.round((suma / estrellas.length) * 10) / 10
 }
 
+/**
+ * Total y promedio a partir de cuántas reseñas hay con 1, 2, 3, 4 y 5
+ * estrellas (`conteos[0]` = las de 1). Exacto sin traer filas.
+ */
+export function resumenDeConteos(conteos: readonly number[]): {
+  total: number
+  promedio: number | null
+} {
+  let total = 0
+  let suma = 0
+  conteos.forEach((n, i) => {
+    total += n
+    suma += n * (i + 1)
+  })
+  return { total, promedio: total === 0 ? null : Math.round((suma / total) * 10) / 10 }
+}
+
 /** «4,5» con coma decimal; «—» cuando no hay promedio. */
 export function formatearPromedio(valor: number | null): string {
   if (valor === null) return '—'

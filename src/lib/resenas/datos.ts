@@ -3,8 +3,9 @@ import 'server-only'
 import { cache } from 'react'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { rangoDePagina } from '@/lib/shared/paginacion'
 import { obtenerMiComercio } from '@/lib/comercios/comercio-sesion'
-import { esTablaAusente, promedio, type ResenaVista } from './resenas'
+import { esTablaAusente, resumenDeConteos, type ResenaVista } from './resenas'
 import {
   gestionDeFila,
   separarMiResena,
@@ -31,6 +32,11 @@ type ResumenGestion = {
   total: number
   promedio: number | null
   resenas: ResenaGestion[]
+  /** Página servida (1..paginas), cuántas hay y el tramo «desde–hasta». */
+  pagina: number
+  paginas: number
+  desde: number
+  hasta: number
 }
 
 const SOCIO_VACIO: ResumenSocio = {
@@ -46,6 +52,10 @@ const GESTION_VACIO: ResumenGestion = {
   total: 0,
   promedio: null,
   resenas: [],
+  pagina: 1,
+  paginas: 1,
+  desde: 0,
+  hasta: 0,
 }
 
 /** Tabla ausente: silencio. Cualquier otro error: consola, nunca la página. */
@@ -121,40 +131,60 @@ export const puedoResenar = cache(async (comercioId: number): Promise<boolean> =
  * filtro por `comercio_id`, que llega ya validado por quien llama. Ve las
  * reseñas aunque el comercio esté inactivo.
  */
-async function cargarParaGestion(comercioId: number): Promise<ResumenGestion> {
+async function cargarParaGestion(
+  comercioId: number,
+  /** Sin página: las `PAGINA_RESENAS` más recientes (comercio). Con página: 25 por página (panel). */
+  pagina?: number,
+): Promise<ResumenGestion> {
   try {
     const admin = createAdminClient()
 
-    // Todas las estrellas (una columna) para el total y el promedio exactos;
-    // la lista, solo la primera página.
-    const [estrellas, lista] = await Promise.all([
-      admin.from('resenas').select('estrellas').eq('comercio_id', comercioId),
-      admin
-        .from('resenas')
-        .select(
-          'id, estrellas, mensaje, created_at, respuesta_comercio, respuesta_comercio_at, respuesta_admin, respuesta_admin_at, miembros ( nombres, apellidos )',
-        )
-        .eq('comercio_id', comercioId)
-        .order('created_at', { ascending: false })
-        .order('id', { ascending: false })
-        .limit(PAGINA_RESENAS),
-    ])
-
-    if (estrellas.error) {
-      registrar('resenas (estrellas)', estrellas.error)
+    // Total y promedio EXACTOS sin traer filas (PostgREST corta en 1000):
+    // cinco consultas `head`, una por número de estrellas.
+    const conteos = await Promise.all(
+      [1, 2, 3, 4, 5].map((n) =>
+        admin
+          .from('resenas')
+          .select('id', { count: 'exact', head: true })
+          .eq('comercio_id', comercioId)
+          .eq('estrellas', n),
+      ),
+    )
+    const falla = conteos.find((c) => c.error)
+    if (falla?.error) {
+      registrar('resenas (conteo)', falla.error)
       return GESTION_VACIO
     }
+    const { total, promedio: media } = resumenDeConteos(conteos.map((c) => c.count ?? 0))
+
+    const paginado = pagina !== undefined
+    const rango = rangoDePagina(total, pagina ?? 1)
+
+    let consulta = admin
+      .from('resenas')
+      .select(
+        'id, estrellas, mensaje, created_at, respuesta_comercio, respuesta_comercio_at, respuesta_admin, respuesta_admin_at, miembros ( nombres, apellidos )',
+      )
+      .eq('comercio_id', comercioId)
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+    consulta = paginado ? consulta.range(rango.inicio, rango.fin) : consulta.limit(PAGINA_RESENAS)
+    const lista = total === 0 ? { data: [], error: null } : await consulta
+
     if (lista.error) {
       registrar('resenas (lista)', lista.error)
       return GESTION_VACIO
     }
 
-    const todas = (estrellas.data ?? []).map((f) => f.estrellas)
     return {
       disponible: true,
-      total: todas.length,
-      promedio: promedio(todas),
+      total,
+      promedio: media,
       resenas: (lista.data as unknown as FilaGestion[]).map(gestionDeFila),
+      pagina: rango.pagina,
+      paginas: rango.paginas,
+      desde: rango.desde,
+      hasta: rango.hasta,
     }
   } catch (e) {
     console.error('[resenas] cargarParaGestion:', e)
@@ -173,5 +203,6 @@ export const obtenerResenasParaComercio = cache(
 
 /** Las de cualquier comercio; la página ya hizo `requireRol('super_admin')`. */
 export const obtenerResenasParaAdmin = cache(
-  async (comercioId: number): Promise<ResumenGestion> => cargarParaGestion(comercioId),
+  async (comercioId: number, pagina: number): Promise<ResumenGestion> =>
+    cargarParaGestion(comercioId, pagina),
 )

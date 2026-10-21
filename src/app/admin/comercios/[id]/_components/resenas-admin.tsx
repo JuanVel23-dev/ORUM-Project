@@ -183,11 +183,6 @@ export function ResenasAdmin({ comercioId, total, promedio, resenas }: Props) {
               </li>
             ))}
           </ul>
-          {total > resenas.length && (
-            <p className={estilos.nota}>
-              Mostramos las {resenas.length} más recientes de {total}.
-            </p>
-          )}
         </>
       ) : (
         <EmptyState
