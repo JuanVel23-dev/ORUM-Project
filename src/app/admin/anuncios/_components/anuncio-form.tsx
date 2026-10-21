@@ -23,7 +23,7 @@ import {
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { crearAnuncio, editarAnuncio, type AnuncioState } from '../actions'
 import formStyles from '@/styles/formulario.module.css'
-import styles from './anuncio-form.module.css'
+import styles from './novedad-form.module.css'
 
 export type AnuncioInicial = {
   id: number

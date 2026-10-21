@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, BadgePercent, Store } from 'lucide-react'
 import { obtenerAnunciosPublicos } from '@/lib/publico/datos-publicos'
-import { ListaAnuncios } from '@/components/anuncios/lista-anuncios'
+import { ListaNovedades } from '@/components/novedades/lista-novedades'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { HREF_UNETE } from '../_components/anclas'
 import estilos from './novedades.module.css'
@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic'
 /*
   NOVEDADES  ·  rediseño del 21/10/2026 («se ve muy vacío»)
   ---------------------------------------------------------------------------
-  Cabecera con el titular de la casa, la lista (`ListaAnuncios`: la más
+  Cabecera con el titular de la casa, la lista (`ListaNovedades`: la más
   reciente en grande y las anteriores en rejilla) y, al final, dos accesos
   para seguir: los comercios y las membresías. Todo a lo ancho de la
   fachada, no en una columna de 640px.
@@ -36,7 +36,7 @@ export default async function NovedadesPublicas() {
         </p>
       </header>
 
-      <ListaAnuncios anuncios={anuncios} />
+      <ListaNovedades anuncios={anuncios} />
 
       <nav className={estilos.seguir} aria-label="Seguir explorando">
         <Link href="/explorar" className={estilos.acceso}>

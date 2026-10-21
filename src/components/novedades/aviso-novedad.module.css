@@ -1,13 +1,31 @@
 /* ==========================================================================
-   EL AVISO DE LA ÚLTIMA NOVEDAD  ·  tarjeta blanca (21/10/2026)
+   EL AVISO DE LA ÚLTIMA NOVEDAD  ·  la tarjeta entera es el enlace
+   (21/10/2026). Sin «anuncio» ni «banner» en el nombre: los bloqueadores.
    ========================================================================== */
 
 .aviso {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
   margin-block: var(--space-6);
+  padding: var(--space-4);
+
+  border: 1px solid var(--border-superficie);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--text);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
 
-/* Aparece de cero (lo monta el cliente al hidratar): un `@keyframes` con el
-   estado final como base. Nada desde `scale(0)`: llega desde abajo y 0.98. */
+/* Llega al pintarse: el estado final es la base; el fotograma dice de dónde
+   viene. Nada desde `scale(0)`. */
 @media (prefers-reduced-motion: no-preference) {
   .aviso {
     animation: llegar var(--dur-slow) var(--ease-out);
@@ -18,47 +36,27 @@
   from {
     opacity: 0;
     translate: 0 8px;
-    scale: 0.98;
   }
 }
 
-.tarjeta {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--space-5);
-  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-4);
-
-  border: 1px solid var(--border-superficie);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-card);
-
-  transition:
-    translate var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
-}
-
-/* Toda la tarjeta es el enlace: se levanta al apuntarla. */
+/* Se levanta al apuntarla y se hunde al pulsarla: se nota que se toca. */
 @media (hover: hover) {
-  .tarjeta:hover {
+  .aviso:hover {
     translate: 0 -2px;
     box-shadow: var(--filo-activo), var(--shadow-raised), var(--edge);
   }
 
-  .tarjeta:hover .verMas svg {
+  .aviso:hover .flecha {
     translate: 3px 0;
   }
 }
 
-.tarjeta:active {
+.aviso:active {
   translate: 0 1px;
   box-shadow: var(--shadow-press);
 }
 
-/* El foco del enlace se dibuja en la tarjeta entera. */
-.tarjeta:has(.titulo:focus-visible) {
+.aviso:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
@@ -126,17 +124,6 @@
   font-size: var(--t-title-3-size);
   font-weight: 700;
   line-height: 1.3;
-  color: var(--text);
-  text-decoration: none;
-  outline: none;
-}
-
-/* El enlace estirado: cubre toda la tarjeta (menos la X, que va encima). */
-.titulo::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
 }
 
 .extracto {
@@ -148,60 +135,22 @@
   -webkit-box-orient: vertical;
 }
 
-.verMas {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--tap-min);
-  padding: 0 var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--tinta-1) 15%, transparent);
-  border-radius: var(--radius-full);
-  font-size: var(--t-footnote-size);
-  font-weight: 700;
-  color: var(--text);
-  white-space: nowrap;
-}
-
-.verMas svg {
-  color: var(--brand);
-  transition: translate var(--dur-fast) var(--ease-out);
-}
-
-/* --- La X ------------------------------------------------------------------ */
-
-.cerrar {
-  position: relative;
-  z-index: 1;
+/* La flecha: un círculo con el aro dorado, como los demás iconos. */
+.flecha {
   display: grid;
   place-items: center;
   width: var(--tap-min);
   height: var(--tap-min);
-  padding: 0;
-  border: 0;
   border-radius: var(--radius-full);
-  background: none;
-  color: var(--text-2);
-  cursor: pointer;
-  transition: rotate var(--dur-fast) var(--ease-out);
+  box-shadow: inset 0 0 0 1.5px var(--brand);
+  color: var(--brand);
+  transition: translate var(--dur-fast) var(--ease-out);
 }
 
-@media (hover: hover) {
-  .cerrar:hover {
-    rotate: 90deg;
-    color: var(--text);
-  }
-}
-
-.cerrar:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-/* --- En el teléfono: miniatura a la izquierda, sin el botón «Ver más» ------ */
+/* --- En el teléfono -------------------------------------------------------- */
 
 @container contenido (max-width: 640px) {
-  .tarjeta {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+  .aviso {
     gap: var(--space-3);
     padding: var(--space-3);
   }
@@ -214,7 +163,8 @@
     -webkit-line-clamp: 2;
   }
 
-  .verMas {
-    display: none;
+  .flecha {
+    width: 32px;
+    height: 32px;
   }
 }

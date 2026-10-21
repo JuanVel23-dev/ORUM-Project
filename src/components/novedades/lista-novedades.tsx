@@ -3,7 +3,7 @@ import { EmptyState } from '@/components/ui/feedback'
 import { EstrellaOrum } from '@/components/ui/marca/marca'
 import { formatearFechaNovedad } from '@/lib/anuncios/fecha'
 import type { AnuncioResumen } from '@/lib/anuncios/tipos'
-import styles from './lista-anuncios.module.css'
+import styles from './lista-novedades.module.css'
 
 /*
   LAS NOVEDADES  ·  rediseño del 21/10/2026
@@ -20,7 +20,7 @@ import styles from './lista-anuncios.module.css'
     · CADA UNA TIENE SU ANCLA (`#novedad-{id}`): el «Ver más» del aviso de la
       portada lleva directo a la suya, que se marca con el filo dorado.
 */
-export function ListaAnuncios({ anuncios }: { anuncios: AnuncioResumen[] }) {
+export function ListaNovedades({ anuncios }: { anuncios: AnuncioResumen[] }) {
   if (anuncios.length === 0) {
     return (
       <EmptyState

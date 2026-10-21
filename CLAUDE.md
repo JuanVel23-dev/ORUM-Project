@@ -995,7 +995,7 @@ Todo vive en `src/components/ui/`, en **kebab-case**. Antes de crear uno, mira s
 
 Lo que es de un DOMINIO en vez de una primitiva de interfaz, pero lo comparten varias
 rutas o varios portales, vive en `src/components/<dominio>/` — mismo principio que
-`src/lib/`, aplicado a componentes: `anuncios/` (`AnuncioBanner`, portal público y de
+`src/lib/`, aplicado a componentes: `novedades/` (`AvisoNovedad` y `ListaNovedades`, portal público y de
 miembros) y `comercios/` (`CategoriasDirectorio`, directorio público y catálogo de
 miembros: nació en `(publico)/explorar` y se movió aquí cuando el catálogo de
 miembros dejó de tener su propia fila de chips para usar el mismo componente).
@@ -1447,8 +1447,11 @@ ocultar sin borrar, editar y quitar— y el ajuste en una ventana encima con
 - **Tope de 10** (`lib/publicidad/publicidad.ts`, puro y probado), que
   comprueban la interfaz y el servidor. Las imágenes van al bucket
   `imagenes-anuncios`, carpeta `portada/`, con clave nueva en cada subida.
-- ⚠️ **Nada que llegue al navegador se llama «publicidad», «ads» ni
-  «banner»**: ni la carpeta de Storage ni un módulo CSS (su nombre acaba en
+- ⚠️ **Nada que llegue al navegador se llama «publicidad», «ads», «banner»
+  ni «anuncio»** (esta última, desde el 21/10/2026: el aviso de novedades se
+  llamaba `anuncio-banner` y su enlace no respondía en el navegador del
+  propietario; ahora es `aviso-novedad`, y la hoja del formulario,
+  `novedad-form`): ni la carpeta de Storage ni un módulo CSS (su nombre acaba en
   las clases). Los bloqueadores de anuncios ocultan esas direcciones y
   clases: el primer día la carpeta se llamó `publicidad/` y la imagen no se
   veía en el navegador del propietario, ni en el panel ni en la portada. Por
@@ -1465,11 +1468,14 @@ ocultar sin borrar, editar y quitar— y el ajuste en una ventana encima con
 "Ver más" se ve muy vacío; editar novedad está feo y complicado, y no me deja
 borrar la imagen»). Tres piezas:
 
-- **El aviso de la portada** (`AnuncioBanner`) es una TARJETA BLANCA con su
+- **El aviso de la portada** (`AvisoNovedad`) es una TARJETA BLANCA con su
   sombra —no la franja negra de antes—: miniatura 16:9 (o el megáfono en un
-  aro dorado), «Novedad» y la fecha, título, una línea del texto y «Ver más».
-  Toda la tarjeta lleva a ESA novedad (`/novedades#novedad-{id}`, enlace
-  estirado). No vuelvas al fondo negro.
+  aro dorado), «Novedad» y la fecha, título, una línea del texto y una
+  flecha. **La tarjeta ENTERA es el `<a>`** a ESA novedad
+  (`/novedades#novedad-{id}`): sin «Ver más» ni enlace estirado (el clic no
+  llegaba en el navegador del propietario). **No se puede cerrar** (sin X ni
+  `localStorage`; encargo del mismo día), y por eso se pinta en el servidor.
+  No vuelvas al fondo negro.
 - **`/novedades`** va a lo ancho de la fachada: cabecera con
   `TituloSeccion`, la más reciente EN GRANDE (imagen y texto lado a lado),
   las anteriores en rejilla, y al final dos accesos (comercios y

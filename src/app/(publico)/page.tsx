@@ -8,7 +8,7 @@ import {
   obtenerWhatsappSoporte,
 } from '@/lib/publico/datos-publicos'
 import { INDEXAR_CATALOGO, NOMBRE_SITIO, URL_SITIO } from '@/lib/publico/sitio'
-import { AnuncioBanner } from '@/components/anuncios/anuncio-banner'
+import { AvisoNovedad } from '@/components/novedades/aviso-novedad'
 import { AliadosOverlayTrigger } from './_components/aliados-overlay-trigger'
 import { ComerciosDestacados } from './_components/comercios-destacados'
 import { ComoFunciona } from './_components/como-funciona'
@@ -110,7 +110,7 @@ export default async function LandingPublica() {
         héroe: esa tarjeta se monta sobre el filo de la foto, y una franja en
         medio la dejaría flotando sobre el anuncio en vez de sobre la foto.
       */}
-      <AnuncioBanner anuncio={anuncios[0] ?? null} hrefHistorial="/novedades" />
+      <AvisoNovedad novedad={anuncios[0] ?? null} />
 
       {/* El carrusel es PUBLICIDAD que pone el administrador
           (`/admin/publicidad`). `null` = su tabla aún no existe: mientras
