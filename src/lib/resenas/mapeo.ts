@@ -76,3 +76,22 @@ export function gestionDeFila(fila: FilaGestion): ResenaGestion {
     respuestaAdminAt: fila.respuesta_admin_at,
   }
 }
+
+/**
+ * Separa la reseña propia del resto. La función SQL devuelve todas las filas
+ * (con `es_mia`), así que la propia se busca en la lista COMPLETA: si cayera
+ * fuera de las `limite` más recientes, recortar primero la perdería. Las
+ * demás se recortan dejando un hueco para la propia, de modo que nunca se
+ * muestran más de `limite` y la propia no aparece dos veces.
+ */
+export function separarMiResena(
+  filas: FilaRpcResena[],
+  limite: number,
+): { miResena: (ResenaVista & { esMia: boolean }) | null; otras: (ResenaVista & { esMia: boolean })[] } {
+  const propia = filas.find((f) => f.es_mia) ?? null
+  const otras = filas
+    .filter((f) => !f.es_mia)
+    .slice(0, Math.max(0, limite - (propia ? 1 : 0)))
+    .map(vistaDeFilaRpc)
+  return { miResena: propia ? vistaDeFilaRpc(propia) : null, otras }
+}

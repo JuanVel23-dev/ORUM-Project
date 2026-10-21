@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { gestionDeFila, nombreCompleto, vistaDeFilaRpc } from './mapeo'
+import {
+  gestionDeFila,
+  nombreCompleto,
+  separarMiResena,
+  vistaDeFilaRpc,
+  type FilaRpcResena,
+} from './mapeo'
 
 describe('vistaDeFilaRpc', () => {
   it('pasa de snake_case a camelCase', () => {
@@ -56,5 +62,59 @@ describe('gestionDeFila', () => {
     expect(r.respuestaComercioAt).toBe('b')
     expect(r.respuestaAdminAt).toBeNull()
     expect(r.creadaEn).toBe('a')
+  })
+})
+
+function filas(n: number, mia?: number): FilaRpcResena[] {
+  return Array.from({ length: n }, (_, i) => ({
+    id: i + 1,
+    estrellas: 4,
+    mensaje: null,
+    autor: 'A',
+    created_at: '2026-10-20T10:00:00Z',
+    respuesta_comercio: null,
+    respuesta_admin: null,
+    es_mia: i === mia,
+  }))
+}
+
+describe('separarMiResena', () => {
+  it('encuentra la propia dentro de las primeras 20', () => {
+    const r = separarMiResena(filas(30, 3), 20)
+    expect(r.miResena?.id).toBe(4)
+    expect(r.otras).toHaveLength(19)
+    expect(r.otras.some((o) => o.id === 4)).toBe(false)
+  })
+  it('encuentra la propia más allá de la 20.ª', () => {
+    const r = separarMiResena(filas(30, 25), 20)
+    expect(r.miResena?.id).toBe(26)
+    expect(r.miResena?.esMia).toBe(true)
+    expect(r.otras).toHaveLength(19)
+    expect(r.otras.some((o) => o.esMia)).toBe(false)
+  })
+  it('sin reseña propia devuelve hasta el límite', () => {
+    const r = separarMiResena(filas(30), 20)
+    expect(r.miResena).toBeNull()
+    expect(r.otras).toHaveLength(20)
+  })
+  it('lista vacía', () => {
+    expect(separarMiResena([], 20)).toEqual({ miResena: null, otras: [] })
+  })
+  it('límite exacto: 20 y 21 filas', () => {
+    expect(separarMiResena(filas(20), 20).otras).toHaveLength(20)
+    expect(separarMiResena(filas(21), 20).otras).toHaveLength(20)
+    const r20 = separarMiResena(filas(20, 19), 20)
+    expect(r20.miResena?.id).toBe(20)
+    expect(r20.otras).toHaveLength(19)
+    const r21 = separarMiResena(filas(21, 20), 20)
+    expect(r21.miResena?.id).toBe(21)
+    expect(r21.otras).toHaveLength(19)
+  })
+  it('la propia nunca sale dos veces', () => {
+    for (const mia of [0, 10, 19, 20, 29]) {
+      const r = separarMiResena(filas(30, mia), 20)
+      const ids = [...r.otras.map((o) => o.id), r.miResena!.id]
+      expect(new Set(ids).size).toBe(ids.length)
+    }
   })
 })

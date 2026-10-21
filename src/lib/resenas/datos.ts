@@ -7,7 +7,7 @@ import { obtenerMiComercio } from '@/lib/comercios/comercio-sesion'
 import { esTablaAusente, promedio, type ResenaVista } from './resenas'
 import {
   gestionDeFila,
-  vistaDeFilaRpc,
+  separarMiResena,
   type FilaGestion,
   type ResenaGestion,
 } from './mapeo'
@@ -22,6 +22,8 @@ type ResumenSocio = {
   total: number
   promedio: number | null
   resenas: (ResenaVista & { esMia: boolean })[]
+  /** La reseña del socio, aunque no esté entre las más recientes. */
+  miResena: (ResenaVista & { esMia: boolean }) | null
 }
 
 type ResumenGestion = {
@@ -36,6 +38,7 @@ const SOCIO_VACIO: ResumenSocio = {
   total: 0,
   promedio: null,
   resenas: [],
+  miResena: null,
 }
 
 const GESTION_VACIO: ResumenGestion = {
@@ -77,12 +80,15 @@ export const obtenerResenasParaSocio = cache(
       const fila = resumen.data?.[0]
       if (!fila) return SOCIO_VACIO
 
+      // La función devuelve todas, ya ordenadas; la propia se busca entre
+      // todas y la primera carga recorta el resto.
+      const { miResena, otras } = separarMiResena(lista.data ?? [], PAGINA_RESENAS)
       return {
         disponible: true,
         total: fila.total,
         promedio: fila.promedio === null ? null : Number(fila.promedio),
-        // La función devuelve todas, ya ordenadas; la primera carga recorta.
-        resenas: (lista.data ?? []).slice(0, PAGINA_RESENAS).map(vistaDeFilaRpc),
+        resenas: otras,
+        miResena,
       }
     } catch (e) {
       console.error('[resenas] obtenerResenasParaSocio:', e)

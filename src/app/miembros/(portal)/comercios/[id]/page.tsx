@@ -278,7 +278,7 @@ export default async function FichaComercioPage({
           resumen={resenas}
           resenas={resenas.resenas}
           puedeResenar={puedeResenar}
-          miResena={resenas.resenas.find((r) => r.esMia) ?? null}
+          miResena={resenas.miResena}
         />
       }
     />
