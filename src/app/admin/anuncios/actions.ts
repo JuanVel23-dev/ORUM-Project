@@ -9,6 +9,11 @@ import { registrarCambioImagen } from '@/lib/imagenes/auditoria'
 import { BUCKET_IMAGENES_ANUNCIOS, rutaImagenAnuncio } from '@/lib/imagenes/rutas'
 import { borrarPorUrlPublica, subirImagen } from '@/lib/imagenes/subir'
 import { LIMITE_IMAGENES_COMERCIOS } from '@/lib/imagenes/validacion'
+import {
+  faltanColumnasDeProgramacion,
+  instanteBogota,
+  revisarProgramacion,
+} from '@/lib/anuncios/programacion'
 
 export type AnuncioState = { error?: string; ok?: boolean }
 
@@ -45,6 +50,9 @@ function leerCampos(formData: FormData):
       cuerpo: string
       mostrarPublico: boolean
       mostrarMiembros: boolean
+      desde: string | null
+      hasta: string | null
+      programada: boolean
     }
   | { ok: false; error: string } {
   const titulo = String(formData.get('titulo') ?? '').trim()
@@ -65,7 +73,52 @@ function leerCampos(formData: FormData):
     return { ok: false, error: 'Elige al menos un portal donde mostrarla.' }
   }
 
-  return { ok: true, titulo, cuerpo, mostrarPublico, mostrarMiembros }
+  /*
+    LA PROGRAMACIÓN (21/10/2026). Cada extremo se enciende con su interruptor
+    y lleva fecha y hora de Colombia, que `instanteBogota` convierte a un
+    instante. Apagado, el extremo queda vacío: sale al guardar / no se acaba.
+  */
+  const programarInicio = formData.get('programar_inicio') === 'true'
+  const programarFin = formData.get('programar_fin') === 'true'
+  const desde = programarInicio
+    ? instanteBogota(String(formData.get('inicio_fecha') ?? ''), String(formData.get('inicio_hora') ?? ''))
+    : null
+  const hasta = programarFin
+    ? instanteBogota(String(formData.get('fin_fecha') ?? ''), String(formData.get('fin_hora') ?? ''))
+    : null
+  if (programarInicio && !desde) return { ok: false, error: 'Escribe la fecha y la hora en que sale.' }
+  if (programarFin && !hasta) return { ok: false, error: 'Escribe la fecha y la hora en que termina.' }
+  const errorProgramacion = revisarProgramacion(desde, hasta, new Date())
+  if (errorProgramacion) return { ok: false, error: errorProgramacion }
+
+  return {
+    ok: true,
+    titulo,
+    cuerpo,
+    mostrarPublico,
+    mostrarMiembros,
+    desde,
+    hasta,
+    programada: programarInicio || programarFin,
+  }
+}
+
+const SIN_MIGRACION =
+  'Para programar novedades falta aplicar en la base la actualización «20261021120000_anuncios_programados.sql». Guarda sin programar, o aplícala y vuelve a intentarlo.'
+
+/**
+ * Guarda y, si la base aún no tiene las columnas de programación (la
+ * migración se aplica a mano), vuelve a intentarlo sin ellas cuando no se
+ * pidió programar nada: así el panel sigue funcionando mientras tanto.
+ */
+async function escribirConProgramacion<R extends { error: { code?: string; message?: string } | null }>(
+  escribir: (conFechas: boolean) => PromiseLike<R>,
+  programada: boolean,
+): Promise<R | { error: { message: string; code: 'SIN_MIGRACION' } }> {
+  const primero = await escribir(true)
+  if (!faltanColumnasDeProgramacion(primero.error)) return primero
+  if (programada) return { error: { message: SIN_MIGRACION, code: 'SIN_MIGRACION' } }
+  return escribir(false)
 }
 
 /** El archivo de imagen que viene con el formulario, si viene. */
@@ -149,20 +202,29 @@ export async function crearAnuncio(_prev: AnuncioState, formData: FormData): Pro
   if (!campos.ok) return { error: campos.error }
 
   const admin = createAdminClient()
-  const { data: creado, error } = await admin
-    .from('anuncios')
-    .insert({
-      updated_by: actor.actorId,
-      titulo: campos.titulo,
-      cuerpo: campos.cuerpo,
-      mostrar_publico: campos.mostrarPublico,
-      mostrar_miembros: campos.mostrarMiembros,
-      activo: true,
-      creado_por: actor.actorId,
-    })
-    .select('id')
-    .single()
-  if (error || !creado) return { error: mensajeDeError('No se pudo crear la novedad', error) }
+  const resultado = await escribirConProgramacion(
+    (conFechas) =>
+      admin
+        .from('anuncios')
+        .insert({
+          updated_by: actor.actorId,
+          titulo: campos.titulo,
+          cuerpo: campos.cuerpo,
+          mostrar_publico: campos.mostrarPublico,
+          mostrar_miembros: campos.mostrarMiembros,
+          activo: true,
+          creado_por: actor.actorId,
+          ...(conFechas ? { publicar_desde: campos.desde, publicar_hasta: campos.hasta } : {}),
+        })
+        .select('id')
+        .single(),
+    campos.programada,
+  )
+  if (resultado.error?.code === 'SIN_MIGRACION') return { error: SIN_MIGRACION }
+  const creado = 'data' in resultado ? resultado.data : null
+  if (resultado.error || !creado) {
+    return { error: mensajeDeError('No se pudo crear la novedad', resultado.error) }
+  }
 
   const errorImagen = await aplicarImagen(admin, actor.actorId, creado.id, null, formData)
   refrescar()
@@ -188,16 +250,22 @@ export async function editarAnuncio(_prev: AnuncioState, formData: FormData): Pr
     .maybeSingle()
   if (!anterior) return { error: 'La novedad ya no existe.' }
 
-  const { error } = await admin
-    .from('anuncios')
-    .update({
-      updated_by: actor.actorId,
-      titulo: campos.titulo,
-      cuerpo: campos.cuerpo,
-      mostrar_publico: campos.mostrarPublico,
-      mostrar_miembros: campos.mostrarMiembros,
-    })
-    .eq('id', id)
+  const { error } = await escribirConProgramacion(
+    (conFechas) =>
+      admin
+        .from('anuncios')
+        .update({
+          updated_by: actor.actorId,
+          titulo: campos.titulo,
+          cuerpo: campos.cuerpo,
+          mostrar_publico: campos.mostrarPublico,
+          mostrar_miembros: campos.mostrarMiembros,
+          ...(conFechas ? { publicar_desde: campos.desde, publicar_hasta: campos.hasta } : {}),
+        })
+        .eq('id', id),
+    campos.programada,
+  )
+  if (error?.code === 'SIN_MIGRACION') return { error: SIN_MIGRACION }
   if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
 
   const errorImagen = await aplicarImagen(admin, actor.actorId, id, anterior.imagen_url, formData)

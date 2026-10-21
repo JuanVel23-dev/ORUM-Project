@@ -42,6 +42,10 @@ export type Database = {
           creado_por: string | null
           created_at: Timestamp
           deleted_at: Timestamp | null
+          /** Desde cuándo se ve; `null` = desde que se guarda (20261021120000_anuncios_programados.sql). */
+          publicar_desde: Timestamp | null
+          /** Hasta cuándo se ve; `null` = hasta que se retire. */
+          publicar_hasta: Timestamp | null
         }
         Insert: {
           updated_by?: string | null
@@ -55,6 +59,8 @@ export type Database = {
           creado_por?: string | null
           created_at?: Timestamp
           deleted_at?: Timestamp | null
+          publicar_desde?: Timestamp | null
+          publicar_hasta?: Timestamp | null
         }
         Update: Partial<Database['public']['Tables']['anuncios']['Insert']>
         Relationships: []

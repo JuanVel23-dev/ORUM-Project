@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useRef, useState, type DragEvent } from 'react'
-import { Crop, ImagePlus, Megaphone, RefreshCw, Save, Trash2, Undo2 } from 'lucide-react'
+import { CalendarClock, Crop, ImagePlus, Megaphone, RefreshCw, Save, Trash2, Undo2 } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
@@ -13,7 +13,13 @@ import {
   useImagenElegida,
   type OpcionesEncuadre,
 } from '@/components/imagenes/editor-encuadre'
-import { largo, obligatorio } from '@/lib/validacion/reglas'
+import { largo, obligatorio, type Regla } from '@/lib/validacion/reglas'
+import {
+  describirProgramacion,
+  instanteBogota,
+  partesBogota,
+  revisarProgramacion,
+} from '@/lib/anuncios/programacion'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { crearAnuncio, editarAnuncio, type AnuncioState } from '../actions'
 import formStyles from '@/styles/formulario.module.css'
@@ -26,6 +32,9 @@ export type AnuncioInicial = {
   imagenUrl: string | null
   mostrarPublico: boolean
   mostrarMiembros: boolean
+  /** La ventana programada (`null` = sin ese extremo). */
+  desde: string | null
+  hasta: string | null
 }
 
 const estadoInicial: AnuncioState = {}
@@ -33,12 +42,37 @@ const estadoInicial: AnuncioState = {}
 const TITULO_MAXIMO = 120
 const CUERPO_MAXIMO = 600
 
+/** Obligatorio solo si su interruptor está encendido. */
+function siProgramado(interruptor: string, mensaje: string): Regla {
+  return (v, todos) => (todos[interruptor] === 'true' && v.trim() === '' ? mensaje : null)
+}
+
+/** El rango entero: fin después del inicio y todavía por llegar. */
+const rangoValido: Regla = (_v, todos) => {
+  const desde =
+    todos.programar_inicio === 'true' ? instanteBogota(todos.inicio_fecha ?? '', todos.inicio_hora ?? '') : null
+  const hasta =
+    todos.programar_fin === 'true' ? instanteBogota(todos.fin_fecha ?? '', todos.fin_hora ?? '') : null
+  return revisarProgramacion(desde, hasta, new Date())
+}
+
 const REGLAS = {
   titulo: [obligatorio('Escribe el título de la novedad.'), largo(4, TITULO_MAXIMO, 'El título')],
   cuerpo: [obligatorio('Escribe el texto de la novedad.'), largo(10, CUERPO_MAXIMO, 'El texto')],
+  inicio_fecha: [siProgramado('programar_inicio', 'Elige el día en que sale.')],
+  inicio_hora: [siProgramado('programar_inicio', 'Elige la hora en que sale.')],
+  fin_fecha: [siProgramado('programar_fin', 'Elige el día en que termina.')],
+  fin_hora: [siProgramado('programar_fin', 'Elige la hora en que termina.'), rangoValido],
 }
 
-const ETIQUETAS: Record<string, string> = { titulo: 'Título', cuerpo: 'Texto' }
+const ETIQUETAS: Record<string, string> = {
+  titulo: 'Título',
+  cuerpo: 'Texto',
+  inicio_fecha: 'Día en que sale',
+  inicio_hora: 'Hora en que sale',
+  fin_fecha: 'Día en que termina',
+  fin_hora: 'Hora en que termina',
+}
 
 /* 16:9, la proporción con la que se ve en la portada y en `/novedades`. Las
    mismas opciones que las fotos de un comercio. */
@@ -93,6 +127,16 @@ export function AnuncioForm({ anuncio }: { anuncio?: AnuncioInicial }) {
   const [largoCuerpo, setLargoCuerpo] = useState((anuncio?.cuerpo ?? '').length)
 
   const ajustando = editor.imagen !== null
+
+  /* La programación: cada extremo con su interruptor, su día y su hora (de
+     Colombia). Controlados, para decir en palabras qué va a pasar. */
+  const [programarInicio, setProgramarInicio] = useState(Boolean(anuncio?.desde))
+  const [programarFin, setProgramarFin] = useState(Boolean(anuncio?.hasta))
+  const [inicio, setInicio] = useState(() => partesBogota(anuncio?.desde ?? null))
+  const [fin, setFin] = useState(() => partesBogota(anuncio?.hasta ?? null))
+  const desde = programarInicio ? instanteBogota(inicio.fecha, inicio.hora) : null
+  const hasta = programarFin ? instanteBogota(fin.fecha, fin.hora) : null
+  const resumen = describirProgramacion(desde, hasta)
 
   // La vista previa de una imagen nueva vive en memoria: se suelta al cambiarla.
   useEffect(() => {
@@ -303,6 +347,82 @@ export function AnuncioForm({ anuncio }: { anuncio?: AnuncioInicial }) {
             onChange={(e) => setLargoCuerpo(e.target.value.length)}
           />
         </Field>
+
+        {/* ── PROGRAMACIÓN ──────────────────────────────────────────────── */}
+        <fieldset className={styles.grupo}>
+          <legend className={styles.etiqueta}>Programación</legend>
+          <div className={styles.programacion}>
+            <div className={styles.extremo}>
+              <Switch
+                name="programar_inicio"
+                value="true"
+                label="Programar cuándo sale"
+                description="Apagado, sale en cuanto guardes."
+                checked={programarInicio}
+                onChange={(e) => setProgramarInicio(e.target.checked)}
+              />
+              {programarInicio && (
+                <div className={styles.momento}>
+                  <Field label="Día" error={v.error('inicio_fecha')}>
+                    <Input
+                      type="date"
+                      name="inicio_fecha"
+                      value={inicio.fecha}
+                      onChange={(e) => setInicio((x) => ({ ...x, fecha: e.target.value }))}
+                    />
+                  </Field>
+                  <Field label="Hora" error={v.error('inicio_hora')}>
+                    <Input
+                      type="time"
+                      name="inicio_hora"
+                      value={inicio.hora}
+                      onChange={(e) => setInicio((x) => ({ ...x, hora: e.target.value }))}
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.extremo}>
+              <Switch
+                name="programar_fin"
+                value="true"
+                label="Programar cuándo termina"
+                description="Apagado, se ve hasta que la retires."
+                checked={programarFin}
+                onChange={(e) => setProgramarFin(e.target.checked)}
+              />
+              {programarFin && (
+                <div className={styles.momento}>
+                  <Field label="Día" error={v.error('fin_fecha')}>
+                    <Input
+                      type="date"
+                      name="fin_fecha"
+                      value={fin.fecha}
+                      onChange={(e) => setFin((x) => ({ ...x, fecha: e.target.value }))}
+                    />
+                  </Field>
+                  <Field label="Hora" error={v.error('fin_hora')}>
+                    <Input
+                      type="time"
+                      name="fin_hora"
+                      value={fin.hora}
+                      onChange={(e) => setFin((x) => ({ ...x, hora: e.target.value }))}
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Lo que va a pasar, en palabras. La hora es la de Colombia. */}
+          <p className={styles.resumen} aria-live="polite">
+            <CalendarClock size={16} aria-hidden="true" />
+            {resumen
+              ? `${resumen} (hora de Colombia).`
+              : 'Sale en cuanto guardes y se ve hasta que la retires.'}
+          </p>
+        </fieldset>
 
         {/* ── DÓNDE SE MUESTRA ──────────────────────────────────────────── */}
         <fieldset className={styles.grupo}>

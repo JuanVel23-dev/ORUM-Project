@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { leerAnuncioParaEditar } from '@/lib/anuncios/consultas'
 import { PageHeader } from '@/components/ui/layout'
 import { FormCard } from '@/components/ui/form-card'
 import { AnuncioForm } from '../../_components/anuncio-form'
@@ -18,30 +19,14 @@ export default async function EditarAnuncioPage({
   const anuncioId = Number(id)
   if (!Number.isInteger(anuncioId) || anuncioId < 1) notFound()
 
-  const admin = createAdminClient()
-  const { data: anuncio } = await admin
-    .from('anuncios')
-    .select('id, titulo, cuerpo, imagen_url, mostrar_publico, mostrar_miembros')
-    .eq('id', anuncioId)
-    .is('deleted_at', null)
-    .maybeSingle()
-
+  const anuncio = await leerAnuncioParaEditar(createAdminClient(), anuncioId)
   if (!anuncio) notFound()
 
   return (
     <>
       <PageHeader title="Editar novedad" />
       <FormCard>
-        <AnuncioForm
-          anuncio={{
-            id: anuncio.id,
-            titulo: anuncio.titulo,
-            cuerpo: anuncio.cuerpo,
-            imagenUrl: anuncio.imagen_url,
-            mostrarPublico: anuncio.mostrar_publico,
-            mostrarMiembros: anuncio.mostrar_miembros,
-          }}
-        />
+        <AnuncioForm anuncio={anuncio} />
       </FormCard>
     </>
   )

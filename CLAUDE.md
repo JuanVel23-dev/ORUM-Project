@@ -1486,6 +1486,23 @@ borrar la imagen»). Tres piezas:
   `imagen-actions.ts` ni el segundo formulario con «Subir imagen». Las
   acciones sueltan la caché `publico` (antes la portada tardaba hasta un
   minuto en enterarse).
+- **Una novedad se puede PROGRAMAR** (21/10/2026: «un rango de fechas con
+  una hora de salida y una de finalización»). Columnas `publicar_desde` y
+  `publicar_hasta` (`20261021120000_anuncios_programados.sql`), las dos
+  opcionales: sin la primera sale al guardar; sin la segunda, se ve hasta
+  retirarla. En el formulario, cada extremo tiene su interruptor con día y
+  hora, y una línea dice en palabras qué va a pasar. **La hora es SIEMPRE la
+  de Colombia** (`instanteBogota`, `partesBogota`; la del navegador no
+  cuenta). La lógica es pura y probada (`lib/anuncios/programacion.ts`):
+  `estadoNovedad` (publicada · programada · finalizada · retirada) da el
+  estado y las pestañas de la lista del panel, y `vigentesAhora` decide qué
+  ven los portales —ordenadas por cuándo SALIERON—. La política de lectura
+  pública también filtra por la ventana: una programada no se lee por
+  adelantado. Por la caché de la fachada, una novedad puede tardar hasta un
+  minuto en aparecer o irse tras su hora. ⚠️ **El código aguanta la base sin
+  la migración** (`faltanColumnasDeProgramacion`): lee sin fechas y guarda
+  sin ellas si no se programó nada; si se programa, avisa de que falta
+  aplicarla.
 
 **El formulario «Quiero ser aliado» valida con EXIGENCIA** (05/10/2026: «es
 el portal público; no quiero que pongan datos que no son»). Las reglas viven
