@@ -57,6 +57,13 @@
   animation: salirFondo var(--dur-salida) var(--ease-out) forwards;
 }
 
+/* La ventana sustituye a su ventana de carga (`continuidad-ventana.ts`): el
+   fondo ya estaba oscurecido y no se vuelve a fundir. El cierre se anima
+   como siempre (`:not(.cerrando)`). */
+.sinEntrada[open]:not(.cerrando)::backdrop {
+  animation: none;
+}
+
 /*
   MATERIALIZAR, NO FUNDIR (v3 §3.5).
 

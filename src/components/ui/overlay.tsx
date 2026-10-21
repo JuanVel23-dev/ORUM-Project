@@ -48,6 +48,11 @@ type Props = {
    * propia X no cabe en la gramática de la hoja inferior.
    */
   desnudo?: boolean
+  /**
+   * Ya había una ventana abierta en su lugar (la de carga): aparece en su
+   * sitio, sin animar la entrada. Ver `continuidad-ventana.ts`.
+   */
+  continua?: boolean
   children?: ReactNode
 }
 
@@ -61,13 +66,21 @@ export function Overlay({
   width,
   detent = 'large',
   desnudo = false,
+  continua = false,
   children,
 }: Props) {
   const enEscritorio = useMediaQuery(ESCRITORIO)
 
   if (desnudo) {
     return (
-      <Modal open={open} onClose={onClose} ariaLabel={ariaLabel} width={width} desnudo>
+      <Modal
+        open={open}
+        onClose={onClose}
+        ariaLabel={ariaLabel}
+        width={width}
+        desnudo
+        sinEntrada={continua}
+      >
         {children}
       </Modal>
     )
@@ -83,6 +96,7 @@ export function Overlay({
         ariaLabel={ariaLabel}
         footer={footer}
         width={width}
+        sinEntrada={continua}
       >
         {children}
       </Modal>
@@ -98,6 +112,7 @@ export function Overlay({
       ariaLabel={ariaLabel}
       footer={footer}
       detent={detent}
+      sinEntrada={continua}
     >
       {children}
     </Sheet>

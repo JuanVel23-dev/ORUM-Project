@@ -7,9 +7,11 @@ import {
   useContext,
   useEffect,
   useRef,
+  useState,
   type ReactNode,
 } from 'react'
 import { Overlay } from '@/components/ui/overlay'
+import { sustituyeVentanaDeCarga } from '@/components/ui/continuidad-ventana'
 import type { Detent } from '@/components/ui/sheet'
 
 /**
@@ -90,6 +92,10 @@ export function OverlayRuta({
 }) {
   const router = useRouter()
   const cerrar = useCallback(() => router.back(), [router])
+  /* Si llega en lugar de su ventana de carga, aparece ya abierta: es la
+     misma ventana, que recibe su contenido (`continuidad-ventana.ts`). Se
+     pregunta UNA vez, al montarse. */
+  const [continua] = useState(sustituyeVentanaDeCarga)
 
   return (
     <CerrarOverlayContext.Provider value={cerrar}>
@@ -103,6 +109,7 @@ export function OverlayRuta({
         detent={detent}
         ariaLabel={ariaLabel}
         desnudo={desnudo}
+        continua={continua}
       >
         {children}
       </Overlay>

@@ -1,6 +1,8 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { registrarVentanaDeCarga } from '@/components/ui/continuidad-ventana'
 import { Overlay } from '@/components/ui/overlay'
 import { Skeleton } from '@/components/ui/feedback'
 import styles from './overlay-cargando.module.css'
@@ -19,6 +21,8 @@ import styles from './overlay-cargando.module.css'
  */
 export function OverlayCargando() {
   const router = useRouter()
+  // La ventana del formulario que llegue después la continúa (`continuidad-ventana.ts`).
+  useEffect(() => registrarVentanaDeCarga(), [])
 
   return (
     <Overlay open onClose={() => router.back()} width="640px">

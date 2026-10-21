@@ -966,6 +966,18 @@ producción: allí `<Link>` precarga hasta la primera carga de cada ranura y la
 pinta al pulsar; en desarrollo no se precarga y no se ve. Miembros y el
 Público ya seguían este reparto.
 
+⚠️ **La ventana de carga y la del formulario son LA MISMA ventana** (21/10/2026:
+«lo abre, hace como si cargara, se cierra y lo vuelve a abrir»). Son dos
+`<dialog>` distintos —`OverlayCargando` es el `fallback` y `OverlayRuta` el
+contenido— y React retira uno y monta el otro en el mismo `commit`: el
+segundo repetía la entrada entera y el fondo se volvía a fundir.
+`continuidad-ventana.ts` cuenta las ventanas de carga en pantalla; la que
+llega a sustituirla lo pregunta al montarse (`Overlay continua` →
+`Modal`/`Sheet sinEntrada`) y aparece ya abierta, sin entrada y con el fondo
+quieto (`.sinEntrada`). El aviso vale hasta el primer cierre, no una pasada
+del efecto (React lo repite). Una ventana de carga nueva se registra con
+`registrarVentanaDeCarga()`.
+
 Tras mover o añadir rutas paralelas, **reinicia el servidor de desarrollo**: el
 manifiesto de rutas queda obsoleto y la interceptación falla en silencio, lo que
 parece un bug de código y no lo es.

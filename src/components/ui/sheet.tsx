@@ -67,6 +67,8 @@ type Props = {
    * Por defecto `large`: la mayoría de hojas de este panel son formularios.
    */
   detent?: Detent
+  /** La primera apertura no se anima: ver `Modal sinEntrada`. */
+  sinEntrada?: boolean
   children?: ReactNode
 }
 
@@ -79,9 +81,12 @@ export function Sheet({
   footer,
   hideClose = false,
   detent = 'large',
+  sinEntrada = false,
   children,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  /** Vale hasta el primer cierre: ver `Modal sinEntrada`. */
+  const saltarEntrada = useRef(sinEntrada)
   const tituloId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const veloRef = useRef<HTMLDivElement>(null)
@@ -130,6 +135,8 @@ export function Sheet({
       const panel = panelRef.current
       if (!dialogo || !panel || cerrando.current) return
       cerrando.current = true
+      // Cerrada una vez, las aperturas siguientes se animan.
+      saltarEntrada.current = false
 
       const fin = () => {
         dialogo.close()
@@ -166,6 +173,13 @@ export function Sheet({
 
       const { medio } = detents()
       const destino = detent === 'medium' ? medio : 0
+
+      // Sustituye a la hoja de carga: ya estaba arriba, no vuelve a subir.
+      if (saltarEntrada.current) {
+        colocar(destino)
+        if (veloRef.current) veloRef.current.style.opacity = '1'
+        return
+      }
 
       if (prefiereMovimientoReducido()) {
         colocar(destino)

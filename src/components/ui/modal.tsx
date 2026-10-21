@@ -95,6 +95,12 @@ type Props = {
    * devuelve el foco al disparador (que puede haber desaparecido).
    */
   onClosed?: () => void
+  /**
+   * La PRIMERA apertura no se anima: la ventana ya estaba en pantalla (la de
+   * carga a la que sustituye; ver `continuidad-ventana.ts`). El cierre y las
+   * aperturas siguientes se animan como siempre.
+   */
+  sinEntrada?: boolean
   children?: ReactNode
 }
 
@@ -112,9 +118,16 @@ export function Modal({
   cerrarAlPulsarFuera = true,
   onAtras,
   onClosed,
+  sinEntrada = false,
   children,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
+  /*
+    Vale hasta el primer cierre, no una sola pasada del efecto: el efecto de
+    apertura puede repetirse (React lo repite en desarrollo, y también si
+    cambia una dependencia), y la segunda pasada hacía la entrada entera.
+  */
+  const saltarEntrada = useRef(sinEntrada)
   /** Id propio del título: dos modales montados a la vez no pueden compartirlo. */
   const tituloId = useId()
   const alCerradoRef = useRef(onClosed)
@@ -134,6 +147,8 @@ export function Modal({
     const dialogo = ref.current
     if (!dialogo || cerrando.current) return
     cerrando.current = true
+    // Cerrada una vez, las aperturas siguientes se animan.
+    saltarEntrada.current = false
     const miTurno = ++turno.current
 
     // Marca el cierre para que el ::backdrop se desvanezca a la vez que el
@@ -191,6 +206,9 @@ export function Modal({
         dialogo.classList.remove(styles.cerrando)
       }
       if (!dialogo.open) dialogo.showModal()
+
+      // Sustituye a la ventana de carga: ya estaba abierta, no se vuelve a abrir.
+      if (saltarEntrada.current) return
 
       /*
         INTERRUMPIBLE (v3 §3.3): se arranca desde lo que HAY PINTADO, no desde
@@ -282,7 +300,9 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className={[styles.dialog, desnudo && styles.desnudo, className].filter(Boolean).join(' ')}
+      className={[styles.dialog, desnudo && styles.desnudo, sinEntrada && styles.sinEntrada, className]
+        .filter(Boolean)
+        .join(' ')}
       style={{ '--ancho': width } as CSSProperties}
       onCancel={alCancelar}
       onClose={alCerrarNativo}
