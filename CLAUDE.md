@@ -1477,8 +1477,13 @@ borrar la imagen»). Tres piezas:
   pegadas al borde). **La tarjeta ENTERA es el `<a>`** a `/novedades`, que
   abre ARRIBA con su titular (no al ancla: «que aparezca desde el inicio»).
   Sin «Ver más» ni enlace estirado (el clic no llegaba en el navegador del
-  propietario). **No se puede cerrar** (sin X ni `localStorage`), y por eso
-  se pinta en el servidor. No vuelvas al fondo negro ni a la miniatura.
+  propietario). **Se puede quitar, pero solo por ahora**: una X ENCIMA de la
+  tarjeta (`CerrarAviso`, no dentro: un botón dentro de un enlace no vale)
+  lo oculta mientras la página siga abierta; al recargar vuelve. Se recuerda
+  en el estado del componente y en NINGÚN otro sitio —nada de
+  `localStorage`, que lo dejaba quitado para siempre y no se quería—. La
+  tarjeta se pinta en el servidor; solo la X es de cliente. No vuelvas al
+  fondo negro ni a la miniatura.
 - **`/novedades`** va a lo ancho de la fachada: cabecera con
   `TituloSeccion`, la más reciente EN GRANDE (imagen y texto lado a lado),
   las anteriores en rejilla, y al final dos accesos (comercios y

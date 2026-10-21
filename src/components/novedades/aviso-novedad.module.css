@@ -12,7 +12,6 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-6);
-  margin-block: var(--space-8);
   padding: var(--space-7) var(--space-8);
 
   border: 1px solid var(--border-superficie);
@@ -181,11 +180,11 @@
 @container contenido (max-width: 640px) {
   .aviso {
     grid-template-columns: minmax(0, 1fr) auto;
+    /* Arriba a la derecha va la X: la flecha baja junto al final del texto. */
     grid-template-areas:
-      'icono flecha'
-      'textos textos';
+      'icono icono'
+      'textos flecha';
     gap: var(--space-4);
-    margin-block: var(--space-6);
     padding: var(--space-6) var(--space-5);
   }
 
@@ -201,6 +200,7 @@
 
   .flecha {
     grid-area: flecha;
+    align-self: end;
     width: 48px;
     height: 48px;
   }
@@ -208,4 +208,86 @@
   .extracto {
     -webkit-line-clamp: 3;
   }
+}
+
+/* --- Quitarlo por ahora (`CerrarAviso`) ------------------------------------ */
+
+/* La envoltura lleva el margen y ancla la X encima de la tarjeta. */
+.envoltura {
+  position: relative;
+  margin-block: var(--space-8);
+}
+
+@container contenido (max-width: 640px) {
+  .envoltura {
+    margin-block: var(--space-6);
+  }
+}
+
+/* Se va con un fundido corto, encogiendo un poco: la salida, más rápida
+   que la entrada. Al acabar, `CerrarAviso` lo retira del todo. */
+.envoltura[data-saliendo] {
+  animation: irse var(--dur-salida) var(--ease-out) forwards;
+  pointer-events: none;
+}
+
+@keyframes irse {
+  to {
+    opacity: 0;
+    translate: 0 -6px;
+    scale: 0.98;
+  }
+}
+
+/* La X: pequeña a la vista, con su área de toque completa (`::after`). */
+.cerrar {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    rotate var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out),
+    scale var(--dur-press) var(--ease-out);
+}
+
+.cerrar::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  translate: -50% -50%;
+}
+
+@media (hover: hover) {
+  /* Sube con la tarjeta cuando esta se levanta. */
+  .envoltura:hover .cerrar {
+    translate: 0 -2px;
+  }
+
+  .cerrar:hover {
+    rotate: 90deg;
+    color: var(--text);
+  }
+}
+
+.cerrar:active {
+  scale: 0.9;
+}
+
+.cerrar:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
