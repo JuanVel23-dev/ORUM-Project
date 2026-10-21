@@ -94,6 +94,11 @@
   color: var(--text-2);
 }
 
+/* La fecha corta solo existe en el teléfono. */
+.fechaCorta {
+  display: none;
+}
+
 /* «Novedad»: una insignia, sin sombra. */
 .etiqueta {
   display: inline-flex;
@@ -144,38 +149,69 @@
   transition: translate var(--dur-fast) var(--ease-out);
 }
 
-/* --- En el teléfono: el megáfono y la flecha arriba, el texto debajo ------ */
+/* --- En el teléfono: compacto, en UNA fila ---------------------------------
+   (21/10/2026: «la distribución está mal; sin espacios tan grandes, ocupa
+   demasiado»). El megáfono pequeño a la izquierda y el texto al lado, con
+   el relleno justo; la flecha se va —toda la tarjeta se toca— y deja la
+   esquina a la X, que ya no compite con nada. */
 
 @container contenido (max-width: 640px) {
   .aviso {
-    grid-template-columns: minmax(0, 1fr) auto;
-    /* Arriba a la derecha va la X: la flecha baja junto al final del texto. */
-    grid-template-areas:
-      'icono icono'
-      'textos flecha';
-    gap: var(--space-4);
-    padding: var(--space-6) var(--space-5);
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    /* Hueco para la X de la esquina: el texto no pasa por debajo. */
+    padding-right: var(--space-8);
   }
 
   .icono {
-    grid-area: icono;
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
+    box-shadow: inset 0 0 0 1.5px var(--brand);
+  }
+
+  .icono svg {
+    width: 20px;
+    height: 20px;
   }
 
   .textos {
-    grid-area: textos;
+    gap: var(--space-1);
   }
 
-  .flecha {
-    grid-area: flecha;
-    align-self: end;
-    width: 48px;
-    height: 48px;
+  /* «Novedad» y la fecha, en una sola línea. */
+  .meta {
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+    font-size: var(--t-caption-size);
+    white-space: nowrap;
+  }
+
+  .etiqueta {
+    min-height: var(--space-5);
+    padding: 0 var(--space-2);
+  }
+
+  .fechaLarga {
+    display: none;
+  }
+
+  .fechaCorta {
+    display: inline;
+  }
+
+  .titulo {
+    font-size: var(--t-title-2-size);
   }
 
   .extracto {
-    -webkit-line-clamp: 3;
+    font-size: var(--t-footnote-size);
+    line-height: 1.45;
+  }
+
+  .flecha {
+    display: none;
   }
 }
 
@@ -187,9 +223,12 @@
   margin-block: var(--space-8);
 }
 
+/* En el teléfono, el margen lo puede anular quien lo monta: en la portada
+   las franjas de alrededor ya traen su relleno y sumarle este dejaba un
+   hueco grande arriba y abajo («ocupa demasiado espacio», 21/10/2026). */
 @container contenido (max-width: 640px) {
   .envoltura {
-    margin-block: var(--space-6);
+    margin-block: var(--aviso-margen-movil, var(--space-5));
   }
 }
 

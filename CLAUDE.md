@@ -1486,6 +1486,13 @@ borrar la imagen»). Tres piezas:
   `localStorage`, que lo dejaba quitado para siempre y no se quería—. La
   tarjeta se pinta en el servidor; solo la X es de cliente. No vuelvas al
   fondo negro ni a la miniatura.
+  **En el teléfono es COMPACTO** («la distribución está mal, ocupa
+  demasiado espacio», 21/10/2026): megáfono de 40px a la izquierda, sin
+  flecha, «Novedad» y la fecha CORTA («26 sept 2026»,
+  `formatearFechaNovedadCorta`) en UNA línea, título y dos líneas de texto;
+  mide ~124px. Y en la portada no suma margen propio
+  (`--aviso-margen-movil: 0`, que pone `publico.module.css`): las franjas de
+  alrededor ya traen su relleno. En el Inicio del socio conserva su margen.
 - **Y TAMBIÉN EN EL PORTAL DE MIEMBROS** (21/10/2026: «no lo veo en el
   portal de miembros»; desde el 29/09 el Inicio del socio no enseñaba
   ninguna novedad). El Inicio pasa el mismo `AvisoNovedad` al directorio

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight, Megaphone } from 'lucide-react'
 import { AdornoEstrella } from '@/components/ui/marca/marca'
-import { formatearFechaNovedad } from '@/lib/anuncios/fecha'
+import { formatearFechaNovedad, formatearFechaNovedadCorta } from '@/lib/anuncios/fecha'
 import type { AnuncioResumen } from '@/lib/anuncios/tipos'
 import { CerrarAviso } from './cerrar-aviso'
 import styles from './aviso-novedad.module.css'
@@ -54,7 +54,11 @@ export function AvisoNovedad({
         <span className={styles.textos}>
           <span className={styles.meta}>
             <span className={styles.etiqueta}>Novedad</span>
-            <time dateTime={novedad.createdAt}>{formatearFechaNovedad(novedad.createdAt)}</time>
+            {/* Larga en escritorio; corta en el teléfono, para que quepa en la línea. */}
+            <time dateTime={novedad.createdAt}>
+              <span className={styles.fechaLarga}>{formatearFechaNovedad(novedad.createdAt)}</span>
+              <span className={styles.fechaCorta}>{formatearFechaNovedadCorta(novedad.createdAt)}</span>
+            </time>
           </span>
           {/* La estrella de ORUM AL LADO del título, como en todos los de la marca. */}
           <span className={styles.titulo}>

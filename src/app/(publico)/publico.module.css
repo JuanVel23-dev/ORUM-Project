@@ -120,6 +120,12 @@
   `#membresias`—, en vez de una por módulo: la sección que se añada mañana
   la hereda sin que nadie se acuerde.
 */
+/* El aviso de la última novedad va entre dos franjas que ya traen su
+   relleno: en el teléfono no suma margen propio. */
+.main {
+  --aviso-margen-movil: 0;
+}
+
 .main section[id] {
   scroll-margin-block-start: var(--cabecera-alto);
 }
