@@ -24,7 +24,8 @@ import {
   Skeleton,
   SkeletonText,
 } from '@/components/ui/feedback'
-import { EstrellasLectura, EstrellasSelector } from '@/components/ui/estrellas'
+import { EstrellasSelector } from '@/components/ui/estrellas'
+import { EstrellasLectura } from '@/components/ui/estrellas-lectura'
 import { Field } from '@/components/ui/field'
 import { Input, Select, Textarea } from '@/components/ui/input'
 import { Divider, Grid, PageHeader, Section, Stack } from '@/components/ui/layout'
