@@ -66,7 +66,7 @@ export function AvisoNovedad({
           </span>
           {/* La estrella de ORUM AL LADO del título, como en todos los de la marca. */}
           <span className={styles.titulo}>
-            <AdornoEstrella />
+            <AdornoEstrella className={styles.estrella} />
             {novedad.titulo}
           </span>
           <span className={styles.extracto}>{novedad.cuerpo}</span>

@@ -1476,7 +1476,10 @@ borrar la imagen»). Tres piezas:
   con el megáfono en su aro dorado, «Novedad» y la fecha en una línea, el
   título en el serif de la marca con la estrella de ORUM AL LADO
   (`AdornoEstrella`, como los títulos de sección), UNA línea del texto y
-  una flecha en un círculo dorado. No lo vuelvas a agrandar. **La tarjeta ENTERA es el `<a>`** a `/novedades`, que
+  una flecha en un círculo dorado. No lo vuelvas a agrandar. **Al
+  apuntarlo NO sale el filo dorado** («se ve feo y cortado», 21/10/2026):
+  sube 3px con la sombra flotante, el megáfono se inclina, la estrella gira
+  y la flecha avanza — transiciones de `transform`, nada de `@keyframes`. **La tarjeta ENTERA es el `<a>`** a `/novedades`, que
   abre ARRIBA con su titular (no al ancla: «que aparezca desde el inicio»).
   Sin «Ver más» ni enlace estirado (el clic no llegaba en el navegador del
   propietario). **Se puede quitar, pero solo por ahora**: una X ENCIMA de la

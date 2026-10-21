@@ -43,15 +43,29 @@
   }
 }
 
-/* Se levanta al apuntarla y se hunde al pulsarla. */
+/* AL APUNTARLA (21/10/2026: «quitemos ese borde, se ve feo y cortado;
+   alguna animación mejor»). SIN filo dorado: la tarjeta sube y su sombra
+   crece; el megáfono se inclina como si sonara, la estrella da un giro
+   corto y la flecha avanza. Todo transiciones de `transform`: se
+   reencaminan si el puntero entra y sale rápido, nada reinicia. */
 @media (hover: hover) {
   .aviso:hover {
-    translate: 0 -2px;
-    box-shadow: var(--filo-activo), var(--shadow-flotante), var(--edge);
+    translate: 0 -3px;
+    box-shadow: var(--shadow-flotante), var(--edge);
+  }
+
+  .aviso:hover .icono svg {
+    rotate: -14deg;
+    scale: 1.12;
+  }
+
+  .aviso:hover .estrella {
+    rotate: 90deg;
   }
 
   .aviso:hover .flecha {
     translate: 4px 0;
+    scale: 1.08;
   }
 }
 
@@ -78,6 +92,13 @@
   background: var(--surface);
   box-shadow: inset 0 0 0 1.5px var(--brand);
   color: var(--brand);
+}
+
+.icono svg {
+  transform-origin: 60% 60%;
+  transition:
+    rotate var(--dur-base) var(--ease-out),
+    scale var(--dur-base) var(--ease-out);
 }
 
 /* --- Los textos ------------------------------------------------------------ */
@@ -128,6 +149,11 @@
   -webkit-font-smoothing: auto;
 }
 
+/* La estrella de ORUM (`AdornoEstrella`), que gira al apuntar. */
+.estrella {
+  transition: rotate var(--dur-slow) var(--ease-out);
+}
+
 .extracto {
   display: -webkit-box;
   overflow: hidden;
@@ -150,7 +176,9 @@
   border-radius: var(--radius-full);
   background: var(--gold-500);
   color: var(--tinta-1);
-  transition: translate var(--dur-fast) var(--ease-out);
+  transition:
+    translate var(--dur-fast) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
 }
 
 /* --- En el teléfono: compacto, en UNA fila ---------------------------------
