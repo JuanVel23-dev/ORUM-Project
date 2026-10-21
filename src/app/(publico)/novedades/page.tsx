@@ -5,7 +5,7 @@ import { obtenerAnunciosPublicos } from '@/lib/publico/datos-publicos'
 import { ListaNovedades } from '@/components/novedades/lista-novedades'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
 import { HREF_UNETE } from '../_components/anclas'
-import estilos from './novedades.module.css'
+import estilos from '@/components/novedades/pagina-novedades.module.css'
 
 export const metadata: Metadata = {
   alternates: { canonical: '/novedades' },

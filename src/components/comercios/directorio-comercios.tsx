@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { CatalogoPublico } from '@/lib/publico/datos-publicos'
 import { DirectorioInteractivo } from './directorio-interactivo'
 import { ProveedorFavoritos } from './favoritos'
@@ -41,6 +42,8 @@ type Props = {
    * ellos (la fachada pública), ni lo uno ni lo otro.
    */
   favoritos?: number[]
+  /** Entre el banner y los filtros (el aviso de la última novedad del socio). */
+  aviso?: ReactNode
 }
 
 export function DirectorioComercios({
@@ -50,6 +53,7 @@ export function DirectorioComercios({
   bajada,
   socio = false,
   favoritos,
+  aviso,
 }: Props) {
   /*
     SIN `<Suspense>` alrededor, a propósito. `useSearchParams` solo exige esa
@@ -66,6 +70,7 @@ export function DirectorioComercios({
       titulo={titulo}
       bajada={bajada}
       socio={socio}
+      aviso={aviso}
     />
   )
 

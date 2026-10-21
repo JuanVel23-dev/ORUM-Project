@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type FormEvent, type MouseEvent } from 'react'
+import { useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from 'react'
 import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -86,9 +86,11 @@ type Props = {
   titulo: string
   bajada: string
   socio: boolean
+  /** Lo que va entre el banner y los filtros: el aviso de la última novedad (portal del socio). */
+  aviso?: ReactNode
 }
 
-export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio }: Props) {
+export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio, aviso }: Props) {
   /*
     LOS FILTROS SE LEEN SOLO CUANDO LA URL ES LA DEL DIRECTORIO (bug del
     03/10/2026). Al tocar un comercio, la ficha se abre ENCIMA como ruta
@@ -292,6 +294,8 @@ export function DirectorioInteractivo({ base, directorio, titulo, bajada, socio 
           </form>
         </div>
       </section>
+
+      {aviso}
 
       {/* ── FAVORITOS + CATEGORÍAS + CIUDAD + ORDEN ─────────────────────── */}
       <section

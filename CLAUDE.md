@@ -1486,6 +1486,15 @@ borrar la imagen»). Tres piezas:
   `localStorage`, que lo dejaba quitado para siempre y no se quería—. La
   tarjeta se pinta en el servidor; solo la X es de cliente. No vuelvas al
   fondo negro ni a la miniatura.
+- **Y TAMBIÉN EN EL PORTAL DE MIEMBROS** (21/10/2026: «no lo veo en el
+  portal de miembros»; desde el 29/09 el Inicio del socio no enseñaba
+  ninguna novedad). El Inicio pasa el mismo `AvisoNovedad` al directorio
+  (`DirectorioComercios aviso`, entre el banner y los filtros), con las
+  novedades marcadas para miembros, y lleva a **`/miembros/novedades`**, que
+  vuelve: la misma página que la pública (`ListaNovedades`, la hoja
+  compartida `components/novedades/pagina-novedades.module.css`) pero con
+  las del socio, leídas con su sesión. Se retiró la redirección vieja a
+  `/miembros#novedades` de `next.config.ts`.
 - **`/novedades`** va a lo ancho de la fachada: cabecera con
   `TituloSeccion`, la más reciente EN GRANDE (imagen y texto lado a lado),
   las anteriores en rejilla, y al final dos accesos (comercios y

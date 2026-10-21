@@ -33,12 +33,19 @@ import styles from './aviso-novedad.module.css'
   ⚠️ NINGÚN NOMBRE CON «anuncio» NI «banner» en lo que llega al navegador:
   los bloqueadores de publicidad los ocultan o anulan. Ver `CLAUDE.md`.
 */
-export function AvisoNovedad({ novedad }: { novedad: AnuncioResumen | null }) {
+export function AvisoNovedad({
+  novedad,
+  href = '/novedades',
+}: {
+  novedad: AnuncioResumen | null
+  /** A dónde lleva: `/novedades` en la fachada, `/miembros/novedades` en el portal del socio. */
+  href?: string
+}) {
   if (!novedad) return null
 
   return (
     <CerrarAviso>
-      <Link href="/novedades" className={styles.aviso} aria-label={`Novedad: ${novedad.titulo}. Ver novedades.`}>
+      <Link href={href} className={styles.aviso} aria-label={`Novedad: ${novedad.titulo}. Ver novedades.`}>
         {/* El megáfono, grande, en su aro dorado. */}
         <span className={styles.icono} aria-hidden="true">
           <Megaphone size={26} />
