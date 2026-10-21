@@ -357,7 +357,7 @@ export function AnuncioForm({ anuncio }: { anuncio?: AnuncioInicial }) {
                 name="programar_inicio"
                 value="true"
                 label="Programar cuándo sale"
-                description="Apagado, sale en cuanto guardes."
+                description={programarInicio ? 'Elige el día y la hora en que sale.' : 'Apagado, sale en cuanto guardes.'}
                 checked={programarInicio}
                 onChange={(e) => setProgramarInicio(e.target.checked)}
               />
@@ -388,7 +388,7 @@ export function AnuncioForm({ anuncio }: { anuncio?: AnuncioInicial }) {
                 name="programar_fin"
                 value="true"
                 label="Programar cuándo termina"
-                description="Apagado, se ve hasta que la retires."
+                description={programarFin ? 'Elige el día y la hora en que deja de verse.' : 'Apagado, se ve hasta que la retires.'}
                 checked={programarFin}
                 onChange={(e) => setProgramarFin(e.target.checked)}
               />

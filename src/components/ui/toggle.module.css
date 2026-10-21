@@ -14,6 +14,10 @@
 }
 
 .fila {
+  /* El `<input>` oculto vive DENTRO de su fila: si su caja quedara lejos
+     (colocado contra un antepasado), al enfocarlo el navegador desplazaría
+     hasta ese sitio y no hasta el interruptor. */
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);

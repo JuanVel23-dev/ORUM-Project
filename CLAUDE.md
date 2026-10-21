@@ -1600,9 +1600,17 @@ paleta. **No en una ventana que desplaza entera** (se fundiría su fondo)
 **ni con algo `sticky` abajo.** No vuelvas a un degradado superpuesto.
 
 **`.marcoCuerpo` (Modal) RECORTA a la forma de la ventana** (`overflow:
-hidden` con el radio interior, abajo si no hay pie y arriba si no hay
+clip` con el radio interior, abajo si no hay pie y arriba si no hay
 cabecera). El `<dialog>` no puede recortar —perdería su sombra—, y sin esto
 asomaban por la curva el borde de un campo o el final de la barra.
+⚠️ **`clip`, nunca `hidden`, en lo que recorta una ventana** (21/10/2026:
+«cuando activo una opción se daña la ventana»). `hidden` deja que el
+navegador DESPLACE la caja: al tocar un interruptor, su `<input>` oculto
+tomaba el foco, Chrome desplazaba el marco para enseñarlo y el formulario
+se corría hacia arriba dejando media ventana en blanco. La hoja lo había
+cerrado el 02/10; la ventana de escritorio seguía con `hidden`. Y la fila
+de `Switch`/`Checkbox`/`Radio` es `position: relative`: su `<input>` oculto
+vive dentro de ella, no contra un antepasado lejano.
 
 **Una ventana con cabecera de color no desplaza ENTERA** (veredicto de
 comercios): desplaza su cuerpo (`.ventanaCuerpo`, que lleva el `data-barra`).

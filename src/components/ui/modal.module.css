@@ -201,7 +201,17 @@
 .marcoCuerpo {
   --radio-interior: calc(var(--radius-lg) - 1px);
 
+  /*
+    `clip` y no `hidden` (21/10/2026, «cuando activo una opción se daña la
+    ventana»): `hidden` recorta pero DEJA que el navegador desplace la caja.
+    Al tocar un interruptor, su `<input>` oculto recibía el foco y Chrome
+    desplazaba ESTE marco para mostrarlo: el cuerpo se corría hacia arriba
+    y la ventana quedaba media en blanco. Es el mismo bug que la hoja
+    (`sheet.module.css`) cerró el 02/10. `hidden` queda de respaldo para
+    navegadores sin `clip`.
+  */
   overflow: hidden;
+  overflow: clip;
 }
 
 .marcoCuerpo:last-child {
