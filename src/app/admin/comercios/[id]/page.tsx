@@ -18,6 +18,9 @@ import { cambiarEstadoPromocion } from '../promociones-actions'
 import { EditarComercioForm } from './editar/_components/editar-comercio-form'
 import { GestorImagenes } from './imagenes/_components/gestor-imagenes'
 import { cargarImagenesComercio } from './imagenes/_components/datos'
+import { Paginacion } from '@/components/ui/paginacion'
+import { ResenasAdmin } from './_components/resenas-admin'
+import { obtenerResenasParaAdmin } from '@/lib/resenas/datos'
 import styles from './ficha.module.css'
 
 export const metadata = { title: 'Ficha de comercio · ORUM' }
@@ -38,9 +41,9 @@ type Promocion = {
   tipo_beneficio_id: number
 }
 
-type Parte = 'datos' | 'sucursales' | 'promociones' | 'imagenes'
+type Parte = 'datos' | 'sucursales' | 'promociones' | 'imagenes' | 'resenas'
 
-const PARTES: readonly Parte[] = ['datos', 'sucursales', 'promociones', 'imagenes']
+const PARTES: readonly Parte[] = ['datos', 'sucursales', 'promociones', 'imagenes', 'resenas']
 
 /*
   LA FICHA DEL COMERCIO  ·  rediseño del panel (15/10/2026)
@@ -57,10 +60,10 @@ export default async function FichaComercioPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ pestana?: string }>
+  searchParams: Promise<{ pestana?: string; pagina?: string }>
 }) {
   await requireRol('super_admin')
-  const [{ id }, { pestana: pestanaRaw }] = await Promise.all([params, searchParams])
+  const [{ id }, { pestana: pestanaRaw, pagina: paginaRaw }] = await Promise.all([params, searchParams])
   const comercioId = Number(id)
   const parte: Parte = PARTES.includes(pestanaRaw as Parte) ? (pestanaRaw as Parte) : 'datos'
 
@@ -81,6 +84,8 @@ export default async function FichaComercioPage({
     { data: tipos },
     { count: fotosGaleria },
     imagenes,
+    resenas,
+    { count: cuentaResenas },
   ] = await Promise.all([
     cargarCategoriasConSubcategorias(admin),
     admin
@@ -101,6 +106,11 @@ export default async function FichaComercioPage({
       .select('id', { count: 'exact', head: true })
       .eq('comercio_id', comercioId),
     parte === 'imagenes' ? cargarImagenesComercio(comercioId) : Promise.resolve(null),
+    // La lista completa solo con la pestaña abierta; el recuento de la
+    // pestaña es una consulta barata (head). Si la tabla aún no existe, el
+    // error se ignora y el recuento queda en 0.
+    parte === 'resenas' ? obtenerResenasParaAdmin(comercioId, Number.parseInt(paginaRaw ?? '1', 10)) : Promise.resolve(null),
+    admin.from('resenas').select('id', { count: 'exact', head: true }).eq('comercio_id', comercioId),
   ])
 
   // Cadena vacía y no '—': el valor va directo a un campo de formulario.
@@ -213,6 +223,12 @@ export default async function FichaComercioPage({
             etiqueta: 'Imágenes',
             cuenta: totalFotos,
             activa: parte === 'imagenes',
+          },
+          {
+            href: `${base}?pestana=resenas`,
+            etiqueta: 'Reseñas',
+            cuenta: resenas?.disponible ? resenas.total : (cuentaResenas ?? 0),
+            activa: parte === 'resenas',
           },
         ]}
       />
@@ -418,6 +434,35 @@ export default async function FichaComercioPage({
             portadaUrl={imagenes.portadaUrl}
             galeria={imagenes.galeria}
           />
+        </section>
+      )}
+
+      {parte === 'resenas' && (
+        <section className={styles.panel} aria-label="Reseñas del comercio">
+          {resenas?.disponible ? (
+            <>
+            <ResenasAdmin
+              comercioId={comercio.id}
+              total={resenas.total}
+              promedio={resenas.promedio}
+              resenas={resenas.resenas}
+            />
+            <Paginacion
+              pagina={resenas.pagina}
+              paginas={resenas.paginas}
+              total={resenas.total}
+              desde={resenas.desde}
+              hasta={resenas.hasta}
+              nombre={resenas.total === 1 ? 'reseña' : 'reseñas'}
+              href={(n) => `${base}?pestana=resenas${n > 1 ? `&pagina=${n}` : ''}`}
+            />
+            </>
+          ) : (
+            <EmptyState
+              title="Las reseñas todavía no están disponibles"
+              description="No pudimos leer las reseñas. Inténtalo de nuevo más tarde."
+            />
+          )}
         </section>
       )}
     </div>

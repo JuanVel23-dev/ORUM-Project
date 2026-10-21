@@ -1055,6 +1055,33 @@ significa «error» en casi todas las interfaces, y lo que la convierte aquí en
 único portador**: `prefers-reduced-motion` la retira entera, así que el estado
 tiene que verse igual con color, texto y `aria-pressed`.
 
+**Las reseñas de comercios** (20/10/2026). El socio puntúa de 1 a 5 estrellas
+enteras, con mensaje opcional (≤500 caracteres, sin enlaces ni marcado): una por
+socio y comercio, que él edita o borra. Solo reseña quien tiene una venta en
+ese comercio y una membresía vigente (crear y editar; borrar no exige
+vigencia). Cada reseña admite una respuesta del comercio y una de ORUM (columnas
+en la misma fila); la del admin se muestra como «ORUM».
+
+- **Tabla `resenas`** (`supabase/migrations/20261020150000_resenas.sql`;
+  comprobación en `supabase/verificacion/resenas_verificacion.sql`). NADIE
+  escribe con la sesión del navegador: `anon`/`authenticated` no tienen
+  privilegios. Las server actions escriben con `service_role` tomando socio y
+  comercio de la SESIÓN, y el trigger `trg_resenas_validar` es la barrera
+  real. Los socios leen con `resenas_resumen`, `resenas_de_comercio` y
+  `puedo_resenar` (autor «María G.»); comercio y admin, con el cliente de
+  administración filtrado (el comercio de la sesión / un id validado tras
+  `requireRol('super_admin')`).
+- **Dónde viven**: reglas puras en `src/lib/resenas/` (`resenas.ts`, `mapeo.ts`,
+  `datos.ts`), estrellas en `components/ui/estrellas*.tsx`, el resto en
+  `components/resenas/`. Acciones del socio
+  (`miembros/(portal)/comercios/resenas-actions.ts`), del comercio
+  (`comercios/(portal)/resenas-actions.ts`) y del panel
+  (`admin/comercios/resenas-actions.ts`: pestaña «Reseñas» de la ficha, de a 25,
+  solo `super_admin`). Eliminar y responder del admin se anotan en
+  `bitacora_actividad` (entidad `resena`, sin el texto de la reseña).
+- Vistas previas con datos falsos, solo fuera de producción: `/dev/resenas`,
+  `/dev/resenas-comercio`, `/dev/resenas-admin`.
+
 **`ComercioLogo` pinta un CÍRCULO** en sus tres variantes (`tarjeta` 72px,
 `hero` 144px, `portada` responsiva). `object-fit` se queda en **`contain`**: un
 logotipo apaisado deja aire arriba y abajo, y eso es preferible a recortar la
@@ -1731,3 +1758,8 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
       Turnstile en los logins y las fuentes de `next/font` (locales).
     - Se prueba **desplegada**, en los cuatro portales y en los logins, no
       solo en `pnpm dev`.
+12. **Las reseñas no se han probado de punta a punta con sesiones reales.**
+    Crear, editar y borrar del socio, responder del comercio y moderar del
+    admin se verificaron con datos falsos (`/dev/resenas*`), el script SQL de
+    verificación y lectura de código; falta recorrerlo con un socio, un
+    comercio y un admin reales.

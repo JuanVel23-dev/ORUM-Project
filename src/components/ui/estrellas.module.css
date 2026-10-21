@@ -1,0 +1,163 @@
+/*
+  Estrellas. Llena = --gold-600 (3,27:1 sobre el crema: el mínimo de 1.4.11 para
+  un objeto gráfico); --gold-500 / --gold-400 sobre claro están prohibidos.
+  Vacía = solo trazo en --border-control. La FORMA (relleno contra hueco) y el
+  aria-label llevan el significado; el color no es el único portador.
+*/
+
+/* ------------------------------ Lectura ---------------------------------- */
+
+.lectura {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  line-height: 1;
+}
+
+.estrellas {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.sm {
+  --lado: 14px;
+}
+
+.md {
+  --lado: 20px;
+}
+
+.celda {
+  position: relative;
+  display: block;
+  width: var(--lado);
+  height: var(--lado);
+}
+
+.celda svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hueca {
+  fill: transparent;
+  stroke: var(--border-control);
+  stroke-width: 1.6;
+}
+
+/* La capa llena se recorta por la derecha: media estrella = 50 %. */
+.llena {
+  fill: var(--gold-600);
+  stroke: var(--gold-600);
+  stroke-width: 1.6;
+  clip-path: inset(0 calc(100% - var(--relleno, 0%)) 0 0);
+}
+
+.total {
+  font-size: var(--t-caption-size);
+  color: var(--text-3);
+}
+
+/* ------------------------------ Selector --------------------------------- */
+
+.selector {
+  display: inline-flex;
+  /* Paso de 44px entre centros: cada objetivo táctil cabe sin pisar al vecino. */
+  gap: calc(var(--tap-min) - 32px);
+}
+
+.opcion {
+  position: relative;
+  display: block;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  -webkit-tap-highlight-color: transparent;
+  /* Respuesta al apretar (:active) y vuelta suave: solo transform. */
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+/* El objetivo táctil se amplía sin agrandar la estrella. */
+.opcion::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  transform: translate(-50%, -50%);
+}
+
+.opcion:active {
+  transform: scale(0.88);
+  transition-duration: var(--dur-press);
+}
+
+.forma {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: transparent;
+  stroke: var(--border-control);
+  stroke-width: 1.6;
+  transition:
+    fill var(--dur-fast) var(--ease-out),
+    stroke var(--dur-fast) var(--ease-out);
+}
+
+.opcion[data-lleno='true'] .forma {
+  fill: var(--gold-600);
+  stroke: var(--gold-600);
+}
+
+/* Vista previa al apuntar: hasta la estrella señalada. Solo con puntero real. */
+@media (hover: hover) {
+  .selector:not([data-disabled]):has(.opcion:hover) .forma {
+    fill: transparent;
+    stroke: var(--border-control);
+  }
+
+  .selector:not([data-disabled]) .opcion:hover .forma,
+  .selector:not([data-disabled]):has(.opcion:hover) .opcion:has(~ .opcion:hover) .forma {
+    fill: var(--gold-600);
+    stroke: var(--gold-600);
+  }
+}
+
+.opcion:has(.radio:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.selector[data-disabled] .opcion {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Radio real conservado: da rol, flechas y envío con el formulario. */
+.radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Sin movimiento: el estado sigue cambiando de color y de forma. */
+@media (prefers-reduced-motion: reduce) {
+  .opcion,
+  .forma {
+    transition: none;
+  }
+
+  .opcion:active {
+    transform: none;
+  }
+}

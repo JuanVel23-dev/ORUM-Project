@@ -35,6 +35,29 @@ export function paginar<T>(filas: readonly T[], pagina: number, tam = FILAS_POR_
 }
 
 /**
+ * La página de una lista que se pide al servidor con `.range(inicio, fin)`
+ * (sin tener todas las filas en memoria). Misma aritmética que `paginar`:
+ * NaN, negativa o pasada del final se llevan a 1..última. `fin` es inclusivo,
+ * como en PostgREST; con `total` 0 no hay filas y `fin` queda antes de `inicio`.
+ */
+export function rangoDePagina(total: number, pagina: number, tam = FILAS_POR_PAGINA) {
+  const paginas = Math.max(1, Math.ceil(Math.max(0, total) / tam))
+  const pedida = Number.isFinite(pagina) ? Math.trunc(pagina) : 1
+  const actual = Math.min(Math.max(1, pedida), paginas)
+  const inicio = (actual - 1) * tam
+  const hasta = Math.min(total, inicio + tam)
+  return {
+    pagina: actual,
+    paginas,
+    total,
+    inicio,
+    fin: inicio + tam - 1,
+    desde: total <= 0 ? 0 : inicio + 1,
+    hasta: total <= 0 ? 0 : hasta,
+  }
+}
+
+/**
  * Los números de página que se enseñan: la primera, la última, la actual y
  * sus vecinas; `null` es un salto («…»).
  */

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useRef, type ReactNode } from 'react'
 import { animate } from 'motion'
 import { X } from 'lucide-react'
 import {
@@ -82,6 +82,7 @@ export function Sheet({
   children,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const tituloId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const veloRef = useRef<HTMLDivElement>(null)
 
@@ -335,7 +336,7 @@ export function Sheet({
       ref={dialogRef}
       className={styles.dialog}
       onCancel={alCancelar}
-      aria-labelledby={title ? 'sheet-titulo' : undefined}
+      aria-labelledby={title ? tituloId : undefined}
       aria-label={!title && ariaLabel ? ariaLabel : undefined}
     >
       <div ref={veloRef} className={styles.velo} onClick={onClose} aria-hidden="true" />
@@ -361,7 +362,7 @@ export function Sheet({
           <div className={styles.cabecera}>
             <div className={styles.textos}>
               {title && (
-                <h2 className={styles.titulo} id="sheet-titulo">
+                <h2 className={styles.titulo} id={tituloId}>
                   {title}
                 </h2>
               )}
