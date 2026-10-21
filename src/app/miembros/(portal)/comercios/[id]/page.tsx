@@ -10,6 +10,8 @@ import { transicionComercio } from '@/lib/comercios/transiciones'
 import { hoyISO } from '@/lib/shared/fecha'
 import { FichaComercio, type SedeFicha } from '@/components/comercios/ficha-comercio'
 import estilos from '@/components/comercios/ficha-comercio.module.css'
+import { obtenerResenasParaSocio, puedoResenar } from '@/lib/resenas/datos'
+import { SeccionResenas } from '@/components/resenas/seccion-resenas'
 import { BotonMostrarCarnet } from '../../_components/boton-carnet'
 
 /*
@@ -136,6 +138,8 @@ export default async function FichaComercioPage({
     { data: ciudades },
     { data: imagenesCrudas },
     { data: portada },
+    resenas,
+    puedeResenar,
   ] = await Promise.all([
     cargarComercio(numero),
     supabase
@@ -167,6 +171,10 @@ export default async function FichaComercioPage({
     /* La portada va APARTE: si su columna faltara, pedirla en la consulta que
        decide si el comercio EXISTE convertiría eso en un 404. */
     supabase.from('comercios').select('portada_url').eq('id', numero).maybeSingle(),
+    /* Con la sesión del socio (funciones SQL, nunca el cliente de
+       administración). Si fallan o la tabla no existe, la sección no se pinta. */
+    obtenerResenasParaSocio(numero),
+    puedoResenar(numero),
   ])
 
   if (!comercio) notFound()
@@ -263,6 +271,16 @@ export default async function FichaComercioPage({
         </div>
       }
       accion={<BotonMostrarCarnet className={estilos.botonOro} />}
+      resenas={
+        <SeccionResenas
+          comercioId={comercio.id}
+          comercioNombre={comercio.nombre}
+          resumen={resenas}
+          resenas={resenas.resenas}
+          puedeResenar={puedeResenar}
+          miResena={resenas.resenas.find((r) => r.esMia) ?? null}
+        />
+      }
     />
   )
 }

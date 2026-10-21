@@ -16,6 +16,7 @@ import estilos from './ficha-comercio.module.css'
     · `beneficio` — el público lo enseña desenfocado con «inicia sesión»; el
                     socio, legible.
     · `accion`    — «Preguntar por WhatsApp» / «Mostrar mi carnet».
+    · `resenas`   — solo el socio: promedio, lista y su propia reseña.
 
   Portada, logo y fotos se AMPLÍAN al tocarlos (`VisorImagenes`): «cuando le
   dé clic al logo o a alguna foto, se agrande para que la pueda ver mejor».
@@ -47,6 +48,8 @@ type Props = {
   beneficio: ReactNode
   /** La acción principal, al pie. */
   accion?: ReactNode
+  /** Las reseñas, tras la información principal. Solo la monta el Portal de Miembros. */
+  resenas?: ReactNode
   /** Enlace de vuelta a pantalla completa (dentro del overlay no se pinta). */
   volver?: { href: string; texto: string }
   enOverlay?: boolean
@@ -67,6 +70,7 @@ export function FichaComercio({
   fotos,
   beneficio,
   accion,
+  resenas,
   volver,
   enOverlay = false,
   transicion,
@@ -193,6 +197,8 @@ export function FichaComercio({
           <div className={estilos.beneficio}>{beneficio}</div>
 
           {accion}
+
+          {resenas}
         </div>
       </article>
     </VisorImagenes>
