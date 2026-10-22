@@ -116,6 +116,11 @@
   font-size: var(--t-caption-size);
   line-height: var(--t-caption-leading);
   color: var(--text-3);
+  /* Hasta tres categorías: dos líneas y puntos suspensivos. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .beneficio {

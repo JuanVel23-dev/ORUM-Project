@@ -44,7 +44,8 @@ export type FiltrosDirectorio = {
    * Subcategorías elegidas (20/10/2026), con las mismas reglas que las
    * categorías. Afinan SU categoría: con «Gastronomía» y «Pizzerías» se ven
    * solo las pizzerías; una categoría sin ninguna de sus subcategorías
-   * elegidas se ve entera.
+   * elegidas se ve entera. Un comercio con varias categorías se mira fila a
+   * fila: afinar una no esconde lo que el comercio es en otra.
    */
   subcategoriaIds: number[]
   ciudadId: number | null
@@ -56,14 +57,40 @@ export type FiltrosDirectorio = {
   soloFavoritos: boolean
 }
 
+/**
+ * Una de las categorías de un comercio (21/10/2026: hasta 3), con su
+ * subcategoría opcional.
+ */
+export type CategoriaDeComercio = {
+  categoriaId: number
+  categoriaNombre: string
+  subcategoriaId: number | null
+  subcategoriaNombre: string | null
+}
+
+/** «Gastronomía (Pizzerías)», o solo «Gastronomía» si no hay subcategoría. */
+export function etiquetaCategoria(c: CategoriaDeComercio): string {
+  return c.subcategoriaNombre ? `${c.categoriaNombre} (${c.subcategoriaNombre})` : c.categoriaNombre
+}
+
+/**
+ * La línea de detalle de una tarjeta o ficha: todas las categorías separadas
+ * por coma y, tras un punto medio, las ciudades. Las vacías no dejan huecos.
+ */
+export function detalleComercio(
+  categorias: readonly CategoriaDeComercio[],
+  ciudades: readonly string[],
+): string {
+  return [categorias.map(etiquetaCategoria).join(', '), ciudades.join(', ')]
+    .filter(Boolean)
+    .join(' · ')
+}
+
 /** Lo mínimo que el filtro necesita saber de un comercio. */
 export type ComercioFiltrable = {
   nombre: string
-  categoriaId: number | null
-  categoriaNombre: string | null
-  /** Opcional: un comercio sin subcategoría (o una lista que no la trae) no la busca. */
-  subcategoriaNombre?: string | null
-  subcategoriaId?: number | null
+  /** Sus categorías, en el orden en que se guardaron. Puede estar vacía. */
+  categorias: CategoriaDeComercio[]
   ciudadIds: number[]
   ciudades: string[]
 }
@@ -208,8 +235,7 @@ function casaBusqueda(comercio: ComercioFiltrable, busqueda: string): boolean {
   if (!busqueda) return true
   const campos = [
     comercio.nombre,
-    comercio.categoriaNombre ?? '',
-    comercio.subcategoriaNombre ?? '',
+    ...comercio.categorias.flatMap((c) => [c.categoriaNombre, c.subcategoriaNombre ?? '']),
     ...comercio.ciudades,
   ]
   return campos.some((campo) => normalizarNombre(campo).includes(busqueda))
@@ -238,16 +264,20 @@ export function filtrarDirectorio<T extends ComercioFiltrable>(
     if (!afinadas.has(categoria)) afinadas.set(categoria, new Set())
     afinadas.get(categoria)!.add(s)
   }
-  const casaSubcategoria = (c: ComercioFiltrable) => {
-    const elegidas = c.categoriaId !== null ? afinadas.get(c.categoriaId) : undefined
-    return !elegidas || (c.subcategoriaId != null && elegidas.has(c.subcategoriaId))
-  }
+  // Un comercio casa por categoría si ALGUNA de sus filas está elegida y,
+  // en esa fila, la categoría no está afinada o su subcategoría es una de las
+  // elegidas. Una subcategoría afina solo SU categoría.
+  const casaCategoria = (c: ComercioFiltrable) =>
+    filtros.categoriaIds.length === 0 ||
+    c.categorias.some((fila) => {
+      if (!filtros.categoriaIds.includes(fila.categoriaId)) return false
+      const elegidas = afinadas.get(fila.categoriaId)
+      return !elegidas || (fila.subcategoriaId !== null && elegidas.has(fila.subcategoriaId))
+    })
 
   const filtrados = comercios.filter(
     (c) =>
-      (filtros.categoriaIds.length === 0 ||
-        (c.categoriaId !== null && filtros.categoriaIds.includes(c.categoriaId))) &&
-      casaSubcategoria(c) &&
+      casaCategoria(c) &&
       (filtros.ciudadId === null || c.ciudadIds.includes(filtros.ciudadId)) &&
       casaBusqueda(c, busqueda),
   )

@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import type { ComercioVitrina } from '@/lib/publico/datos-publicos'
+import { etiquetaCategoria } from '@/lib/publico/directorio'
 import escaparate from '../escaparate.module.css'
 import { AdornoEstrella } from '@/components/ui/marca/marca'
 import { Revelar } from './revelar'
@@ -86,9 +87,9 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
                   <ComercioLogo logoUrl={c.logoUrl} nombre={c.nombre} />
                   <span className={estilos.textos}>
                     <span className={estilos.nombre}>{c.nombre}</span>
-                    {c.categoriaNombre && (
+                    {c.categorias.length > 0 && (
                       <span className={estilos.categoria}>
-                        {[c.categoriaNombre, c.subcategoriaNombre].filter(Boolean).join(' · ')}
+                        {c.categorias.map(etiquetaCategoria).join(', ')}
                       </span>
                     )}
                     <span className={estilos.ver}>

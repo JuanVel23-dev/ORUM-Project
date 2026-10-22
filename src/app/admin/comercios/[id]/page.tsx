@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/ui/feedback'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { Pestanas } from '@/components/ui/pestanas'
 import { TituloSeccion } from '@/components/ui/titulo-seccion'
-import { cargarCategoriasConSubcategorias } from '@/lib/comercios/categorias-admin'
+import { cargarCategoriasConSubcategorias, cargarFilasCategoria } from '@/lib/comercios/categorias-admin'
 import { cambiarEstadoAccesoComercio, cambiarEstadoComercio } from '../actions'
 import { cambiarEstadoSucursal } from '../sucursales-actions'
 import { cambiarEstadoPromocion } from '../promociones-actions'
@@ -70,7 +70,7 @@ export default async function FichaComercioPage({
   const admin = createAdminClient()
   const { data: comercio } = await admin
     .from('comercios')
-    .select('id, perfil_id, nombre, descripcion, categoria_id, subcategoria_id, logo_url, portada_url, activo, indexable')
+    .select('id, perfil_id, nombre, descripcion, logo_url, portada_url, activo, indexable')
     .eq('id', comercioId)
     .is('deleted_at', null)
     .maybeSingle()
@@ -79,6 +79,7 @@ export default async function FichaComercioPage({
 
   const [
     categorias,
+    filasCategoria,
     { data: sucursales },
     { data: promociones },
     { data: tipos },
@@ -88,6 +89,7 @@ export default async function FichaComercioPage({
     { count: cuentaResenas },
   ] = await Promise.all([
     cargarCategoriasConSubcategorias(admin),
+    cargarFilasCategoria(admin, comercioId),
     admin
       .from('sucursales')
       .select('id, nombre, direccion, telefono, activo')
@@ -125,11 +127,15 @@ export default async function FichaComercioPage({
     perfilActivo = perfil?.activo ?? false
   }
 
-  const categoriaActual = categorias.find((c) => c.id === comercio.categoria_id)
-  const categoria = categoriaActual?.nombre
-  const subcategoria = categoriaActual?.subcategorias.find(
-    (s) => s.id === comercio.subcategoria_id,
-  )?.nombre
+  // «Gastronomía (Pizzerías), Belleza»: todas las categorías del comercio.
+  const etiquetaCategorias = filasCategoria
+    .flatMap((f) => {
+      const categoria = categorias.find((c) => c.id === f.categoriaId)
+      if (!categoria) return []
+      const sub = categoria.subcategorias.find((s) => s.id === f.subcategoriaId)?.nombre
+      return [sub ? `${categoria.nombre} (${sub})` : categoria.nombre]
+    })
+    .join(', ')
   const listaSucursales = (sucursales ?? []) as Sucursal[]
   const listaPromociones = (promociones ?? []) as Promocion[]
   const totalFotos = (fotosGaleria ?? 0) + (comercio.portada_url ? 1 : 0)
@@ -194,7 +200,7 @@ export default async function FichaComercioPage({
               {comercio.activo ? 'Aliado activo' : 'Aliado inactivo'}
             </Badge>
             <span>
-              {[categoria, subcategoria, `${activas} ${activas === 1 ? 'sucursal activa' : 'sucursales activas'}`]
+              {[etiquetaCategorias, `${activas} ${activas === 1 ? 'sucursal activa' : 'sucursales activas'}`]
                 .filter(Boolean)
                 .join(' · ')}
             </span>
@@ -243,8 +249,7 @@ export default async function FichaComercioPage({
                 perfil_id: comercio.perfil_id,
                 nombre: comercio.nombre,
                 descripcion: comercio.descripcion,
-                categoria_id: comercio.categoria_id,
-                subcategoria_id: comercio.subcategoria_id,
+                categorias: filasCategoria,
                 indexable: comercio.indexable,
                 correo,
               }}

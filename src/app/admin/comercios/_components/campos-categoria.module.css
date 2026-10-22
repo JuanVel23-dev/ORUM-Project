@@ -1,0 +1,24 @@
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.fila {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+/* La pareja de campos ocupa todo el ancho de la fila. */
+.fila > :first-child {
+  align-self: stretch;
+}
+
+.nota {
+  margin: var(--space-2) 0 0;
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-leading);
+  color: var(--text-3);
+}

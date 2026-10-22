@@ -12,8 +12,9 @@ export type FilaComercio = {
   id: number
   nombre: string
   logoUrl: string | null
-  categoriaId: number | null
-  categoria: string | null
+  /** Sus categorías (hasta 3), en el orden en que se guardaron. */
+  categoriaIds: number[]
+  categorias: string[]
   activo: boolean
   /** Sucursales activas. */
   sucursales: number
@@ -61,10 +62,10 @@ export function filtrarComercios(
   const palabras = plano(busqueda).split(/\s+/).filter(Boolean)
   return filas
     .filter((f) => enPestanaComercio(f, pestana))
-    .filter((f) => categoriaId === null || f.categoriaId === categoriaId)
+    .filter((f) => categoriaId === null || f.categoriaIds.includes(categoriaId))
     .filter((f) => {
       if (palabras.length === 0) return true
-      const texto = plano(`${f.nombre} ${f.categoria ?? ''}`)
+      const texto = plano(`${f.nombre} ${f.categorias.join(' ')}`)
       return palabras.every((p) => texto.includes(p))
     })
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))

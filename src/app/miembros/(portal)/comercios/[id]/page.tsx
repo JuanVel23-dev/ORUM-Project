@@ -8,6 +8,7 @@ import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
 import { transicionComercio } from '@/lib/comercios/transiciones'
 import { hoyISO } from '@/lib/shared/fecha'
+import { detalleComercio, type CategoriaDeComercio } from '@/lib/publico/directorio'
 import { FichaComercio, type SedeFicha } from '@/components/comercios/ficha-comercio'
 import estilos from '@/components/comercios/ficha-comercio.module.css'
 import { obtenerResenasParaSocio, puedoResenar } from '@/lib/resenas/datos'
@@ -39,8 +40,7 @@ type Hero = {
   id: number
   nombre: string
   descripcion: string | null
-  categoriaNombre: string | null
-  subcategoriaNombre: string | null
+  categorias: CategoriaDeComercio[]
   logoUrl: string | null
 }
 
@@ -57,11 +57,16 @@ const cargarComercio = cache(async (id: number): Promise<Hero | null> => {
   // final no saltan RLS.
   const supabase = await createClient()
 
-  const [{ data: comercio }, { data: marcas }, { data: categorias }, { data: subcategorias }] =
-    await Promise.all([
+  const [
+    { data: comercio },
+    { data: marcas },
+    { data: categorias },
+    { data: subcategorias },
+    { data: filasCategoria },
+  ] = await Promise.all([
     supabase
       .from('comercios')
-      .select('id, nombre, descripcion, marca_id, categoria_id, subcategoria_id, logo_url')
+      .select('id, nombre, descripcion, marca_id, logo_url')
       .eq('id', id)
       .eq('activo', true)
       .is('deleted_at', null)
@@ -69,6 +74,12 @@ const cargarComercio = cache(async (id: number): Promise<Hero | null> => {
     supabase.from('marcas').select('id, nombre, logo_url').limit(100),
     supabase.from('categorias').select('id, nombre').limit(100),
     supabase.from('subcategorias').select('id, subcategoria').limit(300),
+    supabase
+      .from('comercio_categorias')
+      .select('categoria_id, subcategoria_id, orden')
+      .eq('comercio_id', id)
+      .order('orden')
+      .limit(3),
   ])
 
   if (!comercio) return null
@@ -76,19 +87,27 @@ const cargarComercio = cache(async (id: number): Promise<Hero | null> => {
   const marca = comercio.marca_id
     ? ((marcas ?? []).find((m) => m.id === comercio.marca_id) ?? null)
     : null
-  const categoria = comercio.categoria_id
-    ? ((categorias ?? []).find((c) => c.id === comercio.categoria_id) ?? null)
-    : null
+  const categoriasDelComercio: CategoriaDeComercio[] = (filasCategoria ?? []).flatMap((f) => {
+    const nombre = (categorias ?? []).find((c) => c.id === f.categoria_id)?.nombre
+    if (nombre === undefined) return []
+    return [
+      {
+        categoriaId: f.categoria_id,
+        categoriaNombre: nombre.trim(),
+        subcategoriaId: f.subcategoria_id,
+        subcategoriaNombre: f.subcategoria_id
+          ? ((subcategorias ?? []).find((s) => s.id === f.subcategoria_id)?.subcategoria.trim() ??
+            null)
+          : null,
+      },
+    ]
+  })
 
   return {
     id: comercio.id,
     nombre: comercio.nombre,
     descripcion: comercio.descripcion,
-    categoriaNombre: categoria?.nombre ?? null,
-    subcategoriaNombre: comercio.subcategoria_id
-      ? ((subcategorias ?? []).find((s) => s.id === comercio.subcategoria_id)?.subcategoria.trim() ??
-        null)
-      : null,
+    categorias: categoriasDelComercio,
     // La misma cadena comercio -> marca -> inicial que usa el directorio.
     logoUrl: resolverLogoComercio(comercio.logo_url, marca?.logo_url ?? null),
   }
@@ -220,9 +239,7 @@ export default async function FichaComercioPage({
   const ciudadesDelComercio = Array.from(
     new Set(sedes.map((s) => s.ciudadNombre).filter((c): c is string => Boolean(c))),
   )
-  const detalle = [comercio.categoriaNombre, comercio.subcategoriaNombre, ciudadesDelComercio.join(', ')]
-    .filter(Boolean)
-    .join(' · ')
+  const detalle = detalleComercio(comercio.categorias, ciudadesDelComercio)
 
   /* ENTRADA NO CONFIABLE: `?volver=` viaja en una URL que cualquiera puede
      enviar. Sin la lista blanca, el botón de vuelta sería una redirección

@@ -606,6 +606,28 @@ export type Database = {
         Relationships: []
       }
       /**
+       * Las categorías de un comercio (20261021120000_comercio_categorias.sql):
+       * de 1 a 3, cada una con su subcategoría opcional. Solo escribe
+       * `service_role`, por `reemplazar_categorias_comercio`.
+       */
+      comercio_categorias: {
+        Row: {
+          comercio_id: number
+          categoria_id: number
+          subcategoria_id: number | null
+          /** 0–2: el orden en que se guardaron. */
+          orden: number
+        }
+        Insert: {
+          comercio_id: number
+          categoria_id: number
+          subcategoria_id?: number | null
+          orden: number
+        }
+        Update: Partial<Database['public']['Tables']['comercio_categorias']['Insert']>
+        Relationships: []
+      }
+      /**
        * Reseñas de socios a comercios (20261020150000_resenas.sql). Solo
        * escribe `service_role`; `trg_resenas_validar` exige compra previa,
        * comercio activo y membresía vigente. Socios y comercios leen por las
@@ -738,6 +760,15 @@ export type Database = {
       /** Borra el contador de una clave (el login lo usa al acertar). Solo `service_role`. */
       reiniciar_cupo: {
         Args: { p_clave: string }
+        Returns: undefined
+      }
+      /**
+       * Reemplaza en una transacción las categorías de un comercio. `p_filas`:
+       * `[{ categoria_id, subcategoria_id | null }, …]` en orden (hasta 3).
+       * Solo `service_role`.
+       */
+      reemplazar_categorias_comercio: {
+        Args: { p_comercio_id: number; p_filas: { categoria_id: number; subcategoria_id: number | null }[]; p_actor?: string | null }
         Returns: undefined
       }
       /**

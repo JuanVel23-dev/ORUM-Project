@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Lock, TicketPercent } from 'lucide-react'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import type { ComercioVitrina } from '@/lib/publico/datos-publicos'
+import { detalleComercio } from '@/lib/publico/directorio'
 import estilos from './tarjeta-directorio.module.css'
 
 /*
@@ -29,13 +30,10 @@ export function TarjetaDirectorio({
   /** Portal de Miembros: beneficio legible y ficha de socio. */
   socio?: boolean
 }) {
-  const detalle = [
-    comercio.categoriaNombre,
-    comercio.subcategoriaNombre,
-    comercio.ciudades.join(', '),
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  /* Todas sus categorías (hasta 3) y las ciudades. La tarjeta es corta: el CSS
+     recorta a dos líneas con puntos suspensivos, y el texto entero queda para
+     el lector de pantalla. */
+  const detalle = detalleComercio(comercio.categorias, comercio.ciudades)
 
   const href = socio ? `/miembros/comercios/${comercio.id}` : `/explorar/${comercio.id}`
 
