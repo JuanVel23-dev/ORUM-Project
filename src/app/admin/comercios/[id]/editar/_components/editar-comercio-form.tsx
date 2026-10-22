@@ -13,6 +13,7 @@ import { correo, largo, obligatorio } from '@/lib/validacion/reglas'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import { editarComercio, type EditarComercioState } from '../../../actions'
 import type { CategoriaConSubcategorias } from '@/lib/comercios/categorias-admin'
+import type { FilaCategoriaComercio } from '@/lib/comercios/categorias-comercio'
 import { CamposCategoria } from '../../../_components/campos-categoria'
 import formStyles from '@/styles/formulario.module.css'
 import styles from './editar-comercio-form.module.css'
@@ -22,8 +23,8 @@ type ComercioInicial = {
   perfil_id: string | null
   nombre: string
   descripcion: string | null
-  categoria_id: number | null
-  subcategoria_id: number | null
+  /** Sus categorías (1–3) con su subcategoría opcional, en orden. */
+  categorias: FilaCategoriaComercio[]
   indexable: boolean
   /** Correo real de Auth, o cadena vacía si no tiene cuenta. */
   correo: string
@@ -105,11 +106,7 @@ function Formulario({
           <Input name="nombre" defaultValue={comercio.nombre} required autoFocus={!enPagina} />
         </Field>
 
-        <CamposCategoria
-          categorias={categorias}
-          categoriaInicial={comercio.categoria_id}
-          subcategoriaInicial={comercio.subcategoria_id}
-        />
+        <CamposCategoria categorias={categorias} filasIniciales={comercio.categorias} />
 
         <Field
           label="Descripción"

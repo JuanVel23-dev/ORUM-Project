@@ -5,6 +5,7 @@ import estilos from '@/components/comercios/ficha-comercio.module.css'
 import { Button } from '@/components/ui/button'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import { obtenerFichaPublica, obtenerWhatsappSoporte } from '@/lib/publico/datos-publicos'
+import { detalleComercio } from '@/lib/publico/directorio'
 import { URL_SITIO } from '@/lib/publico/sitio'
 import { MENSAJE_WHATSAPP_PUBLICO } from '@/lib/publico/whatsapp'
 
@@ -104,9 +105,7 @@ export default async function FichaPublicaPage({
   ])
   if (!ficha) notFound()
 
-  const detalle = [ficha.categoriaNombre, ficha.subcategoriaNombre, ficha.ciudades.join(', ')]
-    .filter(Boolean)
-    .join(' · ')
+  const detalle = detalleComercio(ficha.categorias, ficha.ciudades)
 
   return (
     <>

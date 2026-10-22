@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { OverlayRuta } from '@/components/shell/overlay-ruta'
-import { cargarCategoriasConSubcategorias } from '@/lib/comercios/categorias-admin'
+import { cargarCategoriasConSubcategorias, cargarFilasCategoria } from '@/lib/comercios/categorias-admin'
 import { EditarComercioForm } from '@/app/admin/comercios/[id]/editar/_components/editar-comercio-form'
 
 export default async function EditarComercioInterceptado({
@@ -14,14 +14,15 @@ export default async function EditarComercioInterceptado({
   const { id } = await params
 
   const admin = createAdminClient()
-  const [{ data: comercio }, categorias] = await Promise.all([
+  const [{ data: comercio }, categorias, filasCategoria] = await Promise.all([
     admin
       .from('comercios')
-      .select('id, perfil_id, nombre, descripcion, categoria_id, subcategoria_id, logo_url, indexable')
+      .select('id, perfil_id, nombre, descripcion, logo_url, indexable')
       .eq('id', Number(id))
       .is('deleted_at', null)
       .maybeSingle(),
     cargarCategoriasConSubcategorias(admin),
+    cargarFilasCategoria(admin, Number(id)),
   ])
 
   if (!comercio) notFound()
@@ -35,7 +36,7 @@ export default async function EditarComercioInterceptado({
   return (
     <OverlayRuta title="Editar comercio" description={comercio.nombre} width="640px">
       <EditarComercioForm
-        comercio={{ ...comercio, correo }}
+        comercio={{ ...comercio, correo, categorias: filasCategoria }}
         categorias={categorias}
       />
     </OverlayRuta>

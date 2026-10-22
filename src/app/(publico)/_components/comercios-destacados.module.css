@@ -243,6 +243,11 @@
   text-transform: uppercase;
   /* El gris del boceto: 6,35:1 sobre la tarjeta negra, 7,10:1 sobre el negro. */
   color: var(--franja-fg-3);
+  /* Hasta tres categorías: dos líneas y puntos suspensivos. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .ver {

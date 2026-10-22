@@ -11,6 +11,7 @@ import {
   type PestanaComercio,
 } from '@/lib/comercios/listado-admin'
 import { leerPagina } from '@/lib/miembros/listado'
+import { cargarFilasCategoriaDeTodos } from '@/lib/comercios/categorias-admin'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
@@ -44,7 +45,9 @@ const COLUMNAS: ReadonlyArray<Column<FilaComercio>> = [
         </span>
         <span className={styles.nombreBloque}>
           <span className={styles.nombre}>{c.nombre}</span>
-          {c.categoria && <span className={styles.subtitulo}>{c.categoria}</span>}
+          {c.categorias.length > 0 && (
+            <span className={styles.subtitulo}>{c.categorias.join(', ')}</span>
+          )}
         </span>
       </span>
     ),
@@ -105,15 +108,17 @@ export default async function ComerciosPage({ searchParams }: { searchParams: Pr
     { data: sucursales },
     { data: promociones },
     { data: subcategorias },
+    filasCategoria,
   ] = await Promise.all([
       admin
         .from('comercios')
-        .select('id, nombre, logo_url, categoria_id, subcategoria_id, activo')
+        .select('id, nombre, logo_url, activo')
         .is('deleted_at', null),
       admin.from('categorias').select('id, nombre').order('nombre'),
       admin.from('sucursales').select('comercio_id').eq('activo', true).is('deleted_at', null),
       admin.from('promociones').select('comercio_id').eq('activo', true).is('deleted_at', null),
       admin.from('subcategorias').select('id, subcategoria'),
+      cargarFilasCategoriaDeTodos(admin),
     ])
 
   const contar = (filas: { comercio_id: number }[] | null) => {
@@ -130,15 +135,14 @@ export default async function ComerciosPage({ searchParams }: { searchParams: Pr
     id: c.id,
     nombre: c.nombre,
     logoUrl: c.logo_url,
-    categoriaId: c.categoria_id,
-    // «Gastronomía · Pizzerías»: así se ve de un vistazo qué tiene asignado.
-    categoria:
-      [
-        c.categoria_id ? nombreCategoria.get(c.categoria_id) : null,
-        c.subcategoria_id ? nombreSubcategoria.get(c.subcategoria_id) : null,
-      ]
-        .filter(Boolean)
-        .join(' · ') || null,
+    categoriaIds: (filasCategoria.get(c.id) ?? []).map((f) => f.categoriaId),
+    // «Gastronomía (Pizzerías)», una por categoría: así se ve de un vistazo qué tiene asignado.
+    categorias: (filasCategoria.get(c.id) ?? []).flatMap((f) => {
+      const nombre = nombreCategoria.get(f.categoriaId)
+      if (!nombre) return []
+      const sub = f.subcategoriaId ? nombreSubcategoria.get(f.subcategoriaId) : null
+      return [sub ? `${nombre} (${sub})` : nombre]
+    }),
     activo: c.activo,
     sucursales: nSucursales.get(c.id) ?? 0,
     promociones: nPromociones.get(c.id) ?? 0,
@@ -173,7 +177,7 @@ export default async function ComerciosPage({ searchParams }: { searchParams: Pr
   }
 
   // Solo las categorías que algún comercio usa: elegir una vacía no sirve de nada.
-  const usadas = new Set(filas.map((f) => f.categoriaId))
+  const usadas = new Set(filas.flatMap((f) => f.categoriaIds))
   const categoriasFiltro = (categorias ?? []).filter((c) => usadas.has(c.id))
   const categoriaActual = categoriasFiltro.find((c) => c.id === categoriaId)
   const hayFiltros = !!busqueda || categoriaId !== null

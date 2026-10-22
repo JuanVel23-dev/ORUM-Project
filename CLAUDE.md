@@ -1034,6 +1034,25 @@ algún comercio activo (`CatalogoPublico.categorias[].subcategorias`), y el
 buscador de «Ver todas» encuentra la categoría por el nombre de una
 subcategoría.
 
+**Un comercio tiene de 1 a 3 categorías, cada una con su subcategoría
+opcional** (21/10/2026; antes era una sola). La fuente de verdad es la tabla
+`comercio_categorias` (`supabase/migrations/20261021120000_comercio_categorias.sql`;
+comprobación en `supabase/verificacion/comercio_categorias_verificacion.sql`).
+La base garantiza el tope de 3 y que la subcategoría sea de su categoría; el
+mínimo de 1 lo exigen las server actions (`lib/comercios/categorias-comercio.ts`,
+puro y probado). Se escribe SOLO con la función `reemplazar_categorias_comercio`
+(transacción única, `service_role`): borra y reinserta las filas y copia la
+primera (`orden = 0`) a `comercios.categoria_id`/`subcategoria_id`, que ya
+nadie lee y se conservan para poder volver atrás. `authenticated` solo lee las
+filas de comercios activos (la ficha del socio lee con su sesión). En el
+directorio un comercio sale bajo CADA una de sus categorías, una sola vez, y
+una subcategoría afina únicamente SU categoría: mirando fila a fila, afinar
+«Gastronomía» no esconde lo que el comercio es en «Belleza»
+(`filtrarDirectorio`, `ComercioFiltrable.categorias`). Tarjetas y fichas
+muestran todas en una línea (`detalleComercio`: «Gastronomía (Pizzerías),
+Belleza · Bogotá»). El formulario del panel es `CamposCategoria`: hasta 3
+filas categoría + subcategoría.
+
 **Cada categoría y subcategoría tiene SU icono, sin repetir** (mismo día:
 «quiero que cada icono sea alusivo, no quiero nada repetido»). Las de hoy van
 por nombre exacto en `EXACTOS` (`lib/comercios/iconos-categoria.ts`) y la
@@ -1861,6 +1880,12 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
       Turnstile en los logins y las fuentes de `next/font` (locales).
     - Se prueba **desplegada**, en los cuatro portales y en los logins, no
       solo en `pnpm dev`.
+13. **Las columnas `comercios.categoria_id` / `subcategoria_id` están en
+    desuso** desde el 21/10/2026 (varias categorías por comercio): solo
+    guardan una copia de la primera fila. Se retiran en una migración aparte
+    cuando todo esté probado en producción. Tampoco se han probado las
+    categorías múltiples con sesiones reales (alta y edición desde el panel,
+    ficha del socio con su sesión).
 12. **Las reseñas no se han probado de punta a punta con sesiones reales.**
     Crear, editar y borrar del socio, responder del comercio y moderar del
     admin se verificaron con datos falsos (`/dev/resenas*`), el script SQL de

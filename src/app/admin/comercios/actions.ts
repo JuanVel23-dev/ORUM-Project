@@ -7,6 +7,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
+import {
+  leerFilasCategoria,
+  revisarFilasCategoria,
+  type FilaCategoriaComercio,
+} from '@/lib/comercios/categorias-comercio'
 
 /** Verifica que quien ejecuta la acción sea super_admin. */
 async function exigirSuperAdmin(): Promise<string | null> {
@@ -32,37 +37,52 @@ export type CrearComercioState = {
 function leerCamposComercio(formData: FormData) {
   const nombre = String(formData.get('nombre') ?? '').trim()
   const descripcion = String(formData.get('descripcion') ?? '').trim() || null
-  const categoriaRaw = String(formData.get('categoria_id') ?? '').trim()
-  const subcategoriaRaw = String(formData.get('subcategoria_id') ?? '').trim()
   // Un interruptor apagado no envía nada: la ausencia ES el `false`.
   const indexable = formData.get('indexable') === 'on'
-  const categoria_id = categoriaRaw ? Number(categoriaRaw) : null
-  return {
-    nombre,
-    descripcion,
-    categoria_id,
-    // Sin categoría no hay subcategoría que valga.
-    subcategoria_id: categoria_id && subcategoriaRaw ? Number(subcategoriaRaw) : null,
-    indexable,
-  }
+  // De 1 a 3 categorías, cada una con su subcategoría opcional: una pareja
+  // `categoria_id` / `subcategoria_id` por fila del formulario.
+  const categorias = leerFilasCategoria(
+    formData.getAll('categoria_id').map(String),
+    formData.getAll('subcategoria_id').map(String),
+  )
+  return { nombre, descripcion, categorias, indexable }
 }
 
 /**
- * La subcategoría tiene que existir y ser de la categoría elegida: el
- * formulario ya lo garantiza, pero el servidor es quien decide.
+ * Las categorías tienen que ser de 1 a 3, sin repetir, y cada subcategoría de
+ * SU categoría: el formulario ya lo garantiza, pero el servidor es quien
+ * decide. Devuelve el aviso, o `null` si valen.
  */
-async function subcategoriaInvalida(
+async function categoriasInvalidas(
   admin: ReturnType<typeof createAdminClient>,
-  campos: ReturnType<typeof leerCamposComercio>,
+  filas: readonly FilaCategoriaComercio[],
 ): Promise<string | null> {
-  if (campos.subcategoria_id === null) return null
-  const { data } = await admin
-    .from('subcategorias')
-    .select('id')
-    .eq('id', campos.subcategoria_id)
-    .eq('categoria_id', campos.categoria_id ?? -1)
-    .maybeSingle()
-  return data ? null : 'La subcategoría no pertenece a la categoría elegida.'
+  const subcategoriaIds = filas.flatMap((f) =>
+    f.subcategoriaId !== null && Number.isInteger(f.subcategoriaId) ? [f.subcategoriaId] : [],
+  )
+  const categoriaDe = new Map<number, number>()
+  if (subcategoriaIds.length > 0) {
+    const { data } = await admin
+      .from('subcategorias')
+      .select('id, categoria_id')
+      .in('id', subcategoriaIds)
+    for (const s of data ?? []) categoriaDe.set(s.id, s.categoria_id)
+  }
+  return revisarFilasCategoria(filas, categoriaDe)
+}
+
+/** Guarda las categorías del comercio en una transacción (y copia la primera a las columnas viejas). */
+async function guardarCategorias(
+  admin: ReturnType<typeof createAdminClient>,
+  comercioId: number,
+  filas: readonly FilaCategoriaComercio[],
+  actorId: string,
+) {
+  return admin.rpc('reemplazar_categorias_comercio', {
+    p_comercio_id: comercioId,
+    p_filas: filas.map((f) => ({ categoria_id: f.categoriaId, subcategoria_id: f.subcategoriaId })),
+    p_actor: actorId,
+  })
 }
 
 /**
@@ -85,8 +105,8 @@ export async function crearComercio(
 
   const admin = createAdminClient()
 
-  const errSub = await subcategoriaInvalida(admin, campos)
-  if (errSub) return { error: errSub }
+  const errCategorias = await categoriasInvalidas(admin, campos.categorias)
+  if (errCategorias) return { error: errCategorias }
 
   const { data: rol } = await admin.from('roles').select('id').eq('codigo', 'comercio').single()
   if (!rol) return { error: 'No se encontró el rol "comercio" en la base de datos.' }
@@ -117,20 +137,33 @@ export async function crearComercio(
     return { error: mensajeDeError('No se pudo crear el perfil', errPerfil) }
   }
 
-  const { error: errComercio } = await admin.from('comercios').insert({
-
-    updated_by: actorId,
-    perfil_id: userId,
-    nombre: campos.nombre,
-    descripcion: campos.descripcion,
-    categoria_id: campos.categoria_id,
-    subcategoria_id: campos.subcategoria_id,
-    indexable: campos.indexable,
-    activo: true,
-  })
-  if (errComercio) {
+  const { data: comercioNuevo, error: errComercio } = await admin
+    .from('comercios')
+    .insert({
+      updated_by: actorId,
+      perfil_id: userId,
+      nombre: campos.nombre,
+      descripcion: campos.descripcion,
+      indexable: campos.indexable,
+      activo: true,
+    })
+    .select('id')
+    .single()
+  if (errComercio || !comercioNuevo) {
     await revertir()
     return { error: mensajeDeError('No se pudo registrar el comercio', errComercio) }
+  }
+
+  const { error: errGuardado } = await guardarCategorias(
+    admin,
+    comercioNuevo.id,
+    campos.categorias,
+    actorId,
+  )
+  if (errGuardado) {
+    await admin.from('comercios').delete().eq('id', comercioNuevo.id)
+    await revertir()
+    return { error: mensajeDeError('No se pudieron guardar las categorías', errGuardado) }
   }
 
   await enviarCorreoInvitacion({
@@ -151,7 +184,7 @@ export async function crearComercio(
 export type EditarComercioState = { error?: string; ok?: boolean }
 
 /**
- * Edita nombre, descripción, categoría, subcategoría, indexable y (si cambió) el correo.
+ * Edita nombre, descripción, categorías (con sus subcategorías), indexable y (si cambió) el correo.
  * El logo ya no se toca aquí: se sube como archivo desde la pestaña de imágenes.
  */
 export async function editarComercio(
@@ -170,8 +203,8 @@ export async function editarComercio(
 
   const admin = createAdminClient()
 
-  const errSub = await subcategoriaInvalida(admin, campos)
-  if (errSub) return { error: errSub }
+  const errCategorias = await categoriasInvalidas(admin, campos.categorias)
+  if (errCategorias) return { error: errCategorias }
 
   const { error } = await admin
     .from('comercios')
@@ -179,12 +212,15 @@ export async function editarComercio(
       updated_by: actorId,
       nombre: campos.nombre,
       descripcion: campos.descripcion,
-      categoria_id: campos.categoria_id,
-      subcategoria_id: campos.subcategoria_id,
       indexable: campos.indexable,
     })
     .eq('id', id)
   if (error) return { error: mensajeDeError('No se pudieron guardar los cambios', error) }
+
+  const { error: errGuardado } = await guardarCategorias(admin, id, campos.categorias, actorId)
+  if (errGuardado) {
+    return { error: mensajeDeError('No se pudieron guardar las categorías', errGuardado) }
+  }
 
   const correo = String(formData.get('correo') ?? '').trim().toLowerCase()
   const correoOriginal = String(formData.get('correo_original') ?? '').trim().toLowerCase()

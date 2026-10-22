@@ -9,7 +9,7 @@ import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { formatearBeneficio, formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import { TOPE_PUBLICIDAD, textoAlternativo } from '@/lib/publicidad/publicidad'
 import { hoyISO } from '@/lib/shared/fecha'
-import { compararNombres, ordenarCategorias } from './directorio'
+import { compararNombres, ordenarCategorias, type CategoriaDeComercio } from './directorio'
 import { prepararPlanes, type PlanPublico } from './planes'
 
 /* ==========================================================================
@@ -100,7 +100,9 @@ async function conRespaldo<T>(leer: () => Promise<T>, respaldo: T, que: string):
    archivo, en un único sitio:
 
      · Solo se seleccionan columnas públicas. De `comercios`: `id`, `nombre`,
-       `descripcion`, `logo_url`, `portada_url`, `categoria_id` y `marca_id`.
+       `descripcion`, `logo_url`, `portada_url` y `marca_id`; de
+       `comercio_categorias`, `categoria_id` y `subcategoria_id` (hasta 3 por
+       comercio).
        De `marcas`: `id` y `logo_url`. De `promociones`, lo justo para saber
        si hay un beneficio vigente y cómo se llama. De `sucursales`: nombre,
        dirección y ciudad —el teléfono de cada sede se queda fuera: el
@@ -152,10 +154,8 @@ export type ComercioVitrina = {
   id: number
   nombre: string
   descripcion: string | null
-  categoriaId: number | null
-  categoriaNombre: string | null
-  subcategoriaNombre: string | null
-  subcategoriaId: number | null
+  /** Sus categorías (hasta 3), en el orden en que se guardaron. */
+  categorias: CategoriaDeComercio[]
   /** Ids de las ciudades con al menos una sede activa. Alimentan el filtro. */
   ciudadIds: number[]
   ciudades: string[]
@@ -225,7 +225,7 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
     supabase
       .from('comercios')
       .select(
-        'id, nombre, descripcion, logo_url, portada_url, categoria_id, subcategoria_id, marca_id',
+        'id, nombre, descripcion, logo_url, portada_url, marca_id',
       )
       .eq('activo', true)
       .is('deleted_at', null)
@@ -240,8 +240,23 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
   const categorias = exigir(rCategorias, 'las categorías')
   const subcategorias = exigir(rSubcategorias, 'las subcategorías')
 
+  const ids = (comercios ?? []).map((c) => c.id)
+
+  /* Las categorías de los comercios activos (hasta 3 cada uno). Sin comercios
+     no hay nada que pedir. */
+  const rFilasCategoria =
+    ids.length > 0
+      ? await supabase
+          .from('comercio_categorias')
+          .select('comercio_id, categoria_id, subcategoria_id, orden')
+          .in('comercio_id', ids)
+          .order('orden')
+          .limit(TOPE_DIRECTORIO * 3)
+      : { data: [], error: null }
+  const filasCategoria = exigir(rFilasCategoria, 'las categorías de los comercios')
+
   // Las subcategorías que algún comercio activo usa, bajo su categoría.
-  const subcategoriasUsadas = new Set((comercios ?? []).map((c) => c.subcategoria_id))
+  const subcategoriasUsadas = new Set((filasCategoria ?? []).map((f) => f.subcategoria_id))
   const categoriasOrdenadas: CategoriaFiltro[] = ordenarCategorias(
     (categorias ?? []).map((c) => ({ id: c.id, nombre: c.nombre.trim() })),
   ).map((c) => ({
@@ -255,8 +270,6 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
   if (!comercios || comercios.length === 0) {
     return { comercios: [], categorias: categoriasOrdenadas, ciudades: [] }
   }
-
-  const ids = comercios.map((c) => c.id)
 
   const [rPromociones, rTipos, rSucursales, rCiudades] =
     await Promise.all([
@@ -314,18 +327,29 @@ async function leerCatalogoPublico(): Promise<CatalogoPublico> {
     beneficioPorComercio.set(p.comercio_id, formatearBeneficioCorto(tipoCodigo, p.valor))
   }
 
+  const categoriasPorComercio = new Map<number, CategoriaDeComercio[]>()
+  for (const f of filasCategoria ?? []) {
+    const categoriaNombre = nombreCategoria.get(f.categoria_id)
+    if (categoriaNombre === undefined) continue
+    const deEste = categoriasPorComercio.get(f.comercio_id) ?? []
+    deEste.push({
+      categoriaId: f.categoria_id,
+      categoriaNombre: categoriaNombre.trim(),
+      subcategoriaId: f.subcategoria_id,
+      subcategoriaNombre: f.subcategoria_id
+        ? (nombreSubcategoria.get(f.subcategoria_id) ?? null)
+        : null,
+    })
+    categoriasPorComercio.set(f.comercio_id, deEste)
+  }
+
   const lista: ComercioVitrina[] = comercios.map((c) => {
     const ciudadIds = Array.from(ciudadesPorComercio.get(c.id) ?? [])
     return {
       id: c.id,
       nombre: c.nombre,
       descripcion: c.descripcion,
-      categoriaId: c.categoria_id,
-      categoriaNombre: c.categoria_id ? (nombreCategoria.get(c.categoria_id) ?? null) : null,
-      subcategoriaNombre: c.subcategoria_id
-        ? (nombreSubcategoria.get(c.subcategoria_id) ?? null)
-        : null,
-      subcategoriaId: c.subcategoria_id,
+      categorias: categoriasPorComercio.get(c.id) ?? [],
       ciudadIds,
       ciudades: ciudadIds.map((id) => nombreCiudad.get(id) ?? '').filter(Boolean),
       logoUrl: resolverLogoComercio(
@@ -458,8 +482,7 @@ export type FichaPublica = {
   id: number
   nombre: string
   descripcion: string | null
-  categoriaNombre: string | null
-  subcategoriaNombre: string | null
+  categorias: CategoriaDeComercio[]
   logoUrl: string | null
   portadaUrl: string | null
   ciudades: string[]
@@ -487,6 +510,7 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
     rMarcas,
     rCategorias,
     rSubcategorias,
+    rFilasCategoria,
     rPromociones,
     rTipos,
     rSucursales,
@@ -496,7 +520,7 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
     supabase
       .from('comercios')
       .select(
-        'id, nombre, descripcion, logo_url, portada_url, categoria_id, subcategoria_id, marca_id, indexable',
+        'id, nombre, descripcion, logo_url, portada_url, marca_id, indexable',
       )
       .eq('id', id)
       .eq('activo', true)
@@ -505,6 +529,12 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
     supabase.from('marcas').select('id, logo_url').limit(200),
     supabase.from('categorias').select('id, nombre').limit(100),
     supabase.from('subcategorias').select('id, subcategoria').limit(300),
+    supabase
+      .from('comercio_categorias')
+      .select('categoria_id, subcategoria_id, orden')
+      .eq('comercio_id', id)
+      .order('orden')
+      .limit(3),
     supabase
       .from('promociones')
       .select('valor, tipo_beneficio_id, activo, fecha_inicio, fecha_fin')
@@ -536,6 +566,7 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
   const marcas = exigir(rMarcas, 'las marcas')
   const categorias = exigir(rCategorias, 'las categorías')
   const subcategorias = exigir(rSubcategorias, 'las subcategorías')
+  const filasCategoria = exigir(rFilasCategoria, 'las categorías del comercio')
   const promociones = exigir(rPromociones, 'las promociones')
   const tipos = exigir(rTipos, 'los tipos de beneficio')
   const sucursales = exigir(rSucursales, 'las sucursales')
@@ -569,6 +600,22 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
     ),
   )
 
+  const categoriasDeFicha: CategoriaDeComercio[] = (filasCategoria ?? []).flatMap((f) => {
+    const nombre = (categorias ?? []).find((c) => c.id === f.categoria_id)?.nombre
+    if (nombre === undefined) return []
+    return [
+      {
+        categoriaId: f.categoria_id,
+        categoriaNombre: nombre.trim(),
+        subcategoriaId: f.subcategoria_id,
+        subcategoriaNombre: f.subcategoria_id
+          ? ((subcategorias ?? []).find((s) => s.id === f.subcategoria_id)?.subcategoria.trim() ??
+            null)
+          : null,
+      },
+    ]
+  })
+
   const fotos: FotoPublica[] = (imagenes ?? []).flatMap((i) => {
     const url = (i.url ?? '').trim()
     /* Vacío = decorativa, como dice el propio tipo. Nunca el nombre del
@@ -580,13 +627,7 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
     id: comercio.id,
     nombre: comercio.nombre,
     descripcion: comercio.descripcion,
-    categoriaNombre: comercio.categoria_id
-      ? ((categorias ?? []).find((c) => c.id === comercio.categoria_id)?.nombre ?? null)
-      : null,
-    subcategoriaNombre: comercio.subcategoria_id
-      ? ((subcategorias ?? []).find((s) => s.id === comercio.subcategoria_id)?.subcategoria.trim() ??
-        null)
-      : null,
+    categorias: categoriasDeFicha,
     logoUrl: resolverLogoComercio(comercio.logo_url, logoMarca),
     portadaUrl: (comercio.portada_url ?? '').trim() || null,
     ciudades: Array.from(new Set(sedes.flatMap((s) => (s.ciudadNombre ? [s.ciudadNombre] : [])))),

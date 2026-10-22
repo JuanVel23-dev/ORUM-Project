@@ -10,8 +10,8 @@ const fila = (f: Partial<FilaComercio>): FilaComercio => ({
   id: 1,
   nombre: 'Café Arábigo',
   logoUrl: null,
-  categoriaId: 1,
-  categoria: 'Cafés',
+  categoriaIds: [1],
+  categorias: ['Cafés'],
   activo: true,
   sucursales: 1,
   promociones: 1,
@@ -20,8 +20,8 @@ const fila = (f: Partial<FilaComercio>): FilaComercio => ({
 
 const FILAS = [
   fila({ id: 1 }),
-  fila({ id: 2, nombre: 'Heladería Polo', categoriaId: 2, categoria: 'Heladerías', promociones: 0 }),
-  fila({ id: 3, nombre: 'Asadero', categoriaId: 3, categoria: 'Restaurantes', activo: false }),
+  fila({ id: 2, nombre: 'Heladería Polo', categoriaIds: [2], categorias: ['Heladerías'], promociones: 0 }),
+  fila({ id: 3, nombre: 'Asadero', categoriaIds: [3], categorias: ['Restaurantes'], activo: false }),
 ]
 
 describe('lista de comercios del panel', () => {
@@ -50,5 +50,21 @@ describe('lista de comercios del panel', () => {
       'Café Arábigo',
       'Heladería Polo',
     ])
+  })
+
+  it('con varias categorías aparece al filtrar por cualquiera y se busca por todas', () => {
+    const filas = [fila({ id: 9, nombre: 'Barbería', categoriaIds: [4, 5], categorias: ['Belleza', 'Moda'] })]
+    const base = { pestana: 'todos' as const, busqueda: '' }
+    expect(filtrarComercios(filas, { ...base, categoriaId: 4 })).toHaveLength(1)
+    expect(filtrarComercios(filas, { ...base, categoriaId: 5 })).toHaveLength(1)
+    expect(filtrarComercios(filas, { ...base, categoriaId: 6 })).toHaveLength(0)
+    expect(filtrarComercios(filas, { pestana: 'todos', busqueda: 'moda', categoriaId: null })).toHaveLength(1)
+  })
+
+  it('un comercio sin categorías no sale al filtrar por una, y sí sin filtro', () => {
+    const filas = [fila({ id: 8, categoriaIds: [], categorias: [] })]
+    const base = { pestana: 'todos' as const, busqueda: '' }
+    expect(filtrarComercios(filas, { ...base, categoriaId: 1 })).toHaveLength(0)
+    expect(filtrarComercios(filas, { ...base, categoriaId: null })).toHaveLength(1)
   })
 })

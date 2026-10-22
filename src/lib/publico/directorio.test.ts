@@ -9,6 +9,9 @@ import {
   leerFiltrosDirectorio,
   ordenarCategorias,
   quitarSubcategoriasDe,
+  detalleComercio,
+  etiquetaCategoria,
+  type CategoriaDeComercio,
   type ComercioFiltrable,
   type FiltrosDirectorio,
 } from './directorio'
@@ -28,12 +31,20 @@ function comercio(
 ): ComercioFiltrable {
   return {
     nombre,
-    categoriaId: null,
-    categoriaNombre: null,
+    categorias: [],
     ciudadIds: [],
     ciudades: [],
     ...extra,
   }
+}
+
+function cat(
+  categoriaId: number,
+  categoriaNombre: string,
+  subcategoriaId: number | null = null,
+  subcategoriaNombre: string | null = null,
+): CategoriaDeComercio {
+  return { categoriaId, categoriaNombre, subcategoriaId, subcategoriaNombre }
 }
 
 describe('leerFiltrosDirectorio', () => {
@@ -129,10 +140,10 @@ describe('compararNombres', () => {
 
 describe('filtrarDirectorio', () => {
   const lista = [
-    comercio('Zapatería Luna', { categoriaId: 2, categoriaNombre: 'Ropa', subcategoriaNombre: 'Calzado de mujer', ciudadIds: [1], ciudades: ['Bogotá'] }),
-    comercio('Café 10', { categoriaId: 1, categoriaNombre: 'Café', ciudadIds: [2], ciudades: ['Medellín'] }),
-    comercio('Café 2', { categoriaId: 1, categoriaNombre: 'Café', ciudadIds: [1, 2], ciudades: ['Bogotá', 'Medellín'] }),
-    comercio('Ámbar Spa', { categoriaId: 3, categoriaNombre: 'Spa', ciudadIds: [1], ciudades: ['Bogotá'] }),
+    comercio('Zapatería Luna', { categorias: [cat(2, 'Ropa', null, 'Calzado de mujer')], ciudadIds: [1], ciudades: ['Bogotá'] }),
+    comercio('Café 10', { categorias: [cat(1, 'Café')], ciudadIds: [2], ciudades: ['Medellín'] }),
+    comercio('Café 2', { categorias: [cat(1, 'Café')], ciudadIds: [1, 2], ciudades: ['Bogotá', 'Medellín'] }),
+    comercio('Ámbar Spa', { categorias: [cat(3, 'Spa')], ciudadIds: [1], ciudades: ['Bogotá'] }),
   ]
 
   const nombres = (xs: ComercioFiltrable[]) => xs.map((x) => x.nombre)
@@ -258,11 +269,11 @@ describe('subcategorías', () => {
     [15, 3],
   ])
   const lista = [
-    comercio('Pizza Roma', { categoriaId: 1, subcategoriaId: 3 }),
-    comercio('Alitas Ya', { categoriaId: 1, subcategoriaId: 4 }),
-    comercio('Sin sub', { categoriaId: 1, subcategoriaId: null }),
-    comercio('Uñas Bellas', { categoriaId: 3, subcategoriaId: 15 }),
-    comercio('Peluquería Ana', { categoriaId: 3, subcategoriaId: null }),
+    comercio('Pizza Roma', { categorias: [cat(1, 'c1', 3)] }),
+    comercio('Alitas Ya', { categorias: [cat(1, 'c1', 4)] }),
+    comercio('Sin sub', { categorias: [cat(1, 'c1', null)] }),
+    comercio('Uñas Bellas', { categorias: [cat(3, 'c3', 15)] }),
+    comercio('Peluquería Ana', { categorias: [cat(3, 'c3', null)] }),
   ]
   const nombres = (f: Partial<FiltrosDirectorio>) =>
     filtrarDirectorio(lista, { ...SIN_FILTROS, ...f }, categoriaDe).map((c) => c.nombre)
@@ -297,5 +308,62 @@ describe('subcategorías', () => {
 
   it('cuentan como filtro puesto', () => {
     expect(hayFiltros({ ...SIN_FILTROS, subcategoriaIds: [3] })).toBe(true)
+  })
+})
+
+describe('varias categorías', () => {
+  const lista = [
+    comercio('Barbería Dos Mundos', { categorias: [cat(3, 'Belleza', 15), cat(1, 'Gastronomía')] }),
+    comercio('Pizza Roma', { categorias: [cat(1, 'Gastronomía', 3, 'Pizzerías')] }),
+    comercio('Sin categoría'),
+  ]
+  const categoriaDe = new Map([
+    [3, 1],
+    [15, 3],
+  ])
+  const nombres = (f: Partial<FiltrosDirectorio>) =>
+    filtrarDirectorio(lista, { ...SIN_FILTROS, ...f }, categoriaDe).map((c) => c.nombre)
+
+  it('sale bajo cualquiera de sus categorías', () => {
+    expect(nombres({ categoriaIds: [3] })).toEqual(['Barbería Dos Mundos'])
+    expect(nombres({ categoriaIds: [1] })).toEqual(['Barbería Dos Mundos', 'Pizza Roma'])
+  })
+
+  it('con dos de sus categorías elegidas sale una sola vez', () => {
+    expect(nombres({ categoriaIds: [1, 3] })).toEqual(['Barbería Dos Mundos', 'Pizza Roma'])
+  })
+
+  it('un comercio sin categorías no sale al filtrar por categoría, y sí sin filtro', () => {
+    expect(nombres({ categoriaIds: [1] })).not.toContain('Sin categoría')
+    expect(nombres({})).toContain('Sin categoría')
+  })
+
+  it('la subcategoría afina SOLO su categoría', () => {
+    // Gastronomía + Pizzerías: la barbería tiene Gastronomía sin subcategoría y Belleza.
+    expect(nombres({ categoriaIds: [1], subcategoriaIds: [3] })).toEqual(['Pizza Roma'])
+    // Con Belleza elegida también, la barbería sale por Belleza, entera.
+    expect(nombres({ categoriaIds: [1, 3], subcategoriaIds: [3] })).toEqual([
+      'Barbería Dos Mundos',
+      'Pizza Roma',
+    ])
+  })
+
+  it('la búsqueda casa con cualquiera de sus categorías y subcategorías', () => {
+    expect(nombres({ q: 'belleza' })).toEqual(['Barbería Dos Mundos'])
+    expect(nombres({ q: 'pizzerias' })).toEqual(['Pizza Roma'])
+  })
+
+  it('etiquetaCategoria dice la categoría y, si hay, su subcategoría', () => {
+    expect(etiquetaCategoria(cat(1, 'Gastronomía', 3, 'Pizzerías'))).toBe('Gastronomía (Pizzerías)')
+    expect(etiquetaCategoria(cat(1, 'Gastronomía'))).toBe('Gastronomía')
+  })
+
+  it('detalleComercio junta todas las categorías y luego las ciudades', () => {
+    expect(
+      detalleComercio([cat(1, 'Gastronomía', 3, 'Pizzerías'), cat(3, 'Belleza')], ['Bogotá', 'Cali']),
+    ).toBe('Gastronomía (Pizzerías), Belleza · Bogotá, Cali')
+    expect(detalleComercio([], ['Bogotá'])).toBe('Bogotá')
+    expect(detalleComercio([cat(1, 'Gastronomía')], [])).toBe('Gastronomía')
+    expect(detalleComercio([], [])).toBe('')
   })
 })
