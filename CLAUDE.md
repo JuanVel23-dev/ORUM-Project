@@ -1036,7 +1036,7 @@ subcategoría.
 
 **Un comercio tiene de 1 a 3 categorías, cada una con su subcategoría
 opcional** (21/10/2026; antes era una sola). La fuente de verdad es la tabla
-`comercio_categorias` (`supabase/migrations/20261021120000_comercio_categorias.sql`;
+`comercio_categorias` (`supabase/migrations/20261021130000_comercio_categorias.sql`;
 comprobación en `supabase/verificacion/comercio_categorias_verificacion.sql`).
 La base garantiza el tope de 3 y que la subcategoría sea de su categoría; el
 mínimo de 1 lo exigen las server actions (`lib/comercios/categorias-comercio.ts`,

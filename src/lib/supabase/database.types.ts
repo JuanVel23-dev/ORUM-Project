@@ -612,7 +612,7 @@ export type Database = {
         Relationships: []
       }
       /**
-       * Las categorías de un comercio (20261021120000_comercio_categorias.sql):
+       * Las categorías de un comercio (20261021130000_comercio_categorias.sql):
        * de 1 a 3, cada una con su subcategoría opcional. Solo escribe
        * `service_role`, por `reemplazar_categorias_comercio`.
        */

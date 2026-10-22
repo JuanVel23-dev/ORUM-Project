@@ -1,4 +1,4 @@
--- Verificación de 20261021120000_comercio_categorias.sql
+-- Verificación de 20261021130000_comercio_categorias.sql
 -- Todo dentro de una transacción que se deshace: no deja rastro.
 -- Cada bloque DO lanza una excepción si la comprobación falla.
 

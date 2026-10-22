@@ -44,7 +44,7 @@ Entradas que el spec implica y que ninguna tarea cubriría sola; cada una tiene 
 | `src/lib/comercios/categorias-comercio.test.ts` (nuevo) | Pruebas de lo anterior |
 | `src/lib/publico/directorio.ts` / `directorio.test.ts` | Tipo `CategoriaDeComercio`, filtro y búsqueda con varias categorías |
 | `src/lib/comercios/listado-admin.ts` / `listado-admin.test.ts` | Fila del listado del panel con varias categorías |
-| `supabase/migrations/20261021120000_comercio_categorias.sql` (nuevo) | Tabla, triggers, función `reemplazar_categorias_comercio`, migración de datos |
+| `supabase/migrations/20261021130000_comercio_categorias.sql` (nuevo) | Tabla, triggers, función `reemplazar_categorias_comercio`, migración de datos |
 | `supabase/verificacion/comercio_categorias_verificacion.sql` (nuevo) | Comprobaciones SQL post-migración |
 | `src/lib/supabase/database.types.ts` | Regenerar con la tabla y la función nuevas |
 | `src/lib/publico/datos-publicos.ts` | Carga de catálogo y ficha con `categorias` |
@@ -129,7 +129,7 @@ Entradas que el spec implica y que ninguna tarea cubriría sola; cada una tiene 
 ### Task 4: Base de datos
 
 **Files:**
-- Create: `supabase/migrations/20261021120000_comercio_categorias.sql`
+- Create: `supabase/migrations/20261021130000_comercio_categorias.sql`
 - Create: `supabase/verificacion/comercio_categorias_verificacion.sql` (patrón de `supabase/verificacion/resenas_verificacion.sql`)
 - Modify: `src/lib/supabase/database.types.ts`
 
