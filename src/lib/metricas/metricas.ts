@@ -17,6 +17,8 @@ export function rangoUltimosDias(dias: number, hoy: Date = new Date()): { desde:
 export type MembresiaVenta = {
   vendido_por: number | null
   precio_pagado: number
+  /** Una cortesía no es una venta: no cuenta ni en cantidad ni en monto. */
+  es_cortesia?: boolean
 }
 export type EmpleadoInfo = { id: number; nombres: string; apellidos: string }
 export type ResumenEmpleado = {
@@ -26,7 +28,10 @@ export type ResumenEmpleado = {
   monto: number
 }
 
-/** Agrupa membresías vendidas por empleado (`vendido_por = null` → "Super admin"). */
+/**
+ * Agrupa membresías vendidas por empleado (`vendido_por = null` → "Super admin").
+ * Las cortesías se dejan fuera: no se cobraron.
+ */
 export function agruparMembresiasPorEmpleado(
   membresias: MembresiaVenta[],
   empleados: EmpleadoInfo[],
@@ -35,6 +40,7 @@ export function agruparMembresiasPorEmpleado(
   const acumulado = new Map<number | null, { cantidad: number; monto: number }>()
 
   for (const m of membresias) {
+    if (m.es_cortesia) continue
     const clave = m.vendido_por
     const actual = acumulado.get(clave) ?? { cantidad: 0, monto: 0 }
     actual.cantidad += 1

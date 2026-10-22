@@ -124,7 +124,7 @@ export default async function MetricasPage({
       .lte('fecha_registro', finDiaBogota(hasta)),
     admin
       .from('membresias')
-      .select('vendido_por, precio_pagado')
+      .select('vendido_por, precio_pagado, es_cortesia')
       .gte('fecha_inicio', desde)
       .lte('fecha_inicio', hasta),
     admin.from('empleados').select('id, nombres, apellidos').is('deleted_at', null),

@@ -8,6 +8,7 @@ import { Copiar } from '@/components/ui/copiar'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { SelectMenu } from '@/components/ui/select-menu'
+import { Checkbox } from '@/components/ui/toggle'
 import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
 import {
   cedula,
@@ -16,6 +17,7 @@ import {
   nombrePersona,
   obligatorio,
   precio as reglaPrecio,
+  salvoCortesia,
   telefono,
 } from '@/lib/validacion/reglas'
 import { Divider, Section, Stack } from '@/components/ui/layout'
@@ -39,7 +41,8 @@ const REGLAS = {
   direccion: [largo(5, 120, 'La dirección')],
   numero_registro: [obligatorio('Elige el número de registro del carné.')],
   plan_id: [obligatorio('Elige un plan.')],
-  precio_pagado: [obligatorio('Escribe el precio pagado.'), reglaPrecio()],
+  // Una cortesía no se cobra: el campo ni se pinta y su regla no corre.
+  precio_pagado: [salvoCortesia(obligatorio('Escribe el precio pagado.')), salvoCortesia(reglaPrecio())],
 }
 
 const ETIQUETAS: Record<string, string> = {
@@ -91,6 +94,7 @@ function FormularioMiembro({
   const cerrar = useCerrarOverlay()
   const [state, formAction, pending] = useActionState(registrarMiembro, estadoInicial)
   const [precio, setPrecio] = useState(planes[0] ? String(planes[0].precio) : '')
+  const [esCortesia, setEsCortesia] = useState(false)
   const v = useValidacion(REGLAS)
 
   const sinPlanes = planes.length === 0
@@ -216,18 +220,29 @@ function FormularioMiembro({
                 />
               </Field>
 
-              <Field label="Precio pagado" help="Ajústalo si hubo un descuento." error={v.error('precio_pagado')}>
-                <Input
-                  name="precio_pagado"
-                  inputMode="numeric"
-                  numeric
-                  required
-                  value={precio}
-                  onChange={(e) => setPrecio(e.target.value)}
-                  disabled={sinPlanes}
-                />
-              </Field>
+              {!esCortesia && (
+                <Field label="Precio pagado" help="Ajústalo si hubo un descuento." error={v.error('precio_pagado')}>
+                  <Input
+                    name="precio_pagado"
+                    inputMode="numeric"
+                    numeric
+                    required
+                    value={precio}
+                    onChange={(e) => setPrecio(e.target.value)}
+                    disabled={sinPlanes}
+                  />
+                </Field>
+              )}
             </div>
+
+            <Checkbox
+              name="es_cortesia"
+              label="Membresía de cortesía"
+              description="No se cobra: queda registrada como cortesía y no suma a los ingresos ni a las ventas."
+              checked={esCortesia}
+              onChange={(e) => setEsCortesia(e.target.checked)}
+              disabled={sinPlanes}
+            />
 
             <p className={styles.nota}>
               Al guardar se asigna el número elegido y se envía un correo para que

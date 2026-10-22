@@ -67,7 +67,10 @@ export async function registrarMiembro(
   const ciudadRaw = String(formData.get('ciudad_id') ?? '').trim()
   const ciudad_id = ciudadRaw ? Number(ciudadRaw) : null
   const plan_id = Number(formData.get('plan_id'))
-  const precio_pagado = leerPesos(formData.get('precio_pagado'))
+  // Cortesía: la membresía existe pero no es una venta. El precio que llegue se
+  // ignora: una cortesía no se cobra.
+  const es_cortesia = formData.get('es_cortesia') === 'on'
+  const precio_pagado = es_cortesia ? 0 : leerPesos(formData.get('precio_pagado'))
   const numero_registro = String(formData.get('numero_registro') ?? '').trim()
 
   if (!nombres || !apellidos) return { error: 'Nombres y apellidos son obligatorios.' }
@@ -216,6 +219,7 @@ export async function registrarMiembro(
     fecha_inicio,
     fecha_fin,
     precio_pagado,
+    es_cortesia,
     vendido_por: empleadoId,
   })
   if (errMembresia) {
@@ -234,6 +238,7 @@ export async function registrarMiembro(
       numero_membresia: numero,
       plan_nombre: plan.nombre,
       precio_pagado,
+      es_cortesia,
     },
   })
 
@@ -267,7 +272,8 @@ export async function renovarMembresia(
 
   const miembro_id = Number(formData.get('miembro_id'))
   const plan_id = Number(formData.get('plan_id'))
-  const precio_pagado = leerPesos(formData.get('precio_pagado'))
+  const es_cortesia = formData.get('es_cortesia') === 'on'
+  const precio_pagado = es_cortesia ? 0 : leerPesos(formData.get('precio_pagado'))
   if (!Number.isInteger(miembro_id) || miembro_id < 1) return { error: 'Falta el identificador del miembro.' }
   if (!Number.isInteger(plan_id) || plan_id < 1) return { error: 'Selecciona un plan de membresía.' }
   if (!Number.isFinite(precio_pagado) || precio_pagado < 0) {
@@ -325,6 +331,7 @@ export async function renovarMembresia(
       fecha_inicio,
       fecha_fin,
       precio_pagado,
+      es_cortesia,
       vendido_por: empleadoId,
       membresia_anterior_id: vigente?.id ?? null,
     })
@@ -349,6 +356,7 @@ export async function renovarMembresia(
       fecha_inicio,
       fecha_fin,
       precio_pagado,
+      es_cortesia,
     },
   })
 

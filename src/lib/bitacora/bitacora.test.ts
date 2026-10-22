@@ -7,6 +7,15 @@ describe('resumirEventoBitacora — alta', () => {
     expect(texto).toBe('Miembro registrado — plan Oro, $50000')
   })
 
+  it('dice «cortesía» en vez del precio', () => {
+    const texto = resumirEventoBitacora('alta', null, {
+      plan_nombre: 'Oro',
+      precio_pagado: 0,
+      es_cortesia: true,
+    })
+    expect(texto).toBe('Miembro registrado — plan Oro, cortesía')
+  })
+
   it('usa (vacío) si falta el dato', () => {
     const texto = resumirEventoBitacora('alta', null, {})
     expect(texto).toBe('Miembro registrado — plan (vacío), $(vacío)')
@@ -22,6 +31,18 @@ describe('resumirEventoBitacora — renovacion', () => {
       precio_pagado: 50000,
     })
     expect(texto).toBe('Membresía renovada — plan Oro, vence 2027-08-01')
+  })
+})
+
+describe('resumirEventoBitacora — renovacion de cortesía', () => {
+  it('lo dice en el resumen', () => {
+    const texto = resumirEventoBitacora('renovacion', null, {
+      plan_nombre: 'Oro',
+      fecha_fin: '2027-08-01',
+      precio_pagado: 0,
+      es_cortesia: true,
+    })
+    expect(texto).toBe('Membresía renovada (cortesía) — plan Oro, vence 2027-08-01')
   })
 })
 

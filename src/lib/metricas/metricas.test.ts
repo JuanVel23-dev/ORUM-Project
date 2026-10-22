@@ -55,6 +55,24 @@ describe('agruparMembresiasPorEmpleado', () => {
   it('devuelve arreglo vacío sin membresías', () => {
     expect(agruparMembresiasPorEmpleado([], empleados)).toEqual([])
   })
+
+  it('las cortesías no cuentan: ni en la cantidad ni en el monto', () => {
+    const resultado = agruparMembresiasPorEmpleado(
+      [
+        { vendido_por: 1, precio_pagado: 50000, es_cortesia: false },
+        { vendido_por: 1, precio_pagado: 0, es_cortesia: true },
+        { vendido_por: 2, precio_pagado: 0, es_cortesia: true },
+      ],
+      empleados,
+    )
+    // El empleado 2 solo registró una cortesía: no aparece.
+    expect(resultado).toEqual([{ empleadoId: 1, nombre: 'Ana Ruiz', cantidad: 1, monto: 50000 }])
+  })
+
+  it('una membresía sin el dato de cortesía se cuenta como vendida', () => {
+    const resultado = agruparMembresiasPorEmpleado([{ vendido_por: 1, precio_pagado: 10000 }], empleados)
+    expect(resultado[0]).toMatchObject({ cantidad: 1, monto: 10000 })
+  })
 })
 
 describe('agruparVentasPorComercio', () => {

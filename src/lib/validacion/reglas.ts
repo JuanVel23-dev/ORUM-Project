@@ -30,6 +30,15 @@ const relleno = (v: string) => /(.)\1{3,}/u.test(v)
 
 /* --- Generales ---------------------------------------------------------------- */
 
+/**
+ * Una membresía de cortesía no se cobra: con la casilla `es_cortesia` marcada,
+ * la regla del precio no se aplica (el campo ni siquiera se pinta).
+ */
+export function salvoCortesia(regla: Regla): Regla {
+  return (v, todos) => (todos.es_cortesia ? null : regla(v, todos))
+}
+
+
 export function obligatorio(mensaje = 'Este campo es obligatorio.'): Regla {
   return (v) => (vacio(v) ? mensaje : null)
 }

@@ -122,7 +122,7 @@ export default async function FichaMiembroPage({
   const [{ data: membresias }, { data: ciudad }, { data: eventos }] = await Promise.all([
     admin
       .from('membresias')
-      .select('id, tipo, estado, fecha_inicio, fecha_fin, precio_pagado, plan_id')
+      .select('id, tipo, estado, fecha_inicio, fecha_fin, precio_pagado, es_cortesia, plan_id')
       .eq('miembro_id', miembroId)
       .order('fecha_inicio', { ascending: false }),
     miembro.ciudad_id
@@ -320,9 +320,15 @@ export default async function FichaMiembroPage({
                       </span>
 
                       <div className={styles.hitoMeta}>
-                        <span className={styles.precio}>
-                          {formatearPrecio(m.precio_pagado)}
-                        </span>
+                        {m.es_cortesia ? (
+                          <Badge tone="info" size="sm">
+                            Cortesía
+                          </Badge>
+                        ) : (
+                          <span className={styles.precio}>
+                            {formatearPrecio(m.precio_pagado)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </li>

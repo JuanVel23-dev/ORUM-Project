@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { SelectMenu } from '@/components/ui/select-menu'
+import { Checkbox } from '@/components/ui/toggle'
 import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
-import { obligatorio, precio as reglaPrecio } from '@/lib/validacion/reglas'
+import { obligatorio, precio as reglaPrecio, salvoCortesia } from '@/lib/validacion/reglas'
 import { useCerrarCuando } from '@/components/shell/overlay-ruta'
 import { renovarMembresia, type RenovarState } from '../../actions'
 import styles from '../ficha.module.css'
@@ -17,10 +18,13 @@ type PlanOpcion = { id: number; nombre: string; precio: number }
 
 const estadoInicial: RenovarState = {}
 
-/* El precio admite 0: una renovación de cortesía. */
+/* El precio admite 0 (un descuento total); la cortesía va con su casilla y no se cobra. */
 const REGLAS = {
   plan_id: [obligatorio('Elige un plan.')],
-  precio_pagado: [obligatorio('Escribe el precio pagado.'), reglaPrecio(undefined, true)],
+  precio_pagado: [
+    salvoCortesia(obligatorio('Escribe el precio pagado.')),
+    salvoCortesia(reglaPrecio(undefined, true)),
+  ],
 }
 
 const ETIQUETAS: Record<string, string> = { plan_id: 'Plan', precio_pagado: 'Precio pagado' }
@@ -34,6 +38,7 @@ export function RenovarForm({
 }) {
   const [state, formAction, pending] = useActionState(renovarMembresia, estadoInicial)
   const [precio, setPrecio] = useState(planes[0] ? String(planes[0].precio) : '')
+  const [esCortesia, setEsCortesia] = useState(false)
 
   const v = useValidacion(REGLAS)
   useCerrarCuando(state.ok)
@@ -75,22 +80,33 @@ export function RenovarForm({
           />
         </Field>
 
-        <Field
-          label="Precio pagado"
-          help="Puedes ajustarlo si hubo un descuento."
-          error={v.error('precio_pagado')}
-        >
-          <Input
-            name="precio_pagado"
-            inputMode="numeric"
-            numeric
-            required
-            value={precio}
-            onChange={(e) => setPrecio(e.target.value)}
-            disabled={sinPlanes}
-          />
-        </Field>
+        {!esCortesia && (
+          <Field
+            label="Precio pagado"
+            help="Puedes ajustarlo si hubo un descuento."
+            error={v.error('precio_pagado')}
+          >
+            <Input
+              name="precio_pagado"
+              inputMode="numeric"
+              numeric
+              required
+              value={precio}
+              onChange={(e) => setPrecio(e.target.value)}
+              disabled={sinPlanes}
+            />
+          </Field>
+        )}
       </div>
+
+      <Checkbox
+        name="es_cortesia"
+        label="Renovación de cortesía"
+        description="No se cobra: queda registrada como cortesía y no suma a los ingresos ni a las ventas."
+        checked={esCortesia}
+        onChange={(e) => setEsCortesia(e.target.checked)}
+        disabled={sinPlanes}
+      />
 
       <Button
         type="submit"
