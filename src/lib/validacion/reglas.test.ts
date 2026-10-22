@@ -14,11 +14,26 @@ import {
   obligatorio,
   porcentaje,
   precio,
+  salvoCortesia,
   telefono,
   validarTodo,
 } from './reglas'
 
 const sinOtros = {}
+
+describe('salvoCortesia', () => {
+  const regla = salvoCortesia(obligatorio('Escribe el precio.'))
+
+  it('aplica la regla cuando la casilla no está marcada', () => {
+    expect(regla('', {})).toBe('Escribe el precio.')
+    expect(regla('', { es_cortesia: '' })).toBe('Escribe el precio.')
+    expect(regla('50000', {})).toBeNull()
+  })
+
+  it('la salta cuando la casilla está marcada', () => {
+    expect(regla('', { es_cortesia: 'on' })).toBeNull()
+  })
+})
 
 describe('obligatorio y largo', () => {
   it('obligatorio rechaza lo vacío o solo espacios', () => {

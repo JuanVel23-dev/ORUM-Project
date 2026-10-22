@@ -612,6 +612,16 @@ pagar.
   con el motivo como texto secundario
 - **"Vence en N días"** no es un estado: sigue activa. Señal ámbar secundaria.
 
+**Cortesía** (22/10/2026): una membresía puede ser de cortesía
+(`membresias.es_cortesia`, siempre con `precio_pagado` 0; lo exige un CHECK).
+Existe y da acceso, pero NO es una venta: no suma al ingreso ni al conteo de
+«membresías vendidas» de Métricas (`agruparMembresiasPorEmpleado` la salta),
+la ficha del miembro dice «Cortesía» en vez de «$0» y la bitácora también. Se
+marca con la casilla de «Registrar miembro» y de «Renovar membresía»
+(`es_cortesia`); con ella marcada el campo del precio no se pinta
+(`salvoCortesia`) y el servidor ignora cualquier precio. Poner 0 sin casilla ya
+no es la forma de regalar una membresía: sigue siendo un descuento total.
+
 ---
 
 ## Movimiento

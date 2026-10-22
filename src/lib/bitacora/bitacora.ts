@@ -29,12 +29,14 @@ export function resumirEventoBitacora(
 ): string {
   if (accion === 'alta') {
     const n = datosNuevos ?? {}
-    return `Miembro registrado — plan ${formatearValor(n.plan_nombre)}, $${formatearValor(n.precio_pagado)}`
+    const cobro = n.es_cortesia === true ? 'cortesía' : `$${formatearValor(n.precio_pagado)}`
+    return `Miembro registrado — plan ${formatearValor(n.plan_nombre)}, ${cobro}`
   }
 
   if (accion === 'renovacion') {
     const n = datosNuevos ?? {}
-    return `Membresía renovada — plan ${formatearValor(n.plan_nombre)}, vence ${formatearValor(n.fecha_fin)}`
+    const cortesia = n.es_cortesia === true ? ' (cortesía)' : ''
+    return `Membresía renovada${cortesia} — plan ${formatearValor(n.plan_nombre)}, vence ${formatearValor(n.fecha_fin)}`
   }
 
   if (accion === 'edicion') {

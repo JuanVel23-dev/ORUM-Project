@@ -379,6 +379,8 @@ export type Database = {
           fecha_inicio: string
           fecha_fin: string
           precio_pagado: number
+          /** Cortesía: existe pero no es una venta (no suma a ingresos). Siempre con `precio_pagado` 0. */
+          es_cortesia: boolean
           comprobante_url: string | null
           vendido_por: number | null
           membresia_anterior_id: number | null
@@ -395,6 +397,7 @@ export type Database = {
           fecha_inicio: string
           fecha_fin: string
           precio_pagado: number
+          es_cortesia?: boolean
           comprobante_url?: string | null
           vendido_por?: number | null
           membresia_anterior_id?: number | null
