@@ -29,6 +29,7 @@ import {
 import { ESTADO_SUBIDA_INICIAL } from '@/lib/imagenes/estado'
 import { guardarMiFotoNegocio, guardarMiLogo, quitarMiFotoNegocio } from '../imagenes-actions'
 import styles from './mi-negocio.module.css'
+import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 /*
   MI NEGOCIO  ·  el comercio cambia su logotipo y sus fotos (04/10/2026)
@@ -525,8 +526,7 @@ function Teja({
     <div className={styles.teja}>
       {/* Decorativa: lo que es lo dicen la insignia y los nombres de los
           botones. `<img>` y no `next/image`: la URL es de Storage o externa. */}
-      {/* eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local */}
-      <img src={url} alt="" className={styles.tejaFoto} loading="lazy" decoding="async" />
+      <ImagenCompleta src={url} alt="" className={styles.tejaFoto} loading="lazy" decoding="async" />
       {insignia && <span className={styles.insignia}>{insignia}</span>}
       <div className={styles.tejaAcciones}>
         <button

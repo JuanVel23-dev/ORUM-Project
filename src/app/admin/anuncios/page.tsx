@@ -21,6 +21,7 @@ import { PageHeader } from '@/components/ui/layout'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { cambiarEstadoAnuncio } from './actions'
 import lista from '@/styles/lista-panel.module.css'
+import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 export const metadata = { title: 'Novedades · ORUM' }
 
@@ -60,8 +61,13 @@ const COLUMNAS: ReadonlyArray<Column<Anuncio>> = [
       <span className={lista.celdaNombre}>
         <span className={lista.miniatura} aria-hidden="true">
           {a.imagen_url ? (
-            // eslint-disable-next-line @next/next/no-img-element -- URL de Storage
-            <img src={a.imagen_url} alt="" loading="lazy" decoding="async" />
+            <ImagenCompleta
+              src={a.imagen_url}
+              alt=""
+              className={lista.miniaturaFoto}
+              loading="lazy"
+              decoding="async"
+            />
           ) : (
             <Megaphone size={16} />
           )}

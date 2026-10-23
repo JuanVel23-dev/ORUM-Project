@@ -18,16 +18,9 @@
   background: var(--surface-hueco);
 }
 
-.imagen img {
-  display: block;
+.foto {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
-
-/* El relleno difuminado solo existe en la destacada (abajo). */
-.relleno {
-  display: none;
 }
 
 /* Sin imagen: una lámina de la marca, no un hueco. */
@@ -71,25 +64,10 @@
   padding-top: 56.25%;
 }
 
-.destacada .imagen img,
+.destacada .foto,
 .destacada .lamina {
   position: absolute;
   inset: 0;
-}
-
-/* LA IMAGEN, ENTERA (23/10/2026: «que las imágenes no se corten»). Con un
-   texto largo la caja crece más alta que 16:9, y `cover` cortaba los lados
-   de la imagen. Ahora va con `contain` y el hueco lo llena ella misma,
-   difuminada, como en el editor. */
-.destacada .imagen img {
-  object-fit: contain;
-}
-
-.destacada .imagen .relleno {
-  display: block;
-  object-fit: cover;
-  scale: 1.1;
-  filter: blur(24px);
 }
 
 .destacadaTexto {

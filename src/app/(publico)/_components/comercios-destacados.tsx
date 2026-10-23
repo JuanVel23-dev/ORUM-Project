@@ -9,6 +9,7 @@ import { AdornoEstrella } from '@/components/ui/marca/marca'
 import { Revelar } from './revelar'
 import { REVELAR, revelarEscalonado } from '@/lib/shared/revelado'
 import estilos from './comercios-destacados.module.css'
+import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 /*
   COMERCIOS DESTACADOS  ·  la franja negra de la guía de marca
@@ -70,8 +71,7 @@ export function ComerciosDestacados({ comercios }: { comercios: ComercioVitrina[
             <li key={c.id} className={[estilos.celda, revelarEscalonado(i)].join(' ')}>
               <Link href={`/explorar/${c.id}`} className={estilos.tarjeta} scroll={false}>
                 {c.portadaUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
-                  <img
+                  <ImagenCompleta
                     className={estilos.foto}
                     src={c.portadaUrl}
                     alt=""

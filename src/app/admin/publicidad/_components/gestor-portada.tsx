@@ -26,6 +26,7 @@ import {
   quitarPublicidad,
 } from '../actions'
 import styles from './gestor-portada.module.css'
+import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 /*
   EL GESTOR DE PUBLICIDAD  ·  las imágenes del carrusel de la portada
@@ -251,8 +252,7 @@ export function GestorPublicidad({ piezas }: { piezas: PiezaPublicidad[] }) {
                 <div className={styles.marco}>
                   {/* `<img>` y no `next/image`: la URL es de Storage. El texto
                       alternativo es la descripción que escribió el admin. */}
-                  {/* eslint-disable-next-line @next/next/no-img-element -- URL de Storage, no un asset local */}
-                  <img
+                  <ImagenCompleta
                     src={pieza.url}
                     alt={pieza.descripcion}
                     className={styles.foto}

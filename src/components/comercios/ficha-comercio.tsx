@@ -5,6 +5,7 @@ import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { Ampliable, VisorImagenes, type ImagenVisor } from '@/components/ui/visor-imagenes'
 import { enlaceMapa } from '@/lib/comercios/enlace-mapa'
 import estilos from './ficha-comercio.module.css'
+import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 /*
   LA FICHA DE UN COMERCIO  ·  una sola, para el público y para el socio
@@ -106,8 +107,7 @@ export function FichaComercio({
               etiqueta="Ampliar la foto de portada"
               className={estilos.portadaBoton}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local */}
-              <img src={portadaUrl} alt="" className={estilos.portadaFoto} fetchPriority="high" />
+              <ImagenCompleta src={portadaUrl} alt="" className={estilos.portadaFoto} fetchPriority="high" />
             </Ampliable>
           ) : (
             <span className={estilos.portadaVacia} aria-hidden="true" />
@@ -181,8 +181,12 @@ export function FichaComercio({
                     indice={inicioGaleria + i}
                     etiqueta={`Ampliar foto ${i + 1} de ${fotos.length}`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local */}
-                    <img src={foto.url} alt={foto.alt} className={estilos.galeriaFoto} loading="lazy" />
+                    <ImagenCompleta
+                      src={foto.url}
+                      alt={foto.alt}
+                      className={estilos.galeriaFoto}
+                      loading="lazy"
+                    />
                   </Ampliable>
                   {i === enRejilla.length - 1 && restantes > 0 && (
                     <span className={estilos.galeriaMas} aria-hidden="true">
