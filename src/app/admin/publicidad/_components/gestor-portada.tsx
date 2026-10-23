@@ -68,6 +68,8 @@ import styles from './gestor-portada.module.css'
 const OPCIONES_IMAGEN: OpcionesEncuadre = {
   proporcion: 3 / 4,
   forma: 'rectangulo',
+  // Se puede poner ENTERA, sin recortar (23/10/2026); arranca así.
+  completa: true,
   anchoSalida: 1600,
   pesoMaximo: 700 * 1024,
 }

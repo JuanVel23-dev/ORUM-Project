@@ -101,6 +101,31 @@
   pointer-events: none;
 }
 
+/*
+  EL RELLENO DE UNA FOTO ENTERA (23/10/2026). La misma foto LLENANDO el
+  marco (sus variables de colocación, con zoom 1 y sin desplazar),
+  difuminada y recortada a la forma del marco. Es lo que el archivo lleva en
+  el hueco (`pintarRelleno`), así que el ajuste se ve como se guarda. El
+  difuminado se mide en el ancho del marco (`cqi`): igual de suave en un
+  teléfono que en un escritorio, como en el archivo.
+*/
+.relleno {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  container-type: inline-size;
+  pointer-events: none;
+}
+
+.imagenRelleno {
+  --zoom: 1;
+  --tx: 0;
+  --ty: 0;
+
+  scale: 1.08;
+  filter: blur(2.4cqi);
+}
+
 /* Solo para lo que SALTA (girar, restablecer, los botones ±): ahí un corte
    seco desorienta. */
 .suave {
@@ -170,6 +195,11 @@
 }
 
 /* --- Los controles ----------------------------------------------------------- */
+
+/* «Imagen completa / Llenar el marco», centrado sobre la barra de zoom. */
+.ajuste {
+  justify-self: center;
+}
 
 .controles {
   display: flex;

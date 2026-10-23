@@ -46,6 +46,14 @@ export type Marco = {
    * DIAGONAL. Solo tiene sentido con `proporcion: 1`.
    */
   circular?: boolean
+  /**
+   * Una FOTOGRAFÍA que se puede ver ENTERA (23/10/2026: «que las imágenes que
+   * suben los comercios y el administrador no se corten automáticamente;
+   * tener la opción de ponerla completa»). Se aleja hasta caber justa —sin el
+   * aire del logotipo— y el hueco que queda lo rellena la propia foto,
+   * difuminada (lo pinta el editor). Arranca ENTERA al abrir un archivo nuevo.
+   */
+  completa?: boolean
 }
 
 /**
@@ -85,6 +93,7 @@ export function zoomQueContiene(
 
 /** Lo más que se puede alejar en este marco: 1 si siempre cubre. */
 export function zoomMinimo(ancho: number, alto: number, giro: Giro, marco: Marco): number {
+  if (marco.completa) return zoomQueContiene(ancho, alto, giro, marco.proporcion)
   if (!marco.permiteContener) return 1
   return zoomQueContiene(ancho, alto, giro, marco.proporcion, marco.circular) * MARGEN_AL_CONTENER
 }
@@ -106,10 +115,47 @@ export function encuadreInicialEnMarco(
   marco: Marco,
   comoSeVe = false,
 ): Encuadre {
+  if (marco.completa) {
+    // Una foto ya publicada se guardó con el marco lleno (con su relleno
+    // difuminado, si se puso entera): se abre tal cual se ve, a zoom 1.
+    return { x: 0, y: 0, zoom: comoSeVe ? 1 : zoomQueContiene(ancho, alto, 0, marco.proporcion), giro: 0 }
+  }
   const zoom = marco.permiteContener
     ? zoomQueContiene(ancho, alto, 0, marco.proporcion, marco.circular && !comoSeVe)
     : 1
   return { x: 0, y: 0, zoom, giro: 0 }
+}
+
+/** Tolerancia para decir que un zoom «es» el de entera o el de llenar. */
+const CASI = 0.004
+
+/** Cómo está la foto respecto al marco: entera, llenándolo o a medio camino. */
+export function ajusteActual(
+  e: Encuadre,
+  ancho: number,
+  alto: number,
+  marco: Marco,
+): 'completa' | 'llenar' | 'otro' {
+  const contiene = zoomQueContiene(ancho, alto, e.giro, marco.proporcion)
+  if (Math.abs(e.zoom - contiene) <= CASI) return 'completa'
+  if (Math.abs(e.zoom - 1) <= CASI) return 'llenar'
+  return 'otro'
+}
+
+/**
+ * Lleva la foto a uno de los dos ajustes, centrada: ENTERA (cabe justa en el
+ * marco) o LLENANDO el marco (lo cubre; lo que sobra se recorta). Si la foto
+ * ya tiene la proporción del marco, los dos son el mismo.
+ */
+export function ajustarEnMarco(
+  e: Encuadre,
+  ajuste: 'completa' | 'llenar',
+  ancho: number,
+  alto: number,
+  marco: Marco,
+): Encuadre {
+  const zoom = ajuste === 'completa' ? zoomQueContiene(ancho, alto, e.giro, marco.proporcion) : 1
+  return limitarEnMarco({ x: 0, y: 0, zoom, giro: e.giro }, ancho, alto, marco)
 }
 
 /**
@@ -157,5 +203,10 @@ export function zoomEnMarco(
  */
 export function girarEnMarco(e: Encuadre, ancho: number, alto: number, marco: Marco): Encuadre {
   const giro = ((e.giro + 90) % 360) as Giro
+  // Una foto ENTERA sigue entera al girarla: el zoom de «caber» cambia con
+  // el giro, y conservar el número la dejaría cortada o con aire de más.
+  if (marco.completa && ajusteActual(e, ancho, alto, marco) === 'completa') {
+    return ajustarEnMarco({ ...e, giro }, 'completa', ancho, alto, marco)
+  }
   return limitarEnMarco({ ...e, giro, x: -e.y, y: e.x }, ancho, alto, marco)
 }

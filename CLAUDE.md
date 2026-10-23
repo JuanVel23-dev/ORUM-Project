@@ -1387,6 +1387,24 @@ imagen se AJUSTA antes de subirla, como la foto del socio:
   para que la ficha enseñe la imagen nueva al momento.
 - Las imágenes de un comercio quedan fuera de la declaración de derechos del
   socio (spec de derechos de imagen, §3): no se pide aquí.
+- **Las FOTOS se pueden poner ENTERAS** (23/10/2026, petición del
+  cliente: «que las imágenes que suben los comercios y el administrador no
+  se corten automáticamente; tener la opción de ponerla completa»). Los
+  marcos rectangulares —fotos del negocio en «Mi negocio» y en el panel,
+  publicidad de la portada e imagen de una novedad— llevan `completa: true`
+  (`Marco`, `lib/imagenes/marco.ts`, probado): un archivo nuevo ARRANCA
+  entero, un selector «Imagen completa / Llenar el marco» cambia entre los
+  dos (`ajustarEnMarco`, `ajusteActual`), la barra de zoom baja hasta
+  «entera» y girar una foto entera la deja entera. El hueco que queda lo
+  rellena la MISMA foto difuminada —en el escenario y en el archivo
+  (`pintarRelleno`: reducir a un lienzo diminuto y estirar, porque Safari no
+  tiene `ctx.filter`)—, no una franja de color. El archivo sigue midiendo lo
+  que el marco, así que donde se pinta con su proporción se ve entera. Donde
+  la caja es de OTRA proporción sigue recortando: la tarjeta del directorio
+  (4:3), las de «destacados» (3:4) y las miniaturas cuadradas de la galería
+  de la ficha (el visor sí las enseña enteras). La novedad destacada, que
+  crece más alta que 16:9 con texto largo, va con `contain` y el mismo
+  relleno difuminado. El logotipo no cambia: ya podía verse entero.
 - **«Editar» abre la imagen que YA está**, no el selector de archivos
   (`useImagenElegida().abrirActual`: la descarga como datos, porque pintarla
   desde su URL contaminaría el `canvas`). Desde el editor, «Elegir otra» la

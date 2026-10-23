@@ -95,6 +95,8 @@ const OPCIONES_LOGO: OpcionesEncuadre = {
 const OPCIONES_FOTO: OpcionesEncuadre = {
   proporcion: 9 / 16,
   forma: 'rectangulo',
+  // Se puede poner ENTERA, sin recortar (23/10/2026); arranca así.
+  completa: true,
   anchoSalida: 1600,
   pesoMaximo: 700 * 1024,
 }

@@ -11,14 +11,18 @@ import {
 import { Check, ImagePlus, RotateCcw, RotateCw, ZoomIn, ZoomOut } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { SegmentedControl } from '@/components/ui/segmented'
 import { ZOOM_MAX, type Encuadre } from '@/lib/imagenes/encuadre'
 import {
+  ajustarEnMarco,
+  ajusteActual,
   encuadreInicialEnMarco,
   escalaCubrir,
   girarEnMarco,
   limitarEnMarco,
   zoomEnMarco,
   zoomMinimo,
+  zoomQueContiene,
   type Marco,
 } from '@/lib/imagenes/marco'
 import estilos from './editor-encuadre.module.css'
@@ -37,6 +41,12 @@ import estilos from './editor-encuadre.module.css'
     · un CÍRCULO en el que la imagen puede verse entera, con aire (el
       logotipo: `permiteContener`), y
     · un RECTÁNGULO 16:9 que la imagen siempre cubre (las fotos del negocio).
+
+  Y desde el 23/10/2026 una foto puede ir ENTERA (`completa`: «que las
+  imágenes no se corten automáticamente; tener la opción de ponerla
+  completa»). Arranca entera, un selector la pasa a «Llenar el marco» y
+  vuelta, y el hueco que deja lo rellena la MISMA foto difuminada —en el
+  escenario y en el archivo—, no una franja de color.
 
   El editor del socio NO se tocó: lleva su material negro y plata, la
   detección de caras y la declaración de derechos, que aquí no aplican (las
@@ -221,6 +231,50 @@ export function useImagenElegida() {
    EXPORTAR EL RECORTE
    ========================================================================== */
 
+/** Ancho del lienzo diminuto del relleno: cuanto menor, más difuminado. */
+const ANCHO_RELLENO = 24
+
+/**
+ * El relleno de una foto ENTERA: la misma foto LLENANDO el marco, reducida a
+ * un lienzo diminuto y estirada otra vez, que el suavizado al agrandar deja
+ * difuminada. No usa `ctx.filter`: Safari no lo tiene. Se reduce en dos
+ * pasos (primero a 256 px) porque de 4000 px a 24 de un salto el navegador
+ * muestrea en vez de promediar, y salen manchas.
+ */
+function pintarRelleno(
+  ctx: CanvasRenderingContext2D,
+  f: ImagenElegida,
+  giro: Encuadre['giro'],
+  proporcion: number,
+  ancho: number,
+  alto: number,
+) {
+  let fuente: CanvasImageSource = f.imagen
+  let medida = { ancho: f.ancho, alto: f.alto }
+  for (const [paso, lado] of [256, ANCHO_RELLENO].entries()) {
+    const lienzo = document.createElement('canvas')
+    lienzo.width = lado
+    lienzo.height = Math.max(1, Math.round(lado * proporcion))
+    const c = lienzo.getContext('2d')
+    if (!c) return
+    c.imageSmoothingEnabled = true
+    c.imageSmoothingQuality = 'high'
+    if (paso === 0) {
+      // Primer paso: la foto girada, cubriendo el marco.
+      const escala = escalaCubrir(f.ancho, f.alto, giro, proporcion) * lado
+      c.translate(lado / 2, lienzo.height / 2)
+      c.rotate((giro * Math.PI) / 180)
+      c.scale(escala, escala)
+      c.drawImage(fuente, -f.ancho / 2, -f.alto / 2, f.ancho, f.alto)
+    } else {
+      c.drawImage(fuente, 0, 0, lado, lienzo.height)
+    }
+    fuente = lienzo
+    medida = { ancho: lado, alto: lienzo.height }
+  }
+  ctx.drawImage(fuente, 0, 0, medida.ancho, medida.alto, 0, 0, ancho, alto)
+}
+
 /** Pinta el recorte en un `canvas` y lo entrega como JPEG dentro del peso. */
 async function exportar(
   f: ImagenElegida,
@@ -245,6 +299,9 @@ async function exportar(
     ctx.fillRect(0, 0, ancho, alto)
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
+
+    // Una foto alejada deja hueco: lo rellena ella misma, difuminada.
+    if (opciones.completa) pintarRelleno(ctx, f, e.giro, opciones.proporcion, ancho, alto)
 
     // La misma cuenta que el CSS del escenario, en píxeles de salida: el
     // ancho del marco es la unidad, también para el desplazamiento vertical.
@@ -308,6 +365,12 @@ export function EditorEncuadre({
 
   const { ancho, alto } = imagen
   const minimo = zoomMinimo(ancho, alto, encuadre.giro, opciones)
+  // El selector solo tiene sentido si entera y llenando son distintas: con
+  // la proporción del marco, son la misma.
+  const conAjuste =
+    Boolean(opciones.completa) &&
+    Math.abs(zoomQueContiene(ancho, alto, encuadre.giro, opciones.proporcion) - 1) > 0.01
+  const ajuste = ajusteActual(encuadre, ancho, alto, opciones)
   const ocupado = preparando || guardando
 
   /*
@@ -460,6 +523,19 @@ export function EditorEncuadre({
         onKeyDown={alTeclear}
       >
         <div ref={marco} className={estilos.marco}>
+          {/* El relleno de la foto entera: ella misma llenando el marco,
+              difuminada. Es lo que se guardará en el hueco. */}
+          {opciones.completa && (
+            <div className={estilos.relleno} aria-hidden="true">
+              {/* eslint-disable-next-line @next/next/no-img-element -- object URL local, no un asset */}
+              <img
+                src={imagen.url}
+                alt=""
+                draggable={false}
+                className={`${estilos.imagen} ${estilos.imagenRelleno}`}
+              />
+            </div>
+          )}
           {/* eslint-disable-next-line @next/next/no-img-element -- object URL local, no un asset */}
           <img
             src={imagen.url}
@@ -471,6 +547,24 @@ export function EditorEncuadre({
         <div className={estilos.velo} aria-hidden="true" />
         <div className={estilos.filo} aria-hidden="true" />
       </div>
+
+      {conAjuste && (
+        <SegmentedControl
+          className={estilos.ajuste}
+          ariaLabel="Cómo se ajusta la imagen al marco"
+          size="md"
+          options={[
+            { value: 'completa', label: 'Imagen completa' },
+            { value: 'llenar', label: 'Llenar el marco' },
+          ]}
+          value={ajuste === 'llenar' ? 'llenar' : 'completa'}
+          indicatorHidden={ajuste === 'otro'}
+          onChange={(valor) => {
+            setSuave(true)
+            setEncuadre((a) => ajustarEnMarco(a, valor, ancho, alto, opciones))
+          }}
+        />
+      )}
 
       <div className={estilos.controles}>
         <button

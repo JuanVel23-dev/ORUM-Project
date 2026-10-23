@@ -79,8 +79,15 @@ function Imagen({ url }: { url: string | null }) {
   return (
     <div className={styles.imagen} aria-hidden="true">
       {url ? (
-        // eslint-disable-next-line @next/next/no-img-element -- URL externa de Storage, no un asset local
-        <img src={url} alt="" loading="lazy" decoding="async" />
+        <>
+          {/* El relleno: la misma imagen, difuminada. Solo se ve en la
+              destacada, cuando su caja es más alta que 16:9 (texto largo):
+              ahí la imagen va ENTERA y esto llena el resto, sin recortarla. */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- URL externa de Storage, no un asset local */}
+          <img src={url} alt="" loading="lazy" decoding="async" className={styles.relleno} />
+          {/* eslint-disable-next-line @next/next/no-img-element -- URL externa de Storage, no un asset local */}
+          <img src={url} alt="" loading="lazy" decoding="async" />
+        </>
       ) : (
         <span className={styles.lamina}>
           <EstrellaOrum className={styles.laminaEstrella} />
