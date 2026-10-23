@@ -1393,13 +1393,16 @@ imagen se AJUSTA antes de subirla, como la foto del socio:
   marcos rectangulares —fotos del negocio en «Mi negocio» y en el panel,
   publicidad de la portada e imagen de una novedad— llevan `completa: true`
   (`Marco`, `lib/imagenes/marco.ts`, probado): un archivo nuevo ARRANCA
-  entero, un selector «Imagen completa / Llenar el marco» cambia entre los
-  dos (`ajustarEnMarco`, `ajusteActual`), la barra de zoom baja hasta
-  «entera» y girar una foto entera la deja entera. El hueco que queda lo
-  rellena la MISMA foto difuminada —en el escenario y en el archivo
-  (`pintarRelleno`: reducir a un lienzo diminuto y estirar, porque Safari no
-  tiene `ctx.filter`)—, no una franja de color. El archivo sigue midiendo lo
-  que el marco. El logotipo no cambia: ya podía verse entero.
+  entero y un selector «Imagen completa / Llenar el marco» cambia entre los
+  dos (solo sale si la foto no tiene ya la proporción del marco,
+  `mismaProporcion`). **Entera, el marco es el de la PROPIA foto**
+  (`marcoDeLaImagen`): se ve y se guarda tal cual, con su proporción y SIN
+  BORDES —el lado largo mide `anchoSalida`, `medidaDeSalida`—, y no se
+  acerca ni se arrastra (girarla la deja entera). ⚠️ Primero se rellenó el
+  hueco con la misma foto difuminada y el cliente no lo quiso («que se vea
+  completa y ya, sin esos bordes»): **no lo vuelvas a poner**. Una foto ya
+  publicada se abre como se guardó (si tiene la proporción del marco,
+  llenándolo; si no, entera). El logotipo no cambia: ya podía verse entero.
   ⚠️ **Al MOSTRARLAS, las fotos LLENAN su caja (`cover`)** y solo se ven
   enteras al tocarlas, en el visor (propietario, 23/10/2026: «me gusta
   mejor que rellenen el espacio faltante; que se vean completas si le doy

@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { ZOOM_MAX } from './encuadre'
 import {
-  ajustarEnMarco,
-  ajusteActual,
   encuadreInicialEnMarco,
   escalaCubrir,
   girarEnMarco,
   limitarEnMarco,
+  marcoDeLaImagen,
+  medidaDeSalida,
+  mismaProporcion,
   zoomEnMarco,
   zoomMinimo,
   zoomQueContiene,
@@ -16,7 +17,6 @@ import {
 const FOTO: Marco = { proporcion: 9 / 16 }
 const LOGO: Marco = { proporcion: 1, permiteContener: true }
 const LOGO_REDONDO: Marco = { proporcion: 1, permiteContener: true, circular: true }
-const FOTO_COMPLETA: Marco = { proporcion: 9 / 16, completa: true }
 
 describe('escalaCubrir', () => {
   it('en un cuadrado coincide con el lado corto, como el círculo del socio', () => {
@@ -165,46 +165,26 @@ describe('girarEnMarco', () => {
   })
 })
 
-describe('una foto que se puede ver entera (`completa`)', () => {
-  it('se aleja justo hasta caber, sin el aire del logotipo', () => {
-    // 900×1600 en 16:9: cubre a lo ancho; entera, cabe por el alto.
-    const contiene = zoomQueContiene(900, 1600, 0, 9 / 16)
-    expect(zoomMinimo(900, 1600, 0, FOTO_COMPLETA)).toBeCloseTo(contiene)
-    expect(zoomMinimo(900, 1600, 0, FOTO)).toBe(1)
+describe('una foto guardada entera', () => {
+  it('su marco es el de la propia imagen, girada', () => {
+    expect(marcoDeLaImagen(900, 1600, 0).proporcion).toBeCloseTo(1600 / 900)
+    expect(marcoDeLaImagen(900, 1600, 90).proporcion).toBeCloseTo(900 / 1600)
   })
 
-  it('un archivo nuevo arranca ENTERO; una ya publicada, como se ve', () => {
-    expect(encuadreInicialEnMarco(900, 1600, FOTO_COMPLETA).zoom).toBeCloseTo(
-      zoomQueContiene(900, 1600, 0, 9 / 16),
-    )
-    expect(encuadreInicialEnMarco(900, 1600, FOTO_COMPLETA, true).zoom).toBe(1)
+  it('en su propio marco, llenarlo es verla entera: zoom 1 no corta nada', () => {
+    const marco = marcoDeLaImagen(900, 1600, 0)
+    expect(zoomQueContiene(900, 1600, 0, marco.proporcion)).toBeCloseTo(1)
   })
 
-  it('dice en qué ajuste está', () => {
-    const entera = encuadreInicialEnMarco(900, 1600, FOTO_COMPLETA)
-    expect(ajusteActual(entera, 900, 1600, FOTO_COMPLETA)).toBe('completa')
-    expect(ajusteActual({ ...entera, zoom: 1 }, 900, 1600, FOTO_COMPLETA)).toBe('llenar')
-    expect(ajusteActual({ ...entera, zoom: 1.5 }, 900, 1600, FOTO_COMPLETA)).toBe('otro')
+  it('sabe cuándo la foto ya tiene la proporción del marco', () => {
+    expect(mismaProporcion(1600, 900, 0, 9 / 16)).toBe(true)
+    expect(mismaProporcion(900, 1600, 0, 9 / 16)).toBe(false)
+    expect(mismaProporcion(900, 1600, 90, 9 / 16)).toBe(true)
   })
 
-  it('pasar a entera o a llenar la centra', () => {
-    const movida = { x: 0, y: 0.3, zoom: 2, giro: 0 as const }
-    const entera = ajustarEnMarco(movida, 'completa', 900, 1600, FOTO_COMPLETA)
-    expect(entera).toEqual({ x: 0, y: 0, zoom: zoomQueContiene(900, 1600, 0, 9 / 16), giro: 0 })
-    expect(ajustarEnMarco(movida, 'llenar', 900, 1600, FOTO_COMPLETA)).toEqual({ x: 0, y: 0, zoom: 1, giro: 0 })
-  })
-
-  it('una entera sigue entera al girarla', () => {
-    const entera = encuadreInicialEnMarco(900, 1600, FOTO_COMPLETA)
-    const girada = girarEnMarco(entera, 900, 1600, FOTO_COMPLETA)
-    // Girada es 1600×900, la proporción del marco: entera es llenarlo justo.
-    expect(girada.giro).toBe(90)
-    expect(girada.zoom).toBeCloseTo(1)
-    expect(ajusteActual(girada, 900, 1600, FOTO_COMPLETA)).toBe('completa')
-  })
-
-  it('entera, no se desplaza: está centrada en el eje donde sobra marco', () => {
-    const entera = encuadreInicialEnMarco(900, 1600, FOTO_COMPLETA)
-    expect(limitarEnMarco({ ...entera, x: 0.3, y: 0.2 }, 900, 1600, FOTO_COMPLETA)).toEqual(entera)
+  it('el archivo mide su lado LARGO, sea apaisada o vertical', () => {
+    expect(medidaDeSalida(1600, 9 / 16)).toEqual({ ancho: 1600, alto: 900 })
+    expect(medidaDeSalida(1600, 1600 / 900)).toEqual({ ancho: 900, alto: 1600 })
+    expect(medidaDeSalida(640, 1)).toEqual({ ancho: 640, alto: 640 })
   })
 })

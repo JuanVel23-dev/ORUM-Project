@@ -46,10 +46,18 @@
   width: min(100%, 320px, max(200px, 100dvh - 400px));
 }
 
-/* La foto, apaisada: se acota por el alto de la ventana (su escenario mide
-   ~0,62 veces su ancho), para que la barra y «Guardar» sigan a la vista. */
+/* La foto: se acota por el alto de la ventana, para que la barra y
+   «Guardar» sigan a la vista. El alto del escenario es
+   `0,88 × proporción + 0,12` anchos, así que el ancho máximo es el alto
+   disponible dividido por eso: vale para la apaisada de siempre y para una
+   foto VERTICAL guardada entera, cuyo marco es el suyo. */
 .escenario[data-forma='rectangulo'] {
-  width: min(100%, max(320px, (100dvh - 300px) * 1.6));
+  width: min(100%, max(220px, (100dvh - 320px) / (0.88 * var(--proporcion) + 0.12)));
+}
+
+/* Entera no se arrastra: el cursor no promete lo que no hace. */
+.escenario[data-fija] {
+  cursor: default;
 }
 
 .escenario:active {
@@ -99,31 +107,6 @@
   transform: translate(-50%, -50%) translate(calc(var(--tx) * 100%), calc(var(--ty) * 100%))
     rotate(var(--giro)) scale(var(--zoom));
   pointer-events: none;
-}
-
-/*
-  EL RELLENO DE UNA FOTO ENTERA (23/10/2026). La misma foto LLENANDO el
-  marco (sus variables de colocación, con zoom 1 y sin desplazar),
-  difuminada y recortada a la forma del marco. Es lo que el archivo lleva en
-  el hueco (`pintarRelleno`), así que el ajuste se ve como se guarda. El
-  difuminado se mide en el ancho del marco (`cqi`): igual de suave en un
-  teléfono que en un escritorio, como en el archivo.
-*/
-.relleno {
-  position: absolute;
-  inset: 0;
-  overflow: clip;
-  container-type: inline-size;
-  pointer-events: none;
-}
-
-.imagenRelleno {
-  --zoom: 1;
-  --tx: 0;
-  --ty: 0;
-
-  scale: 1.08;
-  filter: blur(2.4cqi);
 }
 
 /* Solo para lo que SALTA (girar, restablecer, los botones ±): ahí un corte
