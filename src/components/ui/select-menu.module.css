@@ -117,3 +117,28 @@
     min-height: var(--tap-min);
   }
 }
+
+/* Opción con una línea de nota debajo (la promoción que hoy no vale). */
+.opcionTextos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding-block: var(--space-1);
+  text-align: left;
+}
+
+.opcionNota {
+  font-size: var(--t-footnote-size);
+  color: var(--text-2);
+}
+
+/* Una opción apagada atenúa SOLO su nombre: la nota es la explicación y tiene
+   que leerse (la atenuación general de `.item:disabled` la dejaría a 0,45). */
+.lista button:disabled {
+  opacity: 1;
+}
+
+.opcionApagada {
+  opacity: 0.55;
+}

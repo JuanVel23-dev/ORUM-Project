@@ -20,6 +20,10 @@ type Promocion = {
   titulo: string
   tipoCodigo: TipoBeneficioCodigo
   valor: number | null
+  /** Vale hoy (día de Colombia). Si no, se ve apagada y no se puede elegir. */
+  disponibleHoy: boolean
+  /** «Solo martes y jueves»; null si vale todos los días. */
+  diasTexto: string | null
 }
 
 const PESOS = new Intl.NumberFormat('es-CO', {
@@ -144,13 +148,16 @@ export function ConfirmarVentaForm({
 
   const haySelectorSucursal = sucursales.length > 1
   const hayPromociones = promociones.length > 0
+  /* Se exige elegir solo si hay alguna que hoy valga: si todas son de otros
+     días, la venta se registra sin promoción, como en un comercio sin ellas. */
+  const hayPromocionesHoy = promociones.some((p) => p.disponibleHoy)
 
   /* Sin importe, sin promoción o sin sucursal no se envía: se dice en el
      propio campo y se lleva el foco al primero que falte —enfocarlo lo trae
      a la vista si quedó bajo el pie pegado—. */
   const alEnviar = (e: FormEvent<HTMLFormElement>) => {
     const sinImporte = compra <= 0
-    const sinPromocion = hayPromociones && promocionId === ''
+    const sinPromocion = hayPromocionesHoy && promocionId === ''
     const sinSucursal = haySelectorSucursal && sucursalId === ''
     if (!sinImporte && !sinPromocion && !sinSucursal) return
     e.preventDefault()
@@ -247,7 +254,7 @@ export function ConfirmarVentaForm({
             <SelectMenu
               name="promocion_id"
               etiqueta="Promoción"
-              placeholder="Selecciona una promoción"
+              placeholder={hayPromocionesHoy ? 'Selecciona una promoción' : 'Hoy ninguna aplica'}
               value={promocionId}
               onChange={(id) => {
                 setPromocionId(id)
@@ -258,6 +265,13 @@ export function ConfirmarVentaForm({
                 /* La cifra corta DELANTE («30% · …»): si el título es largo
                    y se corta, lo que se pierde es el final, no el beneficio. */
                 label: `${formatearBeneficioCorto(p.tipoCodigo, p.valor)} · ${p.titulo}`,
+                /* La que hoy no toca se ve apagada y dice por qué. */
+                disabled: !p.disponibleHoy,
+                nota: p.diasTexto
+                  ? p.disponibleHoy
+                    ? p.diasTexto
+                    : `${p.diasTexto} · hoy no aplica`
+                  : undefined,
               }))}
             />
           </Field>

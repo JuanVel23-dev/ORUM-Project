@@ -9,7 +9,14 @@ import { VentanaVeredicto } from './ventana-veredicto'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 
 type Sucursal = { id: number; nombre: string | null }
-type Promocion = { id: number; titulo: string; tipoCodigo: TipoBeneficioCodigo; valor: number | null }
+type Promocion = {
+  id: number
+  titulo: string
+  tipoCodigo: TipoBeneficioCodigo
+  valor: number | null
+  disponibleHoy: boolean
+  diasTexto: string | null
+}
 
 const estadoInicial: BuscarMiembroState = {}
 

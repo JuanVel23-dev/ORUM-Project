@@ -4,6 +4,7 @@ import { requireMiembroVigente } from '@/lib/miembros/requerir-miembro'
 import { resolverVolverAlCatalogo } from '@/lib/miembros/volver-catalogo'
 import { createClient } from '@/lib/supabase/server'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
+import { textoDias } from '@/lib/comercios/dias-promocion'
 import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
 import { transicionComercio } from '@/lib/comercios/transiciones'
@@ -163,7 +164,7 @@ export default async function FichaComercioPage({
     cargarComercio(numero),
     supabase
       .from('promociones')
-      .select('id, titulo, descripcion, valor, tipo_beneficio_id, activo, fecha_inicio, fecha_fin')
+      .select('id, titulo, descripcion, valor, tipo_beneficio_id, activo, fecha_inicio, fecha_fin, dias_semana')
       .eq('comercio_id', numero)
       .eq('activo', true)
       .is('deleted_at', null)
@@ -224,6 +225,8 @@ export default async function FichaComercioPage({
           valor: formatearBeneficio(tipoCodigo, p.valor),
           titulo: p.titulo,
           descripcion: p.descripcion,
+          // «Solo martes y jueves»: lo que el socio necesita saber antes de ir.
+          dias: textoDias(p.dias_semana),
         },
       ]
     })
@@ -276,6 +279,7 @@ export default async function FichaComercioPage({
                   <p className={estilos.beneficioTitulo}>
                     {b.titulo}
                     {b.descripcion && ` · ${b.descripcion}`}
+                    {b.dias && ` · ${b.dias}`}
                   </p>
                 </li>
               ))}

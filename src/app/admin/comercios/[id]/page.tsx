@@ -15,6 +15,7 @@ import { cargarCategoriasConSubcategorias, cargarFilasCategoria } from '@/lib/co
 import { cambiarEstadoAccesoComercio, cambiarEstadoComercio } from '../actions'
 import { cambiarEstadoSucursal } from '../sucursales-actions'
 import { cambiarEstadoPromocion } from '../promociones-actions'
+import { textoDias } from '@/lib/comercios/dias-promocion'
 import { EditarComercioForm } from './editar/_components/editar-comercio-form'
 import { GestorImagenes } from './imagenes/_components/gestor-imagenes'
 import { cargarImagenesComercio } from './imagenes/_components/datos'
@@ -39,6 +40,7 @@ type Promocion = {
   valor: number | null
   activo: boolean
   tipo_beneficio_id: number
+  dias_semana: number[] | null
 }
 
 type Parte = 'datos' | 'sucursales' | 'promociones' | 'imagenes' | 'resenas'
@@ -98,7 +100,7 @@ export default async function FichaComercioPage({
       .order('nombre'),
     admin
       .from('promociones')
-      .select('id, titulo, valor, activo, tipo_beneficio_id')
+      .select('id, titulo, valor, activo, tipo_beneficio_id, dias_semana')
       .eq('comercio_id', comercioId)
       .is('deleted_at', null)
       .order('titulo'),
@@ -159,7 +161,11 @@ export default async function FichaComercioPage({
   ]
 
   const columnasPromociones: ReadonlyArray<Column<Promocion>> = [
-    { key: 'titulo', header: 'Promoción', primary: true, cell: (p) => p.titulo },
+    { key: 'titulo', header: 'Promoción', primary: true, cell: (p) => {
+        const dias = textoDias(p.dias_semana)
+        return dias ? `${p.titulo} · ${dias}` : p.titulo
+      },
+    },
     {
       key: 'tipo',
       header: 'Tipo',

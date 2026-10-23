@@ -485,6 +485,8 @@ export type Database = {
           valor: number | null
           fecha_inicio: string | null
           fecha_fin: string | null
+          /** Días de la semana ISO (lunes = 1 … domingo = 7) en que vale. `null` = todos. */
+          dias_semana: number[] | null
           activo: boolean
           created_at: Timestamp
           updated_at: Timestamp
@@ -500,6 +502,7 @@ export type Database = {
           valor?: number | null
           fecha_inicio?: string | null
           fecha_fin?: string | null
+          dias_semana?: number[] | null
           activo?: boolean
           created_at?: Timestamp
           updated_at?: Timestamp

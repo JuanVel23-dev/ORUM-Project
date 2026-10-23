@@ -7,6 +7,7 @@ import type { MetodoRegistroVenta } from '@/lib/supabase/database.types'
 import { calcularDescuento, calcularValorFinal } from '@/lib/comercios/ventas'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
+import { aplicaEnFecha, textoDias } from '@/lib/comercios/dias-promocion'
 import { hoyISO } from '@/lib/shared/fecha'
 import { obtenerMiComercio } from '@/lib/comercios/comercio-sesion'
 import { MAX_VISITAS, prepararVisitas, type HistorialVisitas } from '@/lib/comercios/visitas'
@@ -216,7 +217,7 @@ export async function registrarVenta(
       promocionId
         ? supabase
             .from('promociones')
-            .select('id, comercio_id, tipo_beneficio_id, valor, activo, fecha_inicio, fecha_fin')
+            .select('id, comercio_id, tipo_beneficio_id, valor, activo, fecha_inicio, fecha_fin, dias_semana')
             .eq('id', promocionId)
             .maybeSingle()
         : Promise.resolve({ data: null }),
@@ -271,6 +272,10 @@ export async function registrarVenta(
   if (promo) {
     if (!tipo || !esPromocionVigente(promo.activo, promo.fecha_inicio, promo.fecha_fin, hoyISO())) {
       return { error: 'Esa promoción ya no está vigente.' }
+    }
+    // Vigente por fechas, pero solo ciertos días de la semana (día de Colombia).
+    if (!aplicaEnFecha(promo.dias_semana, hoyISO())) {
+      return { error: `Esa promoción no aplica hoy. ${textoDias(promo.dias_semana)}.` }
     }
 
     valorDescuento =

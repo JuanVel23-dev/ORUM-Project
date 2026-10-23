@@ -828,6 +828,13 @@
   overflow-wrap: anywhere;
 }
 
+.promocionDias {
+  display: block;
+  font-size: var(--t-footnote-size);
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
 .sinPromociones {
   margin: 0;
   font-size: var(--t-callout-size);

@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { validarValorPromocion } from '@/lib/comercios/promociones'
+import { leerDiasDelFormulario } from '@/lib/comercios/dias-promocion'
 import { leerPesos } from '@/lib/validacion/reglas'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 
@@ -25,6 +26,7 @@ function leerCamposPromocion(formData: FormData):
       valor: number | null
       fecha_inicio: string | null
       fecha_fin: string | null
+      dias_semana: number[] | null
     }
   | { ok: false; error: string } {
   const titulo = String(formData.get('titulo') ?? '').trim()
@@ -49,6 +51,8 @@ function leerCamposPromocion(formData: FormData):
     valor,
     fecha_inicio: String(formData.get('fecha_inicio') ?? '').trim() || null,
     fecha_fin: String(formData.get('fecha_fin') ?? '').trim() || null,
+    // Nada marcado (o los siete) = vale todos los días: se guarda null.
+    dias_semana: leerDiasDelFormulario(formData.getAll('dias_semana').map(String)),
   }
 }
 
@@ -84,6 +88,7 @@ export async function crearPromocion(_prev: PromocionState, formData: FormData):
     valor: campos.valor,
     fecha_inicio: campos.fecha_inicio,
     fecha_fin: campos.fecha_fin,
+    dias_semana: campos.dias_semana,
     activo: true,
   })
   if (error) return { error: mensajeDeError('No se pudo crear la promoción', error) }
@@ -128,6 +133,7 @@ export async function editarPromocion(_prev: PromocionState, formData: FormData)
       valor: campos.valor,
       fecha_inicio: campos.fecha_inicio,
       fecha_fin: campos.fecha_fin,
+      dias_semana: campos.dias_semana,
     })
     .eq('id', id)
     .eq('comercio_id', comercioId)

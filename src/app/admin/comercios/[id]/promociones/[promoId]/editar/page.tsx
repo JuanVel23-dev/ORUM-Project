@@ -20,7 +20,7 @@ export default async function EditarPromocionPage({
   const [{ data: promocion }, { data: tipos }] = await Promise.all([
     admin
       .from('promociones')
-      .select('id, titulo, descripcion, tipo_beneficio_id, valor, fecha_inicio, fecha_fin')
+      .select('id, titulo, descripcion, tipo_beneficio_id, valor, fecha_inicio, fecha_fin, dias_semana')
       .eq('id', Number(promoId))
       .eq('comercio_id', comercioId)
       .is('deleted_at', null)

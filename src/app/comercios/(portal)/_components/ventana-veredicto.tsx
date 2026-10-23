@@ -19,6 +19,8 @@ type Promocion = {
   titulo: string
   tipoCodigo: TipoBeneficioCodigo
   valor: number | null
+  disponibleHoy: boolean
+  diasTexto: string | null
 }
 
 const estadoInicial: RegistrarVentaState = {}

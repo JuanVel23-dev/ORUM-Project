@@ -39,7 +39,14 @@ import styles from './select-menu.module.css'
   `<label>` es solo la etiqueta, y el lector no diría qué hay elegido.
 */
 
-export type OpcionSelectMenu = { value: string; label: string }
+export type OpcionSelectMenu = {
+  value: string
+  label: string
+  /** Apagada: se ve pero no se puede elegir. Lleva `nota` para decir por qué. */
+  disabled?: boolean
+  /** Línea pequeña bajo la etiqueta («Solo martes y jueves»). */
+  nota?: string
+}
 
 type Props = {
   /** Nombre con el que viaja en el formulario. */
@@ -120,8 +127,20 @@ export function SelectMenu({
         {/* Desplaza por dentro si son muchas: el menú no tiene tope de alto. */}
         <div className={styles.lista} data-barra="" data-desvanece="">
           {opciones.map((o) => (
-            <MenuItem key={o.value} selected={o.value === value} onSelect={() => elegir(o.value)}>
-              {o.label}
+            <MenuItem
+              key={o.value}
+              selected={o.value === value}
+              disabled={o.disabled}
+              onSelect={() => elegir(o.value)}
+            >
+              {o.nota ? (
+                <span className={styles.opcionTextos}>
+                  <span className={o.disabled ? styles.opcionApagada : undefined}>{o.label}</span>
+                  <span className={styles.opcionNota}>{o.nota}</span>
+                </span>
+              ) : (
+                o.label
+              )}
             </MenuItem>
           ))}
         </div>

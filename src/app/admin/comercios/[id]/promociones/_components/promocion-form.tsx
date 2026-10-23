@@ -6,6 +6,7 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/toggle'
 import { SelectMenu } from '@/components/ui/select-menu'
 import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
 import {
@@ -18,6 +19,7 @@ import {
   type Regla,
 } from '@/lib/validacion/reglas'
 import { Stack } from '@/components/ui/layout'
+import { DIAS_SEMANA } from '@/lib/comercios/dias-promocion'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import {
   crearPromocion,
@@ -36,6 +38,7 @@ type PromocionInicial = {
   valor: number | null
   fecha_inicio: string | null
   fecha_fin: string | null
+  dias_semana: number[] | null
 }
 
 const estadoInicial: PromocionState = {}
@@ -178,6 +181,28 @@ export function PromocionForm({
               />
             </Field>
           </div>
+
+          {/* Sin ninguno marcado vale todos los días. El cajero ve la promoción
+              apagada, con el aviso, los días que no toca. */}
+          <fieldset className={styles.grupoDias}>
+            <legend className={styles.grupoDiasTitulo}>
+              Días en que vale <span className={styles.grupoDiasOpcional}>(opcional)</span>
+            </legend>
+            <p className={styles.grupoDiasAyuda}>
+              Si no marcas ninguno, la promoción vale todos los días. Se cuenta el día en Colombia.
+            </p>
+            <div className={styles.dias}>
+              {DIAS_SEMANA.map((d) => (
+                <Checkbox
+                  key={d.numero}
+                  name="dias_semana"
+                  value={d.numero}
+                  label={d.corto}
+                  defaultChecked={promocion?.dias_semana?.includes(d.numero) ?? false}
+                />
+              ))}
+            </div>
+          </fieldset>
         </Stack>
 
         <div className={styles.acciones}>
