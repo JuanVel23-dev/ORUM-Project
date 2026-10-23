@@ -14,6 +14,7 @@ import {
 } from '@/lib/miembros/membresias'
 import { esNumeroRegistroValido } from '@/lib/miembros/numeros-registro'
 import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
+import { errorDeCorreoOcupado } from '@/lib/auth/correo-registrado'
 
 type Admin = ReturnType<typeof createAdminClient>
 
@@ -118,6 +119,11 @@ export async function registrarMiembro(
 
   // 5) Crear usuario en Auth vía invitación: no se genera ni se envía
   // contraseña, el miembro elige la suya al abrir el enlace de un solo uso.
+  // Antes se comprueba que el correo esté libre: la invitación no falla con uno
+  // ya registrado y le pisaría el rol a esa cuenta.
+  const errCorreo = await errorDeCorreoOcupado(admin, correo)
+  if (errCorreo) return { error: errCorreo }
+
   const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
     type: 'invite',
     email: correo,

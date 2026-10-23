@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
+import { errorDeCorreoOcupado } from '@/lib/auth/correo-registrado'
 import {
   leerFilasCategoria,
   revisarFilasCategoria,
@@ -110,6 +111,9 @@ export async function crearComercio(
 
   const { data: rol } = await admin.from('roles').select('id').eq('codigo', 'comercio').single()
   if (!rol) return { error: 'No se encontró el rol "comercio" en la base de datos.' }
+
+  const errCorreo = await errorDeCorreoOcupado(admin, email)
+  if (errCorreo) return { error: errCorreo }
 
   const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
     type: 'invite',

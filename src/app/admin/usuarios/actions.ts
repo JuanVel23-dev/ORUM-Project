@@ -8,6 +8,7 @@ import { getPerfilActual } from '@/lib/auth/auth'
 import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 import type { RolCodigo } from '@/lib/supabase/database.types'
 import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
+import { errorDeCorreoOcupado } from '@/lib/auth/correo-registrado'
 
 /** Tipos de usuario que el admin puede crear en esta sección. */
 type TipoUsuario = 'super_admin' | 'empleado'
@@ -71,6 +72,9 @@ export async function crearUsuario(
     cedula,
     telefono: String(formData.get('telefono') ?? '').trim() || null,
   }
+
+  const errCorreo = await errorDeCorreoOcupado(admin, email)
+  if (errCorreo) return { error: errCorreo }
 
   const { data: creado, error: errAuth } = await admin.auth.admin.generateLink({
     type: 'invite',
