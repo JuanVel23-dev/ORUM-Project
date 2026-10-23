@@ -96,9 +96,10 @@
   color: var(--text-3);
 }
 
-.miniaturaFoto {
+.miniatura img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 /* Una línea del texto, cortada: el resto vive en la ficha. */

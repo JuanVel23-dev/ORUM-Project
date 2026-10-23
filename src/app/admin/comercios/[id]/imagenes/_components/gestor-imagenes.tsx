@@ -25,7 +25,6 @@ import {
   usarFotoComoPortada,
 } from '@/app/admin/comercios/imagenes-actions'
 import styles from './gestor-imagenes.module.css'
-import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 /*
   GESTOR DE IMÁGENES DE UN COMERCIO  ·  en el panel (rehecho el 13/10/2026)
@@ -569,7 +568,8 @@ function Teja({
         {/* Decorativa aquí: lo que es lo dicen la insignia, el texto de
             debajo y los nombres de los botones. `<img>` y no `next/image`:
             la URL es de Storage o externa. */}
-        <ImagenCompleta src={url} alt="" className={styles.foto} loading="lazy" decoding="async" />
+        {/* eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local */}
+        <img src={url} alt="" className={styles.foto} loading="lazy" decoding="async" />
         {insignia && <span className={styles.insignia}>{insignia}</span>}
         {puesto !== undefined && (
           <span className={styles.insignia} aria-hidden="true">

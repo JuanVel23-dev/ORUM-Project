@@ -4,7 +4,6 @@ import { ComercioLogo } from '@/components/ui/comercio-logo'
 import type { ComercioVitrina } from '@/lib/publico/datos-publicos'
 import { detalleComercio } from '@/lib/publico/directorio'
 import estilos from './tarjeta-directorio.module.css'
-import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 /*
   LA TARJETA DEL DIRECTORIO  ·  la comparten `/explorar` y `/miembros`
@@ -42,7 +41,8 @@ export function TarjetaDirectorio({
     <Link href={href} className={estilos.tarjeta} scroll={socio ? undefined : false}>
       <span className={estilos.portada}>
         {comercio.portadaUrl ? (
-          <ImagenCompleta
+          // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+          <img
             src={comercio.portadaUrl}
             alt=""
             className={estilos.foto}

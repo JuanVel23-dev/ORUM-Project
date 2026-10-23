@@ -24,7 +24,6 @@ import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ru
 import { crearAnuncio, editarAnuncio, type AnuncioState } from '../actions'
 import formStyles from '@/styles/formulario.module.css'
 import styles from './novedad-form.module.css'
-import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 export type AnuncioInicial = {
   id: number
@@ -266,7 +265,8 @@ export function AnuncioForm({ anuncio }: { anuncio?: AnuncioInicial }) {
 
           {urlVista ? (
             <figure className={styles.vista}>
-              <ImagenCompleta src={urlVista} alt="" className={styles.vistaImagen} />
+              {/* eslint-disable-next-line @next/next/no-img-element -- vista previa local o URL de Storage */}
+              <img src={urlVista} alt="" className={styles.vistaImagen} />
               <figcaption className={styles.vistaAcciones}>
                 <Button
                   type="button"

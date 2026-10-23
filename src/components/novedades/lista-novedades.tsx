@@ -4,7 +4,6 @@ import { EstrellaOrum } from '@/components/ui/marca/marca'
 import { formatearFechaNovedad } from '@/lib/anuncios/fecha'
 import type { AnuncioResumen } from '@/lib/anuncios/tipos'
 import styles from './lista-novedades.module.css'
-import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 /*
   LAS NOVEDADES  ·  rediseño del 21/10/2026
@@ -80,9 +79,8 @@ function Imagen({ url }: { url: string | null }) {
   return (
     <div className={styles.imagen} aria-hidden="true">
       {url ? (
-        // Entera: en la destacada la caja crece más alta que 16:9 con un
-        // texto largo, y el hueco lo llena la misma imagen difuminada.
-        <ImagenCompleta src={url} alt="" loading="lazy" decoding="async" className={styles.foto} />
+        // eslint-disable-next-line @next/next/no-img-element -- URL externa de Storage, no un asset local
+        <img src={url} alt="" loading="lazy" decoding="async" />
       ) : (
         <span className={styles.lamina}>
           <EstrellaOrum className={styles.laminaEstrella} />

@@ -5,7 +5,6 @@ import { Pause, Play } from 'lucide-react'
 import { useMediaQuery } from '@/components/use-media-query'
 import type { FotoPublica } from '@/lib/publico/datos-publicos'
 import estilos from './carrusel-fotos.module.css'
-import { ImagenCompleta } from '@/components/ui/imagen-completa'
 
 /*
   EL CARRUSEL DE «QUÉ ES ORUM»  ·  fotos reales que se relevan solas
@@ -202,7 +201,8 @@ export function CarruselFotos({ fotos, etiqueta, className }: Props) {
           }
         >
           {fotos.map((foto, i) => (
-            <ImagenCompleta
+            // eslint-disable-next-line @next/next/no-img-element -- URL externa arbitraria, no un asset local
+            <img
               key={foto.url}
               src={foto.url}
               alt={foto.alt}

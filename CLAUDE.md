@@ -1076,7 +1076,7 @@ subcategoría nueva en la base, añádela a `EXACTOS` con un glifo libre.**
 `Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` `CifraAnimada` · `Alert` `Toast` · `Modal` `Sheet`
 `Overlay` `DropdownMenu` `MenuItem` · `Skeleton` `ProgressBar` `EmptyState` `ErrorState` ·
 `DataList` `AccionEstado` `Copiar` · `PantallaAuth` `ComercioLogo` `QrCode` `WhatsAppButton`
-· `Agitar` · `ImagenCompleta`
+· `Agitar`
 
 **`SelectMenu`** (04/10/2026) es un desplegable CON DISEÑO: el campo se ve
 como un `Input` y la lista que abre es el `DropdownMenu` del sitio, no la del
@@ -1400,20 +1400,14 @@ imagen se AJUSTA antes de subirla, como la foto del socio:
   (`pintarRelleno`: reducir a un lienzo diminuto y estirar, porque Safari no
   tiene `ctx.filter`)—, no una franja de color. El archivo sigue midiendo lo
   que el marco. El logotipo no cambia: ya podía verse entero.
-- **Y TODA imagen subida se MUESTRA entera, pinte donde pinte** (mismo
-  día: «todo lo que tenga que ver como imagen se muestra completo; ya en la
-  edición el usuario decide si recortar o no»). La pieza es
-  **`ImagenCompleta`** (`components/ui/imagen-completa.tsx`, sin cliente):
-  la foto con `contain` sobre ella misma difuminada, y `className` va en su
-  CAJA, que se coloca como antes el `<img>`. La usan la tarjeta del
-  directorio (4:3), las de «destacados» (3:4), la portada y las miniaturas
-  cuadradas de la ficha, el carrusel de la portada, las novedades (rejilla,
-  destacada y la miniatura de la lista del panel), y las vistas previas del
-  panel y de «Mi negocio». **Una foto de un comercio, de la publicidad o de
-  una novedad que se pinte en un sitio nuevo va con `ImagenCompleta`, no con
-  un `<img>` en `cover`.** No aplica a la foto de marca (héroe, banners,
-  acceso), a la foto del socio ni a los avatares: esas las encuadra su
-  propio editor o son de la marca.
+  ⚠️ **Al MOSTRARLAS, las fotos LLENAN su caja (`cover`)** y solo se ven
+  enteras al tocarlas, en el visor (propietario, 23/10/2026: «me gusta
+  mejor que rellenen el espacio faltante; que se vean completas si le doy
+  clic, como antes; pero cuando se suba la imagen, que se vea completa»).
+  Se probó pintarlas enteras en todas partes (tarjetas del directorio y de
+  destacados, galería, carrusel, novedades) con la foto difuminada de
+  relleno, y no gustó: **no lo vuelvas a poner**. Lo entero vive en el
+  EDITOR, al subirla, y en el visor.
 - **«Editar» abre la imagen que YA está**, no el selector de archivos
   (`useImagenElegida().abrirActual`: la descarga como datos, porque pintarla
   desde su URL contaminaría el `canvas`). Desde el editor, «Elegir otra» la
