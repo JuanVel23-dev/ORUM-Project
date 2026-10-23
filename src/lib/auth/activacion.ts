@@ -54,3 +54,33 @@ export const MENSAJE_ENLACE_INVALIDO =
   'Este enlace no es válido o ya expiró. Pide que te envíen uno nuevo.'
 
 export const MENSAJE_ENLACE_VENCIDO = 'Este enlace ya expiró o ya se usó. Pide uno nuevo.'
+
+/**
+ * ¿La cuenta sigue sin activarse? Una invitación crea el usuario SIN correo
+ * confirmado; se confirma al canjear el enlace. Es la señal que decide si se
+ * ofrece «Reenviar correo de activación».
+ */
+export function cuentaPendienteDeActivar(
+  usuario: { email_confirmed_at?: string | null } | null | undefined,
+): boolean {
+  return Boolean(usuario) && !usuario?.email_confirmed_at
+}
+
+/** El `rol` que lleva el enlace de activación según el rol de la cuenta (`roles.codigo`). */
+export function rolActivacionDe(rolCodigo: string): RolActivacion | null {
+  if (rolCodigo === 'miembro') return 'miembro'
+  if (rolCodigo === 'comercio') return 'comercio'
+  if (rolCodigo === 'empleado' || rolCodigo === 'super_admin') return 'staff'
+  return null
+}
+
+/**
+ * Quién puede reenviar la activación de quién. El empleado registra miembros,
+ * así que puede reenviarles; comercios y personal del panel los gestiona solo
+ * el administrador, igual que su alta.
+ */
+export function puedeReenviarActivacion(rolActor: string, rolCuenta: string): boolean {
+  if (rolActor === 'super_admin') return rolActivacionDe(rolCuenta) !== null
+  if (rolActor === 'empleado') return rolCuenta === 'miembro'
+  return false
+}

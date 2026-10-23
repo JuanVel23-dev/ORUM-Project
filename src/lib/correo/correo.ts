@@ -127,12 +127,17 @@ function obtenerTransporte(config: ConfigSmtp): Transporter {
   return cache.transporte
 }
 
-/** Envía un correo transaccional por SMTP de Gmail. Nunca lanza: registra y sigue. */
-export async function enviarCorreo(input: InputCorreo): Promise<void> {
+/**
+ * Envía un correo transaccional por SMTP de Gmail y dice si salió. Nunca
+ * lanza: registra el fallo y devuelve `false`. Lo usa quien tiene que
+ * avisarle a una persona que el correo no llegó a enviarse (reenviar la
+ * activación); el resto lo ignora con `enviarCorreo`.
+ */
+export async function enviarCorreoConResultado(input: InputCorreo): Promise<boolean> {
   const config = leerConfigSmtp(process.env)
   if (!config) {
     console.error('Correo no enviado: faltan variables GMAIL_SMTP_USER / GMAIL_SMTP_APP_PASSWORD / GMAIL_FROM_EMAIL.')
-    return
+    return false
   }
 
   try {
@@ -143,14 +148,29 @@ export async function enviarCorreo(input: InputCorreo): Promise<void> {
       html: input.html,
       text: input.texto,
     })
+    return true
   } catch (err) {
     console.error('No se pudo enviar el correo:', err)
+    return false
   }
+}
+
+/** Envía un correo transaccional por SMTP de Gmail. Nunca lanza: registra y sigue. */
+export async function enviarCorreo(input: InputCorreo): Promise<void> {
+  await enviarCorreoConResultado(input)
 }
 
 export async function enviarCorreoInvitacion(input: InputCorreoInvitacion): Promise<void> {
   const { asunto, html, texto } = construirCorreoInvitacion(input)
   await enviarCorreo({ para: input.correo, nombre: input.nombre, asunto, html, texto })
+}
+
+/** Como `enviarCorreoInvitacion`, pero dice si el correo salió. */
+export async function enviarCorreoInvitacionConResultado(
+  input: InputCorreoInvitacion,
+): Promise<boolean> {
+  const { asunto, html, texto } = construirCorreoInvitacion(input)
+  return enviarCorreoConResultado({ para: input.correo, nombre: input.nombre, asunto, html, texto })
 }
 
 export async function enviarCorreoRecuperacion(input: {

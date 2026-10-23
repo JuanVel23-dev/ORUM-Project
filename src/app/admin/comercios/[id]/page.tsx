@@ -22,6 +22,8 @@ import { cargarImagenesComercio } from './imagenes/_components/datos'
 import { Paginacion } from '@/components/ui/paginacion'
 import { ResenasAdmin } from './_components/resenas-admin'
 import { obtenerResenasParaAdmin } from '@/lib/resenas/datos'
+import { ReenviarActivacion } from '../../_components/reenviar-activacion'
+import { cuentaPendienteDeActivar } from '@/lib/auth/activacion'
 import styles from './ficha.module.css'
 
 export const metadata = { title: 'Ficha de comercio · ORUM' }
@@ -120,12 +122,14 @@ export default async function FichaComercioPage({
   // Cadena vacía y no '—': el valor va directo a un campo de formulario.
   let correo = ''
   let perfilActivo = false
+  let pendienteDeActivar = false
   if (comercio.perfil_id) {
     const [{ data: authUser }, { data: perfil }] = await Promise.all([
       admin.auth.admin.getUserById(comercio.perfil_id),
       admin.from('perfiles').select('activo').eq('id', comercio.perfil_id).maybeSingle(),
     ])
     correo = authUser.user?.email ?? ''
+    pendienteDeActivar = cuentaPendienteDeActivar(authUser.user)
     perfilActivo = perfil?.activo ?? false
   }
 
@@ -302,6 +306,9 @@ export default async function FichaComercioPage({
                 <span className={styles.estadoNota}>
                   Si puede iniciar sesión para registrar ventas. Es independiente de seguir siendo aliado.
                 </span>
+                {pendienteDeActivar && (
+                  <span className={styles.estadoNota}>Aún no ha activado su cuenta.</span>
+                )}
               </div>
               <form action={cambiarEstadoAccesoComercio}>
                 <input type="hidden" name="id" value={comercio.id} />
@@ -316,6 +323,10 @@ export default async function FichaComercioPage({
                   {perfilActivo ? 'Desactivar acceso' : 'Activar acceso'}
                 </Button>
               </form>
+              {/* Mientras no active su cuenta, se le puede mandar el correo otra vez. */}
+              {pendienteDeActivar && perfilActivo && comercio.perfil_id && (
+                <ReenviarActivacion perfilId={comercio.perfil_id} tamano="sm" />
+              )}
             </div>
           </section>
         </div>

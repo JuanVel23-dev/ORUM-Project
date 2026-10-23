@@ -49,14 +49,18 @@ export function resumirEventoBitacora(
     return `Datos editados — ${cambios.join(', ')}`
   }
 
+  if (accion === 'reenvio_activacion') return 'Correo de activación reenviado'
+
   return `Evento: ${accion}`
 }
 
-export type AccionBitacora = 'alta' | 'edicion' | 'renovacion'
+export type AccionBitacora = 'alta' | 'edicion' | 'renovacion' | 'reenvio_activacion'
 
 export type RegistrarActividadInput = {
   actorId: string | null
   accion: AccionBitacora
+  /** Por defecto `miembro`. Solo ese se muestra en la bitácora del panel. */
+  entidad?: 'miembro' | 'comercio' | 'empleado'
   entidadId: number
   datosAnteriores?: DatosEvento
   datosNuevos?: DatosEvento
@@ -73,7 +77,7 @@ export async function registrarActividad(admin: Admin, input: RegistrarActividad
     const { error } = await admin.from('bitacora_actividad').insert({
       actor_id: input.actorId,
       accion: input.accion,
-      entidad: 'miembro',
+      entidad: input.entidad ?? 'miembro',
       entidad_id: input.entidadId,
       datos_anteriores: input.datosAnteriores ?? null,
       datos_nuevos: input.datosNuevos ?? null,

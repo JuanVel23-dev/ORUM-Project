@@ -11,6 +11,8 @@ import { PageHeader } from '@/components/ui/layout'
 import { DropdownMenu, MenuItem } from '@/components/ui/menu'
 import { Pestanas, type TonoPestana } from '@/components/ui/pestanas'
 import { cambiarEstadoAcceso } from './actions'
+import { ReenviarActivacion } from '../_components/reenviar-activacion'
+import { cuentaPendienteDeActivar } from '@/lib/auth/activacion'
 import styles from '@/styles/lista-panel.module.css'
 
 export const metadata = { title: 'Usuarios · ORUM' }
@@ -24,6 +26,8 @@ type Fila = {
   activo: boolean
   /** Foto de perfil. Sin ella el avatar pinta iniciales. */
   avatarUrl: string | null
+  /** Aún no ha activado su cuenta: se le puede reenviar el correo. */
+  pendiente: boolean
 }
 
 const COLUMNAS: ReadonlyArray<Column<Fila>> = [
@@ -91,6 +95,9 @@ export default async function UsuariosPage({ searchParams }: { searchParams: Pro
 
   const rolPorId = new Map((roles ?? []).map((r) => [r.id, r]))
   const emailPorId = new Map((authList.data?.users ?? []).map((u) => [u.id, u.email ?? '—']))
+  const pendientePorId = new Map(
+    (authList.data?.users ?? []).map((u) => [u.id, cuentaPendienteDeActivar(u)]),
+  )
   const empleadoPorPerfil = new Map((empleados ?? []).map((e) => [e.perfil_id, e]))
 
   const filas: Fila[] = (perfiles ?? [])
@@ -107,6 +114,7 @@ export default async function UsuariosPage({ searchParams }: { searchParams: Pro
         rolCodigo: rol.codigo,
         activo: p.activo,
         avatarUrl: (p.avatar_url ?? '').trim() || null,
+        pendiente: pendientePorId.get(p.id) ?? false,
       }
     })
     .filter((f): f is Fila => f !== null)
@@ -190,6 +198,9 @@ export default async function UsuariosPage({ searchParams }: { searchParams: Pro
                 >
                   Cambiar foto
                 </MenuItem>
+                {f.pendiente && f.activo && (
+                  <ReenviarActivacion perfilId={f.perfilId} variante="menu" />
+                )}
               </DropdownMenu>
             </>
           )}

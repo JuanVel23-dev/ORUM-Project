@@ -12,6 +12,8 @@ import { Copiar } from '@/components/ui/copiar'
 import { DataList, type Column } from '@/components/ui/data-list'
 import { EmptyState } from '@/components/ui/feedback'
 import { PageHeader, Section, Stack } from '@/components/ui/layout'
+import { ReenviarActivacion } from '../../_components/reenviar-activacion'
+import { cuentaPendienteDeActivar } from '@/lib/auth/activacion'
 import styles from './ficha.module.css'
 
 export const metadata = { title: 'Ficha de miembro · ORUM' }
@@ -167,6 +169,7 @@ export default async function FichaMiembroPage({
   const nombrePlan = new Map((planesHistoricos ?? []).map((p) => [p.id, p.nombre]))
   // Correo de Auth (informativo), como en la gestión de usuarios.
   const correo = authUser.data.user?.email ?? null
+  const pendienteDeActivar = cuentaPendienteDeActivar(authUser.data.user)
   const correoActor = new Map(correoActorEntries)
 
   const actividad = (eventos ?? []).map((e) => ({
@@ -222,6 +225,10 @@ export default async function FichaMiembroPage({
               >
                 Retirar foto
               </Button>
+            )}
+            {/* Solo mientras no haya activado: por si no pudo hacerlo al recibirlo. */}
+            {pendienteDeActivar && miembro.perfil_id && (
+              <ReenviarActivacion perfilId={miembro.perfil_id} />
             )}
             {/*
               Renovar es la acción que mueve dinero: va primaria y arriba.
