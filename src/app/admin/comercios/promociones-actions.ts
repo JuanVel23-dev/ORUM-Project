@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getPerfilActual } from '@/lib/auth/auth'
 import { validarValorPromocion } from '@/lib/comercios/promociones'
 import { leerDiasDelFormulario } from '@/lib/comercios/dias-promocion'
+import { leerRestricciones } from '@/lib/comercios/restricciones-promocion'
 import { leerPesos } from '@/lib/validacion/reglas'
 import type { TipoBeneficioCodigo } from '@/lib/supabase/database.types'
 
@@ -27,6 +28,7 @@ function leerCamposPromocion(formData: FormData):
       fecha_inicio: string | null
       fecha_fin: string | null
       dias_semana: number[] | null
+      restricciones: string | null
     }
   | { ok: false; error: string } {
   const titulo = String(formData.get('titulo') ?? '').trim()
@@ -43,6 +45,9 @@ function leerCamposPromocion(formData: FormData):
   const valor = valorRaw ? leerPesos(valorRaw.replace('%', '')) : null
   if (valorRaw && !Number.isFinite(valor)) return { ok: false, error: 'El valor debe ser un número.' }
 
+  const restricciones = leerRestricciones(String(formData.get('restricciones') ?? ''))
+  if (!restricciones.ok) return { ok: false, error: restricciones.error }
+
   return {
     ok: true,
     titulo,
@@ -53,6 +58,7 @@ function leerCamposPromocion(formData: FormData):
     fecha_fin: String(formData.get('fecha_fin') ?? '').trim() || null,
     // Nada marcado (o los siete) = vale todos los días: se guarda null.
     dias_semana: leerDiasDelFormulario(formData.getAll('dias_semana').map(String)),
+    restricciones: restricciones.valor,
   }
 }
 
@@ -89,6 +95,7 @@ export async function crearPromocion(_prev: PromocionState, formData: FormData):
     fecha_inicio: campos.fecha_inicio,
     fecha_fin: campos.fecha_fin,
     dias_semana: campos.dias_semana,
+    restricciones: campos.restricciones,
     activo: true,
   })
   if (error) return { error: mensajeDeError('No se pudo crear la promoción', error) }
@@ -134,6 +141,7 @@ export async function editarPromocion(_prev: PromocionState, formData: FormData)
       fecha_inicio: campos.fecha_inicio,
       fecha_fin: campos.fecha_fin,
       dias_semana: campos.dias_semana,
+      restricciones: campos.restricciones,
     })
     .eq('id', id)
     .eq('comercio_id', comercioId)

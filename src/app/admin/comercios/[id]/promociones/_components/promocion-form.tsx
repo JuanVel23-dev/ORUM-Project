@@ -5,7 +5,7 @@ import { Save, Tag } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { Input, Textarea } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/toggle'
 import { SelectMenu } from '@/components/ui/select-menu'
 import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
@@ -20,6 +20,7 @@ import {
 } from '@/lib/validacion/reglas'
 import { Stack } from '@/components/ui/layout'
 import { DIAS_SEMANA } from '@/lib/comercios/dias-promocion'
+import { MAX_RESTRICCIONES } from '@/lib/comercios/restricciones-promocion'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import {
   crearPromocion,
@@ -39,6 +40,7 @@ type PromocionInicial = {
   fecha_inicio: string | null
   fecha_fin: string | null
   dias_semana: number[] | null
+  restricciones: string | null
 }
 
 const estadoInicial: PromocionState = {}
@@ -49,6 +51,7 @@ const TIPOS_SIN_VALOR = new Set(['dos_por_uno', 'regalo'])
 const ETIQUETAS: Record<string, string> = {
   titulo: 'Título',
   descripcion: 'Descripción',
+  restricciones: 'Condiciones y restricciones',
   tipo_beneficio_id: 'Tipo de beneficio',
   valor: 'Valor del beneficio',
   fecha_inicio: 'Fecha de inicio',
@@ -68,6 +71,7 @@ function reglasPara(tipos: TipoOpcion[]) {
   return {
     titulo: [obligatorio('Escribe el título de la promoción.'), largo(4, 80, 'El título')],
     descripcion: [largo(5, 280, 'La descripción')],
+    restricciones: [largo(5, MAX_RESTRICCIONES, 'Las condiciones y restricciones')],
     tipo_beneficio_id: [obligatorio('Elige el tipo de beneficio.')],
     valor: [valor],
     fecha_inicio: [fecha],
@@ -137,6 +141,21 @@ export function PromocionForm({
 
           <Field label="Descripción" optional error={v.error('descripcion')}>
             <Input name="descripcion" defaultValue={promocion?.descripcion ?? ''} />
+          </Field>
+
+          <Field
+            label="Condiciones y restricciones"
+            optional
+            help="Cuándo o cómo NO aplica. Lo ven el socio en su ficha y el cajero al cobrar."
+            error={v.error('restricciones')}
+          >
+            <Textarea
+              name="restricciones"
+              rows={3}
+              maxLength={MAX_RESTRICCIONES}
+              defaultValue={promocion?.restricciones ?? ''}
+              placeholder="No acumulable con otras promociones. No aplica en domicilios."
+            />
           </Field>
 
           <Field label="Tipo de beneficio" error={v.error('tipo_beneficio_id')}>

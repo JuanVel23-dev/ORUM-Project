@@ -513,6 +513,8 @@ export type Database = {
           fecha_fin: string | null
           /** Días de la semana ISO (lunes = 1 … domingo = 7) en que vale. `null` = todos. */
           dias_semana: number[] | null
+          /** «Condiciones y restricciones»: cuándo o cómo NO aplica. 1–400 caracteres o `null`. Migración 20261024140000. */
+          restricciones: string | null
           activo: boolean
           created_at: Timestamp
           updated_at: Timestamp
@@ -529,6 +531,7 @@ export type Database = {
           fecha_inicio?: string | null
           fecha_fin?: string | null
           dias_semana?: number[] | null
+          restricciones?: string | null
           activo?: boolean
           created_at?: Timestamp
           updated_at?: Timestamp
