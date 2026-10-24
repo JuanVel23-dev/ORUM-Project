@@ -43,7 +43,7 @@ create policy "sucursal_horarios_lectura_activas"
       select 1
       from public.sucursales s
       join public.comercios c on c.id = s.comercio_id
-      where s.id = sucursal_id
+      where s.id = sucursal_horarios.sucursal_id
         and s.activo and s.deleted_at is null
         and c.activo and c.deleted_at is null
     )
