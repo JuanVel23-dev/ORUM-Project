@@ -1071,6 +1071,37 @@ prueba falla si dos comparten clave; ningún glifo de `GLIFOS`
 quedan para las que se creen después. **Al crear una categoría o
 subcategoría nueva en la base, añádela a `EXACTOS` con un glifo libre.**
 
+**El horario de atención es de CADA sucursal** (24/10/2026; la dirección sigue
+siendo opcional, no se hizo obligatoria). Vive en `sucursal_horarios`
+(`supabase/migrations/20261024120000_sucursal_horarios.sql`; comprobación en
+`supabase/verificacion/sucursal_horarios_verificacion.sql`): una fila por
+sucursal y «día», 1 = lunes … 7 = domingo y **8 = festivos** (UNA regla para
+todos los festivos; sin fechas sueltas). `abre` nulo = cerrado; **sin filas =
+«sin horario cargado» y las fichas no dicen nada** (no «Cerrado»). Un `cierra`
+menor o igual a `abre` es pasada la medianoche. El almuerzo es opcional y cae
+dentro de la jornada. NADIE escribe con la sesión del navegador: solo la
+función `reemplazar_horario_sucursal` (`service_role`), que además toca
+`sucursales.updated_by` para que la bitácora anote la edición.
+
+- **Lógica pura y probada** en `src/lib/comercios/`: `horario.ts` (validar,
+  `estadoAhora`, `textoEstado`, `resumenHorario`), `festivos-colombia.ts`
+  (Ley Emiliani + Pascua, calculados: no hay tabla de festivos que mantener),
+  `horario-formulario.ts` y `horario-datos.ts` (lectura tolerante: sin la
+  tabla devuelve vacío, nunca lanza). **TODO es hora de Colombia**
+  (`ahoraEnBogota`), nunca la del navegador ni la del servidor. Un festivo usa
+  la fila 8; sin esa fila, se rige por su día de la semana.
+- **Se edita solo en el panel** (`EditorHorario`, dentro de `SucursalForm`, que
+  manda el JSON en el campo oculto `horario`). El comercio NO lo edita desde
+  «Mi negocio» (decisión del propietario; posible fase posterior). El editor
+  ofrece UNA franja de almuerzo para todos los días abiertos.
+- **Se ve en la ficha** (`HorarioSede`, de CLIENTE): las fichas salen de caché
+  (`updateTag('publico')`) y un «abierto ahora» calculado en el servidor se
+  quedaría viejo. `useSyncExternalStore` con `getServerSnapshot` en `null`:
+  el servidor pinta la semana y el navegador añade el estado y el día de hoy.
+  Punto lleno/hueco **y** texto, nunca color solo.
+- Vista previa con datos falsos, solo fuera de producción: `/dev/horarios`
+  (`?caso=vacio`, `?caso=noche`).
+
 `Button` `Spinner` · `Field` `Input` `Select` `SelectMenu` `Textarea` `Switch` `Checkbox` `Radio`
 `SegmentedControl` · `Card` `FormCard` `Stack` `Grid` `Section` `PageHeader` `Divider` ·
 `Badge` `StatusBadge` `VenceEn` `Avatar` `Cifra` `CifraAnimada` · `Alert` `Toast` · `Modal` `Sheet`
@@ -1925,3 +1956,9 @@ existe antes. Con Node 20 el instalador falla con `No such built-in module`.
     admin se verificaron con datos falsos (`/dev/resenas*`), el script SQL de
     verificación y lectura de código; falta recorrerlo con un socio, un
     comercio y un admin reales.
+14. **Los horarios de sucursal no se han probado con sesión real.** El editor
+    y la ficha se miraron en `/dev/horarios` (~490 px) con datos falsos; falta
+    guardar un horario de verdad desde el panel, verlo en la ficha pública y
+    en la del socio, y mirarlo a 1366 y 820 px. La migración
+    `20261024120000_sucursal_horarios.sql` se aplica a mano: hasta entonces
+    el código se comporta como «sin horarios».
