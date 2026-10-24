@@ -457,6 +457,32 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['sucursales']['Insert']>
         Relationships: []
       }
+      /**
+       * Horario de una sucursal (20261024120000_sucursal_horarios.sql). `dia`:
+       * 1 = lunes … 7 = domingo, 8 = festivos. Horas 'HH:MM:SS'; `abre` nulo =
+       * cerrado. Sin filas = sin horario cargado. Solo escribe `service_role`,
+       * por `reemplazar_horario_sucursal`.
+       */
+      sucursal_horarios: {
+        Row: {
+          sucursal_id: number
+          dia: number
+          abre: string | null
+          cierra: string | null
+          almuerzo_desde: string | null
+          almuerzo_hasta: string | null
+        }
+        Insert: {
+          sucursal_id: number
+          dia: number
+          abre?: string | null
+          cierra?: string | null
+          almuerzo_desde?: string | null
+          almuerzo_hasta?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['sucursal_horarios']['Insert']>
+        Relationships: []
+      }
       tipos_beneficio: {
         Row: {
           id: number
@@ -781,6 +807,24 @@ export type Database = {
        */
       reemplazar_categorias_comercio: {
         Args: { p_comercio_id: number; p_filas: { categoria_id: number; subcategoria_id: number | null }[]; p_actor?: string | null }
+        Returns: undefined
+      }
+      /**
+       * Reemplaza TODO el horario de una sucursal en una transacción. Un
+       * arreglo vacío la deja sin horario. Solo `service_role`.
+       */
+      reemplazar_horario_sucursal: {
+        Args: {
+          p_sucursal_id: number
+          p_filas: {
+            dia: number
+            abre: string | null
+            cierra: string | null
+            almuerzo_desde: string | null
+            almuerzo_hasta: string | null
+          }[]
+          p_actor?: string | null
+        }
         Returns: undefined
       }
       /**
