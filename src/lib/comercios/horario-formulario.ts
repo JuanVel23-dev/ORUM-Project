@@ -29,7 +29,10 @@ export function leerHorarioDelFormulario(
     const horas: (string | null)[] = []
     for (const campo of ['abre', 'cierra', 'almuerzoDesde', 'almuerzoHasta']) {
       const v = f[campo]
-      if (v === null || v === undefined || v === '') {
+      /* Solo `null` es «sin hora». Un texto vacío es una hora BORRADA en un
+         día abierto: aceptarla guardaría como «cerrado» lo que la pantalla
+         mostraba abierto. */
+      if (v === null || v === undefined) {
         horas.push(null)
         continue
       }

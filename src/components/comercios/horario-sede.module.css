@@ -20,8 +20,8 @@
 .punto {
   flex-shrink: 0;
   box-sizing: border-box;
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: var(--radius-full);
   color: var(--text-2);
   background: currentColor;
@@ -34,13 +34,13 @@
 .estado[data-tipo='almuerzo'] .punto {
   color: var(--warning);
   background: transparent;
-  border: 2px solid currentColor;
+  border: 1px solid currentColor;
 }
 
 .estado[data-tipo='cerrado'] .punto {
   color: var(--danger);
   background: transparent;
-  border: 2px solid currentColor;
+  border: 1px solid currentColor;
 }
 
 .lista {

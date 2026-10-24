@@ -26,6 +26,7 @@ async function guardarHorario(
   sucursalId: number,
   horario: HorarioSucursal,
   actorId: string,
+  prefijoError = 'La sucursal se guardó, pero no el horario',
 ): Promise<string | null> {
   if (horario.length === 0 && (await leerHorarioDeSucursal(admin, sucursalId)).length === 0) {
     return null
@@ -35,7 +36,7 @@ async function guardarHorario(
     p_filas: aFilasRpc(horario),
     p_actor: actorId,
   })
-  return error ? mensajeDeError('La sucursal se guardó, pero no el horario', error) : null
+  return error ? mensajeDeError(prefijoError, error) : null
 }
 
 /** Lee y valida los campos de sucursal. `nombre` obligatorio en app (D4). */
@@ -102,13 +103,26 @@ export async function crearSucursal(_prev: SucursalState, formData: FormData): P
   if (error || !creada) return { error: mensajeDeError('No se pudo crear la sucursal', error) }
 
   const errorHorario = campos.horario
-    ? await guardarHorario(admin, creada.id, campos.horario, actorId)
+    ? await guardarHorario(
+        admin,
+        creada.id,
+        campos.horario,
+        actorId,
+        'No se pudo guardar el horario y la sucursal no se creó',
+      )
     : null
+  if (errorHorario) {
+    /* El formulario se queda abierto con el aviso: si la sucursal ya existiera,
+       reintentar crearía otra igual. Se deshace para que «no se creó» sea
+       verdad. */
+    await admin.from('sucursales').delete().eq('id', creada.id)
+    return { error: errorHorario }
+  }
 
   revalidatePath(`/admin/comercios/${comercioId}`)
 
   updateTag('publico')
-  return errorHorario ? { error: errorHorario } : { ok: true }
+  return { ok: true }
 }
 
 export async function editarSucursal(_prev: SucursalState, formData: FormData): Promise<SucursalState> {

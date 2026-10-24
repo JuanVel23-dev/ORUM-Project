@@ -38,6 +38,16 @@ describe('leerHorarioDelFormulario', () => {
     expect(r.ok).toBe(false)
   })
 
+  it('las dos horas VACIADAS en un día abierto son un error, no un día cerrado', () => {
+    const dia = { ...fila(1, '09:00', '18:00'), abre: '', cierra: '' }
+    expect(leerHorarioDelFormulario(JSON.stringify([dia])).ok).toBe(false)
+  })
+
+  it('un almuerzo con las dos horas vaciadas es un error, no «sin almuerzo»', () => {
+    const dia = { ...fila(1, '09:00', '18:00'), almuerzoDesde: '', almuerzoHasta: '' }
+    expect(leerHorarioDelFormulario(JSON.stringify([dia])).ok).toBe(false)
+  })
+
   it('un almuerzo fuera de la jornada devuelve el mensaje de validarHorario', () => {
     const r = leerHorarioDelFormulario(
       JSON.stringify([{ ...fila(1, '09:00', '18:00'), almuerzoDesde: '08:00', almuerzoHasta: '10:00' }]),
