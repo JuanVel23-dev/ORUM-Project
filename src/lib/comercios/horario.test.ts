@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  almuerzoCabe,
   ahoraEnBogota,
   DIA_FESTIVOS,
   estadoAhora,
@@ -161,6 +162,23 @@ describe('estadoAhora', () => {
 
   it('sin fila de festivos, el festivo se rige por su día de la semana', () => {
     expect(estadoAhora(SEMANA, bogota('2026-05-18', '10:00')).tipo).toBe('abierto')
+  })
+})
+
+describe('almuerzoCabe', () => {
+  it('cabe dentro de la jornada', () => {
+    expect(almuerzoCabe('09:00', '18:00', '12:00', '13:00')).toBe(true)
+  })
+  it('no cabe si la jornada es más corta o no lo contiene', () => {
+    expect(almuerzoCabe('10:00', '12:00', '12:00', '13:00')).toBe(false)
+    expect(almuerzoCabe('09:00', '18:00', '08:00', '10:00')).toBe(false)
+  })
+  it('cabe en una jornada pasada la medianoche', () => {
+    expect(almuerzoCabe('22:00', '02:00', '23:30', '00:30')).toBe(true)
+  })
+  it('un día cerrado o una hora inválida no lo admite', () => {
+    expect(almuerzoCabe(null, null, '12:00', '13:00')).toBe(false)
+    expect(almuerzoCabe('09:00', '18:00', '', '13:00')).toBe(false)
   })
 })
 

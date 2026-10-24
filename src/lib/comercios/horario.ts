@@ -296,3 +296,26 @@ export function textoEstado(estado: EstadoHorario): string {
     p.cuando === 'hoy' ? 'hoy' : p.cuando === 'manana' ? 'mañana' : `el ${DIAS_SEMANA[p.cuando - 1].largo}`
   return `Cerrado · abre ${cuando} ${aLas(p.hora)}`
 }
+
+/**
+ * ¿Cabe este almuerzo dentro de esta jornada? Lo usa el editor para aplicar la
+ * franja solo a los días donde entra, en vez de bloquear el guardado.
+ */
+export function almuerzoCabe(
+  abre: string | null,
+  cierra: string | null,
+  desde: string | null,
+  hasta: string | null,
+): boolean {
+  const horas = [abre, cierra, desde, hasta]
+  if (horas.some((h) => h === null || normalizarHora(h) !== h)) return false
+  const iv = intervalos({
+    dia: 1,
+    abre,
+    cierra,
+    almuerzoDesde: desde,
+    almuerzoHasta: hasta,
+  })
+  if (!iv || !iv.almuerzo) return false
+  return iv.almuerzo[0] >= iv.abre && iv.almuerzo[1] <= iv.cierra
+}

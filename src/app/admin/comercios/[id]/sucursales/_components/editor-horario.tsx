@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Radio, Switch } from '@/components/ui/toggle'
 import { DIAS_SEMANA } from '@/lib/comercios/dias-promocion'
 import {
+  almuerzoCabe,
   DIA_FESTIVOS,
   validarHorario,
   type DiaHorario,
@@ -89,7 +90,12 @@ function estadoInicial(inicial: HorarioSucursal): Estado {
 function construir(e: Estado): HorarioSucursal {
   if (!e.activo) return []
   const filas: DiaHorario[] = e.dias.map((d, i) => {
-    const conAlmuerzo = d.abierto && e.almuerzo.activo
+    /* Solo en los días donde la franja cabe: un sábado corto no bloquea el
+       guardado, simplemente no lleva pausa. */
+    const conAlmuerzo =
+      d.abierto &&
+      e.almuerzo.activo &&
+      almuerzoCabe(d.abre, d.cierra, e.almuerzo.desde, e.almuerzo.hasta)
     return {
       dia: i + 1,
       abre: d.abierto ? d.abre : null,
@@ -208,7 +214,7 @@ export function EditorHorario({
           <div className={styles.bloque}>
             <Switch
               label="Pausa de almuerzo"
-              description="Una misma franja para todos los días abiertos."
+              description="Una misma franja para los días abiertos. Se omite en los días donde no cabe."
               checked={estado.almuerzo.activo}
               onChange={(ev) =>
                 setEstado((e) => ({ ...e, almuerzo: { ...e.almuerzo, activo: ev.target.checked } }))
