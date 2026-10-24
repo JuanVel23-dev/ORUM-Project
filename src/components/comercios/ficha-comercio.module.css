@@ -333,6 +333,22 @@
   color: var(--text-2);
 }
 
+/* «Condiciones y restricciones» de una promoción: letra pequeña, pero legible
+   (mismo gris que el título, sobre el bloque hundido). Respeta los saltos de
+   línea que escribió el administrador. */
+.beneficioRestricciones {
+  margin: var(--space-1) 0 0;
+  font-size: var(--t-footnote-size);
+  line-height: 1.45;
+  color: var(--text-2);
+  white-space: pre-line;
+}
+
+.beneficioRestriccionesRotulo {
+  font-weight: 600;
+  color: var(--text);
+}
+
 .beneficioPronto {
   margin: 0;
   font-size: var(--t-callout-size);

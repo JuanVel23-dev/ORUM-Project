@@ -69,7 +69,7 @@ export default async function ComerciosHomePage() {
         .limit(50),
       supabase
         .from('promociones')
-        .select('id, titulo, tipo_beneficio_id, valor, activo, fecha_inicio, fecha_fin, dias_semana')
+        .select('id, titulo, tipo_beneficio_id, valor, activo, fecha_inicio, fecha_fin, dias_semana, restricciones')
         .eq('comercio_id', comercio.id)
         .eq('activo', true)
         .is('deleted_at', null)
@@ -107,6 +107,7 @@ export default async function ComerciosHomePage() {
       // Vigente por fechas, pero puede no tocar hoy: se ve apagada, con el aviso.
       disponibleHoy: aplicaEnFecha(p.dias_semana, hoy),
       diasTexto: textoDias(p.dias_semana),
+      restricciones: p.restricciones,
     }))
 
   /* Solo dígitos: `wa.me` rechaza espacios, guiones y paréntesis. */

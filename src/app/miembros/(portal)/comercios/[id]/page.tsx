@@ -165,7 +165,7 @@ export default async function FichaComercioPage({
     cargarComercio(numero),
     supabase
       .from('promociones')
-      .select('id, titulo, descripcion, valor, tipo_beneficio_id, activo, fecha_inicio, fecha_fin, dias_semana')
+      .select('id, titulo, descripcion, valor, tipo_beneficio_id, activo, fecha_inicio, fecha_fin, dias_semana, restricciones')
       .eq('comercio_id', numero)
       .eq('activo', true)
       .is('deleted_at', null)
@@ -228,6 +228,7 @@ export default async function FichaComercioPage({
           descripcion: p.descripcion,
           // «Solo martes y jueves»: lo que el socio necesita saber antes de ir.
           dias: textoDias(p.dias_semana),
+          restricciones: p.restricciones,
         },
       ]
     })
@@ -290,6 +291,14 @@ export default async function FichaComercioPage({
                     {b.descripcion && ` · ${b.descripcion}`}
                     {b.dias && ` · ${b.dias}`}
                   </p>
+                  {b.restricciones && (
+                    <p className={estilos.beneficioRestricciones}>
+                      <span className={estilos.beneficioRestriccionesRotulo}>
+                        Condiciones y restricciones:{' '}
+                      </span>
+                      {b.restricciones}
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>

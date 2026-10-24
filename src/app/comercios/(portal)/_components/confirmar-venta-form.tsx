@@ -24,6 +24,8 @@ type Promocion = {
   disponibleHoy: boolean
   /** «Solo martes y jueves»; null si vale todos los días. */
   diasTexto: string | null
+  /** «Condiciones y restricciones» de la promoción; null si no tiene. */
+  restricciones: string | null
 }
 
 const PESOS = new Intl.NumberFormat('es-CO', {
@@ -275,6 +277,13 @@ export function ConfirmarVentaForm({
               }))}
             />
           </Field>
+
+          {/* Lo que el cajero tiene que leer ANTES de aplicar el descuento. */}
+          {promocionSeleccionada?.restricciones && (
+            <Alert tone="info" title="Condiciones y restricciones">
+              <span className={styles.restricciones}>{promocionSeleccionada.restricciones}</span>
+            </Alert>
+          )}
         </div>
       ) : (
         /* Sin promociones vigentes no hay nada que elegir. */

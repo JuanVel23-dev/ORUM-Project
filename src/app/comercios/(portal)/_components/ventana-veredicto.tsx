@@ -21,6 +21,7 @@ type Promocion = {
   valor: number | null
   disponibleHoy: boolean
   diasTexto: string | null
+  restricciones: string | null
 }
 
 const estadoInicial: RegistrarVentaState = {}

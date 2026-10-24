@@ -890,3 +890,9 @@
     max-width: none;
   }
 }
+
+/* «Condiciones y restricciones» de la promoción elegida: respeta los saltos de
+   línea que escribió el administrador. */
+.restricciones {
+  white-space: pre-line;
+}
