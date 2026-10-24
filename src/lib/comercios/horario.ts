@@ -1,0 +1,252 @@
+/**
+ * Horario de atención de una sucursal (`sucursal_horarios`).
+ *
+ * Una fila por día: 1 = lunes … 7 = domingo (numeración ISO, la de
+ * `dias-promocion.ts`) y 8 = festivos. `abre`/`cierra` en 'HH:MM' de 24 h;
+ * `abre null` es «cerrado» (distinto de no tener fila). Un cierre menor o
+ * igual a la apertura es «pasada la medianoche». Sin ninguna fila = «sin
+ * horario cargado» y las fichas no dicen nada.
+ *
+ * TODO se evalúa en hora de Colombia (UTC−5, sin horario de verano): ni la del
+ * navegador ni la del servidor cuentan.
+ */
+import { DIAS_SEMANA, diaDeSemanaISO } from './dias-promocion'
+import { esFestivoColombia } from './festivos-colombia'
+
+export const DIA_FESTIVOS = 8
+
+export type DiaHorario = {
+  dia: number
+  abre: string | null
+  cierra: string | null
+  almuerzoDesde: string | null
+  almuerzoHasta: string | null
+}
+
+export type HorarioSucursal = DiaHorario[]
+
+const MIN_DIA = 1440
+const DESFASE_BOGOTA_MS = 5 * 3_600_000
+
+/* ---------------------------------- horas --------------------------------- */
+
+const PATRON_HORA = /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?$/
+
+/** '08:00:00' → '08:00'; lo que no es una hora → `null`. */
+export function normalizarHora(valor: string | null | undefined): string | null {
+  if (typeof valor !== 'string') return null
+  const m = PATRON_HORA.exec(valor.trim())
+  return m ? `${m[1]}:${m[2]}` : null
+}
+
+function aMinutos(hhmm: string): number {
+  return Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5))
+}
+
+function deMinutos(min: number): string {
+  const m = ((min % MIN_DIA) + MIN_DIA) % MIN_DIA
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
+}
+
+/** '18:00' → '6:00 p. m.' */
+export function formatearHora(hhmm: string): string {
+  const h = Number(hhmm.slice(0, 2))
+  const resto = hhmm.slice(2, 5)
+  return `${h % 12 || 12}${resto} ${h < 12 ? 'a. m.' : 'p. m.'}`
+}
+
+/* -------------------------------- validación ------------------------------- */
+
+function nombreDia(n: number): string {
+  return n === DIA_FESTIVOS ? 'festivos' : (DIAS_SEMANA[n - 1]?.largo ?? `día ${n}`)
+}
+
+/**
+ * Intervalo de la jornada y del almuerzo en minutos desde las 00:00 del día de
+ * apertura. Pasada la medianoche, los valores superan 1440.
+ */
+function intervalos(f: DiaHorario): {
+  abre: number
+  cierra: number
+  almuerzo: [number, number] | null
+} | null {
+  if (f.abre === null || f.cierra === null) return null
+  const abre = aMinutos(f.abre)
+  let cierra = aMinutos(f.cierra)
+  if (cierra <= abre) cierra += MIN_DIA
+
+  let almuerzo: [number, number] | null = null
+  if (f.almuerzoDesde !== null && f.almuerzoHasta !== null) {
+    let desde = aMinutos(f.almuerzoDesde)
+    if (desde < abre) desde += MIN_DIA
+    let hasta = aMinutos(f.almuerzoHasta)
+    while (hasta <= desde) hasta += MIN_DIA
+    almuerzo = [desde, hasta]
+  }
+  return { abre, cierra, almuerzo }
+}
+
+/** El primer error del horario, en español, o `null` si está bien. */
+export function validarHorario(filas: readonly DiaHorario[]): string | null {
+  const vistos = new Set<number>()
+  for (const f of filas) {
+    if (!Number.isInteger(f.dia) || f.dia < 1 || f.dia > DIA_FESTIVOS) {
+      return 'Hay un día del horario que no existe.'
+    }
+    if (vistos.has(f.dia)) return `El horario repite ${nombreDia(f.dia)}.`
+    vistos.add(f.dia)
+
+    const nombre = nombreDia(f.dia)
+    const horas = [f.abre, f.cierra, f.almuerzoDesde, f.almuerzoHasta]
+    if (horas.some((h) => h !== null && normalizarHora(h) !== h)) {
+      return `Revisa las horas de ${nombre}: deben ser como 09:00.`
+    }
+    if ((f.abre === null) !== (f.cierra === null)) {
+      return `En ${nombre} falta la hora de apertura o la de cierre.`
+    }
+    if (f.abre !== null && f.abre === f.cierra) {
+      return `En ${nombre} la apertura y el cierre no pueden ser la misma hora.`
+    }
+    if ((f.almuerzoDesde === null) !== (f.almuerzoHasta === null)) {
+      return `En ${nombre} el almuerzo necesita hora de inicio y de fin.`
+    }
+    if (f.almuerzoDesde !== null) {
+      const iv = intervalos(f)
+      if (!iv) return `En ${nombre} hay almuerzo pero el comercio está cerrado.`
+      const [desde, hasta] = iv.almuerzo!
+      if (desde < iv.abre || hasta > iv.cierra) {
+        return `El almuerzo de ${nombre} debe quedar dentro del horario de atención.`
+      }
+    }
+  }
+  return null
+}
+
+/* ----------------------------- estado «ahora» ----------------------------- */
+
+export type EstadoHorario = {
+  tipo: 'abierto' | 'almuerzo' | 'cerrado' | 'sin_horario'
+  /** El siguiente cambio: hoy, mañana o el día ISO (1–7) en que ocurre. */
+  proximo: { cuando: 'hoy' | 'manana' | number; hora: string } | null
+}
+
+type Segmento = { desde: number; hasta: number; tipo: 'abierto' | 'almuerzo' }
+
+function sumarDias(fecha: string, dias: number): string {
+  const [a, m, d] = fecha.split('-').map(Number)
+  return new Date(Date.UTC(a, m - 1, d + dias)).toISOString().slice(0, 10)
+}
+
+/** La fila que rige una fecha civil: festivos si lo es y hay fila; si no, su día. */
+function filaDe(horario: HorarioSucursal, fecha: string): DiaHorario | undefined {
+  if (esFestivoColombia(fecha)) {
+    const festivos = horario.find((f) => f.dia === DIA_FESTIVOS)
+    if (festivos) return festivos
+  }
+  return horario.find((f) => f.dia === diaDeSemanaISO(fecha))
+}
+
+/** Los tramos del día, en minutos desde sus 00:00 (pueden pasar de 1440). */
+function segmentosDe(horario: HorarioSucursal, fecha: string): Segmento[] {
+  const fila = filaDe(horario, fecha)
+  const iv = fila ? intervalos(fila) : null
+  if (!iv) return []
+  if (!iv.almuerzo) return [{ desde: iv.abre, hasta: iv.cierra, tipo: 'abierto' }]
+  const [ad, ah] = iv.almuerzo
+  return [
+    { desde: iv.abre, hasta: ad, tipo: 'abierto' },
+    { desde: ad, hasta: ah, tipo: 'almuerzo' },
+    { desde: ah, hasta: iv.cierra, tipo: 'abierto' },
+  ]
+}
+
+export function estadoAhora(horario: HorarioSucursal, instante: Date): EstadoHorario {
+  if (horario.length === 0) return { tipo: 'sin_horario', proximo: null }
+
+  const local = new Date(instante.getTime() - DESFASE_BOGOTA_MS)
+  const hoy = local.toISOString().slice(0, 10)
+  const ahora = local.getUTCHours() * 60 + local.getUTCMinutes()
+
+  // Los tramos de hoy y los de ayer que se alargan pasada la medianoche.
+  const tramos: Segmento[] = [
+    ...segmentosDe(horario, sumarDias(hoy, -1)).map((s) => ({
+      ...s,
+      desde: s.desde - MIN_DIA,
+      hasta: s.hasta - MIN_DIA,
+    })),
+    ...segmentosDe(horario, hoy),
+  ]
+  const actual = tramos.find((s) => s.desde <= ahora && ahora < s.hasta)
+  if (actual) {
+    return {
+      tipo: actual.tipo,
+      proximo: {
+        cuando: actual.hasta < MIN_DIA ? 'hoy' : 'manana',
+        hora: deMinutos(actual.hasta),
+      },
+    }
+  }
+
+  for (let d = 0; d <= 7; d++) {
+    const fecha = sumarDias(hoy, d)
+    const siguiente = segmentosDe(horario, fecha)
+      .filter((s) => d > 0 || s.desde > ahora)
+      .sort((a, b) => a.desde - b.desde)[0]
+    if (siguiente) {
+      return {
+        tipo: 'cerrado',
+        proximo: {
+          cuando: d === 0 ? 'hoy' : d === 1 ? 'manana' : diaDeSemanaISO(fecha),
+          hora: deMinutos(siguiente.desde),
+        },
+      }
+    }
+  }
+  return { tipo: 'cerrado', proximo: null }
+}
+
+/* -------------------------------- resumen --------------------------------- */
+
+export type GrupoHorario = { dias: number[]; fila: DiaHorario }
+
+const mismaFila = (a: DiaHorario, b: DiaHorario) =>
+  a.abre === b.abre &&
+  a.cierra === b.cierra &&
+  a.almuerzoDesde === b.almuerzoDesde &&
+  a.almuerzoHasta === b.almuerzoHasta
+
+/** Agrupa los días consecutivos con la misma jornada; aparte, los festivos. */
+export function resumenHorario(horario: HorarioSucursal): {
+  grupos: GrupoHorario[]
+  festivos: DiaHorario | null
+} {
+  const semana = horario.filter((f) => f.dia >= 1 && f.dia <= 7).sort((a, b) => a.dia - b.dia)
+  const grupos: GrupoHorario[] = []
+  for (const fila of semana) {
+    const ultimo = grupos[grupos.length - 1]
+    if (ultimo && ultimo.dias[ultimo.dias.length - 1] === fila.dia - 1 && mismaFila(ultimo.fila, fila)) {
+      ultimo.dias.push(fila.dia)
+    } else {
+      grupos.push({ dias: [fila.dia], fila })
+    }
+  }
+  return { grupos, festivos: horario.find((f) => f.dia === DIA_FESTIVOS) ?? null }
+}
+
+/** 'Cerrado' o '9:00 a. m. – 6:00 p. m. · Almuerzo 12:00 p. m. – 1:00 p. m.' */
+export function textoJornada(fila: DiaHorario): string {
+  if (fila.abre === null || fila.cierra === null) return 'Cerrado'
+  const base = `${formatearHora(fila.abre)} – ${formatearHora(fila.cierra)}`
+  if (fila.almuerzoDesde === null || fila.almuerzoHasta === null) return base
+  return `${base} · Almuerzo ${formatearHora(fila.almuerzoDesde)} – ${formatearHora(fila.almuerzoHasta)}`
+}
+
+/** 'Lun–vie · 9:00 a. m. – 6:00 p. m.' */
+export function textoGrupo(g: GrupoHorario): string {
+  const corto = (n: number) => DIAS_SEMANA[n - 1].corto
+  const primero = g.dias[0]
+  const ultimo = g.dias[g.dias.length - 1]
+  const dias =
+    g.dias.length === 1 ? corto(primero) : `${corto(primero)}–${corto(ultimo).toLowerCase()}`
+  return `${dias} · ${textoJornada(g.fila)}`
+}
