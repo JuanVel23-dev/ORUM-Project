@@ -15,6 +15,7 @@ import {
 import { esNumeroRegistroValido } from '@/lib/miembros/numeros-registro'
 import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
 import { errorDeCorreoOcupado } from '@/lib/auth/correo-registrado'
+import { cambiarCorreoDeCuenta } from '@/lib/auth/cambiar-correo'
 
 type Admin = ReturnType<typeof createAdminClient>
 
@@ -438,16 +439,8 @@ export async function editarMiembro(
 
   // Correo (vía Auth), sólo si cambió. El formato ya se validó arriba.
   if (perfilId && correo && correo !== correoOriginal) {
-    const { error: errCorreo } = await admin.auth.admin.updateUserById(perfilId, {
-      email: correo,
-      email_confirm: true,
-    })
-    if (errCorreo) {
-      const msg = /already been registered|already registered|exists/i.test(errCorreo.message)
-        ? 'Ese correo ya está en uso por otro usuario.'
-        : mensajeDeError('No se pudo actualizar el correo', errCorreo)
-      return { error: msg }
-    }
+    const cambio = await cambiarCorreoDeCuenta(admin, perfilId, correo)
+    if (!cambio.ok) return { error: cambio.error }
   }
 
   revalidatePath('/admin/miembros')

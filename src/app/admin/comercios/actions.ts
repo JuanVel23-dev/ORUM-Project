@@ -8,6 +8,7 @@ import { getPerfilActual } from '@/lib/auth/auth'
 import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
 import { errorDeCorreoOcupado } from '@/lib/auth/correo-registrado'
+import { cambiarCorreoDeCuenta } from '@/lib/auth/cambiar-correo'
 import {
   leerFilasCategoria,
   revisarFilasCategoria,
@@ -230,16 +231,8 @@ export async function editarComercio(
   const correoOriginal = String(formData.get('correo_original') ?? '').trim().toLowerCase()
   if (perfilId && correo && correo !== correoOriginal) {
     if (!correo.includes('@')) return { error: 'El correo electrónico no es válido.' }
-    const { error: errCorreo } = await admin.auth.admin.updateUserById(perfilId, {
-      email: correo,
-      email_confirm: true,
-    })
-    if (errCorreo) {
-      const msg = /already been registered|already registered|exists/i.test(errCorreo.message)
-        ? 'Ese correo ya está en uso por otro usuario.'
-        : mensajeDeError('No se pudo actualizar el correo', errCorreo)
-      return { error: msg }
-    }
+    const cambio = await cambiarCorreoDeCuenta(admin, perfilId, correo)
+    if (!cambio.ok) return { error: cambio.error }
   }
 
   revalidatePath('/admin/comercios')

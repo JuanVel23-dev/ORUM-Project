@@ -66,6 +66,22 @@ export function cuentaPendienteDeActivar(
   return Boolean(usuario) && !usuario?.email_confirmed_at
 }
 
+/**
+ * Cuando un administrador CAMBIA el correo de una cuenta a mano, ¿se da el
+ * correo nuevo por verificado?
+ *
+ * Solo si la cuenta ya inició sesión alguna vez. Una cuenta que nunca entró
+ * está pendiente de activar, y el correo que acaba de escribir el administrador
+ * —quizá con un error— nadie lo ha comprobado: marcarlo como confirmado lo
+ * esconde (la cuenta deja de verse «pendiente»), no manda ninguna invitación a
+ * la dirección buena y no se puede detectar después.
+ */
+export function confirmarCorreoAlCambiar(
+  usuario: { last_sign_in_at?: string | null } | null | undefined,
+): boolean {
+  return Boolean(usuario?.last_sign_in_at)
+}
+
 /** El `rol` que lleva el enlace de activación según el rol de la cuenta (`roles.codigo`). */
 export function rolActivacionDe(rolCodigo: string): RolActivacion | null {
   if (rolCodigo === 'miembro') return 'miembro'

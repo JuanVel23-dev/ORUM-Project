@@ -9,6 +9,7 @@ import { enviarCorreoInvitacion } from '@/lib/correo/correo'
 import type { RolCodigo } from '@/lib/supabase/database.types'
 import { construirEnlaceActivacion, urlBaseSitio } from '@/lib/auth/activacion'
 import { errorDeCorreoOcupado } from '@/lib/auth/correo-registrado'
+import { cambiarCorreoDeCuenta } from '@/lib/auth/cambiar-correo'
 
 /** Tipos de usuario que el admin puede crear en esta sección. */
 type TipoUsuario = 'super_admin' | 'empleado'
@@ -177,16 +178,8 @@ export async function editarUsuario(
   const emailOriginal = String(formData.get('email_original') ?? '').trim().toLowerCase()
   if (email && email !== emailOriginal) {
     if (!email.includes('@')) return { error: 'El correo electrónico no es válido.' }
-    const { error: errEmail } = await admin.auth.admin.updateUserById(perfilId, {
-      email,
-      email_confirm: true,
-    })
-    if (errEmail) {
-      const msg = /already been registered|already registered|exists/i.test(errEmail.message)
-        ? 'Ese correo ya está en uso por otro usuario.'
-        : mensajeDeError('No se pudo actualizar el correo', errEmail)
-      return { error: msg }
-    }
+    const cambio = await cambiarCorreoDeCuenta(admin, perfilId, email)
+    if (!cambio.ok) return { error: cambio.error }
   }
 
   revalidatePath('/admin/usuarios')
