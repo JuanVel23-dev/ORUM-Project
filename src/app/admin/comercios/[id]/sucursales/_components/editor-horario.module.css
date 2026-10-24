@@ -1,0 +1,69 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.dias {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Una fila por día: el interruptor con el nombre a la izquierda, las horas a la derecha. */
+.dia {
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 11rem) 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.dia:first-child {
+  border-top: 0;
+}
+
+.interruptorDia {
+  min-width: 0;
+}
+
+.horas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-2);
+}
+
+.horas input {
+  min-width: 7.5rem;
+  max-width: 9rem;
+}
+
+.cerrado {
+  font-size: var(--t-callout-size);
+  color: var(--text-2);
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 640px) {
+  .dia {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .horas input {
+    flex: 1 1 7.5rem;
+    max-width: none;
+  }
+}

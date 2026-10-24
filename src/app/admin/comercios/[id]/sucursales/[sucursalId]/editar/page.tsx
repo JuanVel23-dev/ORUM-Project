@@ -3,6 +3,7 @@ import { requireRol } from '@/lib/auth/auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/ui/layout'
 import { FormCard } from '@/components/ui/form-card'
+import { leerHorarioDeSucursal } from '@/lib/comercios/horario-datos'
 import { SucursalForm } from '../../_components/sucursal-form'
 
 export const metadata = { title: 'Editar sucursal · ORUM' }
@@ -17,7 +18,7 @@ export default async function EditarSucursalPage({
   const comercioId = Number(id)
 
   const admin = createAdminClient()
-  const [{ data: sucursal }, { data: ciudades }] = await Promise.all([
+  const [{ data: sucursal }, { data: ciudades }, horario] = await Promise.all([
     admin
       .from('sucursales')
       .select('id, nombre, direccion, telefono, ciudad_id')
@@ -26,6 +27,7 @@ export default async function EditarSucursalPage({
       .is('deleted_at', null)
       .maybeSingle(),
     admin.from('ciudades').select('id, nombre').order('nombre'),
+    leerHorarioDeSucursal(admin, Number(sucursalId)),
   ])
   if (!sucursal) notFound()
 
@@ -37,6 +39,7 @@ export default async function EditarSucursalPage({
           comercioId={comercioId}
           ciudades={ciudades ?? []}
           sucursal={{ ...sucursal, nombre: sucursal.nombre ?? '' }}
+          horario={horario}
         />
       </FormCard>
     </>

@@ -8,7 +8,10 @@ import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { SelectMenu } from '@/components/ui/select-menu'
 import { ResumenErrores, useValidacion } from '@/components/ui/validacion'
-import { largo, obligatorio, telefono } from '@/lib/validacion/reglas'
+import { largo, obligatorio, telefono, type Regla } from '@/lib/validacion/reglas'
+import { leerHorarioDelFormulario } from '@/lib/comercios/horario-formulario'
+import type { HorarioSucursal } from '@/lib/comercios/horario'
+import { EditorHorario } from './editor-horario'
 import { Stack } from '@/components/ui/layout'
 import { useCerrarCuando, useCerrarOverlay } from '@/components/shell/overlay-ruta'
 import {
@@ -30,11 +33,18 @@ type SucursalInicial = {
 
 const estadoInicial: SucursalState = {}
 
+/** El horario viaja como JSON en un campo oculto: se valida con la misma lectura del servidor. */
+const reglaHorario: Regla = (valor) => {
+  const leido = leerHorarioDelFormulario(valor)
+  return leido.ok ? null : leido.error
+}
+
 const REGLAS = {
   nombre: [obligatorio('Escribe el nombre de la sucursal.'), largo(2, 60, 'El nombre')],
   direccion: [largo(5, 120, 'La dirección')],
   telefono: [telefono],
   ciudad_id: [obligatorio('Elige la ciudad de la sucursal.')],
+  horario: [reglaHorario],
 }
 
 const ETIQUETAS: Record<string, string> = {
@@ -42,16 +52,20 @@ const ETIQUETAS: Record<string, string> = {
   direccion: 'Dirección',
   telefono: 'Teléfono',
   ciudad_id: 'Ciudad',
+  horario: 'Horario',
 }
 
 export function SucursalForm({
   comercioId,
   ciudades,
   sucursal,
+  horario,
 }: {
   comercioId: number
   ciudades: Opcion[]
   sucursal?: SucursalInicial
+  /** El horario que ya tiene la sucursal (al editar). */
+  horario?: HorarioSucursal
 }) {
   const editando = Boolean(sucursal)
   const [state, formAction, pending] = useActionState(
@@ -109,6 +123,8 @@ export function SucursalForm({
               />
             </Field>
           </div>
+
+          <EditorHorario inicial={horario ?? []} error={v.error('horario')} />
         </Stack>
 
         <div className={styles.acciones}>
