@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  ahoraEnBogota,
   DIA_FESTIVOS,
   estadoAhora,
   formatearHora,
   normalizarHora,
   resumenHorario,
+  textoEstado,
   textoGrupo,
   validarHorario,
   type DiaHorario,
@@ -98,28 +100,35 @@ describe('estadoAhora', () => {
   it('lunes 10:00 está abierto hasta el almuerzo', () => {
     expect(estadoAhora(SEMANA, bogota('2026-10-26', '10:00'))).toEqual({
       tipo: 'abierto',
-      proximo: { cuando: 'hoy', hora: '12:00' },
+      proximo: { cuando: 'hoy', hora: '12:00', accion: 'almuerzo' },
     })
   })
 
   it('lunes 12:30 está en pausa de almuerzo', () => {
     expect(estadoAhora(SEMANA, bogota('2026-10-26', '12:30'))).toEqual({
       tipo: 'almuerzo',
-      proximo: { cuando: 'hoy', hora: '13:00' },
+      proximo: { cuando: 'hoy', hora: '13:00', accion: 'reabre' },
+    })
+  })
+
+  it('lunes 15:00 está abierto hasta el cierre', () => {
+    expect(estadoAhora(SEMANA, bogota('2026-10-26', '15:00'))).toEqual({
+      tipo: 'abierto',
+      proximo: { cuando: 'hoy', hora: '18:00', accion: 'cierra' },
     })
   })
 
   it('lunes 19:00 está cerrado y abre mañana', () => {
     expect(estadoAhora(SEMANA, bogota('2026-10-26', '19:00'))).toEqual({
       tipo: 'cerrado',
-      proximo: { cuando: 'manana', hora: '09:00' },
+      proximo: { cuando: 'manana', hora: '09:00', accion: 'abre' },
     })
   })
 
   it('el sábado cerrado dice que abre el lunes', () => {
     expect(estadoAhora(SEMANA, bogota('2026-10-24', '10:00'))).toEqual({
       tipo: 'cerrado',
-      proximo: { cuando: 1, hora: '09:00' },
+      proximo: { cuando: 1, hora: '09:00', accion: 'abre' },
     })
   })
 
@@ -127,7 +136,7 @@ describe('estadoAhora', () => {
     const bar = [dia(1, '22:00', '02:00')]
     expect(estadoAhora(bar, bogota('2026-10-27', '01:00'))).toEqual({
       tipo: 'abierto',
-      proximo: { cuando: 'hoy', hora: '02:00' },
+      proximo: { cuando: 'hoy', hora: '02:00', accion: 'cierra' },
     })
     expect(estadoAhora(bar, bogota('2026-10-27', '03:00')).tipo).toBe('cerrado')
   })
@@ -152,6 +161,47 @@ describe('estadoAhora', () => {
 
   it('sin fila de festivos, el festivo se rige por su día de la semana', () => {
     expect(estadoAhora(SEMANA, bogota('2026-05-18', '10:00')).tipo).toBe('abierto')
+  })
+})
+
+describe('ahoraEnBogota', () => {
+  it('03:00Z del 24 de octubre es el 23 a las 22:00 en Bogotá', () => {
+    expect(ahoraEnBogota(new Date('2026-10-24T03:00:00Z'))).toEqual({
+      fecha: '2026-10-23',
+      minutos: 22 * 60,
+    })
+  })
+})
+
+describe('textoEstado', () => {
+  it('abierto dice cuándo cierra', () => {
+    expect(textoEstado(estadoAhora(SEMANA, bogota('2026-10-26', '15:00')))).toBe(
+      'Abierto ahora · cierra a las 6:00 p. m.',
+    )
+  })
+  it('abierto antes del almuerzo dice cuándo empieza la pausa', () => {
+    expect(textoEstado(estadoAhora(SEMANA, bogota('2026-10-26', '10:00')))).toBe(
+      'Abierto ahora · pausa de almuerzo a las 12:00 p. m.',
+    )
+  })
+  it('en pausa dice cuándo reabre, con «a la» para la 1:00', () => {
+    expect(textoEstado(estadoAhora(SEMANA, bogota('2026-10-26', '12:30')))).toBe(
+      'En pausa de almuerzo · reabre a la 1:00 p. m.',
+    )
+  })
+  it('cerrado dice hoy, mañana o el día', () => {
+    expect(textoEstado(estadoAhora(SEMANA, bogota('2026-10-26', '19:00')))).toBe(
+      'Cerrado · abre mañana a las 9:00 a. m.',
+    )
+    expect(textoEstado(estadoAhora(SEMANA, bogota('2026-10-24', '10:00')))).toBe(
+      'Cerrado · abre el lunes a las 9:00 a. m.',
+    )
+    expect(textoEstado(estadoAhora(SEMANA, bogota('2026-10-26', '07:00')))).toBe(
+      'Cerrado · abre hoy a las 9:00 a. m.',
+    )
+  })
+  it('sin horario no dice nada', () => {
+    expect(textoEstado({ tipo: 'sin_horario', proximo: null })).toBe('')
   })
 })
 

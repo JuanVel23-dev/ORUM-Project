@@ -7,6 +7,7 @@ import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { textoDias } from '@/lib/comercios/dias-promocion'
 import { formatearBeneficio } from '@/lib/comercios/beneficios-formato'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
+import { leerHorariosDeSucursales } from '@/lib/comercios/horario-datos'
 import { transicionComercio } from '@/lib/comercios/transiciones'
 import { hoyISO } from '@/lib/shared/fecha'
 import { detalleComercio, type CategoriaDeComercio } from '@/lib/publico/directorio'
@@ -231,12 +232,20 @@ export default async function FichaComercioPage({
       ]
     })
 
+  /* Con la sesión del socio (la política deja ver solo sucursales activas de
+     comercios activos). Si la tabla no existe, llega vacío y no se dice nada. */
+  const horarios = await leerHorariosDeSucursales(
+    supabase,
+    (sucursales ?? []).map((s) => s.id),
+  )
+
   const sedes: SedeFicha[] = (sucursales ?? []).map((s) => ({
     id: s.id,
     nombre: (s.nombre ?? '').trim() || null,
     direccion: s.direccion,
     telefono: s.telefono,
     ciudadNombre: nombreCiudad.get(s.ciudad_id) ?? null,
+    horario: horarios.get(s.id) ?? [],
   }))
 
   const ciudadesDelComercio = Array.from(

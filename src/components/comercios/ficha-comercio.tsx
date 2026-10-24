@@ -4,6 +4,8 @@ import { ChevronLeft, ExternalLink, MapPin, Phone } from 'lucide-react'
 import { ComercioLogo } from '@/components/ui/comercio-logo'
 import { Ampliable, VisorImagenes, type ImagenVisor } from '@/components/ui/visor-imagenes'
 import { enlaceMapa } from '@/lib/comercios/enlace-mapa'
+import type { HorarioSucursal } from '@/lib/comercios/horario'
+import { HorarioSede } from './horario-sede'
 import estilos from './ficha-comercio.module.css'
 
 /*
@@ -31,6 +33,8 @@ export type SedeFicha = {
   direccion: string | null
   ciudadNombre: string | null
   telefono?: string | null
+  /** El horario de la sede; vacío o ausente = no se dice nada. */
+  horario?: HorarioSucursal
 }
 
 export type FotoFicha = { url: string; alt: string }
@@ -75,7 +79,8 @@ export function FichaComercio({
   enOverlay = false,
   transicion,
 }: Props) {
-  const sedesConDireccion = sedes.filter((s) => s.direccion)
+  /* Una sede sin dirección pero con horario también se enseña. */
+  const sedesVisibles = sedes.filter((s) => s.direccion || (s.horario && s.horario.length > 0))
 
   /* La lista del visor, en el orden de la ficha: portada, logo, galería. */
   const imagenes: ImagenVisor[] = []
@@ -132,28 +137,32 @@ export function FichaComercio({
             {detalle && <p className={estilos.detalle}>{detalle}</p>}
           </header>
 
-          {sedesConDireccion.length > 0 && (
-            <ul className={estilos.sedes} aria-label="Direcciones">
-              {sedesConDireccion.map((s) => (
+          {sedesVisibles.length > 0 && (
+            <ul className={estilos.sedes} aria-label="Direcciones y horarios">
+              {sedesVisibles.map((s) => (
                 <li key={s.id} className={estilos.sede}>
                   <MapPin size={15} aria-hidden="true" className={estilos.sedeIcono} />
                   <span>
-                    {/* La dirección abre Google Maps (en el teléfono, la
-                        app). Pestaña nueva: la ficha se queda donde estaba. */}
-                    <a
-                      href={enlaceMapa(s.direccion ?? '', s.ciudadNombre)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={estilos.sedeMapa}
-                    >
-                      {s.direccion}
-                      {s.ciudadNombre && `, ${s.ciudadNombre}`}
-                      <ExternalLink size={12} aria-hidden="true" className={estilos.sedeMapaIcono} />
-                      <span className="sr-only"> (abre Google Maps)</span>
-                    </a>
+                    {s.direccion ? (
+                      /* La dirección abre Google Maps (en el teléfono, la
+                         app). Pestaña nueva: la ficha se queda donde estaba. */
+                      <a
+                        href={enlaceMapa(s.direccion, s.ciudadNombre)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={estilos.sedeMapa}
+                      >
+                        {s.direccion}
+                        {s.ciudadNombre && `, ${s.ciudadNombre}`}
+                        <ExternalLink size={12} aria-hidden="true" className={estilos.sedeMapaIcono} />
+                        <span className="sr-only"> (abre Google Maps)</span>
+                      </a>
+                    ) : (
+                      <span>{s.nombre ?? s.ciudadNombre ?? 'Sede'}</span>
+                    )}
                     {/* El nombre de la sede solo si hay varias: con una sola,
                         «Sede principal» no le dice nada a nadie. */}
-                    {sedesConDireccion.length > 1 && s.nombre && (
+                    {s.direccion && sedesVisibles.length > 1 && s.nombre && (
                       <span className={estilos.sedeNombre}> · {s.nombre}</span>
                     )}
                     {s.telefono && (
@@ -165,6 +174,7 @@ export function FichaComercio({
                         {s.telefono}
                       </a>
                     )}
+                    {s.horario && s.horario.length > 0 && <HorarioSede horario={s.horario} />}
                   </span>
                 </li>
               ))}

@@ -126,8 +126,16 @@ export function validarHorario(filas: readonly DiaHorario[]): string | null {
 
 export type EstadoHorario = {
   tipo: 'abierto' | 'almuerzo' | 'cerrado' | 'sin_horario'
-  /** El siguiente cambio: hoy, mañana o el día ISO (1–7) en que ocurre. */
-  proximo: { cuando: 'hoy' | 'manana' | number; hora: string } | null
+  /**
+   * El siguiente cambio: cuándo ocurre (hoy, mañana o el día ISO 1–7), a qué
+   * hora y QUÉ es (`cierra`, `almuerzo` = empieza la pausa, `reabre` = termina
+   * la pausa, `abre`).
+   */
+  proximo: {
+    cuando: 'hoy' | 'manana' | number
+    hora: string
+    accion: 'cierra' | 'almuerzo' | 'reabre' | 'abre'
+  } | null
 }
 
 type Segmento = { desde: number; hasta: number; tipo: 'abierto' | 'almuerzo' }
@@ -160,12 +168,19 @@ function segmentosDe(horario: HorarioSucursal, fecha: string): Segmento[] {
   ]
 }
 
+/** La fecha civil y los minutos desde las 00:00 en Bogotá (UTC−5) de un instante. */
+export function ahoraEnBogota(instante: Date): { fecha: string; minutos: number } {
+  const local = new Date(instante.getTime() - DESFASE_BOGOTA_MS)
+  return {
+    fecha: local.toISOString().slice(0, 10),
+    minutos: local.getUTCHours() * 60 + local.getUTCMinutes(),
+  }
+}
+
 export function estadoAhora(horario: HorarioSucursal, instante: Date): EstadoHorario {
   if (horario.length === 0) return { tipo: 'sin_horario', proximo: null }
 
-  const local = new Date(instante.getTime() - DESFASE_BOGOTA_MS)
-  const hoy = local.toISOString().slice(0, 10)
-  const ahora = local.getUTCHours() * 60 + local.getUTCMinutes()
+  const { fecha: hoy, minutos: ahora } = ahoraEnBogota(instante)
 
   // Los tramos de hoy y los de ayer que se alargan pasada la medianoche.
   const tramos: Segmento[] = [
@@ -178,11 +193,13 @@ export function estadoAhora(horario: HorarioSucursal, instante: Date): EstadoHor
   ]
   const actual = tramos.find((s) => s.desde <= ahora && ahora < s.hasta)
   if (actual) {
+    const sigueAlmuerzo = tramos.some((s) => s.tipo === 'almuerzo' && s.desde === actual.hasta)
     return {
       tipo: actual.tipo,
       proximo: {
         cuando: actual.hasta < MIN_DIA ? 'hoy' : 'manana',
         hora: deMinutos(actual.hasta),
+        accion: actual.tipo === 'almuerzo' ? 'reabre' : sigueAlmuerzo ? 'almuerzo' : 'cierra',
       },
     }
   }
@@ -198,6 +215,7 @@ export function estadoAhora(horario: HorarioSucursal, instante: Date): EstadoHor
         proximo: {
           cuando: d === 0 ? 'hoy' : d === 1 ? 'manana' : diaDeSemanaISO(fecha),
           hora: deMinutos(siguiente.desde),
+          accion: 'abre',
         },
       }
     }
@@ -249,4 +267,32 @@ export function textoGrupo(g: GrupoHorario): string {
   const dias =
     g.dias.length === 1 ? corto(primero) : `${corto(primero)}–${corto(ultimo).toLowerCase()}`
   return `${dias} · ${textoJornada(g.fila)}`
+}
+
+/** «a las 6:00 p. m.», pero «a la 1:00 p. m.». */
+function aLas(hhmm: string): string {
+  return `${Number(hhmm.slice(0, 2)) % 12 === 1 ? 'a la' : 'a las'} ${formatearHora(hhmm)}`
+}
+
+/**
+ * La línea de estado de la ficha: «Abierto ahora · cierra a las 6:00 p. m.».
+ * Vacía si la sucursal no tiene horario cargado.
+ */
+export function textoEstado(estado: EstadoHorario): string {
+  if (estado.tipo === 'sin_horario') return ''
+  const p = estado.proximo
+
+  if (estado.tipo === 'abierto') {
+    if (!p) return 'Abierto ahora'
+    return p.accion === 'almuerzo'
+      ? `Abierto ahora · pausa de almuerzo ${aLas(p.hora)}`
+      : `Abierto ahora · cierra ${aLas(p.hora)}`
+  }
+  if (estado.tipo === 'almuerzo') {
+    return p ? `En pausa de almuerzo · reabre ${aLas(p.hora)}` : 'En pausa de almuerzo'
+  }
+  if (!p) return 'Cerrado'
+  const cuando =
+    p.cuando === 'hoy' ? 'hoy' : p.cuando === 'manana' ? 'mañana' : `el ${DIAS_SEMANA[p.cuando - 1].largo}`
+  return `Cerrado · abre ${cuando} ${aLas(p.hora)}`
 }

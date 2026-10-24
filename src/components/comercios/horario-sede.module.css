@@ -1,0 +1,65 @@
+.horario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+/* Punto lleno = abierto; hueco = en pausa o cerrado. El texto lo dice igual:
+   el color nunca es el único portador. */
+.estado {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--t-callout-size);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.punto {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-full);
+  color: var(--text-2);
+  background: currentColor;
+}
+
+.estado[data-tipo='abierto'] .punto {
+  color: var(--success);
+}
+
+.estado[data-tipo='almuerzo'] .punto {
+  color: var(--warning);
+  background: transparent;
+  border: 2px solid currentColor;
+}
+
+.estado[data-tipo='cerrado'] .punto {
+  color: var(--danger);
+  background: transparent;
+  border: 2px solid currentColor;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  font-size: var(--t-footnote-size);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+/* Hoy: más peso, no otro color. */
+.item[data-hoy='true'] {
+  font-weight: 700;
+  color: var(--text);
+}

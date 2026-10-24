@@ -5,6 +5,8 @@ import { unstable_cache } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { obtenerAnunciosVisibles } from '@/lib/anuncios/consultas'
 import { resolverLogoComercio } from '@/lib/comercios/logo-comercio'
+import { leerHorariosDeSucursales } from '@/lib/comercios/horario-datos'
+import type { HorarioSucursal } from '@/lib/comercios/horario'
 import { esPromocionVigente } from '@/lib/comercios/promocion-vigente'
 import { formatearBeneficio, formatearBeneficioCorto } from '@/lib/comercios/beneficios-formato'
 import { TOPE_PUBLICIDAD, textoAlternativo } from '@/lib/publicidad/publicidad'
@@ -476,6 +478,8 @@ export type SedePublica = {
   nombre: string | null
   direccion: string | null
   ciudadNombre: string | null
+  /** Vacío = la sucursal no tiene horario cargado. */
+  horario: HorarioSucursal
 }
 
 export type FichaPublica = {
@@ -580,11 +584,18 @@ async function leerFichaPublica(id: number): Promise<FichaPublica | null> {
     ? ((marcas ?? []).find((m) => m.id === comercio.marca_id)?.logo_url ?? null)
     : null
 
+  /* Tolerante, como la galería: sin la tabla, la ficha se pinta sin horario. */
+  const horarios = await leerHorariosDeSucursales(
+    supabase,
+    (sucursales ?? []).map((s) => s.id),
+  )
+
   const sedes: SedePublica[] = (sucursales ?? []).map((s) => ({
     id: s.id,
     nombre: (s.nombre ?? '').trim() || null,
     direccion: (s.direccion ?? '').trim() || null,
     ciudadNombre: nombreCiudad.get(s.ciudad_id) ?? null,
+    horario: horarios.get(s.id) ?? [],
   }))
 
   /* Dos promociones con el mismo valor se anunciarían dos veces con el mismo
